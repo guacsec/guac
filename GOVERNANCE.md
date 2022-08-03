@@ -38,4 +38,3 @@ Technical Advisory Membership is provided by:
 - If members are seen to act disruptively, they may be given warnings of their disruptive actions, with up to two warnings. Disruptive behavior 
 - Upon the 3rd occurance of disruptive behavior, membership may be removed by unanimous vote by maintainers
 - Members who are found to be threatening and malicious, e.g. active harassment will be removed immediately with vote by 2 maintainers
-- 
