@@ -22,12 +22,12 @@ import (
 )
 
 type Processor interface {
-	ProcessDocument(i ProcessorInput) ([]ProcessorOutput, error)
+	ProcessDocument(i Document) ([]Document, error)
 }
 
 type DocumentProcessor interface {
-	ValidateSchema(i *ProcessorInput) error
-	ValidateTrustInformation(i *ProcessorInput) error
+	ValidateSchema(i *Document) error
+	ValidateTrustInformation(i *Document) error
 
 	// Unpack takes in the document and tries to unpack it
 	// if there is a valid decomposition of sub-documents.
@@ -35,24 +35,22 @@ type DocumentProcessor interface {
 	// For example, a DSSE envelope or a tarball
 	// Returns empty list and nil error if nothing to unpack
 	// Returns unpacked list and nil error if successfully unpacked
-	Unpack(i *ProcessorInput) ([]ProcessorInput, error)
+	Unpack(i *Document) ([]Document, error)
 }
 
-func (i *ProcessorInput) validateFormat() error {
+func (i *Document) validateFormat() error {
 	return fmt.Errorf("Unimplemented")
 }
 
-// ProcessorInput describes the input for a processor to run. This input can
+// Document describes the input for a processor to run. This input can
 // come from a collector or from the processor itself (run recursively).
-type ProcessorInput struct {
+type Document struct {
 	Blob              []byte
 	Type              DocumentType
 	Format            FormatType
 	TrustInformation  TrustInformation
 	SourceInformation SourceInformation
 }
-
-type ProcessorOutput ProcessorInput
 
 // DocumentType describes the type of the document contents for schema checks
 type DocumentType string
