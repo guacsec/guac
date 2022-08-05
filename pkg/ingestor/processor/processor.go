@@ -17,7 +17,6 @@ package processor
 
 import (
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
-	rtype "github.com/sigstore/rekor/pkg/generated/models"
 )
 
 type Processor interface{}
@@ -52,9 +51,10 @@ const (
 
 // TrustInformation provides additional information about how to verify the document
 type TrustInformation struct {
-	DSSE            *dsse.Envelope
-	LogVerification *rtype.LogEntryAnonVerification
-	IssuerUri       *string
+	DSSE      *dsse.Envelope
+	IssuerUri *string
+	// TODO: Figure out how to handle log verification trust
+	// LogVerification *rtype.LogEntryAnonVerification
 }
 
 // TrustInformation provides additional information about where the document comes from
