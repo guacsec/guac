@@ -16,18 +16,12 @@
 package processor
 
 import (
-	"fmt"
-
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
-type Processor interface {
-	ProcessDocument(i Document) ([]Document, error)
-}
-
 type DocumentProcessor interface {
 	ValidateSchema(i *Document) error
-	ValidateTrustInformation(i *Document) error
+	ValidateTrustInformation(i *Document) (map[string]interface{}, error)
 
 	// Unpack takes in the document and tries to unpack it
 	// if there is a valid decomposition of sub-documents.
@@ -35,11 +29,7 @@ type DocumentProcessor interface {
 	// For example, a DSSE envelope or a tarball
 	// Returns empty list and nil error if nothing to unpack
 	// Returns unpacked list and nil error if successfully unpacked
-	Unpack(i *Document) ([]Document, error)
-}
-
-func (i *Document) validateFormat() error {
-	return fmt.Errorf("Unimplemented")
+	Unpack(i *Document) ([]*Document, error)
 }
 
 // Document describes the input for a processor to run. This input can
