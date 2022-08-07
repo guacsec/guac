@@ -1,5 +1,5 @@
 //
-// Copyright 2021 The AFF Authors.
+// Copyright 2022 The AFF Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,35 +13,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package verifier
 
 import (
-	"fmt"
-	"os"
+	"crypto"
 
-	"github.com/artifact-ff/artifact-ff/pkg/ingestor/collector"
 	"github.com/artifact-ff/artifact-ff/pkg/ingestor/processor"
-	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "ingestor",
-	Short: "ingestor is a ingestor cmdline for artifact-ff",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-		var (
-			collector collector.Collector
-			processor processor.DocumentProcessor
-		)
-		fmt.Println("Artifact ff")
-		_ = collector
-		_ = processor
-	},
+// TODO: Create VerifierProvider so we can support more than Sigstore for verifying signatures
+
+type Verifier interface {
+	Verify(i *processor.Document) (map[int]VerifiedKey, error)
 }
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+type VerifiedKey struct {
+	Key crypto.PublicKey
+	ID  string
 }
