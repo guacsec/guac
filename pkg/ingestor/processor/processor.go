@@ -27,7 +27,7 @@ type DocumentProcessor interface {
 	// if there is a valid decomposition of sub-documents.
 	//
 	// For example, a DSSE envelope or a tarball
-	// Returns empty list and nil error if nothing to unpack
+	// Returns list of len=0 and nil error if nothing to unpack
 	// Returns unpacked list and nil error if successfully unpacked
 	Unpack(i *Document) ([]*Document, error)
 }
