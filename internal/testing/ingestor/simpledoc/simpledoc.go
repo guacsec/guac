@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package processor
+package simpledoc
 
 import (
 	"encoding/json"
@@ -24,7 +24,7 @@ import (
 
 // TODO: Move to internal
 
-// simpleDocProc is a document processor for a simple docment
+// SimpleDocProc is a document processor for a simple docment
 // It is of JSON blob type
 //
 // It should have an issuer field, that should match up with
@@ -57,24 +57,24 @@ import (
 // 		"info": "this is a cooler nested doc 2"
 //  }]
 // }
-type simpleDocProc struct{}
+type SimpleDocProc struct{}
 
 const (
-	simpleDocType processor.DocumentType = "simple-doc"
+	SimpleDocType processor.DocumentType = "simple-doc"
 )
 
-type simpleDoc struct {
+type SimpleDoc struct {
 	Issuer string      `json:"issuer"`
 	Info   string      `json:"info,omitempty"`
-	Nested []simpleDoc `json:"nested,omitempty"`
+	Nested []SimpleDoc `json:"nested,omitempty"`
 }
 
-func (dp *simpleDocProc) ValidateSchema(d *processor.Document) error {
+func (dp *SimpleDocProc) ValidateSchema(d *processor.Document) error {
 	if d.Format != processor.FormatJSON {
 		return fmt.Errorf("only accept JSON formats")
 	}
 
-	var p simpleDoc
+	var p SimpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (dp *simpleDocProc) ValidateSchema(d *processor.Document) error {
 	return validateSimpleDoc(p)
 }
 
-func validateSimpleDoc(pd simpleDoc) error {
+func validateSimpleDoc(pd SimpleDoc) error {
 	if pd.Issuer == "" {
 		return fmt.Errorf("issuer shouldn't be empty")
 	}
@@ -94,8 +94,8 @@ func validateSimpleDoc(pd simpleDoc) error {
 	return nil
 }
 
-func (dp *simpleDocProc) ValidateTrustInformation(d *processor.Document) (map[string]interface{}, error) {
-	var p simpleDoc
+func (dp *SimpleDocProc) ValidateTrustInformation(d *processor.Document) (map[string]interface{}, error) {
+	var p SimpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
 		return nil, err
 	}
@@ -110,8 +110,8 @@ func (dp *simpleDocProc) ValidateTrustInformation(d *processor.Document) (map[st
 	return trustInfo, nil
 }
 
-func (dp *simpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, error) {
-	var p simpleDoc
+func (dp *SimpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, error) {
+	var p SimpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (dp *simpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, e
 		}
 		retDocs[i] = &processor.Document{
 			Blob:             b,
-			Type:             simpleDocType,
+			Type:             SimpleDocType,
 			Format:           processor.FormatJSON,
 			TrustInformation: d.TrustInformation,
 		}
