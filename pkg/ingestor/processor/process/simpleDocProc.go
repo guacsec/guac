@@ -18,6 +18,8 @@ package processor
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/artifact-ff/artifact-ff/pkg/ingestor/processor"
 )
 
 // TODO: Move to internal
@@ -58,7 +60,7 @@ import (
 type simpleDocProc struct{}
 
 const (
-	simpleDocType DocumentType = "simple-doc"
+	simpleDocType processor.DocumentType = "simple-doc"
 )
 
 type simpleDoc struct {
@@ -67,8 +69,8 @@ type simpleDoc struct {
 	Nested []simpleDoc `json:"nested,omitempty"`
 }
 
-func (dp *simpleDocProc) ValidateSchema(d *Document) error {
-	if d.Format != FormatJSON {
+func (dp *simpleDocProc) ValidateSchema(d *processor.Document) error {
+	if d.Format != processor.FormatJSON {
 		return fmt.Errorf("only accept JSON formats")
 	}
 
@@ -92,7 +94,7 @@ func validateSimpleDoc(pd simpleDoc) error {
 	return nil
 }
 
-func (dp *simpleDocProc) ValidateTrustInformation(d *Document) (map[string]interface{}, error) {
+func (dp *simpleDocProc) ValidateTrustInformation(d *processor.Document) (map[string]interface{}, error) {
 	var p simpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
 		return nil, err
@@ -108,22 +110,22 @@ func (dp *simpleDocProc) ValidateTrustInformation(d *Document) (map[string]inter
 	return trustInfo, nil
 }
 
-func (dp *simpleDocProc) Unpack(d *Document) ([]*Document, error) {
+func (dp *simpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, error) {
 	var p simpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
 		return nil, err
 	}
 
-	retDocs := make([]*Document, len(p.Nested))
+	retDocs := make([]*processor.Document, len(p.Nested))
 	for i, nd := range p.Nested {
 		b, err := json.Marshal(nd)
 		if err != nil {
 			return nil, err
 		}
-		retDocs[i] = &Document{
+		retDocs[i] = &processor.Document{
 			Blob:             b,
 			Type:             simpleDocType,
-			Format:           FormatJSON,
+			Format:           processor.FormatJSON,
 			TrustInformation: d.TrustInformation,
 		}
 	}

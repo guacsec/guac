@@ -19,27 +19,28 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/artifact-ff/artifact-ff/pkg/ingestor/processor"
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	documentProcessors = map[DocumentType]DocumentProcessor{}
+	documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
 )
 
 func init() {
-	// RegisterDocumentProcessor()
+	// Registerprocessor.DocumentProcessor()
 }
 
-func RegisterDocumentProcessor(p DocumentProcessor, d DocumentType) {
+func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) {
 	if _, ok := documentProcessors[d]; ok {
 		logrus.Warnf("the document processor is being overwritten: %s", d)
 	}
 	documentProcessors[d] = p
 }
 
-func Process(i *Document) ([]*Document, error) {
-	docsToUnpack := []*Document{i}
-	finalDocs := []*Document{}
+func Process(i *processor.Document) ([]*processor.Document, error) {
+	docsToUnpack := []*processor.Document{i}
+	finalDocs := []*processor.Document{}
 	for len(docsToUnpack) > 0 {
 		logrus.Debugf("%v documents left in queue", len(docsToUnpack))
 		dd := docsToUnpack[0]
@@ -62,12 +63,12 @@ func Process(i *Document) ([]*Document, error) {
 	return finalDocs, nil
 }
 
-func processDocument(i *Document) ([]*Document, error) {
-	if err := i.validateFormat(); err != nil {
+func processDocument(i *processor.Document) ([]*processor.Document, error) {
+	if err := validateFormat(i); err != nil {
 		return nil, err
 	}
 
-	trustInfo, err := i.validateDocument()
+	trustInfo, err := validateDocument(i)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func processDocument(i *Document) ([]*Document, error) {
 	// pass trustInfo into policy
 	_ = trustInfo
 
-	ds, err := i.unpackDocument()
+	ds, err := unpackDocument(i)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unpack document: %w", err)
 	}
@@ -83,9 +84,9 @@ func processDocument(i *Document) ([]*Document, error) {
 	return ds, nil
 }
 
-func (i *Document) validateFormat() error {
+func validateFormat(i *processor.Document) error {
 	switch i.Format {
-	case FormatJSON:
+	case processor.FormatJSON:
 		if !json.Valid(i.Blob) {
 			return fmt.Errorf("invalid JSON document")
 		}
@@ -96,7 +97,7 @@ func (i *Document) validateFormat() error {
 	return nil
 }
 
-func (i *Document) validateDocument() (map[string]interface{}, error) {
+func validateDocument(i *processor.Document) (map[string]interface{}, error) {
 	p, ok := documentProcessors[i.Type]
 	if !ok {
 		return nil, fmt.Errorf("no document processor registered for type: %s", i.Type)
@@ -114,7 +115,7 @@ func (i *Document) validateDocument() (map[string]interface{}, error) {
 	return trustInfo, nil
 }
 
-func (i *Document) unpackDocument() ([]*Document, error) {
+func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 	p, ok := documentProcessors[i.Type]
 	if !ok {
 		return nil, fmt.Errorf("no document processor registered for type: %s", i.Type)
@@ -122,12 +123,12 @@ func (i *Document) unpackDocument() ([]*Document, error) {
 	return p.Unpack(i)
 }
 
-func (i *Document) validate() (bool, error) {
-	if err := i.validateFormat(); err != nil {
+func validate(i *processor.Document) (bool, error) {
+	if err := validateFormat(i); err != nil {
 		return false, err
 	}
 
-	trustInfo, err := i.validateDocument()
+	trustInfo, err := validateDocument(i)
 	if err != nil {
 		return false, err
 	}
