@@ -130,22 +130,3 @@ func (dp *simpleDocProc) Unpack(d *Document) ([]*Document, error) {
 
 	return retDocs, nil
 }
-
-/*
-func goodSimpleDoc(issuer string, info string) Document {
-	b, _ := json.Marshal(simpleDoc{
-		Issuer: issuer,
-		Info:   info,
-	})
-
-	return Document{
-		Blob:   b,
-		Type:   simpleDocType,
-		Format: FormatJSON,
-		TrustInformation: TrustInformation{
-			IssuerUri: &issuer,
-		},
-		SourceInformation: d.SourceInformation,
-	}
-}
-*/
