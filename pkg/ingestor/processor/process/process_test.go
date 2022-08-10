@@ -13,13 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package processor
+package process
 
 import (
 	"encoding/json"
 	"reflect"
 	"testing"
 
+	"github.com/artifact-ff/artifact-ff/internal/testing/ingestor/simpledoc"
 	"github.com/artifact-ff/artifact-ff/pkg/ingestor/processor"
 	"github.com/sirupsen/logrus"
 )
@@ -38,7 +39,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -51,7 +52,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -74,7 +75,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							 "info": "this is a cooler nested doc 2"
 						 }]
 						}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -87,7 +88,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 1"
 					}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -98,7 +99,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 2"
 					}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -129,7 +130,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							 }]
 						 }]
 						}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -142,7 +143,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 3"
 					}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -153,7 +154,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 4"
 					}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -180,7 +181,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 					 }]
 				 }]
 				}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -193,7 +194,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 				"issuer": "google.com",
 				"info": "this is a cooler nested doc 1"
 			}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -204,7 +205,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 				"issuer": "google.com",
 				"info": "this is a cooler nested doc 4"
 			}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -220,7 +221,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -236,7 +237,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: "invalid-format",
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -252,7 +253,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 			Blob: []byte(`{
                         "info": "this is a cool document"
                     }`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -285,7 +286,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("bing.com"),
@@ -308,7 +309,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							 "info": "this is a cooler nested doc 2"
 						 }]
 						}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -321,7 +322,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 2"
 					}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -338,7 +339,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -354,7 +355,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -381,7 +382,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                              "info": "this is a cooler nested doc 2"
                          }]
                         }`),
-			Type:   simpleDocType,
+			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
 			TrustInformation: processor.TrustInformation{
 				IssuerUri: ptrStr("google.com"),
@@ -397,7 +398,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                         "issuer": "google.com",
                         "info": "this is a cooler nested doc 1"
                     }`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -411,7 +412,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                         "issuer": "google.com",
                         "info": "this is a cooler nested doc 2"
                     }`),
-				Type:   simpleDocType,
+				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
 				TrustInformation: processor.TrustInformation{
 					IssuerUri: ptrStr("google.com"),
@@ -426,7 +427,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 
 	logrus.SetLevel(logrus.DebugLevel)
 	// Register
-	RegisterDocumentProcessor(&simpleDocProc{}, simpleDocType)
+	RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			docs, err := Process(&tt.doc)
