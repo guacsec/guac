@@ -2,7 +2,7 @@
 
 ![image](https://user-images.githubusercontent.com/3060102/182691308-d3c7e4d5-b6bd-4b5c-85c5-24dfa19875e2.png)
 
-The Artifact Friend Finder (AFF) project aims to create a means to ingest, validate and parse artifact information (i.e. in-toto attestations, SBOM, etc.) from various data sources and represent and store them in a knowledge graph, where users can query information about artifacts or request evidence of certain properties of an artifact. The purpose of this aims to satisfy the use case of being a monitor for public supply chain and security documents as well as for internal use by organizations to query information about artifacts that they use.
+The Artifact Fact Finder (AFF) project aims to create a means to ingest, validate and parse artifact information (i.e. in-toto attestations, SBOM, etc.) from various data sources and represent and store them in a knowledge graph, where users can query information about artifacts or request evidence of certain properties of an artifact. The purpose of this aims to satisfy the use case of being a monitor for public supply chain and security documents as well as for internal use by organizations to query information about artifacts that they use.
 
 A few examples of questions answered by AFF Graph include:
 
