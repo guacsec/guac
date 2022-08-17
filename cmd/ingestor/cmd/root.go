@@ -19,19 +19,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/artifact-ff/artifact-ff/pkg/ingestor/collector"
-	"github.com/artifact-ff/artifact-ff/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/ingestor/collector"
+	"github.com/guacsec/guac/pkg/ingestor/processor"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "ingestor",
-	Short: "ingestor is a ingestor cmdline for artifact-ff",
+	Short: "ingestor is a ingestor cmdline for GUAC",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
 		var (
 			collector collector.Collector
-			processor processor.Processor
+			processor processor.DocumentProcessor
 		)
 		fmt.Println("Artifact ff")
 		_ = collector

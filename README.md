@@ -1,4 +1,4 @@
-# AFF Knowledge Graph
+# GUAC: Graph for Understanding Artifact Composition
 
 ![image](https://user-images.githubusercontent.com/3060102/182691308-d3c7e4d5-b6bd-4b5c-85c5-24dfa19875e2.png)
 
@@ -16,7 +16,7 @@ Here is an overview of the architecture of AFF:
 
 ## Communication
 
-All communication should be done through issues, unless it is a private matter. In that case, an e-mail should be sent to artifact-ff-maintainers@googlegroups.com.
+All communication should be done through issues, unless it is a private matter. In that case, an e-mail should be sent to guac-maintainers@googlegroups.com.
 
 ## Governance
 

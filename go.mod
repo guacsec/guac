@@ -1,4 +1,4 @@
-module github.com/artifact-ff/artifact-ff
+module github.com/guacsec/guac
 
 go 1.18
 
