@@ -16,7 +16,7 @@
 package main
 
 import (
-	"github.com/artifact-ff/artifact-ff/cmd/ingestor/cmd"
+	"github.com/guacsec/guac/cmd/ingestor/cmd"
 )
 
 func main() {

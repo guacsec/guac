@@ -20,8 +20,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/artifact-ff/artifact-ff/internal/testing/ingestor/simpledoc"
-	"github.com/artifact-ff/artifact-ff/pkg/ingestor/processor"
+	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
+	"github.com/guacsec/guac/pkg/ingestor/processor"
 	"github.com/sirupsen/logrus"
 )
 
