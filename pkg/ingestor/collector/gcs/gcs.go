@@ -1,5 +1,5 @@
 //
-// Copyright 2021 The AFF Authors.
+// Copyright 2022 The AFF Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 
 	"github.com/guacsec/guac/pkg/config"
+	"github.com/guacsec/guac/pkg/ingestor/processor"
 	"go.uber.org/zap"
 )
 
@@ -35,8 +36,9 @@ const (
 type Backend struct {
 	logger       *zap.SugaredLogger
 	reader       gcsReader
-	cfg          config.Config
-	LastDownload time.Time
+	config       config.Config
+	lastDownload time.Time
+	isDone       bool
 }
 
 func NewStorageBackend(ctx context.Context, logger *zap.SugaredLogger, cfg config.Config) (*Backend, error) {
@@ -44,11 +46,10 @@ func NewStorageBackend(ctx context.Context, logger *zap.SugaredLogger, cfg confi
 	if err != nil {
 		return nil, err
 	}
-	bucket := cfg.Storage.GCS.Bucket
 	return &Backend{
 		logger: logger,
-		reader: &reader{client: client, bucket: bucket},
-		cfg:    cfg,
+		reader: &reader{client: client, bucket: cfg.Storage.GCS.Bucket},
+		config: cfg,
 	}, nil
 }
 
@@ -56,9 +57,13 @@ func (b *Backend) Type() string {
 	return CollectorGCS
 }
 
+func (b *Backend) IsDone() bool {
+	return b.isDone
+}
+
 type gcsReader interface {
-	GetIterator(ctx context.Context) *storage.ObjectIterator
-	GetReader(ctx context.Context, object string) (io.ReadCloser, error)
+	getIterator(ctx context.Context) *storage.ObjectIterator
+	getReader(ctx context.Context, object string) (io.ReadCloser, error)
 }
 
 type reader struct {
@@ -66,7 +71,7 @@ type reader struct {
 	bucket string
 }
 
-func (r *reader) GetIterator(ctx context.Context) *storage.ObjectIterator {
+func (r *reader) getIterator(ctx context.Context) *storage.ObjectIterator {
 	q := &storage.Query{
 		Projection: storage.ProjectionNoACL,
 	}
@@ -75,44 +80,52 @@ func (r *reader) GetIterator(ctx context.Context) *storage.ObjectIterator {
 	return r.client.Bucket(r.bucket).Objects(ctx, q)
 }
 
-func (r *reader) GetReader(ctx context.Context, object string) (io.ReadCloser, error) {
+func (r *reader) getReader(ctx context.Context, object string) (io.ReadCloser, error) {
 	return r.client.Bucket(r.bucket).Object(object).NewReader(ctx)
 }
 
-func (b *Backend) RetrieveArtifacts(ctx context.Context) (map[string][]byte, error) {
+func (b *Backend) RetrieveArtifacts(ctx context.Context) ([]*processor.Document, error) {
 
-	artifacts := make(map[string][]byte)
-	it := b.reader.GetIterator(ctx)
+	artifacts := []*processor.Document{}
+	it := b.reader.getIterator(ctx)
+	b.isDone = false
+	var payload []byte
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			b.logger.Errorf("failed to retrieve object attribute from bucket: %s", b.cfg.Storage.GCS.Bucket)
+			b.logger.Errorf("failed to retrieve object attribute from bucket: %s", b.config.Storage.GCS.Bucket)
 		}
-		if b.LastDownload.IsZero() {
-			payload, err := b.getObject(ctx, attrs.Name)
+		if b.lastDownload.IsZero() {
+			payload, err = b.getObject(ctx, attrs.Name)
 			if err != nil {
-				b.logger.Errorf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.cfg.Storage.GCS.Bucket)
+				b.logger.Errorf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.config.Storage.GCS.Bucket)
 				continue
 			}
-			artifacts[attrs.Name] = payload
-		} else if attrs.Updated.After(b.LastDownload) {
-			payload, err := b.getObject(ctx, attrs.Name)
+		} else if attrs.Updated.After(b.lastDownload) {
+			payload, err = b.getObject(ctx, attrs.Name)
 			if err != nil {
-				b.logger.Errorf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.cfg.Storage.GCS.Bucket)
+				b.logger.Errorf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.config.Storage.GCS.Bucket)
 				continue
 			}
-			artifacts[attrs.Name] = payload
 		}
+		artifacts = append(artifacts, &processor.Document{
+			Blob: payload,
+			SourceInformation: processor.SourceInformation{
+				Collector: b.Type(),
+				Source:    b.config.Storage.GCS.Bucket,
+			},
+		})
 	}
-	b.LastDownload = time.Now()
+	b.lastDownload = time.Now()
+	b.isDone = true
 	return artifacts, nil
 }
 
 func (b *Backend) getObject(ctx context.Context, object string) ([]byte, error) {
-	reader, err := b.reader.GetReader(ctx, object)
+	reader, err := b.reader.getReader(ctx, object)
 	if err != nil {
 		return nil, err
 	}

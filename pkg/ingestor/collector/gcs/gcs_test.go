@@ -1,5 +1,5 @@
 //
-// Copyright 2021 The AFF Authors.
+// Copyright 2022 The AFF Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import (
 	"io"
 	"reflect"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/config"
+	"github.com/guacsec/guac/pkg/ingestor/processor"
 	"go.uber.org/zap"
 )
 
@@ -56,9 +58,11 @@ func TestNewStorageBackend(t *testing.T) {
 
 func TestBackend_Type(t *testing.T) {
 	type fields struct {
-		logger *zap.SugaredLogger
-		reader gcsReader
-		cfg    config.Config
+		logger       *zap.SugaredLogger
+		reader       gcsReader
+		config       config.Config
+		lastDownload time.Time
+		isDone       bool
 	}
 	tests := []struct {
 		name   string
@@ -70,9 +74,11 @@ func TestBackend_Type(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Backend{
-				logger: tt.fields.logger,
-				reader: tt.fields.reader,
-				cfg:    tt.fields.cfg,
+				logger:       tt.fields.logger,
+				reader:       tt.fields.reader,
+				config:       tt.fields.config,
+				lastDownload: tt.fields.lastDownload,
+				isDone:       tt.fields.isDone,
 			}
 			if got := b.Type(); got != tt.want {
 				t.Errorf("Backend.Type() = %v, want %v", got, tt.want)
@@ -81,7 +87,38 @@ func TestBackend_Type(t *testing.T) {
 	}
 }
 
-func Test_reader_GetIterator(t *testing.T) {
+func TestBackend_IsDone(t *testing.T) {
+	type fields struct {
+		logger       *zap.SugaredLogger
+		reader       gcsReader
+		config       config.Config
+		lastDownload time.Time
+		isDone       bool
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Backend{
+				logger:       tt.fields.logger,
+				reader:       tt.fields.reader,
+				config:       tt.fields.config,
+				lastDownload: tt.fields.lastDownload,
+				isDone:       tt.fields.isDone,
+			}
+			if got := b.IsDone(); got != tt.want {
+				t.Errorf("Backend.IsDone() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_reader_getIterator(t *testing.T) {
 	type fields struct {
 		client *storage.Client
 		bucket string
@@ -103,14 +140,14 @@ func Test_reader_GetIterator(t *testing.T) {
 				client: tt.fields.client,
 				bucket: tt.fields.bucket,
 			}
-			if got := r.GetIterator(tt.args.ctx); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("reader.GetIterator() = %v, want %v", got, tt.want)
+			if got := r.getIterator(tt.args.ctx); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("reader.getIterator() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_reader_GetReader(t *testing.T) {
+func Test_reader_getReader(t *testing.T) {
 	type fields struct {
 		client *storage.Client
 		bucket string
@@ -134,13 +171,13 @@ func Test_reader_GetReader(t *testing.T) {
 				client: tt.fields.client,
 				bucket: tt.fields.bucket,
 			}
-			got, err := r.GetReader(tt.args.ctx, tt.args.object)
+			got, err := r.getReader(tt.args.ctx, tt.args.object)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("reader.GetReader() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("reader.getReader() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("reader.GetReader() = %v, want %v", got, tt.want)
+				t.Errorf("reader.getReader() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -148,9 +185,11 @@ func Test_reader_GetReader(t *testing.T) {
 
 func TestBackend_RetrieveArtifacts(t *testing.T) {
 	type fields struct {
-		logger *zap.SugaredLogger
-		reader gcsReader
-		cfg    config.Config
+		logger       *zap.SugaredLogger
+		reader       gcsReader
+		config       config.Config
+		lastDownload time.Time
+		isDone       bool
 	}
 	type args struct {
 		ctx context.Context
@@ -159,7 +198,7 @@ func TestBackend_RetrieveArtifacts(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    map[string][]byte
+		want    []*processor.Document
 		wantErr bool
 	}{
 		// TODO: Add test cases.
@@ -167,9 +206,11 @@ func TestBackend_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Backend{
-				logger: tt.fields.logger,
-				reader: tt.fields.reader,
-				cfg:    tt.fields.cfg,
+				logger:       tt.fields.logger,
+				reader:       tt.fields.reader,
+				config:       tt.fields.config,
+				lastDownload: tt.fields.lastDownload,
+				isDone:       tt.fields.isDone,
 			}
 			got, err := b.RetrieveArtifacts(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
@@ -178,6 +219,48 @@ func TestBackend_RetrieveArtifacts(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Backend.RetrieveArtifacts() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBackend_getObject(t *testing.T) {
+	type fields struct {
+		logger       *zap.SugaredLogger
+		reader       gcsReader
+		config       config.Config
+		lastDownload time.Time
+		isDone       bool
+	}
+	type args struct {
+		ctx    context.Context
+		object string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Backend{
+				logger:       tt.fields.logger,
+				reader:       tt.fields.reader,
+				config:       tt.fields.config,
+				lastDownload: tt.fields.lastDownload,
+				isDone:       tt.fields.isDone,
+			}
+			got, err := b.getObject(tt.args.ctx, tt.args.object)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Backend.getObject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Backend.getObject() = %v, want %v", got, tt.want)
 			}
 		})
 	}

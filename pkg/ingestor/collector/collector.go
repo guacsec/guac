@@ -23,17 +23,18 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/collector/oci"
 	"github.com/guacsec/guac/pkg/ingestor/collector/pubsub"
 	"github.com/guacsec/guac/pkg/ingestor/collector/transparency"
+	"github.com/guacsec/guac/pkg/ingestor/processor"
 	"go.uber.org/zap"
 )
 
 type Collector interface {
-	RetrieveArtifacts(ctx context.Context) (map[string][]byte, error)
+	// Retrieve the artifacts from the collector
+	RetrieveArtifacts(ctx context.Context) ([]*processor.Document, error)
 	// Type is the string representation of the backend
 	Type() string
+	// Indicated when the collector is done
+	IsDone() bool
 }
-
-// CollectorType describes the type of the collector contents for schema checks
-type CollectorType string
 
 // InitializeBackends creates and initializes every configured storage backend.
 func InitializeBackends(ctx context.Context, logger *zap.SugaredLogger, cfg config.Config) (map[string]Collector, error) {
@@ -46,6 +47,7 @@ func InitializeBackends(ctx context.Context, logger *zap.SugaredLogger, cfg conf
 	for _, backendType := range configuredBackends {
 		switch backendType {
 		case gcs.CollectorGCS:
+			// Need to change how the bucket address is passed in
 			gcsBackend, err := gcs.NewStorageBackend(ctx, logger, cfg)
 			if err != nil {
 				return nil, err
