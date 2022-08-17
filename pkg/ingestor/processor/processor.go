@@ -1,5 +1,5 @@
 //
-// Copyright 2021 The AFF Authors.
+// Copyright 2022 The AFF Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,11 +19,22 @@ import (
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
-type Processor interface{}
+type DocumentProcessor interface {
+	ValidateSchema(i *Document) error
+	ValidateTrustInformation(i *Document) (map[string]interface{}, error)
 
-// ProcessorInput describes the input for a processor to run. This input can
+	// Unpack takes in the document and tries to unpack it
+	// if there is a valid decomposition of sub-documents.
+	//
+	// For example, a DSSE envelope or a tarball
+	// Returns list of len=0 and nil error if nothing to unpack
+	// Returns unpacked list and nil error if successfully unpacked
+	Unpack(i *Document) ([]*Document, error)
+}
+
+// Document describes the input for a processor to run. This input can
 // come from a collector or from the processor itself (run recursively).
-type ProcessorInput struct {
+type Document struct {
 	Blob              []byte
 	Type              DocumentType
 	Format            FormatType
