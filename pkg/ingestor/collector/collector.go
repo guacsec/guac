@@ -22,9 +22,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/collector/gcs"
 	"github.com/guacsec/guac/pkg/ingestor/collector/oci"
 	"github.com/guacsec/guac/pkg/ingestor/collector/pubsub"
-	"github.com/guacsec/guac/pkg/ingestor/collector/transparency"
+	"github.com/guacsec/guac/pkg/ingestor/collector/rekor"
 	"github.com/guacsec/guac/pkg/ingestor/processor"
-	"go.uber.org/zap"
 )
 
 type Collector interface {
@@ -37,10 +36,8 @@ type Collector interface {
 }
 
 // InitializeBackends creates and initializes every configured storage backend.
-func InitializeBackends(ctx context.Context, logger *zap.SugaredLogger, cfg config.Config) (map[string]Collector, error) {
-	// Add an entry here for every configured backend
-	// Add this to the config on what is enabled and disabled
-	configuredBackends := []string{string(gcs.CollectorGCS)}
+func InitializeBackends(ctx context.Context, configuredBackends []string, cfg config.Config) (map[string]Collector, error) {
+	// TODO: change which backends to initialize
 
 	// Now only initialize and return the configured ones.
 	backends := map[string]Collector{}
@@ -48,12 +45,12 @@ func InitializeBackends(ctx context.Context, logger *zap.SugaredLogger, cfg conf
 		switch backendType {
 		case gcs.CollectorGCS:
 			// Need to change how the bucket address is passed in
-			gcsBackend, err := gcs.NewStorageBackend(ctx, logger, cfg)
+			gcsBackend, err := gcs.NewStorageBackend(ctx, cfg)
 			if err != nil {
 				return nil, err
 			}
 			backends[backendType] = gcsBackend
-		case transparency.CollectorTransparency:
+		case rekor.CollectorRekor:
 			// Add for Rekor
 		case oci.CollectorOCI:
 			// Add for OCI

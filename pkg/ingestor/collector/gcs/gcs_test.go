@@ -16,23 +16,22 @@
 package gcs
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
-	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/config"
 	"github.com/guacsec/guac/pkg/ingestor/processor"
-	"go.uber.org/zap"
 )
 
 func TestNewStorageBackend(t *testing.T) {
 	type args struct {
-		ctx    context.Context
-		logger *zap.SugaredLogger
-		cfg    config.Config
+		ctx context.Context
+		cfg config.Config
 	}
 	tests := []struct {
 		name    string
@@ -44,7 +43,7 @@ func TestNewStorageBackend(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewStorageBackend(tt.args.ctx, tt.args.logger, tt.args.cfg)
+			got, err := NewStorageBackend(tt.args.ctx, tt.args.cfg)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewStorageBackend() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -56,136 +55,8 @@ func TestNewStorageBackend(t *testing.T) {
 	}
 }
 
-func TestBackend_Type(t *testing.T) {
-	type fields struct {
-		logger       *zap.SugaredLogger
-		reader       gcsReader
-		config       config.Config
-		lastDownload time.Time
-		isDone       bool
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			b := &Backend{
-				logger:       tt.fields.logger,
-				reader:       tt.fields.reader,
-				config:       tt.fields.config,
-				lastDownload: tt.fields.lastDownload,
-				isDone:       tt.fields.isDone,
-			}
-			if got := b.Type(); got != tt.want {
-				t.Errorf("Backend.Type() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestBackend_IsDone(t *testing.T) {
-	type fields struct {
-		logger       *zap.SugaredLogger
-		reader       gcsReader
-		config       config.Config
-		lastDownload time.Time
-		isDone       bool
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			b := &Backend{
-				logger:       tt.fields.logger,
-				reader:       tt.fields.reader,
-				config:       tt.fields.config,
-				lastDownload: tt.fields.lastDownload,
-				isDone:       tt.fields.isDone,
-			}
-			if got := b.IsDone(); got != tt.want {
-				t.Errorf("Backend.IsDone() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_reader_getIterator(t *testing.T) {
-	type fields struct {
-		client *storage.Client
-		bucket string
-	}
-	type args struct {
-		ctx context.Context
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *storage.ObjectIterator
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &reader{
-				client: tt.fields.client,
-				bucket: tt.fields.bucket,
-			}
-			if got := r.getIterator(tt.args.ctx); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("reader.getIterator() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_reader_getReader(t *testing.T) {
-	type fields struct {
-		client *storage.Client
-		bucket string
-	}
-	type args struct {
-		ctx    context.Context
-		object string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    io.ReadCloser
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := &reader{
-				client: tt.fields.client,
-				bucket: tt.fields.bucket,
-			}
-			got, err := r.getReader(tt.args.ctx, tt.args.object)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("reader.getReader() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("reader.getReader() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestBackend_RetrieveArtifacts(t *testing.T) {
 	type fields struct {
-		logger       *zap.SugaredLogger
 		reader       gcsReader
 		config       config.Config
 		lastDownload time.Time
@@ -206,7 +77,6 @@ func TestBackend_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Backend{
-				logger:       tt.fields.logger,
 				reader:       tt.fields.reader,
 				config:       tt.fields.config,
 				lastDownload: tt.fields.lastDownload,
@@ -224,44 +94,45 @@ func TestBackend_RetrieveArtifacts(t *testing.T) {
 	}
 }
 
-func TestBackend_getObject(t *testing.T) {
-	type fields struct {
-		logger       *zap.SugaredLogger
-		reader       gcsReader
-		config       config.Config
-		lastDownload time.Time
-		isDone       bool
+type mockGcsReader struct {
+	objects map[string]*bytes.Buffer
+}
+
+func (m *mockGcsReader) getReader(ctx context.Context, object string) (io.ReadCloser, error) {
+	buf := m.objects[object]
+	return &ReaderCloser{buf}, nil
+}
+
+func (m *mockGcsReader) getIterator(ctx context.Context, object string) (io.ReadCloser, error) {
+	buf := m.objects[object]
+	return &ReaderCloser{buf}, nil
+}
+
+type ReaderCloser struct {
+	*bytes.Buffer
+}
+
+func (rc *ReaderCloser) Close() error {
+	// Noop
+	return nil
+}
+
+func testObjectIterator(t *testing.T, bkt *BucketHandle, objects []string) {
+	ctx := context.Background()
+	h := testHelper{t}
+	// Collect the list of items we expect: ObjectAttrs in lexical order by name.
+	names := make([]string, len(objects))
+	copy(names, objects)
+	sort.Strings(names)
+	var attrs []*ObjectAttrs
+	for _, name := range names {
+		attrs = append(attrs, h.mustObjectAttrs(bkt.Object(name)))
 	}
-	type args struct {
-		ctx    context.Context
-		object string
+	msg, ok := itesting.TestIterator(attrs,
+		func() interface{} { return bkt.Objects(ctx, &Query{Prefix: "obj"}) },
+		func(it interface{}) (interface{}, error) { return it.(*ObjectIterator).Next() })
+	if !ok {
+		t.Errorf("ObjectIterator.Next: %s", msg)
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []byte
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			b := &Backend{
-				logger:       tt.fields.logger,
-				reader:       tt.fields.reader,
-				config:       tt.fields.config,
-				lastDownload: tt.fields.lastDownload,
-				isDone:       tt.fields.isDone,
-			}
-			got, err := b.getObject(tt.args.ctx, tt.args.object)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Backend.getObject() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Backend.getObject() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	// TODO(jba): test query.Delimiter != ""
 }

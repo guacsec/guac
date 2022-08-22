@@ -16,34 +16,29 @@
 package config
 
 type Config struct {
-	Storage StorageConfigs
+	Collector CollectorConfigs
 }
 
-// StorageConfigs contains the configuration to instantiate different storage providers
-type StorageConfigs struct {
-	GCS          GCSStorageConfig
-	OCI          OCIStorageConfig
+// CollectorConfigs contains the configuration to instantiate different collector providers
+type CollectorConfigs struct {
+	GCS          GCSSCollectorConfig
+	OCI          OCICollectorConfig
 	Transparency TransparencyConfig
-	PubSub       PubSubStorageConfig
+	PubSub       PubSubCollectorConfig
 }
 
-type GCSStorageConfig struct {
+type GCSSCollectorConfig struct {
 	Bucket string
 }
 
-type OCIStorageConfig struct {
+type OCICollectorConfig struct {
 	Repository string
 	Insecure   bool
 }
 
-type PubSubStorageConfig struct {
+type PubSubCollectorConfig struct {
 	Provider string
 	Topic    string
-	Kafka    KafkaStorageConfig
-}
-
-type KafkaStorageConfig struct {
-	BootstrapServers string
 }
 
 type TransparencyConfig struct {

@@ -18,35 +18,55 @@ package collector
 import (
 	"context"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/guacsec/guac/pkg/config"
-	"go.uber.org/zap"
+	"github.com/guacsec/guac/pkg/ingestor/collector/gcs"
 )
 
 func TestInitializeBackends(t *testing.T) {
-	type args struct {
-		ctx    context.Context
-		logger *zap.SugaredLogger
-		cfg    config.Config
-	}
 	tests := []struct {
-		name    string
-		args    args
-		want    map[string]Collector
-		wantErr bool
+		name               string
+		configuredBackends []string
+		cfg                config.Config
+		want               []string
+		wantErr            bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:               "none",
+			configuredBackends: []string{},
+			want:               []string{},
+		},
+		{
+			// TODO: change such that it does not error for missing credentials
+			name:               "gcs",
+			configuredBackends: []string{gcs.CollectorGCS},
+			want:               []string{},
+			cfg: config.Config{Collector: config.CollectorConfigs{
+				GCS: config.GCSSCollectorConfig{
+					Bucket: "foo",
+				},
+			}},
+			wantErr: true,
+		},
 	}
+	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := InitializeBackends(tt.args.ctx, tt.args.logger, tt.args.cfg)
+			got, err := InitializeBackends(ctx, tt.configuredBackends, tt.cfg)
+			gotTypes := []string{}
+			for _, g := range got {
+				gotTypes = append(gotTypes, g.Type())
+			}
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InitializeBackends() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			sort.Strings(gotTypes)
+			sort.Strings(tt.want)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("InitializeBackends() = %v, want %v", got, tt.want)
+				t.Errorf("InitializeBackends() = %v, want %v", gotTypes, tt.want)
 			}
 		})
 	}

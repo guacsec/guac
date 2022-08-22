@@ -17,6 +17,7 @@ package gcs
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"time"
@@ -26,7 +27,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/config"
 	"github.com/guacsec/guac/pkg/ingestor/processor"
-	"go.uber.org/zap"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -34,21 +35,19 @@ const (
 )
 
 type Backend struct {
-	logger       *zap.SugaredLogger
 	reader       gcsReader
 	config       config.Config
 	lastDownload time.Time
 	isDone       bool
 }
 
-func NewStorageBackend(ctx context.Context, logger *zap.SugaredLogger, cfg config.Config) (*Backend, error) {
+func NewStorageBackend(ctx context.Context, cfg config.Config) (*Backend, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return &Backend{
-		logger: logger,
-		reader: &reader{client: client, bucket: cfg.Storage.GCS.Bucket},
+		reader: &reader{client: client, bucket: cfg.Collector.GCS.Bucket},
 		config: cfg,
 	}, nil
 }
@@ -96,18 +95,18 @@ func (b *Backend) RetrieveArtifacts(ctx context.Context) ([]*processor.Document,
 			break
 		}
 		if err != nil {
-			b.logger.Errorf("failed to retrieve object attribute from bucket: %s", b.config.Storage.GCS.Bucket)
+			return nil, fmt.Errorf("failed to retrieve object attribute from bucket: %s", b.config.Collector.GCS.Bucket)
 		}
 		if b.lastDownload.IsZero() {
 			payload, err = b.getObject(ctx, attrs.Name)
 			if err != nil {
-				b.logger.Errorf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.config.Storage.GCS.Bucket)
+				logrus.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.config.Collector.GCS.Bucket)
 				continue
 			}
 		} else if attrs.Updated.After(b.lastDownload) {
 			payload, err = b.getObject(ctx, attrs.Name)
 			if err != nil {
-				b.logger.Errorf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.config.Storage.GCS.Bucket)
+				logrus.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, b.config.Collector.GCS.Bucket)
 				continue
 			}
 		}
@@ -115,7 +114,7 @@ func (b *Backend) RetrieveArtifacts(ctx context.Context) ([]*processor.Document,
 			Blob: payload,
 			SourceInformation: processor.SourceInformation{
 				Collector: b.Type(),
-				Source:    b.config.Storage.GCS.Bucket,
+				Source:    b.config.Collector.GCS.Bucket,
 			},
 		})
 	}
