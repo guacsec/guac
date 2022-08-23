@@ -18,7 +18,7 @@ package collector
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 const (
