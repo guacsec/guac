@@ -14,6 +14,11 @@ Here is an overview of the architecture of GUAC:
 
 ![image](https://user-images.githubusercontent.com/3060102/182689908-477f4770-1142-4c18-8fa9-16d93dcf84b4.png)
 
+## Additional References
+
+- [GUAC Design Doc](https://docs.google.com/document/d/1N5x0HErb-kmCPgG9M8TwBEOGIVU54clqp_X4KhtNJI8/edit)
+- [GUAC Intro Slides](https://docs.google.com/presentation/d/1WF4dsJiwR6URWPgn1aiHAE3iLVl-oGP4SJRWFpcOlao/edit#slide=id.p)
+
 ## Communication
 
 All communication should be done through issues, unless it is a private matter. In that case, an e-mail should be sent to guac-maintainers@googlegroups.com.
