@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 const (

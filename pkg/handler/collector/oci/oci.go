@@ -15,8 +15,6 @@
 
 package oci
 
-import "github.com/guacsec/guac/pkg/ingestor/collector"
-
 const (
-	CollectorOCI collector.CollectorType = "oci"
+	CollectorOCI = "oci"
 )

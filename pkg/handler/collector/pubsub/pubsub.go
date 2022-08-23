@@ -15,8 +15,6 @@
 
 package pubsub
 
-import "github.com/guacsec/guac/pkg/ingestor/collector"
-
 const (
-	CollectorPubSub collector.CollectorType = "pubsub"
+	CollectorPubSub = "pubsub"
 )

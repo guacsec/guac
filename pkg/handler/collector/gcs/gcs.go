@@ -26,7 +26,6 @@ import (
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 
-	"github.com/guacsec/guac/pkg/ingestor/collector"
 	"github.com/guacsec/guac/pkg/ingestor/processor"
 	"github.com/sirupsen/logrus"
 )
@@ -40,19 +39,29 @@ type GCS struct {
 
 const (
 	// Specify the GCS bucket address
-	bucketEnv                            = "GCS_BUCKET_ADDRESS"
-	CollectorGCS collector.CollectorType = "GCS"
+	bucketEnv    = "GCS_BUCKET_ADDRESS"
+	CollectorGCS = "GCS"
 )
-
-func init() {
-	collector.RegisterDocumentCollector(&GCS{}, CollectorGCS)
-}
 
 func getBucketPath() string {
 	if env := os.Getenv(bucketEnv); env != "" {
 		return env
 	}
 	return ""
+}
+
+func NewGCSClient(ctx context.Context) (*GCS, error) {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	bucket := cfg.Storage.GCS.Bucket
+	return &Backend{
+		logger: logger,
+		writer: &writer{client: client, bucket: bucket},
+		reader: &reader{client: client, bucket: bucket},
+		cfg:    cfg,
+	}, nil
 }
 
 // setupClient initializes GCS and returns true if properly configured
@@ -75,7 +84,7 @@ func (g *GCS) IsDone() bool {
 }
 
 // Type is the collector type of the collector
-func (g *GCS) Type() collector.CollectorType {
+func (g *GCS) Type() string {
 	return CollectorGCS
 }
 

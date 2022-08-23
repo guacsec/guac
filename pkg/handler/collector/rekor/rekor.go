@@ -15,8 +15,6 @@
 
 package rekor
 
-import "github.com/guacsec/guac/pkg/ingestor/collector"
-
 const (
-	CollectorRekor collector.CollectorType = "rekor"
+	CollectorRekor = "rekor"
 )
