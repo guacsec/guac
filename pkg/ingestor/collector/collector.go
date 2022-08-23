@@ -51,18 +51,40 @@ func RegisterDocumentCollector(p Collector, d CollectorType) {
 
 // Collect takes all the collectors and starts collecting
 // the artifacts
-func Collect(ctx context.Context) (<-chan *processor.Document, error) {
+func Collect(ctx context.Context) (<-chan *processor.Document, <-chan error, int, error) {
 	//add channel
-	finalDocs := make(chan *processor.Document, BufferChannelSize)
+	docChan := make(chan *processor.Document, BufferChannelSize)
+	errChan := make(chan error, len(documentCollector))
 	for _, collector := range documentCollector {
-		err := collector.RetrieveArtifacts(ctx, finalDocs)
-		if err != nil {
-			return nil, err
-		}
-		finalDocs = append(finalDocs, docs...)
+		c := collector
+		go func() {
+			errChan <- c.RetrieveArtifacts(ctx, docChan)
+		}()
 	}
-	return finalDocs, nil
+	return docChan, errChan, len(documentCollector), nil
 }
+
+/*
+
+	docChan, err := collector.Collect()
+	check(err)
+
+	for  {
+		select {
+			d := <- docChan:
+				emit(d)
+			err := <- errChan:
+				if err != nil {
+					log
+				}
+				errCount +=1
+				if errCount == n {
+					break
+				}
+		}
+	}
+
+*/
 
 // Complete checks if the selected collector has completed
 func complete(d CollectorType) bool {
