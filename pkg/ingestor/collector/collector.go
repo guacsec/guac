@@ -22,9 +22,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	BufferChannelSize int = 1000
+)
+
 type Collector interface {
 	// Retrieve the artifacts from the collector
-	RetrieveArtifacts(ctx context.Context) (<-chan *processor.Document, error)
+	RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error
 	// Indicated when the collector is done
 	IsDone() bool
 	// Type of the collector
@@ -48,9 +52,10 @@ func RegisterDocumentCollector(p Collector, d CollectorType) {
 // Collect takes all the collectors and starts collecting
 // the artifacts
 func Collect(ctx context.Context) (<-chan *processor.Document, error) {
-	finalDocs := []*processor.Document{}
+	//add channel
+	finalDocs := make(chan *processor.Document, BufferChannelSize)
 	for _, collector := range documentCollector {
-		docs, err := collector.RetrieveArtifacts(ctx)
+		err := collector.RetrieveArtifacts(ctx, finalDocs)
 		if err != nil {
 			return nil, err
 		}
