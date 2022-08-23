@@ -17,6 +17,7 @@ package process
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -29,7 +30,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	testCases := []struct {
 		name      string
 		doc       processor.Document
-		expected  []processor.Document
+		expected  processor.DocumentTree
 		expectErr bool
 	}{{
 
@@ -39,27 +40,19 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: []processor.Document{
-			{
-				Blob: []byte(`{
+		expected: docNode(&processor.Document{
+			Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
-				SourceInformation: processor.SourceInformation{},
-			},
-		},
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		}),
 	}, {
 
 		name: "unpack test",
@@ -75,38 +68,45 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							 "info": "this is a cooler nested doc 2"
 						 }]
 						}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: []processor.Document{
-			{
+		expected: docNode(
+			&processor.Document{ //root
+				Blob: []byte(`{
+                           "issuer": "google.com",
+                           "info": "this is a cool document",
+                           "nested": [{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 1"
+                           },{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 2"
+                           }]
+                          }`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			docNode(&processor.Document{ // child 1
 				Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 1"
 					}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{},
-			}, {
+			}),
+			docNode(&processor.Document{ //child 2
 				Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 2"
 					}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{},
-			},
-		},
+			})),
 	}, {
 
 		name: "unpack twice test",
@@ -130,38 +130,79 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							 }]
 						 }]
 						}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: []processor.Document{
-			{
+		expected: docNode(
+			&processor.Document{ // root
 				Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cooler nested doc 3"
-					}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
-				SourceInformation: processor.SourceInformation{},
-			}, {
-				Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cooler nested doc 4"
-					}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
+                           "issuer": "google.com",
+                           "info": "this is a cool document",
+                           "nested": [{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 1",
+                               "nested": [{
+                                 "issuer": "google.com",
+                                 "info": "this is a cooler nested doc 3"
+                               }]
+                           },{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 2",
+                               "nested": [{
+                                 "issuer": "google.com",
+                                 "info": "this is a cooler nested doc 4"
+                               }]
+                           }]
+                          }`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{},
 			},
-		},
+			docNode(&processor.Document{
+				Blob: []byte(`{
+							"issuer": "google.com",
+							 "info": "this is a cooler nested doc 1",
+							 "nested": [{
+							   "issuer": "google.com",
+							   "info": "this is a cooler nested doc 3"
+							 }]
+							 }`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+				docNode(&processor.Document{
+					Blob: []byte(`{
+                        "issuer": "google.com",
+                        "info": "this is a cooler nested doc 3"
+                    }`),
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				})),
+			docNode(&processor.Document{
+				Blob: []byte(`{
+                              "issuer": "google.com",
+                               "info": "this is a cooler nested doc 2",
+                               "nested": [{
+                                 "issuer": "google.com",
+                                 "info": "this is a cooler nested doc 4"
+                               }]
+                               }`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+				docNode(&processor.Document{
+					Blob: []byte(`{
+                        "issuer": "google.com",
+                        "info": "this is a cooler nested doc 4"
+                    }`),
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				}))),
 	}, {
 
 		name: "unpack assymetric test",
@@ -181,38 +222,63 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 					 }]
 				 }]
 				}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: []processor.Document{
-			{
+		expected: docNode(
+			&processor.Document{ //root
+				Blob: []byte(`{
+                   "issuer": "google.com",
+                   "info": "this is a cool document",
+                   "nested": [{
+                       "issuer": "google.com",
+                       "info": "this is a cooler nested doc 1"
+                   },{
+                       "issuer": "google.com",
+                       "info": "this is a cooler nested doc 2",
+                       "nested": [{
+                         "issuer": "google.com",
+                         "info": "this is a cooler nested doc 4"
+                       }]
+                   }]
+                  }`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			docNode(&processor.Document{ // child 1
 				Blob: []byte(`{
 				"issuer": "google.com",
 				"info": "this is a cooler nested doc 1"
 			}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{},
-			}, {
+			}),
+			docNode(&processor.Document{ // child 2
 				Blob: []byte(`{
 				"issuer": "google.com",
-				"info": "this is a cooler nested doc 4"
-			}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
+				"info": "this is a cooler nested doc 2",
+				"nested": [{
+				   "issuer": "google.com",
+				   "info": "this is a cooler nested doc 4"
+				 }]
+				}`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{},
 			},
-		},
+				docNode(&processor.Document{ // child 2.1
+					Blob: []byte(`{
+                  "issuer": "google.com",
+                  "info": "this is a cooler nested doc 4"
+                  }`),
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				})),
+		),
 	}, {
 
 		name: "bad format",
@@ -221,11 +287,8 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectErr: true,
@@ -237,11 +300,8 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: "invalid-format",
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              simpledoc.SimpleDocType,
+			Format:            "invalid-format",
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectErr: true,
@@ -253,11 +313,8 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 			Blob: []byte(`{
                         "info": "this is a cool document"
                     }`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectErr: true,
@@ -269,67 +326,11 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                         "issuer": "google.com",
                         "info": "this is a cool document"
                     }`),
-			Type:   "invalid-document-type",
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
+			Type:              "invalid-document-type",
+			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectErr: true,
-	}, {
-
-		// validate trust
-		name: "bad trust info",
-		doc: processor.Document{
-			Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cool document"
-					}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("bing.com"),
-			},
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: []processor.Document{},
-	}, {
-
-		name: "bad nested trust info",
-		doc: processor.Document{
-			Blob: []byte(`{
-						 "issuer": "google.com",
-						 "info": "this is a cool document",
-						 "nested": [{
-							 "issuer": "bing.com",
-							 "info": "this is a cooler nested doc 1"
-						 },{
-							 "issuer": "google.com",
-							 "info": "this is a cooler nested doc 2"
-						 }]
-						}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: []processor.Document{
-			{
-				Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cooler nested doc 2"
-					}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
-				SourceInformation: processor.SourceInformation{},
-			},
-		},
 	}, {
 
 		// misc
@@ -341,31 +342,23 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 					}`),
 			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
 			SourceInformation: processor.SourceInformation{
 				Collector: "a-collector",
 				Source:    "a-source",
 			},
 		},
-		expected: []processor.Document{
-			{
-				Blob: []byte(`{
+		expected: docNode(&processor.Document{
+			Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
-				SourceInformation: processor.SourceInformation{
-					Collector: "a-collector",
-					Source:    "a-source",
-				},
+			Type:   simpledoc.SimpleDocType,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "a-collector",
+				Source:    "a-source",
 			},
-		},
+		}),
 	}, {
 
 		// misc
@@ -384,45 +377,55 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                         }`),
 			Type:   simpledoc.SimpleDocType,
 			Format: processor.FormatJSON,
-			TrustInformation: processor.TrustInformation{
-				IssuerUri: ptrStr("google.com"),
-			},
 			SourceInformation: processor.SourceInformation{
 				Collector: "a-collector",
 				Source:    "a-source",
 			},
 		},
-		expected: []processor.Document{
-			{
+		expected: docNode(
+			&processor.Document{ //root
+				Blob: []byte(`{
+                           "issuer": "google.com",
+                           "info": "this is a cool document",
+                           "nested": [{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 1"
+                           },{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 2"
+                           }]
+                          }`),
+				Type:   simpledoc.SimpleDocType,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "a-collector",
+					Source:    "a-source",
+				},
+			},
+			docNode(&processor.Document{ //child 1
 				Blob: []byte(`{
                         "issuer": "google.com",
                         "info": "this is a cooler nested doc 1"
                     }`),
 				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
 				SourceInformation: processor.SourceInformation{
 					Collector: "a-collector",
 					Source:    "a-source",
 				},
-			}, {
+			}),
+			docNode(&processor.Document{ //child 2
 				Blob: []byte(`{
                         "issuer": "google.com",
                         "info": "this is a cooler nested doc 2"
                     }`),
 				Type:   simpledoc.SimpleDocType,
 				Format: processor.FormatJSON,
-				TrustInformation: processor.TrustInformation{
-					IssuerUri: ptrStr("google.com"),
-				},
 				SourceInformation: processor.SourceInformation{
 					Collector: "a-collector",
 					Source:    "a-source",
 				},
-			},
-		},
+			})),
 	}}
 
 	logrus.SetLevel(logrus.DebugLevel)
@@ -430,7 +433,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			docs, err := Process(&tt.doc)
+			docTree, err := Process(&tt.doc)
 			if err != nil {
 				if tt.expectErr {
 					return
@@ -439,31 +442,77 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 				return
 			}
 
-			// Compare docs
-			if len(docs) != len(tt.expected) {
-				t.Errorf("number of docs got %v, expected %v", len(docs), len(tt.expected))
-				return
+			if !docTreeEqual(docTree, tt.expected) {
+				t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", stringTree(docTree), stringTree(tt.expected))
 			}
-			for _, d := range docs {
-				if !existAndPop(tt.expected, *d) {
-					t.Errorf("got doc but not expected: %v", d)
+
+			/*
+				// Compare docs
+				if len(docs) != len(tt.expected) {
+					t.Errorf("number of docs got %v, expected %v", len(docs), len(tt.expected))
 					return
 				}
-			}
+				for _, d := range docs {
+					if !existAndPop(tt.expected, *d) {
+						t.Errorf("got doc but not expected: %v", d)
+						return
+					}
+				}
+			*/
 		})
 	}
 }
 
-func existAndPop(docs []processor.Document, d processor.Document) bool {
-	for i, dd := range docs {
-		d.Blob = consistentJsonBytes(d.Blob)
-		dd.Blob = consistentJsonBytes(dd.Blob)
-		if reflect.DeepEqual(d, dd) {
-			docs = append(docs[:i], docs[i+1:]...)
+func existAndPop(nodes []*processor.DocumentNode, n *processor.DocumentNode) bool {
+	for i, nn := range nodes {
+		if docNodeEqual(nn, n) {
+			nodes = append(nodes[:i], nodes[i+1:]...)
 			return true
 		}
 	}
 	return false
+}
+
+func docEqual(a, b *processor.Document) bool {
+	a.Blob = consistentJsonBytes(a.Blob)
+	b.Blob = consistentJsonBytes(b.Blob)
+	return reflect.DeepEqual(a, b)
+}
+
+func docTreeEqual(a, b processor.DocumentTree) bool {
+	return docNodeEqual(a, b)
+}
+
+func docNodeEqual(a, b *processor.DocumentNode) bool {
+	if a == nil || b == nil {
+		return false
+	}
+
+	// check if a and b Docuemnts are equal
+	if !docEqual(a.Document, b.Document) {
+		return false
+	}
+
+	// check if len of children are equal
+	if len(a.Children) != len(b.Children) {
+		return false
+	}
+
+	if len(a.Children) > 0 {
+		// Copy list of documentNodes of A
+		aCopy := make([]*processor.DocumentNode, len(a.Children))
+		copy(aCopy, a.Children)
+
+		// for each document in B, check exists and pop on listA
+		// where exists and pop equivalency
+		for _, bNode := range b.Children {
+			if !existAndPop(aCopy, bNode) {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func ptrStr(i string) *string {
@@ -480,4 +529,27 @@ func consistentJsonBytes(b []byte) []byte {
 	}
 	out, _ := json.Marshal(v)
 	return out
+}
+
+func docNode(v *processor.Document, children ...*processor.DocumentNode) *processor.DocumentNode {
+	return &processor.DocumentNode{
+		Document: v,
+		Children: children,
+	}
+}
+
+func stringTree(n *processor.DocumentNode) string {
+	return stringTreeHelper(n, "")
+}
+
+func stringTreeHelper(n *processor.DocumentNode, prefix string) string {
+	str := fmt.Sprintf("%s { doc: %s, %v, %v, %v}", prefix, string(consistentJsonBytes(n.Document.Blob)),
+		n.Document.Format,
+		n.Document.Type,
+		n.Document.SourceInformation,
+	)
+	for _, c := range n.Children {
+		str += "\n" + stringTreeHelper(c, prefix+"-")
+	}
+	return str
 }

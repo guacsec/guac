@@ -94,22 +94,6 @@ func validateSimpleDoc(pd SimpleDoc) error {
 	return nil
 }
 
-func (dp *SimpleDocProc) ValidateTrustInformation(d *processor.Document) (map[string]interface{}, error) {
-	var p SimpleDoc
-	if err := json.Unmarshal(d.Blob, &p); err != nil {
-		return nil, err
-	}
-
-	trustInfo := map[string]interface{}{}
-	if d.TrustInformation.IssuerUri != nil {
-		if p.Issuer != *d.TrustInformation.IssuerUri {
-			return nil, fmt.Errorf("trust information not valid issuer doesn't match")
-		}
-		trustInfo["issuer"] = d.TrustInformation.IssuerUri
-	}
-	return trustInfo, nil
-}
-
 func (dp *SimpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, error) {
 	var p SimpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
@@ -123,10 +107,9 @@ func (dp *SimpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, e
 			return nil, err
 		}
 		retDocs[i] = &processor.Document{
-			Blob:             b,
-			Type:             SimpleDocType,
-			Format:           processor.FormatJSON,
-			TrustInformation: d.TrustInformation,
+			Blob:   b,
+			Type:   SimpleDocType,
+			Format: processor.FormatJSON,
 		}
 	}
 
