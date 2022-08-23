@@ -15,4 +15,45 @@
 
 package collector
 
-type Collector interface{}
+import (
+	"context"
+
+	"github.com/guacsec/guac/pkg/ingestor/processor"
+)
+
+const (
+	BufferChannelSize int = 1000
+)
+
+type Collector interface {
+	// RetrieveArtifacts collects the documents from the collector. It emits each collected
+	// document through the channel to be collected and processed by the upstream processor.
+	// The function should block until all the artifacts are collected and return a nil error
+	// or return an error from the collector crashing. This function can keep running and check
+	// for new artifacts as they are being uploaded by polling on an interval or run once and
+	// grab all the artifacts and end.
+	RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error
+	// IsDone indicated when the collector is finished collecting
+	IsDone() bool
+	// Type returns the collector type
+	Type() string
+}
+
+var (
+	documentCollector = map[string]Collector{}
+)
+
+// Collect takes all the collectors and starts collecting artifacts
+func Collect(ctx context.Context) (<-chan *processor.Document, <-chan error, int, error) {
+	// docChan to collect artifacts
+	docChan := make(chan *processor.Document, BufferChannelSize)
+	// errChan to receive error from collectors
+	errChan := make(chan error, len(documentCollector))
+	for _, collector := range documentCollector {
+		c := collector
+		go func() {
+			errChan <- c.RetrieveArtifacts(ctx, docChan)
+		}()
+	}
+	return docChan, errChan, len(documentCollector), nil
+}
