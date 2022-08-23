@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/guacsec/guac/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/sirupsen/logrus"
 )
 

@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/guacsec/guac/pkg/ingestor/collector"
-	"github.com/guacsec/guac/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/handler/collector"
+	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/spf13/cobra"
 )
 

@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
-	"github.com/guacsec/guac/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/sirupsen/logrus"
 )
 
