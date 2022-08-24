@@ -38,29 +38,36 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 	documentProcessors[d] = p
 }
 
-func Process(i *processor.Document) ([]*processor.Document, error) {
-	docsToUnpack := []*processor.Document{i}
-	finalDocs := []*processor.Document{}
-	for len(docsToUnpack) > 0 {
-		logrus.Debugf("%v documents left in queue", len(docsToUnpack))
-		dd := docsToUnpack[0]
-		docsToUnpack = docsToUnpack[1:]
+func Process(i *processor.Document) (processor.DocumentTree, error) {
+	node, err := processHelper(i)
+	if err != nil {
+		return nil, err
+	}
 
-		ds, err := processDocument(dd)
-		// TODO: return a policy type error to provide better log warnings
-		if err != nil {
-			continue
-		}
+	return processor.DocumentTree(node), nil
+}
 
-		logrus.Debugf("unpacked document to %v documents", len(ds))
-		if len(ds) > 0 {
-			docsToUnpack = append(docsToUnpack, ds...)
-		} else {
-			dd.SourceInformation = i.SourceInformation
-			finalDocs = append(finalDocs, dd)
+func processHelper(doc *processor.Document) (*processor.DocumentNode, error) {
+	ds, err := processDocument(doc)
+	if err != nil {
+		return nil, err
+	}
+
+	children := make([]*processor.DocumentNode, len(ds))
+	if ds != nil {
+		for i, d := range ds {
+			d.SourceInformation = doc.SourceInformation
+			n, err := processHelper(d)
+			if err != nil {
+				return nil, err
+			}
+			children[i] = n
 		}
 	}
-	return finalDocs, nil
+	return &processor.DocumentNode{
+		Document: doc,
+		Children: children,
+	}, nil
 }
 
 func processDocument(i *processor.Document) ([]*processor.Document, error) {
@@ -68,13 +75,10 @@ func processDocument(i *processor.Document) ([]*processor.Document, error) {
 		return nil, err
 	}
 
-	trustInfo, err := validateDocument(i)
+	err := validateDocument(i)
 	if err != nil {
 		return nil, err
 	}
-
-	// pass trustInfo into policy
-	_ = trustInfo
 
 	ds, err := unpackDocument(i)
 	if err != nil {
@@ -91,28 +95,21 @@ func validateFormat(i *processor.Document) error {
 			return fmt.Errorf("invalid JSON document")
 		}
 		break
+	case processor.FormatUnknown:
+		return nil
 	default:
 		return fmt.Errorf("invalid document format type: %v", i.Format)
 	}
 	return nil
 }
 
-func validateDocument(i *processor.Document) (map[string]interface{}, error) {
+func validateDocument(i *processor.Document) error {
 	p, ok := documentProcessors[i.Type]
 	if !ok {
-		return nil, fmt.Errorf("no document processor registered for type: %s", i.Type)
+		return fmt.Errorf("no document processor registered for type: %s", i.Type)
 	}
 
-	if err := p.ValidateSchema(i); err != nil {
-		return nil, fmt.Errorf("error validating document schema: %w", err)
-	}
-
-	trustInfo, err := p.ValidateTrustInformation(i)
-	if err != nil {
-		return nil, fmt.Errorf("error validating trust information: %w", err)
-	}
-
-	return trustInfo, nil
+	return p.ValidateSchema(i)
 }
 
 func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
@@ -121,20 +118,4 @@ func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 		return nil, fmt.Errorf("no document processor registered for type: %s", i.Type)
 	}
 	return p.Unpack(i)
-}
-
-func validate(i *processor.Document) (bool, error) {
-	if err := validateFormat(i); err != nil {
-		return false, err
-	}
-
-	trustInfo, err := validateDocument(i)
-	if err != nil {
-		return false, err
-	}
-
-	// pass trustInfo into policy
-	_ = trustInfo
-
-	return true, nil
 }

@@ -15,13 +15,9 @@
 
 package processor
 
-import (
-	"github.com/secure-systems-lab/go-securesystemslib/dsse"
-)
-
 type DocumentProcessor interface {
+	// ValidateSchema validates the schema of the document
 	ValidateSchema(i *Document) error
-	ValidateTrustInformation(i *Document) (map[string]interface{}, error)
 
 	// Unpack takes in the document and tries to unpack it
 	// if there is a valid decomposition of sub-documents.
@@ -38,8 +34,17 @@ type Document struct {
 	Blob              []byte
 	Type              DocumentType
 	Format            FormatType
-	TrustInformation  TrustInformation
 	SourceInformation SourceInformation
+}
+
+// DocumentTree describes the output of a document tree that resulted from
+// processing a node
+type DocumentTree *DocumentNode
+
+// DocumentNode describes a node of a DocumentTree
+type DocumentNode struct {
+	Document *Document
+	Children []*DocumentNode
 }
 
 // DocumentType describes the type of the document contents for schema checks
@@ -47,9 +52,10 @@ type DocumentType string
 
 // Document* is the enumerables of DocumentType
 const (
-	DocumentSLSA DocumentType = "SLSA"
-	DocumentITE6              = "ITE6"
-	DocumentDSSE              = "DSSE"
+	DocumentSLSA    DocumentType = "SLSA"
+	DocumentITE6                 = "ITE6"
+	DocumentDSSE                 = "DSSE"
+	DocumentUnknown              = "UNKNOWN"
 )
 
 // FormatType describes the document format for malform checks
@@ -57,18 +63,11 @@ type FormatType string
 
 // Format* is the enumerables of FormatType
 const (
-	FormatJSON FormatType = "JSON"
+	FormatJSON    FormatType = "JSON"
+	FormatUnknown            = "UNKNOWN"
 )
 
-// TrustInformation provides additional information about how to verify the document
-type TrustInformation struct {
-	DSSE      *dsse.Envelope
-	IssuerUri *string
-	// TODO: Figure out how to handle log verification trust
-	// LogVerification *rtype.LogEntryAnonVerification
-}
-
-// TrustInformation provides additional information about where the document comes from
+// SourceInformation provides additional information about where the document comes from
 type SourceInformation struct {
 	// Collector describes the name of the collector providing this information
 	Collector string
