@@ -13,35 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/spf13/cobra"
+	"github.com/guacsec/guac/cmd/collector/cmd"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "ingestor",
-	Short: "ingestor is a ingestor cmdline for GUAC",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-		var (
-			collector collector.Collector
-			processor processor.DocumentProcessor
-		)
-		fmt.Println("Artifact ff")
-		_ = collector
-		_ = processor
-	},
-}
-
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+func main() {
+	cmd.Execute()
 }
