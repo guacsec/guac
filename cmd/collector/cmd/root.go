@@ -19,24 +19,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	rootCmd.AddCommand(exampleCmd)
+}
+
 var rootCmd = &cobra.Command{
-	Use:   "ingestor",
-	Short: "ingestor is a ingestor cmdline for GUAC",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-		var (
-			collector collector.Collector
-			processor processor.DocumentProcessor
-		)
-		fmt.Println("GUAC")
-		_ = collector
-		_ = processor
-	},
+	Use:   "collector",
+	Short: "collector is an collector cmdline for GUAC",
 }
 
 func Execute() {
