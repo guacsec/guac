@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/fsouza/fake-gcs-server/fakestorage"
-	"github.com/guacsec/guac/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 func TestGCS_RetrieveArtifacts(t *testing.T) {
@@ -54,12 +54,11 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		bucket       string
 		reader       gcsReader
 		lastDownload time.Time
-		isDone       bool
 	}
 	tests := []struct {
 		name     string
 		fields   fields
-		want     []*processor.Document
+		want     *processor.Document
 		wantErr  bool
 		wantDone bool
 	}{
@@ -73,9 +72,8 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			fields: fields{
 				bucket: getBucketPath(),
 				reader: &reader{client: client, bucket: getBucketPath()},
-				isDone: false,
 			},
-			want:     []*processor.Document{doc},
+			want:     doc,
 			wantErr:  false,
 			wantDone: true,
 		},
@@ -84,10 +82,9 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			fields: fields{
 				bucket:       getBucketPath(),
 				reader:       &reader{client: client, bucket: getBucketPath()},
-				isDone:       false,
 				lastDownload: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			},
-			want:     []*processor.Document{},
+			want:     nil,
 			wantErr:  false,
 			wantDone: true,
 		},
@@ -96,33 +93,46 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			fields: fields{
 				bucket:       getBucketPath(),
 				reader:       &reader{client: client, bucket: getBucketPath()},
-				isDone:       false,
 				lastDownload: time.Date(2009, 10, 17, 20, 34, 58, 651387237, time.UTC),
 			},
-			want:     []*processor.Document{doc},
+			want:     doc,
 			wantErr:  false,
 			wantDone: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &GCS{
+			g := &gcs{
 				bucket:       tt.fields.bucket,
 				reader:       tt.fields.reader,
 				lastDownload: tt.fields.lastDownload,
-				isDone:       tt.fields.isDone,
 			}
-			got, err := g.RetrieveArtifacts(ctx)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GCS.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			docChan := make(chan *processor.Document, 1)
+			errChan := make(chan error, 1)
+			go func() {
+				errChan <- g.RetrieveArtifacts(ctx, docChan)
+			}()
+			numCollectors := 1
+			collectorsDone := 0
+			for collectorsDone < numCollectors {
+				select {
+				case d := <-docChan:
+					if !reflect.DeepEqual(d, tt.want) {
+						t.Errorf("g.RetrieveArtifacts() = %v, want %v", d, tt.want)
+					}
+				case err := <-errChan:
+					if (err != nil) != tt.wantErr {
+						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
+						return
+					}
+					collectorsDone += 1
+				}
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GCS.RetrieveArtifacts() = %v, want %v", got, tt.want)
+			if g.Type() != CollectorGCS {
+				t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGCS)
 			}
-			if g.IsDone() != tt.wantDone {
-				t.Errorf("GCS.isDone() = %v, want %v", g.IsDone(), tt.wantDone)
-			}
+			close(docChan)
+			close(errChan)
 		})
 	}
 }

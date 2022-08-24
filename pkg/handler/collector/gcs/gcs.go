@@ -17,6 +17,7 @@ package gcs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -25,19 +26,21 @@ import (
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 
-	"github.com/guacsec/guac/pkg/ingestor/processor"
+	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/sirupsen/logrus"
 )
 
-type GCS struct {
+type gcs struct {
 	bucket       string
 	reader       gcsReader
 	lastDownload time.Time
-	isDone       bool
 }
 
 const (
+	// gcsCredsEnv is the env variable to hold the json creds file
+	gcsCredsEnv = "GOOGLE_APPLICATION_CREDENTIALS"
 	// Specify the GCS bucket address
 	bucketEnv    = "GCS_BUCKET_ADDRESS"
 	CollectorGCS = "GCS"
@@ -50,41 +53,35 @@ func getBucketPath() string {
 	return ""
 }
 
-func NewGCSClient(ctx context.Context) (*GCS, error) {
-	client, err := storage.NewClient(ctx)
+func getCredsPath() string {
+	if env := os.Getenv(gcsCredsEnv); env != "" {
+		return env
+	}
+	return ""
+}
+
+func NewGCSClient(ctx context.Context) (*gcs, error) {
+	// TODO: Change to pass in token via command line
+	if getCredsPath() == "" {
+		return nil, errors.New("gcs bucket not specified")
+	}
+	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv(gcsCredsEnv)))
 	if err != nil {
 		return nil, err
 	}
-	bucket := cfg.Storage.GCS.Bucket
-	return &Backend{
-		logger: logger,
-		writer: &writer{client: client, bucket: bucket},
-		reader: &reader{client: client, bucket: bucket},
-		cfg:    cfg,
-	}, nil
-}
-
-// setupClient initializes GCS and returns true if properly configured
-func (g *GCS) setupClient(ctx context.Context) error {
-	if getBucketPath() != "" {
-		client, err := storage.NewClient(ctx)
-		if err != nil {
-			return err
-		}
-		g.bucket = getBucketPath()
-		g.reader = &reader{client: client, bucket: getBucketPath()}
-		g.isDone = true
+	if getBucketPath() == "" {
+		return nil, errors.New("gcs bucket not specified")
 	}
-	return nil
-}
-
-// IsDone return if the collector is done collecting artifacts
-func (g *GCS) IsDone() bool {
-	return g.isDone
+	bucket := getBucketPath()
+	gstore := &gcs{
+		bucket: getBucketPath(),
+		reader: &reader{client: client, bucket: bucket},
+	}
+	return gstore, nil
 }
 
 // Type is the collector type of the collector
-func (g *GCS) Type() string {
+func (g *gcs) Type() string {
 	return CollectorGCS
 }
 
@@ -112,24 +109,19 @@ func (r *reader) getReader(ctx context.Context, object string) (io.ReadCloser, e
 }
 
 // RetrieveArtifacts get the artifacts from the collector source
-func (g *GCS) RetrieveArtifacts(ctx context.Context) ([]*processor.Document, error) {
+func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 
-	artifacts := []*processor.Document{}
 	if g.reader == nil {
-		err := g.setupClient(ctx)
-		if err != nil {
-			return nil, err
-		}
+		return errors.New("gcs not initialized")
 	}
 	it := g.reader.getIterator(ctx)
-	g.isDone = false
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve object attribute from bucket: %s", g.bucket)
+			return fmt.Errorf("failed to retrieve object attribute from bucket: %s, error: %w", g.bucket, err)
 		}
 		payload := []byte{}
 		if g.lastDownload.IsZero() {
@@ -146,21 +138,21 @@ func (g *GCS) RetrieveArtifacts(ctx context.Context) ([]*processor.Document, err
 			}
 		}
 		if len(payload) > 0 {
-			artifacts = append(artifacts, &processor.Document{
+			doc := &processor.Document{
 				Blob: payload,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(CollectorGCS),
 					Source:    g.bucket,
 				},
-			})
+			}
+			docChannel <- doc
 		}
 	}
 	g.lastDownload = time.Now()
-	g.isDone = true
-	return artifacts, nil
+	return nil
 }
 
-func (g *GCS) getObject(ctx context.Context, object string) ([]byte, error) {
+func (g *gcs) getObject(ctx context.Context, object string) ([]byte, error) {
 	reader, err := g.reader.getReader(ctx, object)
 	if err != nil {
 		return nil, err
