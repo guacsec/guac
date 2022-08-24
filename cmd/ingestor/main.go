@@ -13,27 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/spf13/cobra"
+	"github.com/guacsec/guac/cmd/ingestor/cmd"
 )
 
-func init() {
-	rootCmd.AddCommand(exampleCmd)
-}
-
-var rootCmd = &cobra.Command{
-	Use:   "collector",
-	Short: "collector is an collector cmdline for GUAC",
-}
-
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+func main() {
+	cmd.Execute()
 }

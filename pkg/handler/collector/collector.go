@@ -19,7 +19,6 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -34,34 +33,27 @@ type Collector interface {
 	// for new artifacts as they are being uploaded by polling on an interval or run once and
 	// grab all the artifacts and end.
 	RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error
-
+	// IsDone indicated when the collector is finished collecting
+	IsDone() bool
 	// Type returns the collector type
 	Type() string
 }
 
 var (
-	documentCollectors = map[string]Collector{}
+	documentCollector = map[string]Collector{}
 )
 
-func RegisterDocumentCollector(c Collector, collectorType string) {
-	if _, ok := documentCollectors[collectorType]; ok {
-		logrus.Warnf("the document collector is being overwritten: %s", collectorType)
-	}
-	documentCollectors[collectorType] = c
-}
-
 // Collect takes all the collectors and starts collecting artifacts
-// after Collect is called, no calls to RegisterDocumentCollector should happen.
 func Collect(ctx context.Context) (<-chan *processor.Document, <-chan error, int, error) {
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
-	errChan := make(chan error, len(documentCollectors))
-	for _, collector := range documentCollectors {
+	errChan := make(chan error, len(documentCollector))
+	for _, collector := range documentCollector {
 		c := collector
 		go func() {
 			errChan <- c.RetrieveArtifacts(ctx, docChan)
 		}()
 	}
-	return docChan, errChan, len(documentCollectors), nil
+	return docChan, errChan, len(documentCollector), nil
 }
