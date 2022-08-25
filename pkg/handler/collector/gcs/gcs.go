@@ -36,6 +36,8 @@ type gcs struct {
 	bucket       string
 	reader       gcsReader
 	lastDownload time.Time
+	poll         bool
+	interval     time.Duration
 }
 
 const (
@@ -60,7 +62,7 @@ func getCredsPath() string {
 	return ""
 }
 
-func NewGCSClient(ctx context.Context) (*gcs, error) {
+func NewGCSClient(ctx context.Context, poll bool, interval time.Duration) (*gcs, error) {
 	// TODO: Change to pass in token via command line
 	if getCredsPath() == "" {
 		return nil, errors.New("gcs bucket not specified")
@@ -74,8 +76,10 @@ func NewGCSClient(ctx context.Context) (*gcs, error) {
 	}
 	bucket := getBucketPath()
 	gstore := &gcs{
-		bucket: getBucketPath(),
-		reader: &reader{client: client, bucket: bucket},
+		bucket:   getBucketPath(),
+		reader:   &reader{client: client, bucket: bucket},
+		poll:     poll,
+		interval: interval,
 	}
 	return gstore, nil
 }
@@ -114,6 +118,26 @@ func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processo
 	if g.reader == nil {
 		return errors.New("gcs not initialized")
 	}
+	if g.poll {
+		for {
+			time.Sleep(g.interval)
+			err := g.getArtifacts(ctx, docChannel)
+			if err != nil {
+				return err
+			}
+			g.lastDownload = time.Now()
+		}
+	} else {
+		err := g.getArtifacts(ctx, docChannel)
+		if err != nil {
+			return err
+		}
+		g.lastDownload = time.Now()
+	}
+	return nil
+}
+
+func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	it := g.reader.getIterator(ctx)
 	for {
 		attrs, err := it.Next()
@@ -148,7 +172,6 @@ func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processo
 			docChannel <- doc
 		}
 	}
-	g.lastDownload = time.Now()
 	return nil
 }
 

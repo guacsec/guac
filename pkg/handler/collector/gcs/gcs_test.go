@@ -54,6 +54,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		bucket       string
 		reader       gcsReader
 		lastDownload time.Time
+		poll         bool
 	}
 	tests := []struct {
 		name     string
@@ -106,6 +107,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				bucket:       tt.fields.bucket,
 				reader:       tt.fields.reader,
 				lastDownload: tt.fields.lastDownload,
+				poll:         tt.fields.poll,
 			}
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
