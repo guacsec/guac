@@ -20,6 +20,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func init() {
+	RegisterDocumentFormatGuesser(&jsonFormatGuesser{}, "json")
+}
+
 // DocumentFormatGuesser guesses the format of the document given a blob
 type DocumentFormatGuesser interface {
 	// GuessFormat returns the format type guessed to processor.FormatUnknown if
