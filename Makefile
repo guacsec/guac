@@ -6,12 +6,8 @@ PKG=github.com/guacsec/guac
 LDFLAGS="-X $(PKG).version=$(VERSION) -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(BUILD)"
 
 .PHONY: all
-all: setup test cover fmt lint ci build
+all: test cover fmt lint ci build
     
-.PHONY: setup
-setup: ## TODO Install all the build and lint dependencies
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.49.0
-
 
 .PHONY: test
 test: ## Run all the tests
