@@ -90,7 +90,7 @@ func performBasicTest(client Client, t *testing.T) {
 	returnedNodes := make([]string, len(result))
 	for i, node := range result {
 		// each node is a list of 1 string, collect the strings
-		returnedNodes[i] = node[0].(string))
+		returnedNodes[i] = node[0].(string)
 	}
 	for _, node := range nodes {
 		found := false
