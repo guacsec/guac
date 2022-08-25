@@ -9,8 +9,8 @@ LDFLAGS="-X $(PKG).version=$(VERSION) -X $(PKG).commit=$(COMMIT) -X $(PKG).date=
 all: setup test cover fmt lint ci build
     
 .PHONY: setup
-setup: ## Install all the build and lint dependencies
-	curl -L https://git.io/vp6lP | sh
+setup: ## TODO Install all the build and lint dependencies
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.49.0
 
 
 .PHONY: test
@@ -24,28 +24,18 @@ cover: test ## Run all the tests and opens the coverage report
 
 .PHONY: fmt
 fmt: ## Run goimports on all go files
-	find . -name '*.go' -not -wholename './vendor/*' | while read -r file; do goimports -w "$$file"; done
+	find . -name '*.go' -not -wholename './vendor/*' -exec goimports -w {} \;
 
 .PHONY: lint
-lint: ## Run all the linters
-	gometalinter --vendor --disable-all \
-		--enable=deadcode \
-		--enable=ineffassign \
-		--enable=gofmt \
-		--enable=goimports \
-		--enable=misspell \
-		--enable=errcheck \
-		--enable=vet \
-		--enable=vetshadow \
-		--deadline=10m \
-		./...
+lint: ## TODO Run all the linters
+	golangci-lint run ./...
 
 .PHONY: ci
 ci: lint test ## Run all the tests and code checks
 
 .PHONY: build
 build: ## Build a version
-	go build -ldflags ${LDFLAGS} -o ingestor cmd/ingestor/main.go
+	go build -ldflags ${LDFLAGS} -o bin/ingestor cmd/ingestor/main.go
 
 .PHONY: clean
 clean: ## Remove temporary files
