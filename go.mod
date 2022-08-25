@@ -3,6 +3,7 @@ module github.com/guacsec/guac
 go 1.18
 
 require (
+	github.com/neo4j/neo4j-go-driver/v4 v4.4.4
 	github.com/secure-systems-lab/go-securesystemslib v0.4.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.5.0
