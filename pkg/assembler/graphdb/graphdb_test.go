@@ -87,21 +87,21 @@ func performBasicTest(client Client, t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not retrieve nodes: %v", err)
 	}
-	returned_nodes := make([]string, len(nodes))
-	for _, node := range result {
+	returnedNodes := make([]string, len(result))
+	for i, node := range result {
 		// each node is a list of 1 string, collect the strings
-		returned_nodes = append(returned_nodes, node[0].(string))
+		returnedNodes[i] = node[0].(string))
 	}
 	for _, node := range nodes {
 		found := false
-		for _, returned_node := range returned_nodes {
-			if node == returned_node {
+		for _, returnedNode := range returnedNodes {
+			if node == returnedNode {
 				found = true
 				break
 			}
 		}
 		if !found {
-			t.Errorf("Expected the following nodes %v but got %v", nodes, returned_nodes)
+			t.Errorf("Expected the following nodes %v but got %v", nodes, returnedNodes)
 		}
 	}
 
@@ -115,9 +115,9 @@ func performBasicTest(client Client, t *testing.T) {
 	if len(result) != 1 {
 		t.Errorf("Expected 1 edge, got %v", len(result))
 	}
-	edge_endpoints := []string{result[0][0].(string), result[0][1].(string)}
+	edgeEndpoints := []string{result[0][0].(string), result[0][1].(string)}
 	for _, node := range nodes {
-		if node != edge_endpoints[0] && node != edge_endpoints[1] {
+		if node != edgeEndpoints[0] && node != edgeEndpoints[1] {
 			t.Errorf("Node %v is not an edge endpoint", node)
 		}
 	}
