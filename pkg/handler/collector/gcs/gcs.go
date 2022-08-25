@@ -62,6 +62,7 @@ func getCredsPath() string {
 	return ""
 }
 
+// NewGCSClient initializes the gcs and sets it for polling or one time run
 func NewGCSClient(ctx context.Context, poll bool, interval time.Duration) (*gcs, error) {
 	// TODO: Change to pass in token via command line
 	if getCredsPath() == "" {
@@ -112,7 +113,7 @@ func (r *reader) getReader(ctx context.Context, object string) (io.ReadCloser, e
 	return r.client.Bucket(r.bucket).Object(object).NewReader(ctx)
 }
 
-// RetrieveArtifacts get the artifacts from the collector source
+// RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 
 	if g.reader == nil {
