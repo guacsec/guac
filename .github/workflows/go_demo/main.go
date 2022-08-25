@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The AFF Authors.
+// Copyright 2022 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ func createGraph(driver neo4j.Driver) {
 	session := driver.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
-	nodes := []string{"Hello world!", "Welcome to AFF."}
+	nodes := []string{"Hello world!", "Welcome to GUAC."}
 	for _, msg := range nodes {
 		_, err := session.WriteTransaction(createNode(msg))
 		if err != nil {
