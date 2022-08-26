@@ -59,7 +59,6 @@ var (
 				]
 			}
 	}`
-	// Taken from: https://slsa.dev/provenance/v0.1#example
 	ite6SLSA = `{
 		"_type": "https://in-toto.io/Statement/v0.1",
 		"subject": [{"name": "_", "digest": {"sha256": "5678..."}}],
