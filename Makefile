@@ -31,7 +31,7 @@ ci: lint test ## Run all the tests and code checks
 
 .PHONY: build
 build: ## Build a version
-	go build -ldflags ${LDFLAGS} -o bin/ingestor cmd/ingestor/main.go
+	go build -ldflags ${LDFLAGS} -o bin/collector cmd/collector/main.go
 
 .PHONY: clean
 clean: ## Remove temporary files
