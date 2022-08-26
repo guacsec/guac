@@ -104,6 +104,15 @@ var (
 			Source:    "TestSource",
 		},
 	}
+	incorrectTypeDoc = processor.Document{
+		Blob:   []byte("not a DSSE Envelope"),
+		Type:   processor.DocumentUnknown,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	}
 )
 
 func TestDSSEProcessor_Unpack(t *testing.T) {
@@ -122,6 +131,11 @@ func TestDSSEProcessor_Unpack(t *testing.T) {
 		doc:       ite6DSSEDoc,
 		expected:  []*processor.Document{&ite6SLSADoc},
 		expectErr: false,
+	}, {
+		name:      "Incorrect type",
+		doc:       incorrectTypeDoc,
+		expected:  nil,
+		expectErr: true,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
@@ -132,6 +146,31 @@ func TestDSSEProcessor_Unpack(t *testing.T) {
 			}
 			if !reflect.DeepEqual(actual, tt.expected) {
 				t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", actual, tt.expected)
+			}
+		})
+	}
+}
+
+func TestDSSEProcessor_ValidateSchema(t *testing.T) {
+	testCases := []struct {
+		name      string
+		doc       processor.Document
+		expectErr bool
+	}{{
+		name:      "Valid DSSE Envelope",
+		doc:       unknownDSSEDoc,
+		expectErr: false,
+	}, {
+		name:      "Invalid DSSE Envelope",
+		doc:       incorrectTypeDoc,
+		expectErr: true,
+	}}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			d := DSSEProcessor{}
+			err := d.ValidateSchema(&tt.doc)
+			if (err != nil) != tt.expectErr {
+				t.Errorf("DSSEProcessor.ValidateSchema() error = %v, expectErr %v", err, tt.expectErr)
 			}
 		})
 	}
