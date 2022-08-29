@@ -17,6 +17,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -60,7 +61,7 @@ func retrieveGraph(driver neo4j.Driver) {
 	session := driver.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
-	readers := []func(neo4j.Transaction)(interface{}, error){matchNodes, matchEdges}
+	readers := []func(neo4j.Transaction) (interface{}, error){matchNodes, matchEdges}
 	for _, reader := range readers {
 		_, err := session.ReadTransaction(reader)
 		if err != nil {

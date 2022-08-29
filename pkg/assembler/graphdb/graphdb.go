@@ -56,6 +56,7 @@ func NewGraphClient(uri string, authToken AuthToken) (Client, error) {
 
 // Transaction is a transaction in the database
 type Transaction = neo4j.Transaction
+
 // TransactionWork represents work done inside a `Transaction`.
 type TransactionWork = neo4j.TransactionWork
 

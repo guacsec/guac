@@ -64,6 +64,8 @@ type FormatType string
 // Format* is the enumerables of FormatType
 const (
 	FormatJSON    FormatType = "JSON"
+	FormatSLSA    FormatType = "SLSA"
+	FormatITE6    FormatType = "ITE6"
 	FormatUnknown            = "UNKNOWN"
 )
 
