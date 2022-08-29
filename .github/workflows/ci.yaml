@@ -60,5 +60,5 @@ jobs:
     - name: format
       run: |
         find . -name '*.go' -not -wholename './vendor/*' -exec gofmt -l -s {} \;
-	      find . -name '*.go' -not -wholename './vendor/*' -exec goimports -l {} \;
+        find . -name '*.go' -not -wholename './vendor/*' -exec goimports -l {} \;
 
