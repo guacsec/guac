@@ -93,3 +93,84 @@ func (bn BuilderNode) IdentifiableAttributes() [][]string {
 	// A builder needs both type and id to be identified
 	return [][]string{{"type", "id"}}
 }
+
+// AttestationEdge is an edge that represents the fact that an
+// `AttestationNode` is an attestation for an `ArtifactNode`.
+type AttestationEdge struct {
+	AttestationNode AttestationNode
+	ArtifactNode    ArtifactNode
+}
+
+func (e AttestationEdge) Type() string {
+	return "Attestation"
+}
+
+func (e AttestationEdge) Nodes() (v, u GuacNode) {
+	return e.AttestationNode, e.ArtifactNode
+}
+
+func (e AttestationEdge) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e AttestationEdge) Attributes() []string {
+	return []string{}
+}
+
+func (e AttestationEdge) IdentifiableAttributes() [][]string {
+	return [][]string{}
+}
+
+// BuiltByEdge is an edge that represents the fact that an
+// `ArtifactNode` has been built by a `BuilderNode`
+type BuiltByEdge struct {
+	ArtifactNode ArtifactNode
+	BuilderNode  BuilderNode
+}
+
+func (e BuiltByEdge) Type() string {
+	return "BuiltBy"
+}
+
+func (e BuiltByEdge) Nodes() (v, u GuacNode) {
+	return e.ArtifactNode, e.BuilderNode
+}
+
+func (e BuiltByEdge) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e BuiltByEdge) Attributes() []string {
+	return []string{}
+}
+
+func (e BuiltByEdge) IdentifiableAttributes() [][]string {
+	return [][]string{}
+}
+
+// DependsOnEdge is an edge that represents the fact that an
+// `ArtifactNode` depends on another `ArtifactNode`
+type DependsOnEdge struct {
+	ArtifactNode ArtifactNode
+	Dependency   ArtifactNode
+}
+
+func (e DependsOnEdge) Type() string {
+	return "DependsOn"
+}
+
+func (e DependsOnEdge) Nodes() (v, u GuacNode) {
+	return e.ArtifactNode, e.Dependency
+}
+
+func (e DependsOnEdge) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e DependsOnEdge) Attributes() []string {
+	return []string{}
+}
+
+func (e DependsOnEdge) IdentifiableAttributes() [][]string {
+	return [][]string{}
+}
