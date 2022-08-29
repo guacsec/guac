@@ -19,7 +19,8 @@ cover: test ## Run all the tests and opens the coverage report
 	go tool cover -html=coverage.txt
 
 .PHONY: fmt
-fmt: ## Run goimports on all go files
+fmt: ## Run goimports & gofmt on all go files
+	find . -name '*.go' -not -wholename './vendor/*' -exec gofmt -w -s {} \;
 	find . -name '*.go' -not -wholename './vendor/*' -exec goimports -w {} \;
 
 .PHONY: lint
