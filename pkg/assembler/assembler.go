@@ -17,43 +17,66 @@ package assembler
 
 type assembler struct{} //nolint: unused
 
-// Identifiable implements the ability to retrieve a set of
-// attributes such that a graph query is able to identify a
-// GuacNode or GuacEdge uniquely (or as a GuacHyperNode).
-type Identifiable interface {
-	// Identifiers returns a map of fields and values which
-	// can be used to identify an object in the graph.
-	Identifiers() map[string]interface{}
-}
-
 // GuacNode represents a node in the GUAC graph
 type GuacNode interface {
-	Identifiable
-
 	// Type returns the type of node
 	Type() string
 
 	// Properties returns the list of properties of the node
 	Properties() map[string]interface{}
+
+	// Attributes returns the names of the properties of the node.
+	//
+	// If a string `s` is in the list returned by `Attributes` then it
+	// should also be a key in the map returned by `Properties`.
+	Attributes() []string
+
+	// IdentifiableAttributes returns a list of tuples of property names
+	// that can uniquely specify a GuacNode.
+	//
+	// Any string found in a tuple returned by `IdentifiableAttributes`
+	// must also be returned by `Attributes`.
+	IdentifiableAttributes() [][]string
 }
 
 // GuacEdge represents an edge in the GUAC graph
 type GuacEdge interface {
-	Identifiable
-
-	// Nodes returns the (v,u) nodes of the edge
-	// where v--edge-->u for directional edges.
-	Nodes() (v, u GuacNode)
-
 	// Type returns the type of edge
 	Type() string
 
-	// Properties returns the list of properties of the node
+	// Nodes returns the (v,u) nodes of the edge
+	//
+	// For directional edges: v-[edge]->u.
+	// For non-directional edges there is no guaranteed order.
+	Nodes() (v, u GuacNode)
+
+	// Properties returns the list of properties of the edge
 	Properties() map[string]interface{}
+
+	// Attributes returns the names of the properties of the edge.
+	//
+	// If a string `s` is in the list returned by `Attributes` then it
+	// should also be a key in the map returned by `Properties`.
+	Attributes() []string
+
+	// IdentifiableAttributes returns a list of tuples of property names
+	// that can uniquely specify a GuacEdge, as an alternative to the two
+	// node endpoints.
+	//
+	// Any string found in a tuple returned by `IdentifiableAttributes`
+	// must also be returned by `Attributes`.
+	//
+	// TODO(mihaimaruseac): We might not need this?
+	IdentifiableAttributes() [][]string
 }
 
-// AssemblerInput represents the inputs to add to the graph
-type AssemblerInput struct {
+// Subgraph represents a subgraph read from the database or written to it.
+type Subgraph struct {
 	V []GuacNode
 	E []GuacEdge
 }
+
+// TODO(mihaimaruseac): Write queries to write/read subgraphs from DB?
+
+// AssemblerInput represents the inputs to add to the graph
+type AssemblerInput = Subgraph
