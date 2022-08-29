@@ -16,18 +16,21 @@
 package guesser
 
 import (
+	"context"
+
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/sirupsen/logrus"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
-func GuessDocument(d *processor.Document) (processor.DocumentType, processor.FormatType, error) {
+func GuessDocument(ctx context.Context, d *processor.Document) (processor.DocumentType, processor.FormatType, error) {
+	logger := logging.FromContext(ctx)
 	format := d.Format
 
 	if format == processor.FormatUnknown {
 		for name, g := range documentFormatGuessers {
 			if f := g.GuessFormat(d.Blob); f != processor.FormatUnknown {
 				format = f
-				logrus.Debugf("Format guesser %v guessed document format %v", name, f)
+				logger.Debugf("Format guesser %v guessed document format %v", name, f)
 				break
 			}
 		}
@@ -38,7 +41,7 @@ func GuessDocument(d *processor.Document) (processor.DocumentType, processor.For
 		for name, g := range documentTypeGuessers {
 			if t := g.GuessDocumentType(d.Blob, format); t != processor.DocumentUnknown {
 				documentType = t
-				logrus.Debugf("DocumentType guesser %v guessed document format %v", name, t)
+				logger.Debugf("DocumentType guesser %v guessed document format %v", name, t)
 				break
 			}
 		}

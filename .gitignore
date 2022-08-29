@@ -1,0 +1,10 @@
+*.dll
+*.dylib
+*.exe
+*.exe~
+*.out
+*.so
+*.test
+bin/
+coverage.txt
+go.work

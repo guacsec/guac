@@ -18,12 +18,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/guacsec/guac/cmd/collector/cmd/mockcollector"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/sirupsen/logrus"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 )
 
@@ -34,18 +33,20 @@ var exampleCmd = &cobra.Command{
 		// Do Stuff Here
 		fmt.Println("GUAC example mock collector, it will emit 5 documents within 5 second intervals")
 
-		ctx := context.Background()
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
 
 		// Register collector
 		// We create our own MockCollector and register it
 		mc := mockcollector.NewMockCollector()
-		collector.RegisterDocumentCollector(mc, mc.Type())
+		if err := collector.RegisterDocumentCollector(mc, mc.Type()); err != nil {
+			logger.Fatal(err)
+		}
 
 		// Collect
 		docChan, errChan, numCollectors, err := collector.Collect(ctx)
 		if err != nil {
-			logrus.Error(err)
-			os.Exit(1)
+			logger.Fatal(err)
 		}
 
 		collectorsDone := 0
@@ -53,12 +54,12 @@ var exampleCmd = &cobra.Command{
 			select {
 			case d := <-docChan:
 				emit(d)
-				logrus.Infof("emitted document: %+v", d)
+				logger.Infof("emitted document: %+v", d)
 			case err = <-errChan:
 				if err != nil {
-					logrus.Errorf("collector ended with error: %v", err)
+					logger.Errorf("collector ended with error: %v", err)
 				} else {
-					logrus.Info("collector ended gracefully")
+					logger.Info("collector ended gracefully")
 				}
 				collectorsDone += 1
 			}
@@ -68,7 +69,7 @@ var exampleCmd = &cobra.Command{
 		for len(docChan) > 0 {
 			d := <-docChan
 			emit(d)
-			logrus.Infof("emitted document: %+v", d)
+			logger.Infof("emitted document: %+v", d)
 		}
 	},
 }

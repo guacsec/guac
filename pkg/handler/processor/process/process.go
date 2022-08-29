@@ -16,12 +16,12 @@
 package process
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -32,15 +32,16 @@ func init() {
 	// Registerprocessor.DocumentProcessor()
 }
 
-func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) {
+func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) error {
 	if _, ok := documentProcessors[d]; ok {
-		logrus.Warnf("the document processor is being overwritten: %s", d)
+		return fmt.Errorf("the document processor is being overwritten: %s", d)
 	}
 	documentProcessors[d] = p
+	return nil
 }
 
-func Process(i *processor.Document) (processor.DocumentTree, error) {
-	node, err := processHelper(i)
+func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
+	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +49,8 @@ func Process(i *processor.Document) (processor.DocumentTree, error) {
 	return processor.DocumentTree(node), nil
 }
 
-func processHelper(doc *processor.Document) (*processor.DocumentNode, error) {
-	ds, err := processDocument(doc)
+func processHelper(ctx context.Context, doc *processor.Document) (*processor.DocumentNode, error) {
+	ds, err := processDocument(ctx, doc)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +58,7 @@ func processHelper(doc *processor.Document) (*processor.DocumentNode, error) {
 	children := make([]*processor.DocumentNode, len(ds))
 	for i, d := range ds {
 		d.SourceInformation = doc.SourceInformation
-		n, err := processHelper(d)
+		n, err := processHelper(ctx, d)
 		if err != nil {
 			return nil, err
 		}
@@ -69,8 +70,8 @@ func processHelper(doc *processor.Document) (*processor.DocumentNode, error) {
 	}, nil
 }
 
-func processDocument(i *processor.Document) ([]*processor.Document, error) {
-	if err := preProcessDocument(i); err != nil {
+func processDocument(ctx context.Context, i *processor.Document) ([]*processor.Document, error) {
+	if err := preProcessDocument(ctx, i); err != nil {
 		return nil, err
 	}
 
@@ -91,8 +92,8 @@ func processDocument(i *processor.Document) ([]*processor.Document, error) {
 	return ds, nil
 }
 
-func preProcessDocument(i *processor.Document) error {
-	docType, format, err := guesser.GuessDocument(i)
+func preProcessDocument(ctx context.Context, i *processor.Document) error {
+	docType, format, err := guesser.GuessDocument(ctx, i)
 	if err != nil {
 		return err
 	}

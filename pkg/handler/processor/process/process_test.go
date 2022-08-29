@@ -16,6 +16,7 @@
 package process
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -24,7 +25,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
-	"github.com/sirupsen/logrus"
 )
 
 func Test_SimpleDocProcessTest(t *testing.T) {
@@ -498,13 +498,19 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	},
 	}
 
-	logrus.SetLevel(logrus.DebugLevel)
 	// Register
-	RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
-	guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
+	err := RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	err = guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			docTree, err := Process(&tt.doc)
+			docTree, err := Process(context.TODO(), &tt.doc)
 			if err != nil {
 				if tt.expectErr {
 					return
