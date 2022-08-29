@@ -20,6 +20,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func init() {
+	RegisterDocumentTypeGuesser(&ite6TypeGuesser{}, "ite6")
+}
+
 // DocumentTypeGuesser guesses the document type based on the blob and format given
 type DocumentTypeGuesser interface {
 	// GuessDocumentType returns the document type guessed or processor.DocumentUnknown if
