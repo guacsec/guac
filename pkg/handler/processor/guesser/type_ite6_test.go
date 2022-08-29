@@ -31,7 +31,7 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			guesser := &ite6TypeGusser{}
+			guesser := &ite6TypeGuesser{}
 			f := guesser.GuessDocumentType(tt.blob, processor.FormatJSON)
 			if f != tt.expected {
 				t.Errorf("got the wrong format, got %v, expected %v", f, tt.expected)
