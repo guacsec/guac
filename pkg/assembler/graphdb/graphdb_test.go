@@ -28,17 +28,11 @@ const (
 )
 
 func Test_Connect(t *testing.T) {
-	tk := CreateAuthTokenForTesting()
-	client, err := NewGraphClient(dbUri, tk)
+	client, err := EmptyClientForTesting(dbUri)
 	if err != nil {
-		t.Fatalf("Unexpected connection error %v", err)
+		t.Fatalf("Could not obtain testing database: %v", err)
 	}
 	defer client.Close()
-
-	err = ClearDBForTesting(client)
-	if err != nil {
-		t.Fatalf("Unexpected error clearing the test database: %v", err)
-	}
 	performBasicTest(client, t)
 }
 

@@ -36,9 +36,9 @@ func (an ArtifactNode) PropertyNames() []string {
 	return []string{"name", "digest"}
 }
 
-func (an ArtifactNode) IdentifiablePropertyNames() [][]string {
+func (an ArtifactNode) IdentifiablePropertyNames() []string {
 	// An artifact can be uniquely identified by digest
-	return [][]string{{"digest"}}
+	return []string{"digest"}
 }
 
 // IdentityNode is a node that represents an identity
@@ -91,9 +91,9 @@ func (an AttestationNode) PropertyNames() []string {
 	return []string{"filepath", "digest"}
 }
 
-func (an AttestationNode) IdentifiablePropertyNames() [][]string {
+func (an AttestationNode) IdentifiablePropertyNames() []string {
 	// An attestation can be uniquely identified by filename?
-	return [][]string{{"filepath"}}
+	return []string{"filepath"}
 }
 
 // BuilderNode is a node that represents a builder for an artifact
@@ -117,9 +117,9 @@ func (bn BuilderNode) PropertyNames() []string {
 	return []string{"type", "id"}
 }
 
-func (bn BuilderNode) IdentifiablePropertyNames() [][]string {
+func (bn BuilderNode) IdentifiablePropertyNames() []string {
 	// A builder needs both type and id to be identified
-	return [][]string{{"type", "id"}}
+	return []string{"type", "id"}
 }
 
 // IdentityForEdge is an edge that represents the fact that an
@@ -172,8 +172,8 @@ func (e AttestationForEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e AttestationForEdge) IdentifiablePropertyNames() [][]string {
-	return [][]string{}
+func (e AttestationForEdge) IdentifiablePropertyNames() []string {
+	return []string{}
 }
 
 // BuiltByEdge is an edge that represents the fact that an
@@ -199,8 +199,8 @@ func (e BuiltByEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e BuiltByEdge) IdentifiablePropertyNames() [][]string {
-	return [][]string{}
+func (e BuiltByEdge) IdentifiablePropertyNames() []string {
+	return []string{}
 }
 
 // DependsOnEdge is an edge that represents the fact that an
@@ -226,6 +226,6 @@ func (e DependsOnEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e DependsOnEdge) IdentifiablePropertyNames() [][]string {
-	return [][]string{}
+func (e DependsOnEdge) IdentifiablePropertyNames() []string {
+	return []string{}
 }
