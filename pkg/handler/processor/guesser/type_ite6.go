@@ -20,24 +20,20 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
-type attestation struct {
-	Type          string `json:"_type"`
-	PredicateType string `json:"predicateType"`
-}
+type ite6TypeGusser struct{}
 
-type ite6FormatGuesser struct{}
-
-func (_ *ite6FormatGuesser) GuessFormat(blob []byte) processor.FormatType {
-	var att attestation
-	if json.Unmarshal(blob, &att) == nil {
-		if strings.Contains(att.Type, "https://in-toto.io/Statement") {
-			if strings.Contains(att.PredicateType, "https://slsa.dev/provenance") {
-				return processor.FormatSLSA
+func (_ *ite6TypeGusser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
+	var statement in_toto.Statement
+	if json.Unmarshal(blob, &statement) == nil && format == processor.FormatJSON {
+		if strings.HasPrefix(statement.Type, "https://in-toto.io/Statement") {
+			if strings.HasPrefix(statement.PredicateType, "https://slsa.dev/provenance") {
+				return processor.DocumentSLSA
 			}
-			return processor.FormatITE6
+			return processor.DocumentITE6
 		}
 	}
-	return processor.FormatUnknown
+	return processor.DocumentUnknown
 }
