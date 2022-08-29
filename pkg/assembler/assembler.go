@@ -15,7 +15,7 @@
 
 package assembler
 
-type assembler struct{}
+type assembler struct{} //nolint: unused
 
 // Identifiable implements the ability to retrieve a set of
 // attributes such that a graph query is able to identify a

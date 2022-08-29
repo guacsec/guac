@@ -21,8 +21,8 @@ import (
 
 const (
 	dbUri    string = "neo4j://localhost:7687"
-	username        = "neo4j"
-	password        = "neo4j"
+	username string = "neo4j"
+	password string = "neo4j"
 )
 
 func Test_Connect(t *testing.T) {

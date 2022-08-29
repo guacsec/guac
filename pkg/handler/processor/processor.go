@@ -53,9 +53,9 @@ type DocumentType string
 // Document* is the enumerables of DocumentType
 const (
 	DocumentSLSA    DocumentType = "SLSA"
-	DocumentITE6                 = "ITE6"
-	DocumentDSSE                 = "DSSE"
-	DocumentUnknown              = "UNKNOWN"
+	DocumentITE6    DocumentType = "ITE6"
+	DocumentDSSE    DocumentType = "DSSE"
+	DocumentUnknown DocumentType = "UNKNOWN"
 )
 
 // FormatType describes the document format for malform checks
@@ -64,7 +64,7 @@ type FormatType string
 // Format* is the enumerables of FormatType
 const (
 	FormatJSON    FormatType = "JSON"
-	FormatUnknown            = "UNKNOWN"
+	FormatUnknown FormatType = "UNKNOWN"
 )
 
 // SourceInformation provides additional information about where the document comes from
