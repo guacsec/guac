@@ -60,8 +60,9 @@ jobs:
         fmt=$(find . -name '*.go' -not -wholename './vendor/*' -exec gofmt -l -s {} \;)
         printf "files with gofmt issues: [$fmt]\n"
         test -z $fmt
-    - name: goimports
-      run: | 
+    - name: goimports 
+      run: |
+        go install golang.org/x/tools/cmd/goimports@latest
         imports=$(find . -name '*.go' -not -wholename './vendor/*' -exec goimports -l {} \;)
         printf "files with goimports issues: [$imports]\n"
         test -z $imports
