@@ -59,6 +59,10 @@ jobs:
       uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # tag=v3.2.0
     - name: format
       run: |
-        find . -name '*.go' -not -wholename './vendor/*' -exec gofmt -l -s {} \;
-        find . -name '*.go' -not -wholename './vendor/*' -exec goimports -l {} \;
+        fmt=$(find . -name '*.go' -not -wholename './vendor/*' -exec gofmt -l -s {} \;)
+        printf "files with gofmt issues: [$fmt]\n"
+        test -z $fmt
+        imports=$(find . -name '*.go' -not -wholename './vendor/*' -exec goimports -l {} \;)
+        printf "files with goimports issues: [$imports]\n"
+        test -z $imports
 
