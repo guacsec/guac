@@ -21,22 +21,22 @@ type ArtifactNode struct {
 	Checksum string
 }
 
-func (an *ArtifactNode) Type() string {
+func (an ArtifactNode) Type() string {
 	return "Artifact"
 }
 
-func (an *ArtifactNode) Properties() map[string]interface{} {
+func (an ArtifactNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["name"] = an.Name
 	properties["checksum"] = an.Checksum
 	return properties
 }
 
-func (an *ArtifactNode) Attributes() []string {
+func (an ArtifactNode) Attributes() []string {
 	return []string{"name", "checksum"}
 }
 
-func (an *ArtifactNode) IdentifiableAttributes() [][]string {
+func (an ArtifactNode) IdentifiableAttributes() [][]string {
 	// An artifact can be uniquely identified by checksum
 	return [][]string{{"checksum"}}
 }
@@ -48,22 +48,22 @@ type AttestationNode struct {
 	Checksum string
 }
 
-func (an *AttestationNode) Type() string {
+func (an AttestationNode) Type() string {
 	return "Attestation"
 }
 
-func (an *AttestationNode) Properties() map[string]interface{} {
+func (an AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["file"] = an.File
 	properties["checksum"] = an.Checksum
 	return properties
 }
 
-func (an *AttestationNode) Attributes() []string {
+func (an AttestationNode) Attributes() []string {
 	return []string{"file", "checksum"}
 }
 
-func (an *AttestationNode) IdentifiableAttributes() [][]string {
+func (an AttestationNode) IdentifiableAttributes() [][]string {
 	// An attestation can be uniquely identified by filename?
 	return [][]string{{"file"}}
 }
@@ -74,22 +74,22 @@ type BuilderNode struct {
 	BuilderId   string
 }
 
-func (bn *BuilderNode) Type() string {
+func (bn BuilderNode) Type() string {
 	return "Builder"
 }
 
-func (bn *BuilderNode) Properties() map[string]interface{} {
+func (bn BuilderNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["type"] = bn.BuilderType
 	properties["id"] = bn.BuilderId
 	return properties
 }
 
-func (bn *BuilderNode) Attributes() []string {
+func (bn BuilderNode) Attributes() []string {
 	return []string{"type", "id"}
 }
 
-func (bn *BuilderNode) IdentifiableAttributes() [][]string {
+func (bn BuilderNode) IdentifiableAttributes() [][]string {
 	// A builder needs both type and id to be identified
 	return [][]string{{"type", "id"}}
 }
