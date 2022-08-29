@@ -62,45 +62,40 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		want     *processor.Document
 		wantErr  bool
 		wantDone bool
-	}{
-		{
-			name:    "no reader",
-			want:    nil,
-			wantErr: true,
+	}{{
+		name:    "no reader",
+		want:    nil,
+		wantErr: true,
+	}, {
+		name: "get object",
+		fields: fields{
+			bucket: getBucketPath(),
+			reader: &reader{client: client, bucket: getBucketPath()},
 		},
-		{
-			name: "get object",
-			fields: fields{
-				bucket: getBucketPath(),
-				reader: &reader{client: client, bucket: getBucketPath()},
-			},
-			want:     doc,
-			wantErr:  false,
-			wantDone: true,
+		want:     doc,
+		wantErr:  false,
+		wantDone: true,
+	}, {
+		name: "last download time the same",
+		fields: fields{
+			bucket:       getBucketPath(),
+			reader:       &reader{client: client, bucket: getBucketPath()},
+			lastDownload: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 		},
-		{
-			name: "last download time the same",
-			fields: fields{
-				bucket:       getBucketPath(),
-				reader:       &reader{client: client, bucket: getBucketPath()},
-				lastDownload: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
-			},
-			want:     nil,
-			wantErr:  false,
-			wantDone: true,
+		want:     nil,
+		wantErr:  false,
+		wantDone: true,
+	}, {
+		name: "last download time set before",
+		fields: fields{
+			bucket:       getBucketPath(),
+			reader:       &reader{client: client, bucket: getBucketPath()},
+			lastDownload: time.Date(2009, 10, 17, 20, 34, 58, 651387237, time.UTC),
 		},
-		{
-			name: "last download time set before",
-			fields: fields{
-				bucket:       getBucketPath(),
-				reader:       &reader{client: client, bucket: getBucketPath()},
-				lastDownload: time.Date(2009, 10, 17, 20, 34, 58, 651387237, time.UTC),
-			},
-			want:     doc,
-			wantErr:  false,
-			wantDone: true,
-		},
-	}
+		want:     doc,
+		wantErr:  false,
+		wantDone: true,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := &gcs{
@@ -111,6 +106,8 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			}
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
+			defer close(docChan)
+			defer close(errChan)
 			go func() {
 				errChan <- g.RetrieveArtifacts(ctx, docChan)
 			}()
@@ -130,11 +127,13 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 					collectorsDone += 1
 				}
 			}
+			// Drain anything left in document channel
+			for len(docChan) > 0 {
+				<-docChan
+			}
 			if g.Type() != CollectorGCS {
 				t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGCS)
 			}
-			close(docChan)
-			close(errChan)
 		})
 	}
 }
