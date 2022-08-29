@@ -16,18 +16,18 @@
 package assembler
 
 // ArtifactNode is a node that represents an artifact
-type ArtifactNode struct{
+type ArtifactNode struct {
 	Name     string
 	Checksum string
 }
 
-func (an* ArtifactNode) Type() string {
+func (an *ArtifactNode) Type() string {
 	return "Artifact"
 }
 
 func (an *ArtifactNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["name"]     = an.Name
+	properties["name"] = an.Name
 	properties["checksum"] = an.Checksum
 	return properties
 }
@@ -42,19 +42,19 @@ func (an *ArtifactNode) IdentifiableAttributes() [][]string {
 }
 
 // AttestationNode is a node that represents an attestation
-type AttestationNode struct{
+type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
 	File     string
 	Checksum string
 }
 
-func (an* AttestationNode) Type() string {
+func (an *AttestationNode) Type() string {
 	return "Attestation"
 }
 
 func (an *AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["file"]     = an.File
+	properties["file"] = an.File
 	properties["checksum"] = an.Checksum
 	return properties
 }
@@ -69,19 +69,19 @@ func (an *AttestationNode) IdentifiableAttributes() [][]string {
 }
 
 // BuilderNode is a node that represents an attestation
-type BuilderNode struct{
-	BuilderType     string
-	BuilderId       string
+type BuilderNode struct {
+	BuilderType string
+	BuilderId   string
 }
 
-func (bn* BuilderNode) Type() string {
+func (bn *BuilderNode) Type() string {
 	return "Builder"
 }
 
 func (bn *BuilderNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["type"] = bn.BuilderType
-	properties["id"]   = bn.BuilderId
+	properties["id"] = bn.BuilderId
 	return properties
 }
 
