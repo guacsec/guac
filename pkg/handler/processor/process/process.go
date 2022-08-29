@@ -54,15 +54,13 @@ func processHelper(doc *processor.Document) (*processor.DocumentNode, error) {
 	}
 
 	children := make([]*processor.DocumentNode, len(ds))
-	if ds != nil {
-		for i, d := range ds {
-			d.SourceInformation = doc.SourceInformation
-			n, err := processHelper(d)
-			if err != nil {
-				return nil, err
-			}
-			children[i] = n
+	for i, d := range ds {
+		d.SourceInformation = doc.SourceInformation
+		n, err := processHelper(d)
+		if err != nil {
+			return nil, err
 		}
+		children[i] = n
 	}
 	return &processor.DocumentNode{
 		Document: doc,
@@ -94,7 +92,6 @@ func validateFormat(i *processor.Document) error {
 		if !json.Valid(i.Blob) {
 			return fmt.Errorf("invalid JSON document")
 		}
-		break
 	case processor.FormatUnknown:
 		return nil
 	default:

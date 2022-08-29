@@ -466,7 +466,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 func existAndPop(nodes []*processor.DocumentNode, n *processor.DocumentNode) bool {
 	for i, nn := range nodes {
 		if docNodeEqual(nn, n) {
-			nodes = append(nodes[:i], nodes[i+1:]...)
+			nodes = append(nodes[:i], nodes[i+1:]...) //nolint: staticcheck
 			return true
 		}
 	}
@@ -513,10 +513,6 @@ func docNodeEqual(a, b *processor.DocumentNode) bool {
 	}
 
 	return true
-}
-
-func ptrStr(i string) *string {
-	return &i
 }
 
 // consistentJsonBytes makes sure that the blob byte comparison
