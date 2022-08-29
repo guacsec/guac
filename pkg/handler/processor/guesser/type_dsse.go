@@ -24,16 +24,10 @@ import (
 
 type dsseTypeGuesser struct{}
 
-type envelope struct {
-	PayloadType *string           `json:"payloadType"`
-	Payload     *string           `json:"payload"`
-	Signatures  *[]dsse.Signature `json:"signatures"`
-}
-
 func (_ *dsseTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
-	var envelope envelope
+	var envelope dsse.Envelope
 	if json.Unmarshal(blob, &envelope) == nil && format == processor.FormatJSON {
-		if envelope.Payload != nil && envelope.PayloadType != nil && envelope.Signatures != nil {
+		if envelope.Payload != "" && envelope.PayloadType != "" {
 			return processor.DocumentDSSE
 		}
 	}
