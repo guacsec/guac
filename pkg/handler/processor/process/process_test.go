@@ -23,6 +23,7 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/sirupsen/logrus"
 )
 
@@ -333,6 +334,31 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 		expectErr: true,
 	}, {
 
+		name: "unknown format",
+		doc: processor.Document{
+			Blob: []byte(`{ NOT JSON YO
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: true,
+	}, {
+
+		name: "unknown document",
+		doc: processor.Document{
+			Blob: []byte(`{
+						"abc": "def"
+					}`),
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: true,
+	}, {
+
 		// misc
 		name: "propagate source info",
 		doc: processor.Document{
@@ -426,11 +452,56 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 					Source:    "a-source",
 				},
 			})),
-	}}
+	}, {
+
+		// preprocessor tests
+		name: "preprocessor on format JSON",
+		doc: processor.Document{
+			Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expected: docNode(&processor.Document{
+			Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		}),
+	}, {
+
+		name: "preprocessor on simpledoc",
+		doc: processor.Document{
+			Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expected: docNode(&processor.Document{
+			Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		}),
+	},
+	}
 
 	logrus.SetLevel(logrus.DebugLevel)
 	// Register
 	RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
+	guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			docTree, err := Process(&tt.doc)
