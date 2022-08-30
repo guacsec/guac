@@ -21,7 +21,7 @@ type assembler struct{} //nolint: unused
 // change in the future as we discover issues with reading/writing from the
 // graph database.
 //
-// For now, the design of the interface follows these guideliness:
+// For now, the design of the interface follows these guidelines:
 //
 //   1. We want to serialize `GuacNode`s and `GuacEdge`s to graph database
 //      (e.g. Neo4j) without creating duplicate nodes. To do this, we need
@@ -64,6 +64,8 @@ type assembler struct{} //nolint: unused
 // serialization/deserialization, similar to how json is done.
 
 // GuacNode represents a node in the GUAC graph
+// Note: this is experimental and might change. Please refer to source code for
+// more details about usage.
 type GuacNode interface {
 	// Type returns the type of node
 	Type() string
@@ -86,6 +88,8 @@ type GuacNode interface {
 }
 
 // GuacEdge represents an edge in the GUAC graph
+// Note: this is experimental and might change. Please refer to source code for
+// more details about usage.
 type GuacEdge interface {
 	// Type returns the type of edge
 	Type() string
@@ -117,6 +121,8 @@ type GuacEdge interface {
 }
 
 // Subgraph represents a subgraph read from the database or written to it.
+// Note: this is experimental and might change. Please refer to source code for
+// more details about usage.
 type Subgraph struct {
 	V []GuacNode
 	E []GuacEdge
