@@ -34,7 +34,6 @@ type Collector interface {
 	// for new artifacts as they are being uploaded by polling on an interval or run once and
 	// grab all the artifacts and end.
 	RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error
-
 	// Type returns the collector type
 	Type() string
 }
