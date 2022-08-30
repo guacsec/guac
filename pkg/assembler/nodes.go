@@ -32,11 +32,11 @@ func (an ArtifactNode) Properties() map[string]interface{} {
 	return properties
 }
 
-func (an ArtifactNode) Attributes() []string {
+func (an ArtifactNode) PropertyNames() []string {
 	return []string{"name", "checksum"}
 }
 
-func (an ArtifactNode) IdentifiableAttributes() [][]string {
+func (an ArtifactNode) IdentifiablePropertyNames() [][]string {
 	// An artifact can be uniquely identified by checksum
 	return [][]string{{"checksum"}}
 }
@@ -59,11 +59,11 @@ func (an AttestationNode) Properties() map[string]interface{} {
 	return properties
 }
 
-func (an AttestationNode) Attributes() []string {
+func (an AttestationNode) PropertyNames() []string {
 	return []string{"file", "checksum"}
 }
 
-func (an AttestationNode) IdentifiableAttributes() [][]string {
+func (an AttestationNode) IdentifiablePropertyNames() [][]string {
 	// An attestation can be uniquely identified by filename?
 	return [][]string{{"file"}}
 }
@@ -85,11 +85,11 @@ func (bn BuilderNode) Properties() map[string]interface{} {
 	return properties
 }
 
-func (bn BuilderNode) Attributes() []string {
+func (bn BuilderNode) PropertyNames() []string {
 	return []string{"type", "id"}
 }
 
-func (bn BuilderNode) IdentifiableAttributes() [][]string {
+func (bn BuilderNode) IdentifiablePropertyNames() [][]string {
 	// A builder needs both type and id to be identified
 	return [][]string{{"type", "id"}}
 }
@@ -113,11 +113,11 @@ func (e AttestationEdge) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func (e AttestationEdge) Attributes() []string {
+func (e AttestationEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e AttestationEdge) IdentifiableAttributes() [][]string {
+func (e AttestationEdge) IdentifiablePropertyNames() [][]string {
 	return [][]string{}
 }
 
@@ -140,11 +140,11 @@ func (e BuiltByEdge) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func (e BuiltByEdge) Attributes() []string {
+func (e BuiltByEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e BuiltByEdge) IdentifiableAttributes() [][]string {
+func (e BuiltByEdge) IdentifiablePropertyNames() [][]string {
 	return [][]string{}
 }
 
@@ -167,10 +167,10 @@ func (e DependsOnEdge) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func (e DependsOnEdge) Attributes() []string {
+func (e DependsOnEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e DependsOnEdge) IdentifiableAttributes() [][]string {
+func (e DependsOnEdge) IdentifiablePropertyNames() [][]string {
 	return [][]string{}
 }

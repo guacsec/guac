@@ -25,18 +25,18 @@ type GuacNode interface {
 	// Properties returns the list of properties of the node
 	Properties() map[string]interface{}
 
-	// Attributes returns the names of the properties of the node.
+	// PropertyNames returns the names of the properties of the node.
 	//
-	// If a string `s` is in the list returned by `Attributes` then it
+	// If a string `s` is in the list returned by `PropertyNames` then it
 	// should also be a key in the map returned by `Properties`.
-	Attributes() []string
+	PropertyNames() []string
 
-	// IdentifiableAttributes returns a list of tuples of property names
+	// IdentifiablePropertyNames returns a list of tuples of property names
 	// that can uniquely specify a GuacNode.
 	//
-	// Any string found in a tuple returned by `IdentifiableAttributes`
-	// must also be returned by `Attributes`.
-	IdentifiableAttributes() [][]string
+	// Any string found in a tuple returned by `IdentifiablePropertyNames`
+	// must also be returned by `PropertyNames`.
+	IdentifiablePropertyNames() [][]string
 }
 
 // GuacEdge represents an edge in the GUAC graph
@@ -53,21 +53,21 @@ type GuacEdge interface {
 	// Properties returns the list of properties of the edge
 	Properties() map[string]interface{}
 
-	// Attributes returns the names of the properties of the edge.
+	// PropertyNames returns the names of the properties of the edge.
 	//
-	// If a string `s` is in the list returned by `Attributes` then it
+	// If a string `s` is in the list returned by `PropertyNames` then it
 	// should also be a key in the map returned by `Properties`.
-	Attributes() []string
+	PropertyNames() []string
 
-	// IdentifiableAttributes returns a list of tuples of property names
+	// IdentifiablePropertyNames returns a list of tuples of property names
 	// that can uniquely specify a GuacEdge, as an alternative to the two
 	// node endpoints.
 	//
-	// Any string found in a tuple returned by `IdentifiableAttributes`
-	// must also be returned by `Attributes`.
+	// Any string found in a tuple returned by `IdentifiablePropertyNames`
+	// must also be returned by `PropertyNames`.
 	//
 	// TODO(mihaimaruseac): We might not need this?
-	IdentifiableAttributes() [][]string
+	IdentifiablePropertyNames() [][]string
 }
 
 // Subgraph represents a subgraph read from the database or written to it.
