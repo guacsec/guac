@@ -16,7 +16,6 @@
 package ite6
 
 import (
-	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -27,36 +26,6 @@ var (
 	badProvenance = `{
 		"_type": ["https://in-toto.io/Statement/v0.1"],
 		"subject": [{"name": "_", "digest": {"sha256": "5678..."}}],
-	}`
-	unknownProvenance = `{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"subject": [{"name": "_", "digest": {"sha256": "5678..."}}],
-		"predicateType": "https://hello-world/provenance/v0.2",
-		"predicate":
-			{
-				"builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
-				"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
-				"invocation": {
-				  "configSource": {
-					"uri": "git+https://github.com/curl/curl-docker@master",
-					"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },   
-					"entryPoint": "build.yaml:maketgz"
-				  }
-				},
-				"metadata": {
-				  "completeness": {
-					  "environment": true
-				  }
-				},
-				"materials": [
-				  {
-					"uri": "git+https://github.com/curl/curl-docker@master",
-					"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
-				  }, {
-					"uri": "github_hosted_vm:ubuntu-18.04:20210123.1"
-				  }
-				]
-			}
 	}`
 	ite6SLSA = `{
 		"_type": "https://in-toto.io/Statement/v0.1",
@@ -88,31 +57,6 @@ var (
 				]
 			}
 	}`
-
-	predicate = `{
-		"builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
-		"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
-		"invocation": {
-		  "configSource": {
-			"uri": "git+https://github.com/curl/curl-docker@master",
-			"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },   
-			"entryPoint": "build.yaml:maketgz"
-		  }
-		},
-		"metadata": {
-		  "completeness": {
-			  "environment": true
-		  }
-		},
-		"materials": [
-		  {
-			"uri": "git+https://github.com/curl/curl-docker@master",
-			"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
-		  }, {
-			"uri": "github_hosted_vm:ubuntu-18.04:20210123.1"
-		  }
-		]
-	}`
 )
 
 func TestITE6Processor_ValidateSchema(t *testing.T) {
@@ -124,7 +68,7 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		name: "ITE6 Doc with unknown payload",
 		args: &processor.Document{
 			Blob:   []byte(badProvenance),
-			Type:   processor.DocumentITE6,
+			Type:   processor.DocumentITE6Unknown,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
@@ -136,7 +80,7 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		name: "ITE6 Doc with valid payload",
 		args: &processor.Document{
 			Blob:   []byte(ite6SLSA),
-			Type:   processor.DocumentITE6,
+			Type:   processor.DocumentITE6Unknown,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
@@ -162,82 +106,18 @@ func TestITE6Processor_Unpack(t *testing.T) {
 		want    []*processor.Document
 		wantErr bool
 	}{{
-		name: "ITE6 Doc with unknown payload",
-		args: &processor.Document{
-			Blob:   []byte(unknownProvenance),
-			Type:   processor.DocumentITE6,
-			Format: processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		},
-		want: []*processor.Document{{
-			Blob:   []byte(predicate),
-			Type:   processor.DocumentUnknown,
-			Format: processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		}},
-		wantErr: false,
-	}, {
-		name: "ITE6 Doc with valid payload",
-		args: &processor.Document{
-			Blob:   []byte(ite6SLSA),
-			Type:   processor.DocumentITE6,
-			Format: processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		},
-		want: []*processor.Document{{
-			Blob:   []byte(predicate),
-			Type:   processor.DocumentSLSA,
-			Format: processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		}},
-		wantErr: false,
+		// add test cases
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := &ITE6Processor{}
 			got, err := e.Unpack(tt.args)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ITE6Processor.Unpack() error = %v, wantErr %v", err, tt.wantErr)
-				return
+				t.Errorf("ITE6Processor.ValidateSchema() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if len(got) > 0 {
-				for i := range got {
-					// check if a and b Docuemnts are equal
-					if !docEqual(got[i], tt.want[i]) {
-						t.Errorf("ITE6Processor.Unpack() = %v, want %v", got[i], tt.want[i])
-					}
-				}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", got, tt.want)
 			}
 		})
 	}
-}
-
-func docEqual(a, b *processor.Document) bool {
-	a.Blob = consistentJsonBytes(a.Blob)
-	b.Blob = consistentJsonBytes(b.Blob)
-	return reflect.DeepEqual(a, b)
-}
-
-// consistentJsonBytes makes sure that the blob byte comparison
-// does not differ due to whitespace in testing definitions.
-func consistentJsonBytes(b []byte) []byte {
-	var v interface{}
-	err := json.Unmarshal(b, &v)
-	if err != nil {
-		panic(err)
-	}
-	out, _ := json.Marshal(v)
-	return out
 }

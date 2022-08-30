@@ -23,19 +23,13 @@ import (
 	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
-type ite6Type string
-
-const (
-	slsaPredicateType ite6Type = "https://slsa.dev/provenance/v0.2"
-)
-
 type ITE6Processor struct {
 }
 
 // ValidateSchema ensures that the document blob can be parsed into a valid data structure
 func (e *ITE6Processor) ValidateSchema(i *processor.Document) error {
-	if i.Type != processor.DocumentITE6 {
-		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentITE6, i.Type)
+	if i.Type != processor.DocumentITE6Unknown {
+		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentITE6Unknown, i.Type)
 	}
 
 	_, err := parseStatement(i.Blob)
@@ -44,39 +38,11 @@ func (e *ITE6Processor) ValidateSchema(i *processor.Document) error {
 }
 
 // Unpack takes in the document and tries to unpack the provenance.
-// if the predicate is of SLSA type the predicate is stored in the blob
+// Based on discussion captured in https://github.com/guacsec/guac/issues/53
+// this ITE6 unpack does not return anything as it will be the same document
+// this will change in the future
 func (e *ITE6Processor) Unpack(i *processor.Document) ([]*processor.Document, error) {
-	if i.Type != processor.DocumentITE6 {
-		return nil, fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentITE6, i.Type)
-	}
-
-	statement, err := parseStatement(i.Blob)
-	if err != nil {
-		return nil, err
-	}
-	var doc *processor.Document
-	predicatePayload, err := getPredicate(statement)
-	if err != nil {
-		return nil, err
-	}
-	switch pt := statement.PredicateType; pt {
-	case string(slsaPredicateType):
-		doc = &processor.Document{
-			Blob:              predicatePayload,
-			Type:              processor.DocumentSLSA,
-			Format:            processor.FormatJSON,
-			SourceInformation: i.SourceInformation,
-		}
-	default:
-		doc = &processor.Document{
-			Blob:              predicatePayload,
-			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatUnknown,
-			SourceInformation: i.SourceInformation,
-		}
-	}
-
-	return []*processor.Document{doc}, nil
+	return nil, nil
 }
 
 func parseStatement(p []byte) (*in_toto.Statement, error) {
@@ -85,12 +51,4 @@ func parseStatement(p []byte) (*in_toto.Statement, error) {
 		return nil, err
 	}
 	return &ps, nil
-}
-
-func getPredicate(statement *in_toto.Statement) ([]byte, error) {
-	predicatePayload, err := json.Marshal(statement.Predicate)
-	if err != nil {
-		return nil, err
-	}
-	return predicatePayload, nil
 }

@@ -97,7 +97,7 @@ var (
 	}
 	ite6SLSADoc = processor.Document{
 		Blob:   []byte(ite6SLSA),
-		Type:   processor.DocumentITE6,
+		Type:   processor.DocumentITE6Unknown,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",

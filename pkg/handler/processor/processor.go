@@ -52,10 +52,10 @@ type DocumentType string
 
 // Document* is the enumerables of DocumentType
 const (
-	DocumentSLSA    DocumentType = "SLSA"
-	DocumentITE6    DocumentType = "ITE6"
-	DocumentDSSE    DocumentType = "DSSE"
-	DocumentUnknown DocumentType = "UNKNOWN"
+	DocumentITE6SLSA    DocumentType = "SLSA"
+	DocumentITE6Unknown DocumentType = "ITE6"
+	DocumentDSSE        DocumentType = "DSSE"
+	DocumentUnknown     DocumentType = "UNKNOWN"
 )
 
 // FormatType describes the document format for malform checks
