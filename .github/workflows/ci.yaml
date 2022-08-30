@@ -12,22 +12,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Neo4j CI
+name: ci
 
 on:
-  workflow_dispatch:  # testing only, trigger manually to test it works
+  workflow_dispatch: # testing only, trigger manually to test it works
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
-    types: [opened, synchronize]
-  pull_request_review:
-    types: [submitted]
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   build:
-    name: CI using Neo4j
     runs-on: ubuntu-latest
+    name: CI using Neo4j
     services:
       neo4j:
         image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
@@ -36,35 +39,36 @@ jobs:
         ports:
           - 7687:7687
     steps:
-    - name: Checkout code
-      uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
-    - name: setup-go
-      uses: actions/setup-go@84cbf8094393cdc5fe1fe1671ff2647332956b1a # tag=v3.2.1
-      with:
-        go-version: '1.18'
-    - name: Run tests
-      run: go test ./...
+      - name: Checkout code
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: setup-go
+        uses: actions/setup-go@84cbf8094393cdc5fe1fe1671ff2647332956b1a # tag=v3.2.1
+        with:
+          go-version: '1.18'
+      - uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Setup the project
+        run: go mod download
+      - name: Run tests
+        run: make test
+      - name: Run integration tests
+        run: make integration-test
 
   static-analysis:
     name: Static Analysis
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
-    - name: setup-go
-      uses: actions/setup-go@84cbf8094393cdc5fe1fe1671ff2647332956b1a # tag=v3.2.1
-      with:
-        go-version: '1.18'
-    - name: gofmt
-      run: |
-        fmt=$(find . -name '*.go' -not -wholename './vendor/*' -exec gofmt -l -s {} \;)
-        printf "files with gofmt issues: [$fmt]\n"
-        test -z $fmt
-    - name: goimports 
-      run: |
-        go install golang.org/x/tools/cmd/goimports@latest
-        imports=$(find . -name '*.go' -not -wholename './vendor/*' -exec goimports -l {} \;)
-        printf "files with goimports issues: [$imports]\n"
-        test -z $imports
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # tag=v3.2.0
+      - name: Checkout code
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: setup-go
+        uses: actions/setup-go@84cbf8094393cdc5fe1fe1671ff2647332956b1a # tag=v3.2.1
+        with:
+          go-version: '1.18'
+      - name: Install formatter
+        run: go install golang.org/x/tools/cmd/goimports@latest
+      - name: Check format
+        run: make fmt
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # tag=v3.2.0
