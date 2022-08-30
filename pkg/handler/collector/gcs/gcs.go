@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The AFF Authors.
+// Copyright 2022 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ func (g *gcs) Type() string {
 }
 
 type gcsReader interface {
-	getIterator(ctx context.Context) *storage.ObjectIterator
+	getIterator(ctx context.Context) (*storage.ObjectIterator, error)
 	getReader(ctx context.Context, object string) (io.ReadCloser, error)
 }
 
@@ -100,13 +100,16 @@ type reader struct {
 	bucket string
 }
 
-func (r *reader) getIterator(ctx context.Context) *storage.ObjectIterator {
+func (r *reader) getIterator(ctx context.Context) (*storage.ObjectIterator, error) {
 	q := &storage.Query{
 		Projection: storage.ProjectionNoACL,
 	}
 	// set query to return only the Name and Updated attributes
-	q.SetAttrSelection([]string{"Name", "Updated"})
-	return r.client.Bucket(r.bucket).Objects(ctx, q)
+	err := q.SetAttrSelection([]string{"Name", "Updated"})
+	if err != nil {
+		return nil, err
+	}
+	return r.client.Bucket(r.bucket).Objects(ctx, q), nil
 }
 
 func (r *reader) getReader(ctx context.Context, object string) (io.ReadCloser, error) {
@@ -139,7 +142,10 @@ func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processo
 }
 
 func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	it := g.reader.getIterator(ctx)
+	it, err := g.reader.getIterator(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get reader for object for bucket: %s, error: %w", g.bucket, err)
+	}
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
