@@ -17,6 +17,52 @@ package assembler
 
 type assembler struct{} //nolint: unused
 
+// NOTE: `GuacNode` and `GuacEdge` interfaces are very experimental and might
+// change in the future as we discover issues with reading/writing from the
+// graph database.
+//
+// For now, the design of the interface follows these guideliness:
+//
+//   1. We want to serialize `GuacNode`s and `GuacEdge`s to graph database
+//      (e.g. Neo4j) without creating duplicate nodes. To do this, we need
+//      ability to uniquely identify a node. Since a node could be created from
+//      different document types, it can be uniquely identified by different
+//      subsets of attributes/properties. For example, we could have a node
+//      that is identified by an `"id"` field from one document and by the pair
+//      `"name"`, `"digest"` from another one.
+//   2. Nodes can also have attributes that are not unique and are generated
+//      from various documents.
+//   3. In order to write the serialization/deserialization code, we need to
+//      get the name of the attributes separate from the pairing between the
+//      attribute and the value.
+//
+// In broad lines, the serialization process for a node would look like:
+//
+//   1. For each identifiable set in `IdentifiablePropertyNames()` check if the
+//      node has values for all of the specified properties. If one is missing,
+//      try the next set. If no set is left, panic.
+//   2. If a set of identifiable properties is found and we have values for all
+//      of these, write a query that would match on nodes which have these
+//      property:value attributes. The graph database engine will allow us to
+//      run separate code if a node already exists or one is newly created. In
+//      our case, in both instances we will just need to set the other
+//      attributes that have a value. To do this, the `Properties()` returned
+//      map will be passed directly to the prepared statement (which uses
+//      `Type()` to select the graph database node type and `PropertyNames()`
+//      to build the rest of the query).
+//
+// The serialization process for an edge would be similar, with the caveat that
+// an edge is always created between two existing nodes.
+//
+// Deserialization is left for later, with the only caveat that we might
+// envision a case where we'd like to match on edges without first matching on
+// their endpoints (e.g., "retrieve all attestations from this time period and
+// for each of them return the artifact nodes"). Hence, we need ways to
+// uniquely identify edges without having endpoint nodes.
+//
+// TODO(mihaimaruseac): Look into using tags of fields to automate
+// serialization/deserialization, similar to how json is done.
+
 // GuacNode represents a node in the GUAC graph
 type GuacNode interface {
 	// Type returns the type of node

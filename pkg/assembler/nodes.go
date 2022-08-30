@@ -17,8 +17,8 @@ package assembler
 
 // ArtifactNode is a node that represents an artifact
 type ArtifactNode struct {
-	Name     string
-	Checksum string
+	Name   string
+	Digest string
 }
 
 func (an ArtifactNode) Type() string {
@@ -28,24 +28,24 @@ func (an ArtifactNode) Type() string {
 func (an ArtifactNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["name"] = an.Name
-	properties["checksum"] = an.Checksum
+	properties["digest"] = an.Digest
 	return properties
 }
 
 func (an ArtifactNode) PropertyNames() []string {
-	return []string{"name", "checksum"}
+	return []string{"name", "digest"}
 }
 
 func (an ArtifactNode) IdentifiablePropertyNames() [][]string {
-	// An artifact can be uniquely identified by checksum
-	return [][]string{{"checksum"}}
+	// An artifact can be uniquely identified by digest
+	return [][]string{{"digest"}}
 }
 
 // AttestationNode is a node that represents an attestation
 type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
-	File     string
-	Checksum string
+	FilePath string
+	Digest   string
 }
 
 func (an AttestationNode) Type() string {
@@ -54,21 +54,21 @@ func (an AttestationNode) Type() string {
 
 func (an AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["file"] = an.File
-	properties["checksum"] = an.Checksum
+	properties["filepath"] = an.FilePath
+	properties["digest"] = an.Digest
 	return properties
 }
 
 func (an AttestationNode) PropertyNames() []string {
-	return []string{"file", "checksum"}
+	return []string{"filepath", "digest"}
 }
 
 func (an AttestationNode) IdentifiablePropertyNames() [][]string {
 	// An attestation can be uniquely identified by filename?
-	return [][]string{{"file"}}
+	return [][]string{{"filepath"}}
 }
 
-// BuilderNode is a node that represents an attestation
+// BuilderNode is a node that represents a builder for an artifact
 type BuilderNode struct {
 	BuilderType string
 	BuilderId   string
@@ -94,30 +94,30 @@ func (bn BuilderNode) IdentifiablePropertyNames() [][]string {
 	return [][]string{{"type", "id"}}
 }
 
-// AttestationEdge is an edge that represents the fact that an
+// AttestationForEdge is an edge that represents the fact that an
 // `AttestationNode` is an attestation for an `ArtifactNode`.
-type AttestationEdge struct {
+type AttestationForEdge struct {
 	AttestationNode AttestationNode
 	ArtifactNode    ArtifactNode
 }
 
-func (e AttestationEdge) Type() string {
+func (e AttestationForEdge) Type() string {
 	return "Attestation"
 }
 
-func (e AttestationEdge) Nodes() (v, u GuacNode) {
+func (e AttestationForEdge) Nodes() (v, u GuacNode) {
 	return e.AttestationNode, e.ArtifactNode
 }
 
-func (e AttestationEdge) Properties() map[string]interface{} {
+func (e AttestationForEdge) Properties() map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func (e AttestationEdge) PropertyNames() []string {
+func (e AttestationForEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e AttestationEdge) IdentifiablePropertyNames() [][]string {
+func (e AttestationForEdge) IdentifiablePropertyNames() [][]string {
 	return [][]string{}
 }
 
