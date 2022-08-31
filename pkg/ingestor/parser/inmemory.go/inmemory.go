@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package parser
+package inmemory
 
 import (
 	"crypto/sha256"
@@ -29,28 +29,48 @@ const (
 	algorithmSHA256 string = "sha256"
 )
 
-func ParseDocumentTree(processedDocTree processor.DocumentTree) (assembler.AssemblerInput, error) {
+type InMemoryParser struct{}
+
+func (m *InMemoryParser) ParseDocumentTree(processedDocTree processor.DocumentTree) (assembler.AssemblerInput, error) {
+
+	nodes, edges, err := parserHelper(processedDocTree)
+	if err != nil {
+		return assembler.AssemblerInput{}, err
+	}
+
+	assemblerinput := assembler.AssemblerInput{
+		V: nodes,
+		E: edges,
+	}
+
+	return assemblerinput, nil
+}
+
+func (m *InMemoryParser) Type() string {
+	return "inmemory"
+}
+
+func parserHelper(processedDocTree processor.DocumentTree) ([]assembler.GuacNode, []assembler.GuacEdge, error) {
 	foundNodes := []assembler.GuacNode{}
 	foundEdges := []assembler.GuacEdge{}
 
 	nodes, edges, err := parseDoc(processedDocTree.Document)
 	if err != nil {
-		return assembler.AssemblerInput{}, err
+		return nil, nil, err
 	}
 
 	foundNodes = append(foundNodes, nodes...)
 	foundEdges = append(foundEdges, edges...)
-	for _, doc := range processedDocTree.Children {
-		parseDoc(doc.Document)
 
+	for _, d := range processedDocTree.Children {
+		nodes, edges, err := parserHelper(processor.DocumentTree(d))
+		if err != nil {
+			return nil, nil, err
+		}
+		foundNodes = append(foundNodes, nodes...)
+		foundEdges = append(foundEdges, edges...)
 	}
-
-	assemblerinput := assembler.AssemblerInput{
-		V: foundNodes,
-		E: foundEdges,
-	}
-
-	return assemblerinput, nil
+	return foundNodes, foundEdges, nil
 }
 
 func parseDoc(doc *processor.Document) ([]assembler.GuacNode, []assembler.GuacEdge, error) {
