@@ -27,7 +27,7 @@ type dsseTypeGuesser struct{}
 func (_ *dsseTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	var envelope dsse.Envelope
 	if json.Unmarshal(blob, &envelope) == nil && format == processor.FormatJSON {
-		if envelope.Payload != "" && envelope.PayloadType != "" {
+		if envelope.Payload != "" && envelope.PayloadType != "" && len(envelope.Signatures) > 0 {
 			return processor.DocumentDSSE
 		}
 	}
