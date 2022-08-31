@@ -75,7 +75,7 @@ var (
 		},
 	}
 	incorrectTypeDoc = processor.Document{
-		Blob:   []byte("not a DSSE Envelope"),
+		Blob:   []byte("not valid JSON Lines"),
 		Type:   processor.DocumentUnknown,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
