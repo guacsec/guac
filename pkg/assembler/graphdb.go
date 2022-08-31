@@ -31,17 +31,23 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 	defer session.Close()
 
 	node_queries := make([]string, len(g.Nodes))
+	node_dicts := make([]map[string]interface{}, len(g.Nodes))
 	for i, n := range g.Nodes {
 		var sb strings.Builder
 		if err := queryPartForMergeNode(&sb, n, "n"); err != nil {
 			return err
 		}
-		queryPartForNodeAttributes(&sb, "CREATE", n, "n")
-		queryPartForNodeAttributes(&sb, "MATCH", n, "n")
+		queryPartForNodeAttributes(&sb, true, n, "n")
+		queryPartForNodeAttributes(&sb, false, n, "n")
 		node_queries[i] = sb.String()
+		node_dicts[i] = map[string]interface{}{}
+		for k, v := range n.Properties() {
+			node_dicts[i]["n_" + k] = v
+		}
 	}
 
 	edge_queries := make([]string, len(g.Edges))
+	edge_dicts := make([]map[string]interface{}, len(g.Nodes))
 	for i, e := range g.Edges {
 		a, b := e.Nodes()
 		var sb strings.Builder
@@ -53,17 +59,28 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 		}
 		queryPartForEdgeConnection(&sb, e)
 		edge_queries[i] = sb.String()
+		edge_dicts[i] = map[string]interface{}{}
+		for k, v := range a.Properties() {
+			edge_dicts[i]["a_" + k] = v
+		}
+		for k, v := range b.Properties() {
+			edge_dicts[i]["b_" + k] = v
+		}
+		for k, v := range e.Properties() {
+			edge_dicts[i]["e_" + k] = v
+		}
 	}
 
 	queries := append(node_queries, edge_queries...)
+	params := append(node_dicts, edge_dicts...)
 	_, err := session.WriteTransaction(
 		func (tx graphdb.Transaction) (interface{}, error) {
-			for _, query := range queries {
-				if _, err := tx.Run(query, nil); err != nil {
-					return nil, nil
+			for i, query := range queries {
+				fmt.Printf("%v(where: %v)\n\n", query, params[i])
+				if _, err := tx.Run(query, params[i]); err != nil {
+					return nil, err
 				}
 			}
-			// TODO: for query, args: tf.Run(query, args)
 			return nil, nil
 		})
 
@@ -74,13 +91,13 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 func queryPartForMergeNode(sb *strings.Builder, n GuacNode, label string) error {
 	node_data := n.Properties()
 	sb.WriteString("MERGE (")
-	sb.WriteString(label)
+	sb.WriteString(label)    // not user controlled
 	sb.WriteString(":")
-	sb.WriteString(n.Type())
+	sb.WriteString(n.Type()) // not user controlled
 	sb.WriteString(" {")
 	for ix, key := range n.IdentifiablePropertyNames() {
-		if val, ok := node_data[key]; ok {
-			writeKeyValToQuery(sb, key, val, label, false, ix == 0)
+		if _, ok := node_data[key]; ok {
+			writeKeyValToQuery(sb, key, label, false, ix == 0)
 		} else {
 			return fmt.Errorf("Node %v has no value for property %v", n, key)
 		}
@@ -92,14 +109,16 @@ func queryPartForMergeNode(sb *strings.Builder, n GuacNode, label string) error 
 
 // Creates the "ON CREATE SET ${ATTR}=${VALUE}, ..." part of the query
 // Creates the "ON MATCH SET ${ATTR}=${VALUE}, ..." part of the query
-func queryPartForNodeAttributes(sb *strings.Builder, when string, n GuacNode, label string) {
+func queryPartForNodeAttributes(sb *strings.Builder, onCreate bool, n GuacNode, label string) {
 	node_data := n.Properties()
-	sb.WriteString("ON ")
-	sb.WriteString(when)
-	sb.WriteString(" SET ")
+	if onCreate {
+		sb.WriteString("ON CREATE SET ")
+	} else {
+		sb.WriteString("ON MATCH SET ")
+	}
 	first := true
 	for key := range node_data {
-		writeKeyValToQuery(sb, key, node_data[key], label, true, first)
+		writeKeyValToQuery(sb, key, label, true, first)
 		first = false
 	}
 	sb.WriteString("\n")
@@ -108,13 +127,13 @@ func queryPartForNodeAttributes(sb *strings.Builder, when string, n GuacNode, la
 // Creates the "(a) -[e:${EDGE_TYPE}] -> (b)" part of the query and sets the edge attributes
 func queryPartForEdgeConnection(sb *strings.Builder, e GuacEdge) {
 	sb.WriteString("MERGE (a) -[e:")
-	sb.WriteString(e.Type())
+	sb.WriteString(e.Type()) // not user controlled
 	sb.WriteString("]-> (b)")
 	if edge_data := e.Properties(); len(edge_data) > 0 {
 		sb.WriteString("\nSET ")
 		first := true
 		for key := range edge_data {
-			writeKeyValToQuery(sb, key, edge_data[key], "e", true, first)
+			writeKeyValToQuery(sb, key, "e", true, first)
 			first = false
 		}
 	}
@@ -123,26 +142,21 @@ func queryPartForEdgeConnection(sb *strings.Builder, e GuacEdge) {
 
 // Creates either the "${ATTR}:${VALUE}" part (set=false) or the "n.${ATTR}=${VALUE}" one (set=true).
 // Uses first to determine if we need to add comma from what comes before
-func writeKeyValToQuery(sb *strings.Builder, key string, val interface{}, label string, set bool, first bool) {
+func writeKeyValToQuery(sb *strings.Builder, key string, label string, set bool, first bool) {
 	if !first {
 		sb.WriteString(", ")
 	}
 	if set {
-		sb.WriteString(label)
+		sb.WriteString(label) // not user controlled
 		sb.WriteString(".")
 	}
-	sb.WriteString(key)
+	sb.WriteString(key) // not user controlled
 	if set {
-		sb.WriteString("=")
+		sb.WriteString("=$")
 	} else {
-		sb.WriteString(":")
+		sb.WriteString(":$")
 	}
-	switch val.(type) {
-	case string:
-		sb.WriteString("\"")
-		sb.WriteString(val.(string))
-		sb.WriteString("\"")
-	default:
-		sb.WriteString(fmt.Sprint(val))
-	}
+	sb.WriteString(label) // not user controlled
+	sb.WriteString("_")
+	sb.WriteString(key) // not user controlled, will be as a prepared statement parameter
 }
