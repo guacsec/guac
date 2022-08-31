@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // Note: This module is experimental and might change often!
@@ -42,7 +42,7 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 		node_queries[i] = sb.String()
 		node_dicts[i] = map[string]interface{}{}
 		for k, v := range n.Properties() {
-			node_dicts[i]["n_" + k] = v
+			node_dicts[i]["n_"+k] = v
 		}
 	}
 
@@ -61,20 +61,20 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 		edge_queries[i] = sb.String()
 		edge_dicts[i] = map[string]interface{}{}
 		for k, v := range a.Properties() {
-			edge_dicts[i]["a_" + k] = v
+			edge_dicts[i]["a_"+k] = v
 		}
 		for k, v := range b.Properties() {
-			edge_dicts[i]["b_" + k] = v
+			edge_dicts[i]["b_"+k] = v
 		}
 		for k, v := range e.Properties() {
-			edge_dicts[i]["e_" + k] = v
+			edge_dicts[i]["e_"+k] = v
 		}
 	}
 
 	queries := append(node_queries, edge_queries...)
 	params := append(node_dicts, edge_dicts...)
 	_, err := session.WriteTransaction(
-		func (tx graphdb.Transaction) (interface{}, error) {
+		func(tx graphdb.Transaction) (interface{}, error) {
 			for i, query := range queries {
 				fmt.Printf("%v(where: %v)\n\n", query, params[i])
 				if _, err := tx.Run(query, params[i]); err != nil {
@@ -91,7 +91,7 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 func queryPartForMergeNode(sb *strings.Builder, n GuacNode, label string) error {
 	node_data := n.Properties()
 	sb.WriteString("MERGE (")
-	sb.WriteString(label)    // not user controlled
+	sb.WriteString(label) // not user controlled
 	sb.WriteString(":")
 	sb.WriteString(n.Type()) // not user controlled
 	sb.WriteString(" {")
