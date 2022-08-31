@@ -18,6 +18,7 @@ package collector
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -53,16 +54,35 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 
 // Collect takes all the collectors and starts collecting artifacts
 // after Collect is called, no calls to RegisterDocumentCollector should happen.
-func Collect(ctx context.Context) (<-chan *processor.Document, <-chan error, int, error) {
+func Collect(ctx context.Context, emitter processor.Emitter, handleErr processor.ErrHandler) error {
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, len(documentCollectors))
+
+	var wg sync.WaitGroup
+	wg.Add(len(documentCollectors))
 	for _, collector := range documentCollectors {
 		c := collector
 		go func() {
 			errChan <- c.RetrieveArtifacts(ctx, docChan)
+			wg.Done()
 		}()
 	}
-	return docChan, errChan, len(documentCollectors), nil
+	wg.Wait()
+
+	for i := 0; i < len(docChan); i++ {
+		if err := emitter(<-docChan); err != nil {
+			if !handleErr(err) {
+				return err
+			}
+		}
+	}
+	for i := 0; i < len(errChan); i++ {
+		err := <-errChan
+		if !handleErr(err) {
+			return err
+		}
+	}
+	return nil
 }
