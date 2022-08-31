@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/sirupsen/logrus"
 )
 
@@ -69,6 +70,10 @@ func processHelper(doc *processor.Document) (*processor.DocumentNode, error) {
 }
 
 func processDocument(i *processor.Document) ([]*processor.Document, error) {
+	if err := preProcessDocument(i); err != nil {
+		return nil, err
+	}
+
 	if err := validateFormat(i); err != nil {
 		return nil, err
 	}
@@ -84,6 +89,18 @@ func processDocument(i *processor.Document) ([]*processor.Document, error) {
 	}
 
 	return ds, nil
+}
+
+func preProcessDocument(i *processor.Document) error {
+	docType, format, err := guesser.GuessDocument(i)
+	if err != nil {
+		return err
+	}
+
+	i.Type = docType
+	i.Format = format
+
+	return nil
 }
 
 func validateFormat(i *processor.Document) error {

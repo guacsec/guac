@@ -115,3 +115,14 @@ func (dp *SimpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, e
 
 	return retDocs, nil
 }
+
+func (_ *SimpleDocProc) GuessDocumentType(blob []byte, f processor.FormatType) processor.DocumentType {
+	var p SimpleDoc
+	if err := json.Unmarshal(blob, &p); err != nil {
+		return processor.DocumentUnknown
+	}
+	if err := validateSimpleDoc(p); err != nil {
+		return processor.DocumentUnknown
+	}
+	return SimpleDocType
+}
