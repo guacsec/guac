@@ -24,7 +24,8 @@ cover: test ## Run all the tests and opens the coverage report
 
 .PHONY: fmt
 fmt: ## Check the formatting
-	test -z "$(goimports -l -e .)"
+	test -z "$(shell goimports -l -e .)"
+	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -exec .github/scripts/copywrite.sh {} \;)"
 
 .PHONY: lint
 lint: ## Run all the linters
