@@ -76,7 +76,7 @@ func (d *DSSEProcessor) Unpack(i *processor.Document) ([]*processor.Document, er
 		doc = &processor.Document{
 			Blob:              decodedPayload,
 			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatUnknown,
+			Format:            processor.FormatJSON,
 			SourceInformation: i.SourceInformation,
 		}
 	}

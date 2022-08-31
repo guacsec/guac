@@ -49,7 +49,7 @@ var (
 	unpackedUnknownDSSEDoc = processor.Document{
 		Blob:   decodedPayload,
 		Type:   processor.DocumentUnknown,
-		Format: processor.FormatUnknown,
+		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",
 			Source:    "TestSource",
