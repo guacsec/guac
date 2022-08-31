@@ -16,7 +16,6 @@
 package assembler
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -39,8 +38,6 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 		}
 		queryPartForNodeAttributes(&sb, "CREATE", n, "n")
 		queryPartForNodeAttributes(&sb, "MATCH", n, "n")
-
-		fmt.Println(sb.String())
 		node_queries[i] = sb.String()
 	}
 
@@ -55,8 +52,6 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 			return err
 		}
 		queryPartForEdgeConnection(&sb, e)
-
-		fmt.Println(sb.String())
 		edge_queries[i] = sb.String()
 	}
 
@@ -87,7 +82,7 @@ func queryPartForMergeNode(sb *strings.Builder, n GuacNode, label string) error 
 		if val, ok := node_data[key]; ok {
 			writeKeyValToQuery(sb, key, val, label, false, ix == 0)
 		} else {
-			return errors.New(fmt.Sprintf("Node %v has no value for property %v", n, key))
+			return fmt.Errorf("Node %v has no value for property %v", n, key)
 		}
 	}
 	sb.WriteString("})\n")
