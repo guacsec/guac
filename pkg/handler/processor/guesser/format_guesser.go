@@ -23,7 +23,7 @@ import (
 
 func init() {
 	_ = RegisterDocumentFormatGuesser(&jsonFormatGuesser{}, "json")
-	_ = RegisterDocumentFormatGuesser(&jsonLinesFormatGuesser{}, "jsonlines")
+	_ = RegisterDocumentFormatGuesser(&jsonLinesFormatGuesser{}, "json-lines")
 }
 
 // DocumentFormatGuesser guesses the format of the document given a blob

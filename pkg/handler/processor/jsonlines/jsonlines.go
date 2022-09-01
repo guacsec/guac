@@ -21,8 +21,6 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/dsse"
-	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 )
 
 type JsonLinesProcessor struct{}
@@ -31,7 +29,6 @@ func (d *JsonLinesProcessor) ValidateSchema(i *processor.Document) error {
 	if i.Type != processor.DocumentJsonLines {
 		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentJsonLines, i.Type)
 	}
-
 	_, err := parseJsonLines(i.Blob)
 	return err
 }
@@ -52,29 +49,13 @@ func (d *JsonLinesProcessor) Unpack(i *processor.Document) ([]*processor.Documen
 		return nil, err
 	}
 
-	documents := []*processor.Document{}
-	for _, line := range lines {
-		doc := &processor.Document{
+	documents := make([]*processor.Document, len(lines))
+	for idx, line := range lines {
+		documents[idx] = &processor.Document{
 			Blob:              line,
 			Type:              processor.DocumentUnknown,
 			Format:            processor.FormatJSON,
 			SourceInformation: i.SourceInformation,
-		}
-		docType, _, err := guesser.GuessDocument(doc)
-		if err != nil {
-			return nil, err
-		}
-		doc.Type = docType
-		switch docType {
-		case processor.DocumentDSSE:
-			var p dsse.DSSEProcessor
-			unpacked, err := p.Unpack(doc)
-			if err != nil {
-				return nil, err
-			}
-			documents = append(documents, unpacked...)
-		default:
-			documents = append(documents, doc)
 		}
 	}
 	return documents, nil

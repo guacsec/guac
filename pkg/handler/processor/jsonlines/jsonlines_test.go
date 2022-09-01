@@ -16,7 +16,6 @@
 package jsonlines
 
 import (
-	"encoding/base64"
 	"fmt"
 	"reflect"
 	"strings"
@@ -45,11 +44,10 @@ var (
 			Source:    "TestSource",
 		},
 	}
-	decodedPayload, _               = base64.StdEncoding.DecodeString("aGVsbG8gd29ybGQ=")
 	unpackedJsonLinesUnknownDSSEDoc = processor.Document{
-		Blob:   decodedPayload,
+		Blob:   []byte(singleLineDSSE),
 		Type:   processor.DocumentUnknown,
-		Format: processor.FormatUnknown,
+		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",
 			Source:    "TestSource",

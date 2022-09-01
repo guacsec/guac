@@ -56,7 +56,7 @@ const (
 	DocumentITE6Unknown DocumentType = "ITE6"
 	DocumentDSSE        DocumentType = "DSSE"
 	DocumentSPDX        DocumentType = "SPDX"
-	DocumentJsonLines DocumentType = "JSONLINES"
+	DocumentJsonLines   DocumentType = "JSONLINES"
 	DocumentScorecard   DocumentType = "SCORECARD"
 	DocumentUnknown     DocumentType = "UNKNOWN"
 )

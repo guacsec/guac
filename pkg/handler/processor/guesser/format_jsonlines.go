@@ -31,7 +31,7 @@ func (_ *jsonLinesFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
 			return processor.FormatUnknown
 		}
 	}
-	if len(lines) <= 1 {
+	if len(lines) == 1 {
 		return processor.FormatJSON
 	}
 	return processor.FormatJSONLines

@@ -52,6 +52,10 @@ func Test_JsonLinesGuesser(t *testing.T) {
 		name:     "invalid JSON Lines",
 		blob:     []byte(`"abc": "def"`),
 		expected: processor.FormatUnknown,
+	}, {
+		name:     "empty input",
+		blob:     []byte{},
+		expected: processor.FormatUnknown,
 	}}
 
 	for _, tt := range testCases {
