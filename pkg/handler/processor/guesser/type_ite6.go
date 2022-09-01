@@ -30,9 +30,9 @@ func (_ *ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.Format
 	if json.Unmarshal(blob, &statement) == nil && format == processor.FormatJSON {
 		if strings.HasPrefix(statement.Type, "https://in-toto.io/Statement") {
 			if strings.HasPrefix(statement.PredicateType, "https://slsa.dev/provenance") {
-				return processor.DocumentSLSA
+				return processor.DocumentITE6SLSA
 			}
-			return processor.DocumentITE6
+			return processor.DocumentITE6Unknown
 		}
 	}
 	return processor.DocumentUnknown
