@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The AFF Authors.
+// Copyright 2022 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/key"
+	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
@@ -80,7 +83,7 @@ var (
 	}
 	ite6SLSADoc = processor.Document{
 		Blob:   []byte(ite6SLSA),
-		Type:   processor.DocumentSLSA,
+		Type:   processor.DocumentITE6SLSA,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",
@@ -98,13 +101,24 @@ var (
 		},
 	}
 
+	ecdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
+	keyHash, _               = dsse.SHA256KeyID(ecdsaPubKey)
+
+	ident = assembler.IdentityNode{
+		ID:        "test",
+		Digest:    keyHash,
+		Key:       base64.StdEncoding.EncodeToString(pemBytes),
+		KeyType:   "ecdsa",
+		KeyScheme: "ecdsa",
+	}
+
 	art = assembler.ArtifactNode{
 		Name:   "helloworld",
 		Digest: "sha256:5678...",
 	}
 
 	att = assembler.AttestationNode{
-		FilePath: "",
+		FilePath: "TestSource",
 		Digest:   "sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
 	}
 
@@ -124,8 +138,12 @@ var (
 	}
 
 	graphInput = assembler.AssemblerInput{
-		V: []assembler.GuacNode{art, att, mat1, mat2, build},
-		E: []assembler.GuacEdge{
+		Nodes: []assembler.GuacNode{ident, art, att, mat1, mat2, build},
+		Edges: []assembler.GuacEdge{
+			assembler.IdentityForEdge{
+				IdentityNode:    ident,
+				AttestationNode: att,
+			},
 			assembler.BuiltByEdge{
 				ArtifactNode: art,
 				BuilderNode:  build,
@@ -147,7 +165,10 @@ var (
 )
 
 func TestParseDocumentTree(t *testing.T) {
-
+	err := verifier.RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
+	if err != nil {
+		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
+	}
 	tests := []struct {
 		name    string
 		tree    processor.DocumentTree
@@ -171,4 +192,31 @@ func TestParseDocumentTree(t *testing.T) {
 			}
 		})
 	}
+}
+
+type mockSigstoreVerifier struct{}
+
+func newMockSigstoreVerifier() *mockSigstoreVerifier {
+	return &mockSigstoreVerifier{}
+}
+
+func (m *mockSigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, error) {
+
+	keyHash, _ := dsse.SHA256KeyID(ecdsaPubKey)
+	return []verifier.Identity{
+		{
+			ID: "test",
+			Key: key.Key{
+				Hash:   keyHash,
+				Type:   "ecdsa",
+				Val:    ecdsaPubKey,
+				Scheme: "ecdsa",
+			},
+			Verified: true,
+		},
+	}, nil
+}
+
+func (m *mockSigstoreVerifier) Type() verifier.VerifierType {
+	return "sigstore"
 }
