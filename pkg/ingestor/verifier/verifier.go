@@ -16,7 +16,7 @@
 package verifier
 
 import (
-	"crypto"
+	"github.com/guacsec/guac/pkg/ingestor/key"
 )
 
 // Verifier allows for multiple signature or identity verifiers that will
@@ -35,6 +35,18 @@ type Verifier interface {
 	Type() string
 }
 
+type Key struct {
+	// KeyHash sha256 hash of the canonical representation of the key
+	KeyHash string
+	// KeyType represents the type of the key
+	KeyType key.KeyType
+	// KeyVal is the byte array of the public key
+	KeyVal []byte
+	// TODO: is this needed? Santiago question?
+	// Scheme is the supported scheme by the key type.
+	Scheme key.KeyScheme
+}
+
 // Identity struct elements might be nil/empty if the key is invalid or the
 // ID of the identity can't be determined. Verified indicates that the
 // identity has been verified, usually based on signature matching the key.
@@ -42,6 +54,6 @@ type Verifier interface {
 // way.
 type Identity struct {
 	ID       string
-	Key      *crypto.PublicKey
+	Key      Key
 	Verified bool
 }
