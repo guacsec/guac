@@ -41,6 +41,34 @@ func (an ArtifactNode) IdentifiablePropertyNames() [][]string {
 	return [][]string{{"digest"}}
 }
 
+// IdentityNode is a node that represents an identity
+type IdentityNode struct {
+	ID     string
+	Digest string
+	Key    string
+}
+
+func (in IdentityNode) Type() string {
+	return "Identity"
+}
+
+func (in IdentityNode) Properties() map[string]interface{} {
+	properties := make(map[string]interface{})
+	properties["id"] = in.ID
+	properties["digest"] = in.Digest
+	properties["key"] = in.Key
+	return properties
+}
+
+func (in IdentityNode) PropertyNames() []string {
+	return []string{"id", "digest", "key"}
+}
+
+func (in IdentityNode) IdentifiablePropertyNames() [][]string {
+	// An artifact can be uniquely identified by digest
+	return [][]string{{"digest"}}
+}
+
 // AttestationNode is a node that represents an attestation
 type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
@@ -92,6 +120,33 @@ func (bn BuilderNode) PropertyNames() []string {
 func (bn BuilderNode) IdentifiablePropertyNames() [][]string {
 	// A builder needs both type and id to be identified
 	return [][]string{{"type", "id"}}
+}
+
+// IdentityForEdge is an edge that represents the fact that an
+// `IdentityNode` is an identity for an `AttestationNode`.
+type IdentityForEdge struct {
+	IdentityNode    IdentityNode
+	AttestationNode AttestationNode
+}
+
+func (e IdentityForEdge) Type() string {
+	return "Identity"
+}
+
+func (e IdentityForEdge) Nodes() (v, u GuacNode) {
+	return e.IdentityNode, e.AttestationNode
+}
+
+func (e IdentityForEdge) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e IdentityForEdge) PropertyNames() []string {
+	return []string{}
+}
+
+func (e IdentityForEdge) IdentifiablePropertyNames() [][]string {
+	return [][]string{}
 }
 
 // AttestationForEdge is an edge that represents the fact that an
