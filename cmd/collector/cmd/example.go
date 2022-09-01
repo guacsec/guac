@@ -61,6 +61,6 @@ var exampleCmd = &cobra.Command{
 }
 
 func emit(d *processor.Document) error {
-	// does nothing right now
+	logrus.Infof("emitted document: %+v", d)
 	return nil
 }
