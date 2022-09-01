@@ -64,9 +64,9 @@ func (in IdentityNode) PropertyNames() []string {
 	return []string{"id", "digest", "key"}
 }
 
-func (in IdentityNode) IdentifiablePropertyNames() [][]string {
-	// An artifact can be uniquely identified by digest
-	return [][]string{{"digest"}}
+func (in IdentityNode) IdentifiablePropertyNames() []string {
+	// An identity can be uniquely identified by digest
+	return []string{"digest"}
 }
 
 // AttestationNode is a node that represents an attestation
@@ -145,8 +145,8 @@ func (e IdentityForEdge) PropertyNames() []string {
 	return []string{}
 }
 
-func (e IdentityForEdge) IdentifiablePropertyNames() [][]string {
-	return [][]string{}
+func (e IdentityForEdge) IdentifiablePropertyNames() []string {
+	return []string{}
 }
 
 // AttestationForEdge is an edge that represents the fact that an
