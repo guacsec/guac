@@ -45,7 +45,10 @@ func (an ArtifactNode) IdentifiablePropertyNames() [][]string {
 type IdentityNode struct {
 	ID     string
 	Digest string
-	Key    string
+	// base64 encoded
+	Key       string
+	KeyType   string
+	KeyScheme string
 }
 
 func (in IdentityNode) Type() string {
@@ -57,11 +60,13 @@ func (in IdentityNode) Properties() map[string]interface{} {
 	properties["id"] = in.ID
 	properties["digest"] = in.Digest
 	properties["key"] = in.Key
+	properties["keyType"] = in.KeyType
+	properties["keyScheme"] = in.KeyScheme
 	return properties
 }
 
 func (in IdentityNode) PropertyNames() []string {
-	return []string{"id", "digest", "key"}
+	return []string{"id", "digest", "key", "keyType", "keyScheme"}
 }
 
 func (in IdentityNode) IdentifiablePropertyNames() [][]string {
