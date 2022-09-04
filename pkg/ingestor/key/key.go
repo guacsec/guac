@@ -198,6 +198,7 @@ func getKeyHash(pub crypto.PublicKey) (string, error) {
 
 }
 
+// TODO: Is there a better way to get the key scheme or does it need to be captured?
 func getKeyInfo(pub crypto.PublicKey) (string, string, error) {
 	switch pub.(type) {
 	case *rsa.PublicKey:
