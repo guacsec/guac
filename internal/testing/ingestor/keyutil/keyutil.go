@@ -18,6 +18,7 @@ package keyutil
 import (
 	"crypto"
 	"crypto/ecdsa"
+	"crypto/ed25519"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
@@ -40,6 +41,14 @@ func GetRSAPubKey(t *testing.T) crypto.PublicKey {
 		t.Fatalf("rsa.GenerateKey failed: %v", err)
 	}
 	return rsaPriv.Public()
+}
+
+func GetED25519Pub(t *testing.T) crypto.PublicKey {
+	edpub, _, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatalf("ed25519.GenerateKey failed: %v", err)
+	}
+	return crypto.PublicKey(edpub)
 }
 
 func GetPemBytes(t *testing.T, pub crypto.PublicKey) []byte {

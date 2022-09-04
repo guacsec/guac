@@ -16,12 +16,28 @@
 package key
 
 import (
+	"bytes"
 	"crypto"
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/rsa"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
+	"github.com/sigstore/rekor/pkg/pki/x509"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	rsaKeyType            string = "rsa"
+	ecdsaKeyType          string = "ecdsa"
+	ed25519KeyType        string = "ed25519"
+	rsassapsssha256Scheme string = "rsassa-pss-sha256"
+	ecdsaSha2nistp256     string = "ecdsa-sha2-nistp256"
+	ed25519Scheme         string = "ed25519"
 )
 
 type KeyProvider interface {
@@ -40,6 +56,18 @@ type KeyProvider interface {
 	Type() KeyProviderType
 }
 
+type Key struct {
+	// KeyHash sha256 hash of the canonical representation of the key
+	KeyHash string
+	// KeyType represents the type of the key
+	KeyType string
+	// KeyVal is the crypto.PublicKey of the public key
+	KeyVal crypto.PublicKey
+	// TODO: is this needed? Santiago question?
+	// Scheme is the supported scheme by the key type.
+	Scheme string
+}
+
 type KeyProviderType string
 
 var (
@@ -55,38 +83,66 @@ func RegisterKeyProvider(k KeyProvider, providerType KeyProviderType) {
 
 // Find goes through each of the registered key providers and retrieves the key
 // TODO: Should this handle if multiple keys are returned
-func Find(id string) (crypto.PublicKey, error) {
-	var key crypto.PublicKey
+func Find(id string) (*Key, error) {
+	var pubKey crypto.PublicKey
 	var err error
 	for i, keyProvider := range keyProviders {
-		key, err = keyProvider.RetrieveKey(id)
+		pubKey, err = keyProvider.RetrieveKey(id)
 		if err != nil {
 			return nil, fmt.Errorf("failed retrieval of key from %s, with error %w", i, err)
 		}
-		if key != nil {
+		if pubKey != nil {
 			break
 		}
 	}
-	if key == nil {
+	if pubKey == nil {
 		return nil, errors.New("failed to find key from key providers")
 	}
-	return key, nil
+	keyHash, err := getKeyHash(pubKey)
+	if err != nil {
+		return nil, err
+	}
+	keyType, KeyScheme, err := getKeyInfo(pubKey)
+	if err != nil {
+		return nil, err
+	}
+	foundKey := &Key{
+		KeyHash: keyHash,
+		KeyType: keyType,
+		KeyVal:  pubKey,
+		Scheme:  KeyScheme,
+	}
+	return foundKey, nil
 }
 
 // Retrieve goes to the specified key provider and gets the key
-func Retrieve(id string, providerType KeyProviderType) (crypto.PublicKey, error) {
-	var key crypto.PublicKey
+func Retrieve(id string, providerType KeyProviderType) (*Key, error) {
+	var pubKey crypto.PublicKey
 	var err error
 	if provider, ok := keyProviders[providerType]; ok {
-		key, err = provider.RetrieveKey(id)
+		pubKey, err = provider.RetrieveKey(id)
 		if err != nil {
 			return nil, fmt.Errorf("failed retrieval of key from %s, with error %w", providerType, err)
 		}
 	}
-	if key == nil {
+	if pubKey == nil {
 		return nil, errors.New("failed to find key from key provider")
 	}
-	return key, nil
+	keyHash, err := getKeyHash(pubKey)
+	if err != nil {
+		return nil, err
+	}
+	keyType, KeyScheme, err := getKeyInfo(pubKey)
+	if err != nil {
+		return nil, err
+	}
+	foundKey := &Key{
+		KeyHash: keyHash,
+		KeyType: keyType,
+		KeyVal:  pubKey,
+		Scheme:  KeyScheme,
+	}
+	return foundKey, nil
 }
 
 // Store goes to the specified key provider and stores the Key
@@ -120,4 +176,37 @@ func Delete(id string, providerType KeyProviderType) error {
 		return fmt.Errorf("key provider not initialized for %s", providerType)
 	}
 	return nil
+}
+
+func getKeyHash(pub crypto.PublicKey) (string, error) {
+	pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(pub)
+	if err != nil {
+		return "", fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
+	}
+	keyObj, err := x509.NewPublicKey(bytes.NewReader(pemBytes))
+	if err != nil {
+		return "", err
+	}
+
+	canonKey, err := keyObj.CanonicalValue()
+	if err != nil {
+		return "", fmt.Errorf("could not canonicize key: %w", err)
+	}
+
+	keyHash := sha256.Sum256(canonKey)
+	return "sha256:" + hex.EncodeToString(keyHash[:]), nil
+
+}
+
+func getKeyInfo(pub crypto.PublicKey) (string, string, error) {
+	switch pub.(type) {
+	case *rsa.PublicKey:
+		return rsaKeyType, rsassapsssha256Scheme, nil
+	case *ecdsa.PublicKey:
+		return ecdsaKeyType, ecdsaSha2nistp256, nil
+	case ed25519.PublicKey:
+		return ed25519KeyType, ed25519Scheme, nil
+	default:
+		return "", "", errors.New("unsupported key type")
+	}
 }
