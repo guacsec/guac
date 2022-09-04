@@ -16,8 +16,14 @@
 package verifier
 
 import (
-	"crypto"
+	"fmt"
+
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/key"
+	"github.com/sirupsen/logrus"
 )
+
+type VerifierType string
 
 // Verifier allows for multiple signature or identity verifiers that will
 // check envelopes, signatures, and other payloads for linking a payload
@@ -32,7 +38,8 @@ type Verifier interface {
 	// which verifier it needs to based on what type of enveloper or
 	// signature is being verified.
 	Verify(payloadBytes []byte) ([]Identity, error)
-	Type() string
+	// Type returns the verifier type
+	Type() VerifierType
 }
 
 // Identity struct elements might be nil/empty if the key is invalid or the
@@ -42,6 +49,29 @@ type Verifier interface {
 // way.
 type Identity struct {
 	ID       string
-	Key      *crypto.PublicKey
+	Key      key.Key
 	Verified bool
+}
+
+var (
+	verifierProviders = map[VerifierType]Verifier{}
+)
+
+// RegisterVerifier registers the providers that are available for verification
+func RegisterVerifier(k Verifier, providerType VerifierType) {
+	if _, ok := verifierProviders[providerType]; ok {
+		logrus.Warnf("the verification provider is being overwritten: %s", providerType)
+	}
+	verifierProviders[providerType] = k
+}
+
+// VerifyIdentity goes through the registered providers and verifies the signatures in the payload
+func VerifyIdentity(doc *processor.Document) ([]Identity, error) {
+	switch doc.Type {
+	case processor.DocumentDSSE:
+		if verifier, ok := verifierProviders["sigstore"]; ok {
+			return verifier.Verify(doc.Blob)
+		}
+	}
+	return nil, fmt.Errorf("failed verification for document type: %s", doc.Type)
 }
