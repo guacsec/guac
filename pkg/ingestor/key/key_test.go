@@ -17,15 +17,16 @@ package key
 
 import (
 	"crypto"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
-	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
 func TestFind_OneProvider(t *testing.T) {
-	wantKey := setupOneProvider(t)
+	provider, pubKey, wantKey := setupOneProvider(t)
+	provider.collector["fake"] = pubKey
 	tests := []struct {
 		name    string
 		id      string
@@ -49,9 +50,8 @@ func TestFind_OneProvider(t *testing.T) {
 				return
 			}
 			if err == nil {
-				err = cryptoutils.EqualKeys(got, tt.want)
-				if err != nil {
-					t.Errorf("Find() = %v, want %v", got, tt.want)
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", got, tt.want)
 				}
 			}
 		})
@@ -60,7 +60,9 @@ func TestFind_OneProvider(t *testing.T) {
 }
 
 func TestFind_MultiProvider(t *testing.T) {
-	wantKey := setupTwoProvider(t)
+	provider, pubKey, wantKey := setupTwoProvider(t)
+	provider[0].collector["fake"] = pubKey[0]
+	provider[1].collector["secondfake"] = pubKey[1]
 	tests := []struct {
 		name    string
 		id      string
@@ -89,9 +91,8 @@ func TestFind_MultiProvider(t *testing.T) {
 				return
 			}
 			if err == nil {
-				err = cryptoutils.EqualKeys(got, tt.want)
-				if err != nil {
-					t.Errorf("Find() = %v, want %v", got, tt.want)
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", got, tt.want)
 				}
 			}
 		})
@@ -99,7 +100,9 @@ func TestFind_MultiProvider(t *testing.T) {
 }
 
 func TestRetrieve(t *testing.T) {
-	wantKey := setupTwoProvider(t)
+	provider, pubKey, wantKey := setupTwoProvider(t)
+	provider[0].collector["fake"] = pubKey[0]
+	provider[1].collector["secondfake"] = pubKey[1]
 	type args struct {
 		id           string
 		providerType KeyProviderType
@@ -156,9 +159,8 @@ func TestRetrieve(t *testing.T) {
 				}
 			}
 			if err == nil {
-				err = cryptoutils.EqualKeys(got, tt.want)
-				if err != nil {
-					t.Errorf("Find() = %v, want %v", got, tt.want)
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", got, tt.want)
 				}
 			}
 		})
@@ -166,12 +168,7 @@ func TestRetrieve(t *testing.T) {
 }
 
 func TestStore(t *testing.T) {
-	ecdsaPub := keyutil.GetECDSAPubKey(t)
-	rsaPub := keyutil.GetRSAPubKey(t)
-	provider := newMockProvider()
-	provider2 := newMockProvider()
-	RegisterKeyProvider(provider, "mock1")
-	RegisterKeyProvider(provider2, "mock2")
+	_, pubKey, wantKey := setupTwoProvider(t)
 	type args struct {
 		id           string
 		pk           []byte
@@ -187,25 +184,25 @@ func TestStore(t *testing.T) {
 		name: "store in provider 1",
 		args: args{
 			id:           "fake",
-			pk:           keyutil.GetPemBytes(t, ecdsaPub),
+			pk:           keyutil.GetPemBytes(t, pubKey[0]),
 			providerType: "mock1",
 		},
-		want:    ecdsaPub,
+		want:    wantKey[0],
 		wantErr: false,
 	}, {
 		name: "store in provider 2",
 		args: args{
 			id:           "secondfake",
-			pk:           keyutil.GetPemBytes(t, rsaPub),
+			pk:           keyutil.GetPemBytes(t, pubKey[1]),
 			providerType: "mock2",
 		},
-		want:    rsaPub,
+		want:    wantKey[1],
 		wantErr: false,
 	}, {
 		name: "provider not found",
 		args: args{
 			id:           "secondfake",
-			pk:           keyutil.GetPemBytes(t, rsaPub),
+			pk:           keyutil.GetPemBytes(t, pubKey[1]),
 			providerType: "mock3",
 		},
 		wantErr:        true,
@@ -224,9 +221,8 @@ func TestStore(t *testing.T) {
 			}
 			if err == nil {
 				found, _ := Find(tt.args.id)
-				err = cryptoutils.EqualKeys(found, tt.want)
-				if err != nil {
-					t.Errorf("Find() = %v, want %v", found, tt.want)
+				if !reflect.DeepEqual(found, tt.want) {
+					t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", found, tt.want)
 				}
 			}
 		})
@@ -327,22 +323,84 @@ func (m *mockKeyProvider) Type() KeyProviderType {
 	return "mock"
 }
 
-func setupOneProvider(t *testing.T) crypto.PublicKey {
+func setupOneProvider(t *testing.T) (*mockKeyProvider, crypto.PublicKey, *Key) {
 	ecdsaPub := keyutil.GetECDSAPubKey(t)
 	provider := newMockProvider()
 	RegisterKeyProvider(provider, "mock1")
-	provider.collector["fake"] = ecdsaPub
-	return ecdsaPub
+
+	keyHash, err := getKeyHash(ecdsaPub)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
+	keyType, KeyScheme, err := getKeyInfo(ecdsaPub)
+
+	if err != nil {
+		t.Fatal("failed to get key type and scheme for test")
+	}
+	foundKey := &Key{
+		KeyHash: keyHash,
+		KeyType: keyType,
+		KeyVal:  ecdsaPub,
+		Scheme:  KeyScheme,
+	}
+	return provider, ecdsaPub, foundKey
 }
 
-func setupTwoProvider(t *testing.T) []crypto.PublicKey {
+func setupTwoProvider(t *testing.T) ([]*mockKeyProvider, []crypto.PublicKey, []*Key) {
 	ecdsaPub := keyutil.GetECDSAPubKey(t)
 	rsaPub := keyutil.GetRSAPubKey(t)
+	ed25519Pub := keyutil.GetED25519Pub(t)
 	provider := newMockProvider()
 	provider2 := newMockProvider()
 	RegisterKeyProvider(provider, "mock1")
 	RegisterKeyProvider(provider2, "mock2")
-	provider.collector["fake"] = ecdsaPub
-	provider2.collector["secondfake"] = rsaPub
-	return []crypto.PublicKey{ecdsaPub, rsaPub}
+
+	keyHash, err := getKeyHash(ecdsaPub)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
+	keyType, KeyScheme, err := getKeyInfo(ecdsaPub)
+
+	if err != nil {
+		t.Fatal("failed to get key type and scheme for test")
+	}
+	ecdsaKey := &Key{
+		KeyHash: keyHash,
+		KeyType: keyType,
+		KeyVal:  ecdsaPub,
+		Scheme:  KeyScheme,
+	}
+
+	keyHash, err = getKeyHash(rsaPub)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
+	keyType, KeyScheme, err = getKeyInfo(rsaPub)
+	if err != nil {
+		t.Fatal("failed to get key type and scheme for test")
+	}
+	rsaKey := &Key{
+		KeyHash: keyHash,
+		KeyType: keyType,
+		KeyVal:  rsaPub,
+		Scheme:  KeyScheme,
+	}
+
+	keyHash, err = getKeyHash(ed25519Pub)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
+	keyType, KeyScheme, err = getKeyInfo(ed25519Pub)
+
+	if err != nil {
+		t.Fatal("failed to get key type and scheme for test")
+	}
+	ed25519Key := &Key{
+		KeyHash: keyHash,
+		KeyType: keyType,
+		KeyVal:  ed25519Pub,
+		Scheme:  KeyScheme,
+	}
+
+	return []*mockKeyProvider{provider, provider2}, []crypto.PublicKey{ecdsaPub, rsaPub, ed25519Pub}, []*Key{ecdsaKey, rsaKey, ed25519Key}
 }
