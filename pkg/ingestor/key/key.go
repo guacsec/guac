@@ -25,19 +25,24 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/sigstore/rekor/pkg/pki/x509"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 	"github.com/sirupsen/logrus"
 )
 
+type KeyType string
+type KeyScheme string
+type KeyProviderType string
+
 const (
-	rsaKeyType            string = "rsa"
-	ecdsaKeyType          string = "ecdsa"
-	ed25519KeyType        string = "ed25519"
-	rsassapsssha256Scheme string = "rsassa-pss-sha256"
-	ecdsaSha2nistp256     string = "ecdsa-sha2-nistp256"
-	ed25519Scheme         string = "ed25519"
+	rsaKeyType            KeyType   = "rsa"
+	ecdsaKeyType          KeyType   = "ecdsa"
+	ed25519KeyType        KeyType   = "ed25519"
+	rsassapsssha256Scheme KeyScheme = "rsassa-pss-sha256"
+	ecdsaSha2nistp256     KeyScheme = "ecdsa-sha2-nistp256"
+	ed25519Scheme         KeyScheme = "ed25519"
 )
 
 type KeyProvider interface {
@@ -57,18 +62,15 @@ type KeyProvider interface {
 }
 
 type Key struct {
-	// KeyHash sha256 hash of the canonical representation of the key
-	KeyHash string
-	// KeyType represents the type of the key
-	KeyType string
-	// KeyVal is the crypto.PublicKey of the public key
-	KeyVal crypto.PublicKey
-	// TODO: is this needed? Santiago question?
+	// Hash sha256 hash of the canonical representation of the key
+	Hash string
+	// Type represents the type of the key
+	Type KeyType
+	// Key is the crypto.PublicKey of the public key
+	Val crypto.PublicKey
 	// Scheme is the supported scheme by the key type.
-	Scheme string
+	Scheme KeyScheme
 }
-
-type KeyProviderType string
 
 var (
 	keyProviders = map[KeyProviderType]KeyProvider{}
@@ -84,33 +86,19 @@ func RegisterKeyProvider(k KeyProvider, providerType KeyProviderType) {
 // Find goes through each of the registered key providers and retrieves the key
 // TODO: Should this handle if multiple keys are returned
 func Find(id string) (*Key, error) {
-	var pubKey crypto.PublicKey
+	var foundKey *Key
 	var err error
-	for i, keyProvider := range keyProviders {
-		pubKey, err = keyProvider.RetrieveKey(id)
-		if err != nil {
-			return nil, fmt.Errorf("failed retrieval of key from %s, with error %w", i, err)
+	for i := range keyProviders {
+		foundKey, err = Retrieve(id, i)
+		if err != nil && !strings.Contains(err.Error(), "failed to find key from key provider") {
+			return nil, err
 		}
-		if pubKey != nil {
+		if foundKey != nil {
 			break
 		}
 	}
-	if pubKey == nil {
+	if foundKey == nil {
 		return nil, errors.New("failed to find key from key providers")
-	}
-	keyHash, err := getKeyHash(pubKey)
-	if err != nil {
-		return nil, err
-	}
-	keyType, KeyScheme, err := getKeyInfo(pubKey)
-	if err != nil {
-		return nil, err
-	}
-	foundKey := &Key{
-		KeyHash: keyHash,
-		KeyType: keyType,
-		KeyVal:  pubKey,
-		Scheme:  KeyScheme,
 	}
 	return foundKey, nil
 }
@@ -137,10 +125,10 @@ func Retrieve(id string, providerType KeyProviderType) (*Key, error) {
 		return nil, err
 	}
 	foundKey := &Key{
-		KeyHash: keyHash,
-		KeyType: keyType,
-		KeyVal:  pubKey,
-		Scheme:  KeyScheme,
+		Hash:   keyHash,
+		Type:   keyType,
+		Val:    pubKey,
+		Scheme: KeyScheme,
 	}
 	return foundKey, nil
 }
@@ -198,13 +186,14 @@ func getKeyHash(pub crypto.PublicKey) (string, error) {
 
 }
 
-// TODO: Is there a better way to get the key scheme or does it need to be captured?
-func getKeyInfo(pub crypto.PublicKey) (string, string, error) {
+func getKeyInfo(pub crypto.PublicKey) (KeyType, KeyScheme, error) {
 	switch pub.(type) {
 	case *rsa.PublicKey:
 		return rsaKeyType, rsassapsssha256Scheme, nil
 	case *ecdsa.PublicKey:
 		return ecdsaKeyType, ecdsaSha2nistp256, nil
+	// ed25519 is not using a pointer here due to its implementation. Using a pointer
+	// will result in the case statement failing to find the ed25519 key type
 	case ed25519.PublicKey:
 		return ed25519KeyType, ed25519Scheme, nil
 	default:
