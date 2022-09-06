@@ -79,12 +79,12 @@ type GuacNode interface {
 	// should also be a key in the map returned by `Properties`.
 	PropertyNames() []string
 
-	// IdentifiablePropertyNames returns a list of tuples of property names
-	// that can uniquely specify a GuacNode.
+	// IdentifiablePropertyNames returns a list of property names that can
+	// uniquely specify a GuacNode.
 	//
-	// Any string found in a tuple returned by `IdentifiablePropertyNames`
+	// Any string found in the list returned by `IdentifiablePropertyNames`
 	// must also be returned by `PropertyNames`.
-	IdentifiablePropertyNames() [][]string
+	IdentifiablePropertyNames() []string
 }
 
 // GuacEdge represents an edge in the GUAC graph
@@ -109,26 +109,26 @@ type GuacEdge interface {
 	// should also be a key in the map returned by `Properties`.
 	PropertyNames() []string
 
-	// IdentifiablePropertyNames returns a list of tuples of property names
+	// IdentifiablePropertyNames returns a list of property names that can
 	// that can uniquely specify a GuacEdge, as an alternative to the two
 	// node endpoints.
 	//
-	// Any string found in a tuple returned by `IdentifiablePropertyNames`
+	// Any string found in the list returned by `IdentifiablePropertyNames`
 	// must also be returned by `PropertyNames`.
 	//
 	// TODO(mihaimaruseac): We might not need this?
-	IdentifiablePropertyNames() [][]string
+	IdentifiablePropertyNames() []string
 }
 
-// Subgraph represents a subgraph read from the database or written to it.
+// Graph represents a subgraph read from the database or written to it.
 // Note: this is experimental and might change. Please refer to source code for
 // more details about usage.
-type Subgraph struct {
-	V []GuacNode
-	E []GuacEdge
+type Graph struct {
+	Nodes []GuacNode
+	Edges []GuacEdge
 }
 
 // TODO(mihaimaruseac): Write queries to write/read subgraphs from DB?
 
 // AssemblerInput represents the inputs to add to the graph
-type AssemblerInput = Subgraph
+type AssemblerInput = Graph

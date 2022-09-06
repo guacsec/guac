@@ -44,7 +44,7 @@ func WriteQueryForTesting(client Client, query string, args map[string]interface
 //
 // Returns the result as an interface to be handled by the caller (as records),
 // but this is not optimal to use in production!
-func ReadQueryForTesting(client Client, query string, args map[string]interface{}) ([][]interface{}, error) { ///*(interface{}, error) { //*/(neo4j.Result, error) {
+func ReadQueryForTesting(client Client, query string, args map[string]interface{}) ([][]interface{}, error) {
 	session := client.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
@@ -87,4 +87,22 @@ func ClearDBForTesting(client Client) error {
 			return tx.Run("MATCH (n) DETACH DELETE n", nil)
 		})
 	return err
+}
+
+// EmptyClientForTesting returns a client to an empty database.
+//
+// Should only be used for testing.
+func EmptyClientForTesting(dbUri string) (Client, error) {
+	tk := CreateAuthTokenForTesting()
+	client, err := NewGraphClient(dbUri, tk)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ClearDBForTesting(client)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
