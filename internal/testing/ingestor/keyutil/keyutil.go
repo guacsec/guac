@@ -22,39 +22,39 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
-	"testing"
+	"fmt"
 
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
-func GetECDSAPubKey(t *testing.T) crypto.PublicKey {
+func GetECDSAPubKey() (crypto.PublicKey, error) {
 	ecdsaPriv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		t.Fatalf("ecdsa.GenerateKey failed: %v", err)
+		return nil, fmt.Errorf("ecdsa.GenerateKey failed: %v", err)
 	}
-	return ecdsaPriv.Public()
+	return ecdsaPriv.Public(), nil
 }
 
-func GetRSAPubKey(t *testing.T) crypto.PublicKey {
+func GetRSAPubKey() (crypto.PublicKey, error) {
 	rsaPriv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		t.Fatalf("rsa.GenerateKey failed: %v", err)
+		return nil, fmt.Errorf("rsa.GenerateKey failed: %v", err)
 	}
-	return rsaPriv.Public()
+	return rsaPriv.Public(), nil
 }
 
-func GetED25519Pub(t *testing.T) crypto.PublicKey {
+func GetED25519Pub() (crypto.PublicKey, error) {
 	edpub, _, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
-		t.Fatalf("ed25519.GenerateKey failed: %v", err)
+		return nil, fmt.Errorf("ed25519.GenerateKey failed: %v", err)
 	}
-	return crypto.PublicKey(edpub)
+	return crypto.PublicKey(edpub), nil
 }
 
-func GetPemBytes(t *testing.T, pub crypto.PublicKey) []byte {
+func GetPemBytes(pub crypto.PublicKey) ([]byte, error) {
 	pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(pub)
 	if err != nil {
-		t.Fatalf("MarshalPublicKeyToPEM returned error: %v", err)
+		return nil, fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
 	}
-	return pemBytes
+	return pemBytes, nil
 }
