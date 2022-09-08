@@ -16,35 +16,36 @@
 package inmemory
 
 import (
-	"crypto"
-
 	"github.com/guacsec/guac/pkg/ingestor/key"
+	"github.com/sirupsen/logrus"
 )
 
 type inmemory struct {
-	collector map[string]crypto.PublicKey
+	collector map[string]key.Key
 }
 
 func newInmemoryProvider() *inmemory {
 	return &inmemory{
-		collector: map[string]crypto.PublicKey{},
+		collector: map[string]key.Key{},
 	}
 }
 
-func (m *inmemory) RetrieveKey(id string) (crypto.PublicKey, error) {
+func (m *inmemory) RetrieveKey(id string) (*key.Key, error) {
 	if key, ok := m.collector[id]; ok {
-		return key, nil
+		return &key, nil
 	}
 	return nil, nil
 }
 
-func (m *inmemory) StoreKey(id string, pk crypto.PublicKey) error {
-	m.collector[id] = pk
+func (m *inmemory) StoreKey(id string, pk *key.Key) error {
+	m.collector[id] = *pk
+	logrus.Warnf("key is being overwritten: %s", id)
 	return nil
 }
 
 func (m *inmemory) DeleteKey(id string) error {
 	delete(m.collector, id)
+	logrus.Warnf("key is being deleted: %s", id)
 	return nil
 }
 
