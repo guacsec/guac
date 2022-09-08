@@ -16,23 +16,25 @@
 package inmemory
 
 import (
-	"crypto"
+	"crypto/sha256"
+	"encoding/hex"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
+	"github.com/guacsec/guac/pkg/ingestor/key"
 )
 
 func Test_inmemory_RetrieveKey(t *testing.T) {
 	provider, pubKey := setupProvider(t)
-	provider.collector["ecdsa"] = pubKey[0]
-	provider.collector["rsa"] = pubKey[1]
-	provider.collector["ed25519"] = pubKey[2]
+	provider.collector["ecdsa"] = *pubKey[0]
+	provider.collector["rsa"] = *pubKey[1]
+	provider.collector["ed25519"] = *pubKey[2]
 	tests := []struct {
 		name    string
 		id      string
-		want    crypto.PublicKey
+		want    *key.Key
 		wantErr bool
 	}{{
 		name:    "get ecdsa key",
@@ -76,12 +78,12 @@ func Test_inmemory_StoreKey(t *testing.T) {
 	provider, pubKey := setupProvider(t)
 	type args struct {
 		id string
-		pk crypto.PublicKey
+		pk *key.Key
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    crypto.PublicKey
+		want    *key.Key
 		wantErr bool
 	}{{
 		name: "store ecdsa",
@@ -126,9 +128,9 @@ func Test_inmemory_StoreKey(t *testing.T) {
 
 func Test_inmemory_DeleteKey(t *testing.T) {
 	provider, pubKey := setupProvider(t)
-	provider.collector["ecdsa"] = pubKey[0]
-	provider.collector["rsa"] = pubKey[1]
-	provider.collector["ed25519"] = pubKey[2]
+	provider.collector["ecdsa"] = *pubKey[0]
+	provider.collector["rsa"] = *pubKey[1]
+	provider.collector["ed25519"] = *pubKey[2]
 	tests := []struct {
 		name    string
 		id      string
@@ -161,20 +163,45 @@ func Test_inmemory_DeleteKey(t *testing.T) {
 	}
 }
 
-func setupProvider(t *testing.T) (*inmemory, []crypto.PublicKey) {
-	ecdsaPub, err := keyutil.GetECDSAPubKey()
+func setupProvider(t *testing.T) (*inmemory, []*key.Key) {
+	ecdsaPub, ecdsaPem, err := keyutil.GetECDSAPubKey()
 	if err != nil {
 		t.Fatalf("failed to get ecdsa key. Error: %v", err)
 	}
-	rsaPub, err := keyutil.GetRSAPubKey()
+	rsaPub, rsaPem, err := keyutil.GetRSAPubKey()
 	if err != nil {
 		t.Fatalf("failed to get rsa key. Error: %v", err)
 	}
-	ed25519Pub, err := keyutil.GetED25519Pub()
+	ed25519Pub, ed25519Pem, err := keyutil.GetED25519Pub()
 	if err != nil {
 		t.Fatalf("failed to get ed25519 key. Error: %v", err)
 	}
+
+	h := sha256.Sum256(ecdsaPem)
+	ecdsaKey := &key.Key{
+		Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+		Type:   "ecdsa",
+		Val:    ecdsaPub,
+		Scheme: "ecdsa-sha2-nistp256",
+	}
+
+	h = sha256.Sum256(rsaPem)
+	rsaKey := &key.Key{
+		Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+		Type:   "rsa",
+		Val:    rsaPub,
+		Scheme: "rsassa-pss-sha256",
+	}
+
+	h = sha256.Sum256(ed25519Pem)
+	ed25519Key := &key.Key{
+		Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+		Type:   "ed25519",
+		Val:    ed25519Pub,
+		Scheme: "ed25519",
+	}
+
 	provider := newInmemoryProvider()
 
-	return provider, []crypto.PublicKey{ecdsaPub, rsaPub, ed25519Pub}
+	return provider, []*key.Key{ecdsaKey, rsaKey, ed25519Key}
 }

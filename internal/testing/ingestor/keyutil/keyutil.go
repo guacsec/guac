@@ -27,28 +27,40 @@ import (
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
-func GetECDSAPubKey() (crypto.PublicKey, error) {
+func GetECDSAPubKey() (crypto.PublicKey, []byte, error) {
 	ecdsaPriv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		return nil, fmt.Errorf("ecdsa.GenerateKey failed: %v", err)
+		return nil, nil, fmt.Errorf("ecdsa.GenerateKey failed: %v", err)
 	}
-	return ecdsaPriv.Public(), nil
+	pemBytes, err := GetPemBytes(ecdsaPriv.Public())
+	if err != nil {
+		return nil, nil, fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
+	}
+	return ecdsaPriv.Public(), pemBytes, nil
 }
 
-func GetRSAPubKey() (crypto.PublicKey, error) {
+func GetRSAPubKey() (crypto.PublicKey, []byte, error) {
 	rsaPriv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, fmt.Errorf("rsa.GenerateKey failed: %v", err)
+		return nil, nil, fmt.Errorf("rsa.GenerateKey failed: %v", err)
 	}
-	return rsaPriv.Public(), nil
+	pemBytes, err := GetPemBytes(rsaPriv.Public())
+	if err != nil {
+		return nil, nil, fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
+	}
+	return rsaPriv.Public(), pemBytes, nil
 }
 
-func GetED25519Pub() (crypto.PublicKey, error) {
+func GetED25519Pub() (crypto.PublicKey, []byte, error) {
 	edpub, _, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
-		return nil, fmt.Errorf("ed25519.GenerateKey failed: %v", err)
+		return nil, nil, fmt.Errorf("ed25519.GenerateKey failed: %v", err)
 	}
-	return crypto.PublicKey(edpub), nil
+	pemBytes, err := GetPemBytes(edpub)
+	if err != nil {
+		return nil, nil, fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
+	}
+	return crypto.PublicKey(edpub), pemBytes, nil
 }
 
 func GetPemBytes(pub crypto.PublicKey) ([]byte, error) {

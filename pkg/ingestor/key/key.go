@@ -47,14 +47,14 @@ const (
 
 type KeyProvider interface {
 	// RetrieveKey takes in the ID (which is commonly the hash of the key)
-	// and it retrieves the crypto.PublicKey that is associated
+	// and it retrieves the wrapped key struct that is associated
 	// Returns nil, nil if no keys are found
 	// Return nil, error if the request to the provider failed
-	RetrieveKey(id string) (crypto.PublicKey, error)
+	RetrieveKey(id string) (*Key, error)
 	// StoreKey takes in the ID and the crypto.PublicKey and stores them
 	// for future retrieval. If key id is already present, it replaces
 	// the key with the new one
-	StoreKey(id string, pk crypto.PublicKey) error
+	StoreKey(id string, pk *Key) error
 	// DeleteKey takes in the ID and will remove the associated key from the provider
 	DeleteKey(id string) error
 	// Type returns the key provider type
@@ -83,7 +83,7 @@ func RegisterKeyProvider(k KeyProvider, providerType KeyProviderType) {
 	keyProviders[providerType] = k
 }
 
-// Find goes through each of the registered key providers and retrieves the key
+// Find goes through each of the registered key providers and retrieves the wrapped Key
 // TODO: Should this handle if multiple keys are returned
 func Find(id string) (*Key, error) {
 	var foundKey *Key
@@ -103,9 +103,9 @@ func Find(id string) (*Key, error) {
 	return foundKey, nil
 }
 
-// Retrieve goes to the specified key provider and gets the key
+// Retrieve goes to the specified key provider and gets the wrapped Key
 func Retrieve(id string, providerType KeyProviderType) (*Key, error) {
-	var pubKey crypto.PublicKey
+	var pubKey *Key
 	var err error
 	if provider, ok := keyProviders[providerType]; ok {
 		pubKey, err = provider.RetrieveKey(id)
@@ -116,33 +116,33 @@ func Retrieve(id string, providerType KeyProviderType) (*Key, error) {
 	if pubKey == nil {
 		return nil, errors.New("failed to find key from key provider")
 	}
-	keyHash, err := getKeyHash(pubKey)
-	if err != nil {
-		return nil, err
-	}
-	keyType, KeyScheme, err := getKeyInfo(pubKey)
-	if err != nil {
-		return nil, err
-	}
-	foundKey := &Key{
-		Hash:   keyHash,
-		Type:   keyType,
-		Val:    pubKey,
-		Scheme: KeyScheme,
-	}
-	return foundKey, nil
+	return pubKey, nil
 }
 
-// Store goes to the specified key provider and stores the Key
-// takes in a PEM-encoded byte slice and converts it to a crypto.PublicKey
+// Store goes to the specified key provider and stores the wrapped Key.
+// It takes in a PEM-encoded byte slice and converts it to a wrapped Key type
 // returns a nil error when successful
 func Store(id string, pemBytes []byte, providerType KeyProviderType) error {
 	key, err := cryptoutils.UnmarshalPEMToPublicKey(pemBytes)
 	if err != nil {
 		return err
 	}
+	keyHash, err := getKeyHash(pemBytes)
+	if err != nil {
+		return err
+	}
+	keyType, KeyScheme, err := getKeyInfo(key)
+	if err != nil {
+		return err
+	}
+	foundKey := &Key{
+		Hash:   keyHash,
+		Type:   keyType,
+		Val:    key,
+		Scheme: KeyScheme,
+	}
 	if provider, ok := keyProviders[providerType]; ok {
-		err := provider.StoreKey(id, key)
+		err := provider.StoreKey(id, foundKey)
 		if err != nil {
 			return fmt.Errorf("failed storing of key to %s, with error %w", providerType, err)
 		}
@@ -166,24 +166,17 @@ func Delete(id string, providerType KeyProviderType) error {
 	return nil
 }
 
-func getKeyHash(pub crypto.PublicKey) (string, error) {
-	pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(pub)
-	if err != nil {
-		return "", fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
-	}
+func getKeyHash(pemBytes []byte) (string, error) {
 	keyObj, err := x509.NewPublicKey(bytes.NewReader(pemBytes))
 	if err != nil {
 		return "", err
 	}
-
 	canonKey, err := keyObj.CanonicalValue()
 	if err != nil {
 		return "", fmt.Errorf("could not canonicize key: %w", err)
 	}
-
 	keyHash := sha256.Sum256(canonKey)
 	return "sha256:" + hex.EncodeToString(keyHash[:]), nil
-
 }
 
 func getKeyInfo(pub crypto.PublicKey) (KeyType, KeyScheme, error) {
