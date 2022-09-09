@@ -78,6 +78,9 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/moby/buildkit v0.10.3 // indirect
+	github.com/nats-io/nats-server/v2 v2.9.0 // indirect
+	github.com/nats-io/nkeys v0.3.0 // indirect
+	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
@@ -104,6 +107,7 @@ require (
 
 require (
 	github.com/CycloneDX/cyclonedx-go v0.7.0
+	github.com/nats-io/nats.go v1.16.1-0.20220906180156-a1017eec10b0
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/sigstore/sigstore v1.4.6
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
