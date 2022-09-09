@@ -15,40 +15,90 @@
 package emitter
 
 import (
+	"encoding/json"
+	"log"
+	"strings"
+
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/nats-io/nats.go"
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	GUACSubject string = "GUAC"
+	streamName    string = "GUAC"
+	streamSubject string = "documents"
 )
 
 var (
 	nc *nats.Conn
+	js nats.JetStreamContext
 )
 
 func init() {
-	initConnection()
+	jetStreamInit()
 }
 
-func initConnection() {
-	if nc == nil || !nc.IsConnected() {
-		var err error
-		nc, err = nats.Connect(nats.DefaultURL)
+func jetStreamInit() {
+	// Connect to NATS
+	var err error
+	nc, err = nats.Connect(nats.DefaultURL)
+	if err != nil {
+		panic("Unable to connect to nats server")
+	}
 
-		if err != nil {
-			panic("Unable to connect to nats server")
-		}
+	// Create JetStream Context
+	js, err = nc.JetStream()
+	if err != nil {
+		panic("Unable to connect to nats jetstream")
+	}
+	err = createStream()
+	if err != nil {
+		panic("failed to create stream")
 	}
 }
 
-func Emit(d *processor.Document) {
-	initConnection()
-	// do I need to publish the whole document?
-	nc.Publish(GUACSubject, d.Blob)
+func createStream() error {
+	stream, err := js.StreamInfo(streamName)
+	if err != nil && !strings.Contains(err.Error(), "nats: stream not found") {
+		return err
+	}
+	// stream not found, create it
+	if stream == nil {
+		log.Printf("Creating stream: %s\n", streamName)
+
+		_, err = js.AddStream(&nats.StreamConfig{
+			Name:     streamName,
+			Subjects: []string{streamSubject},
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func Register(f func(m *nats.Msg)) {
-	initConnection()
-	nc.Subscribe(GUACSubject, f)
+func Emit(d *processor.Document) {
+	docByte, err := json.Marshal(d)
+	if err != nil {
+		logrus.Warnf("failed marshal of document: %s", err)
+	}
+	_, err = js.Publish(streamSubject, docByte)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func Register() {
+	doc := processor.Document{}
+	js.Subscribe(streamSubject, func(m *nats.Msg) {
+		docByte := m.Data
+		err := json.Unmarshal(docByte, &doc)
+		if err != nil {
+			logrus.Warnf("failed unmarshal the document bytes: %s", err)
+		}
+		process.Process(&doc)
+		m.Ack()
+	})
+	log.Println(doc)
 }

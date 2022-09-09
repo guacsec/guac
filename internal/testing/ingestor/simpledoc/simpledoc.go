@@ -18,6 +18,7 @@ package simpledoc
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -30,7 +31,7 @@ import (
 // It should have an issuer field, that should match up with
 // issuer URI in TrustInformation
 //
-// SourceInformation should be propagated
+// # SourceInformation should be propagated
 //
 // Schema check should include:
 // issuer (required) - string
@@ -40,23 +41,25 @@ import (
 // and no other fields
 //
 // Example object is
-// {
-// 	"issuer": "google.com",
-// 	"info": "this is a cool document"
-// }
+//
+//	{
+//		"issuer": "google.com",
+//		"info": "this is a cool document"
+//	}
 //
 // Example object with nested is
-// {
-// 	"issuer": "google.com",
-// 	"info": "this is a cool document",
-// 	"nested": [{
-// 		"issuer": "google.com",
-// 		"info": "this is a cooler nested doc 1"
-// 	},{
-// 		"issuer": "google.com",
-// 		"info": "this is a cooler nested doc 2"
-//  }]
-// }
+//
+//	{
+//		"issuer": "google.com",
+//		"info": "this is a cool document",
+//		"nested": [{
+//			"issuer": "google.com",
+//			"info": "this is a cooler nested doc 1"
+//		},{
+//			"issuer": "google.com",
+//			"info": "this is a cooler nested doc 2"
+//	 }]
+//	}
 type SimpleDocProc struct{}
 
 const (
@@ -112,7 +115,7 @@ func (dp *SimpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, e
 			Format: processor.FormatJSON,
 		}
 	}
-
+	log.Print(retDocs)
 	return retDocs, nil
 }
 
