@@ -17,7 +17,10 @@ package emitter
 import (
 	"testing"
 
+	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	"github.com/guacsec/guac/pkg/handler/processor/process"
 )
 
 var (
@@ -45,8 +48,18 @@ var (
 		}
 	}`
 	ite6SLSADoc = processor.Document{
-		Blob:   []byte(ite6SLSA),
-		Type:   processor.DocumentITE6SLSA,
+		Blob: []byte(`{
+			"issuer": "google.com",
+			"info": "this is a cool document",
+			"nested": [{
+				"issuer": "google.com",
+				"info": "this is a cooler nested doc 1"
+			},{
+				"issuer": "google.com",
+				"info": "this is a cooler nested doc 2"
+			}]
+		   }`),
+		Type:   simpledoc.SimpleDocType,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",
@@ -56,5 +69,8 @@ var (
 )
 
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
+	process.RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
+	guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
 	Emit(&ite6SLSADoc)
+	Register()
 }
