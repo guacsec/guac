@@ -22,6 +22,7 @@ import (
 
 	"github.com/guacsec/guac/cmd/collector/cmd/mockcollector"
 	"github.com/guacsec/guac/pkg/handler/collector"
+	"github.com/guacsec/guac/pkg/handler/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -74,5 +75,5 @@ var exampleCmd = &cobra.Command{
 }
 
 func emit(d *processor.Document) {
-	// does nothing right now
+	emitter.Emit(d)
 }
