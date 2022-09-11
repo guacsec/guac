@@ -17,7 +17,9 @@ package parser
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -28,6 +30,9 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	certify_vuln "github.com/guacsec/guac/pkg/ingestor/parser/vuln"
+	"github.com/nats-io/nats.go"
+	uuid "github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -61,6 +66,89 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 	}
 	documentParser[d] = p
 	return nil
+}
+
+// NATS stream
+const (
+	subjectNameDocProcessed string = "DOCUMENTS.processed"
+)
+
+var (
+	nc *nats.Conn
+	js nats.JetStreamContext
+)
+
+func init() {
+	// TODO: pass in credentials file for NATS secure login
+	jetStreamInit(nats.DefaultURL, "credsfilepath")
+}
+
+func jetStreamInit(url string, creds string) {
+	// Connect to NATS
+	var err error
+	// Connect Options.
+	opts := []nats.Option{nats.Name("NATS GUAC")}
+
+	// secure connection via User creds file or NKey file
+
+	// // Use UserCredentials
+	// if creds != "" {
+	// 	opts = append(opts, nats.UserCredentials(creds))
+	// }
+
+	// // Use Nkey authentication.
+	// if *nkeyFile != "" {
+	// 	opt, err := nats.NkeyOptionFromSeed(*nkeyFile)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	opts = append(opts, opt)
+	// }
+
+	// Connect to NATS
+	nc, err = nats.Connect(url, opts...)
+	if err != nil {
+		panic("Unable to connect to nats server")
+	}
+
+	// Create JetStream Context
+	js, err = nc.JetStream()
+	if err != nil {
+		panic("Unable to connect to nats jetstream")
+	}
+}
+
+func Subscribe() error {
+	id := uuid.NewV4().String()
+	sub, err := js.PullSubscribe(subjectNameDocProcessed, "ingestor")
+	if err != nil {
+		logrus.Errorf("[ingestor: %s] subscribe failed: %v", id, err)
+		return err
+	}
+	for {
+		msgs, err := sub.Fetch(1)
+		if err != nil {
+			logrus.Printf("[ingestor: %s] error consuming, sleeping for a second: %v", id, err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		if len(msgs) > 0 {
+			err := msgs[0].Ack()
+			if err != nil {
+				logrus.Println("[ingestor: %s] unable to Ack: %v", id, err)
+				return err
+			}
+			doc := processor.DocumentNode{}
+			err = json.Unmarshal(msgs[0].Data, &doc)
+			if err != nil {
+				logrus.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+			}
+			// err = ParseDocumentTree(processor.DocumentTree(&doc))
+			// if err != nil {
+			// 	return
+			// }
+		}
+	}
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node

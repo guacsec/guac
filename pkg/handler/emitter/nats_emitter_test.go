@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package emitter
 
 import (
@@ -19,8 +21,7 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/guesser"
-	"github.com/guacsec/guac/pkg/handler/processor/process"
+	"github.com/nats-io/nats.go"
 )
 
 var (
@@ -48,17 +49,7 @@ var (
 		}
 	}`
 	ite6SLSADoc = processor.Document{
-		Blob: []byte(`{
-			"issuer": "google.com",
-			"info": "this is a cool document",
-			"nested": [{
-				"issuer": "google.com",
-				"info": "this is a cooler nested doc 1"
-			},{
-				"issuer": "google.com",
-				"info": "this is a cooler nested doc 2"
-			}]
-		   }`),
+		Blob:   []byte(ite6SLSA),
 		Type:   simpledoc.SimpleDocType,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
@@ -69,8 +60,6 @@ var (
 )
 
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
-	process.RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
-	guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
+	JetStreamInit(nats.DefaultURL, "filepath")
 	Emit(&ite6SLSADoc)
-	Register()
 }

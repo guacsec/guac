@@ -90,7 +90,6 @@ require (
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa // indirect
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/theupdateframework/go-tuf v0.5.2-0.20220930112810-3890c1e7ace4 // indirect
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
@@ -109,7 +108,9 @@ require (
 	github.com/CycloneDX/cyclonedx-go v0.7.0
 	github.com/nats-io/nats.go v1.16.1-0.20220906180156-a1017eec10b0
 	github.com/ossf/scorecard/v4 v4.8.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/sigstore/sigstore v1.4.6
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
 	golang.org/x/vuln v0.0.0-20221116204841-fac3670c993c
 )

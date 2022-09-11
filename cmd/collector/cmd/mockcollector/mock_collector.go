@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -43,12 +44,19 @@ func (m *mockCollector) Type() string {
 
 func mockDoc(i int) *processor.Document {
 	return &processor.Document{
-		Blob:   []byte(fmt.Sprintf("doc-%d", i)),
-		Type:   processor.DocumentUnknown,
-		Format: processor.FormatUnknown,
-		SourceInformation: processor.SourceInformation{
-			Collector: "mock-collector",
-			Source:    "generated",
-		},
+		Blob: []byte(fmt.Sprintf(`{
+			"issuer": "google-%d.com",
+			"info": "this is a cool document",
+			"nested": [{
+				"issuer": "google.com",
+				"info": "this is a cooler nested doc 1"
+			},{
+				"issuer": "google.com",
+				"info": "this is a cooler nested doc 2"
+			}]
+		   }`, i)),
+		Type:              simpledoc.SimpleDocType,
+		Format:            processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{},
 	}
 }

@@ -16,18 +16,19 @@ package emitter
 
 import (
 	"encoding/json"
-	"log"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 )
 
+// NATS stream
 const (
-	streamName    string = "GUAC"
-	streamSubject string = "documents"
+	streamName              string = "DOCUMENTS"
+	streamSubjects          string = "DOCUMENTS.*"
+	subjectNameDocCollected string = "DOCUMENTS.collected"
+	subjectNameDocProcessed string = "DOCUMENTS.processed"
 )
 
 var (
@@ -35,18 +36,33 @@ var (
 	js nats.JetStreamContext
 )
 
-func init() {
-	jetStreamInit()
-}
-
-func jetStreamInit() {
+func JetStreamInit(url string, creds string) {
 	// Connect to NATS
 	var err error
-	nc, err = nats.Connect(nats.DefaultURL)
+	// Connect Options.
+	opts := []nats.Option{nats.Name("NATS GUAC")}
+
+	// secure connection via User creds file or NKey file
+
+	// // Use UserCredentials
+	// if creds != "" {
+	// 	opts = append(opts, nats.UserCredentials(creds))
+	// }
+
+	// // Use Nkey authentication.
+	// if *nkeyFile != "" {
+	// 	opt, err := nats.NkeyOptionFromSeed(*nkeyFile)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	opts = append(opts, opt)
+	// }
+
+	// Connect to NATS
+	nc, err = nats.Connect(url, opts...)
 	if err != nil {
 		panic("Unable to connect to nats server")
 	}
-
 	// Create JetStream Context
 	js, err = nc.JetStream()
 	if err != nil {
@@ -56,6 +72,7 @@ func jetStreamInit() {
 	if err != nil {
 		panic("failed to create stream")
 	}
+
 }
 
 func createStream() error {
@@ -65,11 +82,11 @@ func createStream() error {
 	}
 	// stream not found, create it
 	if stream == nil {
-		log.Printf("Creating stream: %s\n", streamName)
-
+		logrus.Printf("creating stream %q and subjects %q", streamName, streamSubjects)
 		_, err = js.AddStream(&nats.StreamConfig{
-			Name:     streamName,
-			Subjects: []string{streamSubject},
+			Name:      streamName,
+			Subjects:  []string{streamSubjects},
+			Retention: nats.WorkQueuePolicy,
 		})
 		if err != nil {
 			return err
@@ -83,22 +100,13 @@ func Emit(d *processor.Document) {
 	if err != nil {
 		logrus.Warnf("failed marshal of document: %s", err)
 	}
-	_, err = js.Publish(streamSubject, docByte)
+	_, err = js.Publish(subjectNameDocCollected, docByte)
 	if err != nil {
-		log.Println(err)
+		logrus.Error("failed to publish document on stream")
 	}
+	logrus.Infof("doc published: %+v", d)
 }
 
-func Register() {
-	doc := processor.Document{}
-	js.Subscribe(streamSubject, func(m *nats.Msg) {
-		docByte := m.Data
-		err := json.Unmarshal(docByte, &doc)
-		if err != nil {
-			logrus.Warnf("failed unmarshal the document bytes: %s", err)
-		}
-		process.Process(&doc)
-		m.Ack()
-	})
-	log.Println(doc)
+func Close() {
+	nc.Close()
 }
