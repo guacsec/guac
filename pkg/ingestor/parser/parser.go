@@ -1,3 +1,4 @@
+//
 // Copyright 2022 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package emitter
+package parser
 
 import (
 	"encoding/json"
-	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/nats-io/nats.go"
+	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 )
 
 // NATS stream
 const (
-	streamName              string = "DOCUMENTS"
-	streamSubjects          string = "DOCUMENTS.*"
-	subjectNameDocCollected string = "DOCUMENTS.collected"
 	subjectNameDocProcessed string = "DOCUMENTS.processed"
 )
 
@@ -36,7 +35,12 @@ var (
 	js nats.JetStreamContext
 )
 
-func JetStreamInit(url string, creds string) {
+func init() {
+	// TODO: pass in credentials file for NATS secure login
+	jetStreamInit(nats.DefaultURL, "credsfilepath")
+}
+
+func jetStreamInit(url string, creds string) {
 	// Connect to NATS
 	var err error
 	// Connect Options.
@@ -63,50 +67,43 @@ func JetStreamInit(url string, creds string) {
 	if err != nil {
 		panic("Unable to connect to nats server")
 	}
+
 	// Create JetStream Context
 	js, err = nc.JetStream()
 	if err != nil {
 		panic("Unable to connect to nats jetstream")
 	}
-	err = createStream()
-	if err != nil {
-		panic("failed to create stream")
-	}
-
 }
 
-func createStream() error {
-	stream, err := js.StreamInfo(streamName)
-	if err != nil && !strings.Contains(err.Error(), "nats: stream not found") {
+func Subscribe() error {
+	id := uuid.NewV4().String()
+	sub, err := js.PullSubscribe(subjectNameDocProcessed, "ingestor")
+	if err != nil {
+		logrus.Errorf("[ingestor: %s] subscribe failed: %v", id, err)
 		return err
 	}
-	// stream not found, create it
-	if stream == nil {
-		logrus.Printf("creating stream %q and subjects %q", streamName, streamSubjects)
-		_, err = js.AddStream(&nats.StreamConfig{
-			Name:      streamName,
-			Subjects:  []string{streamSubjects},
-			Retention: nats.WorkQueuePolicy,
-		})
+	for {
+		msgs, err := sub.Fetch(1)
 		if err != nil {
-			return err
+			logrus.Printf("[ingestor: %s] error consuming, sleeping for a second: %v", id, err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		if len(msgs) > 0 {
+			err := msgs[0].Ack()
+			if err != nil {
+				logrus.Println("[ingestor: %s] unable to Ack: %v", id, err)
+				return err
+			}
+			doc := processor.DocumentNode{}
+			err = json.Unmarshal(msgs[0].Data, &doc)
+			if err != nil {
+				logrus.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+			}
+			// err = ParseDocumentTree(processor.DocumentTree(&doc))
+			// if err != nil {
+			// 	return
+			// }
 		}
 	}
-	return nil
-}
-
-func Emit(d *processor.Document) {
-	docByte, err := json.Marshal(d)
-	if err != nil {
-		logrus.Warnf("failed marshal of document: %s", err)
-	}
-	_, err = js.Publish(subjectNameDocCollected, docByte)
-	if err != nil {
-		logrus.Error("failed to publish document on stream")
-	}
-	logrus.Infof("doc published: %+v", d)
-}
-
-func Close() {
-	nc.Close()
 }
