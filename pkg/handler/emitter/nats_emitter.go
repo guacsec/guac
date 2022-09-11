@@ -1,3 +1,4 @@
+//
 // Copyright 2022 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,7 @@ import (
 
 // NATS stream
 const (
+	natsName                string = "GUAC"
 	streamName              string = "DOCUMENTS"
 	streamSubjects          string = "DOCUMENTS.*"
 	subjectNameDocCollected string = "DOCUMENTS.collected"
@@ -40,9 +42,9 @@ func JetStreamInit(url string, creds string) {
 	// Connect to NATS
 	var err error
 	// Connect Options.
-	opts := []nats.Option{nats.Name("NATS GUAC")}
+	opts := []nats.Option{nats.Name(natsName)}
 
-	// secure connection via User creds file or NKey file
+	// TODO: secure connection via User creds file or NKey file
 
 	// // Use UserCredentials
 	// if creds != "" {

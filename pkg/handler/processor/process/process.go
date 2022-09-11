@@ -29,6 +29,7 @@ import (
 
 // NATS stream
 const (
+	natsName                string = "GUAC"
 	subjectNameDocCollected string = "DOCUMENTS.collected"
 	subjectNameDocProcessed string = "DOCUMENTS.processed"
 )
@@ -49,7 +50,7 @@ func jetStreamInit(url string, creds string) {
 	// Connect to NATS
 	var err error
 	// Connect Options.
-	opts := []nats.Option{nats.Name("NATS GUAC")}
+	opts := []nats.Option{nats.Name(natsName)}
 
 	// secure connection via User creds file or NKey file
 
@@ -104,7 +105,7 @@ func Subscribe() error {
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logrus.Println("[processor: %v] unable to Ack", id, err)
+				logrus.Printf("[processor: %v] unable to Ack: %v", id, err)
 				return err
 			}
 			doc := processor.Document{}
