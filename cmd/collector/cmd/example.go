@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 

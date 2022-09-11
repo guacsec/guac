@@ -18,9 +18,9 @@ package collector
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -60,28 +60,29 @@ func Collect(ctx context.Context, emitter processor.Emitter, handleErr processor
 	// errChan to receive error from collectors
 	errChan := make(chan error, len(documentCollectors))
 
-	var wg sync.WaitGroup
-	wg.Add(len(documentCollectors))
 	for _, collector := range documentCollectors {
 		c := collector
 		go func() {
 			errChan <- c.RetrieveArtifacts(ctx, docChan)
-			wg.Done()
 		}()
 	}
-	wg.Wait()
 
-	for i := 0; i < len(docChan); i++ {
-		if err := emitter(<-docChan); err != nil {
+	numCollectors := len(documentCollectors)
+	collectorsDone := 0
+	for collectorsDone < numCollectors {
+		select {
+		case d := <-docChan:
+			if err := emitter(d); err != nil {
+				if !handleErr(err) {
+					return err
+				}
+			}
+			logrus.Infof("emitted document: %+v", d)
+		case err := <-errChan:
 			if !handleErr(err) {
 				return err
 			}
-		}
-	}
-	for i := 0; i < len(errChan); i++ {
-		err := <-errChan
-		if !handleErr(err) {
-			return err
+			collectorsDone += 1
 		}
 	}
 	return nil
