@@ -18,7 +18,6 @@ package simpledoc
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -115,7 +114,7 @@ func (dp *SimpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, e
 			Format: processor.FormatJSON,
 		}
 	}
-	log.Print(retDocs)
+
 	return retDocs, nil
 }
 

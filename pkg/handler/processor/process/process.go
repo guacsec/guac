@@ -74,7 +74,7 @@ func Subscribe() error {
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logrus.Println("[processor: %v] unable to Ack", id, err)
+				logrus.Printf("[processor: %v] unable to Ack: %v", id, err)
 				return err
 			}
 			doc := processor.Document{}

@@ -28,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
+	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -63,7 +64,19 @@ var exampleCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			process.Subscribe()
+			err := process.Subscribe()
+			if err != nil {
+				logrus.Errorf("processor ended with error: %v", err)
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := parser.Subscribe()
+			if err != nil {
+				logrus.Errorf("parser ended with error: %v", err)
+			}
 		}()
 
 		wg.Wait()

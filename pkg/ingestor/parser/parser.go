@@ -70,6 +70,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 
 // NATS stream
 const (
+	natsName                string = "GUAC"
 	subjectNameDocProcessed string = "DOCUMENTS.processed"
 )
 
@@ -87,7 +88,7 @@ func jetStreamInit(url string, creds string) {
 	// Connect to NATS
 	var err error
 	// Connect Options.
-	opts := []nats.Option{nats.Name("NATS GUAC")}
+	opts := []nats.Option{nats.Name(natsName)}
 
 	// secure connection via User creds file or NKey file
 
@@ -135,7 +136,7 @@ func Subscribe() error {
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logrus.Println("[ingestor: %s] unable to Ack: %v", id, err)
+				logrus.Printf("[ingestor: %s] unable to Ack: %v", id, err)
 				return err
 			}
 			doc := processor.DocumentNode{}
@@ -143,10 +144,12 @@ func Subscribe() error {
 			if err != nil {
 				logrus.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
 			}
+
 			// err = ParseDocumentTree(processor.DocumentTree(&doc))
 			// if err != nil {
 			// 	return
 			// }
+			logrus.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc))
 		}
 	}
 }
