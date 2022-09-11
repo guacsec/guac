@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
@@ -75,48 +76,12 @@ const (
 )
 
 var (
-	nc *nats.Conn
 	js nats.JetStreamContext
 )
 
 func init() {
 	// TODO: pass in credentials file for NATS secure login
-	jetStreamInit(nats.DefaultURL, "credsfilepath")
-}
-
-func jetStreamInit(url string, creds string) {
-	// Connect to NATS
-	var err error
-	// Connect Options.
-	opts := []nats.Option{nats.Name(natsName)}
-
-	// secure connection via User creds file or NKey file
-
-	// // Use UserCredentials
-	// if creds != "" {
-	// 	opts = append(opts, nats.UserCredentials(creds))
-	// }
-
-	// // Use Nkey authentication.
-	// if *nkeyFile != "" {
-	// 	opt, err := nats.NkeyOptionFromSeed(*nkeyFile)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	opts = append(opts, opt)
-	// }
-
-	// Connect to NATS
-	nc, err = nats.Connect(url, opts...)
-	if err != nil {
-		panic("Unable to connect to nats server")
-	}
-
-	// Create JetStream Context
-	js, err = nc.JetStream()
-	if err != nil {
-		panic("Unable to connect to nats jetstream")
-	}
+	js = emitter.JetStreamInit(nats.DefaultURL, "credsfilepath")
 }
 
 func Subscribe() error {

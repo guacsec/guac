@@ -32,6 +32,11 @@ jobs:
     runs-on: ubuntu-latest
     name: CI for integration tests
     services:
+      jetstream:
+        image: nats:alpine
+        ports: 
+          - 4222:4222
+        options: --name jetstream
       neo4j:
         image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
         env:

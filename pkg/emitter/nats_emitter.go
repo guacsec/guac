@@ -38,7 +38,7 @@ var (
 	js nats.JetStreamContext
 )
 
-func JetStreamInit(url string, creds string) {
+func JetStreamInit(url string, creds string) nats.JetStreamContext {
 	// Connect to NATS
 	var err error
 	// Connect Options.
@@ -74,6 +74,7 @@ func JetStreamInit(url string, creds string) {
 	if err != nil {
 		panic("failed to create stream")
 	}
+	return js
 
 }
 

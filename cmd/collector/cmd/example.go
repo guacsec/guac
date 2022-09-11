@@ -23,12 +23,13 @@ import (
 
 	"github.com/guacsec/guac/cmd/collector/cmd/mockcollector"
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,16 +42,25 @@ var exampleCmd = &cobra.Command{
 		// Do Stuff Here
 		fmt.Println("GUAC example mock collector, it will emit 5 documents within 5 second intervals")
 
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+
 		// Register collector
 		// We create our own MockCollector and register it
 		mc := mockcollector.NewMockCollector()
-		collector.RegisterDocumentCollector(mc, mc.Type())
-		process.RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
-		guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
+		if err := collector.RegisterDocumentCollector(mc, mc.Type()); err != nil {
+			logger.Error(err)
+		}
+		if err := process.RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType); err != nil {
+			logger.Error(err)
+		}
+		if err := guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser"); err != nil {
+			logger.Error(err)
+		}
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		emitter.JetStreamInit(nats.DefaultURL, "credsfilepath")
+		js := emitter.JetStreamInit(nats.DefaultURL, "credsfilepath")
 
 		// Assuming that publisher and consumer are different processes.
 		var wg sync.WaitGroup
@@ -58,15 +68,15 @@ var exampleCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			exampleCollect()
+			exampleCollect(ctx)
 		}()
 
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			err := process.Subscribe()
+			err := process.Subscribe(ctx, js)
 			if err != nil {
-				logrus.Errorf("processor ended with error: %v", err)
+				logger.Errorf("processor ended with error: %v", err)
 			}
 		}()
 
@@ -75,7 +85,7 @@ var exampleCmd = &cobra.Command{
 			defer wg.Done()
 			err := parser.Subscribe()
 			if err != nil {
-				logrus.Errorf("parser ended with error: %v", err)
+				logger.Errorf("parser ended with error: %v", err)
 			}
 		}()
 
@@ -84,8 +94,8 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func exampleCollect() {
-	ctx := context.Background()
+func exampleCollect(ctx context.Context) {
+	logger := logging.FromContext(ctx)
 	// Collect
 	docChan, errChan, numCollectors, err := collector.Collect(ctx)
 	if err != nil {
@@ -100,9 +110,9 @@ func exampleCollect() {
 			emit(d)
 		case err = <-errChan:
 			if err != nil {
-				logrus.Errorf("collector ended with error: %v", err)
+				logger.Errorf("collector ended with error: %v", err)
 			} else {
-				logrus.Info("collector ended gracefully")
+				logger.Info("collector ended gracefully")
 			}
 			collectorsDone += 1
 		}
@@ -112,7 +122,7 @@ func exampleCollect() {
 	for len(docChan) > 0 {
 		d := <-docChan
 		emit(d)
-		logrus.Infof("emitted document: %+v", d)
+		logger.Infof("emitted document: %+v", d)
 	}
 }
 

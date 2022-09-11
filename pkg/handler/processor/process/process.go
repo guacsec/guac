@@ -34,7 +34,6 @@ import (
 )
 
 var (
-	nc                 *nats.Conn
 	js                 nats.JetStreamContext
 	documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
 )
@@ -57,7 +56,7 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 	return nil
 }
 
-func Subscribe() error {
+func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 	id := uuid.NewV4().String()
 	sub, err := js.PullSubscribe(subjectNameDocCollected, "processor")
 	if err != nil {
@@ -82,7 +81,7 @@ func Subscribe() error {
 			if err != nil {
 				logrus.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
 			}
-			docTree, err := Process(&doc)
+			docTree, err := Process(ctx, &doc)
 			logrus.Infof("[processor: %s] docTree Processed: %+v", id, docTree)
 			if err != nil {
 				return err
@@ -91,8 +90,8 @@ func Subscribe() error {
 	}
 }
 
-func Process(i *processor.Document) (processor.DocumentTree, error) {
-	node, err := processHelper(i)
+func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
+	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
 	}
