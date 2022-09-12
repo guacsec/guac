@@ -17,9 +17,9 @@ package collector
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -42,11 +42,13 @@ var (
 	documentCollectors = map[string]Collector{}
 )
 
-func RegisterDocumentCollector(c Collector, collectorType string) {
+func RegisterDocumentCollector(c Collector, collectorType string) error {
 	if _, ok := documentCollectors[collectorType]; ok {
-		logrus.Warnf("the document collector is being overwritten: %s", collectorType)
+		return fmt.Errorf("the document collector is being overwritten: %s", collectorType)
 	}
 	documentCollectors[collectorType] = c
+
+	return nil
 }
 
 // Collect takes all the collectors and starts collecting artifacts

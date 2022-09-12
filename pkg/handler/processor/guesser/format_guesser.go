@@ -16,12 +16,13 @@
 package guesser
 
 import (
+	"fmt"
+
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
-	RegisterDocumentFormatGuesser(&jsonFormatGuesser{}, "json")
+	_ = RegisterDocumentFormatGuesser(&jsonFormatGuesser{}, "json")
 }
 
 // DocumentFormatGuesser guesses the format of the document given a blob
@@ -35,9 +36,11 @@ var (
 	documentFormatGuessers = map[string]DocumentFormatGuesser{}
 )
 
-func RegisterDocumentFormatGuesser(g DocumentFormatGuesser, name string) {
+func RegisterDocumentFormatGuesser(g DocumentFormatGuesser, name string) error {
 	if _, ok := documentFormatGuessers[name]; ok {
-		logrus.Warnf("the document type guesser is being overwritten: %s", name)
+		return fmt.Errorf("the document type guesser is being overwritten: %s", name)
 	}
 	documentFormatGuessers[name] = g
+
+	return nil
 }
