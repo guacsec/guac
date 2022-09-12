@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
@@ -120,7 +121,17 @@ func (m *mockSigstoreVerifier) Type() VerifierType {
 }
 
 func TestVerifyIdentity(t *testing.T) {
-	RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
+	err := RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
+	if err != nil {
+		t.Errorf("RegisterVerifier() failed with error: %v", err)
+	}
+	err = RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
+	if (err != nil) != true {
+		t.Errorf("RegisterVerifier() error = %v, wantErr %v", err, true)
+	}
+	if !strings.Contains(err.Error(), "the verification provider is being overwritten: sigstore") {
+		t.Errorf("RegisterVerifier() failed on wrong error %v", err)
+	}
 
 	h := sha256.Sum256(pemBytes)
 	tests := []struct {
@@ -156,8 +167,14 @@ func TestVerifyIdentity(t *testing.T) {
 				t.Errorf("VerifyIdentity() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("VerifyIdentity() = %v, want %v", got, tt.want)
+			if err == nil {
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("VerifyIdentity() = %v, want %v", got, tt.want)
+				}
+			} else {
+				if !strings.Contains(err.Error(), "failed verification for document type: UNKNOWN") {
+					t.Errorf("VerifyIdentity() failed on wrong error %v", err)
+				}
 			}
 		})
 	}

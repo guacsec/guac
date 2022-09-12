@@ -20,7 +20,6 @@ import (
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/key"
-	"github.com/sirupsen/logrus"
 )
 
 type VerifierType string
@@ -58,11 +57,12 @@ var (
 )
 
 // RegisterVerifier registers the providers that are available for verification
-func RegisterVerifier(k Verifier, providerType VerifierType) {
+func RegisterVerifier(k Verifier, providerType VerifierType) error {
 	if _, ok := verifierProviders[providerType]; ok {
-		logrus.Warnf("the verification provider is being overwritten: %s", providerType)
+		return fmt.Errorf("the verification provider is being overwritten: %s", providerType)
 	}
 	verifierProviders[providerType] = k
+	return nil
 }
 
 // VerifyIdentity goes through the registered providers and verifies the signatures in the payload
