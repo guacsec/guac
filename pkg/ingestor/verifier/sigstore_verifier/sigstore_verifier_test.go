@@ -73,11 +73,11 @@ func setupOneProvider(t *testing.T) {
 	provider := newMockProvider()
 	key.RegisterKeyProvider(provider, "mock")
 
-	err := key.Store("SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88", []byte(ecdsaPub), "mock")
+	err := key.Store(ecdsaKeyID, []byte(ecdsaPub), "mock")
 	if err != nil {
 		t.Fatal("failed to store into mock key provider")
 	}
-	err = key.Store("SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg", []byte(rsapub), "mock")
+	err = key.Store(rsaKeyID, []byte(rsapub), "mock")
 	if err != nil {
 		t.Fatal("failed to store into mock key provider")
 	}
@@ -95,11 +95,11 @@ func randomData(t *testing.T, n int) []byte {
 
 func TestSigstoreVerifier_Verify(t *testing.T) {
 	setupOneProvider(t)
-	foundECDSAKey, err := key.Find("SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88")
+	foundECDSAKey, err := key.Find(ecdsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
-	foundRSAKey, err := key.Find("SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg")
+	foundRSAKey, err := key.Find(rsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
@@ -153,7 +153,7 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	envDSSE.Signatures[0].KeyID = "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88"
+	envDSSE.Signatures[0].KeyID = ecdsaKeyID
 	env, err = json.Marshal(envDSSE)
 	if err != nil {
 		t.Fatal(err)
@@ -165,7 +165,7 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 		SourceInformation: processor.SourceInformation{},
 	}
 
-	envDSSE.Signatures[0].KeyID = "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg"
+	envDSSE.Signatures[0].KeyID = rsaKeyID
 	env, err = json.Marshal(envDSSE)
 	if err != nil {
 		t.Fatal(err)
@@ -187,7 +187,7 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 		doc:  doc,
 		want: []verifier.Identity{
 			{
-				ID:       "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88",
+				ID:       ecdsaKeyID,
 				Key:      *foundECDSAKey,
 				Verified: true,
 			},
@@ -198,7 +198,7 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 		doc:  badDoc,
 		want: []verifier.Identity{
 			{
-				ID:       "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg",
+				ID:       rsaKeyID,
 				Key:      *foundRSAKey,
 				Verified: false,
 			},
@@ -213,8 +213,10 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 				t.Errorf("SigstoreVerifier.Verify() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SigstoreVerifier.Verify() = %v, want %v", got, tt.want)
+			if err == nil {
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("SigstoreVerifier.Verify() = %v, want %v", got, tt.want)
+				}
 			}
 			if sigVerifier.Type() != "sigstore" {
 				t.Errorf("sigVerifier.Type() = %s, want %s", sigVerifier.Type(), "sigstore")
@@ -225,11 +227,11 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 
 func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 	setupOneProvider(t)
-	foundECDSAKey, err := key.Find("SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88")
+	foundECDSAKey, err := key.Find(ecdsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
-	foundRSAKey, err := key.Find("SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg")
+	foundRSAKey, err := key.Find(rsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
@@ -308,12 +310,12 @@ func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 		doc:  doc,
 		want: []verifier.Identity{
 			{
-				ID:       "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88",
+				ID:       ecdsaKeyID,
 				Key:      *foundECDSAKey,
 				Verified: true,
 			},
 			{
-				ID:       "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg",
+				ID:       rsaKeyID,
 				Key:      *foundRSAKey,
 				Verified: true,
 			},
@@ -328,30 +330,33 @@ func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 				t.Errorf("SigstoreVerifier.Verify() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SigstoreVerifier.Verify() = %v, want %v", got, tt.want)
+			if err == nil {
+				if !reflect.DeepEqual(got, tt.want) {
+					t.Errorf("SigstoreVerifier.Verify() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}
 }
 
-// Obtained from rekor e2e test. Generated with:
-// openssl ecparam -genkey -name prime256v1 > ec_private.pem
-// openssl pkcs8 -topk8 -in ec_private.pem  -nocrypt
-const ecdsaPriv = `-----BEGIN PRIVATE KEY-----
+const (
+	ecdsaKeyID = "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88"
+	rsaKeyID   = "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg"
+	// Obtained from rekor e2e test. Generated with:
+	// openssl ecparam -genkey -name prime256v1 > ec_private.pem
+	// openssl pkcs8 -topk8 -in ec_private.pem  -nocrypt
+	ecdsaPriv = `-----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgmrLtCpBdXgXLUr7o
 nSUPfo3oXMjmvuwTOjpTulIBKlKhRANCAATH6KSpTFe6uXFmW1qNEFXaO7fWPfZt
 pPZrHZ1cFykidZoURKoYXfkohJ+U/USYy8Sd8b4DMd5xDRZCnlDM0h37
 -----END PRIVATE KEY-----`
-
-// Extracted from above with:
-// openssl ec -in ec_private.pem -pubout
-const ecdsaPub = `-----BEGIN PUBLIC KEY-----
+	// Extracted from above with:
+	// openssl ec -in ec_private.pem -pubout
+	ecdsaPub = `-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEx+ikqUxXurlxZltajRBV2ju31j32
 baT2ax2dXBcpInWaFESqGF35KISflP1EmMvEnfG+AzHecQ0WQp5QzNId+w==
 -----END PUBLIC KEY-----`
-
-const rsaKey = `-----BEGIN PRIVATE KEY-----
+	rsaKey = `-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDfCoj9PKxSIpOB
 jVvP7B0l8Q6KXgwSxEBIobMl11nrH2Fv6ufZRWgma7E3rZcjRMygyfia6SB8KBjq
 OBMHnxX78tp5IDxbPWniA7GGTWZyBsXgfLFH7GVGBh8fiJJtfL4TP/xmMzY47rx8
@@ -379,10 +384,9 @@ A0c7jhMN8M9Y5S2Ockw07lrQeAgfu4q+/8ztm0NeHJbk01IJvJY5Nt7bSgwgNVlo
 j7vR2BMAc9U73Ju9aeTl/L6GqmZyA+Ojhl5gA5DPZYqNiqi93ydgRaI6n4+o3dI7
 5wnr40AmbuKCDvMOvN7nMybL
 -----END PRIVATE KEY-----`
-
-// Extracted from the certificate using:
-// openssl x509 -pubkey -noout -in test.crt
-const rsapub = `-----BEGIN PUBLIC KEY-----
+	// Extracted from the certificate using:
+	// openssl x509 -pubkey -noout -in test.crt
+	rsapub = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3wqI/TysUiKTgY1bz+wd
 JfEOil4MEsRASKGzJddZ6x9hb+rn2UVoJmuxN62XI0TMoMn4mukgfCgY6jgTB58V
 +/LaeSA8Wz1p4gOxhk1mcgbF4HyxR+xlRgYfH4iSbXy+Ez/8ZjM2OO68fKr4JZEA
@@ -391,3 +395,4 @@ srJKtXDuC8T0vFmVU726tI6fODsEE6VrSahvw1ENUHzI34sbfrmrggwPO4iMAQvq
 wu2gn2lx6ajWsh806FItiXN+DuizMnx4KMBI0IJynoQpWOFbstGiV0LygZkQ6soz
 vwIDAQAB
 -----END PUBLIC KEY-----`
+)

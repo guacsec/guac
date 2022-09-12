@@ -28,16 +28,17 @@ import (
 	sig_dsse "github.com/sigstore/sigstore/pkg/signature/dsse"
 )
 
-type SigstoreVerifier struct {
+type sigstoreVerifier struct {
 }
 
 // NewSigstoreVerifier initializes the sigstore verifier
-func NewSigstoreVerifier() *SigstoreVerifier {
-	return &SigstoreVerifier{}
+func NewSigstoreVerifier() *sigstoreVerifier {
+	return &sigstoreVerifier{}
 }
 
 // Verify validates that the signature is valid for the payload
-func (d *SigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, error) {
+// TODO: this currently only supports SHA256 hash function when validating signatures
+func (d *sigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, error) {
 	identities := []verifier.Identity{}
 	envelope, err := parseDSSE(payloadBytes)
 	if err != nil {
@@ -54,20 +55,15 @@ func (d *SigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, err
 			Key: *key,
 		}
 		err = verifySignature(key.Val, payloadBytes)
-		if err != nil {
-			foundIdentity.Verified = false
-			identities = append(identities, foundIdentity)
-		} else {
-			foundIdentity.Verified = true
-			identities = append(identities, foundIdentity)
-		}
+		foundIdentity.Verified = (err == nil)
+		identities = append(identities, foundIdentity)
 	}
 
 	return identities, nil
 }
 
 // Type returns the type of the verifier
-func (d *SigstoreVerifier) Type() verifier.VerifierType {
+func (d *sigstoreVerifier) Type() verifier.VerifierType {
 	return "sigstore"
 }
 
