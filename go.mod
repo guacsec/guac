@@ -49,21 +49,18 @@ require (
 )
 
 require (
-	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/google/go-containerregistry v0.11.0 // indirect
-	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
 	github.com/letsencrypt/boulder v0.0.0-20220723181115-27de4befb95e // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
+	github.com/prometheus/client_golang v1.13.0 // indirect
+	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/theupdateframework/go-tuf v0.3.1 // indirect
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
+	go.uber.org/goleak v1.1.12 // indirect
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-require (
-	github.com/sigstore/rekor v0.12.0
-	github.com/sigstore/sigstore v1.4.0
-)
+require github.com/sigstore/sigstore v1.4.0
