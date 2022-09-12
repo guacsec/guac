@@ -16,9 +16,7 @@
 package verifier
 
 import (
-	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"reflect"
 	"strings"
@@ -91,7 +89,7 @@ var (
 			Source:    "TestSource",
 		},
 	}
-	ecdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
+	ecdsaPubKey, _, _ = keyutil.GetECDSAPubKey()
 )
 
 type mockSigstoreVerifier struct{}
@@ -101,12 +99,15 @@ func newMockSigstoreVerifier() *mockSigstoreVerifier {
 }
 
 func (m *mockSigstoreVerifier) Verify(payloadBytes []byte) ([]Identity, error) {
-	h := sha256.Sum256(pemBytes)
+	keyHash, err := dsse.SHA256KeyID(ecdsaPubKey)
+	if err != nil {
+		return nil, err
+	}
 	return []Identity{
 		{
 			ID: "test",
 			Key: key.Key{
-				Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+				Hash:   keyHash,
 				Type:   "ecdsa",
 				Val:    ecdsaPubKey,
 				Scheme: "ecdsa",
@@ -133,7 +134,10 @@ func TestVerifyIdentity(t *testing.T) {
 		t.Errorf("RegisterVerifier() failed on wrong error %v", err)
 	}
 
-	h := sha256.Sum256(pemBytes)
+	keyHash, err := dsse.SHA256KeyID(ecdsaPubKey)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
 	tests := []struct {
 		name    string
 		doc     *processor.Document
@@ -146,7 +150,7 @@ func TestVerifyIdentity(t *testing.T) {
 			{
 				ID: "test",
 				Key: key.Key{
-					Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+					Hash:   keyHash,
 					Type:   "ecdsa",
 					Val:    ecdsaPubKey,
 					Scheme: "ecdsa",

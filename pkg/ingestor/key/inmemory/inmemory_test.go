@@ -16,14 +16,13 @@
 package inmemory
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
 	"github.com/guacsec/guac/pkg/ingestor/key"
+	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
 func Test_inmemory_RetrieveKey(t *testing.T) {
@@ -164,38 +163,47 @@ func Test_inmemory_DeleteKey(t *testing.T) {
 }
 
 func setupProvider(t *testing.T) (*inmemory, []*key.Key) {
-	ecdsaPub, ecdsaPem, err := keyutil.GetECDSAPubKey()
+	ecdsaPub, _, err := keyutil.GetECDSAPubKey()
 	if err != nil {
 		t.Fatalf("failed to get ecdsa key. Error: %v", err)
 	}
-	rsaPub, rsaPem, err := keyutil.GetRSAPubKey()
+	rsaPub, _, err := keyutil.GetRSAPubKey()
 	if err != nil {
 		t.Fatalf("failed to get rsa key. Error: %v", err)
 	}
-	ed25519Pub, ed25519Pem, err := keyutil.GetED25519Pub()
+	ed25519Pub, _, err := keyutil.GetED25519Pub()
 	if err != nil {
 		t.Fatalf("failed to get ed25519 key. Error: %v", err)
 	}
 
-	h := sha256.Sum256(ecdsaPem)
+	keyHash, err := dsse.SHA256KeyID(ecdsaPub)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
 	ecdsaKey := &key.Key{
-		Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+		Hash:   keyHash,
 		Type:   "ecdsa",
 		Val:    ecdsaPub,
 		Scheme: "ecdsa-sha2-nistp256",
 	}
 
-	h = sha256.Sum256(rsaPem)
+	keyHash, err = dsse.SHA256KeyID(rsaPub)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
 	rsaKey := &key.Key{
-		Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+		Hash:   keyHash,
 		Type:   "rsa",
 		Val:    rsaPub,
 		Scheme: "rsassa-pss-sha256",
 	}
 
-	h = sha256.Sum256(ed25519Pem)
+	keyHash, err = dsse.SHA256KeyID(ed25519Pub)
+	if err != nil {
+		t.Fatal("failed to get key hash for test")
+	}
 	ed25519Key := &key.Key{
-		Hash:   "SHA256" + ":" + hex.EncodeToString(h[:]),
+		Hash:   keyHash,
 		Type:   "ed25519",
 		Val:    ed25519Pub,
 		Scheme: "ed25519",

@@ -16,18 +16,15 @@
 package key
 
 import (
-	"bytes"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/rsa"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/sigstore/rekor/pkg/pki/x509"
+	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 	"github.com/sirupsen/logrus"
 )
@@ -127,7 +124,7 @@ func Store(id string, pemBytes []byte, providerType KeyProviderType) error {
 	if err != nil {
 		return err
 	}
-	keyHash, err := getKeyHash(pemBytes)
+	keyHash, err := dsse.SHA256KeyID(key)
 	if err != nil {
 		return err
 	}
@@ -164,19 +161,6 @@ func Delete(id string, providerType KeyProviderType) error {
 		return fmt.Errorf("key provider not initialized for %s", providerType)
 	}
 	return nil
-}
-
-func getKeyHash(pemBytes []byte) (string, error) {
-	keyObj, err := x509.NewPublicKey(bytes.NewReader(pemBytes))
-	if err != nil {
-		return "", err
-	}
-	canonKey, err := keyObj.CanonicalValue()
-	if err != nil {
-		return "", fmt.Errorf("could not canonicize key: %w", err)
-	}
-	keyHash := sha256.Sum256(canonKey)
-	return "sha256:" + hex.EncodeToString(keyHash[:]), nil
 }
 
 func getKeyInfo(pub crypto.PublicKey) (KeyType, KeyScheme, error) {

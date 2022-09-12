@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
+	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
 func TestFind_OneProvider(t *testing.T) {
@@ -334,7 +335,7 @@ func setupOneProvider(t *testing.T) (*mockKeyProvider, []byte, *Key) {
 	provider := newMockProvider()
 	RegisterKeyProvider(provider, "mock1")
 
-	keyHash, err := getKeyHash(ecdsaPem)
+	keyHash, err := dsse.SHA256KeyID(ecdsaPub)
 	if err != nil {
 		t.Fatal("failed to get key hash for test")
 	}
@@ -372,7 +373,7 @@ func setupTwoProvider(t *testing.T) ([]*mockKeyProvider, [][]byte, []*Key) {
 	RegisterKeyProvider(provider, "mock1")
 	RegisterKeyProvider(provider2, "mock2")
 
-	keyHash, err := getKeyHash(ecdsaPem)
+	keyHash, err := dsse.SHA256KeyID(ecdsaPub)
 	if err != nil {
 		t.Fatal("failed to get key hash for test")
 	}
@@ -388,7 +389,7 @@ func setupTwoProvider(t *testing.T) ([]*mockKeyProvider, [][]byte, []*Key) {
 		Scheme: KeyScheme,
 	}
 
-	keyHash, err = getKeyHash(rsaPem)
+	keyHash, err = dsse.SHA256KeyID(rsaPub)
 	if err != nil {
 		t.Fatal("failed to get key hash for test")
 	}
@@ -403,7 +404,7 @@ func setupTwoProvider(t *testing.T) ([]*mockKeyProvider, [][]byte, []*Key) {
 		Scheme: KeyScheme,
 	}
 
-	keyHash, err = getKeyHash(ed25519Pem)
+	keyHash, err = dsse.SHA256KeyID(ed25519Pub)
 	if err != nil {
 		t.Fatal("failed to get key hash for test")
 	}
