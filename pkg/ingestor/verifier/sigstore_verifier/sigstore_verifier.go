@@ -31,11 +31,11 @@ import (
 type SigstoreVerifier struct {
 }
 
+// NewSigstoreVerifier initializes the sigstore verifier
 func NewSigstoreVerifier() *SigstoreVerifier {
 	return &SigstoreVerifier{}
 }
 
-// TODO: Add more than DSSE support here.
 // Verify validates that the signature is valid for the payload
 func (d *SigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, error) {
 	identities := []verifier.Identity{}
@@ -53,7 +53,7 @@ func (d *SigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, err
 			ID:  signature.KeyID,
 			Key: *key,
 		}
-		err = verifySignature(key.KeyVal, payloadBytes)
+		err = verifySignature(key.Val, payloadBytes)
 		if err != nil {
 			foundIdentity.Verified = false
 			identities = append(identities, foundIdentity)
@@ -66,6 +66,7 @@ func (d *SigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, err
 	return identities, nil
 }
 
+// Type returns the type of the verifier
 func (d *SigstoreVerifier) Type() verifier.VerifierType {
 	return "sigstore"
 }

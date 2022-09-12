@@ -39,24 +39,24 @@ import (
 )
 
 type mockKeyProvider struct {
-	collector map[string]crypto.PublicKey
+	collector map[string]key.Key
 }
 
 func newMockProvider() *mockKeyProvider {
 	return &mockKeyProvider{
-		collector: map[string]crypto.PublicKey{},
+		collector: map[string]key.Key{},
 	}
 }
 
-func (m *mockKeyProvider) RetrieveKey(id string) (crypto.PublicKey, error) {
+func (m *mockKeyProvider) RetrieveKey(id string) (*key.Key, error) {
 	if key, ok := m.collector[id]; ok {
-		return key, nil
+		return &key, nil
 	}
 	return nil, nil
 }
 
-func (m *mockKeyProvider) StoreKey(id string, pk crypto.PublicKey) error {
-	m.collector[id] = pk
+func (m *mockKeyProvider) StoreKey(id string, pk *key.Key) error {
+	m.collector[id] = *pk
 	return nil
 }
 
@@ -81,7 +81,6 @@ func setupOneProvider(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to store into mock key provider")
 	}
-
 }
 
 func randomData(t *testing.T, n int) []byte {
@@ -97,6 +96,10 @@ func randomData(t *testing.T, n int) []byte {
 func TestSigstoreVerifier_Verify(t *testing.T) {
 	setupOneProvider(t)
 	foundECDSAKey, err := key.Find("SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88")
+	if err != nil {
+		t.Fatal("failed to find key in mock key provider")
+	}
+	foundRSAKey, err := key.Find("SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg")
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
@@ -162,25 +165,46 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 		SourceInformation: processor.SourceInformation{},
 	}
 
+	envDSSE.Signatures[0].KeyID = "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg"
+	env, err = json.Marshal(envDSSE)
+	if err != nil {
+		t.Fatal(err)
+	}
+	badDoc := &processor.Document{
+		Blob:              env,
+		Type:              processor.DocumentDSSE,
+		Format:            processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{},
+	}
+
 	tests := []struct {
 		name    string
 		doc     *processor.Document
 		want    []verifier.Identity
 		wantErr bool
-	}{
-		{
-			name: "verify Document",
-			doc:  doc,
-			want: []verifier.Identity{
-				{
-					ID:       "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88",
-					Key:      *foundECDSAKey,
-					Verified: true,
-				},
+	}{{
+		name: "verify Document",
+		doc:  doc,
+		want: []verifier.Identity{
+			{
+				ID:       "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88",
+				Key:      *foundECDSAKey,
+				Verified: true,
 			},
-			wantErr: false,
 		},
-	}
+		wantErr: false,
+	}, {
+		name: "unverified Document",
+		doc:  badDoc,
+		want: []verifier.Identity{
+			{
+				ID:       "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg",
+				Key:      *foundRSAKey,
+				Verified: false,
+			},
+		},
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sigVerifier := NewSigstoreVerifier()
@@ -191,6 +215,9 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("SigstoreVerifier.Verify() = %v, want %v", got, tt.want)
+			}
+			if sigVerifier.Type() != "sigstore" {
+				t.Errorf("sigVerifier.Type() = %s, want %s", sigVerifier.Type(), "sigstore")
 			}
 		})
 	}
@@ -276,25 +303,23 @@ func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 		doc     *processor.Document
 		want    []verifier.Identity
 		wantErr bool
-	}{
-		{
-			name: "verify Document",
-			doc:  doc,
-			want: []verifier.Identity{
-				{
-					ID:       "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88",
-					Key:      *foundECDSAKey,
-					Verified: true,
-				},
-				{
-					ID:       "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg",
-					Key:      *foundRSAKey,
-					Verified: true,
-				},
+	}{{
+		name: "verify Document",
+		doc:  doc,
+		want: []verifier.Identity{
+			{
+				ID:       "SHA256:s9b/UAMASq9HN7RPBm5cIHQGoBOQA120kFdWLW/lT88",
+				Key:      *foundECDSAKey,
+				Verified: true,
 			},
-			wantErr: false,
+			{
+				ID:       "SHA256:843yiXZzbDfB0gA1snxYG5SISWMnDimw8/8Aew0nVNg",
+				Key:      *foundRSAKey,
+				Verified: true,
+			},
 		},
-	}
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sigVerifier := NewSigstoreVerifier()
