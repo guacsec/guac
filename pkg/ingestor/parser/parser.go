@@ -69,24 +69,9 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 	return nil
 }
 
-// NATS stream
-const (
-	natsName                string = "GUAC"
-	subjectNameDocProcessed string = "DOCUMENTS.processed"
-)
-
-var (
-	js nats.JetStreamContext
-)
-
-func init() {
-	// TODO: pass in credentials file for NATS secure login
-	js = emitter.JetStreamInit(nats.DefaultURL, "credsfilepath")
-}
-
-func Subscribe() error {
+func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 	id := uuid.NewV4().String()
-	sub, err := js.PullSubscribe(subjectNameDocProcessed, "ingestor")
+	sub, err := js.PullSubscribe(emitter.SubjectNameDocProcessed, "ingestor")
 	if err != nil {
 		logrus.Errorf("[ingestor: %s] subscribe failed: %v", id, err)
 		return err

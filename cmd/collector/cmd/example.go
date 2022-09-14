@@ -60,7 +60,7 @@ var exampleCmd = &cobra.Command{
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		js := emitter.JetStreamInit(nats.DefaultURL, "credsfilepath")
+		js := emitter.JetStreamInit(ctx, nats.DefaultURL, "credsfilepath")
 
 		// Assuming that publisher and consumer are different processes.
 		var wg sync.WaitGroup
@@ -83,7 +83,7 @@ var exampleCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			err := parser.Subscribe()
+			err := parser.Subscribe(ctx, js)
 			if err != nil {
 				logger.Errorf("parser ended with error: %v", err)
 			}
@@ -107,7 +107,7 @@ func exampleCollect(ctx context.Context) {
 	for collectorsDone < numCollectors {
 		select {
 		case d := <-docChan:
-			emit(d)
+			emit(ctx, d)
 		case err = <-errChan:
 			if err != nil {
 				logger.Errorf("collector ended with error: %v", err)
@@ -121,11 +121,11 @@ func exampleCollect(ctx context.Context) {
 	// Drain anything left in document channel
 	for len(docChan) > 0 {
 		d := <-docChan
-		emit(d)
+		emit(ctx, d)
 		logger.Infof("emitted document: %+v", d)
 	}
 }
 
-func emit(d *processor.Document) {
-	emitter.Emit(d)
+func emit(ctx context.Context, d *processor.Document) {
+	emitter.Emit(ctx, d)
 }

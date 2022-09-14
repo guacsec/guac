@@ -34,7 +34,6 @@ import (
 )
 
 var (
-	js                 nats.JetStreamContext
 	documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
 )
 
@@ -58,7 +57,7 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 
 func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 	id := uuid.NewV4().String()
-	sub, err := js.PullSubscribe(subjectNameDocCollected, "processor")
+	sub, err := js.PullSubscribe(emitter.SubjectNameDocCollected, "processor")
 	if err != nil {
 		logrus.Errorf("processor subscribe failed: %s", err)
 		return err
@@ -81,7 +80,7 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 			if err != nil {
 				logrus.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
 			}
-			docTree, err := Process(ctx, &doc)
+			docTree, err := Process(ctx, js, &doc)
 			logrus.Infof("[processor: %s] docTree Processed: %+v", id, docTree)
 			if err != nil {
 				return err
@@ -90,7 +89,7 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 	}
 }
 
-func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
+func Process(ctx context.Context, js nats.JetStreamContext, i *processor.Document) (processor.DocumentTree, error) {
 	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
@@ -99,7 +98,7 @@ func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree
 	if err != nil {
 		return nil, err
 	}
-	_, err = js.Publish(subjectNameDocProcessed, docTreeJSON)
+	_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
 	if err != nil {
 		return nil, err
 	}

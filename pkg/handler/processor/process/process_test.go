@@ -23,11 +23,15 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	"github.com/nats-io/nats.go"
 )
 
 func Test_SimpleDocProcessTest(t *testing.T) {
+	ctx := context.Background()
+	js := emitter.JetStreamInit(ctx, nats.DefaultURL, "credsfilepath")
 	testCases := []struct {
 		name      string
 		doc       processor.Document
@@ -510,7 +514,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			docTree, err := Process(context.TODO(), &tt.doc)
+			docTree, err := Process(ctx, js, &tt.doc)
 			if err != nil {
 				if tt.expectErr {
 					return

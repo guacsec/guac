@@ -16,21 +16,22 @@
 package emitter
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
 )
 
 // NATS stream
 const (
-	natsName                string = "GUAC"
-	streamName              string = "DOCUMENTS"
-	streamSubjects          string = "DOCUMENTS.*"
-	subjectNameDocCollected string = "DOCUMENTS.collected"
-	subjectNameDocProcessed string = "DOCUMENTS.processed"
+	NatsName                string = "GUAC"
+	StreamName              string = "DOCUMENTS"
+	StreamSubjects          string = "DOCUMENTS.*"
+	SubjectNameDocCollected string = "DOCUMENTS.collected"
+	SubjectNameDocProcessed string = "DOCUMENTS.processed"
 )
 
 var (
@@ -38,11 +39,12 @@ var (
 	js nats.JetStreamContext
 )
 
-func JetStreamInit(url string, creds string) nats.JetStreamContext {
+func JetStreamInit(ctx context.Context, url string, creds string) nats.JetStreamContext {
+	logger := logging.FromContext(ctx)
 	// Connect to NATS
 	var err error
 	// Connect Options.
-	opts := []nats.Option{nats.Name(natsName)}
+	opts := []nats.Option{nats.Name(NatsName)}
 
 	// TODO: secure connection via User creds file or NKey file
 
@@ -63,32 +65,33 @@ func JetStreamInit(url string, creds string) nats.JetStreamContext {
 	// Connect to NATS
 	nc, err = nats.Connect(url, opts...)
 	if err != nil {
-		panic("Unable to connect to nats server")
+		logger.Fatalf("Unable to connect to nats server: %v", err)
 	}
 	// Create JetStream Context
 	js, err = nc.JetStream()
 	if err != nil {
-		panic("Unable to connect to nats jetstream")
+		logger.Fatalf("Unable to connect to nats jetstream: %v", err)
 	}
-	err = createStream()
+	err = createStream(ctx)
 	if err != nil {
-		panic("failed to create stream")
+		logger.Fatalf("failed to create stream: %v", err)
 	}
 	return js
 
 }
 
-func createStream() error {
-	stream, err := js.StreamInfo(streamName)
+func createStream(ctx context.Context) error {
+	logger := logging.FromContext(ctx)
+	stream, err := js.StreamInfo(StreamName)
 	if err != nil && !strings.Contains(err.Error(), "nats: stream not found") {
 		return err
 	}
 	// stream not found, create it
 	if stream == nil {
-		logrus.Printf("creating stream %q and subjects %q", streamName, streamSubjects)
+		logger.Infof("creating stream %q and subjects %q", StreamName, StreamSubjects)
 		_, err = js.AddStream(&nats.StreamConfig{
-			Name:      streamName,
-			Subjects:  []string{streamSubjects},
+			Name:      StreamName,
+			Subjects:  []string{StreamSubjects},
 			Retention: nats.WorkQueuePolicy,
 		})
 		if err != nil {
@@ -98,16 +101,17 @@ func createStream() error {
 	return nil
 }
 
-func Emit(d *processor.Document) {
+func Emit(ctx context.Context, d *processor.Document) {
+	logger := logging.FromContext(ctx)
 	docByte, err := json.Marshal(d)
 	if err != nil {
-		logrus.Warnf("failed marshal of document: %s", err)
+		logger.Warnf("failed marshal of document: %s", err)
 	}
-	_, err = js.Publish(subjectNameDocCollected, docByte)
+	_, err = js.Publish(SubjectNameDocCollected, docByte)
 	if err != nil {
-		logrus.Error("failed to publish document on stream")
+		logger.Errorf("failed to publish document on stream: %v", err)
 	}
-	logrus.Infof("doc published: %+v", d)
+	logger.Infof("doc published: %+v", d)
 }
 
 func Close() {

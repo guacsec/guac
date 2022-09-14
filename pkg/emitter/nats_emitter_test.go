@@ -18,6 +18,7 @@
 package emitter
 
 import (
+	"context"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
@@ -61,6 +62,7 @@ var (
 )
 
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
-	JetStreamInit(nats.DefaultURL, "filepath")
-	Emit(&ite6SLSADoc)
+	ctx := context.Background()
+	JetStreamInit(ctx, nats.DefaultURL, "credsfilepath")
+	Emit(ctx, &ite6SLSADoc)
 }
