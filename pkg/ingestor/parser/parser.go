@@ -16,17 +16,10 @@
 package parser
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/ingestor/verifier"
-	"github.com/in-toto/in-toto-golang/in_toto"
-	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
 const (
@@ -71,7 +64,7 @@ func ParseDocumentTree(docTree processor.DocumentTree) ([]assembler.AssemblerInp
 	docTreeBuilder := newDocTreeBuilder()
 	err := docTreeBuilder.parse(docTree)
 	if err != nil {
-		return []assembler.AssemblerInput{}, err
+		return nil, err
 	}
 	for _, builder := range docTreeBuilder.graphBuilders {
 		assemblerinput := builder.createAssemblerInput(docTreeBuilder.identities)
@@ -97,8 +90,8 @@ func (b *graphBuilder) createEdges(foundIdentities []assembler.IdentityNode) []a
 		}
 	}
 	for _, s := range b.foundSubjectArtifacts {
-		for _, b := range b.foundBuilders {
-			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: s, BuilderNode: b})
+		for _, build := range b.foundBuilders {
+			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: s, BuilderNode: build})
 		}
 		for _, a := range b.foundAttestations {
 			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ArtifactNode: s})
@@ -155,132 +148,41 @@ func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
 
 func (b *graphBuilder) parserHelper(doc *processor.Document) error {
 	b.doc = doc
-	sub, err := getSubject(doc)
-	if err != nil {
-		return err
-	}
-	b.foundSubjectArtifacts = append(b.foundSubjectArtifacts, sub...)
-
-	dep, err := getDependency(doc)
-	if err != nil {
-		return err
-	}
-	b.foundDependencies = append(b.foundDependencies, dep...)
-
-	id, err := getIdentity(doc)
-	if err != nil {
-		return err
-	}
-	b.foundIdentities = append(b.foundIdentities, id...)
-
-	att, err := getAttestation(doc)
-	if err != nil {
-		return err
-	}
-	b.foundAttestations = append(b.foundAttestations, att...)
-
-	build, err := getBuilder(doc)
-	if err != nil {
-		return err
-	}
-	b.foundBuilders = append(b.foundBuilders, build...)
-
-	return nil
-}
-
-func getSubject(doc *processor.Document) ([]assembler.ArtifactNode, error) {
-	foundSubject := []assembler.ArtifactNode{}
-	switch doc.Type {
-	case processor.DocumentITE6SLSA:
-		statement, err := parseSlsaPredicate(doc.Blob)
-		if err != nil {
-			return nil, err
-		}
-		// append artifact node for the subjects
-		for _, sub := range statement.Subject {
-			for alg, ds := range sub.Digest {
-				foundSubject = append(foundSubject, assembler.ArtifactNode{
-					Name: sub.Name, Digest: alg + ":" + ds})
-			}
-		}
-		return foundSubject, nil
-	}
-	return nil, nil
-}
-
-func getDependency(doc *processor.Document) ([]assembler.ArtifactNode, error) {
-	foundDependency := []assembler.ArtifactNode{}
-	switch doc.Type {
-	case processor.DocumentITE6SLSA:
-		statement, err := parseSlsaPredicate(doc.Blob)
-		if err != nil {
-			return nil, err
-		}
-		// append dependency nodes for the materials
-		for _, mat := range statement.Predicate.Materials {
-			for alg, ds := range mat.Digest {
-				foundDependency = append(foundDependency, assembler.ArtifactNode{
-					Name: mat.URI, Digest: alg + ":" + ds})
-			}
-		}
-		return foundDependency, nil
-	}
-	return nil, nil
-}
-
-func getIdentity(doc *processor.Document) ([]assembler.IdentityNode, error) {
-	foundIdentity := []assembler.IdentityNode{}
 	switch doc.Type {
 	case processor.DocumentDSSE:
-		identities, err := verifier.VerifyIdentity(doc)
+		id, err := getIdentity(doc)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		for _, i := range identities {
-			pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(i.Key.Val)
-			if err != nil {
-				return nil, fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
-			}
-			foundIdentity = append(foundIdentity, assembler.IdentityNode{
-				ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes), KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme)})
-		}
-		return foundIdentity, nil
-	}
-	return nil, nil
-}
-
-func getAttestation(doc *processor.Document) ([]assembler.AttestationNode, error) {
-	foundAttestation := []assembler.AttestationNode{}
-	switch doc.Type {
-	case processor.DocumentITE6SLSA:
-		h := sha256.Sum256(doc.Blob)
-		foundAttestation = append(foundAttestation, assembler.AttestationNode{
-			FilePath: doc.SourceInformation.Source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:])})
-		return foundAttestation, nil
-	}
-	return nil, nil
-}
-
-func getBuilder(doc *processor.Document) ([]assembler.BuilderNode, error) {
-	foundBuilder := []assembler.BuilderNode{}
-	switch doc.Type {
+		b.foundIdentities = append(b.foundIdentities, id...)
 	case processor.DocumentITE6SLSA:
 		statement, err := parseSlsaPredicate(doc.Blob)
 		if err != nil {
-			return nil, err
+			return fmt.Errorf("failed to parse slsa predicate: %w", err)
 		}
-		// append builder node for builder
-		foundBuilder = append(foundBuilder, assembler.BuilderNode{
-			BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID})
-		return foundBuilder, nil
-	}
-	return nil, nil
-}
+		sub, err := getSubject(statement)
+		if err != nil {
+			return err
+		}
+		b.foundSubjectArtifacts = append(b.foundSubjectArtifacts, sub...)
 
-func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
-	predicate := in_toto.ProvenanceStatement{}
-	if err := json.Unmarshal(p, &predicate); err != nil {
-		return nil, err
+		dep, err := getDependency(statement)
+		if err != nil {
+			return err
+		}
+		b.foundDependencies = append(b.foundDependencies, dep...)
+
+		att, err := getAttestation(doc.Blob, doc.SourceInformation.Source)
+		if err != nil {
+			return err
+		}
+		b.foundAttestations = append(b.foundAttestations, att...)
+
+		build, err := getBuilder(statement)
+		if err != nil {
+			return err
+		}
+		b.foundBuilders = append(b.foundBuilders, build...)
 	}
-	return &predicate, nil
+	return nil
 }
