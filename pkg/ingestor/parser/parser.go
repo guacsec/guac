@@ -33,12 +33,25 @@ const (
 	algorithmSHA256 string = "sha256"
 )
 
+type docTreeBuilder struct {
+	identities    []assembler.IdentityNode
+	graphBuilders []*graphBuilder
+}
+
 type graphBuilder struct {
+	doc                   *processor.Document
 	foundIdentities       []assembler.IdentityNode
 	foundSubjectArtifacts []assembler.ArtifactNode
 	foundAttestations     []assembler.AttestationNode
 	foundBuilders         []assembler.BuilderNode
 	foundDependencies     []assembler.ArtifactNode
+}
+
+func newDocTreeBuilder() *docTreeBuilder {
+	return &docTreeBuilder{
+		identities:    []assembler.IdentityNode{},
+		graphBuilders: []*graphBuilder{},
+	}
 }
 
 func newGraphBuilder() *graphBuilder {
@@ -51,26 +64,34 @@ func newGraphBuilder() *graphBuilder {
 	}
 }
 
-// ParseDocumentTree
-func ParseDocumentTree(docTree processor.DocumentTree) (assembler.AssemblerInput, error) {
+// ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node
+func ParseDocumentTree(docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
 
-	builder := newGraphBuilder()
-	err := builder.parse(docTree)
+	assemblerinputs := []assembler.AssemblerInput{}
+	docTreeBuilder := newDocTreeBuilder()
+	err := docTreeBuilder.parse(docTree)
 	if err != nil {
-		return assembler.AssemblerInput{}, err
+		return []assembler.AssemblerInput{}, err
+	}
+	for _, builder := range docTreeBuilder.graphBuilders {
+		assemblerinput := builder.createAssemblerInput(docTreeBuilder.identities)
+		assemblerinputs = append(assemblerinputs, assemblerinput)
 	}
 
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: builder.createNodes(),
-		Edges: builder.createEdges(),
-	}
-
-	return assemblerinput, nil
+	return assemblerinputs, nil
 }
 
-func (b *graphBuilder) createEdges() []assembler.GuacEdge {
+func (b *graphBuilder) createAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
+	assemblerinput := assembler.AssemblerInput{
+		Nodes: b.createNodes(),
+		Edges: b.createEdges(foundIdentities),
+	}
+	return assemblerinput
+}
+
+func (b *graphBuilder) createEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
-	for _, i := range b.foundIdentities {
+	for _, i := range foundIdentities {
 		for _, a := range b.foundAttestations {
 			edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: a})
 		}
@@ -109,18 +130,22 @@ func (b *graphBuilder) createNodes() []assembler.GuacNode {
 	return nodes
 }
 
-func (b *graphBuilder) parse(root processor.DocumentTree) error {
-	err := b.parserHelper(root.Document)
+func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
+	builder := newGraphBuilder()
+	err := builder.parserHelper(root.Document)
 	if err != nil {
 		return err
 	}
+
+	t.graphBuilders = append(t.graphBuilders, builder)
+	t.identities = append(t.identities, builder.foundIdentities...)
 
 	if len(root.Children) == 0 {
 		return nil
 	}
 
 	for _, c := range root.Children {
-		err := b.parse(c)
+		err := t.parse(c)
 		if err != nil {
 			return err
 		}
@@ -129,7 +154,7 @@ func (b *graphBuilder) parse(root processor.DocumentTree) error {
 }
 
 func (b *graphBuilder) parserHelper(doc *processor.Document) error {
-
+	b.doc = doc
 	sub, err := getSubject(doc)
 	if err != nil {
 		return err

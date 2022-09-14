@@ -137,8 +137,11 @@ var (
 		BuilderId:   "https://github.com/Attestations/GitHubHostedActions@v1",
 	}
 
-	graphInput = assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{ident, art, att, mat1, mat2, build},
+	graphInput = []assembler.AssemblerInput{{
+		Nodes: []assembler.GuacNode{ident},
+		Edges: []assembler.GuacEdge{},
+	}, {
+		Nodes: []assembler.GuacNode{art, att, mat1, mat2, build},
 		Edges: []assembler.GuacEdge{
 			assembler.IdentityForEdge{
 				IdentityNode:    ident,
@@ -161,7 +164,7 @@ var (
 				Dependency:   mat2,
 			},
 		},
-	}
+	}}
 )
 
 func TestParseDocumentTree(t *testing.T) {
@@ -172,7 +175,7 @@ func TestParseDocumentTree(t *testing.T) {
 	tests := []struct {
 		name    string
 		tree    processor.DocumentTree
-		want    assembler.AssemblerInput
+		want    []assembler.AssemblerInput
 		wantErr bool
 	}{{
 		name:    "testing",
