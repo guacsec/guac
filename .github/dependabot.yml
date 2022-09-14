@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Maintain Golang dependencies.
+  - package-ecosystem: gomod
+    directory: "/"
+    schedule:
+      interval: weekly
+
+  # Maintain dependencies for GitHub Actions.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
