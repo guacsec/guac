@@ -1,0 +1,16 @@
+version = 1
+
+[merge]
+blacklist_title_regex = "^WIP:.*"
+blacklist_labels = ["do-not-merge"]
+delete_branch_on_merge = true
+method = "squash"
+prioritize_ready_to_merge = true
+require_automerge_label = false
+
+[update]
+always = true
+require_automerge_label = false
+
+[approve]
+auto_approve_usernames = ["dependabot"]
