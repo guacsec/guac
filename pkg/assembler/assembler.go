@@ -128,6 +128,14 @@ type Graph struct {
 	Edges []GuacEdge
 }
 
+// AppendGraph appends the graph g with additional graphs
+func (g *Graph) AppendGraph(gs ...Graph) {
+	for _, add := range gs {
+		g.Nodes = append(g.Nodes, add.Nodes...)
+		g.Edges = append(g.Edges, add.Edges...)
+	}
+}
+
 // TODO(mihaimaruseac): Write queries to write/read subgraphs from DB?
 
 // AssemblerInput represents the inputs to add to the graph
