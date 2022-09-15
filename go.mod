@@ -3,8 +3,8 @@ module github.com/guacsec/guac
 go 1.18
 
 require (
-	cloud.google.com/go/storage v1.25.0
-	github.com/fsouza/fake-gcs-server v1.39.0
+	cloud.google.com/go/storage v1.26.0
+	github.com/fsouza/fake-gcs-server v1.40.1
 	github.com/in-toto/in-toto-golang v0.3.4-0.20211211042327-af1f9fb822bf
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.4
 	github.com/secure-systems-lab/go-securesystemslib v0.4.0
@@ -49,6 +49,7 @@ require (
 )
 
 require (
+	github.com/alexbrainman/goissue34681 v0.0.0-20191006012335-3fc7a47baff5 // indirect
 	github.com/google/go-containerregistry v0.11.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/letsencrypt/boulder v0.0.0-20220723181115-27de4befb95e // indirect
