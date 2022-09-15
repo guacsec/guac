@@ -97,8 +97,7 @@ func (an AttestationNode) PropertyNames() []string {
 }
 
 func (an AttestationNode) IdentifiablePropertyNames() []string {
-	// An attestation can be uniquely identified by filename?
-	return []string{"filepath"}
+	return []string{"digest"}
 }
 
 // BuilderNode is a node that represents a builder for an artifact
