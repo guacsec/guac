@@ -48,7 +48,7 @@ func init() {
 	exampleCmd.PersistentFlags().StringVar(&flags.dbAddr, "db-addr", "neo4j://localhost:7687", "address to neo4j db")
 	exampleCmd.PersistentFlags().StringVar(&flags.creds, "creds", "", "credentials to access neo4j in 'user:pass' format")
 	exampleCmd.PersistentFlags().StringVar(&flags.realm, "realm", "neo4j", "realm to connecto graph db")
-	exampleCmd.MarkPersistentFlagRequired("creds")
+	_ = exampleCmd.MarkPersistentFlagRequired("creds")
 }
 
 var exampleCmd = &cobra.Command{
