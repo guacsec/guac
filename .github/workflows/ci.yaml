@@ -28,9 +28,9 @@ on:
       - reopened
 
 jobs:
-  build:
+  test-integration:
     runs-on: ubuntu-latest
-    name: CI using Neo4j
+    name: CI for integration tests
     services:
       neo4j:
         image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
@@ -51,10 +51,27 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Setup the project
         run: go mod download
-      - name: Run tests
-        run: make test
       - name: Run integration tests
         run: make integration-test
+
+  test-unit:
+    runs-on: ubuntu-latest
+    name: CI for unit tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: setup-go
+        uses: actions/setup-go@268d8c0ca0432bb2cf416faae41297df9d262d7f # tag=v3.2.1
+        with:
+          go-version: '1.18'
+      - uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Setup the project
+        run: go mod download
+      - name: Run tests
+        run: make test
 
   static-analysis:
     name: Static Analysis
