@@ -77,6 +77,10 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 		return err
 	}
 	for {
+		// if the context is canceled we want to break out of the loop
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
 		msgs, err := sub.Fetch(1)
 		if err != nil {
 			logrus.Printf("[ingestor: %s] error consuming, sleeping for a second: %v", id, err)
@@ -95,10 +99,10 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 				logrus.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
 			}
 
-			// err = ParseDocumentTree(processor.DocumentTree(&doc))
-			// if err != nil {
-			// 	return
-			// }
+			_, err = ParseDocumentTree(processor.DocumentTree(&doc))
+			if err != nil {
+				return err
+			}
 			logrus.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc))
 		}
 	}
@@ -117,7 +121,7 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 		assemblerinputs = append(assemblerinputs, assemblerinput)
 	}
 
-	return assemblerinputs, nil
+	return assemblerInputs, nil
 }
 
 func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree) error {

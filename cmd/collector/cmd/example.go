@@ -60,7 +60,7 @@ var exampleCmd = &cobra.Command{
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		js := emitter.JetStreamInit(ctx, nats.DefaultURL, "credsfilepath")
+		js := emitter.JetStreamInit(ctx, nats.DefaultURL, "", "", true)
 
 		// Assuming that publisher and consumer are different processes.
 		var wg sync.WaitGroup

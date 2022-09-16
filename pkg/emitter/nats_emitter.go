@@ -32,6 +32,7 @@ const (
 	StreamSubjects          string = "DOCUMENTS.*"
 	SubjectNameDocCollected string = "DOCUMENTS.collected"
 	SubjectNameDocProcessed string = "DOCUMENTS.processed"
+	SubjectNameDocParsed    string = "DOCUMENTS.parsed"
 )
 
 var (
@@ -39,7 +40,7 @@ var (
 	js nats.JetStreamContext
 )
 
-func JetStreamInit(ctx context.Context, url string, creds string) nats.JetStreamContext {
+func JetStreamInit(ctx context.Context, url string, creds string, nkeyFile string, insecure bool) nats.JetStreamContext {
 	logger := logging.FromContext(ctx)
 	// Connect to NATS
 	var err error
@@ -47,20 +48,21 @@ func JetStreamInit(ctx context.Context, url string, creds string) nats.JetStream
 	opts := []nats.Option{nats.Name(NatsName)}
 
 	// TODO: secure connection via User creds file or NKey file
+	if !insecure {
+		// Use UserCredentials
+		if creds != "" {
+			opts = append(opts, nats.UserCredentials(creds))
+		}
 
-	// // Use UserCredentials
-	// if creds != "" {
-	// 	opts = append(opts, nats.UserCredentials(creds))
-	// }
-
-	// // Use Nkey authentication.
-	// if *nkeyFile != "" {
-	// 	opt, err := nats.NkeyOptionFromSeed(*nkeyFile)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	opts = append(opts, opt)
-	// }
+		// Use Nkey authentication.
+		if nkeyFile != "" {
+			opt, err := nats.NkeyOptionFromSeed(nkeyFile)
+			if err != nil {
+				logger.Fatal(err)
+			}
+			opts = append(opts, opt)
+		}
+	}
 
 	// Connect to NATS
 	nc, err = nats.Connect(url, opts...)

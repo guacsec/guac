@@ -63,6 +63,10 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 		return err
 	}
 	for {
+		// if the context is canceled we want to break out of the loop
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
 		msgs, err := sub.Fetch(1)
 		if err != nil {
 			logrus.Printf("[processor: %s] error consuming, sleeping for a second: %v", id, err)

@@ -21,17 +21,40 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	"github.com/nats-io/nats-server/v2/server"
+	natsserver "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
 )
 
+const TEST_PORT = 4222
+
+func RunServerOnPort(port int) *server.Server {
+	opts := natsserver.DefaultTestOptions
+	opts.Port = port
+	return RunServerWithOptions(&opts)
+}
+
+func RunServerWithOptions(opts *server.Options) *server.Server {
+	return natsserver.RunServer(opts)
+}
+
 func Test_SimpleDocProcessTest(t *testing.T) {
+	s := RunServerOnPort(TEST_PORT)
+	err := s.EnableJetStream(&server.JetStreamConfig{})
+	if err != nil {
+		t.Fatalf("unexpected error initializing test NATS: %v", err)
+	}
+	time.Sleep(time.Second * 5)
+
 	ctx := context.Background()
-	js := emitter.JetStreamInit(ctx, nats.DefaultURL, "credsfilepath")
+	js := emitter.JetStreamInit(ctx, nats.DefaultURL, "", "", true)
+	defer s.Shutdown()
 	testCases := []struct {
 		name      string
 		doc       processor.Document
@@ -503,7 +526,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	}
 
 	// Register
-	err := RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
+	err = RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

@@ -13,16 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package emitter
 
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/nats-io/nats-server/v2/server"
+	natsserver "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
 )
 
@@ -61,8 +62,27 @@ var (
 	}
 )
 
+const TEST_PORT = 4222
+
+func RunServerOnPort(port int) *server.Server {
+	opts := natsserver.DefaultTestOptions
+	opts.Port = port
+	return RunServerWithOptions(&opts)
+}
+
+func RunServerWithOptions(opts *server.Options) *server.Server {
+	return natsserver.RunServer(opts)
+}
+
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
+	s := RunServerOnPort(TEST_PORT)
+	err := s.EnableJetStream(&server.JetStreamConfig{})
+	if err != nil {
+		t.Fatalf("unexpected error initializing test NATS: %v", err)
+	}
+	defer s.Shutdown()
+	time.Sleep(time.Second * 5)
 	ctx := context.Background()
-	JetStreamInit(ctx, nats.DefaultURL, "credsfilepath")
+	JetStreamInit(ctx, nats.DefaultURL, "", "", true)
 	Emit(ctx, &ite6SLSADoc)
 }
