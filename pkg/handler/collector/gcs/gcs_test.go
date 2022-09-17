@@ -43,7 +43,9 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 	client := server.Client()
 
 	var doc *processor.Document = &processor.Document{
-		Blob: []byte("inside the file"),
+		Blob:   []byte("inside the file"),
+		Type:   processor.DocumentUnknown,
+		Format: processor.FormatUnknown,
 		SourceInformation: processor.SourceInformation{
 			Collector: string(CollectorGCS),
 			Source:    getBucketPath(),
