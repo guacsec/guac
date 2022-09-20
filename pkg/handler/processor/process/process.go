@@ -21,7 +21,9 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/dsse"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	"github.com/guacsec/guac/pkg/handler/processor/ite6"
 )
 
 var (
@@ -29,7 +31,9 @@ var (
 )
 
 func init() {
-	// Registerprocessor.DocumentProcessor()
+	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Unknown)
+	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6SLSA)
+	_ = RegisterDocumentProcessor(&dsse.DSSEProcessor{}, processor.DocumentDSSE)
 }
 
 func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) error {
