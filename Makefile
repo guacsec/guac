@@ -37,6 +37,8 @@ ci: fmt lint test ## Run all the tests and code checks
 .PHONY: build
 build: ## Build a version
 	go build -ldflags ${LDFLAGS} -o bin/collector cmd/collector/main.go
+	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
+	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
 
 .PHONY: clean
 clean: ## Remove temporary files
