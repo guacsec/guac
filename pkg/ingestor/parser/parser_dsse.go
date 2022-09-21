@@ -25,6 +25,18 @@ import (
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
+func parseDsse(doc *processor.Document) (GraphBuilder, error) {
+	b := newGenericGraphBuilder()
+	b.doc = doc
+	id, err := getIdentity(doc)
+	if err != nil {
+		return nil, err
+	}
+	b.foundIdentities = append(b.foundIdentities, id...)
+
+	return b, nil
+}
+
 func getIdentity(doc *processor.Document) ([]assembler.IdentityNode, error) {
 	foundIdentity := []assembler.IdentityNode{}
 	identities, err := verifier.VerifyIdentity(doc)
