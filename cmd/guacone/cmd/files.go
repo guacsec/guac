@@ -165,7 +165,8 @@ func validateFlags(args []string) (options, error) {
 
 func getProcessor(ctx context.Context) (func(*processor.Document) (processor.DocumentTree, error), error) {
 	return func(d *processor.Document) (processor.DocumentTree, error) {
-		return process.Process(ctx, d)
+		// passing in nil for the jetstream as this is not being used for local testing
+		return process.Process(ctx, nil, d)
 	}, nil
 }
 func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {

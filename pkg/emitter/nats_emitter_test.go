@@ -18,7 +18,6 @@ package emitter
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -81,8 +80,14 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 		t.Fatalf("unexpected error initializing test NATS: %v", err)
 	}
 	defer s.Shutdown()
-	time.Sleep(time.Second * 5)
 	ctx := context.Background()
-	JetStreamInit(ctx, nats.DefaultURL, "", "", true)
-	Emit(ctx, &ite6SLSADoc)
+	config := NewJetStreamConfig(nats.DefaultURL, "", "")
+	_, err = JetStreamInit(ctx, config)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
+	err = Emit(ctx, &ite6SLSADoc)
+	if err != nil {
+		t.Fatalf("unexpected error on emit: %v", err)
+	}
 }

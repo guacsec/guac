@@ -53,7 +53,11 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	time.Sleep(time.Second * 5)
 
 	ctx := context.Background()
-	js := emitter.JetStreamInit(ctx, nats.DefaultURL, "", "", true)
+	config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
+	js, err := emitter.JetStreamInit(ctx, config)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
 	defer s.Shutdown()
 	testCases := []struct {
 		name      string

@@ -31,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +59,12 @@ var exampleCmd = &cobra.Command{
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		js := emitter.JetStreamInit(ctx, nats.DefaultURL, "", "", true)
+		config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
+		js, err := emitter.JetStreamInit(ctx, config)
+		if err != nil {
+			logger.Error(err)
+			os.Exit(1)
+		}
 
 		// Assuming that publisher and consumer are different processes.
 		var wg sync.WaitGroup
@@ -68,7 +72,11 @@ var exampleCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			exampleCollect(ctx)
+			err = exampleCollect(ctx)
+			if err != nil {
+				logger.Error(err)
+				os.Exit(1)
+			}
 		}()
 
 		wg.Add(1)
@@ -94,12 +102,12 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func exampleCollect(ctx context.Context) {
+func exampleCollect(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 	// Collect
 	docChan, errChan, numCollectors, err := collector.Collect(ctx)
 	if err != nil {
-		logrus.Error(err)
+		logger.Error(err)
 		os.Exit(1)
 	}
 
@@ -107,7 +115,10 @@ func exampleCollect(ctx context.Context) {
 	for collectorsDone < numCollectors {
 		select {
 		case d := <-docChan:
-			emit(ctx, d)
+			err := emit(ctx, d)
+			if err != nil {
+				return err
+			}
 		case err = <-errChan:
 			if err != nil {
 				logger.Errorf("collector ended with error: %v", err)
@@ -121,11 +132,19 @@ func exampleCollect(ctx context.Context) {
 	// Drain anything left in document channel
 	for len(docChan) > 0 {
 		d := <-docChan
-		emit(ctx, d)
+		err := emit(ctx, d)
+		if err != nil {
+			return err
+		}
 		logger.Infof("emitted document: %+v", d)
 	}
+	return nil
 }
 
-func emit(ctx context.Context, d *processor.Document) {
-	emitter.Emit(ctx, d)
+func emit(ctx context.Context, d *processor.Document) error {
+	err := emitter.Emit(ctx, d)
+	if err != nil {
+		return err
+	}
+	return nil
 }

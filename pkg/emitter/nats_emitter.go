@@ -18,7 +18,8 @@ package emitter
 import (
 	"context"
 	"encoding/json"
-	"strings"
+	"errors"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -32,7 +33,6 @@ const (
 	StreamSubjects          string = "DOCUMENTS.*"
 	SubjectNameDocCollected string = "DOCUMENTS.collected"
 	SubjectNameDocProcessed string = "DOCUMENTS.processed"
-	SubjectNameDocParsed    string = "DOCUMENTS.parsed"
 )
 
 var (
@@ -40,52 +40,68 @@ var (
 	js nats.JetStreamContext
 )
 
-func JetStreamInit(ctx context.Context, url string, creds string, nkeyFile string, insecure bool) nats.JetStreamContext {
+type jetStreamConfig struct {
+	// url of the NATS server to connect to
+	url string
+	// creds is the user credentials file for NATS authentication
+	// either user credentials or NKey needs to be specified
+	creds string
+	// nKeyFile is the alternative method of login for NATS
+	// either user credentials or NKey needs to be specified
+	nKeyFile string
+}
+
+func NewJetStreamConfig(url string, creds string, nKeyFile string) *jetStreamConfig {
+	return &jetStreamConfig{
+		url:      url,
+		creds:    creds,
+		nKeyFile: nKeyFile,
+	}
+}
+
+func JetStreamInit(ctx context.Context, config *jetStreamConfig) (nats.JetStreamContext, error) {
 	logger := logging.FromContext(ctx)
-	// Connect to NATS
 	var err error
 	// Connect Options.
 	opts := []nats.Option{nats.Name(NatsName)}
 
-	// TODO: secure connection via User creds file or NKey file
-	if !insecure {
-		// Use UserCredentials
-		if creds != "" {
-			opts = append(opts, nats.UserCredentials(creds))
-		}
+	// Use UserCredentials
+	if config.creds != "" {
+		opts = append(opts, nats.UserCredentials(config.creds))
+	}
 
-		// Use Nkey authentication.
-		if nkeyFile != "" {
-			opt, err := nats.NkeyOptionFromSeed(nkeyFile)
-			if err != nil {
-				logger.Fatal(err)
-			}
-			opts = append(opts, opt)
+	// Use Nkey authentication.
+	if config.nKeyFile != "" {
+		opt, err := nats.NkeyOptionFromSeed(config.nKeyFile)
+		if err != nil {
+			logger.Fatal(err)
 		}
+		opts = append(opts, opt)
 	}
 
 	// Connect to NATS
-	nc, err = nats.Connect(url, opts...)
+	nc, err = nats.Connect(config.url, opts...)
 	if err != nil {
-		logger.Fatalf("Unable to connect to nats server: %v", err)
+		return nil, fmt.Errorf("unable to connect to nats server: %w", err)
 	}
 	// Create JetStream Context
 	js, err = nc.JetStream()
 	if err != nil {
-		logger.Fatalf("Unable to connect to nats jetstream: %v", err)
+		return nil, fmt.Errorf("unable to connect to nats jetstream: %w", err)
 	}
-	err = createStream(ctx)
+	err = createStreamOrExists(ctx)
 	if err != nil {
-		logger.Fatalf("failed to create stream: %v", err)
+		return nil, fmt.Errorf("failed to create stream: %w", err)
 	}
-	return js
+	return js, nil
 
 }
 
-func createStream(ctx context.Context) error {
+func createStreamOrExists(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 	stream, err := js.StreamInfo(StreamName)
-	if err != nil && !strings.Contains(err.Error(), "nats: stream not found") {
+
+	if err != nil && !errors.Is(err, nats.ErrStreamNotFound) {
 		return err
 	}
 	// stream not found, create it
@@ -103,17 +119,18 @@ func createStream(ctx context.Context) error {
 	return nil
 }
 
-func Emit(ctx context.Context, d *processor.Document) {
+func Emit(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	docByte, err := json.Marshal(d)
 	if err != nil {
-		logger.Warnf("failed marshal of document: %s", err)
+		return fmt.Errorf("failed marshal of document: %w", err)
 	}
 	_, err = js.Publish(SubjectNameDocCollected, docByte)
 	if err != nil {
-		logger.Errorf("failed to publish document on stream: %v", err)
+		return fmt.Errorf("failed to publish document on stream: %w", err)
 	}
 	logger.Infof("doc published: %+v", d)
+	return nil
 }
 
 func Close() {

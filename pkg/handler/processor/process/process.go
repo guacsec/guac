@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/cyclonedx"
 	"github.com/guacsec/guac/pkg/handler/processor/dsse"
@@ -28,9 +29,9 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/ite6"
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -56,10 +57,11 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 }
 
 func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
+	logger := logging.FromContext(ctx)
 	id := uuid.NewV4().String()
 	sub, err := js.PullSubscribe(emitter.SubjectNameDocCollected, "processor")
 	if err != nil {
-		logrus.Errorf("processor subscribe failed: %s", err)
+		logger.Errorf("processor subscribe failed: %s", err)
 		return err
 	}
 	for {
@@ -69,23 +71,23 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 		}
 		msgs, err := sub.Fetch(1)
 		if err != nil {
-			logrus.Printf("[processor: %s] error consuming, sleeping for a second: %v", id, err)
+			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
 			time.Sleep(1 * time.Second)
 			continue
 		}
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logrus.Printf("[processor: %v] unable to Ack: %v", id, err)
+				logger.Errorf("[processor: %v] unable to Ack: %v", id, err)
 				return err
 			}
 			doc := processor.Document{}
 			err = json.Unmarshal(msgs[0].Data, &doc)
 			if err != nil {
-				logrus.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
 			}
 			docTree, err := Process(ctx, js, &doc)
-			logrus.Infof("[processor: %s] docTree Processed: %+v", id, docTree)
+			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree)
 			if err != nil {
 				return err
 			}
@@ -94,6 +96,7 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 }
 
 func Process(ctx context.Context, js nats.JetStreamContext, i *processor.Document) (processor.DocumentTree, error) {
+	logger := logging.FromContext(ctx)
 	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
@@ -102,9 +105,12 @@ func Process(ctx context.Context, js nats.JetStreamContext, i *processor.Documen
 	if err != nil {
 		return nil, err
 	}
-	_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
-	if err != nil {
-		return nil, err
+	if js != nil {
+		_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
+		if err != nil {
+			return nil, err
+		}
+		logger.Infof("doc processed: %+v", node)
 	}
 	return processor.DocumentTree(node), nil
 }

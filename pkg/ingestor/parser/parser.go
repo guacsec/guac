@@ -31,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	certify_vuln "github.com/guacsec/guac/pkg/ingestor/parser/vuln"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
@@ -70,6 +71,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
+	logger := logging.FromContext(ctx)
 	id := uuid.NewV4().String()
 	sub, err := js.PullSubscribe(emitter.SubjectNameDocProcessed, "ingestor")
 	if err != nil {
@@ -83,27 +85,27 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 		}
 		msgs, err := sub.Fetch(1)
 		if err != nil {
-			logrus.Printf("[ingestor: %s] error consuming, sleeping for a second: %v", id, err)
+			logger.Infof("[ingestor: %s] error consuming, backoff for a second: %v", id, err)
 			time.Sleep(1 * time.Second)
 			continue
 		}
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logrus.Printf("[ingestor: %s] unable to Ack: %v", id, err)
+				logger.Errorf("[ingestor: %s] unable to Ack: %v", id, err)
 				return err
 			}
 			doc := processor.DocumentNode{}
 			err = json.Unmarshal(msgs[0].Data, &doc)
 			if err != nil {
-				logrus.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+				logger.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
 			}
 
 			_, err = ParseDocumentTree(processor.DocumentTree(&doc))
 			if err != nil {
 				return err
 			}
-			logrus.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc))
+			logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc))
 		}
 	}
 }
