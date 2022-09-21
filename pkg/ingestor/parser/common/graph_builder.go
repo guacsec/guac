@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package parser
+package common
 
 import (
 	"github.com/guacsec/guac/pkg/assembler"
@@ -21,51 +21,51 @@ import (
 )
 
 type genericGraphBuilder struct {
-	doc                   *processor.Document
-	foundIdentities       []assembler.IdentityNode
-	foundSubjectArtifacts []assembler.ArtifactNode
-	foundAttestations     []assembler.AttestationNode
-	foundBuilders         []assembler.BuilderNode
-	foundDependencies     []assembler.ArtifactNode
+	Doc                   *processor.Document
+	FoundIdentities       []assembler.IdentityNode
+	FoundSubjectArtifacts []assembler.ArtifactNode
+	FoundAttestations     []assembler.AttestationNode
+	FoundBuilders         []assembler.BuilderNode
+	FoundDependencies     []assembler.ArtifactNode
 }
 
-func newGenericGraphBuilder() *genericGraphBuilder {
+func NewGenericGraphBuilder() *genericGraphBuilder {
 	return &genericGraphBuilder{
-		foundIdentities:       []assembler.IdentityNode{},
-		foundSubjectArtifacts: []assembler.ArtifactNode{},
-		foundAttestations:     []assembler.AttestationNode{},
-		foundBuilders:         []assembler.BuilderNode{},
-		foundDependencies:     []assembler.ArtifactNode{},
+		FoundIdentities:       []assembler.IdentityNode{},
+		FoundSubjectArtifacts: []assembler.ArtifactNode{},
+		FoundAttestations:     []assembler.AttestationNode{},
+		FoundBuilders:         []assembler.BuilderNode{},
+		FoundDependencies:     []assembler.ArtifactNode{},
 	}
 }
 
-func (b *genericGraphBuilder) CreateAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
+func (b *genericGraphBuilder) CreateAssemblerInput(FoundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: b.createNodes(),
-		Edges: b.createEdges(foundIdentities),
+		Edges: b.createEdges(FoundIdentities),
 	}
 	return assemblerinput
 }
 
 func (b *genericGraphBuilder) GetIdentities() []assembler.IdentityNode {
-	return b.foundIdentities
+	return b.FoundIdentities
 }
 
-func (b *genericGraphBuilder) createEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (b *genericGraphBuilder) createEdges(FoundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
-	for _, i := range foundIdentities {
-		for _, a := range b.foundAttestations {
+	for _, i := range FoundIdentities {
+		for _, a := range b.FoundAttestations {
 			edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: a})
 		}
 	}
-	for _, s := range b.foundSubjectArtifacts {
-		for _, build := range b.foundBuilders {
+	for _, s := range b.FoundSubjectArtifacts {
+		for _, build := range b.FoundBuilders {
 			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: s, BuilderNode: build})
 		}
-		for _, a := range b.foundAttestations {
+		for _, a := range b.FoundAttestations {
 			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ArtifactNode: s})
 		}
-		for _, d := range b.foundDependencies {
+		for _, d := range b.FoundDependencies {
 			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: s, Dependency: d})
 		}
 	}
@@ -74,19 +74,19 @@ func (b *genericGraphBuilder) createEdges(foundIdentities []assembler.IdentityNo
 
 func (b *genericGraphBuilder) createNodes() []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
-	for _, i := range b.foundIdentities {
+	for _, i := range b.FoundIdentities {
 		nodes = append(nodes, i)
 	}
-	for _, s := range b.foundSubjectArtifacts {
+	for _, s := range b.FoundSubjectArtifacts {
 		nodes = append(nodes, s)
 	}
-	for _, a := range b.foundAttestations {
+	for _, a := range b.FoundAttestations {
 		nodes = append(nodes, a)
 	}
-	for _, d := range b.foundDependencies {
+	for _, d := range b.FoundDependencies {
 		nodes = append(nodes, d)
 	}
-	for _, b := range b.foundBuilders {
+	for _, b := range b.FoundBuilders {
 		nodes = append(nodes, b)
 	}
 	return nodes

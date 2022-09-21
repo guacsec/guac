@@ -20,26 +20,20 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/dsse"
+	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 )
-
-const (
-	algorithmSHA256 string = "sha256"
-)
-
-type GraphBuilder interface {
-	CreateAssemblerInput([]assembler.IdentityNode) assembler.AssemblerInput
-	GetIdentities() []assembler.IdentityNode
-}
 
 type docTreeBuilder struct {
 	identities    []assembler.IdentityNode
-	graphBuilders []GraphBuilder
+	graphBuilders []common.GraphBuilder
 }
 
 func newDocTreeBuilder() *docTreeBuilder {
 	return &docTreeBuilder{
 		identities:    []assembler.IdentityNode{},
-		graphBuilders: []GraphBuilder{},
+		graphBuilders: []common.GraphBuilder{},
 	}
 }
 
@@ -82,12 +76,12 @@ func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
 	return nil
 }
 
-func parseHelper(doc *processor.Document) (GraphBuilder, error) {
+func parseHelper(doc *processor.Document) (common.GraphBuilder, error) {
 	switch doc.Type {
 	case processor.DocumentDSSE:
-		return parseDsse(doc)
+		return dsse.ParseDsse(doc)
 	case processor.DocumentITE6SLSA:
-		return parseITE6Slsa(doc)
+		return slsa.ParseITE6Slsa(doc)
 	}
 	return nil, fmt.Errorf("no parser found for document type: %v", doc.Type)
 }

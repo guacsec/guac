@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package parser
+package dsse
 
 import (
 	"encoding/base64"
@@ -21,24 +21,25 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
-func parseDsse(doc *processor.Document) (GraphBuilder, error) {
-	b := newGenericGraphBuilder()
-	b.doc = doc
+func ParseDsse(doc *processor.Document) (common.GraphBuilder, error) {
+	b := common.NewGenericGraphBuilder()
+	b.Doc = doc
 	id, err := getIdentity(doc)
 	if err != nil {
 		return nil, err
 	}
-	b.foundIdentities = append(b.foundIdentities, id...)
+	b.FoundIdentities = append(b.FoundIdentities, id...)
 
 	return b, nil
 }
 
 func getIdentity(doc *processor.Document) ([]assembler.IdentityNode, error) {
-	foundIdentity := []assembler.IdentityNode{}
+	FoundIdentity := []assembler.IdentityNode{}
 	identities, err := verifier.VerifyIdentity(doc)
 	if err != nil {
 		return nil, err
@@ -48,8 +49,8 @@ func getIdentity(doc *processor.Document) ([]assembler.IdentityNode, error) {
 		if err != nil {
 			return nil, fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
 		}
-		foundIdentity = append(foundIdentity, assembler.IdentityNode{
+		FoundIdentity = append(FoundIdentity, assembler.IdentityNode{
 			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes), KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme)})
 	}
-	return foundIdentity, nil
+	return FoundIdentity, nil
 }
