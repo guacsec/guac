@@ -20,40 +20,20 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
-)
-
-const (
-	algorithmSHA256 string = "sha256"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/dsse"
+	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 )
 
 type docTreeBuilder struct {
 	identities    []assembler.IdentityNode
-	graphBuilders []*graphBuilder
-}
-
-type graphBuilder struct {
-	doc                   *processor.Document
-	foundIdentities       []assembler.IdentityNode
-	foundSubjectArtifacts []assembler.ArtifactNode
-	foundAttestations     []assembler.AttestationNode
-	foundBuilders         []assembler.BuilderNode
-	foundDependencies     []assembler.ArtifactNode
+	graphBuilders []common.GraphBuilder
 }
 
 func newDocTreeBuilder() *docTreeBuilder {
 	return &docTreeBuilder{
 		identities:    []assembler.IdentityNode{},
-		graphBuilders: []*graphBuilder{},
-	}
-}
-
-func newGraphBuilder() *graphBuilder {
-	return &graphBuilder{
-		foundIdentities:       []assembler.IdentityNode{},
-		foundSubjectArtifacts: []assembler.ArtifactNode{},
-		foundAttestations:     []assembler.AttestationNode{},
-		foundBuilders:         []assembler.BuilderNode{},
-		foundDependencies:     []assembler.ArtifactNode{},
+		graphBuilders: []common.GraphBuilder{},
 	}
 }
 
@@ -67,71 +47,21 @@ func ParseDocumentTree(docTree processor.DocumentTree) ([]assembler.AssemblerInp
 		return nil, err
 	}
 	for _, builder := range docTreeBuilder.graphBuilders {
-		assemblerinput := builder.createAssemblerInput(docTreeBuilder.identities)
+		assemblerinput := builder.CreateAssemblerInput(docTreeBuilder.identities)
 		assemblerinputs = append(assemblerinputs, assemblerinput)
 	}
 
 	return assemblerinputs, nil
 }
 
-func (b *graphBuilder) createAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: b.createNodes(),
-		Edges: b.createEdges(foundIdentities),
-	}
-	return assemblerinput
-}
-
-func (b *graphBuilder) createEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
-	edges := []assembler.GuacEdge{}
-	for _, i := range foundIdentities {
-		for _, a := range b.foundAttestations {
-			edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: a})
-		}
-	}
-	for _, s := range b.foundSubjectArtifacts {
-		for _, build := range b.foundBuilders {
-			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: s, BuilderNode: build})
-		}
-		for _, a := range b.foundAttestations {
-			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ArtifactNode: s})
-		}
-		for _, d := range b.foundDependencies {
-			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: s, Dependency: d})
-		}
-	}
-	return edges
-}
-
-func (b *graphBuilder) createNodes() []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	for _, i := range b.foundIdentities {
-		nodes = append(nodes, i)
-	}
-	for _, s := range b.foundSubjectArtifacts {
-		nodes = append(nodes, s)
-	}
-	for _, a := range b.foundAttestations {
-		nodes = append(nodes, a)
-	}
-	for _, d := range b.foundDependencies {
-		nodes = append(nodes, d)
-	}
-	for _, b := range b.foundBuilders {
-		nodes = append(nodes, b)
-	}
-	return nodes
-}
-
 func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
-	builder := newGraphBuilder()
-	err := builder.parserHelper(root.Document)
+	builder, err := parseHelper(root.Document)
 	if err != nil {
 		return err
 	}
 
 	t.graphBuilders = append(t.graphBuilders, builder)
-	t.identities = append(t.identities, builder.foundIdentities...)
+	t.identities = append(t.identities, builder.GetIdentities()...)
 
 	if len(root.Children) == 0 {
 		return nil
@@ -146,43 +76,12 @@ func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
 	return nil
 }
 
-func (b *graphBuilder) parserHelper(doc *processor.Document) error {
-	b.doc = doc
+func parseHelper(doc *processor.Document) (common.GraphBuilder, error) {
 	switch doc.Type {
 	case processor.DocumentDSSE:
-		id, err := getIdentity(doc)
-		if err != nil {
-			return err
-		}
-		b.foundIdentities = append(b.foundIdentities, id...)
+		return dsse.ParseDsse(doc)
 	case processor.DocumentITE6SLSA:
-		statement, err := parseSlsaPredicate(doc.Blob)
-		if err != nil {
-			return fmt.Errorf("failed to parse slsa predicate: %w", err)
-		}
-		sub, err := getSubject(statement)
-		if err != nil {
-			return err
-		}
-		b.foundSubjectArtifacts = append(b.foundSubjectArtifacts, sub...)
-
-		dep, err := getDependency(statement)
-		if err != nil {
-			return err
-		}
-		b.foundDependencies = append(b.foundDependencies, dep...)
-
-		att, err := getAttestation(doc.Blob, doc.SourceInformation.Source)
-		if err != nil {
-			return err
-		}
-		b.foundAttestations = append(b.foundAttestations, att...)
-
-		build, err := getBuilder(statement)
-		if err != nil {
-			return err
-		}
-		b.foundBuilders = append(b.foundBuilders, build...)
+		return slsa.ParseITE6Slsa(doc)
 	}
-	return nil
+	return nil, fmt.Errorf("no parser found for document type: %v", doc.Type)
 }
