@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/guacsec/guac/cmd/collector/cmd/mockcollector"
 	"github.com/guacsec/guac/pkg/handler/collector"
@@ -44,36 +45,24 @@ var exampleCmd = &cobra.Command{
 		}
 
 		// Collect
-		docChan, errChan, numCollectors, err := collector.Collect(ctx)
-		if err != nil {
-			logger.Fatal(err)
-		}
-
-		collectorsDone := 0
-		for collectorsDone < numCollectors {
-			select {
-			case d := <-docChan:
-				emit(d)
-				logger.Infof("emitted document: %+v", d)
-			case err = <-errChan:
-				if err != nil {
-					logger.Errorf("collector ended with error: %v", err)
-				} else {
-					logger.Info("collector ended gracefully")
-				}
-				collectorsDone += 1
+		errHandler := func(err error) bool {
+			if err == nil {
+				logger.Info("collector ended gracefully")
+				return true
 			}
+			logger.Errorf("collector ended with error: %v", err)
+			return false
 		}
-
-		// Drain anything left in document channel
-		for len(docChan) > 0 {
-			d := <-docChan
-			emit(d)
-			logger.Infof("emitted document: %+v", d)
+		err := collector.Collect(ctx, emit, errHandler)
+		if err != nil {
+			os.Exit(1)
 		}
 	},
 }
 
-func emit(d *processor.Document) {
-	// does nothing right now
+func emit(d *processor.Document) error {
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
+	logger.Infof("emitted document: %+v", d)
+	return nil
 }

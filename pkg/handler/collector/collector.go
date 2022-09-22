@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 const (
@@ -38,6 +39,13 @@ type Collector interface {
 	Type() string
 }
 
+// Emitter processes a document
+type Emitter func(*processor.Document) error
+
+// ErrHandler processes an error and returns a boolean representing if
+// the error was able to be gracefully handled
+type ErrHandler func(error) bool
+
 var (
 	documentCollectors = map[string]Collector{}
 )
@@ -53,16 +61,47 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 
 // Collect takes all the collectors and starts collecting artifacts
 // after Collect is called, no calls to RegisterDocumentCollector should happen.
-func Collect(ctx context.Context) (<-chan *processor.Document, <-chan error, int, error) {
+func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, len(documentCollectors))
+	// logger
+	logger := logging.FromContext(ctx)
+
 	for _, collector := range documentCollectors {
 		c := collector
 		go func() {
 			errChan <- c.RetrieveArtifacts(ctx, docChan)
 		}()
 	}
-	return docChan, errChan, len(documentCollectors), nil
+
+	numCollectors := len(documentCollectors)
+	collectorsDone := 0
+	for collectorsDone < numCollectors {
+		select {
+		case d := <-docChan:
+			if err := emitter(d); err != nil {
+				if !handleErr(err) {
+					return err
+				}
+			}
+			logger.Infof("emitted document: %+v", d)
+		case err := <-errChan:
+			if !handleErr(err) {
+				return err
+			}
+			collectorsDone += 1
+		}
+	}
+	for len(docChan) > 0 {
+		d := <-docChan
+		if err := emitter(d); err != nil {
+			if !handleErr(err) {
+				return err
+			}
+		}
+		logger.Infof("emitted document: %+v", d)
+	}
+	return nil
 }

@@ -95,53 +95,35 @@ var exampleCmd = &cobra.Command{
 		}
 
 		// Set emit function to go through the entire pipeline
-		emit := func(d *processor.Document) {
+		emit := func(d *processor.Document) error {
 			docTree, err := processorFunc(d)
 			if err != nil {
-				logger.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
-				return
+				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
 			}
 
 			graphs, err := ingestorFunc(docTree)
 			if err != nil {
-				logger.Errorf("unable to ingest doc tree: %v", err)
-				return
+				return fmt.Errorf("unable to ingest doc tree: %v", err)
 			}
 
 			err = assemblerFunc(graphs)
 			if err != nil {
-				logger.Errorf("unable to assemble graphs: %v", err)
-				return
+				return fmt.Errorf("unable to assemble graphs: %v", err)
 			}
+			return nil
 		}
 
 		// Collect
-		docChan, errChan, numCollectors, err := collector.Collect(ctx)
-		if err != nil {
-			logger.Fatal(err)
-		}
-
-		collectorsDone := 0
-		for collectorsDone < numCollectors {
-			select {
-			case d := <-docChan:
-				logger.Infof("emitting doc: %v, fomat: %v, document: %v", string(d.Blob[:10]), d.Format, d.Type)
-				emit(d)
-			case err = <-errChan:
-				if err != nil {
-					logger.Errorf("collector ended with error: %v", err)
-				} else {
-					logger.Info("collector ended gracefully")
-				}
-				collectorsDone += 1
+		errHandler := func(err error) bool {
+			if err == nil {
+				logger.Info("collector ended gracefully")
+				return true
 			}
+			logger.Errorf("collector ended with error: %v", err)
+			return false
 		}
-
-		// Drain anything left in document channel
-		for len(docChan) > 0 {
-			d := <-docChan
-			logger.Infof("emitting doc: %v, fomat: %v, document: %v", string(d.Blob[:10]), d.Format, d.Type)
-			emit(d)
+		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+			logger.Fatal(err)
 		}
 	},
 }
