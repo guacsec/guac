@@ -55,6 +55,7 @@ const (
 	DocumentITE6SLSA    DocumentType = "SLSA"
 	DocumentITE6Unknown DocumentType = "ITE6"
 	DocumentDSSE        DocumentType = "DSSE"
+	DocumentSPDX        DocumentType = "SPDX"
 	DocumentUnknown     DocumentType = "UNKNOWN"
 )
 
