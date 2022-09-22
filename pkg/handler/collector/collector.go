@@ -39,6 +39,13 @@ type Collector interface {
 	Type() string
 }
 
+// Emitter processes a document
+type Emitter func(*processor.Document) error
+
+// ErrHandler processes an error and returns a boolean representing if
+// the error was able to be gracefully handled
+type ErrHandler func(error) bool
+
 var (
 	documentCollectors = map[string]Collector{}
 )
@@ -84,6 +91,11 @@ func Collect(ctx context.Context, emitter processor.Emitter, handleErr processor
 			}
 			collectorsDone += 1
 		}
+	}
+	for len(docChan) > 0 {
+		d := <-docChan
+		emitter(d)
+		logrus.Infof("emitted document: %+v", d)
 	}
 	return nil
 }

@@ -74,10 +74,3 @@ type SourceInformation struct {
 	// Source describes the source which the collector got this information
 	Source string
 }
-
-// Emitter processes a document
-type Emitter func(*Document) error
-
-// ErrHandler processes an error and returns a boolean representing if
-// the error was able to be gracefully handled
-type ErrHandler func(error) bool
