@@ -67,7 +67,7 @@ type FormatType string
 // Format* is the enumerables of FormatType
 const (
 	FormatJSON      FormatType = "JSON"
-	FormatJSONLines FormatType = "JSONLINES"
+	FormatJSONLines FormatType = "JSON_LINES"
 	FormatUnknown   FormatType = "UNKNOWN"
 )
 
