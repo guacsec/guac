@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/sirupsen/logrus"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 const (
@@ -61,11 +61,13 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 
 // Collect takes all the collectors and starts collecting artifacts
 // after Collect is called, no calls to RegisterDocumentCollector should happen.
-func Collect(ctx context.Context, emitter processor.Emitter, handleErr processor.ErrHandler) error {
+func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, len(documentCollectors))
+	// logger
+	logger := logging.FromContext(ctx)
 
 	for _, collector := range documentCollectors {
 		c := collector
@@ -84,7 +86,7 @@ func Collect(ctx context.Context, emitter processor.Emitter, handleErr processor
 					return err
 				}
 			}
-			logrus.Infof("emitted document: %+v", d)
+			logger.Infof("emitted document: %+v", d)
 		case err := <-errChan:
 			if !handleErr(err) {
 				return err
@@ -95,7 +97,7 @@ func Collect(ctx context.Context, emitter processor.Emitter, handleErr processor
 	for len(docChan) > 0 {
 		d := <-docChan
 		emitter(d)
-		logrus.Infof("emitted document: %+v", d)
+		logger.Infof("emitted document: %+v", d)
 	}
 	return nil
 }

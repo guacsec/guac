@@ -24,7 +24,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -62,6 +61,8 @@ var exampleCmd = &cobra.Command{
 }
 
 func emit(d *processor.Document) error {
-	logrus.Infof("emitted document: %+v", d)
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
+	logger.Infof("emitted document: %+v", d)
 	return nil
 }
