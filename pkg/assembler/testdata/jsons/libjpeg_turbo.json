@@ -1,0 +1,36 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "libjpeg_turbo",
+      "digest": {
+        "sha256": "64d14bbd095598c41f39e0b9fb019f1cabc2f96c5161ae87ee99024bc0cfd41d"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "nasm",
+      "digest": {
+        "sha256": "1d8b6419aa5b1de898c0bfee87ac9fb529375dd6c4d80bf501df62e77db7e3ba"
+      }
+    }
+  ]
+}

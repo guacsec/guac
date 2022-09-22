@@ -1,0 +1,30 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "kissfft",
+      "digest": {
+        "sha256": "f1f878482ca408d2a849b246cbc332c556523081e937da4eb8f30a39812f2fc6"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    }
+  ]
+}

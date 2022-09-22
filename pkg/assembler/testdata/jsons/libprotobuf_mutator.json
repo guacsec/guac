@@ -1,0 +1,36 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "libprotobuf_mutator",
+      "digest": {
+        "sha256": "8876d0ff6db1d67b3e678b28f1144de1bf13fb872c2f4fb533e87fdec4472981"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "protobuf",
+      "digest": {
+        "sha256": "3a38a479ca737fb6b69ac804b5d8f95298ddeaf9ff71f0a3f1ede5fe6f8a29e5"
+      }
+    }
+  ]
+}

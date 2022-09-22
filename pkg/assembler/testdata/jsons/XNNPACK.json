@@ -1,0 +1,66 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "XNNPACK",
+      "digest": {
+        "sha256": "c954a0988eda44d3bc64da5ac672d3f9cc06b235af6d041b47e4aa6550f58db2"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "FP16",
+      "digest": {
+        "sha256": "42d71d1daebba13d4c49c66c0b14c86b16d68989457279b860a46f8d93cb56fd"
+      }
+    },
+    {
+      "uri": "FXdiv",
+      "digest": {
+        "sha256": "7c7e2774298bea8434c90328240558a189a89a4e7e69915d6bb8322aa3f1ae44"
+      }
+    },
+    {
+      "uri": "absl",
+      "digest": {
+        "sha256": "3104f47b7848edcd5eebd72637a748b31f82938bb6c8ec0d3265567bc90d2a19"
+      }
+    },
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "cpuinfo",
+      "digest": {
+        "sha256": "7defb3fe0d33e84ccd0411fc29443c076a1307393f7d2460d2ad5ed38cecbc00"
+      }
+    },
+    {
+      "uri": "googletest",
+      "digest": {
+        "sha256": "ce5419b3fa3e427b6ccab3a6a6acb939f8e92b6992f79e9a3cf4462d00a223bc"
+      }
+    },
+    {
+      "uri": "pthreadpool",
+      "digest": {
+        "sha256": "e705b209888c170d91db3c8787c3d9340ec1b5007761b0b5e6398799cb48574b"
+      }
+    }
+  ]
+}

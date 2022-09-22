@@ -1,0 +1,42 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "crc32c",
+      "digest": {
+        "sha256": "4c49427de6499986ddf68e1502f085a060bfc5ef862994532f4484808301d569"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "absl",
+      "digest": {
+        "sha256": "3104f47b7848edcd5eebd72637a748b31f82938bb6c8ec0d3265567bc90d2a19"
+      }
+    },
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "googletest",
+      "digest": {
+        "sha256": "ce5419b3fa3e427b6ccab3a6a6acb939f8e92b6992f79e9a3cf4462d00a223bc"
+      }
+    }
+  ]
+}

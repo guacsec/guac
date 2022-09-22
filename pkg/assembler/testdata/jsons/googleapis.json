@@ -1,0 +1,42 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "googleapis",
+      "digest": {
+        "sha256": "5e25812b64b920c1f19c7d9e95e219bc69468f3d10059ded9d643c3c84b7bb8d"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "protobuf",
+      "digest": {
+        "sha256": "3a38a479ca737fb6b69ac804b5d8f95298ddeaf9ff71f0a3f1ede5fe6f8a29e5"
+      }
+    },
+    {
+      "uri": "zlib",
+      "digest": {
+        "sha256": "0ea55c28f8014d8886b6248fe3da5d588f55c0823847a6b4579f1131b051b5e2"
+      }
+    }
+  ]
+}

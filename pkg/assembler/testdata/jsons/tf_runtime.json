@@ -1,0 +1,60 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "tf_runtime",
+      "digest": {
+        "sha256": "3a1b85f9fd1c1afa7c22dec2342254b0f5852684765dd93aa159545c13961f51"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "absl",
+      "digest": {
+        "sha256": "3104f47b7848edcd5eebd72637a748b31f82938bb6c8ec0d3265567bc90d2a19"
+      }
+    },
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "googletest",
+      "digest": {
+        "sha256": "ce5419b3fa3e427b6ccab3a6a6acb939f8e92b6992f79e9a3cf4462d00a223bc"
+      }
+    },
+    {
+      "uri": "llvm",
+      "digest": {
+        "sha256": "ef5a927f5a4ae8bdfa7d187079fa7b2aabc8d72ce219c564f78c9498ff59d2f9"
+      }
+    },
+    {
+      "uri": "llvm_terminfo",
+      "digest": {
+        "sha256": "169a6b455179911102ae9eaf2c44a30b712ad9a7b16f7b3374c25d8727692095"
+      }
+    },
+    {
+      "uri": "llvm_zlib",
+      "digest": {
+        "sha256": "b3c638926f0202e3650a42094f84f48bfbda922ff71d05ed8c4da479cc0a3541"
+      }
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "tensorflow_gcp_tools",
+      "digest": {
+        "sha256": "f6ba8b07f8dac81fc7bb86a2a4e9d626ebc9fbde3b015ec743c425431bdb9e03"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "absl",
+      "digest": {
+        "sha256": "3104f47b7848edcd5eebd72637a748b31f82938bb6c8ec0d3265567bc90d2a19"
+      }
+    },
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "boringssl",
+      "digest": {
+        "sha256": "765f9cec0a7ae2b5580913784e12bdba32e8adcca5bd499bafd3a4bcb33c3284"
+      }
+    },
+    {
+      "uri": "cares",
+      "digest": {
+        "sha256": "fa9b6fbe9997c24f7a461d2c4a201039c1c4217fd6e66392a8e14ba5fdeb8448"
+      }
+    },
+    {
+      "uri": "curl",
+      "digest": {
+        "sha256": "427e4b79b1f0fc90306cbe064b1297b21dc6835bfa656d3bf46bc156e3f24bb0"
+      }
+    },
+    {
+      "uri": "double_conversion",
+      "digest": {
+        "sha256": "fbf433ca1cd4a5e928322979b884daab4057fb4f40953fe8d05338b5dc5af8d6"
+      }
+    },
+    {
+      "uri": "eigen",
+      "digest": {
+        "sha256": "b5ddc345b514e1747327d9e796186e9c7063ed72466825dae9090f20f085cc40"
+      }
+    },
+    {
+      "uri": "farmhash",
+      "digest": {
+        "sha256": "ed25a6728a8884240b10cca6e639a3affebe26e27cc0741249b8cfb083d6cecf"
+      }
+    },
+    {
+      "uri": "fft2d",
+      "digest": {
+        "sha256": "c2b59aee31bf34a872daa66477ed0237a4d2077c7bd0da973f8ddbb7c00bf185"
+      }
+    },
+    {
+      "uri": "gif",
+      "digest": {
+        "sha256": "3b34c6906f7eece822ea010af5ad778c45f86cfbed167b84e33b9f3f293f98b8"
+      }
+    },
+    {
+      "uri": "googleapis",
+      "digest": {
+        "sha256": "5e25812b64b920c1f19c7d9e95e219bc69468f3d10059ded9d643c3c84b7bb8d"
+      }
+    },
+    {
+      "uri": "googletest",
+      "digest": {
+        "sha256": "ce5419b3fa3e427b6ccab3a6a6acb939f8e92b6992f79e9a3cf4462d00a223bc"
+      }
+    },
+    {
+      "uri": "grpc",
+      "digest": {
+        "sha256": "b389db1475dc52e4ab270c6a1ed9210a60bcffb35bd7795303b0f0ed2a9c2a31"
+      }
+    },
+    {
+      "uri": "highwayhash",
+      "digest": {
+        "sha256": "929851b1651ce1a0b99e32b0b2b95c3870fa5a5bed16bb4497bee63e3a698fae"
+      }
+    },
+    {
+      "uri": "hwloc",
+      "digest": {
+        "sha256": "a6dc76e20cce5ff154bfffc60e63177b5363d8e2f4dbc3b59e1d355259b0fb94"
+      }
+    },
+    {
+      "uri": "jsoncpp",
+      "digest": {
+        "sha256": "866ae556fee6070665fdb85dce1a8e656e1a864c3306fa9a7f07eff93112bb08"
+      }
+    },
+    {
+      "uri": "libjpeg_turbo",
+      "digest": {
+        "sha256": "64d14bbd095598c41f39e0b9fb019f1cabc2f96c5161ae87ee99024bc0cfd41d"
+      }
+    },
+    {
+      "uri": "libxsmm",
+      "digest": {
+        "sha256": "a70ed0fd43510403d8bc562782f5d1dcfd5e0cee1ccac1a94e1d20b5d99c7dd2"
+      }
+    },
+    {
+      "uri": "llvm",
+      "digest": {
+        "sha256": "ef5a927f5a4ae8bdfa7d187079fa7b2aabc8d72ce219c564f78c9498ff59d2f9"
+      }
+    },
+    {
+      "uri": "llvm_openmp",
+      "digest": {
+        "sha256": "caa2292a498a43f748cdec245c18e8961d6416668dab377b13e1be4e1e563039"
+      }
+    },
+    {
+      "uri": "llvm_terminfo",
+      "digest": {
+        "sha256": "169a6b455179911102ae9eaf2c44a30b712ad9a7b16f7b3374c25d8727692095"
+      }
+    },
+    {
+      "uri": "llvm_zlib",
+      "digest": {
+        "sha256": "b3c638926f0202e3650a42094f84f48bfbda922ff71d05ed8c4da479cc0a3541"
+      }
+    },
+    {
+      "uri": "nasm",
+      "digest": {
+        "sha256": "1d8b6419aa5b1de898c0bfee87ac9fb529375dd6c4d80bf501df62e77db7e3ba"
+      }
+    },
+    {
+      "uri": "nsync",
+      "digest": {
+        "sha256": "8b7a7c407edf00e21a15f7e606cec886fcb5b5e88c215916e4b1ff838e448b95"
+      }
+    },
+    {
+      "uri": "protobuf",
+      "digest": {
+        "sha256": "3a38a479ca737fb6b69ac804b5d8f95298ddeaf9ff71f0a3f1ede5fe6f8a29e5"
+      }
+    },
+    {
+      "uri": "re2",
+      "digest": {
+        "sha256": "d8f3c4be1310cf4a42c5f905177abfcedfe202d22ed8a09e1e5390bb95681cfb"
+      }
+    },
+    {
+      "uri": "snappy",
+      "digest": {
+        "sha256": "a48a707eb53f0722dc2ff8babc54d3028cb6fe79280ae40a7776fa54bc75d2de"
+      }
+    },
+    {
+      "uri": "upb",
+      "digest": {
+        "sha256": "cb72771be52644ac0401731025af12d52b866be324dc1b23a1e829eb423dc534"
+      }
+    },
+    {
+      "uri": "zlib",
+      "digest": {
+        "sha256": "0ea55c28f8014d8886b6248fe3da5d588f55c0823847a6b4579f1131b051b5e2"
+      }
+    }
+  ]
+}

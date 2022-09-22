@@ -1,0 +1,450 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "tensorflow",
+      "digest": {
+        "sha256": "cebea885ef40f295a311dfe2879c002bba33695e437f859f7ce111645a99c0ec"
+      }
+    }
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+  ],
+  "predicate": {
+    "id": "fake-builder-id"
+  },
+  "buildType": "fake-build",
+  "materials": [
+    {
+      "uri": "FP16",
+      "digest": {
+        "sha256": "42d71d1daebba13d4c49c66c0b14c86b16d68989457279b860a46f8d93cb56fd"
+      }
+    },
+    {
+      "uri": "FXdiv",
+      "digest": {
+        "sha256": "7c7e2774298bea8434c90328240558a189a89a4e7e69915d6bb8322aa3f1ae44"
+      }
+    },
+    {
+      "uri": "XNNPACK",
+      "digest": {
+        "sha256": "c954a0988eda44d3bc64da5ac672d3f9cc06b235af6d041b47e4aa6550f58db2"
+      }
+    },
+    {
+      "uri": "absl",
+      "digest": {
+        "sha256": "3104f47b7848edcd5eebd72637a748b31f82938bb6c8ec0d3265567bc90d2a19"
+      }
+    },
+    {
+      "uri": "absl_py",
+      "digest": {
+        "sha256": "eab7304b54404d3a5996c4fa04444417a8f7bc5b50fbe7c59fa4af3532b2a2de"
+      }
+    },
+    {
+      "uri": "arm_neon_2_x86_sse",
+      "digest": {
+        "sha256": "cba85b868958c7b62691c5f08dbb3972fc696462725ab18353bd2e397c72b3d8"
+      }
+    },
+    {
+      "uri": "astunparse",
+      "digest": {
+        "sha256": "6c019d99eb119f0732dfedb202bb74ff3acdf946e3b8d9fcf97fee9b4325299e"
+      }
+    },
+    {
+      "uri": "bazel_tools",
+      "digest": {
+        "sha256": "a97207aeaacf524eafacba352c7c4aa46cdc2972eda2f4f839d71f1e70c66ea4"
+      }
+    },
+    {
+      "uri": "boringssl",
+      "digest": {
+        "sha256": "765f9cec0a7ae2b5580913784e12bdba32e8adcca5bd499bafd3a4bcb33c3284"
+      }
+    },
+    {
+      "uri": "cares",
+      "digest": {
+        "sha256": "fa9b6fbe9997c24f7a461d2c4a201039c1c4217fd6e66392a8e14ba5fdeb8448"
+      }
+    },
+    {
+      "uri": "compute_library",
+      "digest": {
+        "sha256": "1baddd70862eb53e9f3dd9d0a4406824e16f4bfc1585744170e1bf67d688ff8f"
+      }
+    },
+    {
+      "uri": "cpuinfo",
+      "digest": {
+        "sha256": "7defb3fe0d33e84ccd0411fc29443c076a1307393f7d2460d2ad5ed38cecbc00"
+      }
+    },
+    {
+      "uri": "crc32c",
+      "digest": {
+        "sha256": "4c49427de6499986ddf68e1502f085a060bfc5ef862994532f4484808301d569"
+      }
+    },
+    {
+      "uri": "cub",
+      "digest": {
+        "sha256": "50f610210b17093bef6a97da696a618f242f005e8e8620a6a59c86441ed7f60d"
+      }
+    },
+    {
+      "uri": "curl",
+      "digest": {
+        "sha256": "427e4b79b1f0fc90306cbe064b1297b21dc6835bfa656d3bf46bc156e3f24bb0"
+      }
+    },
+    {
+      "uri": "dill",
+      "digest": {
+        "sha256": "22b3cf5281ba12d71f3394d6353c08ecd402ed2176c9de3260509ed3765a72e5"
+      }
+    },
+    {
+      "uri": "dlpack",
+      "digest": {
+        "sha256": "cddcf52222c65eeabffe21bf214351a71adcf53d81a649452e40dbe5c27399ca"
+      }
+    },
+    {
+      "uri": "double_conversion",
+      "digest": {
+        "sha256": "fbf433ca1cd4a5e928322979b884daab4057fb4f40953fe8d05338b5dc5af8d6"
+      }
+    },
+    {
+      "uri": "eigen",
+      "digest": {
+        "sha256": "b5ddc345b514e1747327d9e796186e9c7063ed72466825dae9090f20f085cc40"
+      }
+    },
+    {
+      "uri": "einsum",
+      "digest": {
+        "sha256": "533ca6c3b08a7c75067e385939b55a203722f0fdd1e62587a61419ccc4dbde10"
+      }
+    },
+    {
+      "uri": "farmhash",
+      "digest": {
+        "sha256": "ed25a6728a8884240b10cca6e639a3affebe26e27cc0741249b8cfb083d6cecf"
+      }
+    },
+    {
+      "uri": "fft2d",
+      "digest": {
+        "sha256": "c2b59aee31bf34a872daa66477ed0237a4d2077c7bd0da973f8ddbb7c00bf185"
+      }
+    },
+    {
+      "uri": "flatbuffers",
+      "digest": {
+        "sha256": "e3c82e6c6bf71c090ee235f26b43aee9b40f120eb4652d8626c7cd714bead4fc"
+      }
+    },
+    {
+      "uri": "gast",
+      "digest": {
+        "sha256": "aaac7fafa76910e7a042ae9f783c08cc516ea835ee3cffb7055421a25be67a21"
+      }
+    },
+    {
+      "uri": "gemmlowp",
+      "digest": {
+        "sha256": "98774b7245bf33eac49c410ff19cf892d83eac0ed90b8845bce845c9440c0565"
+      }
+    },
+    {
+      "uri": "gif",
+      "digest": {
+        "sha256": "3b34c6906f7eece822ea010af5ad778c45f86cfbed167b84e33b9f3f293f98b8"
+      }
+    },
+    {
+      "uri": "google_benchmark",
+      "digest": {
+        "sha256": "4232de6169c56501d0d4cd7fcb9443e7da4a8a0b2afafb1a85201e4c5fd8bd3e"
+      }
+    },
+    {
+      "uri": "google_cloud_cpp",
+      "digest": {
+        "sha256": "2563d99456d6f8efc589c67dff60d722fefc1b84d209f6231c1e3f07f077e4f4"
+      }
+    },
+    {
+      "uri": "google_pprof",
+      "digest": {
+        "sha256": "6704b0d0121ce9bcc1bd97436f6c79b53dc70007c941f0551092c86db76619fb"
+      }
+    },
+    {
+      "uri": "googleapis",
+      "digest": {
+        "sha256": "5e25812b64b920c1f19c7d9e95e219bc69468f3d10059ded9d643c3c84b7bb8d"
+      }
+    },
+    {
+      "uri": "googletest",
+      "digest": {
+        "sha256": "ce5419b3fa3e427b6ccab3a6a6acb939f8e92b6992f79e9a3cf4462d00a223bc"
+      }
+    },
+    {
+      "uri": "grpc",
+      "digest": {
+        "sha256": "b389db1475dc52e4ab270c6a1ed9210a60bcffb35bd7795303b0f0ed2a9c2a31"
+      }
+    },
+    {
+      "uri": "highwayhash",
+      "digest": {
+        "sha256": "929851b1651ce1a0b99e32b0b2b95c3870fa5a5bed16bb4497bee63e3a698fae"
+      }
+    },
+    {
+      "uri": "hwloc",
+      "digest": {
+        "sha256": "a6dc76e20cce5ff154bfffc60e63177b5363d8e2f4dbc3b59e1d355259b0fb94"
+      }
+    },
+    {
+      "uri": "icu",
+      "digest": {
+        "sha256": "ab6a52ad52e69ea708d6af7e009bd2d1b6258486816c40edaefb6163a489eca0"
+      }
+    },
+    {
+      "uri": "jsoncpp",
+      "digest": {
+        "sha256": "866ae556fee6070665fdb85dce1a8e656e1a864c3306fa9a7f07eff93112bb08"
+      }
+    },
+    {
+      "uri": "kissfft",
+      "digest": {
+        "sha256": "f1f878482ca408d2a849b246cbc332c556523081e937da4eb8f30a39812f2fc6"
+      }
+    },
+    {
+      "uri": "libjpeg_turbo",
+      "digest": {
+        "sha256": "64d14bbd095598c41f39e0b9fb019f1cabc2f96c5161ae87ee99024bc0cfd41d"
+      }
+    },
+    {
+      "uri": "libprotobuf_mutator",
+      "digest": {
+        "sha256": "8876d0ff6db1d67b3e678b28f1144de1bf13fb872c2f4fb533e87fdec4472981"
+      }
+    },
+    {
+      "uri": "libxsmm",
+      "digest": {
+        "sha256": "a70ed0fd43510403d8bc562782f5d1dcfd5e0cee1ccac1a94e1d20b5d99c7dd2"
+      }
+    },
+    {
+      "uri": "llvm",
+      "digest": {
+        "sha256": "ef5a927f5a4ae8bdfa7d187079fa7b2aabc8d72ce219c564f78c9498ff59d2f9"
+      }
+    },
+    {
+      "uri": "llvm_openmp",
+      "digest": {
+        "sha256": "caa2292a498a43f748cdec245c18e8961d6416668dab377b13e1be4e1e563039"
+      }
+    },
+    {
+      "uri": "llvm_terminfo",
+      "digest": {
+        "sha256": "169a6b455179911102ae9eaf2c44a30b712ad9a7b16f7b3374c25d8727692095"
+      }
+    },
+    {
+      "uri": "llvm_zlib",
+      "digest": {
+        "sha256": "b3c638926f0202e3650a42094f84f48bfbda922ff71d05ed8c4da479cc0a3541"
+      }
+    },
+    {
+      "uri": "lmdb",
+      "digest": {
+        "sha256": "f6e0576594683ea215b17171ddf9b7ee753d3709b6412ecd895f93d2e33c2beb"
+      }
+    },
+    {
+      "uri": "mkl_dnn",
+      "digest": {
+        "sha256": "2ef1f2a0b2d4b88cae8d4eb55fd7fb56e626ecc8bee25de573c056747fc10015"
+      }
+    },
+    {
+      "uri": "nasm",
+      "digest": {
+        "sha256": "1d8b6419aa5b1de898c0bfee87ac9fb529375dd6c4d80bf501df62e77db7e3ba"
+      }
+    },
+    {
+      "uri": "nlohmann_json",
+      "digest": {
+        "sha256": "d1ec16830ea87a0b5a2e9f9666054f2a52eb3b90c337b1015efd7b9118c4eeee"
+      }
+    },
+    {
+      "uri": "nsync",
+      "digest": {
+        "sha256": "8b7a7c407edf00e21a15f7e606cec886fcb5b5e88c215916e4b1ff838e448b95"
+      }
+    },
+    {
+      "uri": "pasta",
+      "digest": {
+        "sha256": "a4c18ee0ada59e343691ef4ddc0e502b86679f2eaa6a5576a0ec3c9ea0658e36"
+      }
+    },
+    {
+      "uri": "png",
+      "digest": {
+        "sha256": "8f8cbb7dcf46e0bc7d53265749a6c17d116093a6ba95e442764060c76fd4a86c"
+      }
+    },
+    {
+      "uri": "pprof",
+      "digest": {
+        "sha256": "137a5d59256c9738cc9c854fcce790757623d7ce2df7bbafe972d45dbd46ee80"
+      }
+    },
+    {
+      "uri": "protobuf",
+      "digest": {
+        "sha256": "3a38a479ca737fb6b69ac804b5d8f95298ddeaf9ff71f0a3f1ede5fe6f8a29e5"
+      }
+    },
+    {
+      "uri": "pthreadpool",
+      "digest": {
+        "sha256": "e705b209888c170d91db3c8787c3d9340ec1b5007761b0b5e6398799cb48574b"
+      }
+    },
+    {
+      "uri": "pybind11",
+      "digest": {
+        "sha256": "a60424fca0a178fd49f8b4f634751f992954cd6de4a6053aaa0cc9f440da37a6"
+      }
+    },
+    {
+      "uri": "re2",
+      "digest": {
+        "sha256": "d8f3c4be1310cf4a42c5f905177abfcedfe202d22ed8a09e1e5390bb95681cfb"
+      }
+    },
+    {
+      "uri": "rules_python",
+      "digest": {
+        "sha256": "a90bb21ddf552d508565aa2f0d78ac13297e6c407e39eb578eeac09e62c5da3a"
+      }
+    },
+    {
+      "uri": "ruy",
+      "digest": {
+        "sha256": "f286381029c7ead46a90c8789e4f132e552d2f102d1a8fa9f6067822e9435b0d"
+      }
+    },
+    {
+      "uri": "six",
+      "digest": {
+        "sha256": "44778d82365e4af681c40d5f0eef5cf6f5899d3f0ac335050a7ed6779cf3f674"
+      }
+    },
+    {
+      "uri": "snappy",
+      "digest": {
+        "sha256": "a48a707eb53f0722dc2ff8babc54d3028cb6fe79280ae40a7776fa54bc75d2de"
+      }
+    },
+    {
+      "uri": "sobol",
+      "digest": {
+        "sha256": "fc1b2790984f9e54a6d8263a1ad8af12a547743bbfc78204e85a71fb085dc920"
+      }
+    },
+    {
+      "uri": "sqlite",
+      "digest": {
+        "sha256": "0cd8666848bf286d951c3d230e8b6e092fde03c3a080e3454467e496e7b14e78"
+      }
+    },
+    {
+      "uri": "stablehlo",
+      "digest": {
+        "sha256": "b40086aa66365f9a05add7e4cac77ac07f926937aee36cf50f0b60ff39a9250d"
+      }
+    },
+    {
+      "uri": "tblib",
+      "digest": {
+        "sha256": "32baa4afcc8eb8b0d627855525be6c9cae0532c729953ca95107420d8d4dab01"
+      }
+    },
+    {
+      "uri": "tensorflow_gcp_tools",
+      "digest": {
+        "sha256": "f6ba8b07f8dac81fc7bb86a2a4e9d626ebc9fbde3b015ec743c425431bdb9e03"
+      }
+    },
+    {
+      "uri": "termcolor",
+      "digest": {
+        "sha256": "9fce1f6e6dd9106d5ca2ee7de9c717b66e64d030b99ee5024024f481e3fc3b0f"
+      }
+    },
+    {
+      "uri": "tf_runtime",
+      "digest": {
+        "sha256": "3a1b85f9fd1c1afa7c22dec2342254b0f5852684765dd93aa159545c13961f51"
+      }
+    },
+    {
+      "uri": "typing_extensions",
+      "digest": {
+        "sha256": "6e5e49effcec8f8c76f9823331948755c9cf6925872981dbb44a3c4f95f0b3f3"
+      }
+    },
+    {
+      "uri": "upb",
+      "digest": {
+        "sha256": "cb72771be52644ac0401731025af12d52b866be324dc1b23a1e829eb423dc534"
+      }
+    },
+    {
+      "uri": "wrapt",
+      "digest": {
+        "sha256": "429486be2edc91ec0ff78e40ef225de2f5b0693d9f96666c5c785d435a908881"
+      }
+    },
+    {
+      "uri": "zlib",
+      "digest": {
+        "sha256": "0ea55c28f8014d8886b6248fe3da5d588f55c0823847a6b4579f1131b051b5e2"
+      }
+    }
+  ]
+}
