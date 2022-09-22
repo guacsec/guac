@@ -96,7 +96,11 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	}
 	for len(docChan) > 0 {
 		d := <-docChan
-		emitter(d)
+		if err := emitter(d); err != nil {
+			if !handleErr(err) {
+				return err
+			}
+		}
 		logger.Infof("emitted document: %+v", d)
 	}
 	return nil
