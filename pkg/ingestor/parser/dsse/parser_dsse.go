@@ -21,36 +21,60 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
-func ParseDsse(doc *processor.Document) (common.GraphBuilder, error) {
-	b := common.NewGenericGraphBuilder()
-	b.Doc = doc
-	id, err := getIdentity(doc)
-	if err != nil {
-		return nil, err
-	}
-	b.FoundIdentities = append(b.FoundIdentities, id...)
-
-	return b, nil
+type dsseParser struct {
+	identities []assembler.IdentityNode
 }
 
-func getIdentity(doc *processor.Document) ([]assembler.IdentityNode, error) {
-	FoundIdentity := []assembler.IdentityNode{}
+func NewDSSEParser() *dsseParser {
+	return &dsseParser{
+		identities: []assembler.IdentityNode{},
+	}
+}
+
+func (d *dsseParser) Parse(doc *processor.Document) error {
+	err := d.getIdentity(doc)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *dsseParser) getIdentity(doc *processor.Document) error {
 	identities, err := verifier.VerifyIdentity(doc)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	for _, i := range identities {
 		pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(i.Key.Val)
 		if err != nil {
-			return nil, fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
+			return fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
 		}
-		FoundIdentity = append(FoundIdentity, assembler.IdentityNode{
+		d.identities = append(d.identities, assembler.IdentityNode{
 			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes), KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme)})
 	}
-	return FoundIdentity, nil
+	return nil
+}
+
+func (d *dsseParser) GetIdentities() []assembler.IdentityNode {
+	return d.identities
+}
+
+func (d *dsseParser) CreateNodes() []assembler.GuacNode {
+	nodes := []assembler.GuacNode{}
+	for _, i := range d.identities {
+		nodes = append(nodes, i)
+	}
+	return nodes
+}
+
+func (d *dsseParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+	return []assembler.GuacEdge{}
+}
+
+func (d *dsseParser) GetDocType() processor.DocumentType {
+	return processor.DocumentDSSE
 }

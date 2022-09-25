@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/dsse"
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
+	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 )
 
 type docTreeBuilder struct {
@@ -39,7 +40,6 @@ func newDocTreeBuilder() *docTreeBuilder {
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node
 func ParseDocumentTree(docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
-
 	assemblerinputs := []assembler.AssemblerInput{}
 	docTreeBuilder := newDocTreeBuilder()
 	err := docTreeBuilder.parse(docTree)
@@ -79,9 +79,29 @@ func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
 func parseHelper(doc *processor.Document) (common.GraphBuilder, error) {
 	switch doc.Type {
 	case processor.DocumentDSSE:
-		return dsse.ParseDsse(doc)
+		dsseParser := dsse.NewDSSEParser()
+		err := dsseParser.Parse(doc)
+		if err != nil {
+			return nil, err
+		}
+		dsseGraphBuilder := common.NewGenericGraphBuilder(dsseParser, dsseParser.GetIdentities())
+		return dsseGraphBuilder, nil
 	case processor.DocumentITE6SLSA:
-		return slsa.ParseITE6Slsa(doc)
+		slsaParser := slsa.NewSLSAParser()
+		err := slsaParser.Parse(doc)
+		if err != nil {
+			return nil, err
+		}
+		slsaGraphBuilder := common.NewGenericGraphBuilder(slsaParser, nil)
+		return slsaGraphBuilder, nil
+	case processor.DocumentSPDX:
+		spdxParser := spdx.NewSpdxParser()
+		err := spdxParser.Parse(doc)
+		if err != nil {
+			return nil, err
+		}
+		spdxGraphBuilder := common.NewGenericGraphBuilder(spdxParser, nil)
+		return spdxGraphBuilder, nil
 	}
 	return nil, fmt.Errorf("no parser found for document type: %v", doc.Type)
 }

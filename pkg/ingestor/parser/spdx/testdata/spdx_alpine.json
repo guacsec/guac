@@ -1,0 +1,6235 @@
+{
+ "SPDXID": "SPDXRef-DOCUMENT",
+ "name": "alpine-latest",
+ "spdxVersion": "SPDX-2.2",
+ "creationInfo": {
+  "created": "2022-09-24T17:27:55.556104Z",
+  "creators": [
+   "Organization: Anchore, Inc",
+   "Tool: syft-0.57.0"
+  ],
+  "licenseListVersion": "3.18"
+ },
+ "dataLicense": "CC0-1.0",
+ "documentNamespace": "https://anchore.com/syft/image/alpine-latest-e78eca08-d9f4-49c7-97e0-6d4b9bfa99c2",
+ "packages": [
+  {
+   "SPDXID": "SPDXRef-35085779bdf473bb",
+   "name": "alpine-baselayout",
+   "licenseConcluded": "GPL-2.0-only",
+   "description": "Alpine base dir structure and init scripts",
+   "downloadLocation": "https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/alpine-baselayout@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-1ee0f450becc786f",
+    "SPDXRef-336bc8ce40e7fc42",
+    "SPDXRef-3cf575889d9cc66c",
+    "SPDXRef-5be401ad758d7c8",
+    "SPDXRef-757351ee498badd7",
+    "SPDXRef-786c4e711c1a558b",
+    "SPDXRef-88b0f6fae4de13a0",
+    "SPDXRef-a6c4c4e977ddf6d8",
+    "SPDXRef-cb0990ff1c4365e4",
+    "SPDXRef-da399cec16efc781",
+    "SPDXRef-de2a9cb8a967fb5b"
+   ],
+   "licenseDeclared": "GPL-2.0-only",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "3.2.0-r22"
+  },
+  {
+   "SPDXID": "SPDXRef-33b5ab4a81e975bd",
+   "name": "alpine-baselayout-data",
+   "licenseConcluded": "GPL-2.0-only",
+   "description": "Alpine base dir structure and init scripts",
+   "downloadLocation": "https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_baselayout_data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_baselayout_data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-baselayout:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-baselayout:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_baselayout:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_baselayout:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/alpine-baselayout-data@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-14c57fa7ac8df92",
+    "SPDXRef-2ac427870f248704",
+    "SPDXRef-2be29626dd7a31e2",
+    "SPDXRef-2e3b308d2192da55",
+    "SPDXRef-4cb78c1b83f3f6fa",
+    "SPDXRef-58256f3c5c4e6aa2",
+    "SPDXRef-5b4c64f05d9b355a",
+    "SPDXRef-5c71002e828599e6",
+    "SPDXRef-5ec7e40e4299d952",
+    "SPDXRef-75b6ed72d694a357",
+    "SPDXRef-795c342188acc719",
+    "SPDXRef-9622c4a77c0af92d",
+    "SPDXRef-bd8e6d084d722e0a"
+   ],
+   "licenseDeclared": "GPL-2.0-only",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "3.2.0-r22"
+  },
+  {
+   "SPDXID": "SPDXRef-3f53edc3b14056c3",
+   "name": "alpine-keys",
+   "licenseConcluded": "MIT",
+   "description": "Public keys for Alpine Linux packages",
+   "downloadLocation": "https://alpinelinux.org",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-keys:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine-keys:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_keys:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine_keys:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/alpine-keys@2.4-r1?arch=x86_64&upstream=alpine-keys&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-14473a45c2af16d7",
+    "SPDXRef-156d627c97a2de34",
+    "SPDXRef-1ee1cd40588ab89c",
+    "SPDXRef-221af60be84b09c0",
+    "SPDXRef-274572174bc1cc7a",
+    "SPDXRef-300f983a142f9504",
+    "SPDXRef-44193297ee82bac1",
+    "SPDXRef-45232e260abd77f7",
+    "SPDXRef-492cf038d1d9fd9b",
+    "SPDXRef-4cbd1b18ddd59c42",
+    "SPDXRef-4d1c352ad50e20b2",
+    "SPDXRef-6d7742dc4838b698",
+    "SPDXRef-716461c423874936",
+    "SPDXRef-879bdb5c61068a44",
+    "SPDXRef-9b559b61986fccb0",
+    "SPDXRef-af1d9aa588b56c47",
+    "SPDXRef-c549a0b76f823487",
+    "SPDXRef-eb93193a7276c76a",
+    "SPDXRef-f542a07f45615070",
+    "SPDXRef-f91e100c74bf27e",
+    "SPDXRef-f96f56f789a464ad",
+    "SPDXRef-fb57f5df1fd169db"
+   ],
+   "licenseDeclared": "MIT",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "2.4-r1"
+  },
+  {
+   "SPDXID": "SPDXRef-9bb9cb82a4ce72b1",
+   "name": "apk-tools",
+   "licenseConcluded": "GPL-2.0-only",
+   "description": "Alpine Package Keeper - package manager for alpine",
+   "downloadLocation": "https://gitlab.alpinelinux.org/alpine/apk-tools",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:apk-tools:apk-tools:2.12.9-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:apk-tools:apk_tools:2.12.9-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:apk_tools:apk-tools:2.12.9-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:apk_tools:apk_tools:2.12.9-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:apk:apk-tools:2.12.9-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:apk:apk_tools:2.12.9-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/apk-tools@2.12.9-r3?arch=x86_64&upstream=apk-tools&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-4fb0c07667dac902",
+    "SPDXRef-d8bdade972f61759"
+   ],
+   "licenseDeclared": "GPL-2.0-only",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "2.12.9-r3"
+  },
+  {
+   "SPDXID": "SPDXRef-2bc2db5bac1d0fe4",
+   "name": "busybox",
+   "licenseConcluded": "GPL-2.0-only",
+   "description": "Size optimized toolbox of many common UNIX utilities",
+   "downloadLocation": "https://busybox.net/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:busybox:busybox:1.35.0-r17:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/busybox@1.35.0-r17?arch=x86_64&upstream=busybox&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-1ba0b361ecdca2c4",
+    "SPDXRef-2acfdc9dad72d150",
+    "SPDXRef-7dc15fca12e2f017",
+    "SPDXRef-8197f64c214a5a16",
+    "SPDXRef-9ce55bcb43ee284f",
+    "SPDXRef-f475459004544a56"
+   ],
+   "licenseDeclared": "GPL-2.0-only",
+   "originator": "Person: Sören Tempel <soeren+alpine@soeren-tempel.net>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.35.0-r17"
+  },
+  {
+   "SPDXID": "SPDXRef-3ff09d7a5e0dc2ed",
+   "name": "ca-certificates-bundle",
+   "licenseConcluded": "MPL-2.0 AND MIT",
+   "description": "Pre generated bundle of Mozilla certificates",
+   "downloadLocation": "https://www.mozilla.org/en-US/about/governance/policies/security-group/certs/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca-certificates-bundle:ca-certificates-bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca-certificates-bundle:ca_certificates_bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca_certificates_bundle:ca-certificates-bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca_certificates_bundle:ca_certificates_bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca-certificates:ca-certificates-bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca-certificates:ca_certificates_bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca_certificates:ca-certificates-bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca_certificates:ca_certificates_bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca:ca-certificates-bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ca:ca_certificates_bundle:20220614-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/ca-certificates-bundle@20220614-r0?arch=x86_64&upstream=ca-certificates&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-754289e667437895"
+   ],
+   "licenseDeclared": "MPL-2.0 AND MIT",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "20220614-r0"
+  },
+  {
+   "SPDXID": "SPDXRef-ededb9e6ff708347",
+   "name": "libc-utils",
+   "licenseConcluded": "BSD-2-Clause AND BSD-3-Clause",
+   "description": "Meta package to pull in correct libc",
+   "downloadLocation": "https://alpinelinux.org",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libc-utils:libc-utils:0.7.2-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libc-utils:libc_utils:0.7.2-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libc_utils:libc-utils:0.7.2-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libc_utils:libc_utils:0.7.2-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libc:libc-utils:0.7.2-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libc:libc_utils:0.7.2-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/libc-utils@0.7.2-r3?arch=x86_64&upstream=libc-dev&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "licenseDeclared": "BSD-2-Clause AND BSD-3-Clause",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "0.7.2-r3"
+  },
+  {
+   "SPDXID": "SPDXRef-cce075f4f19baaee",
+   "name": "libcrypto1.1",
+   "licenseConcluded": "OpenSSL",
+   "description": "Crypto library from openssl",
+   "downloadLocation": "https://www.openssl.org/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libcrypto1.1:libcrypto1.1:1.1.1q-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/libcrypto1.1@1.1.1q-r0?arch=x86_64&upstream=openssl&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-1087f474228124bb",
+    "SPDXRef-1b1e12f00cbb2df9",
+    "SPDXRef-28854548e0d878c2",
+    "SPDXRef-61a86d4a797602e5",
+    "SPDXRef-c35e7c8840928dba",
+    "SPDXRef-c3c38e46778cd717",
+    "SPDXRef-dd0104ad41122fa2",
+    "SPDXRef-e5e1738bbb13275f",
+    "SPDXRef-eb47016cd05f7d35",
+    "SPDXRef-fa7856d6d0b238f1"
+   ],
+   "licenseDeclared": "OpenSSL",
+   "originator": "Person: Timo Teras <timo.teras@iki.fi>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.1.1q-r0"
+  },
+  {
+   "SPDXID": "SPDXRef-bebc881007d932d",
+   "name": "libssl1.1",
+   "licenseConcluded": "OpenSSL",
+   "description": "SSL shared libraries",
+   "downloadLocation": "https://www.openssl.org/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:libssl1.1:libssl1.1:1.1.1q-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/libssl1.1@1.1.1q-r0?arch=x86_64&upstream=openssl&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-535cfe0185d18797"
+   ],
+   "licenseDeclared": "OpenSSL",
+   "originator": "Person: Timo Teras <timo.teras@iki.fi>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.1.1q-r0"
+  },
+  {
+   "SPDXID": "SPDXRef-ec1d619a28263eb0",
+   "name": "musl",
+   "licenseConcluded": "MIT",
+   "description": "the musl c library (libc) implementation",
+   "downloadLocation": "https://musl.libc.org/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:musl:musl:1.2.3-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/musl@1.2.3-r0?arch=x86_64&upstream=musl&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-e2c90ae8ae67431f"
+   ],
+   "licenseDeclared": "MIT",
+   "originator": "Person: Timo Teräs <timo.teras@iki.fi>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.2.3-r0"
+  },
+  {
+   "SPDXID": "SPDXRef-b703a8e4e90dd6dc",
+   "name": "musl-utils",
+   "licenseConcluded": "MIT",
+   "description": "the musl c library (libc) implementation",
+   "downloadLocation": "https://musl.libc.org/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:musl-utils:musl-utils:1.2.3-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:musl-utils:musl_utils:1.2.3-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:musl_utils:musl-utils:1.2.3-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:musl_utils:musl_utils:1.2.3-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:musl:musl-utils:1.2.3-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:musl:musl_utils:1.2.3-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/musl-utils@1.2.3-r0?arch=x86_64&upstream=musl&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-1b08cd6c03818e29",
+    "SPDXRef-2cd2aeb015390775",
+    "SPDXRef-4a324ad304be8e9a",
+    "SPDXRef-98233f67f18b2755",
+    "SPDXRef-c1d35477db673e2d"
+   ],
+   "licenseDeclared": "MIT",
+   "originator": "Person: Timo Teräs <timo.teras@iki.fi>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.2.3-r0"
+  },
+  {
+   "SPDXID": "SPDXRef-7514a98b23f9928c",
+   "name": "scanelf",
+   "licenseConcluded": "GPL-2.0-only",
+   "description": "Scan ELF binaries for stuff",
+   "downloadLocation": "https://wiki.gentoo.org/wiki/Hardened/PaX_Utilities",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:scanelf:scanelf:1.3.4-r0:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/scanelf@1.3.4-r0?arch=x86_64&upstream=pax-utils&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-19e9882925c797f5"
+   ],
+   "licenseDeclared": "GPL-2.0-only",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.3.4-r0"
+  },
+  {
+   "SPDXID": "SPDXRef-7aec2be3ffd82c3c",
+   "name": "ssl_client",
+   "licenseConcluded": "GPL-2.0-only",
+   "description": "EXternal ssl_client for busybox wget",
+   "downloadLocation": "https://busybox.net/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ssl-client:ssl-client:1.35.0-r17:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ssl-client:ssl_client:1.35.0-r17:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ssl_client:ssl-client:1.35.0-r17:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ssl_client:ssl_client:1.35.0-r17:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ssl:ssl-client:1.35.0-r17:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:ssl:ssl_client:1.35.0-r17:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/ssl_client@1.35.0-r17?arch=x86_64&upstream=busybox&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-a74d39439f2d84b8"
+   ],
+   "licenseDeclared": "GPL-2.0-only",
+   "originator": "Person: Sören Tempel <soeren+alpine@soeren-tempel.net>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.35.0-r17"
+  },
+  {
+   "SPDXID": "SPDXRef-94e7e84b87c1f8c3",
+   "name": "zlib",
+   "licenseConcluded": "Zlib",
+   "description": "A compression/decompression Library",
+   "downloadLocation": "https://zlib.net/",
+   "externalRefs": [
+    {
+     "referenceCategory": "SECURITY",
+     "referenceLocator": "cpe:2.3:a:zlib:zlib:1.2.12-r3:*:*:*:*:*:*:*",
+     "referenceType": "cpe23Type"
+    },
+    {
+     "referenceCategory": "PACKAGE_MANAGER",
+     "referenceLocator": "pkg:alpine/zlib@1.2.12-r3?arch=x86_64&upstream=zlib&distro=alpine-3.16.2",
+     "referenceType": "purl"
+    }
+   ],
+   "filesAnalyzed": false,
+   "hasFiles": [
+    "SPDXRef-6d1b682f6d48f488"
+   ],
+   "licenseDeclared": "Zlib",
+   "originator": "Person: Natanael Copa <ncopa@alpinelinux.org>",
+   "sourceInfo": "acquired package info from APK DB: /lib/apk/db/installed",
+   "versionInfo": "1.2.12-r3"
+  }
+ ],
+ "files": [
+  {
+   "SPDXID": "SPDXRef-a3cc05285a46b7f7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6d517e6bf0e70685",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/arch",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8df887cdb57a2641",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ash",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9edd34ac787c49a1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/base64",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-780b255d1ae9c4d7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/bbconfig",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7dc15fca12e2f017",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "28a60362bdd0a77dcbc5294ef9cdfd256c19c3ee391a24489a42c74be26fde9f"
+    }
+   ],
+   "fileName": "/bin/busybox",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a6ac4f78d5cd5f93",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/cat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-aa453d9369813e0c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/chattr",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e8d7e0f56dc3a03f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/chgrp",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4477a276356768df",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/chmod",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-be4b92934ecbfc94",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/chown",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-484b6f31a956e405",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/cp",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6c8eaaffb917cee",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/date",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-41f5f535c6a1e0e8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/dd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6a926935c040571e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/df",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4050b34cb6bee4ec",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/dmesg",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-22fd5fe8489deeb7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/dnsdomainname",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9fd087224dde96f1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/dumpkmap",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9d09a3c40b0f7d41",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/echo",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-386b28b798b91627",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ed",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-99e71f05815d5624",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/egrep",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8c25f3d5451d0faa",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/false",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9f4441e0b5beec85",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/fatattr",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9fed94d693b1085e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/fdflush",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-44fc87a2ee6105e4",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/fgrep",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1efebe4546217c6f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/fsync",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d5350d63ff6c0f9c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/getopt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-53c968f3c8aae5fb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/grep",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ff6ceb18e6de7917",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/gunzip",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6c9ba49186562a73",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/gzip",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-96f3ed0680d34177",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/hostname",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7a78e2d0fe94e79b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ionice",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-469e70329584d7e2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/iostat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-40220cca5c7bf214",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ipcalc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-406e831e2cffd676",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/kbd_mode",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7c5cd9963ed6337a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/kill",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d1396103d3f293de",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/link",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ffb862aa26887bf2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/linux32",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-95a0f832e07e8ce5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/linux64",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4f4f3685107a6e1f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ln",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5f16573025b98151",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/login",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8cf722f82a4565b8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ls",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7bd0831fa8ecc3be",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/lsattr",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-72607f2ab538fed5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/lzop",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-35c34e57d8a3eac3",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/makemime",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-da673cf3cffa1b7e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/mkdir",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-347de9cf9c6c06b9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/mknod",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6e35e940721cfe50",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/mktemp",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-af01ac5abd6bde3a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/more",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6561d1ed04676f42",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/mount",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-618e97972b6579ca",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/mountpoint",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d0b418fad4f8b497",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/mpstat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f87e35a66f9b5fa0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/mv",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2c3bdf0da1948353",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/netstat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-194ce39ace3e9c98",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/nice",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-82334bcb2b053b3e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/pidof",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1d1d731ee5199ecb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ping",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cb3226c11fe54470",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ping6",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7a5c6b396da7beb8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/pipe_progress",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7dc01716d82917fb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/printenv",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-45cca6ac18cac605",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/ps",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c8ef5660e78c43d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/pwd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ca1d27ffa1260505",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/reformime",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-623688b8d90f4416",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/rev",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5c64f91f9563d674",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/rm",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-93aeeddc4c7e4081",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/rmdir",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e850b045a918788e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/run-parts",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fb56de2bf1ef3aa7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/sed",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-950e96dd091d4a71",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/setpriv",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-51457f3c66873e7f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/setserial",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3e00381ce27e04ec",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/sh",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cc0d2c6e5ec0a56d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/sleep",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9b34ea24a60e39dd",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/stat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9a397a8029c88247",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/stty",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f65a96f4f90b214a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/su",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5b849c767dae61e0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/sync",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2521fc086a0fefdc",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/tar",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fc0eb32308b1fc24",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/touch",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-829d304e6cf92bcd",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/true",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-97b4164c9712b0e7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/umount",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5d282b4cf6bdc4c2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/uname",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a2408a553a0ed61e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/usleep",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9e535662c79ecb12",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/watch",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4cbb5fd83d7c36dd",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/bin/zcat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-145d1717ec1d184c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/dev",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d4f7006e921f80f3",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-258e2cf5f64c5564",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "57f587688ba4f4d42653281630a1a1b02f9fe93e0f6472033baaa1447ff2c35f"
+    }
+   ],
+   "fileName": "/etc/alpine-release",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-85b8884113604aab",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/apk",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a2f99a092dff1440",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62"
+    }
+   ],
+   "fileName": "/etc/apk/arch",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6bcb94f86ee06255",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/apk/keys",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f542a07f45615070",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "9c102bcc376af1498d549b77bdbfa815ae86faa1d2d82f040e616b18ef2df2d4"
+    }
+   ],
+   "fileName": "/etc/apk/keys/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1ee1cd40588ab89c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ebf31683b56410ecc4c00acd9f6e2839e237a3b62b5ae7ef686705c7ba0396a9"
+    }
+   ],
+   "fileName": "/etc/apk/keys/alpine-devel@lists.alpinelinux.org-5243ef4b.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-eb93193a7276c76a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "12f899e55a7691225603d6fb3324940fc51cd7f133e7ead788663c2b7eecb00c"
+    }
+   ],
+   "fileName": "/etc/apk/keys/alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4d1c352ad50e20b2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "207e4696d3c05f7cb05966aee557307151f1f00217af4143c1bcaf33b8df733f"
+    }
+   ],
+   "fileName": "/etc/apk/keys/alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-274572174bc1cc7a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "128d34d4aec39b0daedea8163cd8dc24dff36fd3d848630ab97eeb1d3084bbb3"
+    }
+   ],
+   "fileName": "/etc/apk/keys/alpine-devel@lists.alpinelinux.org-61666e3f.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f48d1fd64f48ac5a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/apk/protected_paths.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f6b6eaa2e7b8c7dc",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "60cdfc600feee85db88042ecd9804097fb1a1ef3efc4e5c2e3c1d3d17c3449ac"
+    }
+   ],
+   "fileName": "/etc/apk/repositories",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9936d4f0772f184e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201"
+    }
+   ],
+   "fileName": "/etc/apk/world",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-da1c0698b180956c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/conf.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-450ab2469f7123c1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/crontabs",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5be401ad758d7c8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3"
+    }
+   ],
+   "fileName": "/etc/crontabs/root",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5ec7e40e4299d952",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "a3efca2e8d62785c87517283092b4c800d88612b6f3f06b80a4c2f39d8e68841"
+    }
+   ],
+   "fileName": "/etc/fstab",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-75b6ed72d694a357",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "0632d55a68081065097472fe7bc7c66f0785f3b78f39fb23f622d24a7e09be9f"
+    }
+   ],
+   "fileName": "/etc/group",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-bd8e6d084d722e0a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "d906aecb61d076a967d9ffe8821c7b04b063f72df9d9e35b33ef36b1c0d98f16"
+    }
+   ],
+   "fileName": "/etc/hostname",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5b4c64f05d9b355a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "e3998dbe02b51dada33de87ae43d18a93ab6915b9e34f5a751bf2b9b25a55492"
+    }
+   ],
+   "fileName": "/etc/hosts",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fcb0bb068c6dc4f2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/init.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5c71002e828599e6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "54a5f36970125bf70cdf7b215c9e12a287d92ad76a693bd72aec4cbc5645df87"
+    }
+   ],
+   "fileName": "/etc/inittab",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7f554520e8441ed7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "eef436c7aac8331ac310b489d63ad1158300d18c006946fefdced8f3d5f3931b"
+    }
+   ],
+   "fileName": "/etc/issue",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-39c579142303efd1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/logrotate.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9ce55bcb43ee284f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "d608a3b7715886b5735def0cc50a6359fd364fac2e0e0a459c588c04be471031"
+    }
+   ],
+   "fileName": "/etc/logrotate.d/acpid",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b65b6d07f62f7897",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/modprobe.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-88b0f6fae4de13a0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "3ebaba946f213670170c7d69949f690a3854553bd0b1560f1d980cba4c83a942"
+    }
+   ],
+   "fileName": "/etc/modprobe.d/aliases.conf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-de2a9cb8a967fb5b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "5cd46031fc7dc7186e67c97fd34780597de4ebff51dbe41eba27220fe5e0d866"
+    }
+   ],
+   "fileName": "/etc/modprobe.d/blacklist.conf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cb0990ff1c4365e4",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "6c46c4cbfb8b7594f19eb94801a350fa2221ae9ac5239a8819d15555caa76ae8"
+    }
+   ],
+   "fileName": "/etc/modprobe.d/i386.conf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1ee0f450becc786f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "50467fa732f809f3a2bb5738628765c5f895c3a237e1c1ad09f85d41fd9ca7c5"
+    }
+   ],
+   "fileName": "/etc/modprobe.d/kms.conf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4cb78c1b83f3f6fa",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "2c881de75a5409c35d2433a24f180b8b02ba478ef2c1c60ea3434a35bcbc335d"
+    }
+   ],
+   "fileName": "/etc/modules",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4d79affffbf9657",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/modules-load.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3cf575889d9cc66c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "4ada0c700c4460f85252987092650c6708f17b4ccebc9ae4fcf8732089a1485f"
+    }
+   ],
+   "fileName": "/etc/motd",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-532b8f0afa98750",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/mtab",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7ee9abd24d093495",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/network",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7c09fe7b3ba85932",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/network/if-down.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2b4674a761754042",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/network/if-post-down.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-76fa08edfc78760",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/network/if-post-up.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-88e73b63f362b004",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/network/if-pre-down.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-aae8ecbab760b5ac",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/network/if-pre-up.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2dde05e479fce51a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/network/if-up.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8197f64c214a5a16",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "8ee2455448c12cd1fd0befbc84f1ace7b80ba46603aff0d67bc7bcad604ea466"
+    }
+   ],
+   "fileName": "/etc/network/if-up.d/dad",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c1d8d57d419a325d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/opt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-244a72cabc8cf6ee",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "433efcc848f7146d5ad1834c7e05a356c9c754e29bcd6a2713021bbab4c36e5d"
+    }
+   ],
+   "fileName": "/etc/os-release",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-14c57fa7ac8df92",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "2e0902cf0a7f64bf4e64ef2fad66ae977b4d01975dddf5352a84aea5c4e901f0"
+    }
+   ],
+   "fileName": "/etc/passwd",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c2dcdc119a3d272c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/periodic",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fadaf78b8067e475",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/periodic/15min",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-72e9aed5cc9cac6c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/periodic/daily",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ba31b8c23d2c27fd",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/periodic/hourly",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-91fec73ae514be1b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/periodic/monthly",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9fc50c6349a0463b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/periodic/weekly",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2ac427870f248704",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "36ae9bf37bacb8bcd7601eb2e29a4fd0dc6b0f822514634406e3d98ac8a28e62"
+    }
+   ],
+   "fileName": "/etc/profile",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a96b1e6340d1501c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/profile.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a6c4c4e977ddf6d8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "b73284f27fe2da9ae1902b1fe9596c3ffc61a154e2805a034184f0468f8b09b0"
+    }
+   ],
+   "fileName": "/etc/profile.d/README",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-786c4e711c1a558b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ba24425c6864a5d17fa0fdaf914c4d21419e47c4d62080c33830af059fe46617"
+    }
+   ],
+   "fileName": "/etc/profile.d/color_prompt.sh.disabled",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-757351ee498badd7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "84eb9034099d759ff08e6da5a731cacfc63a319547ad0f1dfc1c64853aca93f2"
+    }
+   ],
+   "fileName": "/etc/profile.d/locale.sh",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2e3b308d2192da55",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "a90a2be9c2a88be6fbfc1fc73ba76f34698377bb19513e5de503dbb0bfe13be1"
+    }
+   ],
+   "fileName": "/etc/protocols",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d9fc9b40184fc2ed",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/secfixes.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-960a30c55931ec72",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "e2f540a1dc5a92132c3e4de333b9e3edc6e15cbe4de1fd5ac869d35a014ece87"
+    }
+   ],
+   "fileName": "/etc/secfixes.d/alpine",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2acfdc9dad72d150",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "49382575069e4b954a36f1fb2248d1bd96ee7ba28a5b12798fa92d80a29d0fab"
+    }
+   ],
+   "fileName": "/etc/securetty",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2be29626dd7a31e2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "d85f9ab44e46d6605d749935cf9827a38f767b0e5e56ae8d948ef67e0759e52d"
+    }
+   ],
+   "fileName": "/etc/services",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9622c4a77c0af92d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "cdcdf002dbf6a03de7cf3c024d12162d6227cb5e2d27ca58844a716301f03151"
+    }
+   ],
+   "fileName": "/etc/shadow",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-58256f3c5c4e6aa2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "24be6ceb236610df45684c83b06c918ae45635be55f69975e43676b7595bbc5f"
+    }
+   ],
+   "fileName": "/etc/shells",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-35260ec8debcbe78",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/ssl",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8eab6799d1f1be31",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/ssl/cert.pem",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1cf5509dc060ff84",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/ssl/certs",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-754289e667437895",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "92dd040a840947f00a14f66e9e17a799051ad7f88ddcde851b3711ee0a78a7ac"
+    }
+   ],
+   "fileName": "/etc/ssl/certs/ca-certificates.crt",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e5e1738bbb13275f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "f1c1803d13d1d0b755b13b23c28bd4e20e07baf9f2b744c9337ba5866aa0ec3b"
+    }
+   ],
+   "fileName": "/etc/ssl/ct_log_list.cnf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fa7856d6d0b238f1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "f1c1803d13d1d0b755b13b23c28bd4e20e07baf9f2b744c9337ba5866aa0ec3b"
+    }
+   ],
+   "fileName": "/etc/ssl/ct_log_list.cnf.dist",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5ef44538e9697b2a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/ssl/misc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-28854548e0d878c2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "61ab95f7e96f2b0f2acdcafb8afde2f6c43e899416397230c2fae9c1e701e45b"
+    }
+   ],
+   "fileName": "/etc/ssl/misc/CA.pl",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-bb6eaa44aefef49",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/ssl/misc/tsget",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1b1e12f00cbb2df9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "1b7cc20d44514500ac677bbab8ebeb271f77e0cae192d330d02fff8954e0f523"
+    }
+   ],
+   "fileName": "/etc/ssl/misc/tsget.pl",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1087f474228124bb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "f10ba64917b4458fafc1e078c2eb9e6a7602e68fc98c2e9e6df5e1636ae27d6b"
+    }
+   ],
+   "fileName": "/etc/ssl/openssl.cnf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-61a86d4a797602e5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "f10ba64917b4458fafc1e078c2eb9e6a7602e68fc98c2e9e6df5e1636ae27d6b"
+    }
+   ],
+   "fileName": "/etc/ssl/openssl.cnf.dist",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a93ae07983080493",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/ssl/private",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-795c342188acc719",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "8bba47da45bc8715c69ac904a60410eabffaa7bbbef640f9c1368ab9c48493d0"
+    }
+   ],
+   "fileName": "/etc/sysctl.conf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7eb35e1063eb95f5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/etc/sysctl.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f475459004544a56",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "9249f3fd52c2500bfe3586def6765b82336ba7832b65cb8c6b8ca1999c31342e"
+    }
+   ],
+   "fileName": "/etc/udhcpd.conf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b8bf837c32e3271b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/home",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cffb47d7273d4cd8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e24dc6fafdb1098",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/apk",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3d301cffc60158cd",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/apk/db",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cdc0596995eae4f8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "719aeeeaa4023732b8425b236e7d2f5334a138803725465e29e80fe466f57cc5"
+    }
+   ],
+   "fileName": "/lib/apk/db/installed",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4aa164dbdfa531fc",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/apk/db/lock",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8247ce152582a12a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "078ea156b135d0c3e4d4b947ebeea9540189731b8318f2952d0176653f2915ff"
+    }
+   ],
+   "fileName": "/lib/apk/db/scripts.tar",
+   "fileTypes": [
+    "APPLICATION",
+    "ARCHIVE"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6cf3a5a9353a152d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"
+    }
+   ],
+   "fileName": "/lib/apk/db/triggers",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e2a435a9c9e90ff1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/firmware",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e2c90ae8ae67431f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "9ff0a5277b38d46564473d4abaeb35e1b63c68f32084091fc35dab9c08b735d2"
+    }
+   ],
+   "fileName": "/lib/ld-musl-x86_64.so.1",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d8bdade972f61759",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "29310b88202123b955cf0c277ec13f27504044758003f2798f9ee9afb0ca5e07"
+    }
+   ],
+   "fileName": "/lib/libapk.so.3.12.0",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-208519c7fb10de40",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/libc.musl-x86_64.so.1",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c35e7c8840928dba",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "11c30063cf5b182006d20b4be649ef986cee51cbf7150a8cf6f54bed82c02273"
+    }
+   ],
+   "fileName": "/lib/libcrypto.so.1.1",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-535cfe0185d18797",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "676b39b9f454b176e1800df02f91b919851036868595d48996f1fb9e3d0c31c6"
+    }
+   ],
+   "fileName": "/lib/libssl.so.1.1",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8b4613c1493103b1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/libz.so.1",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6d1b682f6d48f488",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "666eb7ed6aa2e835e412c07288763e6c8ec241773e7f1287e0ea57490b6cd2fd"
+    }
+   ],
+   "fileName": "/lib/libz.so.1.2.12",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-34386112689f4560",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/mdev",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-805a711146e1a1c2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/modules-load.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2f92d66bf783345c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/lib/sysctl.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-336bc8ce40e7fc42",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ee169bea2cb6859420b55ca7a9c23fb68b50adc1d26c951f904dec9e8f767380"
+    }
+   ],
+   "fileName": "/lib/sysctl.d/00-alpine.conf",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ac87c1d2d7e7a916",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/media",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f150103421c00981",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/media/cdrom",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7c13b32c4eee245f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/media/floppy",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-30f8fd50b55ad756",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/media/usb",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-681b996188278436",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/mnt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-339b11d854daeb72",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/opt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-81ea045f92f3f3e8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/proc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b155cd268a170b84",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/root",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8bc567d10d12fb84",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/run",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c356596502dc5cf6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f85bb9068bae413c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/acpid",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-640d7d6acf4f33fb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/adjtimex",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4fb0c07667dac902",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "7995d69305583789568e85eeac0abf0c3c7166c4edb53afc5910e57ff0b37650"
+    }
+   ],
+   "fileName": "/sbin/apk",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-98a7444f4abe5ec4",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/arp",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e6e9c2e966235903",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/blkid",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f300ae544281a798",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/blockdev",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ddede65ceae72ee8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/depmod",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-bff3c3f2662bca96",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/fbsplash",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2b069aa4f5050d65",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/fdisk",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-baed9c0bbc4010a9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/findfs",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b81047d9d7838651",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/fsck",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2ea7ecc86d205890",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/fstrim",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2e5f6c75f28f6894",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/getty",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1d61bd966655de9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/halt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ae49575c38f6b823",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/hwclock",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e6f61d5a264a5d97",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/ifconfig",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b7f57b7e8211f4e2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/ifdown",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1e2aaa57754594eb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/ifenslave",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-aab9c7d547f236b3",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/ifup",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-31440658b4b1d99d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/init",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cb3acab296038af5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/inotifyd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-eb675f341c3dd773",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/insmod",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-724123a63e686485",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/ip",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1bdbba7b78e8be39",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/ipaddr",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-70ac6df8f880949",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/iplink",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5467634cad795ab",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/ipneigh",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3a76d5b76bc036e9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/iproute",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c6310ad235feae09",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/iprule",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9639e69c6e734242",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/iptunnel",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1bf0f3b75e3a9931",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/klogd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1b08cd6c03818e29",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "b4a2c06db38742e8c42c3c9838b285a7d8cdac6c091ff3df5ff9a15f1e41b9c7"
+    }
+   ],
+   "fileName": "/sbin/ldconfig",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b33d01aac6edd138",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/loadkmap",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-861519ca92f1b738",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/logread",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3ed1810eb266c3ac",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/losetup",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1c209d27b4d8e393",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/lsmod",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-188777b94d438ff6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/mdev",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-561f375cd7a22390",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/mkdosfs",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f958aec0d14a2ce8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/mkfs.vfat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-da399cec16efc781",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ab0f9ffe6fb1064ed2736c8191f841daaf54700f5e7b670e56fca7d7855dece8"
+    }
+   ],
+   "fileName": "/sbin/mkmntdirs",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-55616c3df5c6c2b3",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/mkswap",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-179d336d44cbfb01",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/modinfo",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4475abb43fa01e7a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/modprobe",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-535edc98c8ebc2e8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/nameif",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f76ed7bebb983017",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/nologin",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9d346865056e5edb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/pivot_root",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-aa2d1f895296bb81",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/poweroff",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-59222b813d99c229",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/raidautorun",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3e99ba841cdd1f52",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/reboot",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7c406a69fc2677d5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/rmmod",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7304602a08d41b0f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/route",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-eee57e03020c3d03",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/setconsole",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c9f7a2aa74476f58",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/slattach",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-973d6b192364e40e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/swapoff",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a470bccb2d0daa5f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/swapon",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1b42cd20e49c9b0a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/switch_root",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-534c78e7ef3ac5fa",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/sysctl",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b0fffa47b8142af7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/syslogd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b6eeba9d6f038e11",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/tunctl",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5e89953341cc3c7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/udhcpc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e05b316d0446070e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/vconfig",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3d01f921739c2f28",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sbin/watchdog",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7c7ce058037e2190",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/srv",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6369193aa105597",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/sys",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8487b94ff450ac05",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/tmp",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-194796ebdf821fa",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b63f886355bbf0b5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f23a37273003a753",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/[",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-765fe54688564957",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/[[",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-348c7c07fa2ab418",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/awk",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fc1a0c24f4938d78",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/basename",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b983037a405d5b7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/bc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-872d8acee3cefb42",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/beep",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c69e76ee520f6195",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/blkdiscard",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a0924fe480e5f629",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/bunzip2",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8908c128ffb3f7ea",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/bzcat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4c1dce09863fee2a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/bzip2",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-80005a0a86aea7a1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/cal",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-513eb1b91680853f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/chvt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a4ff393476ca2390",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/cksum",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ba72f2ae46ff1f42",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/clear",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3dff265d82c616d0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/cmp",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3f45bb6c85dca839",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/comm",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-bedf0eba043c3e21",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/cpio",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b657f2322758202b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/crontab",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-27985d4803353ff0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/cryptpw",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5f94f1809869577e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/cut",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-695a03761bea2039",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/dc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2a14674e978a67b6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/deallocvt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3397f1a14ef0642e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/diff",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c2fa423e2b11d572",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/dirname",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b53f2921f92d2561",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/dos2unix",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7fed746b977a6142",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/du",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-50b65ea02d9a39b2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/eject",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-438d7ef9cdf531c9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/env",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7143f99e97fc9466",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/expand",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1a8f8cbedeb25852",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/expr",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5ccd809307038f5d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/factor",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-119c905f70531049",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/fallocate",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e7a774ba14c608db",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/find",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-197b7f1cd811f9df",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/flock",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b4dd32b6afad1c67",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/fold",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-df5d962f5176bee",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/free",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ecf22017238d9b27",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/fuser",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c1d35477db673e2d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ef0f3388fc8ad6eac493525be5831c4fcf055522ce16ad3e4a0bec550c4adaaa"
+    }
+   ],
+   "fileName": "/usr/bin/getconf",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4a324ad304be8e9a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "7306a001bab1979c128dfb78ef0ae9d3a3306d142553bfa6efe85e1e7d9d3468"
+    }
+   ],
+   "fileName": "/usr/bin/getent",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e456444cc14f6470",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/groups",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cb3832c3e6b5e3d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/hd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-45052213aeaa69c0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/head",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8b5c9c3957b7c8a3",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/hexdump",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f223ffa52ccb1492",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/hostid",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-98233f67f18b2755",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "f25ca03efd9a1b6604f05e117eee70c4710e573ddcdb79a6f8d83334b2085f8a"
+    }
+   ],
+   "fileName": "/usr/bin/iconv",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cd43cdccdbbc931a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/id",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7c13dacae0dfd69b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/install",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f1131a9b4f5c6c7d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/ipcrm",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b0ca5c57445639de",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/ipcs",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-29d2ddb04269d5ee",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/killall",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fbb7f53f1b93e5a9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/last",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2cd2aeb015390775",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "9a49c2541a439be89f1ef1496604ef3b607f460d589877c60775acf74cdb5dfb"
+    }
+   ],
+   "fileName": "/usr/bin/ldd",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b84005f4ae1f5570",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/less",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-32b499cc4ba08006",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/logger",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3b50332d71d188e2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/lsof",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3bcff80221ef63cb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/lsusb",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fd824f0da5f25c21",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/lzcat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7bf77f3a4d43c6a8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/lzma",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-92e6bbb445af06ef",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/lzopcat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6fb43590e921a3b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/md5sum",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3be38ae10fe88684",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/mesg",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ec920dde52e9cbd6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/microcom",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d5b5db9af81b7690",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/mkfifo",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-35901f6c620330a3",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/mkpasswd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4e9aa9170cfa3d2c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/nc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6b5976c879d8ac33",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/nl",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-48578e3c02d92f2b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/nmeter",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3625c9aa8242111",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/nohup",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-38d2a6fb836b57d9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/nproc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a2a8dc122ab3460b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/nsenter",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-28db97080f57a505",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/nslookup",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ca4d817ce3ecc0af",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/od",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ecfd2582c23e7691",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/openvt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-674592a39a4a698e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/passwd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e18f6a6ac71e99d2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/paste",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-66e3ec03dd11fa67",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/pgrep",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b56b21d507c8ccf7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/pkill",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-efa6b56ff7815ac8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/pmap",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cfae4723603c344",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/printf",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1ab04bca20ad1558",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/pscan",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-19052feecf3a9c9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/pstree",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2e981779e7a27f82",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/pwdx",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b6fa26b0668ea5b0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/readlink",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-69b4b7b551bfd814",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/realpath",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ab4e1381625b3501",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/renice",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-196843210580204d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/reset",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5d8551de6ccb963d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/resize",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-19e9882925c797f5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "96c87ffb92aa18f7db3ea650acf406f303690becc6f3f0a403f2d01d593ae03b"
+    }
+   ],
+   "fileName": "/usr/bin/scanelf",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ed1d881f6c85dcb5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/seq",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f033f50cf8eee96f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/setkeycodes",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9fd69c6984f4a74a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/setsid",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-607a58adf10ea4fa",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/sha1sum",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-141a5f52471b9634",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/sha256sum",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-743a7d8b834aa43c",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/sha3sum",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-56242c1aff250483",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/sha512sum",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ce7c0846bc5bbbed",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/showkey",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3db28b7859acfba6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/shred",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e8a8178fea4ef48a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/shuf",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b849c690e8270092",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/sort",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-70ccbaf89d5cde7d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/split",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a74d39439f2d84b8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "a47f0a28dc8113a35aa1b8ed1bfb579940651403bd154463803e0f5daf898fb9"
+    }
+   ],
+   "fileName": "/usr/bin/ssl_client",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-595dd52f61d703a1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/strings",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5a49107fa2176e04",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/sum",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-60fbe7d2a5a37a68",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/tac",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a53a70fe16e570c9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/tail",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-33b51aede163a0f6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/tee",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-31ce38042709e82",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/test",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c3f9e1c6357f3f35",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/time",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1c08b30fa6a03f32",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/timeout",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-36d244fae2bca483",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/top",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-94096781d8673fcb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/tr",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-97e3c8147fda07b8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/traceroute",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-44d6c5925ff36f0f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/traceroute6",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f96b10b653c47c93",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/truncate",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d472e527f7b4ca03",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/tty",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1d4e5def73e5c333",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/ttysize",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-696729fe8c148dbe",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/udhcpc6",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d9c88ddfe8bb2953",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unexpand",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-79c6a5bd868f5699",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/uniq",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-796e6ecaf375b5dc",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unix2dos",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-efbf3eb21e591b5f",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unlink",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-839a3e861afbb621",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unlzma",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a5a8f028fb278d91",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unlzop",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-680bf02863c6c48b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unshare",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5bf01245e7687b12",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unxz",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6e7a257e5301a501",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/unzip",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9ae5e9d1cb8785bb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/uptime",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-60b45199fe66114",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/uudecode",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b7c120ee76213d77",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/uuencode",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9b95595b8e9678e5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/vi",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2f991eee29f71092",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/vlock",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7e9e6bc9c8f39ba1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/volname",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4c234ab7c0638bc2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/wc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-49d6313145c51ab3",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/wget",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-17f7764911c2c581",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/which",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ac4c0ab8dda876c5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/who",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a74e7e0f9b1caec6",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/whoami",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2172e8b15cfc9ccd",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/whois",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-292ee98723f0a666",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/xargs",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d5f25402f5a3e671",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/xxd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-53bbffe1b4f9dbf8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/xzcat",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3474c0ca866edd72",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/bin/yes",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-86e42b282c5bac55",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/lib",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e1a1ff799f8c566b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/lib/engines-1.1",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c3c38e46778cd717",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ee3b7ea14cc8298a030f06275cec39f36cfe66ac0e23c7f2b8928913d45a00d5"
+    }
+   ],
+   "fileName": "/usr/lib/engines-1.1/afalg.so",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-dd0104ad41122fa2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "0f8f098d28379770394547e5980e47a03abcea7505538b1ea4b867f4baa17eb6"
+    }
+   ],
+   "fileName": "/usr/lib/engines-1.1/capi.so",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-eb47016cd05f7d35",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "273bc638dec6c0158a4f82c3031a147a58300e99f380443ea972e9925f3fc21a"
+    }
+   ],
+   "fileName": "/usr/lib/engines-1.1/padlock.so",
+   "fileTypes": [
+    "APPLICATION",
+    "BINARY"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f21d4157543dac49",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/lib/libcrypto.so.1.1",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4455fe867bba9f13",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/lib/libssl.so.1.1",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e99605043ae5ba8a",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/lib/modules-load.d",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9dc542f75211e9e8",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/local",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b10224017fa15885",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/local/bin",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-960792a379cead11",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/local/lib",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-148247f11035d712",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/local/share",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-df5963b6756b0690",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9bb68ebe77312158",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/add-shell",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f2aaccf82d62d787",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/addgroup",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b9018ff6754bac80",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/adduser",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b425a3b89a8041ac",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/arping",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-79722dbfe10f7152",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/brctl",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5c322cc83bc51d4e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/chpasswd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-34dfe590c980749e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/chroot",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b56c12bd1ff25593",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/crond",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-b1ff782c12574c15",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/delgroup",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f0d6de93809007c0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/deluser",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-249cf573e2f93189",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/ether-wake",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4dc0e76229be8e3b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/fbset",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e6a0c480159cd69e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/killall5",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3bfadcf37caf559d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/loadfont",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fa641e7838fd7c5b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/nanddump",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-33df0b77f531e903",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/nandwrite",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d3e86f6b87a40f1b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/nbd-client",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fb0291e244ab1102",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/ntpd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-268935888d91f282",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/partprobe",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2e394c37f12297db",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/rdate",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6247d3bcbf092831",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/rdev",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8070699acfa264a5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/readahead",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-eeecc329ddae5cb9",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/remove-shell",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ea7291dd844ac6b7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/rfkill",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-65da3e8e718d7c2e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/sendmail",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-86faebb8c822299b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/setfont",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cd7224c06427ebad",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/sbin/setlogcons",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a97dfde4f53dde17",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5324741a998fef5b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-65835a57c69c540b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fe40eb02fe7b8700",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/aarch64",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-70dc9aadf689747",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/aarch64/alpine-devel@lists.alpinelinux.org-58199dcc.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-541d049ef5e2b0a1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/aarch64/alpine-devel@lists.alpinelinux.org-616ae350.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c549a0b76f823487",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "9c102bcc376af1498d549b77bdbfa815ae86faa1d2d82f040e616b18ef2df2d4"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-fb57f5df1fd169db",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ebf31683b56410ecc4c00acd9f6e2839e237a3b62b5ae7ef686705c7ba0396a9"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-5243ef4b.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-6d7742dc4838b698",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "1bb2a846c0ea4ca9d0e7862f970863857fc33c32f5506098c636a62a726a847b"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-524d27bb.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f96f56f789a464ad",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "12f899e55a7691225603d6fb3324940fc51cd7f133e7ead788663c2b7eecb00c"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-300f983a142f9504",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "73867d92083f2f8ab899a26ccda7ef63dfaa0032a938620eda605558958a8041"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58199dcc.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9b559b61986fccb0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-492cf038d1d9fd9b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "780b3ed41786772cbc7b68136546fa3f897f28a23b30c72dde6225319c44cfff"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58e4f17d.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-716461c423874936",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "59c01c57b446633249f67c04b115dd6787f4378f183dff2bbf65406df93f176d"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-5e69ca50.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-44193297ee82bac1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "db0b49163f07ffba64a5ca198bcf1688610b0bd1f0d8d5afeaf78559d73f2278"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-60ac2099.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-14473a45c2af16d7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "207e4696d3c05f7cb05966aee557307151f1f00217af4143c1bcaf33b8df733f"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4cbd1b18ddd59c42",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "128d34d4aec39b0daedea8163cd8dc24dff36fd3d848630ab97eeb1d3084bbb3"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-61666e3f.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-45232e260abd77f7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "10877cce0a935e46ad88cb79e174a2491680508eccda08e92bf04fb9bf37fbc1"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616a9724.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-221af60be84b09c0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "4a095a9daca86da496a3cd9adcd95ee2197fdbeb84638656d469f05a4d740751"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616abc23.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-156d627c97a2de34",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "0caf5662fde45616d88cfd7021b7bda269a2fcaf311e51c48945a967a609ec0b"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616ac3bc.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f91e100c74bf27e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "ebe717d228555aa58133c202314a451f81e71f174781fd7ff8d8970d6cfa60da"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616adfeb.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-879bdb5c61068a44",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "d11f6b21c61b4274e182eb888883a8ba8acdbf820dcc7a6d82a7d9fc2fd2836d"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616ae350.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-af1d9aa588b56c47",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "40a216cbd163f22e5f16a9e0929de7cde221b9cbae8e36aa368b1e128afe0a31"
+    }
+   ],
+   "fileName": "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-616db30d.rsa.pub",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e30294d4cd647ed2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/armhf",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5aadd8363dddfecf",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/armhf/alpine-devel@lists.alpinelinux.org-524d27bb.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a5d2aa26dfaf4d20",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/armhf/alpine-devel@lists.alpinelinux.org-616a9724.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c735e863895ff269",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/armv7",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1033afb4c62d085d",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/armv7/alpine-devel@lists.alpinelinux.org-524d27bb.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-94196e80bb8892c0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/armv7/alpine-devel@lists.alpinelinux.org-616adfeb.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a799880a6fd86c4b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/mips64",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4c4fcd44c354a066",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/mips64/alpine-devel@lists.alpinelinux.org-5e69ca50.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-268b57d31210c28e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/ppc64le",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-56babbe8e8fd2287",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/ppc64le/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-49ad2c1e8293ef29",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/ppc64le/alpine-devel@lists.alpinelinux.org-616abc23.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7963310af943a721",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/riscv64",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-203211ed4a76b1d4",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/riscv64/alpine-devel@lists.alpinelinux.org-60ac2099.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-29a5b771cade4759",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/riscv64/alpine-devel@lists.alpinelinux.org-616db30d.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-bcf680e90133b840",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/s390x",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f7d469925bce5d10",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/s390x/alpine-devel@lists.alpinelinux.org-58e4f17d.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-4dee6d682ecde802",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/s390x/alpine-devel@lists.alpinelinux.org-616ac3bc.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-5a46bbcaf25fb848",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7f0e1d7bc304563b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-44c5958bedb3d810",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86/alpine-devel@lists.alpinelinux.org-5243ef4b.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c186a0e29d76248e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86/alpine-devel@lists.alpinelinux.org-61666e3f.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-67a5d75cd1ad596",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86_64",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-161709a072dfecf2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86_64/alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-49281ca1e3f00a3b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86_64/alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3ff5b4becd342681",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/apk/keys/x86_64/alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cb41ac88d5cb26a7",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/man",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-af52fb8d3590cb4b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/misc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-a43f3fe28f10ecd1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/usr/share/udhcpc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1ba0b361ecdca2c4",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "checksums": [
+    {
+     "algorithm": "SHA256",
+     "checksumValue": "04d4b9c67b5e4ee561047a3578d3d031bda5580435c2f118651394a3325a101f"
+    }
+   ],
+   "fileName": "/usr/share/udhcpc/default.script",
+   "fileTypes": [
+    "TEXT"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-74be20b5416a9f2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-43ebc1e2504f000",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/cache",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7bf902e930c618ee",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/cache/apk",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-9209883d906757b1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/cache/misc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-701cf174f2de7661",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/empty",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-ab9a29ea507bbbb0",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/lib",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-7f0c2e359314e949",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/lib/apk",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2cf90cc71e34dcb5",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/lib/misc",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-844a532e50626ac2",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/lib/udhcpd",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f2a84881d51bc133",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/local",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-1a5f40e282e61f48",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/lock",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-49d6649ddd3e5366",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/lock/subsys",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-2b982846d681d17b",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/log",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-c1f4f6d0a2162991",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/mail",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-e31371020debc92e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/opt",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-3356230db584c930",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/run",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-cb3ed0fe5c907bff",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/spool",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-d6509035b2fb7bc1",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/spool/cron",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-8aec287d56fa13fe",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/spool/cron/crontabs",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-f238d90df9726abb",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/spool/mail",
+   "fileTypes": [
+    "OTHER"
+   ]
+  },
+  {
+   "SPDXID": "SPDXRef-659b325adddd783e",
+   "comment": "layerID: sha256:994393dc58e7931862558d06e46aa2bb17487044f670f310dffe1d24e4d1eec7",
+   "licenseConcluded": "NOASSERTION",
+   "fileName": "/var/tmp",
+   "fileTypes": [
+    "OTHER"
+   ]
+  }
+ ],
+ "relationships": [
+  {
+   "spdxElementId": "SPDXRef-2bc2db5bac1d0fe4",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-1ba0b361ecdca2c4"
+  },
+  {
+   "spdxElementId": "SPDXRef-2bc2db5bac1d0fe4",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-2acfdc9dad72d150"
+  },
+  {
+   "spdxElementId": "SPDXRef-2bc2db5bac1d0fe4",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-7dc15fca12e2f017"
+  },
+  {
+   "spdxElementId": "SPDXRef-2bc2db5bac1d0fe4",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-8197f64c214a5a16"
+  },
+  {
+   "spdxElementId": "SPDXRef-2bc2db5bac1d0fe4",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-9ce55bcb43ee284f"
+  },
+  {
+   "spdxElementId": "SPDXRef-2bc2db5bac1d0fe4",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-f475459004544a56"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-14c57fa7ac8df92"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-2ac427870f248704"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-2be29626dd7a31e2"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-2e3b308d2192da55"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-4cb78c1b83f3f6fa"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-58256f3c5c4e6aa2"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-5b4c64f05d9b355a"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-5c71002e828599e6"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-5ec7e40e4299d952"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-75b6ed72d694a357"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-795c342188acc719"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-9622c4a77c0af92d"
+  },
+  {
+   "spdxElementId": "SPDXRef-33b5ab4a81e975bd",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-bd8e6d084d722e0a"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-1ee0f450becc786f"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-336bc8ce40e7fc42"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-3cf575889d9cc66c"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-5be401ad758d7c8"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-757351ee498badd7"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-786c4e711c1a558b"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-88b0f6fae4de13a0"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-a6c4c4e977ddf6d8"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-cb0990ff1c4365e4"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-da399cec16efc781"
+  },
+  {
+   "spdxElementId": "SPDXRef-35085779bdf473bb",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-de2a9cb8a967fb5b"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-14473a45c2af16d7"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-156d627c97a2de34"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-1ee1cd40588ab89c"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-221af60be84b09c0"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-274572174bc1cc7a"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-300f983a142f9504"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-44193297ee82bac1"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-45232e260abd77f7"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-492cf038d1d9fd9b"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-4cbd1b18ddd59c42"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-4d1c352ad50e20b2"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-6d7742dc4838b698"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-716461c423874936"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-879bdb5c61068a44"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-9b559b61986fccb0"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-af1d9aa588b56c47"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-c549a0b76f823487"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-eb93193a7276c76a"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-f542a07f45615070"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-f91e100c74bf27e"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-f96f56f789a464ad"
+  },
+  {
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-fb57f5df1fd169db"
+  },
+  {
+   "spdxElementId": "SPDXRef-3ff09d7a5e0dc2ed",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-754289e667437895"
+  },
+  {
+   "spdxElementId": "SPDXRef-7514a98b23f9928c",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-19e9882925c797f5"
+  },
+  {
+   "spdxElementId": "SPDXRef-7aec2be3ffd82c3c",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-a74d39439f2d84b8"
+  },
+  {
+   "spdxElementId": "SPDXRef-94e7e84b87c1f8c3",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-6d1b682f6d48f488"
+  },
+  {
+   "spdxElementId": "SPDXRef-9bb9cb82a4ce72b1",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-4fb0c07667dac902"
+  },
+  {
+   "spdxElementId": "SPDXRef-9bb9cb82a4ce72b1",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-d8bdade972f61759"
+  },
+  {
+   "spdxElementId": "SPDXRef-b703a8e4e90dd6dc",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-1b08cd6c03818e29"
+  },
+  {
+   "spdxElementId": "SPDXRef-b703a8e4e90dd6dc",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-2cd2aeb015390775"
+  },
+  {
+   "spdxElementId": "SPDXRef-b703a8e4e90dd6dc",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-4a324ad304be8e9a"
+  },
+  {
+   "spdxElementId": "SPDXRef-b703a8e4e90dd6dc",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-98233f67f18b2755"
+  },
+  {
+   "spdxElementId": "SPDXRef-b703a8e4e90dd6dc",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-c1d35477db673e2d"
+  },
+  {
+   "spdxElementId": "SPDXRef-bebc881007d932d",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-535cfe0185d18797"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-1087f474228124bb"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-1b1e12f00cbb2df9"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-28854548e0d878c2"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-61a86d4a797602e5"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-c35e7c8840928dba"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-c3c38e46778cd717"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-dd0104ad41122fa2"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-e5e1738bbb13275f"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-eb47016cd05f7d35"
+  },
+  {
+   "spdxElementId": "SPDXRef-cce075f4f19baaee",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-fa7856d6d0b238f1"
+  },
+  {
+   "spdxElementId": "SPDXRef-ec1d619a28263eb0",
+   "relationshipType": "CONTAINS",
+   "relatedSpdxElement": "SPDXRef-e2c90ae8ae67431f"
+  }
+ ]
+}

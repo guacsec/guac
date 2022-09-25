@@ -13,22 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package assembler
 
-import (
-	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/handler/processor"
-)
+import "reflect"
 
-type GraphBuilder interface {
-	CreateAssemblerInput([]assembler.IdentityNode) assembler.AssemblerInput
-	GetIdentities() []assembler.IdentityNode
-}
-
-type DocumentParser interface {
-	Parse(doc *processor.Document) error
-	GetIdentities() []assembler.IdentityNode
-	CreateNodes() []assembler.GuacNode
-	CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
-	GetDocType() processor.DocumentType
+func isDefined(v interface{}) bool {
+	return !reflect.ValueOf(v).IsZero()
 }

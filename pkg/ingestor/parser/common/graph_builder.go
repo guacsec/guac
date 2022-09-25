@@ -17,77 +17,28 @@ package common
 
 import (
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 type genericGraphBuilder struct {
-	Doc                   *processor.Document
-	FoundIdentities       []assembler.IdentityNode
-	FoundSubjectArtifacts []assembler.ArtifactNode
-	FoundAttestations     []assembler.AttestationNode
-	FoundBuilders         []assembler.BuilderNode
-	FoundDependencies     []assembler.ArtifactNode
+	docParser       DocumentParser
+	foundIdentities []assembler.IdentityNode
 }
 
-func NewGenericGraphBuilder() *genericGraphBuilder {
+func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assembler.IdentityNode) *genericGraphBuilder {
 	return &genericGraphBuilder{
-		FoundIdentities:       []assembler.IdentityNode{},
-		FoundSubjectArtifacts: []assembler.ArtifactNode{},
-		FoundAttestations:     []assembler.AttestationNode{},
-		FoundBuilders:         []assembler.BuilderNode{},
-		FoundDependencies:     []assembler.ArtifactNode{},
+		docParser:       docParser,
+		foundIdentities: foundIdentities,
 	}
 }
 
-func (b *genericGraphBuilder) CreateAssemblerInput(FoundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
+func (b *genericGraphBuilder) CreateAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
 	assemblerinput := assembler.AssemblerInput{
-		Nodes: b.createNodes(),
-		Edges: b.createEdges(FoundIdentities),
+		Nodes: b.docParser.CreateNodes(),
+		Edges: b.docParser.CreateEdges(foundIdentities),
 	}
 	return assemblerinput
 }
 
 func (b *genericGraphBuilder) GetIdentities() []assembler.IdentityNode {
-	return b.FoundIdentities
-}
-
-func (b *genericGraphBuilder) createEdges(FoundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
-	edges := []assembler.GuacEdge{}
-	for _, i := range FoundIdentities {
-		for _, a := range b.FoundAttestations {
-			edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: a})
-		}
-	}
-	for _, s := range b.FoundSubjectArtifacts {
-		for _, build := range b.FoundBuilders {
-			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: s, BuilderNode: build})
-		}
-		for _, a := range b.FoundAttestations {
-			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ArtifactNode: s})
-		}
-		for _, d := range b.FoundDependencies {
-			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: s, Dependency: d})
-		}
-	}
-	return edges
-}
-
-func (b *genericGraphBuilder) createNodes() []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	for _, i := range b.FoundIdentities {
-		nodes = append(nodes, i)
-	}
-	for _, s := range b.FoundSubjectArtifacts {
-		nodes = append(nodes, s)
-	}
-	for _, a := range b.FoundAttestations {
-		nodes = append(nodes, a)
-	}
-	for _, d := range b.FoundDependencies {
-		nodes = append(nodes, d)
-	}
-	for _, b := range b.FoundBuilders {
-		nodes = append(nodes, b)
-	}
-	return nodes
+	return b.foundIdentities
 }
