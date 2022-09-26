@@ -18,6 +18,7 @@ package spdx
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -55,10 +56,10 @@ func (s *spdxParser) getPackages() {
 		currentPackage.Name = pac.PackageName
 		if len(pac.PackageExternalReferences) > 0 {
 			for _, ext := range pac.PackageExternalReferences {
-				if ext.Category == "SECURITY" {
+				if strings.Contains(ext.RefType, "cpe") {
 					currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
 				}
-				if ext.Category == "PACKAGE-MANAGER" {
+				if ext.RefType == "purl" {
 					currentPackage.Purl = ext.Locator
 				}
 			}
@@ -128,10 +129,10 @@ func (s *spdxParser) getFileElement(elementID string) []assembler.ArtifactNode {
 func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
 	for _, rel := range s.spdxDoc.Relationships {
-		foundPackNodes := s.getPackageElement(string(rel.RefA.ElementRefID))
-		foundFileNodes := s.getFileElement(string(rel.RefA.ElementRefID))
-		relatedPackNodes := s.getPackageElement(string(rel.RefB.ElementRefID))
-		relatedFileNodes := s.getFileElement(string(rel.RefB.ElementRefID))
+		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
+		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
+		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
+		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
 		if len(foundPackNodes) > 0 {
 			for _, packNode := range foundPackNodes {
 				if len(relatedFileNodes) > 0 {
