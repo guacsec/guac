@@ -13,27 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package guesser
+package testdata
 
-import (
-	"bytes"
+import _ "embed"
 
-	"github.com/guacsec/guac/pkg/handler/processor"
-	spdx_json "github.com/spdx/tools-golang/json"
+var (
+	// based off https://github.com/spdx/spdx-examples/blob/master/example7/spdx/example7-third-party-modules.spdx.json
+	//go:embed testdata/small-spdx.json
+	SpdxExampleSmall []byte
+
+	//go:embed testdata/alpine-spdx.json
+	SpdxExampleBig []byte
+
+	// Invalid types for field spdxVersion
+	//go:embed testdata/invalid-spdx.json
+	SpdxInvalidExample []byte
 )
-
-type spdxTypeGuesser struct{}
-
-func (_ *spdxTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
-	reader := bytes.NewReader(blob)
-	switch format {
-	case processor.FormatJSON:
-		spdxDoc, err := spdx_json.Load2_2(reader)
-		if err == nil {
-			if spdxDoc.DocumentName != "" {
-				return processor.DocumentSPDX
-			}
-		}
-	}
-	return processor.DocumentUnknown
-}

@@ -16,23 +16,10 @@
 package guesser
 
 import (
-	_ "embed"
 	"testing"
 
+	testdata "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
-)
-
-var (
-	// based off https://github.com/spdx/spdx-examples/blob/master/example7/spdx/example7-third-party-modules.spdx.json
-	//go:embed testdata/small-spdx.json
-	spdxExampleSmall []byte
-
-	//go:embed testdata/alpine-spdx.json
-	spdxExampleBig []byte
-
-	// Invalid types for field spdxVersion
-	//go:embed testdata/invalid-spdx.json
-	spdxInvalidExample []byte
 )
 
 func Test_spdxTypeGuesser_GuessDocumentType(t *testing.T) {
@@ -41,16 +28,22 @@ func Test_spdxTypeGuesser_GuessDocumentType(t *testing.T) {
 		blob     []byte
 		expected processor.DocumentType
 	}{{
+		name: "invalid spdx Document",
+		blob: []byte(`{
+			"abc": "def"
+		}`),
+		expected: processor.DocumentUnknown,
+	}, {
 		name:     "invalid spdx Document",
-		blob:     spdxInvalidExample,
+		blob:     testdata.SpdxInvalidExample,
 		expected: processor.DocumentUnknown,
 	}, {
 		name:     "valid small spdx Document",
-		blob:     spdxExampleSmall,
+		blob:     testdata.SpdxExampleSmall,
 		expected: processor.DocumentSPDX,
 	}, {
 		name:     "valid big spdx Document",
-		blob:     spdxExampleBig,
+		blob:     testdata.SpdxExampleBig,
 		expected: processor.DocumentSPDX,
 	}}
 	for _, tt := range testCases {

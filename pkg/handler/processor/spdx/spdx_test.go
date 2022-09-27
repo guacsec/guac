@@ -16,25 +16,12 @@
 package spdx
 
 import (
-	_ "embed"
 	"fmt"
 	"reflect"
 	"testing"
 
+	testdata "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
-)
-
-var (
-	// based off https://github.com/spdx/spdx-examples/blob/master/example7/spdx/example7-third-party-modules.spdx.json
-	//go:embed testdata/small-spdx.json
-	spdxExampleSmall []byte
-
-	//go:embed testdata/alpine-spdx.json
-	spdxExampleBig []byte
-
-	// Invalid types for field spdxVersion
-	//go:embed testdata/invalid-spdx.json
-	spdxInvalidExample []byte
 )
 
 func TestSPDXProcessor_Unpack(t *testing.T) {
@@ -46,7 +33,7 @@ func TestSPDXProcessor_Unpack(t *testing.T) {
 	}{{
 		name: "SPDX document",
 		doc: processor.Document{
-			Blob:              spdxExampleSmall,
+			Blob:              testdata.SpdxExampleSmall,
 			Format:            processor.FormatUnknown,
 			Type:              processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{},
@@ -56,7 +43,7 @@ func TestSPDXProcessor_Unpack(t *testing.T) {
 	}, {
 		name: "Incorrect type",
 		doc: processor.Document{
-			Blob:              spdxExampleSmall,
+			Blob:              testdata.SpdxExampleSmall,
 			Format:            processor.FormatUnknown,
 			Type:              processor.DocumentUnknown,
 			SourceInformation: processor.SourceInformation{},
@@ -66,7 +53,7 @@ func TestSPDXProcessor_Unpack(t *testing.T) {
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println(spdxExampleSmall)
+			fmt.Println(testdata.SpdxExampleSmall)
 			d := SPDXProcessor{}
 			actual, err := d.Unpack(&tt.doc)
 			if (err != nil) != tt.expectErr {
@@ -87,7 +74,7 @@ func TestSPDXProcessor_ValidateSchema(t *testing.T) {
 	}{{
 		name: "valid small SPDX document",
 		doc: processor.Document{
-			Blob:              spdxExampleSmall,
+			Blob:              testdata.SpdxExampleSmall,
 			Format:            processor.FormatJSON,
 			Type:              processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{},
@@ -96,7 +83,7 @@ func TestSPDXProcessor_ValidateSchema(t *testing.T) {
 	}, {
 		name: "valid big SPDX document",
 		doc: processor.Document{
-			Blob:              spdxExampleBig,
+			Blob:              testdata.SpdxExampleBig,
 			Format:            processor.FormatJSON,
 			Type:              processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{},
@@ -105,7 +92,7 @@ func TestSPDXProcessor_ValidateSchema(t *testing.T) {
 	}, {
 		name: "invalid SPDX document",
 		doc: processor.Document{
-			Blob:              spdxInvalidExample,
+			Blob:              testdata.SpdxInvalidExample,
 			Format:            processor.FormatJSON,
 			Type:              processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{},
@@ -114,7 +101,7 @@ func TestSPDXProcessor_ValidateSchema(t *testing.T) {
 	}, {
 		name: "invalid format supported",
 		doc: processor.Document{
-			Blob:              spdxExampleSmall,
+			Blob:              testdata.SpdxExampleSmall,
 			Format:            processor.FormatUnknown,
 			Type:              processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{},
