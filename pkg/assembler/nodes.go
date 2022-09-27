@@ -44,7 +44,7 @@ func (an ArtifactNode) IdentifiablePropertyNames() []string {
 // PackageNode is a node that represents an artifact
 type PackageNode struct {
 	Name   string
-	Digest string
+	Digest []string
 	Purl   string
 	CPEs   []string
 }
