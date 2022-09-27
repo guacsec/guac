@@ -67,8 +67,7 @@ func (an PackageNode) PropertyNames() []string {
 }
 
 func (an PackageNode) IdentifiablePropertyNames() []string {
-	// An artifact can be uniquely identified by digest
-	return []string{"purl", "digest"}
+	return []string{"purl"}
 }
 
 // IdentityNode is a node that represents an identity
