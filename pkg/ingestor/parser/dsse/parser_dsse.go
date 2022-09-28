@@ -29,12 +29,14 @@ type dsseParser struct {
 	identities []assembler.IdentityNode
 }
 
+// NewDSSEParser initializes the dsseParser
 func NewDSSEParser() *dsseParser {
 	return &dsseParser{
 		identities: []assembler.IdentityNode{},
 	}
 }
 
+// Parse breaks out the document into the graph components
 func (d *dsseParser) Parse(doc *processor.Document) error {
 	err := d.getIdentity(doc)
 	if err != nil {
@@ -59,10 +61,12 @@ func (d *dsseParser) getIdentity(doc *processor.Document) error {
 	return nil
 }
 
+// GetIdentities gets the identity node from the document if they exist
 func (d *dsseParser) GetIdentities() []assembler.IdentityNode {
 	return d.identities
 }
 
+// CreateNodes creates the GuacNode for the graph inputs
 func (d *dsseParser) CreateNodes() []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, i := range d.identities {
@@ -71,10 +75,12 @@ func (d *dsseParser) CreateNodes() []assembler.GuacNode {
 	return nodes
 }
 
+// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
 func (d *dsseParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	return []assembler.GuacEdge{}
 }
 
+// GetDocType returns the DocumentType that is being parsed
 func (d *dsseParser) GetDocType() processor.DocumentType {
 	return processor.DocumentDSSE
 }

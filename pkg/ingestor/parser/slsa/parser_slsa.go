@@ -37,6 +37,7 @@ type slsaParser struct {
 	builders     []assembler.BuilderNode
 }
 
+// NewSLSAParser initializes the slsaParser
 func NewSLSAParser() *slsaParser {
 	return &slsaParser{
 		subjects:     []assembler.ArtifactNode{},
@@ -46,6 +47,7 @@ func NewSLSAParser() *slsaParser {
 	}
 }
 
+// Parse breaks out the document into the graph components
 func (s *slsaParser) Parse(doc *processor.Document) error {
 	statement, err := parseSlsaPredicate(doc.Blob)
 	if err != nil {
@@ -98,6 +100,7 @@ func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
 	return &predicate, nil
 }
 
+// CreateNodes creates the GuacNode for the graph inputs
 func (s *slsaParser) CreateNodes() []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, sub := range s.subjects {
@@ -115,6 +118,7 @@ func (s *slsaParser) CreateNodes() []assembler.GuacNode {
 	return nodes
 }
 
+// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
 func (s *slsaParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
 	for _, i := range foundIdentities {
@@ -136,10 +140,12 @@ func (s *slsaParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 	return edges
 }
 
+// GetIdentities gets the identity node from the document if they exist
 func (s *slsaParser) GetIdentities() []assembler.IdentityNode {
 	return nil
 }
 
+// GetDocType returns the DocumentType that is being parsed
 func (s *slsaParser) GetDocType() processor.DocumentType {
 	return processor.DocumentITE6SLSA
 }

@@ -19,11 +19,13 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
+// GraphBuilder creates the assembler inputs based on the documents being parsed
 type GraphBuilder struct {
 	docParser       DocumentParser
 	foundIdentities []assembler.IdentityNode
 }
 
+// NewGenericGraphBuilder initializes the graphbulder
 func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assembler.IdentityNode) *GraphBuilder {
 	return &GraphBuilder{
 		docParser:       docParser,
@@ -31,6 +33,7 @@ func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assemble
 	}
 }
 
+// CreateAssemblerInput creates the GuacNodes and GuacEdges that are needed by the assembler
 func (b *GraphBuilder) CreateAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: b.docParser.CreateNodes(),
@@ -39,6 +42,7 @@ func (b *GraphBuilder) CreateAssemblerInput(foundIdentities []assembler.Identity
 	return assemblerinput
 }
 
+// GetIdentities returns the identity that is found when parsing a document
 func (b *GraphBuilder) GetIdentities() []assembler.IdentityNode {
 	return b.foundIdentities
 }
