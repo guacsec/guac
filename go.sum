@@ -287,6 +287,8 @@ github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasO
 github.com/spdx/gordf v0.0.0-20201111095634-7098f93598fb/go.mod h1:uKWaldnbMnjsSAXRurWqqrdyZen1R7kxl8TkmWk2OyM=
 github.com/spdx/tools-golang v0.3.1-0.20220818163346-5eb9315c0c55 h1:vVdz7zz4iQvAyUYbjGvd35FMyQEoFjV3BvpnzzBKXZc=
 github.com/spdx/tools-golang v0.3.1-0.20220818163346-5eb9315c0c55/go.mod h1:VHzvNsKAfAGqs4ZvwRL+7a0dNsL20s7lGui4K9C0xQM=
+github.com/spdx/tools-golang v0.3.1-0.20220928133246-97ef16cfc20c h1:Ya4RG6frpbgkMaUPZlIfdgfob1NYZxTvETnUBKZVC2I=
+github.com/spdx/tools-golang v0.3.1-0.20220928133246-97ef16cfc20c/go.mod h1:VHzvNsKAfAGqs4ZvwRL+7a0dNsL20s7lGui4K9C0xQM=
 github.com/spf13/cobra v1.5.0 h1:X+jTBEBqF0bHN+9cSMgmfuvv2VHJ9ezmFNf9Y/XstYU=
 github.com/spf13/cobra v1.5.0/go.mod h1:dWXEIy2H428czQCjInthrTRUg7yKbok+2Qi/yBIJoUM=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
