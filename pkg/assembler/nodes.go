@@ -41,36 +41,6 @@ func (an ArtifactNode) IdentifiablePropertyNames() []string {
 	return []string{"digest"}
 }
 
-// PackageNode is a node that represents an artifact
-type PackageNode struct {
-	Name   string
-	Digest string
-	Purl   string
-	CPEs   []string
-}
-
-func (an PackageNode) Type() string {
-	return "Package"
-}
-
-func (an PackageNode) Properties() map[string]interface{} {
-	properties := make(map[string]interface{})
-	properties["name"] = an.Name
-	properties["purl"] = an.Purl
-	properties["cpes"] = an.CPEs
-	properties["digest"] = an.Digest
-	return properties
-}
-
-func (an PackageNode) PropertyNames() []string {
-	return []string{"name", "digest", "purl", "cpes"}
-}
-
-func (an PackageNode) IdentifiablePropertyNames() []string {
-	// An artifact can be uniquely identified by digest
-	return []string{"purl", "digest"}
-}
-
 // IdentityNode is a node that represents an identity
 type IdentityNode struct {
 	ID     string
@@ -238,13 +208,10 @@ func (e BuiltByEdge) IdentifiablePropertyNames() []string {
 }
 
 // DependsOnEdge is an edge that represents the fact that an
-// `ArtifactNode/PackageNode` depends on another `ArtifactNode/PackageNode`
-// Only one of each side of the edge should be defined.
+// `ArtifactNode` depends on another `ArtifactNode`
 type DependsOnEdge struct {
-	ArtifactNode       ArtifactNode
-	PackageNode        PackageNode
-	ArtifactDependency ArtifactNode
-	PackageDependency  PackageNode
+	ArtifactNode ArtifactNode
+	Dependency   ArtifactNode
 }
 
 func (e DependsOnEdge) Type() string {
@@ -252,29 +219,7 @@ func (e DependsOnEdge) Type() string {
 }
 
 func (e DependsOnEdge) Nodes() (v, u GuacNode) {
-	vA, vP := isDefined(e.ArtifactNode), isDefined(e.PackageNode)
-	uA, uP := isDefined(e.ArtifactDependency), isDefined(e.PackageDependency)
-	if vA == vP {
-		panic("only one of package and artifact node defined for DependsOn relationship")
-	}
-
-	if uA == uP {
-		panic("only on of package and artifact dependency node defined for DependsOn relationship")
-	}
-
-	if vA {
-		v = e.ArtifactNode
-	} else {
-		v = e.PackageNode
-	}
-
-	if uA {
-		u = e.ArtifactDependency
-	} else {
-		u = e.PackageDependency
-	}
-
-	return v, u
+	return e.ArtifactNode, e.Dependency
 }
 
 func (e DependsOnEdge) Properties() map[string]interface{} {
@@ -286,32 +231,5 @@ func (e DependsOnEdge) PropertyNames() []string {
 }
 
 func (e DependsOnEdge) IdentifiablePropertyNames() []string {
-	return []string{}
-}
-
-// Contains is an edge that represents the fact that an
-// `PackageNode` contains a `ArtifactNode`
-type ContainsEdge struct {
-	PackageNode       PackageNode
-	ContainedArtifact ArtifactNode
-}
-
-func (e ContainsEdge) Type() string {
-	return "Contains"
-}
-
-func (e ContainsEdge) Nodes() (v, u GuacNode) {
-	return e.PackageNode, e.ContainedArtifact
-}
-
-func (e ContainsEdge) Properties() map[string]interface{} {
-	return map[string]interface{}{}
-}
-
-func (e ContainsEdge) PropertyNames() []string {
-	return []string{}
-}
-
-func (e ContainsEdge) IdentifiablePropertyNames() []string {
 	return []string{}
 }

@@ -20,11 +20,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
-type GraphBuilder interface {
-	CreateAssemblerInput([]assembler.IdentityNode) assembler.AssemblerInput
-	GetIdentities() []assembler.IdentityNode
-}
-
 type DocumentParser interface {
 	Parse(doc *processor.Document) error
 	GetIdentities() []assembler.IdentityNode

@@ -130,7 +130,7 @@ func (s *slsaParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ArtifactNode: sub})
 		}
 		for _, d := range s.dependencies {
-			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, ArtifactDependency: d})
+			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, Dependency: d})
 		}
 	}
 	return edges

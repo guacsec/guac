@@ -19,19 +19,19 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-type genericGraphBuilder struct {
+type GraphBuilder struct {
 	docParser       DocumentParser
 	foundIdentities []assembler.IdentityNode
 }
 
-func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assembler.IdentityNode) *genericGraphBuilder {
-	return &genericGraphBuilder{
+func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assembler.IdentityNode) *GraphBuilder {
+	return &GraphBuilder{
 		docParser:       docParser,
 		foundIdentities: foundIdentities,
 	}
 }
 
-func (b *genericGraphBuilder) CreateAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
+func (b *GraphBuilder) CreateAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: b.docParser.CreateNodes(),
 		Edges: b.docParser.CreateEdges(foundIdentities),
@@ -39,6 +39,6 @@ func (b *genericGraphBuilder) CreateAssemblerInput(foundIdentities []assembler.I
 	return assemblerinput
 }
 
-func (b *genericGraphBuilder) GetIdentities() []assembler.IdentityNode {
+func (b *GraphBuilder) GetIdentities() []assembler.IdentityNode {
 	return b.foundIdentities
 }
