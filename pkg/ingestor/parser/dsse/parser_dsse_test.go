@@ -16,89 +16,17 @@
 package dsse
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
+	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
-	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
-var (
-	// Taken from: https://slsa.dev/provenance/v0.1#example
-	ite6SLSA = `
-	{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"subject": [{"name": "helloworld", "digest": {"sha256": "5678..."}}],
-		"predicateType": "https://slsa.dev/provenance/v0.2",
-		"predicate": {
-			"builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
-			"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
-			"invocation": {
-			  "configSource": {
-				"uri": "git+https://github.com/curl/curl-docker@master",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },   
-				"entryPoint": "build.yaml:maketgz"
-			  }
-			},
-			"metadata": {
-			  "buildStartedOn": "2020-08-19T08:38:00Z",
-			  "completeness": {
-				  "environment": true
-			  }
-			},
-			"materials": [
-			  {
-				"uri": "git+https://github.com/curl/curl-docker@master",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
-			  }, {
-				"uri": "github_hosted_vm:ubuntu-18.04:20210123.1",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
-			  }
-			]
-		}
-	}`
-	b64ITE6SLSA    = base64.StdEncoding.EncodeToString([]byte(ite6SLSA))
-	ite6Payload, _ = json.Marshal(dsse.Envelope{
-		PayloadType: "https://in-toto.io/Statement/v0.1",
-		Payload:     b64ITE6SLSA,
-		Signatures: []dsse.Signature{{
-			KeyID: "id1",
-			Sig:   "test",
-		}},
-	})
-	ite6DSSEDoc = processor.Document{
-		Blob:   ite6Payload,
-		Type:   processor.DocumentDSSE,
-		Format: processor.FormatJSON,
-		SourceInformation: processor.SourceInformation{
-			Collector: "TestCollector",
-			Source:    "TestSource",
-		},
-	}
-
-	ecdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
-	keyHash, _               = dsse.SHA256KeyID(ecdsaPubKey)
-
-	ident = assembler.IdentityNode{
-		ID:        "test",
-		Digest:    keyHash,
-		Key:       base64.StdEncoding.EncodeToString(pemBytes),
-		KeyType:   "ecdsa",
-		KeyScheme: "ecdsa",
-	}
-
-	slsaNodes = []assembler.GuacNode{ident}
-	slsaEdges = []assembler.GuacEdge{}
-)
-
-func Test_slsaParser(t *testing.T) {
-	err := verifier.RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
+func Test_DsseParser(t *testing.T) {
+	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}
@@ -108,7 +36,7 @@ func Test_slsaParser(t *testing.T) {
 		wantErr bool
 	}{{
 		name:    "testing",
-		doc:     &ite6DSSEDoc,
+		doc:     &testdata.Ite6DSSEDoc,
 		wantErr: false,
 	}}
 	for _, tt := range tests {
@@ -117,45 +45,15 @@ func Test_slsaParser(t *testing.T) {
 			if err := d.Parse(tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if nodes := d.CreateNodes(); !reflect.DeepEqual(nodes, slsaNodes) {
-				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, slsaNodes)
+			if nodes := d.CreateNodes(); !reflect.DeepEqual(nodes, testdata.DsseNodes) {
+				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, testdata.DsseNodes)
 			}
-			if edges := d.CreateEdges([]assembler.IdentityNode{ident}); !reflect.DeepEqual(edges, slsaEdges) {
-				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, slsaEdges)
+			if edges := d.CreateEdges([]assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, testdata.DsseEdges) {
+				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, testdata.DsseEdges)
 			}
-			if docType := d.GetDocType(); !reflect.DeepEqual(docType, processor.DocumentDSSE) {
-				t.Errorf("slsa.GetDocType() = %v, want %v", docType, processor.DocumentDSSE)
-			}
-			if identity := d.GetIdentities(); !reflect.DeepEqual(identity, []assembler.IdentityNode{ident}) {
-				t.Errorf("slsa.GetDocType() = %v, want %v", identity, []assembler.IdentityNode{ident})
+			if identity := d.GetIdentities(); !reflect.DeepEqual(identity, []assembler.IdentityNode{testdata.Ident}) {
+				t.Errorf("slsa.GetDocType() = %v, want %v", identity, []assembler.IdentityNode{testdata.Ident})
 			}
 		})
 	}
-}
-
-type mockSigstoreVerifier struct{}
-
-func newMockSigstoreVerifier() *mockSigstoreVerifier {
-	return &mockSigstoreVerifier{}
-}
-
-func (m *mockSigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, error) {
-
-	keyHash, _ := dsse.SHA256KeyID(ecdsaPubKey)
-	return []verifier.Identity{
-		{
-			ID: "test",
-			Key: key.Key{
-				Hash:   keyHash,
-				Type:   "ecdsa",
-				Val:    ecdsaPubKey,
-				Scheme: "ecdsa",
-			},
-			Verified: true,
-		},
-	}, nil
-}
-
-func (m *mockSigstoreVerifier) Type() verifier.VerifierType {
-	return "sigstore"
 }
