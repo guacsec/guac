@@ -22,7 +22,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
@@ -66,5 +66,5 @@ require (
 
 require (
 	github.com/sigstore/sigstore v1.4.1
-	github.com/spdx/tools-golang v0.3.1-0.20220818163346-5eb9315c0c55
+	github.com/spdx/tools-golang v0.3.1-0.20220928133246-97ef16cfc20c
 )

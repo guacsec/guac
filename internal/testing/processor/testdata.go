@@ -25,6 +25,9 @@ var (
 	//go:embed testdata/alpine-spdx.json
 	SpdxExampleBig []byte
 
+	//go:embed testdata/alpine-small-spdx.json
+	SpdxExampleAlpine []byte
+
 	// Invalid types for field spdxVersion
 	//go:embed testdata/invalid-spdx.json
 	SpdxInvalidExample []byte

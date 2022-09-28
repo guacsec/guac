@@ -20,13 +20,14 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
+	processor_data "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 )
 
 var (
-	docTree = processor.DocumentNode{
+	dsseDocTree = processor.DocumentNode{
 		Document: &testdata.Ite6DSSEDoc,
 		Children: []*processor.DocumentNode{
 			{
@@ -36,12 +37,27 @@ var (
 		},
 	}
 
+	spdxDocTree = processor.DocumentNode{
+		Document: &processor.Document{
+			Blob:              processor_data.SpdxExampleAlpine,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentSPDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		Children: []*processor.DocumentNode{},
+	}
+
 	graphInput = []assembler.AssemblerInput{{
 		Nodes: testdata.DsseNodes,
 		Edges: testdata.DsseEdges,
 	}, {
 		Nodes: testdata.SlsaNodes,
 		Edges: testdata.SlsaEdges,
+	}}
+
+	spdxGraphInput = []assembler.AssemblerInput{{
+		Nodes: testdata.SpdxNodes,
+		Edges: testdata.SpdxEdges,
 	}}
 )
 
@@ -57,8 +73,13 @@ func TestParseDocumentTree(t *testing.T) {
 		wantErr bool
 	}{{
 		name:    "testing",
-		tree:    processor.DocumentTree(&docTree),
+		tree:    processor.DocumentTree(&dsseDocTree),
 		want:    graphInput,
+		wantErr: false,
+	}, {
+		name:    "valid big SPDX document",
+		tree:    processor.DocumentTree(&spdxDocTree),
+		want:    spdxGraphInput,
 		wantErr: false,
 	}}
 	for _, tt := range tests {

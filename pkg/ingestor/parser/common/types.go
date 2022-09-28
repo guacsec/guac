@@ -30,11 +30,3 @@ type DocumentParser interface {
 	// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
 	CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
 }
-
-type DocumentParser interface {
-	Parse(doc *processor.Document) error
-	GetIdentities() []assembler.IdentityNode
-	CreateNodes() []assembler.GuacNode
-	CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
-	GetDocType() processor.DocumentType
-}

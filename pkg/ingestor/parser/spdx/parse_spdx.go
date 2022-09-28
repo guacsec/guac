@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	spdx_json "github.com/spdx/tools-golang/json"
+	spdx_common "github.com/spdx/tools-golang/spdx/common"
 	"github.com/spdx/tools-golang/spdx/v2_2"
 )
 
@@ -56,30 +57,26 @@ func (s *spdxParser) getPackages() {
 		currentPackage.Name = pac.PackageName
 		if len(pac.PackageExternalReferences) > 0 {
 			for _, ext := range pac.PackageExternalReferences {
-				if strings.Contains(ext.RefType, "cpe") {
+				if strings.Contains(ext.RefType, spdx_common.Cpe23Type) {
 					currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
 				}
-				if ext.RefType == "purl" {
+				if ext.RefType == spdx_common.PurlType {
 					currentPackage.Purl = ext.Locator
 				}
 			}
 		}
 		if len(pac.PackageChecksums) > 0 {
 			for _, checksum := range pac.PackageChecksums {
-				currentPackage.Digest = string(checksum.Algorithm) + ":" + checksum.Value
-				s.packages[string(pac.PackageSPDXIdentifier)] = append(s.packages[string(pac.PackageSPDXIdentifier)], currentPackage)
+				currentPackage.Digest = append(currentPackage.Digest, string(checksum.Algorithm)+":"+checksum.Value)
 			}
-		} else {
-			s.packages[string(pac.PackageSPDXIdentifier)] = append(s.packages[string(pac.PackageSPDXIdentifier)], currentPackage)
 		}
-
+		s.packages[string(pac.PackageSPDXIdentifier)] = append(s.packages[string(pac.PackageSPDXIdentifier)], currentPackage)
 	}
 }
 
 func (s *spdxParser) getFiles() {
 	for _, file := range s.spdxDoc.Files {
 		currentFile := assembler.ArtifactNode{}
-		//todo: What to do when files dont have hashes?
 		for _, checksum := range file.Checksums {
 			currentFile.Name = file.FileName
 			currentFile.Digest = string(checksum.Algorithm) + ":" + checksum.Value
@@ -139,8 +136,7 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 					for _, fileNode := range relatedFileNodes {
 						edges = append(edges, sortNodes(packNode, fileNode))
 					}
-				}
-				if len(relatedPackNodes) > 0 {
+				} else if len(relatedPackNodes) > 0 {
 					for _, packNode := range relatedPackNodes {
 						edges = append(edges, sortNodes(packNode, packNode))
 					}
@@ -153,8 +149,7 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 					for _, fileNode := range relatedFileNodes {
 						edges = append(edges, sortNodes(fileNode, fileNode))
 					}
-				}
-				if len(relatedPackNodes) > 0 {
+				} else if len(relatedPackNodes) > 0 {
 					for _, packNode := range relatedPackNodes {
 						edges = append(edges, sortNodes(fileNode, packNode))
 					}
@@ -166,19 +161,19 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 }
 
 func sortNodes(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
-	if foundNode.Type() == "Package" && relatedNode.Type() == "Package" {
-		return assembler.DependsOnEdge{PackageNode: foundNode.(assembler.PackageNode), PackageDependency: relatedNode.(assembler.PackageNode)}
+	e := assembler.DependsOnEdge{}
+	if foundNode.Type() == "Package" {
+		e.PackageNode = foundNode.(assembler.PackageNode)
+	} else {
+		e.ArtifactNode = foundNode.(assembler.ArtifactNode)
 	}
-	if foundNode.Type() == "Package" && relatedNode.Type() == "Artifact" {
-		return assembler.DependsOnEdge{PackageNode: foundNode.(assembler.PackageNode), ArtifactDependency: relatedNode.(assembler.ArtifactNode)}
+
+	if relatedNode.Type() == "Package" {
+		e.PackageDependency = relatedNode.(assembler.PackageNode)
+	} else {
+		e.ArtifactDependency = relatedNode.(assembler.ArtifactNode)
 	}
-	if foundNode.Type() == "Artifact" && relatedNode.Type() == "Artifact" {
-		return assembler.DependsOnEdge{ArtifactNode: foundNode.(assembler.ArtifactNode), ArtifactDependency: relatedNode.(assembler.ArtifactNode)}
-	}
-	if foundNode.Type() == "Artifact" && relatedNode.Type() == "Package" {
-		return assembler.DependsOnEdge{ArtifactNode: foundNode.(assembler.ArtifactNode), PackageDependency: relatedNode.(assembler.PackageNode)}
-	}
-	return nil
+	return e
 }
 
 func (s *spdxParser) GetIdentities() []assembler.IdentityNode {
