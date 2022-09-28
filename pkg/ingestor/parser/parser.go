@@ -27,19 +27,18 @@ import (
 
 type docTreeBuilder struct {
 	identities    []assembler.IdentityNode
-	graphBuilders []common.GraphBuilder
+	graphBuilders []*common.GraphBuilder
 }
 
 func newDocTreeBuilder() *docTreeBuilder {
 	return &docTreeBuilder{
 		identities:    []assembler.IdentityNode{},
-		graphBuilders: []common.GraphBuilder{},
+		graphBuilders: []*common.GraphBuilder{},
 	}
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node
 func ParseDocumentTree(docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
-
 	assemblerinputs := []assembler.AssemblerInput{}
 	docTreeBuilder := newDocTreeBuilder()
 	err := docTreeBuilder.parse(docTree)
@@ -76,12 +75,24 @@ func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
 	return nil
 }
 
-func parseHelper(doc *processor.Document) (common.GraphBuilder, error) {
+func parseHelper(doc *processor.Document) (*common.GraphBuilder, error) {
 	switch doc.Type {
 	case processor.DocumentDSSE:
-		return dsse.ParseDsse(doc)
+		dsseParser := dsse.NewDSSEParser()
+		err := dsseParser.Parse(doc)
+		if err != nil {
+			return nil, err
+		}
+		dsseGraphBuilder := common.NewGenericGraphBuilder(dsseParser, dsseParser.GetIdentities())
+		return dsseGraphBuilder, nil
 	case processor.DocumentITE6SLSA:
-		return slsa.ParseITE6Slsa(doc)
+		slsaParser := slsa.NewSLSAParser()
+		err := slsaParser.Parse(doc)
+		if err != nil {
+			return nil, err
+		}
+		slsaGraphBuilder := common.NewGenericGraphBuilder(slsaParser, nil)
+		return slsaGraphBuilder, nil
 	}
 	return nil, fmt.Errorf("no parser found for document type: %v", doc.Type)
 }

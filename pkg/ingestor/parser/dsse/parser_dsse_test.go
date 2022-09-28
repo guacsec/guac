@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package parser
+package dsse
 
 import (
 	"reflect"
@@ -25,51 +25,34 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 )
 
-var (
-	docTree = processor.DocumentNode{
-		Document: &testdata.Ite6DSSEDoc,
-		Children: []*processor.DocumentNode{
-			{
-				Document: &testdata.Ite6SLSADoc,
-				Children: []*processor.DocumentNode{},
-			},
-		},
-	}
-
-	graphInput = []assembler.AssemblerInput{{
-		Nodes: testdata.DsseNodes,
-		Edges: testdata.DsseEdges,
-	}, {
-		Nodes: testdata.SlsaNodes,
-		Edges: testdata.SlsaEdges,
-	}}
-)
-
-func TestParseDocumentTree(t *testing.T) {
+func Test_DsseParser(t *testing.T) {
 	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}
 	tests := []struct {
 		name    string
-		tree    processor.DocumentTree
-		want    []assembler.AssemblerInput
+		doc     *processor.Document
 		wantErr bool
 	}{{
 		name:    "testing",
-		tree:    processor.DocumentTree(&docTree),
-		want:    graphInput,
+		doc:     &testdata.Ite6DSSEDoc,
 		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseDocumentTree(tt.tree)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			d := NewDSSEParser()
+			if err := d.Parse(tt.doc); (err != nil) != tt.wantErr {
+				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+			if nodes := d.CreateNodes(); !reflect.DeepEqual(nodes, testdata.DsseNodes) {
+				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, testdata.DsseNodes)
+			}
+			if edges := d.CreateEdges([]assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, testdata.DsseEdges) {
+				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, testdata.DsseEdges)
+			}
+			if identity := d.GetIdentities(); !reflect.DeepEqual(identity, []assembler.IdentityNode{testdata.Ident}) {
+				t.Errorf("slsa.GetDocType() = %v, want %v", identity, []assembler.IdentityNode{testdata.Ident})
 			}
 		})
 	}
