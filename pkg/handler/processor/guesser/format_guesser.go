@@ -24,6 +24,7 @@ import (
 func init() {
 	_ = RegisterDocumentFormatGuesser(&jsonFormatGuesser{}, "json")
 	_ = RegisterDocumentFormatGuesser(&jsonLinesFormatGuesser{}, "json-lines")
+	_ = RegisterDocumentFormatGuesser(&xmlFormatGuesser{}, "xml")
 }
 
 // DocumentFormatGuesser guesses the format of the document given a blob
