@@ -143,12 +143,12 @@ var (
 			ArtifactNode:    art,
 		},
 		assembler.DependsOnEdge{
-			ArtifactNode: art,
-			Dependency:   mat1,
+			ArtifactNode:       art,
+			ArtifactDependency: mat1,
 		},
 		assembler.DependsOnEdge{
-			ArtifactNode: art,
-			Dependency:   mat2,
+			ArtifactNode:       art,
+			ArtifactDependency: mat2,
 		},
 	}
 )
