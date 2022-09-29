@@ -49,6 +49,7 @@ require (
 )
 
 require (
+	github.com/CycloneDX/cyclonedx-go v0.7.0 // indirect
 	github.com/alexbrainman/goissue34681 v0.0.0-20191006012335-3fc7a47baff5 // indirect
 	github.com/google/go-containerregistry v0.11.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
