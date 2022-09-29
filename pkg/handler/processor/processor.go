@@ -56,6 +56,7 @@ const (
 	DocumentITE6Unknown DocumentType = "ITE6"
 	DocumentDSSE        DocumentType = "DSSE"
 	DocumentSPDX        DocumentType = "SPDX"
+	DocumentCycloneDX   DocumentType = "CYCLONEDX"
 	DocumentUnknown     DocumentType = "UNKNOWN"
 )
 
@@ -65,6 +66,7 @@ type FormatType string
 // Format* is the enumerables of FormatType
 const (
 	FormatJSON    FormatType = "JSON"
+	FormatXML     FormatType = "XML"
 	FormatUnknown FormatType = "UNKNOWN"
 )
 
