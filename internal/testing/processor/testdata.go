@@ -28,4 +28,17 @@ var (
 	// Invalid types for field spdxVersion
 	//go:embed testdata/invalid-spdx.json
 	SpdxInvalidExample []byte
+
+	//based off https://github.com/CycloneDX/bom-examples/blob/master/SBOM/laravel-7.12.0
+	//go:embed testdata/small-cyclonedx.json
+	CycloneDXExampleJSONSmall []byte
+
+	//go:embed testdata/laravel-cyclonedx.json
+	CycloneDXExampleJSONBig []byte
+
+	//go:embed testdata/laravel-cyclonedx.xml
+	CycloneDXExampleXMLBig []byte
+
+	//go:embed testdata/invalid-cyclonedx.json
+	CycloneDXInvalidExample []byte
 )

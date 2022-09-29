@@ -1,0 +1,117 @@
+{
+    "$schema": "http://cyclonedx.org/schema/bom-1.3.schema.json",
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.4",
+    "version": 1,
+    "metadata": {
+        "tools": [
+            {
+                "vendor": "cyclonedx",
+                "name": "cyclonedx-php-composer",
+                "version": "dev-master"
+            }
+        ],
+        "component": {
+            "bom-ref": "pkg:composer/cyclonedx/cyclonedx-php-composer-demo@dev-master",
+            "type": "application",
+            "name": "cyclonedx-php-composer-demo",
+            "version": "dev-master",
+            "group": "cyclonedx",
+            "description": "demo of cyclonedx/cyclonedx-php-composer with a pinned version of laravel/framework",
+            "purl": "pkg:composer/cyclonedx/cyclonedx-php-composer-demo@dev-master"
+        }
+    },
+    "components": [
+        {
+            "bom-ref": "pkg:composer/asm89/stack-cors@1.3.0",
+            "type": "library",
+            "name": "stack-cors",
+            "version": "1.3.0",
+            "group": "asm89",
+            "description": "Cross-origin resource sharing library and stack middleware",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/asm89/stack-cors@1.3.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://github.com/asm89/stack-cors.git",
+                    "comment": "As detected by composer's `getSourceUrls()` (type=git & reference=b9c31def6a83f84b4d4a40d35996d375755f0e08)"
+                },
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/asm89/stack-cors/zipball/b9c31def6a83f84b4d4a40d35996d375755f0e08",
+                    "comment": "As detected by composer's `getDistUrls()` (type=zip & reference=b9c31def6a83f84b4d4a40d35996d375755f0e08 & sha1=UNDEFINED)"
+                },
+                {
+                    "type": "website",
+                    "url": "https://github.com/asm89/stack-cors",
+                    "comment": "As set via `homepage` in composer package definition."
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/asm89/stack-cors/issues",
+                    "comment": "As set via `support.issues` in composer package definition."
+                },
+                {
+                    "type": "distribution",
+                    "url": "https://github.com/asm89/stack-cors/tree/1.3.0",
+                    "comment": "As set via `support.source` in composer package definition."
+                }
+            ]
+        },
+        {
+            "bom-ref": "pkg:composer/brick/math@0.9.3",
+            "type": "library",
+            "name": "math",
+            "version": "0.9.3",
+            "group": "brick",
+            "description": "Arbitrary-precision arithmetic library",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/brick/math@0.9.3",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://github.com/brick/math.git",
+                    "comment": "As detected by composer's `getSourceUrls()` (type=git & reference=ca57d18f028f84f777b2168cd1911b0dee2343ae)"
+                },
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/brick/math/zipball/ca57d18f028f84f777b2168cd1911b0dee2343ae",
+                    "comment": "As detected by composer's `getDistUrls()` (type=zip & reference=ca57d18f028f84f777b2168cd1911b0dee2343ae & sha1=UNDEFINED)"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/brick/math/issues",
+                    "comment": "As set via `support.issues` in composer package definition."
+                },
+                {
+                    "type": "distribution",
+                    "url": "https://github.com/brick/math/tree/0.9.3",
+                    "comment": "As set via `support.source` in composer package definition."
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/BenMorel",
+                    "comment": "As set via `funding` in composer package definition. (type=github)"
+                },
+                {
+                    "type": "other",
+                    "url": "https://tidelift.com/funding/github/packagist/brick/math",
+                    "comment": "As set via `funding` in composer package definition. (type=tidelift)"
+                }
+            ]
+        }
+    ]
+}

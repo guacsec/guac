@@ -1,0 +1,7 @@
+{
+    "bomFormat": "CycloneDX",
+    "version": 1,
+    "components": [
+        1
+    ]
+}
