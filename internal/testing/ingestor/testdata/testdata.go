@@ -18,6 +18,7 @@ package testdata
 import (
 	"encoding/base64"
 	"encoding/json"
+	"reflect"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -242,4 +243,64 @@ func (m *mockSigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity,
 
 func (m *mockSigstoreVerifier) Type() verifier.VerifierType {
 	return "sigstore"
+}
+
+func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
+
+	if len(slice1) != len(slice2) {
+		return false
+	}
+
+	result := true
+	i, n := 0, len(slice1)
+
+	for i < n {
+		j := 0
+		e := false
+		for j < n && !e {
+			if slice1[i].Type() == "Package" && slice2[j].Type() == "Package" {
+				if slice1[i].(assembler.PackageNode).Name == slice2[j].(assembler.PackageNode).Name {
+					if reflect.DeepEqual(slice1[i], slice2[j]) {
+						e = true
+						break
+					}
+				}
+			} else if slice1[i].Type() == "Artifact" && slice2[j].Type() == "Artifact" {
+				if slice1[i].(assembler.ArtifactNode).Name == slice2[j].(assembler.ArtifactNode).Name {
+					if reflect.DeepEqual(slice1[i], slice2[j]) {
+						e = true
+						break
+					}
+				}
+			} else if slice1[i].Type() == "Attestation" && slice2[j].Type() == "Attestation" {
+				if slice1[i].(assembler.AttestationNode).FilePath == slice2[j].(assembler.AttestationNode).FilePath {
+					if reflect.DeepEqual(slice1[i], slice2[j]) {
+						e = true
+						break
+					}
+				}
+			} else if slice1[i].Type() == "Builder" && slice2[j].Type() == "Builder" {
+				if slice1[i].(assembler.BuilderNode).BuilderId == slice2[j].(assembler.BuilderNode).BuilderId {
+					if reflect.DeepEqual(slice1[i], slice2[j]) {
+						e = true
+						break
+					}
+				}
+			} else if slice1[i].Type() == "Identity" && slice2[j].Type() == "Identity" {
+				if slice1[i].(assembler.IdentityNode).ID == slice2[j].(assembler.IdentityNode).ID {
+					if reflect.DeepEqual(slice1[i], slice2[j]) {
+						e = true
+						break
+					}
+				}
+			}
+			j++
+		}
+		if !e {
+			result = false
+		}
+		i++
+	}
+
+	return result
 }
