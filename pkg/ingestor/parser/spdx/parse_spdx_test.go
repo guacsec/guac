@@ -19,7 +19,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
 	processor_data "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -46,7 +45,7 @@ func Test_spdxParser(t *testing.T) {
 			if err := s.Parse(tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("spdxParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if nodes := s.CreateNodes(); !cmp.Equal(nodes, testdata.SpdxNodes) {
+			if nodes := s.CreateNodes(); !testdata.GuacNodeSliceEqual(nodes, testdata.SpdxNodes) {
 				t.Errorf("spdxParser.CreateNodes() = %v, want %v", nodes, testdata.SpdxNodes)
 			}
 			if edges := s.CreateEdges(nil); !reflect.DeepEqual(edges, testdata.SpdxEdges) {

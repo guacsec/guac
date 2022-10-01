@@ -89,8 +89,29 @@ func TestParseDocumentTree(t *testing.T) {
 				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+			if len(got) > 1 {
+				if len(got) != len(tt.want) {
+					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+				}
+
+				i, n := 0, len(got)
+
+				for i < n {
+					if !reflect.DeepEqual(got[i].Edges, tt.want[i].Edges) {
+						t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+					}
+					if !testdata.GuacNodeSliceEqual(got[i].Nodes, tt.want[i].Nodes) {
+						t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+					}
+					i++
+				}
+			} else {
+				if !reflect.DeepEqual(got[0].Edges, tt.want[0].Edges) {
+					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+				}
+				if !testdata.GuacNodeSliceEqual(got[0].Nodes, tt.want[0].Nodes) {
+					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}
