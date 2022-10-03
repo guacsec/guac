@@ -134,11 +134,12 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 			for _, packNode := range foundPackNodes {
 				if len(relatedFileNodes) > 0 {
 					for _, fileNode := range relatedFileNodes {
-						edges = append(edges, sortNodes(packNode, fileNode))
+						edges = append(edges, sortDependsOnEdge(packNode, fileNode))
+						edges = append(edges, sortContainsEdge(packNode, fileNode))
 					}
 				} else if len(relatedPackNodes) > 0 {
 					for _, packNode := range relatedPackNodes {
-						edges = append(edges, sortNodes(packNode, packNode))
+						edges = append(edges, sortDependsOnEdge(packNode, packNode))
 					}
 				}
 			}
@@ -147,11 +148,11 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 			for _, fileNode := range foundFileNodes {
 				if len(relatedFileNodes) > 0 {
 					for _, fileNode := range relatedFileNodes {
-						edges = append(edges, sortNodes(fileNode, fileNode))
+						edges = append(edges, sortDependsOnEdge(fileNode, fileNode))
 					}
 				} else if len(relatedPackNodes) > 0 {
 					for _, packNode := range relatedPackNodes {
-						edges = append(edges, sortNodes(fileNode, packNode))
+						edges = append(edges, sortDependsOnEdge(fileNode, packNode))
 					}
 				}
 			}
@@ -160,7 +161,19 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 	return edges
 }
 
-func sortNodes(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
+func sortContainsEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
+	e := assembler.ContainsEdge{}
+	if foundNode.Type() == "Package" {
+		e.PackageNode = foundNode.(assembler.PackageNode)
+	}
+
+	if relatedNode.Type() == "Artifact" {
+		e.ContainedArtifact = relatedNode.(assembler.ArtifactNode)
+	}
+	return e
+}
+
+func sortDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
 	e := assembler.DependsOnEdge{}
 	if foundNode.Type() == "Package" {
 		e.PackageNode = foundNode.(assembler.PackageNode)
