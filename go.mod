@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	cloud.google.com/go/storage v1.26.0
-	github.com/fsouza/fake-gcs-server v1.40.1
+	github.com/fsouza/fake-gcs-server v1.40.2
 	github.com/in-toto/in-toto-golang v0.3.4-0.20211211042327-af1f9fb822bf
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.4
 	github.com/secure-systems-lab/go-securesystemslib v0.4.0
@@ -29,7 +29,7 @@ require (
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/pkg/xattr v0.4.8 // indirect
+	github.com/pkg/xattr v0.4.9 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.23.0 // indirect
