@@ -66,5 +66,5 @@ require (
 
 require (
 	github.com/sigstore/sigstore v1.4.2
-	github.com/spdx/tools-golang v0.3.1-0.20220818163346-5eb9315c0c55
+	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
 )

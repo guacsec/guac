@@ -16,7 +16,6 @@
 package parser
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
@@ -93,26 +92,23 @@ func TestParseDocumentTree(t *testing.T) {
 				if len(got) != len(tt.want) {
 					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
 				}
-
 				i, n := 0, len(got)
-
 				for i < n {
-					if !reflect.DeepEqual(got[i].Edges, tt.want[i].Edges) {
-						t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
-					}
-					if !testdata.GuacNodeSliceEqual(got[i].Nodes, tt.want[i].Nodes) {
-						t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
-					}
+					compare(t, got[i].Edges, tt.want[i].Edges, got[i].Nodes, tt.want[i].Nodes)
 					i++
 				}
 			} else {
-				if !reflect.DeepEqual(got[0].Edges, tt.want[0].Edges) {
-					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
-				}
-				if !testdata.GuacNodeSliceEqual(got[0].Nodes, tt.want[0].Nodes) {
-					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
-				}
+				compare(t, got[0].Edges, tt.want[0].Edges, got[0].Nodes, tt.want[0].Nodes)
 			}
 		})
+	}
+}
+
+func compare(t *testing.T, gotEdges, wantEdges []assembler.GuacEdge, gotNodes, wantNodes []assembler.GuacNode) {
+	if !testdata.GuacEdgeSliceEqual(gotEdges, wantEdges) {
+		t.Errorf("ParseDocumentTree() = %v, want %v", gotEdges, wantEdges)
+	}
+	if !testdata.GuacNodeSliceEqual(gotNodes, wantNodes) {
+		t.Errorf("ParseDocumentTree() = %v, want %v", gotNodes, wantNodes)
 	}
 }

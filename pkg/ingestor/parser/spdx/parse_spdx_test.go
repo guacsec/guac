@@ -48,7 +48,7 @@ func Test_spdxParser(t *testing.T) {
 			if nodes := s.CreateNodes(); !testdata.GuacNodeSliceEqual(nodes, testdata.SpdxNodes) {
 				t.Errorf("spdxParser.CreateNodes() = %v, want %v", nodes, testdata.SpdxNodes)
 			}
-			if edges := s.CreateEdges(nil); !reflect.DeepEqual(edges, testdata.SpdxEdges) {
+			if edges := s.CreateEdges(nil); !testdata.GuacEdgeSliceEqual(edges, testdata.SpdxEdges) {
 				t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, testdata.SpdxEdges)
 			}
 			if docType := s.GetDocType(); !reflect.DeepEqual(docType, processor.DocumentSPDX) {

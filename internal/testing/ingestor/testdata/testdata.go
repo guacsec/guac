@@ -156,6 +156,14 @@ var (
 	}
 
 	// SDPX Testdata
+
+	topLevelPack = assembler.PackageNode{
+		Name:   "gcr.io/google-containers/alpine-latest",
+		Digest: nil,
+		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers",
+		CPEs:   nil,
+	}
+
 	baselayoutPack = assembler.PackageNode{
 		Name:   "alpine-baselayout",
 		Digest: nil,
@@ -205,15 +213,35 @@ var (
 		Digest: "SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 	}
 
-	SpdxNodes = []assembler.GuacNode{baselayoutPack, baselayoutdataPack, rsaPubFile, keysPack, worldFile, rootFile, triggersFile}
+	SpdxNodes = []assembler.GuacNode{topLevelPack, baselayoutPack, baselayoutdataPack, rsaPubFile, keysPack, worldFile, rootFile, triggersFile}
 	SpdxEdges = []assembler.GuacEdge{
 		assembler.DependsOnEdge{
-			PackageNode:        baselayoutPack,
-			ArtifactDependency: rootFile,
+			PackageNode:       topLevelPack,
+			PackageDependency: baselayoutPack,
 		},
 		assembler.DependsOnEdge{
-			PackageNode:        keysPack,
+			PackageNode:       topLevelPack,
+			PackageDependency: baselayoutdataPack,
+		},
+		assembler.DependsOnEdge{
+			PackageNode:       topLevelPack,
+			PackageDependency: keysPack,
+		},
+		assembler.DependsOnEdge{
+			PackageNode:       baselayoutPack,
+			PackageDependency: keysPack,
+		},
+		assembler.DependsOnEdge{
+			ArtifactNode:       rootFile,
 			ArtifactDependency: rsaPubFile,
+		},
+		assembler.ContainsEdge{
+			PackageNode:       baselayoutPack,
+			ContainedArtifact: rootFile,
+		},
+		assembler.ContainsEdge{
+			PackageNode:       keysPack,
+			ContainedArtifact: rsaPubFile,
 		},
 	}
 )
@@ -246,7 +274,6 @@ func (m *mockSigstoreVerifier) Type() verifier.VerifierType {
 }
 
 func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
-
 	if len(slice1) != len(slice2) {
 		return false
 	}
@@ -301,6 +328,53 @@ func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
 		}
 		i++
 	}
+	return result
+}
 
+func GuacEdgeSliceEqual(slice1, slice2 []assembler.GuacEdge) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+
+	result := true
+	i, n := 0, len(slice1)
+
+	for i < n {
+		j := 0
+		e := false
+		for j < n && !e {
+			if slice1[i].Type() == "DependsOn" && slice2[j].Type() == "DependsOn" {
+				if reflect.DeepEqual(slice1[i], slice2[j]) {
+					e = true
+					break
+				}
+			} else if slice1[i].Type() == "Contains" && slice2[j].Type() == "Contains" {
+				if reflect.DeepEqual(slice1[i], slice2[j]) {
+					e = true
+					break
+				}
+			} else if slice1[i].Type() == "Attestation" && slice2[j].Type() == "Attestation" {
+				if reflect.DeepEqual(slice1[i], slice2[j]) {
+					e = true
+					break
+				}
+			} else if slice1[i].Type() == "Identity" && slice2[j].Type() == "Identity" {
+				if reflect.DeepEqual(slice1[i], slice2[j]) {
+					e = true
+					break
+				}
+			} else if slice1[i].Type() == "BuiltBy" && slice2[j].Type() == "BuiltBy" {
+				if reflect.DeepEqual(slice1[i], slice2[j]) {
+					e = true
+					break
+				}
+			}
+			j++
+		}
+		if !e {
+			result = false
+		}
+		i++
+	}
 	return result
 }
