@@ -27,3 +27,12 @@ information on using pull requests.
 
 This project follows
 [Google's Open Source Community Guidelines](https://opensource.google/conduct/).
+
+## Getting Started
+
+The project is managed via Github. For contributors that would like to find a good place
+to start, take a look at the "good first issues" and "help wanted" labels 
+[(filter link here)](https://github.com/guacsec/guac/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+
+We also have a [slack channel](https://openssf.slack.com/archives/C03U677QD46) that you
+can reach us at and ask questions!
