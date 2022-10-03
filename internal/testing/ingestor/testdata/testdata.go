@@ -208,12 +208,20 @@ var (
 	SpdxNodes = []assembler.GuacNode{baselayoutPack, baselayoutdataPack, rsaPubFile, keysPack, worldFile, rootFile, triggersFile}
 	SpdxEdges = []assembler.GuacEdge{
 		assembler.DependsOnEdge{
-			PackageNode:        baselayoutPack,
-			ArtifactDependency: rootFile,
+			PackageNode:       baselayoutPack,
+			PackageDependency: keysPack,
 		},
 		assembler.DependsOnEdge{
-			PackageNode:        keysPack,
+			ArtifactNode:       rootFile,
 			ArtifactDependency: rsaPubFile,
+		},
+		assembler.ContainsEdge{
+			PackageNode:       baselayoutPack,
+			ContainedArtifact: rootFile,
+		},
+		assembler.ContainsEdge{
+			PackageNode:       keysPack,
+			ContainedArtifact: rsaPubFile,
 		},
 	}
 )

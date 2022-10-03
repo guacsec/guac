@@ -57,10 +57,10 @@ func (s *spdxParser) getPackages() {
 		currentPackage.Name = pac.PackageName
 		if len(pac.PackageExternalReferences) > 0 {
 			for _, ext := range pac.PackageExternalReferences {
-				if strings.Contains(ext.RefType, spdx_common.Cpe23Type) {
+				if strings.Contains(ext.RefType, "cpe") {
 					currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
 				}
-				if ext.RefType == spdx_common.PurlType {
+				if ext.RefType == spdx_common.TypePackageManagerPURL {
 					currentPackage.Purl = ext.Locator
 				}
 			}
@@ -132,28 +132,17 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
 		if len(foundPackNodes) > 0 {
 			for _, packNode := range foundPackNodes {
-				if len(relatedFileNodes) > 0 {
-					for _, fileNode := range relatedFileNodes {
-						edges = append(edges, sortDependsOnEdge(packNode, fileNode))
-						edges = append(edges, sortContainsEdge(packNode, fileNode))
-					}
-				} else if len(relatedPackNodes) > 0 {
-					for _, packNode := range relatedPackNodes {
-						edges = append(edges, sortDependsOnEdge(packNode, packNode))
-					}
+				createdEdge := sort(packNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
+				if createdEdge != nil {
+					edges = append(edges, createdEdge)
 				}
 			}
 		}
 		if len(foundFileNodes) > 0 {
 			for _, fileNode := range foundFileNodes {
-				if len(relatedFileNodes) > 0 {
-					for _, fileNode := range relatedFileNodes {
-						edges = append(edges, sortDependsOnEdge(fileNode, fileNode))
-					}
-				} else if len(relatedPackNodes) > 0 {
-					for _, packNode := range relatedPackNodes {
-						edges = append(edges, sortDependsOnEdge(fileNode, packNode))
-					}
+				createdEdge := sort(fileNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
+				if createdEdge != nil {
+					edges = append(edges, createdEdge)
 				}
 			}
 		}
@@ -161,12 +150,34 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 	return edges
 }
 
+func sort(foundNode assembler.GuacNode, relationship string, relatedPackNodes []assembler.PackageNode, relatedFileNodes []assembler.ArtifactNode) assembler.GuacEdge {
+	if len(relatedFileNodes) > 0 {
+		for _, rfileNode := range relatedFileNodes {
+			return sortByType(relationship, foundNode, rfileNode)
+		}
+	} else if len(relatedPackNodes) > 0 {
+		for _, rpackNode := range relatedPackNodes {
+			return sortByType(relationship, foundNode, rpackNode)
+		}
+	}
+	return nil
+}
+
+func sortByType(relationship string, foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
+	switch relationship {
+	case spdx_common.TypeRelationshipContains:
+		return sortContainsEdge(foundNode, relatedNode)
+	case spdx_common.TypeRelationshipDependsOn:
+		return sortDependsOnEdge(foundNode, relatedNode)
+	}
+	return nil
+}
+
 func sortContainsEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
 	e := assembler.ContainsEdge{}
 	if foundNode.Type() == "Package" {
 		e.PackageNode = foundNode.(assembler.PackageNode)
 	}
-
 	if relatedNode.Type() == "Artifact" {
 		e.ContainedArtifact = relatedNode.(assembler.ArtifactNode)
 	}
