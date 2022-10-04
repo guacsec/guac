@@ -71,7 +71,7 @@ var exampleCmd = &cobra.Command{
 		}
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
+		fileCollector := file.NewFileCollector(ctx, opts.path, true, time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
@@ -110,6 +110,7 @@ var exampleCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("unable to assemble graphs: %v", err)
 			}
+			logger.Infof("processed doc format: %v, document: %v", d.Format, d.Type)
 			return nil
 		}
 
@@ -167,7 +168,9 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 	if err != nil {
 		return nil, err
 	}
+	num := 0
 	return func(gs []assembler.Graph) error {
+		num += 1
 		combined := assembler.Graph{
 			Nodes: []assembler.GuacNode{},
 			Edges: []assembler.GuacEdge{},
@@ -178,6 +181,9 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 		if err := assembler.StoreGraph(combined, client); err != nil {
 			return err
 		}
+		/*if err := assembler.WriteGraphToCSV(combined, num); err != nil {
+			return err
+		}*/
 
 		return nil
 	}, nil

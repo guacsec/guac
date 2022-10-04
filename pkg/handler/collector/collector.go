@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/logging"
 )
 
 const (
@@ -67,7 +66,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	// errChan to receive error from collectors
 	errChan := make(chan error, len(documentCollectors))
 	// logger
-	logger := logging.FromContext(ctx)
+	//logger := logging.FromContext(ctx)
 
 	for _, collector := range documentCollectors {
 		c := collector
@@ -86,7 +85,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 					return err
 				}
 			}
-			logger.Infof("emitted document: %+v", d)
+			//logger.Infof("emitted document: %+v", d)
 		case err := <-errChan:
 			if !handleErr(err) {
 				return err
@@ -101,7 +100,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 				return err
 			}
 		}
-		logger.Infof("emitted document: %+v", d)
+		//logger.Infof("emitted document: %+v", d)
 	}
 	return nil
 }

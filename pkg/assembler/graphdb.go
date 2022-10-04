@@ -16,7 +16,9 @@
 package assembler
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
@@ -24,6 +26,95 @@ import (
 )
 
 // Note: This module is experimental and might change often!
+
+func WriteGraphToCSV(g Graph, num int) error {
+	pf, err := os.Create(fmt.Sprintf("packages-data%v.csv", num))
+	if err != nil {
+		return err
+	}
+	defer pf.Close()
+
+	af, err := os.Create(fmt.Sprintf("artifacts-data%v.csv", num))
+	if err != nil {
+		return err
+	}
+	defer af.Close()
+
+	cf, err := os.Create(fmt.Sprintf("contains-data%v.csv", num))
+	if err != nil {
+		return err
+	}
+	defer cf.Close()
+
+	df, err := os.Create(fmt.Sprintf("depends_on-data%v.csv", num))
+	if err != nil {
+		return err
+	}
+	defer df.Close()
+
+	wpf := csv.NewWriter(pf)
+	defer wpf.Flush()
+
+	waf := csv.NewWriter(af)
+	defer waf.Flush()
+
+	wcf := csv.NewWriter(cf)
+	defer wcf.Flush()
+
+	wdf := csv.NewWriter(df)
+	defer wdf.Flush()
+
+	// TODO: Make this more efficient.
+	packageNodes := make([][]string, len(g.Nodes))
+	artifactNodes := make([][]string, len(g.Nodes))
+	containsEdges := make([][]string, len(g.Edges))
+	dependsOnEdges := make([][]string, len(g.Edges))
+	for _, n := range g.Nodes {
+		switch n.Type() {
+		case "Package":
+			packageNode := n.(PackageNode)
+			cpes := strings.Join(packageNode.CPEs[:], "|")
+			digest := strings.Join(packageNode.Digest[:], "|")
+			// purl:ID,name,cpes,digest,:LABEL
+			packageNodes = append(packageNodes, []string{packageNode.Purl, packageNode.Name, cpes, digest})
+		case "Artifact":
+			artifactNode := n.(ArtifactNode)
+			artifactNodes = append(artifactNodes, []string{artifactNode.Digest, artifactNode.Name})
+		}
+	}
+	for _, e := range g.Edges {
+		switch e.Type() {
+		case "Contains":
+			containsEdge := e.(ContainsEdge)
+			containsEdges = append(containsEdges, []string{containsEdge.PackageNode.Purl, containsEdge.ContainedArtifact.Digest, "Contains"})
+		case "DependsOn":
+			dependsOnEdge := e.(DependsOnEdge)
+			start, end := dependsOnEdge.Nodes()
+			edge := make([]string, 3)
+			switch start.Type() {
+			case "Artifact":
+				edge[0] = start.(ArtifactNode).Digest
+			case "Package":
+				edge[0] = start.(PackageNode).Purl
+			}
+			switch end.Type() {
+			case "ArtifactDependency":
+				edge[1] = start.(ArtifactNode).Digest
+			case "PackageDependency":
+				edge[1] = start.(PackageNode).Purl
+			}
+			edge[2] = "DependsOn"
+			dependsOnEdges = append(dependsOnEdges, edge)
+		}
+	}
+
+	wpf.WriteAll(packageNodes)
+	waf.WriteAll(artifactNodes)
+	wcf.WriteAll(containsEdges)
+	wdf.WriteAll(dependsOnEdges)
+
+	return nil
+}
 
 // StoreSubgraph stores a Graph to the graph database given by Client
 func StoreGraph(g Graph, client graphdb.Client) error {
@@ -47,7 +138,7 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 	}
 
 	edge_queries := make([]string, len(g.Edges))
-	edge_dicts := make([]map[string]interface{}, len(g.Nodes))
+	edge_dicts := make([]map[string]interface{}, len(g.Edges))
 	for i, e := range g.Edges {
 		a, b := e.Nodes()
 		var sb strings.Builder
@@ -76,9 +167,15 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 	_, err := session.WriteTransaction(
 		func(tx graphdb.Transaction) (interface{}, error) {
 			for i, query := range queries {
-				fmt.Printf("%v(where: %v)\n\n", query, params[i])
-				if _, err := tx.Run(query, params[i]); err != nil {
+				//fmt.Printf("%v(where: %v)\n\n", query, params[i])
+				if result, err := tx.Run(query, params[i]); err != nil {
 					return nil, err
+				} else {
+					// Need to consume the result, otherwise it only processes the transations when the connection closes.
+					_, err = result.Consume()
+					if err != nil {
+						return nil, err
+					}
 				}
 			}
 			return nil, nil
