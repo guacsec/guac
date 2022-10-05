@@ -25,27 +25,40 @@ import (
 
 func Test_GuessDocument(t *testing.T) {
 	testCases := []struct {
-		name     string
-		document *processor.Document
-		expected processor.DocumentType
+		name           string
+		document       *processor.Document
+		expectedType   processor.DocumentType
+		expectedFormat processor.FormatType
 	}{{
-		name: "DocumentUnknown",
+		name: "DocumentUnknown JSON",
 		document: &processor.Document{
 			Blob:              []byte(`{ "abc": "def"}`),
 			Type:              processor.DocumentUnknown,
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentUnknown,
+		expectedType:   processor.DocumentUnknown,
+		expectedFormat: processor.FormatJSON,
 	}, {
-		name: "DocumentUnknown",
+		name: "DocumentUnknown empty JSON",
 		document: &processor.Document{
-			Blob:              testdata.SpdxInvalidExample,
+			Blob:              []byte(``),
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentUnknown,
+		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "DocumentUnknown, FormatUnknown",
+		document: &processor.Document{
+			Blob:              []byte(`unstructured text`),
 			Type:              processor.DocumentUnknown,
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentUnknown,
+		expectedType:   processor.DocumentUnknown,
+		expectedFormat: processor.FormatUnknown,
 	}, {
 		name: "valid small spdx Document",
 		document: &processor.Document{
@@ -54,7 +67,8 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentSPDX,
+		expectedType:   processor.DocumentSPDX,
+		expectedFormat: processor.FormatJSON,
 	}, {
 		name: "valid big spdx Document",
 		document: &processor.Document{
@@ -63,7 +77,8 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentSPDX,
+		expectedType:   processor.DocumentSPDX,
+		expectedFormat: processor.FormatJSON,
 	}, {
 		name: "valid DSSE Document",
 		document: &processor.Document{
@@ -82,7 +97,8 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentDSSE,
+		expectedType:   processor.DocumentDSSE,
+		expectedFormat: processor.FormatJSON,
 	}, {
 		name: "valid ITE6 Document",
 		document: &processor.Document{
@@ -91,7 +107,8 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentITE6Unknown,
+		expectedType:   processor.DocumentITE6Unknown,
+		expectedFormat: processor.FormatJSON,
 	}, {
 		name: "valid SLSA ITE6 Document",
 		document: &processor.Document{
@@ -100,7 +117,8 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentITE6SLSA,
+		expectedType:   processor.DocumentITE6SLSA,
+		expectedFormat: processor.FormatJSON,
 	}, {
 		name: "valid SLSA ITE6 Document with different versions",
 		document: &processor.Document{
@@ -109,13 +127,16 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expected: processor.DocumentITE6SLSA,
+		expectedType:   processor.DocumentITE6SLSA,
+		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			documentType, _, err := GuessDocument(context.TODO(), tt.document)
-			if err == nil && documentType != tt.expected {
-				t.Errorf("got the wrong type, got %v, expected %v", documentType, tt.expected)
+			documentType, documentFormat, err := GuessDocument(context.TODO(), tt.document)
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			} else if documentType != tt.expectedType || documentFormat != tt.expectedFormat {
+				t.Errorf("document type, format: got %v, %v, expected %v, %v", documentType, documentFormat, tt.expectedType, tt.expectedFormat)
 			}
 		})
 	}
