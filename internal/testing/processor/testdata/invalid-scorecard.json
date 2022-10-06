@@ -1,0 +1,13 @@
+{
+  "date": "2022-10-06",
+  "repo": {
+    "commit": "5835544ca568b757a8ecae5c153f317e5736700e"
+  },
+  "scorecard": {
+    "version": "v4.7.0",
+    "commit": "7cd6406aef0b80a819402e631919293d5eb6adcf"
+  },
+  "score": 8.9,
+  "checks": [],
+  "metadata": null
+}

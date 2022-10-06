@@ -1,0 +1,105 @@
+{
+  "date": "2022-10-06",
+  "repo": {
+    "name": "github.com/kubernetes/kubernetes",
+    "commit": "5835544ca568b757a8ecae5c153f317e5736700e"
+  },
+  "scorecard": {
+    "version": "v4.7.0",
+    "commit": "7cd6406aef0b80a819402e631919293d5eb6adcf"
+  },
+  "score": 8.9,
+  "checks": [
+    {
+      "details": null,
+      "score": 10,
+      "reason": "no binaries found in the repo",
+      "name": "Binary-Artifacts",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#binary-artifacts",
+        "short": "Determines if the project has generated executable (binary) artifacts in the source repository."
+      }
+    },
+    {
+      "details": null,
+      "score": 10,
+      "reason": "26 out of 26 merged PRs checked by a CI test -- score normalized to 10",
+      "name": "CI-Tests",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#ci-tests",
+        "short": "Determines if the project runs tests before pull requests are merged."
+      }
+    },
+    {
+      "details": null,
+      "score": 7,
+      "reason": "16 out of last 16 changesets reviewed before merge -- score normalized to 7",
+      "name": "Code-Review",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#code-review",
+        "short": "Determines if the project requires code review before pull requests (aka merge requests) are merged."
+      }
+    },
+    {
+      "details": null,
+      "score": 10,
+      "reason": "no dangerous workflow patterns detected",
+      "name": "Dangerous-Workflow",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#dangerous-workflow",
+        "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns."
+      }
+    },
+    {
+      "details": null,
+      "score": 10,
+      "reason": "license file detected",
+      "name": "License",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#license",
+        "short": "Determines if the project has defined a license."
+      }
+    },
+    {
+      "details": null,
+      "score": 2,
+      "reason": "dependency not pinned by hash detected -- score normalized to 2",
+      "name": "Pinned-Dependencies",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#pinned-dependencies",
+        "short": "Determines if the project has declared and pinned its dependencies."
+      }
+    },
+    {
+      "details": null,
+      "score": 10,
+      "reason": "security policy file detected",
+      "name": "Security-Policy",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#security-policy",
+        "short": "Determines if the project has published a security policy."
+      }
+    },
+    {
+      "details": null,
+      "score": 10,
+      "reason": "tokens are read-only in GitHub workflows",
+      "name": "Token-Permissions",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#token-permissions",
+        "short": "Determines if the project's workflows follow the principle of least privilege."
+      }
+    },
+    {
+      "details": null,
+      "score": 10,
+      "reason": "no vulnerabilities detected",
+      "name": "Vulnerabilities",
+      "documentation": {
+        "url": "https://github.com/ossf/scorecard/blob/7cd6406aef0b80a819402e631919293d5eb6adcf/docs/checks.md#vulnerabilities",
+        "short": "Determines if the project has open, known unfixed vulnerabilities."
+      }
+    }
+  ],
+  "metadata": null
+}
