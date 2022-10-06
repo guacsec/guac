@@ -1,0 +1,42 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "subject": [
+    {
+      "name": "salsa.txt",
+      "digest": {
+        "sha256": "f8161d035cdf328c7bb124fce192cb90b603f34ca78d73e33b736b4f6bddf993"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v0.1",
+  "predicate": {
+    "builder": {
+      "id": "https://github.com/slsa-framework/github-actions-demo/Attestations/GitHubHostedActions@v1"
+    },
+    "metadata": {
+      "buildInvocationId": "https://github.com/slsa-framework/github-actions-demo/actions/runs/940146003",
+      "completeness": {
+        "arguments": true,
+        "environment": false,
+        "materials": false
+      },
+      "reproducible": false,
+      "buildFinishedOn": "2021-06-15T17:24:42Z"
+    },
+    "recipe": {
+      "type": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+      "definedInMaterial": 0,
+      "entryPoint": "Create a sample provenance",
+      "arguments": null,
+      "environment": null
+    },
+    "materials": [
+      {
+        "uri": "git+https://github.com/slsa-framework/github-actions-demo",
+        "digest": {
+          "sha1": "86439f2a3f6e2bddb608860b1895310a9fcb06a1"
+        }
+      }
+    ]
+  }
+}
