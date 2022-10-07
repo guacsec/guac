@@ -24,11 +24,11 @@ import (
 
 type DocumentParser interface {
 	// Parse breaks out the document into the graph components
-	Parse(doc *processor.Document) error
+	Parse(ctx context.Context, doc *processor.Document) error
 	// GetIdentities gets the identity node from the document if they exist
-	GetIdentities() []assembler.IdentityNode
+	GetIdentities(ctx context.Context) []assembler.IdentityNode
 	// CreateNodes creates the GuacNode for the graph inputs
-	CreateNodes() []assembler.GuacNode
+	CreateNodes(ctx context.Context) []assembler.GuacNode
 	// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
 	CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
 }

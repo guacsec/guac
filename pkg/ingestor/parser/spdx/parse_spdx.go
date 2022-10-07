@@ -43,7 +43,7 @@ func NewSpdxParser() *spdxParser {
 	}
 }
 
-func (s *spdxParser) Parse(doc *processor.Document) error {
+func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 	spdxDoc, err := parseSpdxBlob(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse SPDX document: %w", err)
@@ -71,19 +71,15 @@ func (s *spdxParser) getPackages() {
 	for _, pac := range s.spdxDoc.Packages {
 		currentPackage := assembler.PackageNode{}
 		currentPackage.Name = pac.PackageName
-		if len(pac.PackageExternalReferences) > 0 {
-			for _, ext := range pac.PackageExternalReferences {
-				if strings.HasPrefix(ext.RefType, "cpe") {
-					currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
-				} else if ext.RefType == spdx_common.TypePackageManagerPURL {
-					currentPackage.Purl = ext.Locator
-				}
+		for _, ext := range pac.PackageExternalReferences {
+			if strings.HasPrefix(ext.RefType, "cpe") {
+				currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
+			} else if ext.RefType == spdx_common.TypePackageManagerPURL {
+				currentPackage.Purl = ext.Locator
 			}
 		}
-		if len(pac.PackageChecksums) > 0 {
-			for _, checksum := range pac.PackageChecksums {
-				currentPackage.Digest = append(currentPackage.Digest, string(checksum.Algorithm)+":"+checksum.Value)
-			}
+		for _, checksum := range pac.PackageChecksums {
+			currentPackage.Digest = append(currentPackage.Digest, string(checksum.Algorithm)+":"+checksum.Value)
 		}
 		s.packages[string(pac.PackageSPDXIdentifier)] = append(s.packages[string(pac.PackageSPDXIdentifier)], currentPackage)
 	}
@@ -109,7 +105,7 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	return spdx, nil
 }
 
-func (s *spdxParser) CreateNodes() []assembler.GuacNode {
+func (s *spdxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, packNodes := range s.packages {
 		for _, packNode := range packNodes {
@@ -245,7 +241,7 @@ func getDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNo
 	return e
 }
 
-func (s *spdxParser) GetIdentities() []assembler.IdentityNode {
+func (s *spdxParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
 }
 

@@ -44,10 +44,15 @@ func Test_slsaParser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSLSAParser()
-			if err := s.Parse(tt.doc); (err != nil) != tt.wantErr {
+			err := s.Parse(ctx, tt.doc)
+			if (err != nil) != tt.wantErr {
 				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if nodes := s.CreateNodes(); !reflect.DeepEqual(nodes, tt.wantNodes) {
+			if err != nil {
+				return
+			}
+			if nodes := s.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
 				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
 			}
 			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {

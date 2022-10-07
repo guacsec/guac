@@ -49,7 +49,7 @@ func NewSLSAParser() *slsaParser {
 }
 
 // Parse breaks out the document into the graph components
-func (s *slsaParser) Parse(doc *processor.Document) error {
+func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
 	statement, err := parseSlsaPredicate(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
@@ -102,7 +102,7 @@ func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
 }
 
 // CreateNodes creates the GuacNode for the graph inputs
-func (s *slsaParser) CreateNodes() []assembler.GuacNode {
+func (s *slsaParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, sub := range s.subjects {
 		nodes = append(nodes, sub)
@@ -142,6 +142,6 @@ func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assemble
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (s *slsaParser) GetIdentities() []assembler.IdentityNode {
+func (s *slsaParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
 }

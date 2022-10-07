@@ -38,7 +38,7 @@ func NewDSSEParser() *dsseParser {
 }
 
 // Parse breaks out the document into the graph components
-func (d *dsseParser) Parse(doc *processor.Document) error {
+func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
 	err := d.getIdentity(doc)
 	if err != nil {
 		return err
@@ -63,12 +63,12 @@ func (d *dsseParser) getIdentity(doc *processor.Document) error {
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (d *dsseParser) GetIdentities() []assembler.IdentityNode {
+func (d *dsseParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return d.identities
 }
 
 // CreateNodes creates the GuacNode for the graph inputs
-func (d *dsseParser) CreateNodes() []assembler.GuacNode {
+func (d *dsseParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, i := range d.identities {
 		nodes = append(nodes, i)

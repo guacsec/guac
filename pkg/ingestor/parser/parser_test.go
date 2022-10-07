@@ -91,13 +91,15 @@ func TestParseDocumentTree(t *testing.T) {
 				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if err == nil {
-				if len(got) != len(tt.want) {
-					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
-				}
-				for i := range got {
-					compare(t, got[i].Edges, tt.want[i].Edges, got[i].Nodes, tt.want[i].Nodes)
-				}
+			if err != nil {
+				return
+			}
+			if len(got) != len(tt.want) {
+				t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
+				return
+			}
+			for i := range got {
+				compare(t, got[i].Edges, tt.want[i].Edges, got[i].Nodes, tt.want[i].Nodes)
 			}
 		})
 	}

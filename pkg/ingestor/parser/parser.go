@@ -43,7 +43,7 @@ func newDocTreeBuilder() *docTreeBuilder {
 func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
 	assemblerinputs := []assembler.AssemblerInput{}
 	docTreeBuilder := newDocTreeBuilder()
-	err := docTreeBuilder.parse(docTree)
+	err := docTreeBuilder.parse(ctx, docTree)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +55,8 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 	return assemblerinputs, nil
 }
 
-func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
-	builder, err := parseHelper(root.Document)
+func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree) error {
+	builder, err := parseHelper(ctx, root.Document)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
 	}
 
 	for _, c := range root.Children {
-		err := t.parse(c)
+		err := t.parse(ctx, c)
 		if err != nil {
 			return err
 		}
@@ -77,19 +77,19 @@ func (t *docTreeBuilder) parse(root processor.DocumentTree) error {
 	return nil
 }
 
-func parseHelper(doc *processor.Document) (*common.GraphBuilder, error) {
+func parseHelper(ctx context.Context, doc *processor.Document) (*common.GraphBuilder, error) {
 	switch doc.Type {
 	case processor.DocumentDSSE:
 		dsseParser := dsse.NewDSSEParser()
-		err := dsseParser.Parse(doc)
+		err := dsseParser.Parse(ctx, doc)
 		if err != nil {
 			return nil, err
 		}
-		dsseGraphBuilder := common.NewGenericGraphBuilder(dsseParser, dsseParser.GetIdentities())
+		dsseGraphBuilder := common.NewGenericGraphBuilder(dsseParser, dsseParser.GetIdentities(ctx))
 		return dsseGraphBuilder, nil
 	case processor.DocumentITE6SLSA:
 		slsaParser := slsa.NewSLSAParser()
-		err := slsaParser.Parse(doc)
+		err := slsaParser.Parse(ctx, doc)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +97,7 @@ func parseHelper(doc *processor.Document) (*common.GraphBuilder, error) {
 		return slsaGraphBuilder, nil
 	case processor.DocumentSPDX:
 		spdxParser := spdx.NewSpdxParser()
-		err := spdxParser.Parse(doc)
+		err := spdxParser.Parse(ctx, doc)
 		if err != nil {
 			return nil, err
 		}
