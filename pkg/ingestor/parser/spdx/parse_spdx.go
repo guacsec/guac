@@ -17,11 +17,14 @@ package spdx
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	spdx_json "github.com/spdx/tools-golang/json"
 	spdx_common "github.com/spdx/tools-golang/spdx/common"
 	"github.com/spdx/tools-golang/spdx/v2_2"
@@ -70,10 +73,9 @@ func (s *spdxParser) getPackages() {
 		currentPackage.Name = pac.PackageName
 		if len(pac.PackageExternalReferences) > 0 {
 			for _, ext := range pac.PackageExternalReferences {
-				if strings.Contains(ext.RefType, "cpe") {
+				if strings.HasPrefix(ext.RefType, "cpe") {
 					currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
-				}
-				if ext.RefType == spdx_common.TypePackageManagerPURL {
+				} else if ext.RefType == spdx_common.TypePackageManagerPURL {
 					currentPackage.Purl = ext.Locator
 				}
 			}
@@ -136,7 +138,8 @@ func (s *spdxParser) getFileElement(elementID string) []assembler.ArtifactNode {
 	return nil
 }
 
-func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (s *spdxParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+	logger := logging.FromContext(ctx)
 	edges := []assembler.GuacEdge{}
 	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
 	// adding top level package edge manually for all depends on package
@@ -148,20 +151,24 @@ func (s *spdxParser) CreateEdges(foundIdentities []assembler.IdentityNode) []ass
 		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
 		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
 		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
-		if len(foundPackNodes) > 0 {
-			for _, packNode := range foundPackNodes {
-				createdEdge := sort(packNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
-				if createdEdge != nil {
-					edges = append(edges, createdEdge)
-				}
+		for _, packNode := range foundPackNodes {
+			createdEdge, err := getEdge(packNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
+			if err != nil {
+				logger.Errorf("error generating spdx edge %v", err)
+				continue
+			}
+			if createdEdge != nil {
+				edges = append(edges, createdEdge)
 			}
 		}
-		if len(foundFileNodes) > 0 {
-			for _, fileNode := range foundFileNodes {
-				createdEdge := sort(fileNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
-				if createdEdge != nil {
-					edges = append(edges, createdEdge)
-				}
+		for _, fileNode := range foundFileNodes {
+			createdEdge, err := getEdge(fileNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
+			if err != nil {
+				logger.Errorf("error generating spdx edge %v", err)
+				continue
+			}
+			if createdEdge != nil {
+				edges = append(edges, createdEdge)
 			}
 		}
 	}
@@ -184,41 +191,45 @@ func createTopLevelEdges(toplevel assembler.PackageNode, packages map[string][]a
 	return edges
 }
 
-func sort(foundNode assembler.GuacNode, relationship string, relatedPackNodes []assembler.PackageNode, relatedFileNodes []assembler.ArtifactNode) assembler.GuacEdge {
+func getEdge(foundNode assembler.GuacNode, relationship string, relatedPackNodes []assembler.PackageNode, relatedFileNodes []assembler.ArtifactNode) (assembler.GuacEdge, error) {
 	if len(relatedFileNodes) > 0 {
 		for _, rfileNode := range relatedFileNodes {
-			return sortByType(relationship, foundNode, rfileNode)
+			return getEdgeByType(relationship, foundNode, rfileNode)
 		}
 	} else if len(relatedPackNodes) > 0 {
 		for _, rpackNode := range relatedPackNodes {
-			return sortByType(relationship, foundNode, rpackNode)
+			return getEdgeByType(relationship, foundNode, rpackNode)
 		}
 	}
-	return nil
+	return nil, nil
 }
 
-func sortByType(relationship string, foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
+func getEdgeByType(relationship string, foundNode assembler.GuacNode, relatedNode assembler.GuacNode) (assembler.GuacEdge, error) {
 	switch relationship {
 	case spdx_common.TypeRelationshipContains:
-		return sortContainsEdge(foundNode, relatedNode)
+		return getContainsEdge(foundNode, relatedNode)
 	case spdx_common.TypeRelationshipDependsOn:
-		return sortDependsOnEdge(foundNode, relatedNode)
+		return getDependsOnEdge(foundNode, relatedNode), nil
 	}
-	return nil
+	return nil, nil
 }
 
-func sortContainsEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
+func getContainsEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) (assembler.GuacEdge, error) {
 	e := assembler.ContainsEdge{}
 	if foundNode.Type() == "Package" {
 		e.PackageNode = foundNode.(assembler.PackageNode)
+	} else {
+		return nil, errors.New("node type mismatch during contains edge creation")
 	}
 	if relatedNode.Type() == "Artifact" {
 		e.ContainedArtifact = relatedNode.(assembler.ArtifactNode)
+	} else {
+		return nil, errors.New("node type mismatch during contains edge creation")
 	}
-	return e
+	return e, nil
 }
 
-func sortDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
+func getDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
 	e := assembler.DependsOnEdge{}
 	if foundNode.Type() == "Package" {
 		e.PackageNode = foundNode.(assembler.PackageNode)

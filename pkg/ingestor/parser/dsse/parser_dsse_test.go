@@ -16,6 +16,7 @@
 package dsse
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -23,21 +24,29 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 func Test_DsseParser(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}
 	tests := []struct {
-		name    string
-		doc     *processor.Document
-		wantErr bool
+		name         string
+		doc          *processor.Document
+		wantNodes    []assembler.GuacNode
+		wantEdges    []assembler.GuacEdge
+		wantIdentity assembler.IdentityNode
+		wantErr      bool
 	}{{
-		name:    "testing",
-		doc:     &testdata.Ite6DSSEDoc,
-		wantErr: false,
+		name:         "testing",
+		doc:          &testdata.Ite6DSSEDoc,
+		wantNodes:    testdata.DsseNodes,
+		wantEdges:    testdata.DsseEdges,
+		wantIdentity: testdata.Ident,
+		wantErr:      false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -45,14 +54,14 @@ func Test_DsseParser(t *testing.T) {
 			if err := d.Parse(tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if nodes := d.CreateNodes(); !reflect.DeepEqual(nodes, testdata.DsseNodes) {
-				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, testdata.DsseNodes)
+			if nodes := d.CreateNodes(); !reflect.DeepEqual(nodes, tt.wantNodes) {
+				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
 			}
-			if edges := d.CreateEdges([]assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, testdata.DsseEdges) {
-				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, testdata.DsseEdges)
+			if edges := d.CreateEdges(ctx, []assembler.IdentityNode{tt.wantIdentity}); !reflect.DeepEqual(edges, tt.wantEdges) {
+				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
-			if identity := d.GetIdentities(); !reflect.DeepEqual(identity, []assembler.IdentityNode{testdata.Ident}) {
-				t.Errorf("slsa.GetDocType() = %v, want %v", identity, []assembler.IdentityNode{testdata.Ident})
+			if identity := d.GetIdentities(); !reflect.DeepEqual(identity, []assembler.IdentityNode{tt.wantIdentity}) {
+				t.Errorf("slsa.GetDocType() = %v, want %v", identity, []assembler.IdentityNode{tt.wantIdentity})
 			}
 		})
 	}

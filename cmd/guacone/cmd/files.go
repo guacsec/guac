@@ -83,7 +83,7 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		ingestorFunc, err := getIngestor()
+		ingestorFunc, err := getIngestor(ctx)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -151,9 +151,9 @@ func getProcessor(ctx context.Context) (func(*processor.Document) (processor.Doc
 		return process.Process(ctx, d)
 	}, nil
 }
-func getIngestor() (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
+func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
 	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
-		inputs, err := parser.ParseDocumentTree(doc)
+		inputs, err := parser.ParseDocumentTree(ctx, doc)
 		if err != nil {
 			return nil, err
 		}

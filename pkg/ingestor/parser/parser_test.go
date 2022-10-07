@@ -16,6 +16,7 @@
 package parser
 
 import (
+	"context"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
@@ -23,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 var (
@@ -61,6 +63,7 @@ var (
 )
 
 func TestParseDocumentTree(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
@@ -83,22 +86,18 @@ func TestParseDocumentTree(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseDocumentTree(tt.tree)
+			got, err := ParseDocumentTree(ctx, tt.tree)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if len(got) > 1 {
+			if err == nil {
 				if len(got) != len(tt.want) {
 					t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
 				}
-				i, n := 0, len(got)
-				for i < n {
+				for i := range got {
 					compare(t, got[i].Edges, tt.want[i].Edges, got[i].Nodes, tt.want[i].Nodes)
-					i++
 				}
-			} else {
-				compare(t, got[0].Edges, tt.want[0].Edges, got[0].Nodes, tt.want[0].Nodes)
 			}
 		})
 	}

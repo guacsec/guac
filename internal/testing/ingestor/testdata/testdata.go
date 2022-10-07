@@ -279,54 +279,50 @@ func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
 	}
 
 	result := true
-	i, n := 0, len(slice1)
 
-	for i < n {
-		j := 0
+	for _, node1 := range slice1 {
 		e := false
-		for j < n && !e {
-			if slice1[i].Type() == "Package" && slice2[j].Type() == "Package" {
-				if slice1[i].(assembler.PackageNode).Name == slice2[j].(assembler.PackageNode).Name {
-					if reflect.DeepEqual(slice1[i], slice2[j]) {
+		for _, node2 := range slice2 {
+			if node1.Type() == "Package" && node2.Type() == "Package" {
+				if node1.(assembler.PackageNode).Name == node2.(assembler.PackageNode).Name {
+					if reflect.DeepEqual(node1, node2) {
 						e = true
 						break
 					}
 				}
-			} else if slice1[i].Type() == "Artifact" && slice2[j].Type() == "Artifact" {
-				if slice1[i].(assembler.ArtifactNode).Name == slice2[j].(assembler.ArtifactNode).Name {
-					if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if node1.Type() == "Artifact" && node2.Type() == "Artifact" {
+				if node1.(assembler.ArtifactNode).Name == node2.(assembler.ArtifactNode).Name {
+					if reflect.DeepEqual(node1, node2) {
 						e = true
 						break
 					}
 				}
-			} else if slice1[i].Type() == "Attestation" && slice2[j].Type() == "Attestation" {
-				if slice1[i].(assembler.AttestationNode).FilePath == slice2[j].(assembler.AttestationNode).FilePath {
-					if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if node1.Type() == "Attestation" && node2.Type() == "Attestation" {
+				if node1.(assembler.AttestationNode).FilePath == node2.(assembler.AttestationNode).FilePath {
+					if reflect.DeepEqual(node1, node2) {
 						e = true
 						break
 					}
 				}
-			} else if slice1[i].Type() == "Builder" && slice2[j].Type() == "Builder" {
-				if slice1[i].(assembler.BuilderNode).BuilderId == slice2[j].(assembler.BuilderNode).BuilderId {
-					if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if node1.Type() == "Builder" && node2.Type() == "Builder" {
+				if node1.(assembler.BuilderNode).BuilderId == node2.(assembler.BuilderNode).BuilderId {
+					if reflect.DeepEqual(node1, node2) {
 						e = true
 						break
 					}
 				}
-			} else if slice1[i].Type() == "Identity" && slice2[j].Type() == "Identity" {
-				if slice1[i].(assembler.IdentityNode).ID == slice2[j].(assembler.IdentityNode).ID {
-					if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if node1.Type() == "Identity" && node2.Type() == "Identity" {
+				if node1.(assembler.IdentityNode).ID == node2.(assembler.IdentityNode).ID {
+					if reflect.DeepEqual(node1, node2) {
 						e = true
 						break
 					}
 				}
 			}
-			j++
 		}
 		if !e {
 			result = false
 		}
-		i++
 	}
 	return result
 }
@@ -337,44 +333,39 @@ func GuacEdgeSliceEqual(slice1, slice2 []assembler.GuacEdge) bool {
 	}
 
 	result := true
-	i, n := 0, len(slice1)
-
-	for i < n {
-		j := 0
+	for _, edge1 := range slice1 {
 		e := false
-		for j < n && !e {
-			if slice1[i].Type() == "DependsOn" && slice2[j].Type() == "DependsOn" {
-				if reflect.DeepEqual(slice1[i], slice2[j]) {
+		for _, edge2 := range slice2 {
+			if edge1.Type() == "DependsOn" && edge2.Type() == "DependsOn" {
+				if reflect.DeepEqual(edge1, edge2) {
 					e = true
 					break
 				}
-			} else if slice1[i].Type() == "Contains" && slice2[j].Type() == "Contains" {
-				if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if edge1.Type() == "Contains" && edge2.Type() == "Contains" {
+				if reflect.DeepEqual(edge1, edge2) {
 					e = true
 					break
 				}
-			} else if slice1[i].Type() == "Attestation" && slice2[j].Type() == "Attestation" {
-				if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if edge1.Type() == "Attestation" && edge2.Type() == "Attestation" {
+				if reflect.DeepEqual(edge1, edge2) {
 					e = true
 					break
 				}
-			} else if slice1[i].Type() == "Identity" && slice2[j].Type() == "Identity" {
-				if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if edge1.Type() == "Identity" && edge2.Type() == "Identity" {
+				if reflect.DeepEqual(edge1, edge2) {
 					e = true
 					break
 				}
-			} else if slice1[i].Type() == "BuiltBy" && slice2[j].Type() == "BuiltBy" {
-				if reflect.DeepEqual(slice1[i], slice2[j]) {
+			} else if edge1.Type() == "BuiltBy" && edge2.Type() == "BuiltBy" {
+				if reflect.DeepEqual(edge1, edge2) {
 					e = true
 					break
 				}
 			}
-			j++
 		}
 		if !e {
 			result = false
 		}
-		i++
 	}
 	return result
 }

@@ -16,23 +16,30 @@
 package slsa
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 func Test_slsaParser(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name    string
-		doc     *processor.Document
-		wantErr bool
+		name      string
+		doc       *processor.Document
+		wantNodes []assembler.GuacNode
+		wantEdges []assembler.GuacEdge
+		wantErr   bool
 	}{{
-		name:    "testing",
-		doc:     &testdata.Ite6SLSADoc,
-		wantErr: false,
+		name:      "testing",
+		doc:       &testdata.Ite6SLSADoc,
+		wantNodes: testdata.SlsaNodes,
+		wantEdges: testdata.SlsaEdges,
+		wantErr:   false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -40,11 +47,11 @@ func Test_slsaParser(t *testing.T) {
 			if err := s.Parse(tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if nodes := s.CreateNodes(); !reflect.DeepEqual(nodes, testdata.SlsaNodes) {
-				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, testdata.SlsaNodes)
+			if nodes := s.CreateNodes(); !reflect.DeepEqual(nodes, tt.wantNodes) {
+				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
 			}
-			if edges := s.CreateEdges([]assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, testdata.SlsaEdges) {
-				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, testdata.SlsaEdges)
+			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
+				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
 		})
 	}

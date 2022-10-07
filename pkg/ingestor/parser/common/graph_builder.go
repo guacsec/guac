@@ -16,6 +16,8 @@
 package common
 
 import (
+	"context"
+
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
@@ -34,10 +36,10 @@ func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assemble
 }
 
 // CreateAssemblerInput creates the GuacNodes and GuacEdges that are needed by the assembler
-func (b *GraphBuilder) CreateAssemblerInput(foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
+func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: b.docParser.CreateNodes(),
-		Edges: b.docParser.CreateEdges(foundIdentities),
+		Edges: b.docParser.CreateEdges(ctx, foundIdentities),
 	}
 	return assemblerinput
 }

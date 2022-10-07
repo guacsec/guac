@@ -16,19 +16,25 @@
 package spdx
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
 	processor_data "github.com/guacsec/guac/internal/testing/processor"
+	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 func Test_spdxParser(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name    string
-		doc     *processor.Document
-		wantErr bool
+		name      string
+		doc       *processor.Document
+		wantNodes []assembler.GuacNode
+		wantEdges []assembler.GuacEdge
+		wantErr   bool
 	}{{
 		name: "valid big SPDX document",
 		doc: &processor.Document{
@@ -37,22 +43,27 @@ func Test_spdxParser(t *testing.T) {
 			Type:              processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{},
 		},
-		wantErr: false,
+		wantNodes: testdata.SpdxNodes,
+		wantEdges: testdata.SpdxEdges,
+		wantErr:   false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSpdxParser()
-			if err := s.Parse(tt.doc); (err != nil) != tt.wantErr {
+			err := s.Parse(tt.doc)
+			if (err != nil) != tt.wantErr {
 				t.Errorf("spdxParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if nodes := s.CreateNodes(); !testdata.GuacNodeSliceEqual(nodes, testdata.SpdxNodes) {
-				t.Errorf("spdxParser.CreateNodes() = %v, want %v", nodes, testdata.SpdxNodes)
-			}
-			if edges := s.CreateEdges(nil); !testdata.GuacEdgeSliceEqual(edges, testdata.SpdxEdges) {
-				t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, testdata.SpdxEdges)
-			}
-			if docType := s.GetDocType(); !reflect.DeepEqual(docType, processor.DocumentSPDX) {
-				t.Errorf("spdxParser.GetDocType() = %v, want %v", docType, processor.DocumentSPDX)
+			if err == nil {
+				if nodes := s.CreateNodes(); !testdata.GuacNodeSliceEqual(nodes, tt.wantNodes) {
+					t.Errorf("spdxParser.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
+				}
+				if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
+					t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+				}
+				if docType := s.GetDocType(); !reflect.DeepEqual(docType, processor.DocumentSPDX) {
+					t.Errorf("spdxParser.GetDocType() = %v, want %v", docType, processor.DocumentSPDX)
+				}
 			}
 		})
 	}

@@ -16,6 +16,7 @@
 package parser
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -39,7 +40,7 @@ func newDocTreeBuilder() *docTreeBuilder {
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node
-func ParseDocumentTree(docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
 	assemblerinputs := []assembler.AssemblerInput{}
 	docTreeBuilder := newDocTreeBuilder()
 	err := docTreeBuilder.parse(docTree)
@@ -47,7 +48,7 @@ func ParseDocumentTree(docTree processor.DocumentTree) ([]assembler.AssemblerInp
 		return nil, err
 	}
 	for _, builder := range docTreeBuilder.graphBuilders {
-		assemblerinput := builder.CreateAssemblerInput(docTreeBuilder.identities)
+		assemblerinput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities)
 		assemblerinputs = append(assemblerinputs, assemblerinput)
 	}
 
