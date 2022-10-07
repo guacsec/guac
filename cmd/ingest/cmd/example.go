@@ -79,7 +79,7 @@ var exampleCmd = &cobra.Command{
 			Edges: []assembler.GuacEdge{},
 		}
 		for _, doc := range docs {
-			inputs, err := parser.ParseDocumentTree(doc)
+			inputs, err := parser.ParseDocumentTree(ctx, doc)
 			if err != nil {
 				logger.Errorf("unable to parse document: %v", err)
 				os.Exit(1)

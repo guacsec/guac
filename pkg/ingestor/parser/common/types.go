@@ -16,6 +16,8 @@
 package common
 
 import (
+	"context"
+
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -28,5 +30,5 @@ type DocumentParser interface {
 	// CreateNodes creates the GuacNode for the graph inputs
 	CreateNodes() []assembler.GuacNode
 	// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-	CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
+	CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
 }

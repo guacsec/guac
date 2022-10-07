@@ -16,6 +16,7 @@
 package slsa
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -119,7 +120,7 @@ func (s *slsaParser) CreateNodes() []assembler.GuacNode {
 }
 
 // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (s *slsaParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
 	for _, i := range foundIdentities {
 		for _, a := range s.attestations {

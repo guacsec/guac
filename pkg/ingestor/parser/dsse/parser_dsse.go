@@ -16,6 +16,7 @@
 package dsse
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 
@@ -76,6 +77,6 @@ func (d *dsseParser) CreateNodes() []assembler.GuacNode {
 }
 
 // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (d *dsseParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (d *dsseParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	return []assembler.GuacEdge{}
 }
