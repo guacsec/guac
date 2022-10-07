@@ -13,9 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package slsa
+package scorecard
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -23,9 +24,11 @@ import (
 	testdata "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 func Test_scorecardParser(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
 		name      string
 		doc       *processor.Document
@@ -93,13 +96,13 @@ func Test_scorecardParser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewScorecardParser()
-			if err := s.Parse(tt.doc); (err != nil) != tt.wantErr {
+			if err := s.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if nodes := s.CreateNodes(); !reflect.DeepEqual(nodes, tt.wantNodes) {
+			if nodes := s.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
 				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
 			}
-			if edges := s.CreateEdges([]assembler.IdentityNode{testdata_ing.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
+			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata_ing.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
 				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
 		})

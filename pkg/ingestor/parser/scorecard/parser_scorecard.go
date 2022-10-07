@@ -13,14 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package slsa
+package scorecard
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
@@ -44,7 +46,7 @@ type scorecardParser struct {
 }
 
 // NewSLSAParser initializes the slsaParser
-func NewScorecardParser() *scorecardParser {
+func NewScorecardParser() common.DocumentParser {
 	return &scorecardParser{
 		scorecardNodes: []assembler.ScorecardNode{},
 		artifactNodes:  []assembler.ArtifactNode{},
@@ -52,7 +54,7 @@ func NewScorecardParser() *scorecardParser {
 }
 
 // Parse breaks out the document into the graph components
-func (p *scorecardParser) Parse(doc *processor.Document) error {
+func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) error {
 
 	if doc.Type != processor.DocumentScorecard {
 		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentScorecard, doc.Type)
@@ -73,7 +75,7 @@ func (p *scorecardParser) Parse(doc *processor.Document) error {
 }
 
 // CreateNodes creates the GuacNode for the graph inputs
-func (p *scorecardParser) CreateNodes() []assembler.GuacNode {
+func (p *scorecardParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, n := range p.scorecardNodes {
 		nodes = append(nodes, n)
@@ -86,7 +88,7 @@ func (p *scorecardParser) CreateNodes() []assembler.GuacNode {
 }
 
 // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (p *scorecardParser) CreateEdges(foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (p *scorecardParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	// TODO: handle identity for edges (https://github.com/guacsec/guac/issues/128)
 	edges := []assembler.GuacEdge{}
 	for i, s := range p.scorecardNodes {
@@ -99,7 +101,7 @@ func (p *scorecardParser) CreateEdges(foundIdentities []assembler.IdentityNode) 
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (p *scorecardParser) GetIdentities() []assembler.IdentityNode {
+func (p *scorecardParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
 }
 
