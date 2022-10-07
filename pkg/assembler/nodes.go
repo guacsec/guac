@@ -166,7 +166,7 @@ type ScorecardNode struct {
 	Commit           string
 	ScorecardVersion string
 	ScorecardCommit  string
-	Score            float32
+	Score            float64
 
 	// Checks
 	CheckBinaryArtifact     int
