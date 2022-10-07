@@ -51,16 +51,21 @@ func Test_DsseParser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			d := NewDSSEParser()
-			if err := d.Parse(tt.doc); (err != nil) != tt.wantErr {
+			err := d.Parse(ctx, tt.doc)
+			if (err != nil) != tt.wantErr {
 				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if nodes := d.CreateNodes(); !reflect.DeepEqual(nodes, tt.wantNodes) {
+			if err != nil {
+				return
+			}
+			if nodes := d.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
 				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
 			}
 			if edges := d.CreateEdges(ctx, []assembler.IdentityNode{tt.wantIdentity}); !reflect.DeepEqual(edges, tt.wantEdges) {
 				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
-			if identity := d.GetIdentities(); !reflect.DeepEqual(identity, []assembler.IdentityNode{tt.wantIdentity}) {
+			if identity := d.GetIdentities(ctx); !reflect.DeepEqual(identity, []assembler.IdentityNode{tt.wantIdentity}) {
 				t.Errorf("slsa.GetDocType() = %v, want %v", identity, []assembler.IdentityNode{tt.wantIdentity})
 			}
 		})

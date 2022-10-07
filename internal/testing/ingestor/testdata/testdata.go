@@ -322,6 +322,7 @@ func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
 		}
 		if !e {
 			result = false
+			break
 		}
 	}
 	return result
@@ -365,6 +366,7 @@ func GuacEdgeSliceEqual(slice1, slice2 []assembler.GuacEdge) bool {
 		}
 		if !e {
 			result = false
+			break
 		}
 	}
 	return result

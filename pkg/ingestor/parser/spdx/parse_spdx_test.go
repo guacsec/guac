@@ -50,20 +50,22 @@ func Test_spdxParser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSpdxParser()
-			err := s.Parse(tt.doc)
+			err := s.Parse(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("spdxParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if err == nil {
-				if nodes := s.CreateNodes(); !testdata.GuacNodeSliceEqual(nodes, tt.wantNodes) {
-					t.Errorf("spdxParser.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
-				}
-				if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
-					t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
-				}
-				if docType := s.GetDocType(); !reflect.DeepEqual(docType, processor.DocumentSPDX) {
-					t.Errorf("spdxParser.GetDocType() = %v, want %v", docType, processor.DocumentSPDX)
-				}
+			if err != nil {
+				return
+			}
+			if nodes := s.CreateNodes(ctx); !testdata.GuacNodeSliceEqual(nodes, tt.wantNodes) {
+				t.Errorf("spdxParser.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
+			}
+			if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
+				t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+			}
+			if docType := s.GetDocType(); !reflect.DeepEqual(docType, processor.DocumentSPDX) {
+				t.Errorf("spdxParser.GetDocType() = %v, want %v", docType, processor.DocumentSPDX)
 			}
 		})
 	}
