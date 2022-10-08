@@ -47,7 +47,7 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 	}
 
 	edge_queries := make([]string, len(g.Edges))
-	edge_dicts := make([]map[string]interface{}, len(g.Nodes))
+	edge_dicts := make([]map[string]interface{}, len(g.Edges))
 	for i, e := range g.Edges {
 		a, b := e.Nodes()
 		var sb strings.Builder
