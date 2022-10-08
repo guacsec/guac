@@ -1,0 +1,16 @@
+{
+    "bomFormat": "CDX",
+    "specVersion": "1",
+    "serialNumber": "urn:uuid:2c0f3466-55b9-4667-9780-ec8ce9af741e",
+    "version": 1,
+    "metadata": {
+      "timestamp": "2022-10-08T09:59:15-04:00",
+      "tools": [
+        {
+          "vendor": "anchore",
+          "name": "syft",
+          "version": "0.58.0"
+        }
+      ]
+    }
+}

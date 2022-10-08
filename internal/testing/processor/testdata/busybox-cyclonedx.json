@@ -1,0 +1,53 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:2c0f3466-55b9-4667-9780-ec8ce9af741e",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-10-08T09:59:15-04:00",
+    "tools": [
+      {
+        "vendor": "anchore",
+        "name": "syft",
+        "version": "0.58.0"
+      }
+    ],
+    "component": {
+      "bom-ref": "186732ee4e1d4e50",
+      "type": "container",
+      "name": "docker.io/library/busybox",
+      "version": "sha256:bf5e28853a83134e949201fb5979927a9e5cc74cb747b7a080d96eaba1303411"
+    }
+  },
+  "components": [
+    {
+      "type": "operating-system",
+      "name": "busybox",
+      "version": "1.34.1",
+      "description": "BusyBox v1.34.1",
+      "swid": {
+        "tagId": "busybox",
+        "name": "busybox",
+        "version": "1.34.1"
+      },
+      "properties": [
+        {
+          "name": "syft:distro:id",
+          "value": "busybox"
+        },
+        {
+          "name": "syft:distro:idLike:0",
+          "value": "busybox"
+        },
+        {
+          "name": "syft:distro:prettyName",
+          "value": "BusyBox v1.34.1"
+        },
+        {
+          "name": "syft:distro:versionID",
+          "value": "1.34.1"
+        }
+      ]
+    }
+  ]
+}
