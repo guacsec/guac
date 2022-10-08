@@ -46,7 +46,6 @@ func addEdges(curPkg parentPackages, edges *[]assembler.GuacEdge) {
 		return
 	}
 	for _, d := range curPkg.depPackages {
-		fmt.Printf("%s-%s\n", d.curPackage.Name, curPkg.curPackage.Name)
 		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: d.curPackage, PackageDependency: curPkg.curPackage})
 		addEdges(d, edges)
 	}

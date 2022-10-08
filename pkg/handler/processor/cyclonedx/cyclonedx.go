@@ -15,7 +15,7 @@ type CycloneDXProcessor struct {
 
 func (p *CycloneDXProcessor) ValidateSchema(d *processor.Document) error {
 	if d.Type != processor.DocumentCycloneDX {
-		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentSPDX, d.Type)
+		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentCycloneDX, d.Type)
 	}
 
 	switch d.Format {
@@ -27,7 +27,7 @@ func (p *CycloneDXProcessor) ValidateSchema(d *processor.Document) error {
 		return err
 	}
 
-	return fmt.Errorf("unable to support parsing of SPDX document format: %v", d.Format)
+	return fmt.Errorf("unable to support parsing of CycloneDX document format: %v", d.Format)
 }
 
 func (p *CycloneDXProcessor) Unpack(d *processor.Document) ([]*processor.Document, error) {
