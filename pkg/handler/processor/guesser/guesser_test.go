@@ -132,7 +132,10 @@ func Test_GuessDocument(t *testing.T) {
 	}, {
 		name: "valid scorecard Document",
 		document: &processor.Document{
-			Blob: testdata.ScorecardExample,
+			Blob:              testdata.ScorecardExample,
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
 		},
 		expectedType:   processor.DocumentScorecard,
 		expectedFormat: processor.FormatJSON,
