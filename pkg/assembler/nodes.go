@@ -84,7 +84,7 @@ type IdentityNode struct {
 	Key       string
 	KeyType   string
 	KeyScheme string
-	Source    string
+	Metadata  Metadata
 }
 
 func (in IdentityNode) Type() string {
@@ -98,7 +98,7 @@ func (in IdentityNode) Properties() map[string]interface{} {
 	properties["key"] = in.Key
 	properties["keyType"] = in.KeyType
 	properties["keyScheme"] = in.KeyScheme
-	properties["source"] = in.Source
+	properties["source"] = in.Metadata.Source
 	return properties
 }
 
@@ -116,6 +116,7 @@ type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
 	FilePath string
 	Digest   string
+	Metadata Metadata
 }
 
 func (an AttestationNode) Type() string {
@@ -130,7 +131,7 @@ func (an AttestationNode) Properties() map[string]interface{} {
 }
 
 func (an AttestationNode) PropertyNames() []string {
-	return []string{"filepath", "digest"}
+	return []string{"filepath", "digest", "source"}
 }
 
 func (an AttestationNode) IdentifiablePropertyNames() []string {
@@ -141,7 +142,7 @@ func (an AttestationNode) IdentifiablePropertyNames() []string {
 type BuilderNode struct {
 	BuilderType string
 	BuilderId   string
-	Source      string
+	Metadata    Metadata
 }
 
 func (bn BuilderNode) Type() string {
@@ -152,7 +153,7 @@ func (bn BuilderNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["type"] = bn.BuilderType
 	properties["id"] = bn.BuilderId
-	properties["source"] = bn.Source
+	properties["source"] = bn.Metadata.Source
 	return properties
 }
 

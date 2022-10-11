@@ -61,7 +61,7 @@ func (d *dsseParser) getIdentity() error {
 		}
 		d.identities = append(d.identities, assembler.IdentityNode{
 			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
-			KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), Source: d.doc.SourceInformation.Source})
+			KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), Metadata: assembler.Metadata{Source: d.doc.SourceInformation.Source}})
 	}
 	return nil
 }

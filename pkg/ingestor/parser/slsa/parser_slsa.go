@@ -89,13 +89,13 @@ func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
 func (s *slsaParser) getAttestation(blob []byte) {
 	h := sha256.Sum256(blob)
 	s.attestations = append(s.attestations, assembler.AttestationNode{
-		FilePath: s.doc.SourceInformation.Source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:])})
+		FilePath: s.doc.SourceInformation.Source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:]), Metadata: assembler.Metadata{Source: s.doc.SourceInformation.Source}})
 }
 
 func (s *slsaParser) getBuilder(statement *in_toto.ProvenanceStatement) {
 	// append builder node for builder
 	s.builders = append(s.builders, assembler.BuilderNode{
-		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID, Source: s.doc.SourceInformation.Source})
+		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID, Metadata: assembler.Metadata{Source: s.doc.SourceInformation.Source}})
 }
 
 func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
