@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -105,9 +106,9 @@ func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
 	}
 
 	for _, c := range s.Checks {
-		mnNode.Details[c.Name] = c.Score
+		mnNode.Details[strings.ReplaceAll(c.Name, "-", "_")] = c.Score
 	}
-	mnNode.Details["repo"] = s.Repo.Name
+	mnNode.Details["repo"] = sourceUri(s.Repo.Name)
 	mnNode.Details["commit"] = hashToDigest(s.Repo.Commit)
 	mnNode.Details["scorecard_version"] = s.Scorecard.Version
 	mnNode.Details["scorecard_commit"] = hashToDigest(s.Scorecard.Commit)
@@ -118,9 +119,13 @@ func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
 
 func getArtifactNode(s *sc.JSONScorecardResultV2) assembler.ArtifactNode {
 	return assembler.ArtifactNode{
-		Name:   s.Repo.Name,
+		Name:   sourceUri(s.Repo.Name),
 		Digest: hashToDigest(s.Repo.Commit),
 	}
+}
+
+func sourceUri(s string) string {
+	return "git+https://" + s
 }
 
 func hashToDigest(h string) string {
