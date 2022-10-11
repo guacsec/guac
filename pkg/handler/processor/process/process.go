@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/dsse"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/handler/processor/ite6"
+	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 )
 
@@ -36,6 +37,7 @@ func init() {
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6SLSA)
 	_ = RegisterDocumentProcessor(&dsse.DSSEProcessor{}, processor.DocumentDSSE)
 	_ = RegisterDocumentProcessor(&spdx.SPDXProcessor{}, processor.DocumentSPDX)
+	_ = RegisterDocumentProcessor(&scorecard.ScorecardProcessor{}, processor.DocumentScorecard)
 }
 
 func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) error {

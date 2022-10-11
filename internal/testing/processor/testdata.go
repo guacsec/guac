@@ -31,4 +31,12 @@ var (
 	// Invalid types for field spdxVersion
 	//go:embed testdata/invalid-spdx.json
 	SpdxInvalidExample []byte
+
+	// Example scorecard
+	//go:embed testdata/kubernetes-scorecard.json
+	ScorecardExample []byte
+
+	// Invalid scorecard
+	//go:embed testdata/invalid-scorecard.json
+	ScorecardInvalid []byte
 )
