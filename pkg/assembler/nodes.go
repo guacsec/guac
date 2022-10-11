@@ -159,64 +159,40 @@ func (bn BuilderNode) IdentifiablePropertyNames() []string {
 	return []string{"type", "id"}
 }
 
-// ScorecardNode is a node that represents an artifact
-type ScorecardNode struct {
-	MetadataType     string
-	Repo             string
-	Commit           string
-	ScorecardVersion string
-	ScorecardCommit  string
-	Score            float64
-
-	// Checks
-	CheckBinaryArtifact     int
-	CheckCITests            int
-	CheckCodeReview         int
-	CheckDangerousWorkflow  int
-	CheckLicense            int
-	CheckPinnedDependencies int
-	CheckSecurityPolicy     int
-	CheckTokenPermissions   int
-	CheckVulnerabilities    int
+// MetadataNode is a node that represents metadata about an artifact/package
+type MetadataNode struct {
+	MetadataType string
+	ID           string
+	Details      map[string]interface{}
 }
 
-func (sn ScorecardNode) Type() string {
-	return "Scorecard"
+func (mn MetadataNode) Type() string {
+	return "Metadata"
 }
 
-func (sn ScorecardNode) Properties() map[string]interface{} {
+func (mn MetadataNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["metadata_type"] = sn.MetadataType
-	properties["repo"] = sn.Repo
-	properties["commit"] = sn.Commit
-	properties["scorecard_version"] = sn.ScorecardVersion
-	properties["scorecard_commit"] = sn.ScorecardCommit
-	properties["score"] = sn.Score
+	properties["metadata_type"] = mn.MetadataType
+	properties["id"] = mn.ID
 
-	properties["check_binary_artifact"] = sn.CheckBinaryArtifact
-	properties["check_ci_tests"] = sn.CheckCITests
-	properties["check_code_review"] = sn.CheckCodeReview
-	properties["check_dangerous_workflow"] = sn.CheckDangerousWorkflow
-	properties["check_license"] = sn.CheckLicense
-	properties["check_pinned_dependencies"] = sn.CheckPinnedDependencies
-	properties["check_security_policy"] = sn.CheckSecurityPolicy
-	properties["check_token_permissions"] = sn.CheckTokenPermissions
-	properties["check_vulnerabilities"] = sn.CheckVulnerabilities
+	for k, v := range mn.Details {
+		properties[k] = v
+	}
 
 	return properties
 }
 
-func (sn ScorecardNode) PropertyNames() []string {
-	return []string{"metadata_type", "repo", "commit", "scorecard_version", "scorecard_commit", "score",
-		"check_binary_artifact", "check_ci_tests", "check_code_review", "check_dangerous_workflow",
-		"check_license", "check_pinned_dependencies", "check_security_policy",
-		"check_token_permissions", "check_vulnerabilities",
+func (mn MetadataNode) PropertyNames() []string {
+	fields := []string{"metadata_type", "id"}
+	for k := range mn.Details {
+		fields = append(fields, k)
 	}
 
+	return fields
 }
 
-func (sn ScorecardNode) IdentifiablePropertyNames() []string {
-	return []string{"repo", "commit"}
+func (mn MetadataNode) IdentifiablePropertyNames() []string {
+	return []string{"metadata_type", "id"}
 }
 
 // IdentityForEdge is an edge that represents the fact that an
@@ -384,7 +360,7 @@ func (e ContainsEdge) IdentifiablePropertyNames() []string {
 // Only one of each side of the edge should be defined.
 type MetadataForEdge struct {
 	// From node
-	MetadataScorecard ScorecardNode
+	MetadataNode MetadataNode
 	// To node
 	ForArtifact ArtifactNode
 	ForPackage  PackageNode
@@ -400,7 +376,7 @@ func (e MetadataForEdge) Nodes() (v, u GuacNode) {
 		panic("only on of package and artifact dependency node defined for DependsOn relationship")
 	}
 
-	v = e.MetadataScorecard
+	v = e.MetadataNode
 	if uA {
 		u = e.ForArtifact
 	} else {

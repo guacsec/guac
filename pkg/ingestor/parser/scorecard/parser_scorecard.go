@@ -26,20 +26,8 @@ import (
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
-const (
-	checkBinaryArtifact     = "Binary-Artifacts"
-	checkCITests            = "CI-Tests"
-	checkCodeReview         = "Code-Review"
-	checkDangerousWorkflow  = "Dangerous-Workflow"
-	checkLicense            = "License"
-	checkPinnedDependencies = "Pinned-Dependencies"
-	checkSecurityPolicy     = "Security-Policy"
-	checkTokenPermissions   = "Token-Permissions"
-	checkVulnerabilities    = "Vulnerabilities"
-)
-
 type scorecardParser struct {
-	scorecardNodes []assembler.ScorecardNode
+	scorecardNodes []assembler.MetadataNode
 	// artifactNode should have a 1:1 mapping to the index
 	// of scorecardNodes.
 	artifactNodes []assembler.ArtifactNode
@@ -48,7 +36,7 @@ type scorecardParser struct {
 // NewSLSAParser initializes the slsaParser
 func NewScorecardParser() common.DocumentParser {
 	return &scorecardParser{
-		scorecardNodes: []assembler.ScorecardNode{},
+		scorecardNodes: []assembler.MetadataNode{},
 		artifactNodes:  []assembler.ArtifactNode{},
 	}
 }
@@ -67,7 +55,7 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 			return err
 		}
 		//p.scorecards = append(s.scorecards, scorecard)
-		p.scorecardNodes = append(p.scorecardNodes, getScorecardNode(&scorecard))
+		p.scorecardNodes = append(p.scorecardNodes, getMetadataNode(&scorecard))
 		p.artifactNodes = append(p.artifactNodes, getArtifactNode(&scorecard))
 		return nil
 	}
@@ -93,8 +81,8 @@ func (p *scorecardParser) CreateEdges(ctx context.Context, foundIdentities []ass
 	edges := []assembler.GuacEdge{}
 	for i, s := range p.scorecardNodes {
 		edges = append(edges, assembler.MetadataForEdge{
-			MetadataScorecard: s,
-			ForArtifact:       p.artifactNodes[i],
+			MetadataNode: s,
+			ForArtifact:  p.artifactNodes[i],
 		})
 	}
 	return edges
@@ -105,40 +93,27 @@ func (p *scorecardParser) GetIdentities(ctx context.Context) []assembler.Identit
 	return nil
 }
 
-func getScorecardNode(s *sc.JSONScorecardResultV2) assembler.ScorecardNode {
-	scNode := assembler.ScorecardNode{
-		MetadataType:     "scorecard",
-		Repo:             s.Repo.Name,
-		Commit:           hashToDigest(s.Repo.Commit),
-		ScorecardVersion: s.Scorecard.Version,
-		ScorecardCommit:  hashToDigest(s.Scorecard.Commit),
-		Score:            float64(s.AggregateScore),
+func metadataId(s *sc.JSONScorecardResultV2) string {
+	return fmt.Sprintf("%v:%v", s.Repo.Name, s.Repo.Commit)
+}
+
+func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
+	mnNode := assembler.MetadataNode{
+		MetadataType: "scorecard",
+		ID:           metadataId(s),
+		Details:      map[string]interface{}{},
 	}
 
 	for _, c := range s.Checks {
-		switch c.Name {
-		case checkBinaryArtifact:
-			scNode.CheckBinaryArtifact = c.Score
-		case checkCITests:
-			scNode.CheckCITests = c.Score
-		case checkCodeReview:
-			scNode.CheckCodeReview = c.Score
-		case checkDangerousWorkflow:
-			scNode.CheckDangerousWorkflow = c.Score
-		case checkLicense:
-			scNode.CheckLicense = c.Score
-		case checkPinnedDependencies:
-			scNode.CheckPinnedDependencies = c.Score
-		case checkSecurityPolicy:
-			scNode.CheckSecurityPolicy = c.Score
-		case checkTokenPermissions:
-			scNode.CheckTokenPermissions = c.Score
-		case checkVulnerabilities:
-			scNode.CheckVulnerabilities = c.Score
-		}
+		mnNode.Details[c.Name] = c.Score
 	}
+	mnNode.Details["repo"] = s.Repo.Name
+	mnNode.Details["commit"] = hashToDigest(s.Repo.Commit)
+	mnNode.Details["scorecard_version"] = s.Scorecard.Version
+	mnNode.Details["scorecard_commit"] = hashToDigest(s.Scorecard.Commit)
+	mnNode.Details["score"] = float64(s.AggregateScore)
 
-	return scNode
+	return mnNode
 }
 
 func getArtifactNode(s *sc.JSONScorecardResultV2) assembler.ArtifactNode {
