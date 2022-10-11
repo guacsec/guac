@@ -45,6 +45,11 @@ var exampleCmd = &cobra.Command{
 		}
 
 		// Collect
+		emit := func(d *processor.Document) error {
+			logger.Infof("emitted document: %+v", d)
+			return nil
+		}
+
 		errHandler := func(err error) bool {
 			if err == nil {
 				logger.Info("collector ended gracefully")
@@ -58,11 +63,4 @@ var exampleCmd = &cobra.Command{
 			os.Exit(1)
 		}
 	},
-}
-
-func emit(d *processor.Document) error {
-	ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
-	logger.Infof("emitted document: %+v", d)
-	return nil
 }

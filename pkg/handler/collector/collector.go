@@ -82,11 +82,8 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 		select {
 		case d := <-docChan:
 			if err := emitter(d); err != nil {
-				if !handleErr(err) {
-					return err
-				}
+				logger.Errorf("emit error: %v", err)
 			}
-			logger.Infof("emitted document: %+v", d)
 		case err := <-errChan:
 			if !handleErr(err) {
 				return err
@@ -97,11 +94,8 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	for len(docChan) > 0 {
 		d := <-docChan
 		if err := emitter(d); err != nil {
-			if !handleErr(err) {
-				return err
-			}
+			logger.Errorf("emit error: %v", err)
 		}
-		logger.Infof("emitted document: %+v", d)
 	}
 	return nil
 }
