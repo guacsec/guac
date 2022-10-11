@@ -27,6 +27,16 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 )
 
+func init() {
+	_ = RegisterDocumentParser(dsse.NewDSSEParser(), processor.DocumentDSSE)
+	_ = RegisterDocumentParser(slsa.NewSLSAParser(), processor.DocumentITE6SLSA)
+	_ = RegisterDocumentParser(spdx.NewSpdxParser(), processor.DocumentSPDX)
+}
+
+var (
+	documentParser = map[processor.DocumentType]common.DocumentParser{}
+)
+
 type docTreeBuilder struct {
 	identities    []assembler.IdentityNode
 	graphBuilders []*common.GraphBuilder
@@ -37,6 +47,14 @@ func newDocTreeBuilder() *docTreeBuilder {
 		identities:    []assembler.IdentityNode{},
 		graphBuilders: []*common.GraphBuilder{},
 	}
+}
+
+func RegisterDocumentParser(p common.DocumentParser, d processor.DocumentType) error {
+	if _, ok := documentParser[d]; ok {
+		return fmt.Errorf("the document parser is being overwritten: %s", d)
+	}
+	documentParser[d] = p
+	return nil
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node
@@ -78,31 +96,17 @@ func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree)
 }
 
 func parseHelper(ctx context.Context, doc *processor.Document) (*common.GraphBuilder, error) {
-	switch doc.Type {
-	case processor.DocumentDSSE:
-		dsseParser := dsse.NewDSSEParser()
-		err := dsseParser.Parse(ctx, doc)
-		if err != nil {
-			return nil, err
-		}
-		dsseGraphBuilder := common.NewGenericGraphBuilder(dsseParser, dsseParser.GetIdentities(ctx))
-		return dsseGraphBuilder, nil
-	case processor.DocumentITE6SLSA:
-		slsaParser := slsa.NewSLSAParser()
-		err := slsaParser.Parse(ctx, doc)
-		if err != nil {
-			return nil, err
-		}
-		slsaGraphBuilder := common.NewGenericGraphBuilder(slsaParser, nil)
-		return slsaGraphBuilder, nil
-	case processor.DocumentSPDX:
-		spdxParser := spdx.NewSpdxParser()
-		err := spdxParser.Parse(ctx, doc)
-		if err != nil {
-			return nil, err
-		}
-		spdxGraphBuilder := common.NewGenericGraphBuilder(spdxParser, nil)
-		return spdxGraphBuilder, nil
+	p, ok := documentParser[doc.Type]
+	if !ok {
+		return nil, fmt.Errorf("no document parser registered for type: %s", doc.Type)
 	}
-	return nil, fmt.Errorf("no parser found for document type: %v", doc.Type)
+
+	err := p.Parse(ctx, doc)
+	if err != nil {
+		return nil, err
+	}
+
+	graphBuilder := common.NewGenericGraphBuilder(p, p.GetIdentities(ctx))
+
+	return graphBuilder, nil
 }
