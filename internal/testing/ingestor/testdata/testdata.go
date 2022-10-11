@@ -95,40 +95,45 @@ var (
 	art = assembler.ArtifactNode{
 		Name:   "helloworld",
 		Digest: "sha256:5678...",
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
 	att = assembler.AttestationNode{
 		FilePath: "TestSource",
 		Digest:   "sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
 	mat1 = assembler.ArtifactNode{
 		Name:   "git+https://github.com/curl/curl-docker@master",
 		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
 	mat2 = assembler.ArtifactNode{
 		Name:   "github_hosted_vm:ubuntu-18.04:20210123.1",
 		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
 	build = assembler.BuilderNode{
 		BuilderType: "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 		BuilderId:   "https://github.com/Attestations/GitHubHostedActions@v1",
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
@@ -141,8 +146,9 @@ var (
 		Key:       base64.StdEncoding.EncodeToString(pemBytes),
 		KeyType:   "ecdsa",
 		KeyScheme: "ecdsa",
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
@@ -191,8 +197,9 @@ var (
 			"cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
 		},
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
@@ -206,8 +213,9 @@ var (
 			"cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
 		},
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 
@@ -219,8 +227,9 @@ var (
 			"cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
 		},
-		Metadata: assembler.Metadata{
-			Source: "TestSource",
+		NodeData: map[string]interface{}{
+			assembler.SourceType:    "TestSource",
+			assembler.CollectorType: "TestCollector",
 		},
 	}
 

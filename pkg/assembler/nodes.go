@@ -84,7 +84,7 @@ type IdentityNode struct {
 	Key       string
 	KeyType   string
 	KeyScheme string
-	Metadata  Metadata
+	NodeData  map[string]interface{}
 }
 
 func (in IdentityNode) Type() string {
@@ -98,12 +98,18 @@ func (in IdentityNode) Properties() map[string]interface{} {
 	properties["key"] = in.Key
 	properties["keyType"] = in.KeyType
 	properties["keyScheme"] = in.KeyScheme
-	properties["source"] = in.Metadata.Source
+	for k, v := range in.NodeData {
+		properties[k] = v
+	}
 	return properties
 }
 
 func (in IdentityNode) PropertyNames() []string {
-	return []string{"id", "digest", "key", "keyType", "keyScheme", "source"}
+	fields := []string{"id", "digest", "key", "keyType", "keyScheme"}
+	for k := range in.NodeData {
+		fields = append(fields, k)
+	}
+	return fields
 }
 
 func (in IdentityNode) IdentifiablePropertyNames() []string {
@@ -116,7 +122,7 @@ type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
 	FilePath string
 	Digest   string
-	Metadata Metadata
+	NodeData map[string]interface{}
 }
 
 func (an AttestationNode) Type() string {
@@ -131,7 +137,11 @@ func (an AttestationNode) Properties() map[string]interface{} {
 }
 
 func (an AttestationNode) PropertyNames() []string {
-	return []string{"filepath", "digest", "source"}
+	fields := []string{"filepath", "digest"}
+	for k := range an.NodeData {
+		fields = append(fields, k)
+	}
+	return fields
 }
 
 func (an AttestationNode) IdentifiablePropertyNames() []string {
@@ -142,7 +152,7 @@ func (an AttestationNode) IdentifiablePropertyNames() []string {
 type BuilderNode struct {
 	BuilderType string
 	BuilderId   string
-	Metadata    Metadata
+	NodeData    map[string]interface{}
 }
 
 func (bn BuilderNode) Type() string {
@@ -153,12 +163,18 @@ func (bn BuilderNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["type"] = bn.BuilderType
 	properties["id"] = bn.BuilderId
-	properties["source"] = bn.Metadata.Source
+	for k, v := range bn.NodeData {
+		properties[k] = v
+	}
 	return properties
 }
 
 func (bn BuilderNode) PropertyNames() []string {
-	return []string{"type", "id", "source"}
+	fields := []string{"type", "id"}
+	for k := range bn.NodeData {
+		fields = append(fields, k)
+	}
+	return fields
 }
 
 func (bn BuilderNode) IdentifiablePropertyNames() []string {
