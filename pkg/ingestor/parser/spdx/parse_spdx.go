@@ -32,6 +32,7 @@ import (
 )
 
 type spdxParser struct {
+	doc      *processor.Document
 	packages map[string][]assembler.PackageNode
 	files    map[string][]assembler.ArtifactNode
 	spdxDoc  *v2_2.Document
@@ -45,6 +46,7 @@ func NewSpdxParser() common.DocumentParser {
 }
 
 func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
+	s.doc = doc
 	spdxDoc, err := parseSpdxBlob(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse SPDX document: %w", err)
@@ -79,6 +81,7 @@ func (s *spdxParser) getPackages() {
 	for _, pac := range s.spdxDoc.Packages {
 		currentPackage := assembler.PackageNode{}
 		currentPackage.Name = pac.PackageName
+		currentPackage.Source = s.doc.SourceInformation.Source
 		for _, ext := range pac.PackageExternalReferences {
 			if strings.HasPrefix(ext.RefType, "cpe") {
 				currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)

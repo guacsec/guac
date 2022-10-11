@@ -40,10 +40,13 @@ var (
 
 	spdxDocTree = processor.DocumentNode{
 		Document: &processor.Document{
-			Blob:              processor_data.SpdxExampleAlpine,
-			Format:            processor.FormatJSON,
-			Type:              processor.DocumentSPDX,
-			SourceInformation: processor.SourceInformation{},
+			Blob:   processor_data.SpdxExampleAlpine,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentSPDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
 		},
 		Children: []*processor.DocumentNode{},
 	}

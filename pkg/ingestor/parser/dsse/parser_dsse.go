@@ -28,6 +28,7 @@ import (
 )
 
 type dsseParser struct {
+	doc        *processor.Document
 	identities []assembler.IdentityNode
 }
 
@@ -40,15 +41,16 @@ func NewDSSEParser() common.DocumentParser {
 
 // Parse breaks out the document into the graph components
 func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
-	err := d.getIdentity(doc)
+	d.doc = doc
+	err := d.getIdentity()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (d *dsseParser) getIdentity(doc *processor.Document) error {
-	identities, err := verifier.VerifyIdentity(doc)
+func (d *dsseParser) getIdentity() error {
+	identities, err := verifier.VerifyIdentity(d.doc)
 	if err != nil {
 		return err
 	}
@@ -58,7 +60,8 @@ func (d *dsseParser) getIdentity(doc *processor.Document) error {
 			return fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
 		}
 		d.identities = append(d.identities, assembler.IdentityNode{
-			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes), KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme)})
+			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
+			KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), Source: d.doc.SourceInformation.Source})
 	}
 	return nil
 }

@@ -54,25 +54,25 @@ type PackageNode struct {
 	Tags   []string
 }
 
-func (an PackageNode) Type() string {
+func (pn PackageNode) Type() string {
 	return "Package"
 }
 
-func (an PackageNode) Properties() map[string]interface{} {
+func (pn PackageNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["name"] = an.Name
-	properties["purl"] = an.Purl
-	properties["cpes"] = an.CPEs
-	properties["digest"] = toLower(an.Digest...)
-	properties["tags"] = an.Tags
+	properties["name"] = pn.Name
+	properties["purl"] = pn.Purl
+	properties["cpes"] = pn.CPEs
+	properties["digest"] = toLower(pn.Digest...)
+	properties["tags"] = pn.Tags
 	return properties
 }
 
-func (an PackageNode) PropertyNames() []string {
+func (pn PackageNode) PropertyNames() []string {
 	return []string{"name", "digest", "purl", "cpes", "tags"}
 }
 
-func (an PackageNode) IdentifiablePropertyNames() []string {
+func (pn PackageNode) IdentifiablePropertyNames() []string {
 	return []string{"purl"}
 }
 
@@ -84,6 +84,7 @@ type IdentityNode struct {
 	Key       string
 	KeyType   string
 	KeyScheme string
+	Source    string
 }
 
 func (in IdentityNode) Type() string {
@@ -97,11 +98,12 @@ func (in IdentityNode) Properties() map[string]interface{} {
 	properties["key"] = in.Key
 	properties["keyType"] = in.KeyType
 	properties["keyScheme"] = in.KeyScheme
+	properties["source"] = in.Source
 	return properties
 }
 
 func (in IdentityNode) PropertyNames() []string {
-	return []string{"id", "digest", "key", "keyType", "keyScheme"}
+	return []string{"id", "digest", "key", "keyType", "keyScheme", "source"}
 }
 
 func (in IdentityNode) IdentifiablePropertyNames() []string {
@@ -139,6 +141,7 @@ func (an AttestationNode) IdentifiablePropertyNames() []string {
 type BuilderNode struct {
 	BuilderType string
 	BuilderId   string
+	Source      string
 }
 
 func (bn BuilderNode) Type() string {
@@ -149,11 +152,12 @@ func (bn BuilderNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["type"] = bn.BuilderType
 	properties["id"] = bn.BuilderId
+	properties["source"] = bn.Source
 	return properties
 }
 
 func (bn BuilderNode) PropertyNames() []string {
-	return []string{"type", "id"}
+	return []string{"type", "id", "source"}
 }
 
 func (bn BuilderNode) IdentifiablePropertyNames() []string {

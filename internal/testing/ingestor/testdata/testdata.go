@@ -95,6 +95,7 @@ var (
 	art = assembler.ArtifactNode{
 		Name:   "helloworld",
 		Digest: "sha256:5678...",
+		Source: "TestSource",
 	}
 
 	att = assembler.AttestationNode{
@@ -105,16 +106,19 @@ var (
 	mat1 = assembler.ArtifactNode{
 		Name:   "git+https://github.com/curl/curl-docker@master",
 		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
+		Source: "TestSource",
 	}
 
 	mat2 = assembler.ArtifactNode{
 		Name:   "github_hosted_vm:ubuntu-18.04:20210123.1",
 		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
+		Source: "TestSource",
 	}
 
 	build = assembler.BuilderNode{
 		BuilderType: "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 		BuilderId:   "https://github.com/Attestations/GitHubHostedActions@v1",
+		Source:      "TestSource",
 	}
 
 	ecdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
@@ -126,6 +130,7 @@ var (
 		Key:       base64.StdEncoding.EncodeToString(pemBytes),
 		KeyType:   "ecdsa",
 		KeyScheme: "ecdsa",
+		Source:    "TestSource",
 	}
 
 	DsseNodes = []assembler.GuacNode{Ident}
@@ -173,6 +178,7 @@ var (
 			"cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
 		},
+		Source: "TestSource",
 	}
 
 	keysPack = assembler.PackageNode{
@@ -185,6 +191,7 @@ var (
 			"cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
 		},
+		Source: "TestSource",
 	}
 
 	baselayoutdataPack = assembler.PackageNode{
@@ -195,6 +202,7 @@ var (
 			"cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
 		},
+		Source: "TestSource",
 	}
 
 	worldFile = assembler.ArtifactNode{

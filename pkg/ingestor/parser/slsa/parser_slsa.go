@@ -34,6 +34,7 @@ const (
 )
 
 type slsaParser struct {
+	doc          *processor.Document
 	subjects     []assembler.ArtifactNode
 	dependencies []assembler.ArtifactNode
 	attestations []assembler.AttestationNode
@@ -52,13 +53,14 @@ func NewSLSAParser() common.DocumentParser {
 
 // Parse breaks out the document into the graph components
 func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
+	s.doc = doc
 	statement, err := parseSlsaPredicate(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
 	}
 	s.getSubject(statement)
 	s.getDependency(statement)
-	s.getAttestation(doc.Blob, doc.SourceInformation.Source)
+	s.getAttestation(doc.Blob)
 	s.getBuilder(statement)
 	return nil
 }
@@ -84,16 +86,16 @@ func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
 	}
 }
 
-func (s *slsaParser) getAttestation(blob []byte, source string) {
+func (s *slsaParser) getAttestation(blob []byte) {
 	h := sha256.Sum256(blob)
 	s.attestations = append(s.attestations, assembler.AttestationNode{
-		FilePath: source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:])})
+		FilePath: s.doc.SourceInformation.Source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:])})
 }
 
 func (s *slsaParser) getBuilder(statement *in_toto.ProvenanceStatement) {
 	// append builder node for builder
 	s.builders = append(s.builders, assembler.BuilderNode{
-		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID})
+		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID, Source: s.doc.SourceInformation.Source})
 }
 
 func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {

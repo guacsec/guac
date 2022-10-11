@@ -175,7 +175,7 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(CollectorGCS),
-					Source:    g.bucket,
+					Source:    g.bucket + "/" + attrs.Name,
 				},
 			}
 			docChannel <- doc
