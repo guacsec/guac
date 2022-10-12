@@ -16,9 +16,7 @@
 package guesser
 
 import (
-	"bytes"
 	"encoding/xml"
-	"io"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -28,13 +26,8 @@ type xmlFormatGuesser struct{}
 // GuessFormat expects at least 1 XML element in a blob to identify it as an XML
 // formatted document
 func (_ *xmlFormatGuesser) GuessFormat(blob []byte) processor.FormatType {
-	decoder := xml.NewDecoder(bytes.NewReader(blob))
-	for i := 0; ; i++ {
-		if err := decoder.Decode(new(interface{})); err != nil {
-			if err == io.EOF && i != 0 {
-				return processor.FormatXML
-			}
-			return processor.FormatUnknown
-		}
+	if err := xml.Unmarshal(blob, new(interface{})); err == nil {
+		return processor.FormatXML
 	}
+	return processor.FormatUnknown
 }
