@@ -66,7 +66,7 @@ func Test_DsseParser(t *testing.T) {
 				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
 			if identity := d.GetIdentities(ctx); !reflect.DeepEqual(identity, []assembler.IdentityNode{tt.wantIdentity}) {
-				t.Errorf("slsa.GetDocType() = %v, want %v", identity, []assembler.IdentityNode{tt.wantIdentity})
+				t.Errorf("slsa.GetIdentities() = %v, want %v", identity, []assembler.IdentityNode{tt.wantIdentity})
 			}
 		})
 	}

@@ -24,6 +24,7 @@ import (
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
 
 type cyclonedxParser struct {
@@ -35,7 +36,7 @@ type parentPackages struct {
 	depPackages []parentPackages
 }
 
-func NewCycloneDXParser() *cyclonedxParser {
+func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
 		rootPackage: parentPackages{},
 	}

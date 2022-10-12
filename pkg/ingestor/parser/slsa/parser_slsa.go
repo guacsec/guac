@@ -25,6 +25,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
@@ -40,7 +41,7 @@ type slsaParser struct {
 }
 
 // NewSLSAParser initializes the slsaParser
-func NewSLSAParser() *slsaParser {
+func NewSLSAParser() common.DocumentParser {
 	return &slsaParser{
 		subjects:     []assembler.ArtifactNode{},
 		dependencies: []assembler.ArtifactNode{},
