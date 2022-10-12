@@ -139,6 +139,26 @@ func Test_GuessDocument(t *testing.T) {
 		},
 		expectedType:   processor.DocumentScorecard,
 		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "valid big cyclonedx Document",
+		document: &processor.Document{
+			Blob:              testdata.CycloneDXBigExample,
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentCycloneDX,
+		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "valid small cyclonedx Document",
+		document: &processor.Document{
+			Blob:              testdata.CycloneDXBusyboxExample,
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentCycloneDX,
+		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {

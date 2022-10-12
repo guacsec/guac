@@ -39,4 +39,19 @@ var (
 	// Invalid scorecard
 	//go:embed testdata/invalid-scorecard.json
 	ScorecardInvalid []byte
+
+	//go:embed testdata/alpine-cyclonedx.json
+	CycloneDXExampleAlpine []byte
+
+	//go:embed testdata/invalid-cyclonedx.json
+	CycloneDXInvalidExample []byte
+
+	//go:embed testdata/distroless-cyclonedx.json
+	CycloneDXDistrolessExample []byte
+
+	//go:embed testdata/busybox-cyclonedx.json
+	CycloneDXBusyboxExample []byte
+
+	//go:embed testdata/big-mongo-cyclonedx.json
+	CycloneDXBigExample []byte
 )

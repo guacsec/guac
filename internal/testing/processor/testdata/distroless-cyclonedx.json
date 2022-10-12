@@ -1,0 +1,180 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-10-08T10:01:23-04:00",
+    "tools": [
+      {
+        "vendor": "anchore",
+        "name": "syft",
+        "version": "0.58.0"
+      }
+    ],
+    "component": {
+      "bom-ref": "5885a240f2842b78",
+      "type": "container",
+      "name": "gcr.io/distroless/static:nonroot",
+      "version": "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64\u0026distro=debian-11\u0026package-id=f998ebd648b2753b",
+      "type": "library",
+      "publisher": "Santiago Vila \u003csanvila@debian.org\u003e",
+      "name": "base-files",
+      "version": "11.1+deb11u5",
+      "cpe": "cpe:2.3:a:base-files:base-files:11.1\\+deb11u5:*:*:*:*:*:*:*",
+      "purl": "pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64\u0026distro=debian-11",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "dpkgdb-cataloger"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "DpkgMetadata"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "deb"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:base-files:base_files:11.1\\+deb11u5:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:base_files:base-files:11.1\\+deb11u5:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:base_files:base_files:11.1\\+deb11u5:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:base:base-files:11.1\\+deb11u5:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:base:base_files:11.1\\+deb11u5:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:528453af6f60f474766a9e288640095ccbf52e0f09ff068b1d11331c34f8bae1"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/usr/share/doc/base-files/copyright"
+        },
+        {
+          "name": "syft:location:1:layerID",
+          "value": "sha256:528453af6f60f474766a9e288640095ccbf52e0f09ff068b1d11331c34f8bae1"
+        },
+        {
+          "name": "syft:location:1:path",
+          "value": "/var/lib/dpkg/status.d/base"
+        },
+        {
+          "name": "syft:metadata:installedSize",
+          "value": "340"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:deb/debian/netbase@6.3?arch=all\u0026distro=debian-11\u0026package-id=913906225fd3778b",
+      "type": "library",
+      "publisher": "Marco d'Itri \u003cmd@linux.it\u003e",
+      "name": "netbase",
+      "version": "6.3",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-2.0-only"
+          }
+        }
+      ],
+      "cpe": "cpe:2.3:a:netbase:netbase:6.3:*:*:*:*:*:*:*",
+      "purl": "pkg:deb/debian/netbase@6.3?arch=all\u0026distro=debian-11",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "dpkgdb-cataloger"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "DpkgMetadata"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "deb"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:528453af6f60f474766a9e288640095ccbf52e0f09ff068b1d11331c34f8bae1"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/usr/share/doc/netbase/copyright"
+        },
+        {
+          "name": "syft:location:1:layerID",
+          "value": "sha256:528453af6f60f474766a9e288640095ccbf52e0f09ff068b1d11331c34f8bae1"
+        },
+        {
+          "name": "syft:location:1:path",
+          "value": "/var/lib/dpkg/status.d/netbase"
+        },
+        {
+          "name": "syft:metadata:installedSize",
+          "value": "41"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all\u0026distro=debian-11\u0026package-id=c1a811f89bc7edaf",
+      "type": "library",
+      "publisher": "GNU Libc Maintainers \u003cdebian-glibc@lists.debian.org\u003e",
+      "name": "tzdata",
+      "version": "2021a-1+deb11u6",
+      "cpe": "cpe:2.3:a:tzdata:tzdata:2021a-1\\+deb11u6:*:*:*:*:*:*:*",
+      "purl": "pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all\u0026distro=debian-11",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "dpkgdb-cataloger"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "DpkgMetadata"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "deb"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:528453af6f60f474766a9e288640095ccbf52e0f09ff068b1d11331c34f8bae1"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/usr/share/doc/tzdata/copyright"
+        },
+        {
+          "name": "syft:location:1:layerID",
+          "value": "sha256:528453af6f60f474766a9e288640095ccbf52e0f09ff068b1d11331c34f8bae1"
+        },
+        {
+          "name": "syft:location:1:path",
+          "value": "/var/lib/dpkg/status.d/tzdata"
+        },
+        {
+          "name": "syft:metadata:installedSize",
+          "value": "3404"
+        }
+      ]
+    }
+  ]
+}

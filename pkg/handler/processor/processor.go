@@ -58,6 +58,7 @@ const (
 	DocumentSPDX        DocumentType = "SPDX"
 	DocumentJsonLines   DocumentType = "JSON_LINES"
 	DocumentScorecard   DocumentType = "SCORECARD"
+	DocumentCycloneDX   DocumentType = "CycloneDX"
 	DocumentUnknown     DocumentType = "UNKNOWN"
 )
 

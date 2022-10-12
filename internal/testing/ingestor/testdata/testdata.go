@@ -244,6 +244,55 @@ var (
 			ContainedArtifact: rsaPubFile,
 		},
 	}
+
+	// CycloneDX Testdata
+
+	cdxTopLevelPack = assembler.PackageNode{
+		Name:   "gcr.io/distroless/static:nonroot",
+		Digest: []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
+		Purl:   "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
+		CPEs:   nil,
+	}
+
+	cdxTzdataPack = assembler.PackageNode{
+		Name:   "tzdata",
+		Digest: nil,
+		Purl:   "pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11",
+		CPEs: []string{
+			"cpe:2.3:a:tzdata:tzdata:2021a-1\\+deb11u6:*:*:*:*:*:*:*"},
+	}
+
+	cdxNetbasePack = assembler.PackageNode{
+		Name:   "netbase",
+		Digest: nil,
+		Purl:   "pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11",
+		CPEs: []string{
+			"cpe:2.3:a:netbase:netbase:6.3:*:*:*:*:*:*:*"},
+	}
+
+	cdxBasefilesPack = assembler.PackageNode{
+		Name:   "base-files",
+		Digest: nil,
+		Purl:   "pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11",
+		CPEs: []string{
+			"cpe:2.3:a:base-files:base-files:11.1\\+deb11u5:*:*:*:*:*:*:*"},
+	}
+
+	CycloneDXNodes = []assembler.GuacNode{cdxTopLevelPack, cdxBasefilesPack, cdxNetbasePack, cdxTzdataPack}
+	CyloneDXEdges  = []assembler.GuacEdge{
+		assembler.DependsOnEdge{
+			PackageNode:       cdxBasefilesPack,
+			PackageDependency: cdxTopLevelPack,
+		},
+		assembler.DependsOnEdge{
+			PackageNode:       cdxNetbasePack,
+			PackageDependency: cdxTopLevelPack,
+		},
+		assembler.DependsOnEdge{
+			PackageNode:       cdxTzdataPack,
+			PackageDependency: cdxTopLevelPack,
+		},
+	}
 )
 
 type mockSigstoreVerifier struct{}
