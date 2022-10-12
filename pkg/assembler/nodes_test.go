@@ -18,6 +18,7 @@
 package assembler
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
@@ -33,6 +34,8 @@ type MockNode struct {
 	Name    string
 	Age     *int
 	Score   *int
+	digest  string
+	digests []string
 }
 
 func (n MockNode) Type() string {
@@ -44,6 +47,8 @@ func (n MockNode) Properties() map[string]interface{} {
 	properties["id"] = n.Id
 	properties["address"] = n.Address
 	properties["name"] = n.Name
+	properties["digest"] = strings.ToLower(n.digest)
+	properties["digests"] = toLower(n.digests)
 	if n.Age != nil {
 		properties["age"] = *n.Age
 	}
@@ -54,7 +59,7 @@ func (n MockNode) Properties() map[string]interface{} {
 }
 
 func (n MockNode) PropertyNames() []string {
-	keys := []string{"id", "address", "name"}
+	keys := []string{"id", "address", "name", "digest", "digests"}
 	if n.Age != nil {
 		keys = append(keys, "age")
 	}
@@ -117,9 +122,13 @@ func Test_MockNodes(t *testing.T) {
 	score1 := 0
 	score2 := 42
 	age := 42
-	n1 := MockNode{"id1", "addr1", "name1", &age, nil}
-	n2 := MockNode{"id2", "addr1", "name2", nil, &score1}
-	n3 := MockNode{"id3", "addr2", "name3", &age, &score2}
+	n1 := MockNode{"id1", "addr1", "name1", &age, nil,
+		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"}}
+	n2 := MockNode{"id2", "addr1", "name2", nil, &score1, "SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"}}
+	n3 := MockNode{"id3", "addr2", "name3", &age, &score2, "SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"}}
 	edge_id := 0
 	e1 := MockEdge{n1, n2, &edge_id}
 	e2 := MockEdge{n2, n3, nil}
