@@ -96,6 +96,8 @@ var exampleCmd = &cobra.Command{
 
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
+			start := time.Now()
+
 			docTree, err := processorFunc(d)
 			if err != nil {
 				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
@@ -110,6 +112,9 @@ var exampleCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("unable to assemble graphs: %v", err)
 			}
+			t := time.Now()
+			elapsed := t.Sub(start)
+			logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
 			return nil
 		}
 
