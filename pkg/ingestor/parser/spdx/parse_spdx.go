@@ -24,6 +24,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 	spdx_json "github.com/spdx/tools-golang/json"
 	spdx_common "github.com/spdx/tools-golang/spdx/common"
@@ -36,7 +37,7 @@ type spdxParser struct {
 	spdxDoc  *v2_2.Document
 }
 
-func NewSpdxParser() *spdxParser {
+func NewSpdxParser() common.DocumentParser {
 	return &spdxParser{
 		packages: map[string][]assembler.PackageNode{},
 		files:    map[string][]assembler.ArtifactNode{},
@@ -259,8 +260,4 @@ func getDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNo
 
 func (s *spdxParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
-}
-
-func (s *spdxParser) GetDocType() processor.DocumentType {
-	return processor.DocumentSPDX
 }

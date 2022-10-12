@@ -22,6 +22,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
@@ -31,7 +32,7 @@ type dsseParser struct {
 }
 
 // NewDSSEParser initializes the dsseParser
-func NewDSSEParser() *dsseParser {
+func NewDSSEParser() common.DocumentParser {
 	return &dsseParser{
 		identities: []assembler.IdentityNode{},
 	}

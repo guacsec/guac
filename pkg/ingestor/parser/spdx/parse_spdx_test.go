@@ -17,7 +17,6 @@ package spdx
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
@@ -63,9 +62,6 @@ func Test_spdxParser(t *testing.T) {
 			}
 			if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
 				t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
-			}
-			if docType := s.GetDocType(); !reflect.DeepEqual(docType, processor.DocumentSPDX) {
-				t.Errorf("spdxParser.GetDocType() = %v, want %v", docType, processor.DocumentSPDX)
 			}
 		})
 	}

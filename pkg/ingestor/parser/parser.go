@@ -29,14 +29,14 @@ import (
 )
 
 func init() {
-	_ = RegisterDocumentParser(dsse.NewDSSEParser(), processor.DocumentDSSE)
-	_ = RegisterDocumentParser(slsa.NewSLSAParser(), processor.DocumentITE6SLSA)
-	_ = RegisterDocumentParser(spdx.NewSpdxParser(), processor.DocumentSPDX)
-	_ = RegisterDocumentParser(cyclonedx.NewCycloneDXParser(), processor.DocumentCycloneDX)
+	_ = RegisterDocumentParser(dsse.NewDSSEParser, processor.DocumentDSSE)
+	_ = RegisterDocumentParser(slsa.NewSLSAParser, processor.DocumentITE6SLSA)
+	_ = RegisterDocumentParser(spdx.NewSpdxParser, processor.DocumentSPDX)
+	_ = RegisterDocumentParser(cyclonedx.NewCycloneDXParser, processor.DocumentCycloneDX)
 }
 
 var (
-	documentParser = map[processor.DocumentType]common.DocumentParser{}
+	documentParser = map[processor.DocumentType]func() common.DocumentParser{}
 )
 
 type docTreeBuilder struct {
@@ -51,7 +51,7 @@ func newDocTreeBuilder() *docTreeBuilder {
 	}
 }
 
-func RegisterDocumentParser(p common.DocumentParser, d processor.DocumentType) error {
+func RegisterDocumentParser(p func() common.DocumentParser, d processor.DocumentType) error {
 	if _, ok := documentParser[d]; ok {
 		return fmt.Errorf("the document parser is being overwritten: %s", d)
 	}
@@ -98,11 +98,12 @@ func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree)
 }
 
 func parseHelper(ctx context.Context, doc *processor.Document) (*common.GraphBuilder, error) {
-	p, ok := documentParser[doc.Type]
+	pFunc, ok := documentParser[doc.Type]
 	if !ok {
 		return nil, fmt.Errorf("no document parser registered for type: %s", doc.Type)
 	}
 
+	p := pFunc()
 	err := p.Parse(ctx, doc)
 	if err != nil {
 		return nil, err
