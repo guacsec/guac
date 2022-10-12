@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -66,7 +67,7 @@ func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 	for _, sub := range statement.Subject {
 		for alg, ds := range sub.Digest {
 			s.subjects = append(s.subjects, assembler.ArtifactNode{
-				Name: sub.Name, Digest: alg + ":" + ds})
+				Name: sub.Name, Digest: alg + ":" + strings.Trim(ds, "'")})
 		}
 	}
 }
@@ -75,8 +76,9 @@ func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
 	// append dependency nodes for the materials
 	for _, mat := range statement.Predicate.Materials {
 		for alg, ds := range mat.Digest {
+
 			s.dependencies = append(s.dependencies, assembler.ArtifactNode{
-				Name: mat.URI, Digest: alg + ":" + ds})
+				Name: mat.URI, Digest: alg + ":" + strings.Trim(ds, "'")})
 		}
 	}
 }
