@@ -63,6 +63,11 @@ func (s *spdxParser) getTopLevelPackage() {
 		topPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
 		topPackage.Name = s.spdxDoc.DocumentName
 		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
+	} else if len(splitImage) == 2 {
+		topPackage := assembler.PackageNode{}
+		topPackage.Purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0]
+		topPackage.Name = s.spdxDoc.DocumentName
+		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
 	}
 }
 
@@ -79,7 +84,7 @@ func (s *spdxParser) getPackages() {
 			}
 		}
 		for _, checksum := range pac.PackageChecksums {
-			currentPackage.Digest = append(currentPackage.Digest, string(checksum.Algorithm)+":"+checksum.Value)
+			currentPackage.Digest = append(currentPackage.Digest, strings.ToLower(string(checksum.Algorithm))+":"+checksum.Value)
 		}
 		s.packages[string(pac.PackageSPDXIdentifier)] = append(s.packages[string(pac.PackageSPDXIdentifier)], currentPackage)
 	}
@@ -90,7 +95,7 @@ func (s *spdxParser) getFiles() {
 		currentFile := assembler.ArtifactNode{}
 		for _, checksum := range file.Checksums {
 			currentFile.Name = file.FileName
-			currentFile.Digest = string(checksum.Algorithm) + ":" + checksum.Value
+			currentFile.Digest = strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
 			s.files[string(file.FileSPDXIdentifier)] = append(s.files[string(file.FileSPDXIdentifier)], currentFile)
 		}
 	}
@@ -140,7 +145,7 @@ func (s *spdxParser) CreateEdges(ctx context.Context, foundIdentities []assemble
 	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
 	// adding top level package edge manually for all depends on package
 	if toplevel != nil {
-		edges = append(edges, createTopLevelEdges(toplevel[0], s.packages)...)
+		edges = append(edges, createTopLevelEdges(toplevel[0], s.packages, s.files)...)
 	}
 	for _, rel := range s.spdxDoc.Relationships {
 		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
@@ -171,7 +176,7 @@ func (s *spdxParser) CreateEdges(ctx context.Context, foundIdentities []assemble
 	return edges
 }
 
-func createTopLevelEdges(toplevel assembler.PackageNode, packages map[string][]assembler.PackageNode) []assembler.GuacEdge {
+func createTopLevelEdges(toplevel assembler.PackageNode, packages map[string][]assembler.PackageNode, files map[string][]assembler.ArtifactNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
 	for _, packNodes := range packages {
 		for _, packNode := range packNodes {
@@ -184,6 +189,17 @@ func createTopLevelEdges(toplevel assembler.PackageNode, packages map[string][]a
 			}
 		}
 	}
+
+	for _, fileNodes := range files {
+		for _, fileNode := range fileNodes {
+			e := assembler.DependsOnEdge{
+				PackageNode:        toplevel,
+				ArtifactDependency: fileNode,
+			}
+			edges = append(edges, e)
+		}
+	}
+
 	return edges
 }
 
