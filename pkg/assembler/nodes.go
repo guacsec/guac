@@ -19,6 +19,7 @@ package assembler
 type ArtifactNode struct {
 	Name   string
 	Digest string
+	Tags   []string
 }
 
 func (an ArtifactNode) Type() string {
@@ -29,11 +30,12 @@ func (an ArtifactNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["name"] = an.Name
 	properties["digest"] = an.Digest
+	properties["tags"] = an.Tags
 	return properties
 }
 
 func (an ArtifactNode) PropertyNames() []string {
-	return []string{"name", "digest"}
+	return []string{"name", "digest", "tags"}
 }
 
 func (an ArtifactNode) IdentifiablePropertyNames() []string {
@@ -47,6 +49,7 @@ type PackageNode struct {
 	Digest []string
 	Purl   string
 	CPEs   []string
+	Tags   []string
 }
 
 func (an PackageNode) Type() string {
@@ -59,11 +62,12 @@ func (an PackageNode) Properties() map[string]interface{} {
 	properties["purl"] = an.Purl
 	properties["cpes"] = an.CPEs
 	properties["digest"] = an.Digest
+	properties["tags"] = an.Tags
 	return properties
 }
 
 func (an PackageNode) PropertyNames() []string {
-	return []string{"name", "digest", "purl", "cpes"}
+	return []string{"name", "digest", "purl", "cpes", "tags"}
 }
 
 func (an PackageNode) IdentifiablePropertyNames() []string {

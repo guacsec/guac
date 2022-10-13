@@ -162,6 +162,7 @@ var (
 		Digest: nil,
 		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers",
 		CPEs:   nil,
+		Tags:   []string{"CONTAINER"},
 	}
 
 	baselayoutPack = assembler.PackageNode{
@@ -199,18 +200,22 @@ var (
 	worldFile = assembler.ArtifactNode{
 		Name:   "/etc/apk/world",
 		Digest: "sha256:713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
+		Tags:   []string{"TEXT"},
 	}
 	rootFile = assembler.ArtifactNode{
 		Name:   "/etc/crontabs/root",
 		Digest: "sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
+		Tags:   []string{"TEXT"},
 	}
 	triggersFile = assembler.ArtifactNode{
 		Name:   "/lib/apk/db/triggers",
 		Digest: "sha256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4",
+		Tags:   []string{"TEXT"},
 	}
 	rsaPubFile = assembler.ArtifactNode{
 		Name:   "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub",
 		Digest: "sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		Tags:   []string{"TEXT"},
 	}
 
 	SpdxNodes = []assembler.GuacNode{topLevelPack, baselayoutPack, baselayoutdataPack, rsaPubFile, keysPack, worldFile, rootFile, triggersFile}
