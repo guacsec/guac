@@ -94,8 +94,10 @@ var exampleCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		totalNum := 0
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
+			totalNum += 1
 			start := time.Now()
 
 			docTree, err := processorFunc(d)
@@ -130,6 +132,7 @@ var exampleCmd = &cobra.Command{
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
+		logger.Infof("completed ingesting %v documents", totalNum)
 	},
 }
 
