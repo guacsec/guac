@@ -69,6 +69,7 @@ type FormatType string
 const (
 	FormatJSON      FormatType = "JSON"
 	FormatJSONLines FormatType = "JSON_LINES"
+	FormatXML       FormatType = "XML"
 	FormatUnknown   FormatType = "UNKNOWN"
 )
 
