@@ -49,3 +49,9 @@ clean: ## Remove temporary files
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+
+.PHONY:format fmt-md
+format: fmt-md ##  Run all the formatting tasks
+fmt-md: ## Format all the markdown files
+	npx --yes prettier --write --prose-wrap always **/*.md
+
