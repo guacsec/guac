@@ -33,6 +33,7 @@ type MockNode struct {
 	Name    string
 	Age     *int
 	Score   *int
+	Payload map[string]interface{}
 }
 
 func (n MockNode) Type() string {
@@ -50,6 +51,9 @@ func (n MockNode) Properties() map[string]interface{} {
 	if n.Score != nil {
 		properties["score"] = *n.Score
 	}
+	for k, v := range n.Payload {
+		properties[k] = v
+	}
 	return properties
 }
 
@@ -60,6 +64,9 @@ func (n MockNode) PropertyNames() []string {
 	}
 	if n.Score != nil {
 		keys = append(keys, "score")
+	}
+	for k := range n.Payload {
+		keys = append(keys, k)
 	}
 	return keys
 }
@@ -117,9 +124,16 @@ func Test_MockNodes(t *testing.T) {
 	score1 := 0
 	score2 := 42
 	age := 42
-	n1 := MockNode{"id1", "addr1", "name1", &age, nil}
-	n2 := MockNode{"id2", "addr1", "name2", nil, &score1}
-	n3 := MockNode{"id3", "addr2", "name3", &age, &score2}
+	n1 := MockNode{"id1", "addr1", "name1", &age, nil, map[string]interface{}{
+		"id":  "TestID",
+		"uri": "TestURI",
+	}}
+	n2 := MockNode{"id2", "addr1", "name2", nil, &score1, map[string]interface{}{
+		"uri": "TestURI",
+	}}
+	n3 := MockNode{"id3", "addr2", "name3", &age, &score2, map[string]interface{}{
+		"id": "TestID",
+	}}
 	edge_id := 0
 	e1 := MockEdge{n1, n2, &edge_id}
 	e2 := MockEdge{n2, n3, nil}

@@ -28,7 +28,8 @@ type ITE6Processor struct {
 
 // ValidateSchema ensures that the document blob can be parsed into a valid data structure
 func (e *ITE6Processor) ValidateSchema(i *processor.Document) error {
-	if i.Type != processor.DocumentITE6Unknown && i.Type != processor.DocumentITE6SLSA {
+	if i.Type != processor.DocumentITE6Unknown && i.Type != processor.DocumentITE6SLSA &&
+		i.Type != processor.DocumentITE6CREV && i.Type != processor.DocumentITE6REVIEW {
 		return fmt.Errorf("expected ITE6 document type, actual document type: %v", i.Type)
 	}
 

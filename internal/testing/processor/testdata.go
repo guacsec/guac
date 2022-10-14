@@ -54,4 +54,10 @@ var (
 
 	//go:embed testdata/big-mongo-cyclonedx.json
 	CycloneDXBigExample []byte
+
+	//go:embed testdata/crev-review.json
+	ITE6CREVExample []byte
+
+	//go:embed testdata/github-review.json
+	ITE6ReviewExample []byte
 )

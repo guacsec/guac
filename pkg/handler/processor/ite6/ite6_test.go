@@ -19,6 +19,7 @@ import (
 	"reflect"
 	"testing"
 
+	testdata "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -80,7 +81,31 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		name: "ITE6 Doc with valid payload",
 		args: &processor.Document{
 			Blob:   []byte(ite6SLSA),
-			Type:   processor.DocumentITE6Unknown,
+			Type:   processor.DocumentITE6SLSA,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantErr: false,
+	}, {
+		name: "ITE6 CREV with valid payload",
+		args: &processor.Document{
+			Blob:   []byte(testdata.ITE6CREVExample),
+			Type:   processor.DocumentITE6CREV,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantErr: false,
+	}, {
+		name: "ITE6 Review with valid payload",
+		args: &processor.Document{
+			Blob:   []byte(testdata.ITE6ReviewExample),
+			Type:   processor.DocumentITE6REVIEW,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
@@ -106,7 +131,17 @@ func TestITE6Processor_Unpack(t *testing.T) {
 		want    []*processor.Document
 		wantErr bool
 	}{{
-		// add test cases
+		name: "ITE6 Doc with valid payload",
+		args: &processor.Document{
+			Blob:   []byte(ite6SLSA),
+			Type:   processor.DocumentITE6SLSA,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
