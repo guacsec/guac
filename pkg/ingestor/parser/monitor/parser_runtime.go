@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package slsa
+package monitor
 
 import (
 	"context"
@@ -26,44 +26,43 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	"github.com/in-toto/in-toto-golang/in_toto"
 )
 
 const (
 	algorithmSHA256 string = "sha256"
 )
 
-type slsaParser struct {
+type runtimeParser struct {
 	subjects     []assembler.ArtifactNode
-	dependencies []assembler.ArtifactNode
 	attestations []assembler.AttestationNode
 	builders     []assembler.BuilderNode
+	monitors     []assembler.RuntimeNode
 }
 
-// NewSLSAParser initializes the slsaParser
-func NewSLSAParser() common.DocumentParser {
-	return &slsaParser{
+// NewRuntimeParser initializes the slsaParser
+func NewRuntimeParser() common.DocumentParser {
+	return &runtimeParser{
 		subjects:     []assembler.ArtifactNode{},
-		dependencies: []assembler.ArtifactNode{},
 		attestations: []assembler.AttestationNode{},
 		builders:     []assembler.BuilderNode{},
+		monitors:     []assembler.RuntimeNode{},
 	}
 }
 
 // Parse breaks out the document into the graph components
-func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
-	statement, err := parseSlsaPredicate(doc.Blob)
+func (s *runtimeParser) Parse(ctx context.Context, doc *processor.Document) error {
+	statement, err := parsRuntimePredicate(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
 	}
 	s.getSubject(statement)
-	s.getDependency(statement)
 	s.getAttestation(doc.Blob, doc.SourceInformation.Source)
 	s.getBuilder(statement)
+	s.getMonitor(statement)
 	return nil
 }
 
-func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
+func (s *runtimeParser) getSubject(statement *RuntimeStatement) {
 	// append artifact node for the subjects
 	for _, sub := range statement.Subject {
 		for alg, ds := range sub.Digest {
@@ -73,31 +72,26 @@ func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 	}
 }
 
-func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
-	// append dependency nodes for the materials
-	for _, mat := range statement.Predicate.Materials {
-		for alg, ds := range mat.Digest {
-
-			s.dependencies = append(s.dependencies, assembler.ArtifactNode{
-				Name: mat.URI, Digest: alg + ":" + strings.Trim(ds, "'")})
-		}
-	}
-}
-
-func (s *slsaParser) getAttestation(blob []byte, source string) {
+func (s *runtimeParser) getAttestation(blob []byte, source string) {
 	h := sha256.Sum256(blob)
 	s.attestations = append(s.attestations, assembler.AttestationNode{
-		FilePath: source, AttestationType: "slsa", Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:])})
+		FilePath: source, AttestationType: "runtime", Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:])})
 }
 
-func (s *slsaParser) getBuilder(statement *in_toto.ProvenanceStatement) {
+func (s *runtimeParser) getMonitor(statement *RuntimeStatement) {
+	// append builder node for builder
+	s.monitors = append(s.monitors, assembler.RuntimeNode{
+		RuntimeNodeType: statement.Predicate.MonitorType, RuntimeNodeId: statement.Predicate.Monitor.ID})
+}
+
+func (s *runtimeParser) getBuilder(statement *RuntimeStatement) {
 	// append builder node for builder
 	s.builders = append(s.builders, assembler.BuilderNode{
-		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID})
+		BuilderType: statement.Predicate.Build.Type, BuilderId: statement.Predicate.Build.BuilderId})
 }
 
-func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
-	predicate := in_toto.ProvenanceStatement{}
+func parsRuntimePredicate(p []byte) (*RuntimeStatement, error) {
+	predicate := RuntimeStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
 		return nil, err
 	}
@@ -105,7 +99,7 @@ func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
 }
 
 // CreateNodes creates the GuacNode for the graph inputs
-func (s *slsaParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
+func (s *runtimeParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, sub := range s.subjects {
 		nodes = append(nodes, sub)
@@ -113,17 +107,17 @@ func (s *slsaParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	for _, a := range s.attestations {
 		nodes = append(nodes, a)
 	}
-	for _, d := range s.dependencies {
-		nodes = append(nodes, d)
-	}
 	for _, b := range s.builders {
+		nodes = append(nodes, b)
+	}
+	for _, b := range s.monitors {
 		nodes = append(nodes, b)
 	}
 	return nodes
 }
 
 // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (s *runtimeParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
 	for _, i := range foundIdentities {
 		for _, a := range s.attestations {
@@ -137,14 +131,14 @@ func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assemble
 		for _, a := range s.attestations {
 			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ArtifactNode: sub})
 		}
-		for _, d := range s.dependencies {
-			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, ArtifactDependency: d})
+		for _, r := range s.monitors {
+			edges = append(edges, assembler.RuntimeByEdge{ArtifactNode: sub, RuntimeNode: r})
 		}
 	}
 	return edges
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (s *slsaParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
+func (s *runtimeParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
 }

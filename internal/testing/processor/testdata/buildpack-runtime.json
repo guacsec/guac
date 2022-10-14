@@ -1,0 +1,2539 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://in-toto.io/runtime-trace/v0.1.0",
+  "subject": [
+    {
+      "name": "ttl.sh/testin123",
+      "digest": {
+        "sha256": "def2bdf8cee687d5889d51923d7907c441f1a61958f1e5dfb07f53041c83745f"
+      }
+    }
+  ],
+  "predicate": {
+    "monitor": {
+      "id": "https://tetragon"
+    },
+    "monitorType": "https://tetragon",
+    "build": {
+      "builderID": "https://tekton.dev/chains/v2",
+      "type": "https://tekton.dev/attestations/chains@v2",
+      "event": "run-image-pipelinerun-build-trusted"
+    },
+    "invocation": {
+      "configSource": {},
+      "tracePolicy": {
+        "policies": [
+          {
+            "Name": "connect",
+            "Config": ""
+          },
+          {
+            "Name": "sys-read-follow-prefix",
+            "Config": ""
+          }
+        ]
+      }
+    },
+    "monitorLog": {
+      "process": [
+        {
+          "eventType": "process",
+          "processBinary": "/ko-app/entrypoint",
+          "arguments": [
+            "init /ko-app/entrypoint /tekton/bin/entrypoint step-prepare step-create step-results"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/sh",
+          "arguments": [
+            "-c \"scriptfile=\"/tekton/scripts/script-0-vjklb\"\ntouch ${scriptfile} && chmod +x ${scriptfile}\ncat > ${s\" \"riptfile} << '_EOF_'\nIyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLWUKCmlmIFtbICJ0cnVlIiA9PSAidHJ1ZSIgXV07IHRoZW\" KICBlY2hvICI+IFNldHRpbmcgcGVybWlzc2lvbnMgb24gJy93b3Jrc3BhY2UvY2FjaGUnLi4uIgogIGNob3duIC1SICIxMDAwOj wMDAiICIvd29ya3NwYWNlL2NhY2hlIgpmaQoKZm9yIHBhdGggaW4gIi90ZWt0b24vaG9tZSIgIi9sYXllcnMiICIvd29ya3NwYW lL3NvdXJjZSI7IGRvCiAgZWNobyAiPiBTZXR0aW5nIHBlcm1pc3Npb25zIG9uICckcGF0aCcuLi4iCiAgY2hvd24gLVIgIjEwMD 6MTAwMCIgIiRwYXRoIgoKICBpZiBbWyAiJHBhdGgiID09ICIvd29ya3NwYWNlL3NvdXJjZSIgXV07IHRoZW4KICAgICAgY2htb2 gNzc1ICIvd29ya3NwYWNlL3NvdXJjZSIKICBmaQpkb25lCgplY2hvICI+IFBhcnNpbmcgYWRkaXRpb25hbCBjb25maWd1cmF0aW uLi4uIgpwYXJzaW5nX2ZsYWc9IiIKZW52cz0oKQpmb3IgYXJnIGluICIkQCI7IGRvCiAgICBpZiBbWyAiJGFyZyIgPT0gIi0tZW 2LXZhcnMiIF1dOyB0aGVuCiAgICAgICAgZWNobyAiLT4gUGFyc2luZyBlbnYgdmFyaWFibGVzLi4uIgogICAgICAgIHBhcnNpbm fZmxhZz0iZW52LXZhcnMiCiAgICBlbGlmIFtbICIkcGFyc2luZ19mbGFnIiA9PSAiZW52LXZhcnMiIF1dOyB0aGVuCiAgICAgIC"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/touch",
+          "arguments": [
+            "/tekton/scripts/script-0-vjklb"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/chmod",
+          "arguments": [
+            "+x /tekton/scripts/script-0-vjklb"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "decode-script /tekton/scripts/script-0-vjklb"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/touch",
+          "arguments": [
+            "/tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/chmod",
+          "arguments": [
+            "+x /tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "decode-script /tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/tekton/scripts/script-0-vjklb",
+          "arguments": [
+            "bash /tekton/scripts/script-0-vjklb --env-vars"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/local/bin/bash",
+          "arguments": [
+            "/tekton/scripts/script-0-vjklb --env-vars"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "-R 1000:1000 /workspace/cache"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "",
+            "-R 1000:1000 /workspace/cache"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "-R 1000:1000 /tekton/home"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "",
+            "-R 1000:1000 /tekton/home"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "-R 1000:1000 /layers"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "",
+            "-R 1000:1000 /layers"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "-R 1000:1000 /workspace/source"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/chown",
+          "arguments": [
+            "",
+            "-R 1000:1000 /workspace/source"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/chmod",
+          "arguments": [
+            "775 /workspace/source"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/chmod",
+          "arguments": [
+            "",
+            "775 /workspace/source"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/mkdir",
+          "arguments": [
+            "-p /platform/env"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/mkdir",
+          "arguments": [
+            "",
+            "-p /platform/env"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/local/bin/bash",
+          "arguments": [
+            "",
+            "/tekton/scripts/script-0-vjklb --env-vars"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "-app=/workspace/source/apps/ruby-bundler -cache-dir=/workspace/cache -cache-image= -uid=1000 -gid=1000 -layers=/layers -platform=/platform -report=/layers/report.toml -process-type=web -skip-restore=false -previous-image=ttl.sh/testin123:1h -run-image=docker.io/cnbs/sample-stack-run:bionic@sha256:766617895a96c9cdc58fa604468328f6918a13f5c2 5fbe267b37df9dce40fda ttl.sh/testin123:1h"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/cnb/buildpacks/samples_java-maven/0.0.1/bin/detect",
+          "arguments": [
+            "bash /cnb/buildpacks/samples_java-maven/0.0.1/bin/detect /platform /tmp/plan.989695937/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "/cnb/buildpacks/samples_java-maven/0.0.1/bin/detect /platform /tmp/plan.989695937/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "",
+            "/cnb/buildpacks/samples_java-maven/0.0.1/bin/detect /platform /tmp/plan.989695937/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/cnb/buildpacks/samples_kotlin-gradle/0.0.1/bin/detect",
+          "arguments": [
+            "bash /cnb/buildpacks/samples_kotlin-gradle/0.0.1/bin/detect /platform /tmp/plan.656386604/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "/cnb/buildpacks/samples_kotlin-gradle/0.0.1/bin/detect /platform /tmp/plan.656386604/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "",
+            "/cnb/buildpacks/samples_kotlin-gradle/0.0.1/bin/detect /platform /tmp/plan.656386604/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/detect",
+          "arguments": [
+            "bash /cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/detect /platform /tmp/plan.965301659/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "/cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/detect /platform /tmp/plan.965301659/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/tr",
+          "arguments": [
+            "-d [:space:]"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            ".ruby-version"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            ".ruby-version"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/tr",
+          "arguments": [
+            "",
+            "-d [:space:]"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "",
+            "/cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/detect /platform /tmp/plan.965301659/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "Ĕ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "@"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "V"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "A"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "\u001f"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "Ī"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "%"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "*"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "%"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "%"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/build",
+          "arguments": [
+            "bash /cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/build /layers/samples_ruby-bundler /platform /tmp/samples_ruby-bundler-852081726/samples_ruby-bundler/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "/cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/build /layers/samples_ruby-bundler /platform /tmp/samples_ruby-bundler-852081726/samples_ruby-bundler/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/mkdir",
+          "arguments": [
+            "-p /layers/samples_ruby-bundler/ruby"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/mkdir",
+          "arguments": [
+            "",
+            "-p /layers/samples_ruby-bundler/ruby"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "/tmp/samples_ruby-bundler-852081726/samples_ruby-bundler/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            "/tmp/samples_ruby-bundler-852081726/samples_ruby-bundler/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/local/bin/yj",
+          "arguments": [
+            "-t"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/local/bin/jq",
+          "arguments": [
+            "-r \".entries[] | select(.name == \"ruby\") | .version\""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/local/bin/yj",
+          "arguments": [
+            "",
+            "-t"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/local/bin/jq",
+          "arguments": [
+            "",
+            "-r \".entries[] | select(.name == \"ruby\") | .version\""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/tar",
+          "arguments": [
+            "-xzf - -C /layers/samples_ruby-bundler/ruby"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/gzip",
+          "arguments": [
+            "-d"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/wget",
+          "arguments": [
+            "-q -O - https://s3-external-1.amazonaws.com/heroku-buildpack-ruby/heroku-18/ruby-2.5.0.tgz"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/usr/bin/wget",
+          "arguments": [
+            "tcp 172.17.0.8:48256 -> 54.231.172.147:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/usr/bin/wget",
+          "arguments": [
+            "tcp 172.17.0.8:48256 -> 54.231.172.147:443",
+            "ŉ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/usr/bin/wget",
+          "arguments": [
+            "tcp 172.17.0.8:48256 -> 54.231.172.147:443",
+            "~"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/usr/bin/wget",
+          "arguments": [
+            "tcp 172.17.0.8:48256 -> 54.231.172.147:443",
+            "å"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/wget",
+          "arguments": [
+            "",
+            "-q -O - https://s3-external-1.amazonaws.com/heroku-buildpack-ruby/heroku-18/ruby-2.5.0.tgz"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "tcp 172.17.0.8:48256 -> 54.231.172.147:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/gzip",
+          "arguments": [
+            "",
+            "-d"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/tar",
+          "arguments": [
+            "",
+            "-xzf - -C /layers/samples_ruby-bundler/ruby"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/gem",
+          "arguments": [
+            "/layers/samples_ruby-bundler/ruby/bin/gem install bundler --no-ri --no-rdoc"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "-x /layers/samples_ruby-bundler/ruby/bin/gem install bundler --no-ri --no-rdoc"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:17099 -> 151.101.193.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:17099 -> 151.101.193.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:17099 -> 151.101.193.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:17099 -> 151.101.193.227:443",
+            "ß"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:17099 -> 151.101.193.227:443",
+            "\u0018"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:17099 -> 151.101.193.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:20683 -> 151.101.193.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:20683 -> 151.101.193.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:20683 -> 151.101.193.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:20683 -> 151.101.193.227:443",
+            "ĥ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:20683 -> 151.101.193.227:443",
+            "İ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:20683 -> 151.101.193.227:443",
+            "Ĝ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "tcp 172.17.0.8:20683 -> 151.101.193.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/ruby",
+          "arguments": [
+            "",
+            "-x /layers/samples_ruby-bundler/ruby/bin/gem install bundler --no-ri --no-rdoc"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/sha256sum",
+          "arguments": [
+            "Gemfile.lock"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/sha256sum",
+          "arguments": [
+            "",
+            "Gemfile.lock"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/cut",
+          "arguments": [
+            "-d \" \" -f 1"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/cut",
+          "arguments": [
+            "",
+            "-d \" \" -f 1"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "/layers/samples_ruby-bundler/bundler.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/local/bin/yj",
+          "arguments": [
+            "-t"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/local/bin/jq",
+          "arguments": [
+            "-r .metadata"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            "/layers/samples_ruby-bundler/bundler.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/local/bin/yj",
+          "arguments": [
+            "",
+            "-t"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/local/bin/jq",
+          "arguments": [
+            "",
+            "-r .metadata"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/mkdir",
+          "arguments": [
+            "/layers/samples_ruby-bundler/bundler"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/mkdir",
+          "arguments": [
+            "",
+            "/layers/samples_ruby-bundler/bundler"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "/layers/samples_ruby-bundler/ruby/bin/bundle install --path /layers/samples_ruby-bundler/bundler --binstubs /layers/samples_ruby-bundler/bundler/bin"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "-wait_file /tekton/downward/ready -wait_file_content -post_file /tekton/run/0/out -termination_path /tekton/termination -step_metadata_dir /tekton/run/0/status -results APP_IMAGE_DIGEST,APP_IMAGE_URL -entrypoint /tekton/scripts/script-0-vjklb -- --env-vars"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "-wait_file /tekton/run/0/out -post_file /tekton/run/1/out -termination_path /tekton/termination -step_metadata_dir /tekton/run/1/status -results APP_IMAGE_DIGEST,APP_IMAGE_URL -entrypoint /cnb/lifecycle/creator -- -app=/workspace/source/apps/ruby-bundler -cache-dir=/workspace/cache -cache-image= -uid=1000 -gid=1000 -layers=/layers -platform=/platform -report=/layers/report.toml -process-type=web -skip-restore=false -previous-image=ttl.sh/testin123:1h -run-image=docker.io/cnbs/sample-stack-run:bionic@sha256:766617895a96c9cdc58fa604468328f6918a13f5c2 5fbe267b37df9dce40fda ttl.sh/testin123:1h"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "-wait_file /tekton/run/1/out -post_file /tekton/run/2/out -termination_path /tekton/termination -step_metadata_dir /tekton/run/2/status -results APP_IMAGE_DIGEST,APP_IMAGE_URL -entrypoint /tekton/scripts/script-2-8h8vq --"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "ń"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "Ņ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "Ő"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "ŋ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "ŏ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "ň"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "Ņ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "Ņ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "ō"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "Ņ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "ň"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "Ŋ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "Ŗ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "ň"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "ŋ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443",
+            "ŋ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443",
+            "Ņ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:30877 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:39091 -> 151.101.65.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:30877 -> 151.101.1.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:39091 -> 151.101.65.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:30877 -> 151.101.1.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:30877 -> 151.101.1.227:443",
+            "Ė"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:39091 -> 151.101.65.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:39091 -> 151.101.65.227:443",
+            "Ğ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:23243 -> 151.101.193.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:23243 -> 151.101.193.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:23243 -> 151.101.193.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:23243 -> 151.101.193.227:443",
+            "ĕ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:40115 -> 151.101.65.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:33437 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:40115 -> 151.101.65.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:33437 -> 151.101.1.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:40115 -> 151.101.65.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:40115 -> 151.101.65.227:443",
+            "Ě"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:33437 -> 151.101.1.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:33437 -> 151.101.1.227:443",
+            "ğ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:15533 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:15533 -> 151.101.1.227:443",
+            "ȅ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:15533 -> 151.101.1.227:443",
+            "J"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:15533 -> 151.101.1.227:443",
+            "ė"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:39091 -> 151.101.65.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:30877 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:33437 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:23243 -> 151.101.193.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:5320 -> 151.101.129.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:15533 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:40115 -> 151.101.65.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "tcp 172.17.0.8:26781 -> 151.101.1.227:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/layers/samples_ruby-bundler/ruby/bin/bundle",
+          "arguments": [
+            "",
+            "/layers/samples_ruby-bundler/ruby/bin/bundle install --path /layers/samples_ruby-bundler/bundler --binstubs /layers/samples_ruby-bundler/bundler/bin"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/bash",
+          "arguments": [
+            "",
+            "/cnb/buildpacks/samples_ruby-bundler/0.0.1/bin/build /layers/samples_ruby-bundler /platform /tmp/samples_ruby-bundler-852081726/samples_ruby-bundler/plan.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            "ĝ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            "~"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:45737 -> 34.205.13.154:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:45737 -> 34.205.13.154:443",
+            "Ĝ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:45737 -> 34.205.13.154:443",
+            "~"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:45737 -> 34.205.13.154:443",
+            "×"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            "॓"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            "Ž"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:45737 -> 34.205.13.154:443",
+            "×"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            "ળ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443",
+            "ॵ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443",
+            "Į"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443",
+            "]"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443",
+            "]"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443",
+            "ı"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443",
+            "&"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443",
+            "*"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "%"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "f"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "e"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "e"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "e"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "d"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "e"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "e"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "f"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "f"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "e"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "f"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "e"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_connect",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:9860 -> 64.233.183.128:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "Ĥ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:9860 -> 64.233.183.128:443",
+            "Ĥ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:9860 -> 64.233.183.128:443",
+            "@"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "@"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "V"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "ɔ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "ȧ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "\u001f"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "Ȥ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "Ȭ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:9860 -> 64.233.183.128:443",
+            "\u0018"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:9860 -> 64.233.183.128:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "ȡ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "ȫ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "ɏ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "Ȧ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "Ȩ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "ȩ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "ȩ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "Ȥ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443",
+            "'"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "U"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_sendmsg",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443",
+            "ࠟ"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/cnb/lifecycle/creator",
+          "arguments": [
+            "",
+            "-app=/workspace/source/apps/ruby-bundler -cache-dir=/workspace/cache -cache-image= -uid=1000 -gid=1000 -layers=/layers -platform=/platform -report=/layers/report.toml -process-type=web -skip-restore=false -previous-image=ttl.sh/testin123:1h -run-image=docker.io/cnbs/sample-stack-run:bionic@sha256:766617895a96c9cdc58fa604468328f6918a13f5c2 5fbe267b37df9dce40fda ttl.sh/testin123:1h"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "tcp 172.17.0.8:6276 -> 64.233.183.128:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "tcp 172.17.0.8:31915 -> 104.18.121.25:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "tcp 172.17.0.8:45737 -> 34.205.13.154:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "tcp 172.17.0.8:63152 -> 18.206.20.10:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "kprobe",
+          "function": "tcp_close",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "tcp 172.17.0.8:52921 -> 104.21.34.22:443"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "",
+            "-wait_file /tekton/run/0/out -post_file /tekton/run/1/out -termination_path /tekton/termination -step_metadata_dir /tekton/run/1/status -results APP_IMAGE_DIGEST,APP_IMAGE_URL -entrypoint /cnb/lifecycle/creator -- -app=/workspace/source/apps/ruby-bundler -cache-dir=/workspace/cache -cache-image= -uid=1000 -gid=1000 -layers=/layers -platform=/platform -report=/layers/report.toml -process-type=web -skip-restore=false -previous-image=ttl.sh/testin123:1h -run-image=docker.io/cnbs/sample-stack-run:bionic@sha256:766617895a96c9cdc58fa604468328f6918a13f5c2 5fbe267b37df9dce40fda ttl.sh/testin123:1h"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/tekton/scripts/script-2-8h8vq",
+          "arguments": [
+            "bash /tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/local/bin/bash",
+          "arguments": [
+            "/tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/bin/grep",
+          "arguments": [
+            "digest /layers/report.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/grep",
+          "arguments": [
+            "",
+            "digest /layers/report.toml"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/cut",
+          "arguments": [
+            "-d\" -f2"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/tr",
+          "arguments": [
+            "-d \\n"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/tee",
+          "arguments": [
+            "/tekton/results/APP_IMAGE_DIGEST"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/cut",
+          "arguments": [
+            "-d\" -f2"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/cut",
+          "arguments": [
+            "",
+            "-d\" -f2"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/cut",
+          "arguments": [
+            "",
+            "-d\" -f2"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/tr",
+          "arguments": [
+            "",
+            "-d \\n"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/tee",
+          "arguments": [
+            "",
+            "/tekton/results/APP_IMAGE_DIGEST"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "process",
+          "processBinary": "/usr/bin/tee",
+          "arguments": [
+            "/tekton/results/APP_IMAGE_URL"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/bin/tee",
+          "arguments": [
+            "",
+            "/tekton/results/APP_IMAGE_URL"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/usr/local/bin/bash",
+          "arguments": [
+            "",
+            "/tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "",
+            "-wait_file /tekton/run/1/out -post_file /tekton/run/2/out -termination_path /tekton/termination -step_metadata_dir /tekton/run/2/status -results APP_IMAGE_DIGEST,APP_IMAGE_URL -entrypoint /tekton/scripts/script-2-8h8vq --"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/ko-app/entrypoint",
+          "arguments": [
+            "",
+            "init /ko-app/entrypoint /tekton/bin/entrypoint step-prepare step-create step-results"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/touch",
+          "arguments": [
+            "",
+            "/tekton/scripts/script-0-vjklb"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/chmod",
+          "arguments": [
+            "",
+            "+x /tekton/scripts/script-0-vjklb"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "",
+            "decode-script /tekton/scripts/script-0-vjklb"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/touch",
+          "arguments": [
+            "",
+            "/tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/chmod",
+          "arguments": [
+            "",
+            "+x /tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/cat",
+          "arguments": [
+            "",
+            ""
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "",
+            "decode-script /tekton/scripts/script-2-8h8vq"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/bin/sh",
+          "arguments": [
+            "",
+            "-c \"scriptfile=\"/tekton/scripts/script-0-vjklb\"\ntouch ${scriptfile} && chmod +x ${scriptfile}\ncat > ${s\" \"riptfile} << '_EOF_'\nIyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLWUKCmlmIFtbICJ0cnVlIiA9PSAidHJ1ZSIgXV07IHRoZW\" KICBlY2hvICI+IFNldHRpbmcgcGVybWlzc2lvbnMgb24gJy93b3Jrc3BhY2UvY2FjaGUnLi4uIgogIGNob3duIC1SICIxMDAwOj wMDAiICIvd29ya3NwYWNlL2NhY2hlIgpmaQoKZm9yIHBhdGggaW4gIi90ZWt0b24vaG9tZSIgIi9sYXllcnMiICIvd29ya3NwYW lL3NvdXJjZSI7IGRvCiAgZWNobyAiPiBTZXR0aW5nIHBlcm1pc3Npb25zIG9uICckcGF0aCcuLi4iCiAgY2hvd24gLVIgIjEwMD 6MTAwMCIgIiRwYXRoIgoKICBpZiBbWyAiJHBhdGgiID09ICIvd29ya3NwYWNlL3NvdXJjZSIgXV07IHRoZW4KICAgICAgY2htb2 gNzc1ICIvd29ya3NwYWNlL3NvdXJjZSIKICBmaQpkb25lCgplY2hvICI+IFBhcnNpbmcgYWRkaXRpb25hbCBjb25maWd1cmF0aW uLi4uIgpwYXJzaW5nX2ZsYWc9IiIKZW52cz0oKQpmb3IgYXJnIGluICIkQCI7IGRvCiAgICBpZiBbWyAiJGFyZyIgPT0gIi0tZW 2LXZhcnMiIF1dOyB0aGVuCiAgICAgICAgZWNobyAiLT4gUGFyc2luZyBlbnYgdmFyaWFibGVzLi4uIgogICAgICAgIHBhcnNpbm fZmxhZz0iZW52LXZhcnMiCiAgICBlbGlmIFtbICIkcGFyc2luZ19mbGFnIiA9PSAiZW52LXZhcnMiIF1dOyB0aGVuCiAgICAgIC"
+          ],
+          "privileged": null
+        },
+        {
+          "eventType": "exit",
+          "processBinary": "/tekton/bin/entrypoint",
+          "arguments": [
+            "",
+            "-wait_file /tekton/downward/ready -wait_file_content -post_file /tekton/run/0/out -termination_path /tekton/termination -step_metadata_dir /tekton/run/0/status -results APP_IMAGE_DIGEST,APP_IMAGE_URL -entrypoint /tekton/scripts/script-0-vjklb -- --env-vars"
+          ],
+          "privileged": null
+        }
+      ]
+    },
+    "metadata": {
+      "buildStartedOn": "2022-10-13T22:55:50Z",
+      "buildFinishedOn": "2022-10-13T22:56:17Z"
+    }
+  }
+}

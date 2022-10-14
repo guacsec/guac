@@ -1,0 +1,94 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "ttl.sh/testin123",
+      "digest": {
+        "sha256": "def2bdf8cee687d5889d51923d7907c441f1a61958f1e5dfb07f53041c83745f"
+      }
+    }
+  ],
+  "predicate": {
+    "builder": {
+      "id": "https://tekton.dev/chains/v2"
+    },
+    "buildType": "https://tekton.dev/attestations/chains@v2",
+    "invocation": {
+      "configSource": {},
+      "parameters": {
+        "APP_IMAGE": "ttl.sh/testin123:1h",
+        "BUILDER_IMAGE": "docker.io/cnbs/sample-builder:bionic@sha256:6c03dd604503b59820fd15adbc65c0a077a47e31d404a3dcad190f3179e920b5",
+        "CACHE_IMAGE": "",
+        "ENV_VARS": [
+          ""
+        ],
+        "GROUP_ID": "1000",
+        "PLATFORM_DIR": "empty-dir",
+        "PROCESS_TYPE": "web",
+        "RUN_IMAGE": "docker.io/cnbs/sample-stack-run:bionic@sha256:766617895a96c9cdc58fa604468328f6918a13f5c225fbe267b37df9dce40fda",
+        "SKIP_RESTORE": "false",
+        "SOURCE_SUBPATH": "apps/ruby-bundler",
+        "USER_ID": "1000"
+      }
+    },
+    "buildConfig": {
+      "steps": [
+        {
+          "entryPoint": "#!/usr/bin/env bash\nset -e\n\nif [[ \"true\" == \"true\" ]]; then\n  echo \"> Setting permissions on '/workspace/cache'...\"\n  chown -R \"1000:1000\" \"/workspace/cache\"\nfi\n\nfor path in \"/tekton/home\" \"/layers\" \"/workspace/source\"; do\n  echo \"> Setting permissions on '$path'...\"\n  chown -R \"1000:1000\" \"$path\"\n\n  if [[ \"$path\" == \"/workspace/source\" ]]; then\n      chmod 775 \"/workspace/source\"\n  fi\ndone\n\necho \"> Parsing additional configuration...\"\nparsing_flag=\"\"\nenvs=()\nfor arg in \"$@\"; do\n    if [[ \"$arg\" == \"--env-vars\" ]]; then\n        echo \"-> Parsing env variables...\"\n        parsing_flag=\"env-vars\"\n    elif [[ \"$parsing_flag\" == \"env-vars\" ]]; then\n        envs+=(\"$arg\")\n    fi\ndone\n\necho \"> Processing any environment variables...\"\nENV_DIR=\"/platform/env\"\n\necho \"--> Creating 'env' directory: $ENV_DIR\"\nmkdir -p \"$ENV_DIR\"\n\nfor env in \"${envs[@]}\"; do\n    IFS='=' read -r key value <<< \"$env\"\n    if [[ \"$key\" != \"\" && \"$value\" != \"\" ]]; then\n        path=\"${ENV_DIR}/${key}\"\n        echo \"--> Writing ${path}...\"\n        echo -n \"$value\" > \"$path\"\n    fi\ndone\n",
+          "arguments": [
+            "--env-vars",
+            ""
+          ],
+          "environment": {
+            "container": "prepare",
+            "image": "docker-pullable://bash@sha256:b208215a4655538be652b2769d82e576bc4d0a2bb132144c060efc5be8c3f5d6"
+          },
+          "annotations": null
+        },
+        {
+          "entryPoint": "/cnb/lifecycle/creator",
+          "arguments": [
+            "-app=/workspace/source/apps/ruby-bundler",
+            "-cache-dir=/workspace/cache",
+            "-cache-image=",
+            "-uid=1000",
+            "-gid=1000",
+            "-layers=/layers",
+            "-platform=/platform",
+            "-report=/layers/report.toml",
+            "-process-type=web",
+            "-skip-restore=false",
+            "-previous-image=ttl.sh/testin123:1h",
+            "-run-image=docker.io/cnbs/sample-stack-run:bionic@sha256:766617895a96c9cdc58fa604468328f6918a13f5c225fbe267b37df9dce40fda",
+            "ttl.sh/testin123:1h"
+          ],
+          "environment": {
+            "container": "create",
+            "image": "docker-pullable://cnbs/sample-builder@sha256:6c03dd604503b59820fd15adbc65c0a077a47e31d404a3dcad190f3179e920b5"
+          },
+          "annotations": null
+        },
+        {
+          "entryPoint": "#!/usr/bin/env bash\nset -e\ngrep \"digest\" /layers/report.toml | cut -d'\"' -f2 | cut -d'\"' -f2 | tr -d '\\n' | tee \"/tekton/results/APP_IMAGE_DIGEST\"\necho -n \"ttl.sh/testin123:1h\" | tee \"/tekton/results/APP_IMAGE_URL\"\n",
+          "arguments": null,
+          "environment": {
+            "container": "results",
+            "image": "docker-pullable://bash@sha256:b208215a4655538be652b2769d82e576bc4d0a2bb132144c060efc5be8c3f5d6"
+          },
+          "annotations": null
+        }
+      ]
+    },
+    "metadata": {
+      "buildStartedOn": "2022-10-13T22:55:50Z",
+      "buildFinishedOn": "2022-10-13T22:56:17Z",
+      "completeness": {
+        "parameters": false,
+        "environment": false,
+        "materials": false
+      },
+      "reproducible": false
+    }
+  }
+}

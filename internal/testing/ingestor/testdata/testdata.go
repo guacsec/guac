@@ -98,8 +98,9 @@ var (
 	}
 
 	att = assembler.AttestationNode{
-		FilePath: "TestSource",
-		Digest:   "sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
+		FilePath:        "TestSource",
+		AttestationType: "slsa",
+		Digest:          "sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
 	}
 
 	mat1 = assembler.ArtifactNode{

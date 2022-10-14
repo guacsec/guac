@@ -54,4 +54,10 @@ var (
 
 	//go:embed testdata/big-mongo-cyclonedx.json
 	CycloneDXBigExample []byte
+
+	//go:embed testdata/buildpack-runtime.json
+	RuntimeExample []byte
+
+	//go:embed testdata/buildpack-slsa.json
+	SlsaExample []byte
 )

@@ -106,8 +106,9 @@ func (in IdentityNode) IdentifiablePropertyNames() []string {
 // AttestationNode is a node that represents an attestation
 type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
-	FilePath string
-	Digest   string
+	FilePath        string
+	AttestationType string
+	Digest          string
 }
 
 func (an AttestationNode) Type() string {
@@ -117,12 +118,13 @@ func (an AttestationNode) Type() string {
 func (an AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["filepath"] = an.FilePath
+	properties["type"] = an.AttestationType
 	properties["digest"] = an.Digest
 	return properties
 }
 
 func (an AttestationNode) PropertyNames() []string {
-	return []string{"filepath", "digest"}
+	return []string{"filepath", "type", "digest"}
 }
 
 func (an AttestationNode) IdentifiablePropertyNames() []string {
@@ -152,6 +154,32 @@ func (bn BuilderNode) PropertyNames() []string {
 
 func (bn BuilderNode) IdentifiablePropertyNames() []string {
 	// A builder needs both type and id to be identified
+	return []string{"type", "id"}
+}
+
+// RuntimeNode is a node that represents a monitor for an artifact
+type RuntimeNode struct {
+	RuntimeNodeType string
+	RuntimeNodeId   string
+}
+
+func (rn RuntimeNode) Type() string {
+	return "Runtime"
+}
+
+func (rn RuntimeNode) Properties() map[string]interface{} {
+	properties := make(map[string]interface{})
+	properties["type"] = rn.RuntimeNodeType
+	properties["id"] = rn.RuntimeNodeId
+	return properties
+}
+
+func (rn RuntimeNode) PropertyNames() []string {
+	return []string{"type", "id"}
+}
+
+func (rn RuntimeNode) IdentifiablePropertyNames() []string {
+	// A monitor needs both type and id to be identified
 	return []string{"type", "id"}
 }
 
@@ -233,6 +261,33 @@ func (e BuiltByEdge) PropertyNames() []string {
 }
 
 func (e BuiltByEdge) IdentifiablePropertyNames() []string {
+	return []string{}
+}
+
+// RuntimeByEdge is an edge that represents the fact that an
+// `ArtifactNode` has been built by a `RuntimeNode`
+type RuntimeByEdge struct {
+	ArtifactNode ArtifactNode
+	RuntimeNode  RuntimeNode
+}
+
+func (r RuntimeByEdge) Type() string {
+	return "MonitorBy"
+}
+
+func (r RuntimeByEdge) Nodes() (v, u GuacNode) {
+	return r.ArtifactNode, r.RuntimeNode
+}
+
+func (r RuntimeByEdge) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (r RuntimeByEdge) PropertyNames() []string {
+	return []string{}
+}
+
+func (r RuntimeByEdge) IdentifiablePropertyNames() []string {
 	return []string{}
 }
 
