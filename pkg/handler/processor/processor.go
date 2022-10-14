@@ -53,6 +53,8 @@ type DocumentType string
 // Document* is the enumerables of DocumentType
 const (
 	DocumentITE6SLSA    DocumentType = "SLSA"
+	DocumentITE6CREV    DocumentType = "CREV"
+	DocumentITE6REVIEW  DocumentType = "REVIEW"
 	DocumentITE6Unknown DocumentType = "ITE6"
 	DocumentDSSE        DocumentType = "DSSE"
 	DocumentSPDX        DocumentType = "SPDX"

@@ -37,6 +37,7 @@ type MockNode struct {
 	Score    *int
 	digest   string
 	digests  []string
+	Payload  map[string]interface{}
 	NodeData objectMetadata
 }
 
@@ -57,6 +58,9 @@ func (n MockNode) Properties() map[string]interface{} {
 	if n.Score != nil {
 		properties["score"] = *n.Score
 	}
+	for k, v := range n.Payload {
+		properties[k] = v
+	}
 	n.NodeData.addProperties(properties)
 	return properties
 }
@@ -68,6 +72,9 @@ func (n MockNode) PropertyNames() []string {
 	}
 	if n.Score != nil {
 		keys = append(keys, "score")
+	}
+	for k := range n.Payload {
+		keys = append(keys, k)
 	}
 	keys = append(keys, n.NodeData.getProperties()...)
 	return keys
@@ -129,6 +136,10 @@ func Test_MockNodes(t *testing.T) {
 	n1 := MockNode{"id1", "addr1", "name1", &age, nil,
 		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		map[string]interface{}{
+			"id":  "TestID",
+			"uri": "TestURI",
+		},
 		*NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -137,6 +148,9 @@ func Test_MockNodes(t *testing.T) {
 	n2 := MockNode{"id2", "addr1", "name2", nil, &score1,
 		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		map[string]interface{}{
+			"uri": "TestURI",
+		},
 		*NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -145,6 +159,9 @@ func Test_MockNodes(t *testing.T) {
 	n3 := MockNode{"id3", "addr2", "name3", &age, &score2,
 		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		map[string]interface{}{
+			"id": "TestID",
+		},
 		*NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",

@@ -18,6 +18,7 @@ package guesser
 import (
 	"testing"
 
+	testdata "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -42,6 +43,14 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 		name:     "valid SLSA ITE6 Document with different versions",
 		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v1.1", "predicateType": "https://slsa.dev/provenance/v1.0"}`),
 		expected: processor.DocumentITE6SLSA,
+	}, {
+		name:     "valid CREV ITE6 Document",
+		blob:     testdata.ITE6CREVExample,
+		expected: processor.DocumentITE6CREV,
+	}, {
+		name:     "valid Runtime ITE6 Document",
+		blob:     testdata.ITE6ReviewExample,
+		expected: processor.DocumentITE6REVIEW,
 	}}
 
 	for _, tt := range testCases {

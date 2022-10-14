@@ -126,9 +126,11 @@ func (in IdentityNode) IdentifiablePropertyNames() []string {
 // AttestationNode is a node that represents an attestation
 type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
-	FilePath string
-	Digest   string
-	NodeData objectMetadata
+	FilePath        string
+	Digest          string
+	AttestationType string
+	Payload         map[string]interface{}
+	NodeData        objectMetadata
 }
 
 func (an AttestationNode) Type() string {
@@ -139,12 +141,20 @@ func (an AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["filepath"] = an.FilePath
 	properties["digest"] = strings.ToLower(an.Digest)
+	properties["attestation_type"] = an.AttestationType
+	for k, v := range an.Payload {
+		properties[k] = v
+	}
 	an.NodeData.addProperties(properties)
+
 	return properties
 }
 
 func (an AttestationNode) PropertyNames() []string {
-	fields := []string{"filepath", "digest"}
+	fields := []string{"filepath", "digest", "attestation_type"}
+	for k := range an.Payload {
+		fields = append(fields, k)
+	}
 	fields = append(fields, an.NodeData.getProperties()...)
 	return fields
 }
