@@ -103,13 +103,13 @@ func Test_scorecardParser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewScorecardParser()
 			if err := s.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
-				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("scorecard.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if nodes := s.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
-				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
+				t.Errorf("scorecard.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
 			}
 			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata_ing.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
-				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+				t.Errorf("scorecard.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
 		})
 	}

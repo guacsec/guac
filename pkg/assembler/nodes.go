@@ -298,7 +298,7 @@ func (e DependsOnEdge) Nodes() (v, u GuacNode) {
 	}
 
 	if uA == uP {
-		panic("only on of package and artifact dependency node defined for DependsOn relationship")
+		panic("only one of package and artifact dependency node defined for DependsOn relationship")
 	}
 
 	if vA {
@@ -373,7 +373,7 @@ func (e MetadataForEdge) Type() string {
 func (e MetadataForEdge) Nodes() (v, u GuacNode) {
 	uA, uP := isDefined(e.ForArtifact), isDefined(e.ForPackage)
 	if uA == uP {
-		panic("only on of package and artifact dependency node defined for DependsOn relationship")
+		panic("only one of package and artifact dependency node defined for DependsOn relationship")
 	}
 
 	v = e.MetadataNode
