@@ -177,7 +177,7 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expectedType:   processor.DocumentITE6REVIEW,
+		expectedType:   processor.DocumentITE6CERTIFY,
 		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {

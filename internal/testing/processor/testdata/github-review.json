@@ -6,8 +6,15 @@
         "digest": {"sha1": "5835544ca568b757a8ecae5c153f317e5736700e"}
       }
   ],
-  "predicateType": "http://in-toto.io/attestation/review",
+  "predicateType": "http://in-toto.io/attestation/certify",
   "predicate": {
+    "certifier": {
+      "name": "John Doe",
+      "sig": "",
+      "pubKey": "",
+      "url": "person@example.com"
+    },
+    "date": "2022-10-03T12:00:00Z",
     "full_review": "https://github.com/kubernetes/kubernetes/pull/112078#pullrequestreview-1088153270"
   }
 }

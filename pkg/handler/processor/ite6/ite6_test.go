@@ -105,7 +105,7 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		name: "ITE6 Review with valid payload",
 		args: &processor.Document{
 			Blob:   []byte(testdata.ITE6ReviewExample),
-			Type:   processor.DocumentITE6REVIEW,
+			Type:   processor.DocumentITE6CERTIFY,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
