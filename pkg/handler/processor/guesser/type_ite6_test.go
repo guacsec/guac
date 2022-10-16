@@ -50,7 +50,7 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 	}, {
 		name:     "valid Runtime ITE6 Document",
 		blob:     testdata.ITE6ReviewExample,
-		expected: processor.DocumentITE6REVIEW,
+		expected: processor.DocumentITE6CERTIFY,
 	}}
 
 	for _, tt := range testCases {

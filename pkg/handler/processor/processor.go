@@ -54,7 +54,7 @@ type DocumentType string
 const (
 	DocumentITE6SLSA    DocumentType = "SLSA"
 	DocumentITE6CREV    DocumentType = "CREV"
-	DocumentITE6REVIEW  DocumentType = "REVIEW"
+	DocumentITE6CERTIFY DocumentType = "CERTIFY"
 	DocumentITE6Unknown DocumentType = "ITE6"
 	DocumentDSSE        DocumentType = "DSSE"
 	DocumentSPDX        DocumentType = "SPDX"

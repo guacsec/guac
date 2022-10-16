@@ -33,8 +33,8 @@ func (_ *ite6TypeGuesser) GuessDocumentType(blob []byte, format processor.Format
 				return processor.DocumentITE6SLSA
 			} else if strings.HasPrefix(statement.PredicateType, "https://crev.dev/in-toto-scheme") {
 				return processor.DocumentITE6CREV
-			} else if strings.HasPrefix(statement.PredicateType, "http://in-toto.io/attestation/review") {
-				return processor.DocumentITE6REVIEW
+			} else if strings.HasPrefix(statement.PredicateType, "http://in-toto.io/attestation/certify") {
+				return processor.DocumentITE6CERTIFY
 			}
 			return processor.DocumentITE6Unknown
 		}
