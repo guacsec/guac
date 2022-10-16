@@ -21,7 +21,9 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/certify"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/parser/crev"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/dsse"
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
@@ -31,6 +33,8 @@ import (
 func init() {
 	_ = RegisterDocumentParser(dsse.NewDSSEParser, processor.DocumentDSSE)
 	_ = RegisterDocumentParser(slsa.NewSLSAParser, processor.DocumentITE6SLSA)
+	_ = RegisterDocumentParser(crev.NewCrevParser, processor.DocumentITE6CREV)
+	_ = RegisterDocumentParser(certify.NewCerifyParser, processor.DocumentITE6CERTIFY)
 	_ = RegisterDocumentParser(spdx.NewSpdxParser, processor.DocumentSPDX)
 	_ = RegisterDocumentParser(cyclonedx.NewCycloneDXParser, processor.DocumentCycloneDX)
 }

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package crev
+package certify
 
 import (
 	"time"
@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	// PredicateCrev represents a CREV provenance for an artifact.
-	PredicateCrev = "https://crev.dev/in-toto-scheme/v-1"
+	// PredicateCertify represents a CREV provenance for an artifact.
+	PredicateCertify = "http://in-toto.io/attestation/certify"
 )
 
 // StatementHeader defines the common fields for all statements
@@ -33,26 +33,24 @@ type StatementHeader struct {
 	Subject       []intoto.Subject `json:"subject"`
 }
 
-type CrevStatement struct {
+type CertifyStatement struct {
 	StatementHeader
 	// Predicate contains type speficic metadata.
-	Predicate CrevPredicate `json:"predicate"`
+	Predicate CertifyPredicate `json:"predicate"`
 }
 
-// Reviewer identifies the entity
-type Reviewer struct {
-	IDType string `json:"id-type"`
-	ID     string `json:"id"`
+// Certifier identifies the entity
+type Certifier struct {
+	Name   string `json:"name"`
+	Sig    string `json:"sig"`
+	PubKey string `json:"pubKey"`
 	URL    string `json:"url"`
 }
 
 // CrevPredicate is the provenance predicate definition.
-type CrevPredicate struct {
-	Reviewer Reviewer `json:"reviewer-id"`
+type CertifyPredicate struct {
+	Certifier Certifier `json:"certifier"`
 
-	Date          *time.Time `json:"date,omitempty"`
-	Thoroughness  string     `json:"thoroughness,omitempty"`
-	Understanding string     `json:"understanding,omitempty"`
-	Rating        string     `json:"rating,omitempty"`
-	Comment       string     `json:"comment,omitempty"`
+	Date       *time.Time `json:"date"`
+	FullReview string     `json:"full_review"`
 }
