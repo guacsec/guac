@@ -15,8 +15,19 @@
 
 package assembler
 
-import "reflect"
+import (
+	"reflect"
+	"strings"
+)
 
 func isDefined(v interface{}) bool {
 	return !reflect.ValueOf(v).IsZero()
+}
+
+func toLower(v ...string) []string {
+	lowerVals := []string{}
+	for _, val := range v {
+		lowerVals = append(lowerVals, strings.ToLower(val))
+	}
+	return lowerVals
 }

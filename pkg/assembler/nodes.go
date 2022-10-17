@@ -15,6 +15,8 @@
 
 package assembler
 
+import "strings"
+
 // ArtifactNode is a node that represents an artifact
 type ArtifactNode struct {
 	Name   string
@@ -29,7 +31,7 @@ func (an ArtifactNode) Type() string {
 func (an ArtifactNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["name"] = an.Name
-	properties["digest"] = an.Digest
+	properties["digest"] = strings.ToLower(an.Digest)
 	properties["tags"] = an.Tags
 	return properties
 }
@@ -61,7 +63,7 @@ func (an PackageNode) Properties() map[string]interface{} {
 	properties["name"] = an.Name
 	properties["purl"] = an.Purl
 	properties["cpes"] = an.CPEs
-	properties["digest"] = an.Digest
+	properties["digest"] = toLower(an.Digest...)
 	properties["tags"] = an.Tags
 	return properties
 }
@@ -91,7 +93,7 @@ func (in IdentityNode) Type() string {
 func (in IdentityNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["id"] = in.ID
-	properties["digest"] = in.Digest
+	properties["digest"] = strings.ToLower(in.Digest)
 	properties["key"] = in.Key
 	properties["keyType"] = in.KeyType
 	properties["keyScheme"] = in.KeyScheme
@@ -121,7 +123,7 @@ func (an AttestationNode) Type() string {
 func (an AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["filepath"] = an.FilePath
-	properties["digest"] = an.Digest
+	properties["digest"] = strings.ToLower(an.Digest)
 	return properties
 }
 
