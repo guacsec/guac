@@ -70,10 +70,7 @@ func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 	for _, sub := range statement.Subject {
 		for alg, ds := range sub.Digest {
 			s.subjects = append(s.subjects, assembler.ArtifactNode{
-				Name: sub.Name, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: map[string]interface{}{
-					assembler.SourceType:    s.doc.SourceInformation.Source,
-					assembler.CollectorType: s.doc.SourceInformation.Collector,
-				}})
+				Name: sub.Name, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
 		}
 	}
 }
@@ -84,10 +81,7 @@ func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
 		for alg, ds := range mat.Digest {
 
 			s.dependencies = append(s.dependencies, assembler.ArtifactNode{
-				Name: mat.URI, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: map[string]interface{}{
-					assembler.SourceType:    s.doc.SourceInformation.Source,
-					assembler.CollectorType: s.doc.SourceInformation.Collector,
-				}})
+				Name: mat.URI, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
 		}
 	}
 }
@@ -95,19 +89,13 @@ func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
 func (s *slsaParser) getAttestation(blob []byte) {
 	h := sha256.Sum256(blob)
 	s.attestations = append(s.attestations, assembler.AttestationNode{
-		FilePath: s.doc.SourceInformation.Source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:]), NodeData: map[string]interface{}{
-			assembler.SourceType:    s.doc.SourceInformation.Source,
-			assembler.CollectorType: s.doc.SourceInformation.Collector,
-		}})
+		FilePath: s.doc.SourceInformation.Source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:]), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
 }
 
 func (s *slsaParser) getBuilder(statement *in_toto.ProvenanceStatement) {
 	// append builder node for builder
 	s.builders = append(s.builders, assembler.BuilderNode{
-		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID, NodeData: map[string]interface{}{
-			assembler.SourceType:    s.doc.SourceInformation.Source,
-			assembler.CollectorType: s.doc.SourceInformation.Collector,
-		}})
+		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID, NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
 }
 
 func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {

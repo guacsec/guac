@@ -95,46 +95,56 @@ var (
 	art = assembler.ArtifactNode{
 		Name:   "helloworld",
 		Digest: "sha256:5678...",
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	att = assembler.AttestationNode{
 		FilePath: "TestSource",
 		Digest:   "sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	mat1 = assembler.ArtifactNode{
 		Name:   "git+https://github.com/curl/curl-docker@master",
 		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	mat2 = assembler.ArtifactNode{
 		Name:   "github_hosted_vm:ubuntu-18.04:20210123.1",
 		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	build = assembler.BuilderNode{
 		BuilderType: "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 		BuilderId:   "https://github.com/Attestations/GitHubHostedActions@v1",
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	ecdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
@@ -146,10 +156,12 @@ var (
 		Key:       base64.StdEncoding.EncodeToString(pemBytes),
 		KeyType:   "ecdsa",
 		KeyScheme: "ecdsa",
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	DsseNodes = []assembler.GuacNode{Ident}
@@ -187,6 +199,12 @@ var (
 		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers",
 		CPEs:   nil,
 		Tags:   []string{"CONTAINER"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	baselayoutPack = assembler.PackageNode{
@@ -197,10 +215,12 @@ var (
 			"cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
 		},
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	keysPack = assembler.PackageNode{
@@ -213,10 +233,12 @@ var (
 			"cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
 		},
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	baselayoutdataPack = assembler.PackageNode{
@@ -227,31 +249,57 @@ var (
 			"cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
 		},
-		NodeData: map[string]interface{}{
-			assembler.SourceType:    "TestSource",
-			assembler.CollectorType: "TestCollector",
-		},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	worldFile = assembler.ArtifactNode{
 		Name:   "/etc/apk/world",
 		Digest: "sha256:713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
 		Tags:   []string{"TEXT"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 	rootFile = assembler.ArtifactNode{
 		Name:   "/etc/crontabs/root",
 		Digest: "sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
 		Tags:   []string{"TEXT"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 	triggersFile = assembler.ArtifactNode{
 		Name:   "/lib/apk/db/triggers",
 		Digest: "sha256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4",
 		Tags:   []string{"TEXT"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 	rsaPubFile = assembler.ArtifactNode{
 		Name:   "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub",
 		Digest: "sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 		Tags:   []string{"TEXT"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	SpdxNodes = []assembler.GuacNode{topLevelPack, baselayoutPack, baselayoutdataPack, rsaPubFile, keysPack, worldFile, rootFile, triggersFile}
@@ -309,6 +357,12 @@ var (
 		Digest: []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
 		Purl:   "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
 		CPEs:   nil,
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	cdxTzdataPack = assembler.PackageNode{
@@ -317,6 +371,12 @@ var (
 		Purl:   "pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11",
 		CPEs: []string{
 			"cpe:2.3:a:tzdata:tzdata:2021a-1\\+deb11u6:*:*:*:*:*:*:*"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	cdxNetbasePack = assembler.PackageNode{
@@ -325,6 +385,12 @@ var (
 		Purl:   "pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11",
 		CPEs: []string{
 			"cpe:2.3:a:netbase:netbase:6.3:*:*:*:*:*:*:*"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	cdxBasefilesPack = assembler.PackageNode{
@@ -333,6 +399,12 @@ var (
 		Purl:   "pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11",
 		CPEs: []string{
 			"cpe:2.3:a:base-files:base-files:11.1\\+deb11u5:*:*:*:*:*:*:*"},
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
 	}
 
 	CycloneDXNodes = []assembler.GuacNode{cdxTopLevelPack, cdxBasefilesPack, cdxNetbasePack, cdxTzdataPack}

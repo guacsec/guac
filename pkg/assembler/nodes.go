@@ -19,9 +19,10 @@ import "strings"
 
 // ArtifactNode is a node that represents an artifact
 type ArtifactNode struct {
-	Name   string
-	Digest string
-	Tags   []string
+	Name     string
+	Digest   string
+	Tags     []string
+	NodeData objectMetadata
 }
 
 func (an ArtifactNode) Type() string {
@@ -33,11 +34,14 @@ func (an ArtifactNode) Properties() map[string]interface{} {
 	properties["name"] = an.Name
 	properties["digest"] = strings.ToLower(an.Digest)
 	properties["tags"] = an.Tags
+	an.NodeData.addProperties(properties)
 	return properties
 }
 
 func (an ArtifactNode) PropertyNames() []string {
-	return []string{"name", "digest", "tags"}
+	fields := []string{"name", "digest", "tags"}
+	fields = append(fields, an.NodeData.getProperties()...)
+	return fields
 }
 
 func (an ArtifactNode) IdentifiablePropertyNames() []string {
@@ -47,11 +51,12 @@ func (an ArtifactNode) IdentifiablePropertyNames() []string {
 
 // PackageNode is a node that represents an artifact
 type PackageNode struct {
-	Name   string
-	Digest []string
-	Purl   string
-	CPEs   []string
-	Tags   []string
+	Name     string
+	Digest   []string
+	Purl     string
+	CPEs     []string
+	Tags     []string
+	NodeData objectMetadata
 }
 
 func (pn PackageNode) Type() string {
@@ -65,11 +70,14 @@ func (pn PackageNode) Properties() map[string]interface{} {
 	properties["cpes"] = pn.CPEs
 	properties["digest"] = toLower(pn.Digest...)
 	properties["tags"] = pn.Tags
+	pn.NodeData.addProperties(properties)
 	return properties
 }
 
 func (pn PackageNode) PropertyNames() []string {
-	return []string{"name", "digest", "purl", "cpes", "tags"}
+	fields := []string{"name", "digest", "purl", "cpes", "tags"}
+	fields = append(fields, pn.NodeData.getProperties()...)
+	return fields
 }
 
 func (pn PackageNode) IdentifiablePropertyNames() []string {
@@ -84,7 +92,7 @@ type IdentityNode struct {
 	Key       string
 	KeyType   string
 	KeyScheme string
-	NodeData  map[string]interface{}
+	NodeData  objectMetadata
 }
 
 func (in IdentityNode) Type() string {
@@ -98,17 +106,13 @@ func (in IdentityNode) Properties() map[string]interface{} {
 	properties["key"] = in.Key
 	properties["keyType"] = in.KeyType
 	properties["keyScheme"] = in.KeyScheme
-	for k, v := range in.NodeData {
-		properties[k] = v
-	}
+	in.NodeData.addProperties(properties)
 	return properties
 }
 
 func (in IdentityNode) PropertyNames() []string {
 	fields := []string{"id", "digest", "key", "keyType", "keyScheme"}
-	for k := range in.NodeData {
-		fields = append(fields, k)
-	}
+	fields = append(fields, in.NodeData.getProperties()...)
 	return fields
 }
 
@@ -122,7 +126,7 @@ type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
 	FilePath string
 	Digest   string
-	NodeData map[string]interface{}
+	NodeData objectMetadata
 }
 
 func (an AttestationNode) Type() string {
@@ -133,14 +137,13 @@ func (an AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["filepath"] = an.FilePath
 	properties["digest"] = strings.ToLower(an.Digest)
+	an.NodeData.addProperties(properties)
 	return properties
 }
 
 func (an AttestationNode) PropertyNames() []string {
 	fields := []string{"filepath", "digest"}
-	for k := range an.NodeData {
-		fields = append(fields, k)
-	}
+	fields = append(fields, an.NodeData.getProperties()...)
 	return fields
 }
 
@@ -152,7 +155,7 @@ func (an AttestationNode) IdentifiablePropertyNames() []string {
 type BuilderNode struct {
 	BuilderType string
 	BuilderId   string
-	NodeData    map[string]interface{}
+	NodeData    objectMetadata
 }
 
 func (bn BuilderNode) Type() string {
@@ -163,17 +166,13 @@ func (bn BuilderNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["type"] = bn.BuilderType
 	properties["id"] = bn.BuilderId
-	for k, v := range bn.NodeData {
-		properties[k] = v
-	}
+	bn.NodeData.addProperties(properties)
 	return properties
 }
 
 func (bn BuilderNode) PropertyNames() []string {
 	fields := []string{"type", "id"}
-	for k := range bn.NodeData {
-		fields = append(fields, k)
-	}
+	fields = append(fields, bn.NodeData.getProperties()...)
 	return fields
 }
 

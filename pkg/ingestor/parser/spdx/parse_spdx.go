@@ -66,12 +66,14 @@ func (s *spdxParser) getTopLevelPackage() {
 		topPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
 		topPackage.Name = s.spdxDoc.DocumentName
 		topPackage.Tags = []string{"CONTAINER"}
+		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
 		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
 	} else if len(splitImage) == 2 {
 		topPackage := assembler.PackageNode{}
 		topPackage.Purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0]
 		topPackage.Name = s.spdxDoc.DocumentName
 		topPackage.Tags = []string{"CONTAINER"}
+		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
 		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
 	}
 }
@@ -81,10 +83,7 @@ func (s *spdxParser) getPackages() {
 	for _, pac := range s.spdxDoc.Packages {
 		currentPackage := assembler.PackageNode{}
 		currentPackage.Name = pac.PackageName
-		currentPackage.NodeData = map[string]interface{}{
-			assembler.SourceType:    s.doc.SourceInformation.Source,
-			assembler.CollectorType: s.doc.SourceInformation.Collector,
-		}
+		currentPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
 		for _, ext := range pac.PackageExternalReferences {
 			if strings.HasPrefix(ext.RefType, "cpe") {
 				currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
@@ -114,6 +113,7 @@ func (s *spdxParser) getFiles() {
 			currentFile.Name = file.FileName
 			currentFile.Digest = strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
 			currentFile.Tags = getTags(file)
+			currentFile.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
 			s.files[string(file.FileSPDXIdentifier)] = append(s.files[string(file.FileSPDXIdentifier)], currentFile)
 		}
 	}

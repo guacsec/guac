@@ -28,6 +28,7 @@ import (
 )
 
 type cyclonedxParser struct {
+	doc         *processor.Document
 	rootPackage parentPackages
 }
 
@@ -69,6 +70,7 @@ func addEdges(curPkg parentPackages, edges *[]assembler.GuacEdge) {
 
 // Parse breaks out the document into the graph components
 func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) error {
+	c.doc = doc
 	cdxBom, err := parseCycloneDXBOM(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse cyclonedx BOM: %w", err)
@@ -98,6 +100,7 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 		rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
 		rootPackage.Name = cdxBom.Metadata.Component.Name
 		rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
+		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
 		c.rootPackage = parentPackages{
 			curPackage:  rootPackage,
 			depPackages: []parentPackages{},
@@ -110,8 +113,9 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 		curPkg := assembler.PackageNode{
 			Name: comp.Name,
 			// Digest: []string{comp.Version},
-			Purl: comp.PackageURL,
-			CPEs: []string{comp.CPE},
+			Purl:     comp.PackageURL,
+			CPEs:     []string{comp.CPE},
+			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
 		}
 		c.rootPackage.depPackages = append(c.rootPackage.depPackages, parentPackages{
 			curPackage:  curPkg,

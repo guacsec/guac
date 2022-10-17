@@ -18,7 +18,34 @@ package assembler
 import (
 	"reflect"
 	"strings"
+
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
+
+// objectMetadata appends metadata associated with the node
+type objectMetadata struct {
+	// sourceInfo is the file location from which the node was created
+	sourceInfo string
+	// collectorInfo is the collector from which the file that created the node came from
+	collectorInfo string
+}
+
+// NewObjectMetadata creates a new instance to add metadata to nodes
+func NewObjectMetadata(s processor.SourceInformation) *objectMetadata {
+	return &objectMetadata{
+		sourceInfo:    s.Source,
+		collectorInfo: s.Collector,
+	}
+}
+
+func (o *objectMetadata) addProperties(prop map[string]interface{}) {
+	prop["source"] = o.sourceInfo
+	prop["collector"] = o.sourceInfo
+}
+
+func (o *objectMetadata) getProperties() []string {
+	return []string{"source", "collector"}
+}
 
 func isDefined(v interface{}) bool {
 	return !reflect.ValueOf(v).IsZero()
