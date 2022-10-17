@@ -63,7 +63,7 @@ func (an PackageNode) Properties() map[string]interface{} {
 	properties["name"] = an.Name
 	properties["purl"] = an.Purl
 	properties["cpes"] = an.CPEs
-	properties["digest"] = toLower(an.Digest)
+	properties["digest"] = toLower(an.Digest...)
 	properties["tags"] = an.Tags
 	return properties
 }

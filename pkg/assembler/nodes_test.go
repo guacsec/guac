@@ -48,7 +48,7 @@ func (n MockNode) Properties() map[string]interface{} {
 	properties["address"] = n.Address
 	properties["name"] = n.Name
 	properties["digest"] = strings.ToLower(n.digest)
-	properties["digests"] = toLower(n.digests)
+	properties["digests"] = toLower(n.digests...)
 	if n.Age != nil {
 		properties["age"] = *n.Age
 	}
