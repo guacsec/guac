@@ -114,6 +114,7 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 			Name: comp.Name,
 			// Digest: []string{comp.Version},
 			Purl:     comp.PackageURL,
+			Version:  comp.Version,
 			CPEs:     []string{comp.CPE},
 			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
 		}

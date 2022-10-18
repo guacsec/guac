@@ -53,6 +53,7 @@ func (an ArtifactNode) IdentifiablePropertyNames() []string {
 type PackageNode struct {
 	Name     string
 	Digest   []string
+	Version  string
 	Purl     string
 	CPEs     []string
 	Tags     []string
@@ -67,6 +68,7 @@ func (pn PackageNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["name"] = pn.Name
 	properties["purl"] = pn.Purl
+	properties["version"] = pn.Version
 	properties["cpes"] = pn.CPEs
 	properties["digest"] = toLower(pn.Digest...)
 	properties["tags"] = pn.Tags
@@ -75,7 +77,7 @@ func (pn PackageNode) Properties() map[string]interface{} {
 }
 
 func (pn PackageNode) PropertyNames() []string {
-	fields := []string{"name", "digest", "purl", "cpes", "tags"}
+	fields := []string{"name", "digest", "purl", "cpes", "tags", "version"}
 	fields = append(fields, pn.NodeData.getProperties()...)
 	return fields
 }
