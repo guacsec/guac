@@ -29,8 +29,8 @@ git clone git@github.com:guacsec/guac.git
 
 ## Setup Neo4j
 
-GUAC uses Neo4j as a graph database. Neo4j provides and maintain official Docker
-images.
+GUAC uses Neo4j as a graph database. We can run one using the docker image
+provided by the Neo4j community.
 
 ```bash
 docker run --rm \
