@@ -99,6 +99,7 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 		rootPackage := assembler.PackageNode{}
 		rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
 		rootPackage.Name = cdxBom.Metadata.Component.Name
+		rootPackage.Version = cdxBom.Metadata.Component.Version
 		rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
 		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
 		c.rootPackage = parentPackages{

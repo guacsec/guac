@@ -356,10 +356,11 @@ var (
 	// CycloneDX Testdata
 
 	cdxTopLevelPack = assembler.PackageNode{
-		Name:   "gcr.io/distroless/static:nonroot",
-		Digest: []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
-		Purl:   "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
-		CPEs:   nil,
+		Name:    "gcr.io/distroless/static:nonroot",
+		Digest:  []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
+		Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+		Purl:    "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
+		CPEs:    nil,
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
