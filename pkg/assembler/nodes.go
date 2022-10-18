@@ -161,6 +161,42 @@ func (bn BuilderNode) IdentifiablePropertyNames() []string {
 	return []string{"type", "id"}
 }
 
+// MetadataNode is a node that represents metadata about an artifact/package
+type MetadataNode struct {
+	MetadataType string
+	ID           string
+	Details      map[string]interface{}
+}
+
+func (mn MetadataNode) Type() string {
+	return "Metadata"
+}
+
+func (mn MetadataNode) Properties() map[string]interface{} {
+	properties := make(map[string]interface{})
+	properties["metadata_type"] = mn.MetadataType
+	properties["id"] = mn.ID
+
+	for k, v := range mn.Details {
+		properties[k] = v
+	}
+
+	return properties
+}
+
+func (mn MetadataNode) PropertyNames() []string {
+	fields := []string{"metadata_type", "id"}
+	for k := range mn.Details {
+		fields = append(fields, k)
+	}
+
+	return fields
+}
+
+func (mn MetadataNode) IdentifiablePropertyNames() []string {
+	return []string{"metadata_type", "id"}
+}
+
 // IdentityForEdge is an edge that represents the fact that an
 // `IdentityNode` is an identity for an `AttestationNode`.
 type IdentityForEdge struct {
@@ -264,7 +300,7 @@ func (e DependsOnEdge) Nodes() (v, u GuacNode) {
 	}
 
 	if uA == uP {
-		panic("only on of package and artifact dependency node defined for DependsOn relationship")
+		panic("only one of package and artifact dependency node defined for DependsOn relationship")
 	}
 
 	if vA {
@@ -318,5 +354,48 @@ func (e ContainsEdge) PropertyNames() []string {
 }
 
 func (e ContainsEdge) IdentifiablePropertyNames() []string {
+	return []string{}
+}
+
+// MetadataFor is an edge that represents the fact that an
+// a metadata node represents metadata for an `ArtifactNode/PackageNode`
+// Only one of each side of the edge should be defined.
+type MetadataForEdge struct {
+	// From node
+	MetadataNode MetadataNode
+	// To node
+	ForArtifact ArtifactNode
+	ForPackage  PackageNode
+}
+
+func (e MetadataForEdge) Type() string {
+	return "MetadataFor"
+}
+
+func (e MetadataForEdge) Nodes() (v, u GuacNode) {
+	uA, uP := isDefined(e.ForArtifact), isDefined(e.ForPackage)
+	if uA == uP {
+		panic("only one of package and artifact dependency node defined for DependsOn relationship")
+	}
+
+	v = e.MetadataNode
+	if uA {
+		u = e.ForArtifact
+	} else {
+		u = e.ForPackage
+	}
+
+	return v, u
+}
+
+func (e MetadataForEdge) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e MetadataForEdge) PropertyNames() []string {
+	return []string{}
+}
+
+func (e MetadataForEdge) IdentifiablePropertyNames() []string {
 	return []string{}
 }
