@@ -191,7 +191,7 @@ var (
 		},
 	}
 
-	// SDPX Testdata
+	// SPDX Testdata
 
 	topLevelPack = assembler.PackageNode{
 		Name:   "gcr.io/google-containers/alpine-latest",
@@ -208,9 +208,10 @@ var (
 	}
 
 	baselayoutPack = assembler.PackageNode{
-		Name:   "alpine-baselayout",
-		Digest: nil,
-		Purl:   "pkg:alpine/alpine-baselayout@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
+		Name:    "alpine-baselayout",
+		Digest:  nil,
+		Purl:    "pkg:alpine/alpine-baselayout@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
+		Version: "3.2.0-r22",
 		CPEs: []string{
 			"cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
@@ -224,9 +225,10 @@ var (
 	}
 
 	keysPack = assembler.PackageNode{
-		Name:   "alpine-keys",
-		Digest: nil,
-		Purl:   "pkg:alpine/alpine-keys@2.4-r1?arch=x86_64&upstream=alpine-keys&distro=alpine-3.16.2",
+		Name:    "alpine-keys",
+		Digest:  nil,
+		Purl:    "pkg:alpine/alpine-keys@2.4-r1?arch=x86_64&upstream=alpine-keys&distro=alpine-3.16.2",
+		Version: "2.4-r1",
 		CPEs: []string{
 			"cpe:2.3:a:alpine-keys:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-keys:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
@@ -242,9 +244,10 @@ var (
 	}
 
 	baselayoutdataPack = assembler.PackageNode{
-		Name:   "alpine-baselayout-data",
-		Digest: nil,
-		Purl:   "pkg:alpine/alpine-baselayout-data@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
+		Name:    "alpine-baselayout-data",
+		Digest:  nil,
+		Purl:    "pkg:alpine/alpine-baselayout-data@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
+		Version: "3.2.0-r22",
 		CPEs: []string{
 			"cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
 			"cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
@@ -353,10 +356,11 @@ var (
 	// CycloneDX Testdata
 
 	cdxTopLevelPack = assembler.PackageNode{
-		Name:   "gcr.io/distroless/static:nonroot",
-		Digest: []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
-		Purl:   "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
-		CPEs:   nil,
+		Name:    "gcr.io/distroless/static:nonroot",
+		Digest:  []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
+		Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+		Purl:    "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
+		CPEs:    nil,
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -366,9 +370,10 @@ var (
 	}
 
 	cdxTzdataPack = assembler.PackageNode{
-		Name:   "tzdata",
-		Digest: nil,
-		Purl:   "pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11",
+		Name:    "tzdata",
+		Digest:  nil,
+		Version: "2021a-1+deb11u6",
+		Purl:    "pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11",
 		CPEs: []string{
 			"cpe:2.3:a:tzdata:tzdata:2021a-1\\+deb11u6:*:*:*:*:*:*:*"},
 		NodeData: *assembler.NewObjectMetadata(
@@ -380,9 +385,10 @@ var (
 	}
 
 	cdxNetbasePack = assembler.PackageNode{
-		Name:   "netbase",
-		Digest: nil,
-		Purl:   "pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11",
+		Name:    "netbase",
+		Digest:  nil,
+		Version: "6.3",
+		Purl:    "pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11",
 		CPEs: []string{
 			"cpe:2.3:a:netbase:netbase:6.3:*:*:*:*:*:*:*"},
 		NodeData: *assembler.NewObjectMetadata(
@@ -394,9 +400,10 @@ var (
 	}
 
 	cdxBasefilesPack = assembler.PackageNode{
-		Name:   "base-files",
-		Digest: nil,
-		Purl:   "pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11",
+		Name:    "base-files",
+		Digest:  nil,
+		Version: "11.1+deb11u5",
+		Purl:    "pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11",
 		CPEs: []string{
 			"cpe:2.3:a:base-files:base-files:11.1\\+deb11u5:*:*:*:*:*:*:*"},
 		NodeData: *assembler.NewObjectMetadata(

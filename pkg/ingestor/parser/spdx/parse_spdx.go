@@ -84,6 +84,7 @@ func (s *spdxParser) getPackages() {
 		currentPackage := assembler.PackageNode{}
 		currentPackage.Name = pac.PackageName
 		currentPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
+		currentPackage.Version = pac.PackageVersion
 		for _, ext := range pac.PackageExternalReferences {
 			if strings.HasPrefix(ext.RefType, "cpe") {
 				currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
