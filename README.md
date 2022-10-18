@@ -2,14 +2,16 @@
 
 ![image](https://user-images.githubusercontent.com/3060102/182691308-d3c7e4d5-b6bd-4b5c-85c5-24dfa19875e2.png)
 
-The GUAC: Graph for Understanding Artifact Composition project aims to create a
-means to ingest, validate and parse artifact information (i.e. in-toto
-attestations, SBOM, etc.) from various data sources and represent and store them
-in a knowledge graph, where users can query information about artifacts or
-request evidence of certain properties of an artifact. The purpose of this aims
-to satisfy the use case of being a monitor for public supply chain and security
-documents as well as for internal use by organizations to query information
-about artifacts that they use.
+Graph for Understanding Artifact Composition (GUAC) aggregates software
+security metadata into a high fidelity graph database—normalizing entity
+identities and mapping standard relationships between them. Querying this graph
+can drive higher-level organizational outcomes such as audit, policy, risk
+management, and even developer assistance.
+
+Conceptually, GUAC occupies the “aggregation and synthesis” layer of the
+software supply chain transparency logical model:
+
+![image](https://user-images.githubusercontent.com/3060102/196563695-a1cdc8bd-9946-482f-873a-937bf75891dc.png)
 
 A few examples of questions answered by GUAC include:
 
@@ -17,8 +19,8 @@ A few examples of questions answered by GUAC include:
 
 ## Quickstart
 
-Refer to the [Developer Setup](./SETUP.md) document to learn how to prepare your
-environment.
+Refer to the [Setup + Demo](./SETUP.md) document to learn how to prepare your
+environment and try GUAC out!
 
 ## Architecture
 
@@ -28,13 +30,17 @@ Here is an overview of the architecture of GUAC:
 
 ## Additional References
 
-- [GUAC Design Doc](https://docs.google.com/document/d/1N5x0HErb-kmCPgG9M8TwBEOGIVU54clqp_X4KhtNJI8/edit)
 - [GUAC Intro Slides](https://docs.google.com/presentation/d/1WF4dsJiwR6URWPgn1aiHAE3iLVl-oGP4SJRWFpcOlao/edit#slide=id.p)
+- [GUAC Design Doc](https://docs.google.com/document/d/1N5x0HErb-kmCPgG9M8TwBEOGIVU54clqp_X4KhtNJI8/edit)
 
 ## Communication
 
-All communication should be done through issues, unless it is a private matter.
-In that case, an e-mail should be sent to guac-maintainers@googlegroups.com.
+All communication should be done through issues.
+We also use a [public slack channel](https://openssf.slack.com/archives/C03U677QD46) on
+the OpenSSF slack.
+
+For security issues or code of conduct concerns, an e-mail should be sent to
+guac-maintainers@googlegroups.com.
 
 ## Governance
 
