@@ -19,9 +19,10 @@ import "strings"
 
 // ArtifactNode is a node that represents an artifact
 type ArtifactNode struct {
-	Name   string
-	Digest string
-	Tags   []string
+	Name     string
+	Digest   string
+	Tags     []string
+	NodeData objectMetadata
 }
 
 func (an ArtifactNode) Type() string {
@@ -33,11 +34,14 @@ func (an ArtifactNode) Properties() map[string]interface{} {
 	properties["name"] = an.Name
 	properties["digest"] = strings.ToLower(an.Digest)
 	properties["tags"] = an.Tags
+	an.NodeData.addProperties(properties)
 	return properties
 }
 
 func (an ArtifactNode) PropertyNames() []string {
-	return []string{"name", "digest", "tags"}
+	fields := []string{"name", "digest", "tags"}
+	fields = append(fields, an.NodeData.getProperties()...)
+	return fields
 }
 
 func (an ArtifactNode) IdentifiablePropertyNames() []string {
@@ -47,32 +51,36 @@ func (an ArtifactNode) IdentifiablePropertyNames() []string {
 
 // PackageNode is a node that represents an artifact
 type PackageNode struct {
-	Name   string
-	Digest []string
-	Purl   string
-	CPEs   []string
-	Tags   []string
+	Name     string
+	Digest   []string
+	Purl     string
+	CPEs     []string
+	Tags     []string
+	NodeData objectMetadata
 }
 
-func (an PackageNode) Type() string {
+func (pn PackageNode) Type() string {
 	return "Package"
 }
 
-func (an PackageNode) Properties() map[string]interface{} {
+func (pn PackageNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["name"] = an.Name
-	properties["purl"] = an.Purl
-	properties["cpes"] = an.CPEs
-	properties["digest"] = toLower(an.Digest...)
-	properties["tags"] = an.Tags
+	properties["name"] = pn.Name
+	properties["purl"] = pn.Purl
+	properties["cpes"] = pn.CPEs
+	properties["digest"] = toLower(pn.Digest...)
+	properties["tags"] = pn.Tags
+	pn.NodeData.addProperties(properties)
 	return properties
 }
 
-func (an PackageNode) PropertyNames() []string {
-	return []string{"name", "digest", "purl", "cpes", "tags"}
+func (pn PackageNode) PropertyNames() []string {
+	fields := []string{"name", "digest", "purl", "cpes", "tags"}
+	fields = append(fields, pn.NodeData.getProperties()...)
+	return fields
 }
 
-func (an PackageNode) IdentifiablePropertyNames() []string {
+func (pn PackageNode) IdentifiablePropertyNames() []string {
 	return []string{"purl"}
 }
 
@@ -84,6 +92,7 @@ type IdentityNode struct {
 	Key       string
 	KeyType   string
 	KeyScheme string
+	NodeData  objectMetadata
 }
 
 func (in IdentityNode) Type() string {
@@ -97,11 +106,14 @@ func (in IdentityNode) Properties() map[string]interface{} {
 	properties["key"] = in.Key
 	properties["keyType"] = in.KeyType
 	properties["keyScheme"] = in.KeyScheme
+	in.NodeData.addProperties(properties)
 	return properties
 }
 
 func (in IdentityNode) PropertyNames() []string {
-	return []string{"id", "digest", "key", "keyType", "keyScheme"}
+	fields := []string{"id", "digest", "key", "keyType", "keyScheme"}
+	fields = append(fields, in.NodeData.getProperties()...)
+	return fields
 }
 
 func (in IdentityNode) IdentifiablePropertyNames() []string {
@@ -114,6 +126,7 @@ type AttestationNode struct {
 	// TODO(mihaimaruseac): Unsure what fields to store here
 	FilePath string
 	Digest   string
+	NodeData objectMetadata
 }
 
 func (an AttestationNode) Type() string {
@@ -124,11 +137,14 @@ func (an AttestationNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["filepath"] = an.FilePath
 	properties["digest"] = strings.ToLower(an.Digest)
+	an.NodeData.addProperties(properties)
 	return properties
 }
 
 func (an AttestationNode) PropertyNames() []string {
-	return []string{"filepath", "digest"}
+	fields := []string{"filepath", "digest"}
+	fields = append(fields, an.NodeData.getProperties()...)
+	return fields
 }
 
 func (an AttestationNode) IdentifiablePropertyNames() []string {
@@ -139,6 +155,7 @@ func (an AttestationNode) IdentifiablePropertyNames() []string {
 type BuilderNode struct {
 	BuilderType string
 	BuilderId   string
+	NodeData    objectMetadata
 }
 
 func (bn BuilderNode) Type() string {
@@ -149,11 +166,14 @@ func (bn BuilderNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["type"] = bn.BuilderType
 	properties["id"] = bn.BuilderId
+	bn.NodeData.addProperties(properties)
 	return properties
 }
 
 func (bn BuilderNode) PropertyNames() []string {
-	return []string{"type", "id"}
+	fields := []string{"type", "id"}
+	fields = append(fields, bn.NodeData.getProperties()...)
+	return fields
 }
 
 func (bn BuilderNode) IdentifiablePropertyNames() []string {

@@ -48,7 +48,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		Format: processor.FormatUnknown,
 		SourceInformation: processor.SourceInformation{
 			Collector: string(CollectorGCS),
-			Source:    getBucketPath(),
+			Source:    getBucketPath() + "/some/object/file.txt",
 		},
 	}
 

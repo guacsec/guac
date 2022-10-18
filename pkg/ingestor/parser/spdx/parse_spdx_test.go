@@ -37,10 +37,13 @@ func Test_spdxParser(t *testing.T) {
 	}{{
 		name: "valid big SPDX document",
 		doc: &processor.Document{
-			Blob:              processor_data.SpdxExampleAlpine,
-			Format:            processor.FormatJSON,
-			Type:              processor.DocumentSPDX,
-			SourceInformation: processor.SourceInformation{},
+			Blob:   processor_data.SpdxExampleAlpine,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentSPDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
 		},
 		wantNodes: testdata.SpdxNodes,
 		wantEdges: testdata.SpdxEdges,

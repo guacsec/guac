@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 const (
@@ -29,13 +30,14 @@ const (
 )
 
 type MockNode struct {
-	Id      string
-	Address string
-	Name    string
-	Age     *int
-	Score   *int
-	digest  string
-	digests []string
+	Id       string
+	Address  string
+	Name     string
+	Age      *int
+	Score    *int
+	digest   string
+	digests  []string
+	NodeData objectMetadata
 }
 
 func (n MockNode) Type() string {
@@ -55,6 +57,7 @@ func (n MockNode) Properties() map[string]interface{} {
 	if n.Score != nil {
 		properties["score"] = *n.Score
 	}
+	n.NodeData.addProperties(properties)
 	return properties
 }
 
@@ -66,6 +69,7 @@ func (n MockNode) PropertyNames() []string {
 	if n.Score != nil {
 		keys = append(keys, "score")
 	}
+	keys = append(keys, n.NodeData.getProperties()...)
 	return keys
 }
 
@@ -124,11 +128,28 @@ func Test_MockNodes(t *testing.T) {
 	age := 42
 	n1 := MockNode{"id1", "addr1", "name1", &age, nil,
 		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
-		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"}}
-	n2 := MockNode{"id2", "addr1", "name2", nil, &score1, "SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
-		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"}}
-	n3 := MockNode{"id3", "addr2", "name3", &age, &score2, "SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
-		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"}}
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		*NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			})}
+	n2 := MockNode{"id2", "addr1", "name2", nil, &score1,
+		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		*NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			})}
+	n3 := MockNode{"id3", "addr2", "name3", &age, &score2,
+		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		*NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			})}
 	edge_id := 0
 	e1 := MockEdge{n1, n2, &edge_id}
 	e2 := MockEdge{n2, n3, nil}

@@ -16,7 +16,6 @@
 package spdx
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -33,27 +32,32 @@ func TestSPDXProcessor_Unpack(t *testing.T) {
 	}{{
 		name: "SPDX document",
 		doc: processor.Document{
-			Blob:              testdata.SpdxExampleSmall,
-			Format:            processor.FormatUnknown,
-			Type:              processor.DocumentSPDX,
-			SourceInformation: processor.SourceInformation{},
+			Blob:   testdata.SpdxExampleSmall,
+			Format: processor.FormatUnknown,
+			Type:   processor.DocumentSPDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
 		},
 		expected:  []*processor.Document{},
 		expectErr: false,
 	}, {
 		name: "Incorrect type",
 		doc: processor.Document{
-			Blob:              testdata.SpdxExampleSmall,
-			Format:            processor.FormatUnknown,
-			Type:              processor.DocumentUnknown,
-			SourceInformation: processor.SourceInformation{},
+			Blob:   testdata.SpdxExampleSmall,
+			Format: processor.FormatUnknown,
+			Type:   processor.DocumentUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
 		},
 		expected:  nil,
 		expectErr: true,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println(testdata.SpdxExampleSmall)
 			d := SPDXProcessor{}
 			actual, err := d.Unpack(&tt.doc)
 			if (err != nil) != tt.expectErr {

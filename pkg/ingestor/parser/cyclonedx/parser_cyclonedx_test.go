@@ -37,10 +37,13 @@ func Test_cyclonedxParser(t *testing.T) {
 	}{{
 		name: "valid small CycloneDX document",
 		doc: &processor.Document{
-			Blob:              processor_data.CycloneDXDistrolessExample,
-			Format:            processor.FormatJSON,
-			Type:              processor.DocumentCycloneDX,
-			SourceInformation: processor.SourceInformation{},
+			Blob:   processor_data.CycloneDXDistrolessExample,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
 		},
 		wantNodes: testdata.CycloneDXNodes,
 		wantEdges: testdata.CyloneDXEdges,
