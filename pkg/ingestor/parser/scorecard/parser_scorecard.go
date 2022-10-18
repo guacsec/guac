@@ -55,7 +55,6 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 		if err := json.Unmarshal(doc.Blob, &scorecard); err != nil {
 			return err
 		}
-		//p.scorecards = append(s.scorecards, scorecard)
 		p.scorecardNodes = append(p.scorecardNodes, getMetadataNode(&scorecard))
 		p.artifactNodes = append(p.artifactNodes, getArtifactNode(&scorecard))
 		return nil
