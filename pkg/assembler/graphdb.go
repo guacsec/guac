@@ -76,7 +76,6 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 	_, err := session.WriteTransaction(
 		func(tx graphdb.Transaction) (interface{}, error) {
 			for i, query := range queries {
-				fmt.Printf("%v(where: %v)\n\n", query, params[i])
 				if _, err := tx.Run(query, params[i]); err != nil {
 					return nil, err
 				}
