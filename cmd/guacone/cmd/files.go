@@ -199,9 +199,9 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 
 func createIndices(client graphdb.Client) error {
 	indices := map[string][]string{
-		"Artifact": {"digest", "name"},
-		"Package": {"purl", "name"},
-		"Metadata": {"id"},
+		"Artifact":    {"digest", "name"},
+		"Package":     {"purl", "name"},
+		"Metadata":    {"id"},
 		"Attestation": {"digest"},
 	}
 
