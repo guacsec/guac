@@ -175,6 +175,12 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	err = createIndices(client)
+	if err != nil {
+		return nil, err
+	}
+
 	return func(gs []assembler.Graph) error {
 		combined := assembler.Graph{
 			Nodes: []assembler.GuacNode{},
@@ -189,4 +195,24 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 
 		return nil
 	}, nil
+}
+
+func createIndices(client graphdb.Client) error {
+	indices := map[string][]string{
+		"Artifact": {"digest", "name"},
+		"Package": {"purl", "name"},
+		"Metadata": {"id"},
+		"Attestation": {"digest"},
+	}
+
+	for label, attributes := range indices {
+		for _, attribute := range attributes {
+			err := assembler.CreateIndexOn(client, label, attribute)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
