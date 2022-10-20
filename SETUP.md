@@ -174,14 +174,14 @@ RETURN n;
 ```
 
 Text output:
-![image](https://user-images.githubusercontent.com/3060102/196480296-1c0a3b27-35e7-40a1-ae37-557bd8c79e98.png)
+![image](https://user-images.githubusercontent.com/3060102/197051068-ac22ecd1-16ae-44f1-8c1f-44c049a4627e.png)
 
 
 We then run the following commands that finds other containers that share dependencies
 with the debian image, and counts the number of shared dependencies in descending order.
 
 ```
-MATCH (n:Package{purl:"pkg:oci/debian-latest?repository_url=docker.io/library"}) -[:Contains|DependsOn*1..5]->(d)<-[*1..3]-(o:Package)
+MATCH (n:Package{purl:"pkg:oci/debian:latest?repository_url=docker.io/library"}) -[:Contains|DependsOn*1..5]->(d)<-[*1..3]-(o:Package)
 where "CONTAINER" in o.tags
 WITH o.purl AS target, collect(d.name) as shared_dep
 RETURN target, SIZE(shared_dep) as num_deps, shared_dep
@@ -191,12 +191,12 @@ ORDER BY num_deps desc;
 The result of that is a list of containers that share dependencies with debian.
 We can see the top matches which have a lot of shared packages/files.
 
-![image](https://user-images.githubusercontent.com/3060102/196480358-0f34ef39-6921-48e7-ac32-72cfbbe28952.png)
+![image](https://user-images.githubusercontent.com/3060102/197051119-31ebf12d-2b6a-4f0d-b188-f5194956e626.png)
 
 Going down the list, we see other containers which do not have many shared
 packages/files, and thus probably don't use the debian image.
 
-![image](https://user-images.githubusercontent.com/3060102/196480902-4d49ff04-4d37-4f98-81c3-c85281625557.png)
+![image](https://user-images.githubusercontent.com/3060102/197051163-47db6eb1-af3b-41df-a0dc-8fd7c5d582b8.png)
 
 ## Clean-up
 
