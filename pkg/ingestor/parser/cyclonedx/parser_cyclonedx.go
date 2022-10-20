@@ -63,7 +63,7 @@ func addEdges(curPkg parentPackages, edges *[]assembler.GuacEdge) {
 		return
 	}
 	for _, d := range curPkg.depPackages {
-		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: d.curPackage, PackageDependency: curPkg.curPackage})
+		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: curPkg.curPackage, PackageDependency: d.curPackage})
 		addEdges(d, edges)
 	}
 }
@@ -101,6 +101,7 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 		rootPackage.Name = cdxBom.Metadata.Component.Name
 		rootPackage.Version = cdxBom.Metadata.Component.Version
 		rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
+		rootPackage.Tags = []string{"CONTAINER"}
 		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
 		c.rootPackage = parentPackages{
 			curPackage:  rootPackage,

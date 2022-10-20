@@ -360,6 +360,7 @@ var (
 		Digest:  []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
 		Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
 		Purl:    "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
+		Tags:    []string{"CONTAINER"},
 		CPEs:    nil,
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
@@ -417,16 +418,16 @@ var (
 	CycloneDXNodes = []assembler.GuacNode{cdxTopLevelPack, cdxBasefilesPack, cdxNetbasePack, cdxTzdataPack}
 	CyloneDXEdges  = []assembler.GuacEdge{
 		assembler.DependsOnEdge{
-			PackageNode:       cdxBasefilesPack,
-			PackageDependency: cdxTopLevelPack,
+			PackageDependency: cdxBasefilesPack,
+			PackageNode:       cdxTopLevelPack,
 		},
 		assembler.DependsOnEdge{
-			PackageNode:       cdxNetbasePack,
-			PackageDependency: cdxTopLevelPack,
+			PackageDependency: cdxNetbasePack,
+			PackageNode:       cdxTopLevelPack,
 		},
 		assembler.DependsOnEdge{
-			PackageNode:       cdxTzdataPack,
-			PackageDependency: cdxTopLevelPack,
+			PackageDependency: cdxTzdataPack,
+			PackageNode:       cdxTopLevelPack,
 		},
 	}
 )
