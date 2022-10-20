@@ -37,14 +37,21 @@ docker run --rm \
   -p7474:7474 \
   -p7687:7687 \
   -e NEO4J_AUTH=neo4j/s3cr3t \
+  -e NEO4J_apoc_export_file_enabled=true \
+  -e NEO4J_apoc_import_file_enabled=true \
+  -e NEO4J_apoc_import_file_use__neo4j__config=true \
+  -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
   neo4j:4.4.9-community
 ```
 
 Once it is done, the Neo4j console can be accessed either in the web browser at
 <http://localhost:7474/>, either using a client like [Neo4j Desktop],
-or by using any [Neo4j drivers] of your choice. 
+or by using any [Neo4j drivers] of your choice.
 
 To login, use the credentials set above: `neo4j/s3cr3t`.
+
+The environment variables containing `*apoc*` are needed to enable the [apoc]
+Neo4j stored procedures add-on which can be used for more advanced queries.
 
 ### Create Neo4j DB Index
 
@@ -114,7 +121,7 @@ may be different on your neo4j instance.
 ## Example 1: Exploring Kubernetes Containers
 
 In this first example, we want to take a look at the kubernetes containers, and
-see what metadata/attestations can be connected to it. 
+see what metadata/attestations can be connected to it.
 
 We first start by looking up the `kube-controller-manager` containers.
 ```
@@ -126,7 +133,7 @@ RETURN n;
 
 ![image](https://user-images.githubusercontent.com/3060102/196477253-7ede9ec5-a995-4e59-aab7-8acb35dc56cf.png)
 
-We'll pick a specific version, for now we'll choose `v1.24.6`. 
+We'll pick a specific version, for now we'll choose `v1.24.6`.
 
 In this next query we want to ask what are all the binaries in this container, and
 for each of them, is there any metadata tied to them?
@@ -147,7 +154,7 @@ Text/Table view:
 
 In the returned sub-graph result, we can observe the following:
 
-- We can see the kubernetes container package (red) has two binaries 
+- We can see the kubernetes container package (red) has two binaries
   `/go-runner` and `/usr/local/bin/kube-controller-manager`.
 - We can see we have a SLSA attestation (orange) for kube binary,
   but no attestations for the `/go-runner`.
@@ -213,3 +220,4 @@ MATCH (n) DETACH DELETE n;
 [npm]: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 [npx]: https://docs.npmjs.com/cli/v7/commands/npx
 [cleanup]: #Clean-up
+[apoc]: https://neo4j.com/labs/apoc/
