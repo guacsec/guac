@@ -38,8 +38,8 @@ Here is an overview of the architecture of GUAC:
 
 ## Communication
 
-All communication should be done through issues.
-We also use a [public slack channel](https://openssf.slack.com/archives/C03U677QD46) on
+We encourage discussions to be done on github issues.
+We also have a [public slack channel](https://openssf.slack.com/archives/C03U677QD46) on
 the OpenSSF slack.
 
 For security issues or code of conduct concerns, an e-mail should be sent to
