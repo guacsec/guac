@@ -2,14 +2,15 @@
 
 ![image](https://user-images.githubusercontent.com/3060102/182691308-d3c7e4d5-b6bd-4b5c-85c5-24dfa19875e2.png)
 
-**Note:** GUAC is under active development - if you are interested in contributing, please look at [contributor guide](CONTRIBUTING.md)
-and the ["express interest" issue](https://github.com/guacsec/guac/issues/1)
+**Note:** GUAC is under active development - if you are interested in
+contributing, please look at [contributor guide](CONTRIBUTING.md) and the
+["express interest" issue](https://github.com/guacsec/guac/issues/1)
 
-Graph for Understanding Artifact Composition (GUAC) aggregates software
-security metadata into a high fidelity graph database—normalizing entity
-identities and mapping standard relationships between them. Querying this graph
-can drive higher-level organizational outcomes such as audit, policy, risk
-management, and even developer assistance.
+Graph for Understanding Artifact Composition (GUAC) aggregates software security
+metadata into a high fidelity graph database—normalizing entity identities and
+mapping standard relationships between them. Querying this graph can drive
+higher-level organizational outcomes such as audit, policy, risk management, and
+even developer assistance.
 
 Conceptually, GUAC occupies the “aggregation and synthesis” layer of the
 software supply chain transparency logical model:
@@ -38,9 +39,9 @@ Here is an overview of the architecture of GUAC:
 
 ## Communication
 
-We encourage discussions to be done on github issues.
-We also have a [public slack channel](https://openssf.slack.com/archives/C03U677QD46) on
-the OpenSSF slack.
+We encourage discussions to be done on github issues. We also have a
+[public slack channel](https://openssf.slack.com/archives/C03U677QD46) on the
+OpenSSF slack.
 
 For security issues or code of conduct concerns, an e-mail should be sent to
 guac-maintainers@googlegroups.com.

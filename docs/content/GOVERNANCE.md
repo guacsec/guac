@@ -1,14 +1,18 @@
-# Governance
++++
+title = "Governance"
+sort_by = "weight"
+weight = 40
++++
 
 ## License
 
-The project will use [Apache 2.0 license](LICENSE) for code. To start, the
-project will not be under any foundation, and does not have immediate plans to
-do so. However, this may change in the future.
+The project will use [Apache 2.0 license] for code. To start, the project will
+not be under any foundation, and does not have immediate plans to do so.
+However, this may change in the future.
 
 ## Maintainership
 
-List of maintainers can be found at [MAINTAINERS](MAINTAINERS).
+List of maintainers can be found at [MAINTAINERS].
 
 Maintainership is driven by engineering contributions to the project, and a n-1
 vote among current maintainers is required to make changes to the list of
@@ -66,3 +70,6 @@ Technical Advisory Membership is provided by:
   unanimous vote by maintainers
 - Members who are found to be threatening and malicious, e.g. active harassment
   will be removed immediately with vote by 2 maintainers
+
+[maintainers]: https://github.com/guacsec/guac/blob/main/MAINTAINERS
+[apache 2.0 license]: https://github.com/guacsec/guac/blob/main/LICENSE

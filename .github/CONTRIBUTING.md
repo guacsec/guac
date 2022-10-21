@@ -1,9 +1,13 @@
-# How to Contribute
++++
+title = "Contributing"
+sort_by = "weight"
+weight = 20
++++
 
 We'd love to accept your patches and contributions to this project. There are
 just a few small guidelines you need to follow.
 
-Refer to the [Developer Setup](./SETUP.md) document to learn how to prepare your
+Refer to the [Developer Setup](/setup) document to learn how to prepare your
 environment.
 
 ## Contributor License Agreement

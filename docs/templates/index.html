@@ -1,0 +1,19 @@
+{% extends "juice/templates/index.html" %}
+
+{% block hero %}
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+<section class="text-center welcome">
+  <h1 class="heading-text">Graph for Understanding Artifact Composition</h1>
+  <h3 class="title-text">
+    aggregates software security metadata into a high fidelity graph database
+  </h3>
+  <p>
+    <a class="github-button" href="https://github.com/guacsec/guac" data-size="large"
+      data-show-count="true" aria-label="Star guacsec/guac on GitHub">Star</a>
+  </p>
+</section>
+<img class="hero-image" style="width: 35%" src="{{ get_url(path="guac.png") }}">
+
+<div class="explore-more text" onclick="document.getElementById('main').scrollIntoView({behavior: 'smooth'})">Learn
+  More ⇣</div>
+{% endblock hero %}
