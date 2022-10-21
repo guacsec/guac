@@ -35,7 +35,12 @@ func WriteQueryForTesting(client Client, query string, args map[string]interface
 
 	_, err := session.WriteTransaction(
 		func(tx Transaction) (interface{}, error) {
-			return tx.Run(query, args)
+			result, err := tx.Run(query, args)
+			if err != nil {
+				return nil, err
+			}
+			_, err = result.Consume()
+			return nil, err
 		})
 	return err
 }
@@ -48,15 +53,14 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 	session := client.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
-	// For this testing function, we just collect all values.
-	values := make([][]interface{}, 0)
-
-	_, err := session.ReadTransaction(
+	result, err := session.ReadTransaction(
+		// For this testing function, we just collect all values.
 		func(tx Transaction) (interface{}, error) {
 			records, err := tx.Run(query, args)
 			if err != nil {
 				return nil, err
 			}
+			values := make([][]interface{}, 0)
 			// Since `records` is valid only while `tx` is in
 			// scope, we have to process all data here.
 			for records.Next() {
@@ -72,7 +76,7 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 	if err != nil {
 		return nil, err
 	}
-	return values, err
+	return result.([][]interface{}), nil
 }
 
 // ClearDBForTesting clears the entire database.
@@ -84,7 +88,12 @@ func ClearDBForTesting(client Client) error {
 
 	_, err := session.WriteTransaction(
 		func(tx Transaction) (interface{}, error) {
-			return tx.Run("MATCH (n) DETACH DELETE n", nil)
+			results, err := tx.Run("MATCH (n) DETACH DELETE n", nil)
+			if err != nil {
+				return nil, err
+			}
+			_, err = results.Consume()
+			return nil, err
 		})
 	return err
 }
