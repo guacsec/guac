@@ -76,7 +76,12 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 	_, err := session.WriteTransaction(
 		func(tx graphdb.Transaction) (interface{}, error) {
 			for i, query := range queries {
-				if _, err := tx.Run(query, params[i]); err != nil {
+				result, err := tx.Run(query, params[i])
+				if err != nil {
+					return nil, err
+				}
+				_, err = result.Consume()
+				if err != nil {
 					return nil, err
 				}
 			}
