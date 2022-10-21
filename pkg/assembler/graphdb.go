@@ -86,6 +86,26 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 	return err
 }
 
+// CreateIndexOn creates database indixes in the graph database given by Client
+// to optimize performance.
+func CreateIndexOn(client graphdb.Client, nodeLabel string, nodeAttribute string) error {
+	session := client.NewSession(neo4j.SessionConfig{})
+	defer session.Close()
+
+	var sb strings.Builder
+	sb.WriteString("CREATE INDEX IF NOT EXISTS FOR (n:")
+	sb.WriteString(nodeLabel) // not user controlled
+	sb.WriteString(") ON n.")
+	sb.WriteString(nodeAttribute) // not user controlled
+
+	_, err := session.WriteTransaction(
+		func(tx graphdb.Transaction) (interface{}, error) {
+			return tx.Run(sb.String(), nil)
+		})
+
+	return err
+}
+
 // Creates the "MERGE (n:${NODE_TYPE} {${ATTR}:${VALUE}, ...})" part of the query
 func queryPartForMergeNode(sb *strings.Builder, n GuacNode, label string) error {
 	node_data := n.Properties()
