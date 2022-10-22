@@ -1,0 +1,20 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "subject": [
+      {
+        "name": "git://github.com/kubernetes/kubernetes", 
+        "digest": {"sha1": "5835544ca568b757a8ecae5c153f317e5736700e"}
+      }
+  ],
+  "predicateType": "https://in-toto.io/attestation/certify/v0.1",
+  "predicate": {
+    "certifier": {
+      "name": "John Doe",
+      "sig": "",
+      "pubKey": "",
+      "url": "person@example.com"
+    },
+    "date": "2022-10-03T12:00:00Z",
+    "full_review": "https://github.com/kubernetes/kubernetes/pull/112078#pullrequestreview-1088153270"
+  }
+}

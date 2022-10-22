@@ -107,7 +107,7 @@ func Test_GuessDocument(t *testing.T) {
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expectedType:   processor.DocumentITE6Unknown,
+		expectedType:   processor.DocumentITE6Generic,
 		expectedFormat: processor.FormatJSON,
 	}, {
 		name: "valid SLSA ITE6 Document",
@@ -158,6 +158,26 @@ func Test_GuessDocument(t *testing.T) {
 			SourceInformation: processor.SourceInformation{},
 		},
 		expectedType:   processor.DocumentCycloneDX,
+		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "valid CREV ITE6 Document",
+		document: &processor.Document{
+			Blob:              testdata.ITE6CREVExample,
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentITE6Generic,
+		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "valid Review ITE6 Document",
+		document: &processor.Document{
+			Blob:              testdata.ITE6ReviewExample,
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentITE6Generic,
 		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {

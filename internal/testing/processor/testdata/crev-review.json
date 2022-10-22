@@ -1,0 +1,22 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "subject": [
+      {
+        "name": "git://github.com/kubernetes/kubernetes", 
+        "digest": {"sha1": "5835544ca568b757a8ecae5c153f317e5736700e"}
+      }
+  ],
+  "predicateType": "https://crev.dev/in-toto-scheme/v-1",
+  "predicate": {
+    "reviewer-id": {
+      "id-type": "crev",
+      "id": "",
+      "url": "person@example.com"
+    },
+    "date": "2022-10-03T12:00:00Z",
+    "thoroughness": "high",
+    "understanding": "high",
+    "rating": "positive",
+    "comment": "N/A"
+  }
+}
