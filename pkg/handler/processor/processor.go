@@ -69,7 +69,6 @@ type FormatType string
 // Format* is the enumerables of FormatType
 const (
 	FormatJSON      FormatType = "JSON"
-	FormatXML       FormatType = "XML"
 	FormatJSONLines FormatType = "JSON_LINES"
 	FormatXML       FormatType = "XML"
 	FormatUnknown   FormatType = "UNKNOWN"
