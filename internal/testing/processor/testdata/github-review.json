@@ -6,7 +6,7 @@
         "digest": {"sha1": "5835544ca568b757a8ecae5c153f317e5736700e"}
       }
   ],
-  "predicateType": "http://in-toto.io/attestation/certify",
+  "predicateType": "https://in-toto.io/attestation/certify/v0.1",
   "predicate": {
     "certifier": {
       "name": "John Doe",

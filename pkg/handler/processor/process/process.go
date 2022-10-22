@@ -34,10 +34,8 @@ var (
 )
 
 func init() {
-	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Unknown)
+	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Generic)
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6SLSA)
-	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6CREV)
-	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6CERTIFY)
 	_ = RegisterDocumentProcessor(&dsse.DSSEProcessor{}, processor.DocumentDSSE)
 	_ = RegisterDocumentProcessor(&spdx.SPDXProcessor{}, processor.DocumentSPDX)
 	_ = RegisterDocumentProcessor(&scorecard.ScorecardProcessor{}, processor.DocumentScorecard)

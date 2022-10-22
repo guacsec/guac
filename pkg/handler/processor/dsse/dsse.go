@@ -68,7 +68,7 @@ func (d *DSSEProcessor) Unpack(i *processor.Document) ([]*processor.Document, er
 	case string(dsseITE6):
 		doc = &processor.Document{
 			Blob:              decodedPayload,
-			Type:              processor.DocumentITE6Unknown,
+			Type:              processor.DocumentITE6Generic,
 			Format:            processor.FormatJSON,
 			SourceInformation: i.SourceInformation,
 		}

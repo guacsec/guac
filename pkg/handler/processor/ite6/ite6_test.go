@@ -69,7 +69,7 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		name: "ITE6 Doc with unknown payload",
 		args: &processor.Document{
 			Blob:   []byte(badProvenance),
-			Type:   processor.DocumentITE6Unknown,
+			Type:   processor.DocumentITE6Generic,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
@@ -93,7 +93,7 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		name: "ITE6 CREV with valid payload",
 		args: &processor.Document{
 			Blob:   []byte(testdata.ITE6CREVExample),
-			Type:   processor.DocumentITE6CREV,
+			Type:   processor.DocumentITE6Generic,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",
@@ -105,7 +105,7 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		name: "ITE6 Review with valid payload",
 		args: &processor.Document{
 			Blob:   []byte(testdata.ITE6ReviewExample),
-			Type:   processor.DocumentITE6CERTIFY,
+			Type:   processor.DocumentITE6Generic,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
 				Collector: "TestCollector",

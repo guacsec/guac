@@ -34,7 +34,7 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 	}, {
 		name:     "valid ITE6 Document",
 		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v0.1"}`),
-		expected: processor.DocumentITE6Unknown,
+		expected: processor.DocumentITE6Generic,
 	}, {
 		name:     "valid SLSA ITE6 Document",
 		blob:     []byte(`{"_type": "https://in-toto.io/Statement/v0.1", "predicateType": "https://slsa.dev/provenance/v0.2"}`),
@@ -46,11 +46,11 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 	}, {
 		name:     "valid CREV ITE6 Document",
 		blob:     testdata.ITE6CREVExample,
-		expected: processor.DocumentITE6CREV,
+		expected: processor.DocumentITE6Generic,
 	}, {
 		name:     "valid Runtime ITE6 Document",
 		blob:     testdata.ITE6ReviewExample,
-		expected: processor.DocumentITE6CERTIFY,
+		expected: processor.DocumentITE6Generic,
 	}}
 
 	for _, tt := range testCases {
