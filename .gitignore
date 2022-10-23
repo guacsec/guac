@@ -8,3 +8,4 @@
 bin/
 coverage.txt
 go.work
+.idea
