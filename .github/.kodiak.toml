@@ -9,7 +9,7 @@ prioritize_ready_to_merge = true
 require_automerge_label = false
 
 [update]
-always = true
+always = false
 require_automerge_label = false
 
 [approve]
