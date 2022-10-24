@@ -67,7 +67,7 @@ CREATE INDEX IF NOT EXISTS FOR (n:Metadata) on n.id;
 CREATE INDEX IF NOT EXISTS FOR (n:Attestation) on n.digest;
 ```
 
-You can validate the the indices have been created by using the command:
+You can validate the indices have been created by using the command:
 
 ```
 :schema
