@@ -53,29 +53,9 @@ To login, use the credentials set above: `neo4j/s3cr3t`.
 The environment variables containing `*apoc*` are needed to enable the [apoc]
 Neo4j stored procedures add-on which can be used for more advanced queries.
 
-### Create Neo4j DB Index
-
-With the Neo4j Console, you want to first create the indexes before ingesting
-the data. This can be done through running the following query:
-
-```
-CREATE INDEX IF NOT EXISTS FOR (n:Artifact) on n.digest;
-CREATE INDEX IF NOT EXISTS FOR (n:Artifact) on n.name;
-CREATE INDEX IF NOT EXISTS FOR (n:Package) on n.purl;
-CREATE INDEX IF NOT EXISTS FOR (n:Package) on n.name;
-CREATE INDEX IF NOT EXISTS FOR (n:Metadata) on n.id;
-CREATE INDEX IF NOT EXISTS FOR (n:Attestation) on n.digest;
-```
-
-You can validate the the indices have been created by using the command:
-
-```
-:schema
-```
-
 ## Ingesting the data
 
-To ingest the data, we will use the help of the guacone binary, which is an
+To ingest the data, we will use the help of the `guacone` binary, which is an
 all-in-one utility that can take a collection of files and ingest them into
 the neo4j database.
 
