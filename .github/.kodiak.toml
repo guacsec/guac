@@ -4,7 +4,7 @@ version = 1
 blacklist_title_regex = "^WIP:.*"
 blacklist_labels = ["do-not-merge"]
 delete_branch_on_merge = true
-method = "squash"
+method = "rebase"
 prioritize_ready_to_merge = true
 require_automerge_label = false
 
