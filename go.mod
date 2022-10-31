@@ -9,7 +9,7 @@ require (
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.4
 	github.com/secure-systems-lab/go-securesystemslib v0.4.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 	go.uber.org/zap v1.23.0
 	google.golang.org/api v0.100.0
 )
