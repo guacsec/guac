@@ -94,18 +94,20 @@ func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []ass
 
 func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
-	splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
-	if len(splitImage) == 3 {
-		rootPackage := assembler.PackageNode{}
-		rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
-		rootPackage.Name = cdxBom.Metadata.Component.Name
-		rootPackage.Version = cdxBom.Metadata.Component.Version
-		rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
-		rootPackage.Tags = []string{"CONTAINER"}
-		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
-		c.rootPackage = parentPackages{
-			curPackage:  rootPackage,
-			depPackages: []parentPackages{},
+	if cdxBom.Metadata.Component != nil {
+		splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
+		if len(splitImage) == 3 {
+			rootPackage := assembler.PackageNode{}
+			rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
+			rootPackage.Name = cdxBom.Metadata.Component.Name
+			rootPackage.Version = cdxBom.Metadata.Component.Version
+			rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
+			rootPackage.Tags = []string{"CONTAINER"}
+			rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
+			c.rootPackage = parentPackages{
+				curPackage:  rootPackage,
+				depPackages: []parentPackages{},
+			}
 		}
 	}
 }
