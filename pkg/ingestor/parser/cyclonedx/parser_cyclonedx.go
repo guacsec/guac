@@ -34,7 +34,7 @@ type cyclonedxParser struct {
 
 type parentPackages struct {
 	curPackage  assembler.PackageNode
-	depPackages []parentPackages
+	depPackages []*parentPackages
 }
 
 func NewCycloneDXParser() common.DocumentParser {
@@ -52,7 +52,7 @@ func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode 
 func addNodes(curPkg parentPackages, nodes *[]assembler.GuacNode) {
 	*nodes = append(*nodes, curPkg.curPackage)
 	for _, d := range curPkg.depPackages {
-		addNodes(d, nodes)
+		addNodes(*d, nodes)
 	}
 }
 
@@ -64,7 +64,7 @@ func addEdges(curPkg parentPackages, edges *[]assembler.GuacEdge) {
 	}
 	for _, d := range curPkg.depPackages {
 		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: curPkg.curPackage, PackageDependency: d.curPackage})
-		addEdges(d, edges)
+		addEdges(*d, edges)
 	}
 }
 
@@ -95,24 +95,31 @@ func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []ass
 func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	if cdxBom.Metadata.Component != nil {
-		splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
-		if len(splitImage) == 3 {
-			rootPackage := assembler.PackageNode{}
-			rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
-			rootPackage.Name = cdxBom.Metadata.Component.Name
+		rootPackage := assembler.PackageNode{}
+		rootPackage.Name = cdxBom.Metadata.Component.Name
+		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
+		if cdxBom.Metadata.Component.PackageURL != "" {
+			rootPackage.Purl = cdxBom.Metadata.Component.PackageURL
 			rootPackage.Version = cdxBom.Metadata.Component.Version
-			rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
-			rootPackage.Tags = []string{"CONTAINER"}
-			rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
-			c.rootPackage = parentPackages{
-				curPackage:  rootPackage,
-				depPackages: []parentPackages{},
+			rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
+		} else {
+			splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
+			if len(splitImage) == 3 {
+				rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
+				rootPackage.Version = cdxBom.Metadata.Component.Version
+				rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
+				rootPackage.Tags = []string{"CONTAINER"}
 			}
+		}
+		c.rootPackage = parentPackages{
+			curPackage:  rootPackage,
+			depPackages: []*parentPackages{},
 		}
 	}
 }
 
 func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
+	pkgMap := map[string]*parentPackages{}
 	for _, comp := range *cdxBom.Components {
 		curPkg := assembler.PackageNode{
 			Name: comp.Name,
@@ -122,10 +129,22 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 			CPEs:     []string{comp.CPE},
 			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
 		}
-		c.rootPackage.depPackages = append(c.rootPackage.depPackages, parentPackages{
+		parentPkg := parentPackages{
 			curPackage:  curPkg,
-			depPackages: []parentPackages{},
-		})
+			depPackages: []*parentPackages{},
+		}
+		c.rootPackage.depPackages = append(c.rootPackage.depPackages, &parentPkg)
+		pkgMap[comp.BOMRef] = &parentPkg
+	}
+
+	for _, deps := range *cdxBom.Dependencies {
+		if topPkg, found := pkgMap[deps.Ref]; found {
+			for _, depPkg := range *deps.Dependencies {
+				if depPkg, exist := pkgMap[depPkg]; exist {
+					topPkg.depPackages = append(topPkg.depPackages, depPkg)
+				}
+			}
+		}
 	}
 }
 
