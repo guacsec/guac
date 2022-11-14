@@ -43,6 +43,9 @@ var (
 	//go:embed testdata/alpine-cyclonedx.json
 	CycloneDXExampleAlpine []byte
 
+	//go:embed testdata/quarkus-deps-cyclonedx.json
+	CycloneDXExampleQuarkusDeps []byte
+
 	//go:embed testdata/invalid-cyclonedx.json
 	CycloneDXInvalidExample []byte
 

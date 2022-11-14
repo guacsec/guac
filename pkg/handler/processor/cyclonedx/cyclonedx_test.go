@@ -90,6 +90,15 @@ func TestCycloneDXProcessor_ValidateSchema(t *testing.T) {
 		},
 		expectErr: false,
 	}, {
+		name: "valid CycloneDX quarkus document with package dependencies",
+		doc: processor.Document{
+			Blob:              testdata.CycloneDXExampleQuarkusDeps,
+			Format:            processor.FormatJSON,
+			Type:              processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: false,
+	}, {
 		name: "invalid CycloneDX document",
 		doc: processor.Document{
 			Blob:              testdata.CycloneDXInvalidExample,

@@ -137,11 +137,13 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 		pkgMap[comp.BOMRef] = &parentPkg
 	}
 
-	for _, deps := range *cdxBom.Dependencies {
-		if topPkg, found := pkgMap[deps.Ref]; found {
-			for _, depPkg := range *deps.Dependencies {
-				if depPkg, exist := pkgMap[depPkg]; exist {
-					topPkg.depPackages = append(topPkg.depPackages, depPkg)
+	if cdxBom.Dependencies != nil {
+		for _, deps := range *cdxBom.Dependencies {
+			if topPkg, found := pkgMap[deps.Ref]; found {
+				for _, depPkg := range *deps.Dependencies {
+					if depPkg, exist := pkgMap[depPkg]; exist {
+						topPkg.depPackages = append(topPkg.depPackages, depPkg)
+					}
 				}
 			}
 		}
