@@ -491,8 +491,8 @@ func (e AttestationForPackage) IdentifiablePropertyNames() []string {
 // artifact is vulnerable or not based on certification attestation
 // This edge gets created when the attestation contains vulnerabilities
 type VulnerableEdge struct {
-	AtteNodes AttestationNode
-	VulnNode  VulnerabilityNode
+	AttestationNode   AttestationNode
+	VulnerabilityNode VulnerabilityNode
 }
 
 func (e VulnerableEdge) Type() string {
@@ -500,7 +500,7 @@ func (e VulnerableEdge) Type() string {
 }
 
 func (e VulnerableEdge) Nodes() (v, u GuacNode) {
-	return e.AtteNodes, e.VulnNode
+	return e.AttestationNode, e.VulnerabilityNode
 }
 
 func (e VulnerableEdge) Properties() map[string]interface{} {
