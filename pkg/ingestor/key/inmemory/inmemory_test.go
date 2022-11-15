@@ -16,20 +16,23 @@
 package inmemory
 
 import (
+	"context"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
 	"github.com/guacsec/guac/pkg/ingestor/key"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
 func Test_inmemory_RetrieveKey(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider, pubKey := setupProvider(t)
-	provider.collector["ecdsa"] = *pubKey[0]
-	provider.collector["rsa"] = *pubKey[1]
-	provider.collector["ed25519"] = *pubKey[2]
+	provider.collector["ecdsa"] = pubKey[0]
+	provider.collector["rsa"] = pubKey[1]
+	provider.collector["ed25519"] = pubKey[2]
 	tests := []struct {
 		name    string
 		id      string
@@ -58,7 +61,7 @@ func Test_inmemory_RetrieveKey(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := provider.RetrieveKey(tt.id)
+			got, err := provider.RetrieveKey(ctx, tt.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("inmemory.RetrieveKey() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -74,6 +77,7 @@ func Test_inmemory_RetrieveKey(t *testing.T) {
 }
 
 func Test_inmemory_StoreKey(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider, pubKey := setupProvider(t)
 	type args struct {
 		id string
@@ -111,12 +115,12 @@ func Test_inmemory_StoreKey(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := provider.StoreKey(tt.args.id, tt.args.pk)
+			err := provider.StoreKey(ctx, tt.args.id, tt.args.pk)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("inmemory.StoreKey() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if err == nil {
-				got, _ := provider.RetrieveKey(tt.args.id)
+				got, _ := provider.RetrieveKey(ctx, tt.args.id)
 				if !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("inmemory.RetrieveKey() = %v, expected %v", got, tt.want)
 				}
@@ -126,10 +130,11 @@ func Test_inmemory_StoreKey(t *testing.T) {
 }
 
 func Test_inmemory_DeleteKey(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider, pubKey := setupProvider(t)
-	provider.collector["ecdsa"] = *pubKey[0]
-	provider.collector["rsa"] = *pubKey[1]
-	provider.collector["ed25519"] = *pubKey[2]
+	provider.collector["ecdsa"] = pubKey[0]
+	provider.collector["rsa"] = pubKey[1]
+	provider.collector["ed25519"] = pubKey[2]
 	tests := []struct {
 		name    string
 		id      string
@@ -149,7 +154,7 @@ func Test_inmemory_DeleteKey(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := provider.DeleteKey(tt.id)
+			err := provider.DeleteKey(ctx, tt.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("inmemory.DeleteKey() error = %v, wantErr %v", err, tt.wantErr)
 			}

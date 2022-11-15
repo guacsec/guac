@@ -16,6 +16,7 @@
 package key
 
 import (
+	"context"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/ed25519"
@@ -26,7 +27,6 @@ import (
 
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
-	"github.com/sirupsen/logrus"
 )
 
 type KeyType string
@@ -47,13 +47,13 @@ type KeyProvider interface {
 	// and it retrieves the wrapped key struct that is associated
 	// Returns nil, nil if no keys are found
 	// Return nil, error if the request to the provider failed
-	RetrieveKey(id string) (*Key, error)
+	RetrieveKey(ctx context.Context, id string) (*Key, error)
 	// StoreKey takes in the ID and the crypto.PublicKey and stores them
 	// for future retrieval. If key id is already present, it replaces
 	// the key with the new one
-	StoreKey(id string, pk *Key) error
+	StoreKey(ctx context.Context, id string, pk *Key) error
 	// DeleteKey takes in the ID and will remove the associated key from the provider
-	DeleteKey(id string) error
+	DeleteKey(ctx context.Context, id string) error
 	// Type returns the key provider type
 	Type() KeyProviderType
 }
@@ -73,20 +73,21 @@ var (
 	keyProviders = map[KeyProviderType]KeyProvider{}
 )
 
-func RegisterKeyProvider(k KeyProvider, providerType KeyProviderType) {
+func RegisterKeyProvider(k KeyProvider, providerType KeyProviderType) error {
 	if _, ok := keyProviders[providerType]; ok {
-		logrus.Warnf("the key provider is being overwritten: %s", providerType)
+		return fmt.Errorf("the key provider is being overwritten: %s", providerType)
 	}
 	keyProviders[providerType] = k
+	return nil
 }
 
 // Find goes through each of the registered key providers and retrieves the wrapped Key
 // TODO: Should this handle if multiple keys are returned
-func Find(id string) (*Key, error) {
+func Find(ctx context.Context, id string) (*Key, error) {
 	var foundKey *Key
 	var err error
 	for i := range keyProviders {
-		foundKey, err = Retrieve(id, i)
+		foundKey, err = Retrieve(ctx, id, i)
 		if err != nil && !strings.Contains(err.Error(), "failed to find key from key provider") {
 			return nil, err
 		}
@@ -101,11 +102,11 @@ func Find(id string) (*Key, error) {
 }
 
 // Retrieve goes to the specified key provider and gets the wrapped Key
-func Retrieve(id string, providerType KeyProviderType) (*Key, error) {
+func Retrieve(ctx context.Context, id string, providerType KeyProviderType) (*Key, error) {
 	var pubKey *Key
 	var err error
 	if provider, ok := keyProviders[providerType]; ok {
-		pubKey, err = provider.RetrieveKey(id)
+		pubKey, err = provider.RetrieveKey(ctx, id)
 		if err != nil {
 			return nil, fmt.Errorf("failed retrieval of key from %s, with error %w", providerType, err)
 		}
@@ -119,7 +120,7 @@ func Retrieve(id string, providerType KeyProviderType) (*Key, error) {
 // Store goes to the specified key provider and stores the wrapped Key.
 // It takes in a PEM-encoded byte slice and converts it to a wrapped Key type
 // returns a nil error when successful
-func Store(id string, pemBytes []byte, providerType KeyProviderType) error {
+func Store(ctx context.Context, id string, pemBytes []byte, providerType KeyProviderType) error {
 	key, err := cryptoutils.UnmarshalPEMToPublicKey(pemBytes)
 	if err != nil {
 		return err
@@ -139,7 +140,7 @@ func Store(id string, pemBytes []byte, providerType KeyProviderType) error {
 		Scheme: KeyScheme,
 	}
 	if provider, ok := keyProviders[providerType]; ok {
-		err := provider.StoreKey(id, foundKey)
+		err := provider.StoreKey(ctx, id, foundKey)
 		if err != nil {
 			return fmt.Errorf("failed storing of key to %s, with error %w", providerType, err)
 		}
@@ -151,9 +152,9 @@ func Store(id string, pemBytes []byte, providerType KeyProviderType) error {
 
 // Delete goes to the specified key provider and deletes the Key
 // returns a nil error when successful
-func Delete(id string, providerType KeyProviderType) error {
+func Delete(ctx context.Context, id string, providerType KeyProviderType) error {
 	if provider, ok := keyProviders[providerType]; ok {
-		err := provider.DeleteKey(id)
+		err := provider.DeleteKey(ctx, id)
 		if err != nil {
 			return fmt.Errorf("failed deleting of key from %s, with error %w", providerType, err)
 		}

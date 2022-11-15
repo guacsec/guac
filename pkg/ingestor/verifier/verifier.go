@@ -16,6 +16,7 @@
 package verifier
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -36,7 +37,7 @@ type Verifier interface {
 	// about the unverified identity. Upstream caller is expected to know
 	// which verifier it needs to based on what type of enveloper or
 	// signature is being verified.
-	Verify(payloadBytes []byte) ([]Identity, error)
+	Verify(ctx context.Context, payloadBytes []byte) ([]Identity, error)
 	// Type returns the verifier type
 	Type() VerifierType
 }
@@ -66,11 +67,11 @@ func RegisterVerifier(k Verifier, providerType VerifierType) error {
 }
 
 // VerifyIdentity goes through the registered providers and verifies the signatures in the payload
-func VerifyIdentity(doc *processor.Document) ([]Identity, error) {
+func VerifyIdentity(ctx context.Context, doc *processor.Document) ([]Identity, error) {
 	switch doc.Type {
 	case processor.DocumentDSSE:
 		if verifier, ok := verifierProviders["sigstore"]; ok {
-			return verifier.Verify(doc.Blob)
+			return verifier.Verify(ctx, doc.Blob)
 		}
 	}
 	return nil, fmt.Errorf("failed verification for document type: %s", doc.Type)

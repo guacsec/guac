@@ -17,6 +17,7 @@ package sigstore_verifier
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"encoding/json"
 	"fmt"
@@ -38,14 +39,14 @@ func NewSigstoreVerifier() *sigstoreVerifier {
 
 // Verify validates that the signature is valid for the payload
 // TODO: this currently only supports SHA256 hash function when validating signatures
-func (d *sigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, error) {
+func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]verifier.Identity, error) {
 	identities := []verifier.Identity{}
 	envelope, err := parseDSSE(payloadBytes)
 	if err != nil {
 		return nil, err
 	}
 	for _, signature := range envelope.Signatures {
-		key, err := key.Find(signature.KeyID)
+		key, err := key.Find(ctx, signature.KeyID)
 		if err != nil {
 			return nil, err
 		}

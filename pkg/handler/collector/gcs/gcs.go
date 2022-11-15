@@ -29,7 +29,7 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/sirupsen/logrus"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type gcs struct {
@@ -142,6 +142,7 @@ func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processo
 }
 
 func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
 	it, err := g.reader.getIterator(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get reader for object for bucket: %s, error: %w", g.bucket, err)
@@ -158,13 +159,13 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 		if g.lastDownload.IsZero() {
 			payload, err = g.getObject(ctx, attrs.Name)
 			if err != nil {
-				logrus.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
+				logger.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
 				continue
 			}
 		} else if attrs.Updated.After(g.lastDownload) {
 			payload, err = g.getObject(ctx, attrs.Name)
 			if err != nil {
-				logrus.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
+				logger.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
 				continue
 			}
 		}

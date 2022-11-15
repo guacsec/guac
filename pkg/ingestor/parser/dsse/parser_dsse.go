@@ -42,15 +42,15 @@ func NewDSSEParser() common.DocumentParser {
 // Parse breaks out the document into the graph components
 func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
 	d.doc = doc
-	err := d.getIdentity()
+	err := d.getIdentity(ctx)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (d *dsseParser) getIdentity() error {
-	identities, err := verifier.VerifyIdentity(d.doc)
+func (d *dsseParser) getIdentity(ctx context.Context) error {
+	identities, err := verifier.VerifyIdentity(ctx, d.doc)
 	if err != nil {
 		return err
 	}

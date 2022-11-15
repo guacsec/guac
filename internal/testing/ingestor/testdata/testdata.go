@@ -16,6 +16,7 @@
 package testdata
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"reflect"
@@ -438,7 +439,7 @@ func NewMockSigstoreVerifier() *mockSigstoreVerifier {
 	return &mockSigstoreVerifier{}
 }
 
-func (m *mockSigstoreVerifier) Verify(payloadBytes []byte) ([]verifier.Identity, error) {
+func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]verifier.Identity, error) {
 
 	keyHash, _ := dsse.SHA256KeyID(ecdsaPubKey)
 	return []verifier.Identity{
