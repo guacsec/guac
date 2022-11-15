@@ -66,12 +66,24 @@ func (pn PackageNode) Type() string {
 
 func (pn PackageNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["name"] = pn.Name
-	properties["purl"] = pn.Purl
-	properties["version"] = pn.Version
-	properties["cpes"] = pn.CPEs
-	properties["digest"] = toLower(pn.Digest...)
-	properties["tags"] = pn.Tags
+	if len(pn.Name) > 0 {
+		properties["name"] = pn.Name
+	}
+	if len(pn.Purl) > 0 {
+		properties["purl"] = pn.Purl
+	}
+	if len(pn.Version) > 0 {
+		properties["version"] = pn.Version
+	}
+	if len(pn.CPEs) > 0 {
+		properties["cpes"] = pn.CPEs
+	}
+	if len(pn.Digest) > 0 {
+		properties["digest"] = toLower(pn.Digest...)
+	}
+	if len(pn.Tags) > 0 {
+		properties["tags"] = pn.Tags
+	}
 	pn.NodeData.addProperties(properties)
 	return properties
 }
