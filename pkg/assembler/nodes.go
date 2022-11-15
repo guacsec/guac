@@ -229,6 +229,34 @@ func (mn MetadataNode) IdentifiablePropertyNames() []string {
 	return []string{"metadata_type", "id"}
 }
 
+// VulnerabilityNode is a node that represents a vulnerability associated with the certifier attestation
+type VulnerabilityNode struct {
+	ID       string
+	NodeData objectMetadata
+}
+
+func (vn VulnerabilityNode) Type() string {
+	return "Vulnerability"
+}
+
+func (vn VulnerabilityNode) Properties() map[string]interface{} {
+	properties := make(map[string]interface{})
+	properties["id"] = vn.ID
+	vn.NodeData.addProperties(properties)
+	return properties
+}
+
+func (vn VulnerabilityNode) PropertyNames() []string {
+	fields := []string{"id"}
+	fields = append(fields, vn.NodeData.getProperties()...)
+	return fields
+}
+
+func (vn VulnerabilityNode) IdentifiablePropertyNames() []string {
+	// Based on the ID of the vulnerability, more information can be obtained but not stored in the graph DB
+	return []string{"id"}
+}
+
 // IdentityForEdge is an edge that represents the fact that an
 // `IdentityNode` is an identity for an `AttestationNode`.
 type IdentityForEdge struct {
@@ -429,5 +457,60 @@ func (e MetadataForEdge) PropertyNames() []string {
 }
 
 func (e MetadataForEdge) IdentifiablePropertyNames() []string {
+	return []string{}
+}
+
+// AttestationForPackage is an edge that represents the fact that an
+// `AttestationNode` is an attestation for an `PackageNode`.
+type AttestationForPackage struct {
+	AttestationNode AttestationNode
+	PackageNode     PackageNode
+}
+
+func (e AttestationForPackage) Type() string {
+	return "Attestation"
+}
+
+func (e AttestationForPackage) Nodes() (v, u GuacNode) {
+	return e.AttestationNode, e.PackageNode
+}
+
+func (e AttestationForPackage) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e AttestationForPackage) PropertyNames() []string {
+	return []string{}
+}
+
+func (e AttestationForPackage) IdentifiablePropertyNames() []string {
+	return []string{}
+}
+
+// VulnerableEdge is an edge that represents the fact that an
+// artifact is vulnerable or not based on certification attestation
+// This edge gets created when the attestation contains vulnerabilities
+type VulnerableEdge struct {
+	AtteNodes AttestationNode
+	VulnNode  VulnerabilityNode
+}
+
+func (e VulnerableEdge) Type() string {
+	return "Vulnerable"
+}
+
+func (e VulnerableEdge) Nodes() (v, u GuacNode) {
+	return e.AtteNodes, e.VulnNode
+}
+
+func (e VulnerableEdge) Properties() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e VulnerableEdge) PropertyNames() []string {
+	return []string{}
+}
+
+func (e VulnerableEdge) IdentifiablePropertyNames() []string {
 	return []string{}
 }
