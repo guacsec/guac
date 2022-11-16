@@ -28,35 +28,33 @@ import (
 )
 
 type cyclonedxParser struct {
-	doc         *processor.Document
-	rootPackage parentPackages
+	doc           *processor.Document
+	rootComponent component
+	pkgMap        map[string]*component
 }
 
-type parentPackages struct {
+type component struct {
 	curPackage  assembler.PackageNode
-	depPackages []parentPackages
+	depPackages []*component
 }
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
-		rootPackage: parentPackages{},
+		rootComponent: component{},
+		pkgMap:        map[string]*component{},
 	}
 }
 
 func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
-	addNodes(c.rootPackage, &nodes)
+	nodes = append(nodes, c.rootComponent.curPackage)
+	for _, p := range c.rootComponent.depPackages {
+		nodes = append(nodes, p.curPackage)
+	}
 	return nodes
 }
 
-func addNodes(curPkg parentPackages, nodes *[]assembler.GuacNode) {
-	*nodes = append(*nodes, curPkg.curPackage)
-	for _, d := range curPkg.depPackages {
-		addNodes(d, nodes)
-	}
-}
-
-func addEdges(curPkg parentPackages, edges *[]assembler.GuacEdge) {
+func addEdges(curPkg component, edges *[]assembler.GuacEdge) {
 	// this could happen if we image purl creation fails for rootPackage
 	// we need better solution to support different image name formats in SBOM
 	if curPkg.curPackage.Name == "" {
@@ -64,7 +62,7 @@ func addEdges(curPkg parentPackages, edges *[]assembler.GuacEdge) {
 	}
 	for _, d := range curPkg.depPackages {
 		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: curPkg.curPackage, PackageDependency: d.curPackage})
-		addEdges(d, edges)
+		addEdges(*d, edges)
 	}
 }
 
@@ -88,26 +86,33 @@ func (c *cyclonedxParser) GetIdentities(ctx context.Context) []assembler.Identit
 
 func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
-	addEdges(c.rootPackage, &edges)
+	addEdges(c.rootComponent, &edges)
 	return edges
 }
 
 func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	if cdxBom.Metadata.Component != nil {
-		splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
-		if len(splitImage) == 3 {
-			rootPackage := assembler.PackageNode{}
-			rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
-			rootPackage.Name = cdxBom.Metadata.Component.Name
+		rootPackage := assembler.PackageNode{}
+		rootPackage.Name = cdxBom.Metadata.Component.Name
+		// rootPackage.CPEs = nil
+		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
+		if cdxBom.Metadata.Component.PackageURL != "" {
+			rootPackage.Purl = cdxBom.Metadata.Component.PackageURL
 			rootPackage.Version = cdxBom.Metadata.Component.Version
-			rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
-			rootPackage.Tags = []string{"CONTAINER"}
-			rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
-			c.rootPackage = parentPackages{
-				curPackage:  rootPackage,
-				depPackages: []parentPackages{},
+			rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
+		} else {
+			splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
+			if len(splitImage) == 3 {
+				rootPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
+				rootPackage.Version = cdxBom.Metadata.Component.Version
+				rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
+				rootPackage.Tags = []string{"CONTAINER"}
 			}
+		}
+		c.rootComponent = component{
+			curPackage:  rootPackage,
+			depPackages: []*component{},
 		}
 	}
 }
@@ -119,13 +124,32 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 			// Digest: []string{comp.Version},
 			Purl:     comp.PackageURL,
 			Version:  comp.Version,
-			CPEs:     []string{comp.CPE},
 			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
 		}
-		c.rootPackage.depPackages = append(c.rootPackage.depPackages, parentPackages{
+		if comp.CPE != "" {
+			curPkg.CPEs = []string{comp.CPE}
+		}
+		parentPkg := component{
 			curPackage:  curPkg,
-			depPackages: []parentPackages{},
-		})
+			depPackages: []*component{},
+		}
+		c.rootComponent.depPackages = append(c.rootComponent.depPackages, &parentPkg)
+		c.pkgMap[comp.BOMRef] = &parentPkg
+	}
+
+	if cdxBom.Dependencies == nil {
+		return
+	}
+	for _, deps := range *cdxBom.Dependencies {
+		currPkg, found := c.pkgMap[deps.Ref]
+		if !found {
+			continue
+		}
+		for _, depPkg := range *deps.Dependencies {
+			if depPkg, exist := c.pkgMap[depPkg]; exist {
+				currPkg.depPackages = append(currPkg.depPackages, depPkg)
+			}
+		}
 	}
 }
 

@@ -1,0 +1,126 @@
+{
+  "bomFormat" : "CycloneDX",
+  "specVersion" : "1.4",
+  "serialNumber" : "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
+  "version" : 1,
+  "metadata" : {
+    "timestamp" : "2022-11-09T11:14:31Z",
+    "tools" : [
+      {
+        "vendor" : "OWASP Foundation",
+        "name" : "CycloneDX Maven plugin",
+        "version" : "2.7.1",
+        "hashes" : [
+          {
+            "alg" : "SHA3-512",
+            "content" : "72ea0ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964"
+          }
+        ]
+      }
+    ],
+    "component" : {
+      "group" : "org.acme",
+      "name" : "getting-started",
+      "version" : "1.0.0-SNAPSHOT",
+      "licenses" : [ ],
+      "purl" : "pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar"
+    }
+  },
+  "components" : [
+    {
+      "publisher" : "JBoss by Red Hat",
+      "group" : "io.quarkus",
+      "name" : "quarkus-resteasy-reactive",
+      "version" : "2.13.4.Final",
+      "description" : "A JAX-RS implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.",
+      "scope" : "optional",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "bf39044af8c6ba66fc3beb034bc82ae8"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "615e56bdfeb591af8b5fdeadf019f8fa729643232d7e0768674411a7d959bb00e12e114280a6949f871514e1a86e01e0033372a0a826d15720050d7cffb80e69"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "distribution",
+          "url" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/quarkusio/quarkus/issues/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/quarkusio/quarkus"
+        },
+        {
+          "type" : "website",
+          "url" : "http://www.jboss.org"
+        },
+        {
+          "type" : "mailing-list",
+          "url" : "http://lists.jboss.org/pipermail/jboss-user/"
+        }
+      ],
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar"
+    },
+    {
+      "publisher" : "JBoss by Red Hat",
+      "group" : "io.quarkus",
+      "name" : "quarkus-resteasy-reactive-common",
+      "version" : "2.13.4.Final",
+      "description" : "Common runtime parts of Quarkus RESTEasy Reactive",
+      "hashes" : [
+        {
+          "alg" : "SHA3-512",
+          "content" : "54ffa51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "mailing-list",
+          "url" : "http://lists.jboss.org/pipermail/jboss-user/"
+        }
+      ],
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar"
+    }
+  ],
+  "dependencies" : [
+    {
+      "ref" : "pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar",
+      "dependsOn" : [
+        "pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar"
+      ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar",
+      "dependsOn" : [
+        "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar"
+      ]
+    }
+  ]
+}
