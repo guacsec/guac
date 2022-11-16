@@ -137,7 +137,7 @@ func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assemble
 			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: sub, BuilderNode: build})
 		}
 		for _, a := range s.attestations {
-			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ArtifactNode: sub})
+			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ForArtifact: sub})
 		}
 		for _, d := range s.dependencies {
 			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, ArtifactDependency: d})

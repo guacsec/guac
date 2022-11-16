@@ -180,7 +180,7 @@ var (
 		},
 		assembler.AttestationForEdge{
 			AttestationNode: att,
-			ArtifactNode:    art,
+			ForArtifact:     art,
 		},
 		assembler.DependsOnEdge{
 			ArtifactNode:       art,
