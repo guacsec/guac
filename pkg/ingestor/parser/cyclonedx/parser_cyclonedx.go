@@ -47,15 +47,11 @@ func NewCycloneDXParser() common.DocumentParser {
 
 func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
-	addNodes(c.rootComponent, &nodes)
-	return nodes
-}
-
-func addNodes(curPkg component, nodes *[]assembler.GuacNode) {
-	*nodes = append(*nodes, curPkg.curPackage)
-	for _, d := range curPkg.depPackages {
-		addNodes(*d, nodes)
+	nodes = append(nodes, c.rootComponent.curPackage)
+	for _, p := range c.rootComponent.depPackages {
+		nodes = append(nodes, p.curPackage)
 	}
+	return nodes
 }
 
 func addEdges(curPkg component, edges *[]assembler.GuacEdge) {
@@ -99,6 +95,7 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 	if cdxBom.Metadata.Component != nil {
 		rootPackage := assembler.PackageNode{}
 		rootPackage.Name = cdxBom.Metadata.Component.Name
+		// rootPackage.CPEs = nil
 		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
 		if cdxBom.Metadata.Component.PackageURL != "" {
 			rootPackage.Purl = cdxBom.Metadata.Component.PackageURL
@@ -127,8 +124,10 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 			// Digest: []string{comp.Version},
 			Purl:     comp.PackageURL,
 			Version:  comp.Version,
-			CPEs:     []string{comp.CPE},
 			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
+		}
+		if comp.CPE != "" {
+			curPkg.CPEs = []string{comp.CPE}
 		}
 		parentPkg := component{
 			curPackage:  curPkg,

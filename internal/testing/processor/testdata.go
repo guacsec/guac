@@ -46,6 +46,9 @@ var (
 	//go:embed testdata/quarkus-deps-cyclonedx.json
 	CycloneDXExampleQuarkusDeps []byte
 
+	//go:embed testdata/small-deps-cyclonedx.json
+	CycloneDXExampleSmallDeps []byte
+
 	//go:embed testdata/invalid-cyclonedx.json
 	CycloneDXInvalidExample []byte
 

@@ -48,7 +48,22 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantNodes: testdata.CycloneDXNodes,
 		wantEdges: testdata.CyloneDXEdges,
 		wantErr:   false,
-	}}
+	}, {
+		name: "valid small CycloneDX document with package dependencies",
+		doc: &processor.Document{
+			Blob:   processor_data.CycloneDXExampleSmallDeps,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantNodes: testdata.CycloneDXQuarkusNodes,
+		wantEdges: testdata.CyloneDXQuarkusEdges,
+		wantErr:   false,
+	},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewCycloneDXParser()

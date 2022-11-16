@@ -430,6 +430,65 @@ var (
 			PackageNode:       cdxTopLevelPack,
 		},
 	}
+
+	// CycloneDX Testdata with package dependencies
+	cdxTopQuarkusPack = assembler.PackageNode{
+		Name:    "getting-started",
+		Version: "1.0.0-SNAPSHOT",
+		Purl:    "pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar",
+		Tags:    []string{"library"},
+		CPEs:    nil,
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
+	}
+
+	cdxResteasyPack = assembler.PackageNode{
+		Name:    "quarkus-resteasy-reactive",
+		Digest:  nil,
+		Version: "2.13.4.Final",
+		Purl:    "pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar",
+		CPEs:    nil,
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
+	}
+
+	cdxReactiveCommonPack = assembler.PackageNode{
+		Name:    "quarkus-resteasy-reactive-common",
+		Digest:  nil,
+		Version: "2.13.4.Final",
+		Purl:    "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar",
+		CPEs:    nil,
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
+	}
+
+	CycloneDXQuarkusNodes = []assembler.GuacNode{cdxTopQuarkusPack, cdxResteasyPack, cdxReactiveCommonPack}
+	CyloneDXQuarkusEdges  = []assembler.GuacEdge{
+		assembler.DependsOnEdge{
+			PackageDependency: cdxResteasyPack,
+			PackageNode:       cdxTopQuarkusPack,
+		},
+		assembler.DependsOnEdge{
+			PackageDependency: cdxReactiveCommonPack,
+			PackageNode:       cdxTopQuarkusPack,
+		},
+		assembler.DependsOnEdge{
+			PackageDependency: cdxReactiveCommonPack,
+			PackageNode:       cdxResteasyPack,
+		},
+	}
 )
 
 type mockSigstoreVerifier struct{}

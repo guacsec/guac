@@ -87,10 +87,6 @@
       "description" : "Common runtime parts of Quarkus RESTEasy Reactive",
       "hashes" : [
         {
-          "alg" : "MD5",
-          "content" : "6f90b36811373730365a282abb2b7bd7"
-        },
-        {
           "alg" : "SHA3-512",
           "content" : "54ffa51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1"
         }
@@ -105,200 +101,12 @@
       "purl" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar",
       "externalReferences" : [
         {
-          "type" : "distribution",
-          "url" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-        },
-        {
           "type" : "mailing-list",
           "url" : "http://lists.jboss.org/pipermail/jboss-user/"
         }
       ],
       "type" : "library",
       "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar"
-    },
-    {
-      "publisher" : "JBoss by Red Hat",
-      "group" : "io.quarkus.resteasy.reactive",
-      "name" : "resteasy-reactive-common",
-      "version" : "2.13.4.Final",
-      "description" : "Provides, via submodules, a base configuration for JBoss project builds, as well as a derived configuration supporting multi-release JARs",
-      "hashes" : [
-        {
-          "alg" : "MD5",
-          "content" : "7ed7855f54e03730a236810abccc8358"
-        },
-        {
-          "alg" : "SHA3-512",
-          "content" : "03633e91e20d228bbdc4c70927e203fd600ae6c2feee599c06418b7bb78ff3257f7cbda8ab0cf17e97f2050f0dc882f010ce08c6ddfa139898d2de34c1bfd502"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/io.quarkus.resteasy.reactive/resteasy-reactive-common@2.13.4.Final?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "distribution",
-          "url" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-        }
-      ],
-      "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus.resteasy.reactive/resteasy-reactive-common@2.13.4.Final?type=jar"
-    },
-    {
-      "publisher" : "JBoss by Red Hat",
-      "group" : "io.quarkus.resteasy.reactive",
-      "name" : "resteasy-reactive-vertx",
-      "version" : "2.13.4.Final",
-      "description" : "Provides, via submodules, a base configuration for JBoss project builds, as well as a derived configuration supporting multi-release JARs",
-      "hashes" : [
-        {
-          "alg" : "MD5",
-          "content" : "8fd53cdf4d70ebe9b22799c03329be3c"
-        },
-        {
-          "alg" : "SHA3-512",
-          "content" : "a78c43cd3b10af88f20df245ff198851420518692a1dc34e7174593d871fd622c40e79514796670e5175f90af0552db158ab71035551cb171ee4be0ed4d18ecb"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/io.quarkus.resteasy.reactive/resteasy-reactive-vertx@2.13.4.Final?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "distribution",
-          "url" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-        }
-      ],
-      "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus.resteasy.reactive/resteasy-reactive-vertx@2.13.4.Final?type=jar"
-    },    {
-      "publisher" : "JBoss by Red Hat",
-      "group" : "io.quarkus",
-      "name" : "quarkus-vertx-http",
-      "version" : "2.13.4.Final",
-      "description" : "Vert.x HTTP",
-      "hashes" : [
-        {
-          "alg" : "MD5",
-          "content" : "976f811a7d3d21845ca73fab176ee49d"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.4.Final?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "distribution",
-          "url" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-        }
-      ],
-      "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.4.Final?type=jar"
-    },    {
-      "publisher" : "JBoss by Red Hat",
-      "group" : "io.quarkus",
-      "name" : "quarkus-jsonp",
-      "version" : "2.13.4.Final",
-      "description" : "JSON Processing support",
-      "hashes" : [
-        {
-          "alg" : "SHA3-256",
-          "content" : "4b40e8c0726cfeead389f7100d92f0738171e028a725c488a8027f76ffaaf381"
-        },
-        {
-          "alg" : "SHA3-512",
-          "content" : "c16d4175e8439da4d11c275adca8082068dcd417572a89f42ba1f654d52d0a53f7f0bdda57f01d3bfe6b44904c7bac1d9eddc509c0844cd0116a1412f0ebecd7"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/io.quarkus/quarkus-jsonp@2.13.4.Final?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "mailing-list",
-          "url" : "http://lists.jboss.org/pipermail/jboss-user/"
-        }
-      ],
-      "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus/quarkus-jsonp@2.13.4.Final?type=jar"
-    },
-    {
-      "publisher" : "JBoss by Red Hat",
-      "group" : "io.quarkus",
-      "name" : "quarkus-mutiny",
-      "version" : "2.13.4.Final",
-      "description" : "Write reactive applications with the modern Reactive Programming library Mutiny",
-      "hashes" : [
-        {
-          "alg" : "SHA3-512",
-          "content" : "2814a3fa20350ac752a0b028aaf2895b16c11d26a166b12b939d3de2a3d608a638839d261ee66bc7e8eddaabc0d5a5341962a4dbe5f49d4dff77719f5ecaa68b"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/io.quarkus/quarkus-mutiny@2.13.4.Final?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "mailing-list",
-          "url" : "http://lists.jboss.org/pipermail/jboss-user/"
-        }
-      ],
-      "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus/quarkus-mutiny@2.13.4.Final?type=jar"
-    },
-    {
-      "publisher" : "JBoss by Red Hat",
-      "group" : "io.quarkus",
-      "name" : "quarkus-vertx",
-      "version" : "2.13.4.Final",
-      "description" : "Write reactive applications with the Vert.x API",
-      "hashes" : [
-        {
-          "alg" : "SHA3-512",
-          "content" : "93f8f7cd1ef95675f6f59e8987c42a2884774d304d66f8512ba6f18c099ee9a43f3ef99580f103043a571cecf0c7617f3e1d7b63defe6c3e66d29179e12d50bf"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/io.quarkus/quarkus-vertx@2.13.4.Final?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "mailing-list",
-          "url" : "http://lists.jboss.org/pipermail/jboss-user/"
-        }
-      ],
-      "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus/quarkus-vertx@2.13.4.Final?type=jar"
     }
   ],
   "dependencies" : [
@@ -311,19 +119,7 @@
     {
       "ref" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar",
       "dependsOn" : [
-        "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar",
-        "pkg:maven/io.quarkus.resteasy.reactive/resteasy-reactive-vertx@2.13.4.Final?type=jar",
-        "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.4.Final?type=jar",
-        "pkg:maven/io.quarkus/quarkus-jsonp@2.13.4.Final?type=jar"
-      ]
-    },
-    {
-      "ref" : "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar",
-      "dependsOn" : [
-        "pkg:maven/io.quarkus.resteasy.reactive/resteasy-reactive-common@2.13.4.Final?type=jar",
-        "pkg:maven/io.quarkus/quarkus-mutiny@2.13.4.Final?type=jar",
-        "pkg:maven/io.quarkus/quarkus-vertx@2.13.4.Final?type=jar",
-        "pkg:maven/io.quarkus/quarkus-jsonp@2.13.4.Final?type=jar"
+        "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar"
       ]
     }
   ]
