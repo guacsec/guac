@@ -54,6 +54,7 @@ type DocumentType string
 const (
 	DocumentITE6SLSA    DocumentType = "SLSA"
 	DocumentITE6Generic DocumentType = "ITE6"
+	DocumentITE6OSV     DocumentType = "ITE6OSV"
 	DocumentDSSE        DocumentType = "DSSE"
 	DocumentSPDX        DocumentType = "SPDX"
 	DocumentJsonLines   DocumentType = "JSON_LINES"
