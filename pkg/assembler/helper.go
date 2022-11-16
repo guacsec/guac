@@ -43,7 +43,7 @@ func (o *objectMetadata) addProperties(prop map[string]interface{}) {
 		prop["source"] = o.sourceInfo
 	}
 	if len(o.collectorInfo) > 0 {
-		prop["collector"] = o.sourceInfo
+		prop["collector"] = o.collectorInfo
 	}
 }
 
