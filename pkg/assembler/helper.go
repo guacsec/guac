@@ -39,8 +39,12 @@ func NewObjectMetadata(s processor.SourceInformation) *objectMetadata {
 }
 
 func (o *objectMetadata) addProperties(prop map[string]interface{}) {
-	prop["source"] = o.sourceInfo
-	prop["collector"] = o.sourceInfo
+	if len(o.sourceInfo) > 0 {
+		prop["source"] = o.sourceInfo
+	}
+	if len(o.collectorInfo) > 0 {
+		prop["collector"] = o.sourceInfo
+	}
 }
 
 func (o *objectMetadata) getProperties() []string {
