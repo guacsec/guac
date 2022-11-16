@@ -17,6 +17,7 @@ package sigstore_verifier
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/rsa"
@@ -32,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/in-toto/in-toto-golang/in_toto"
 	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
 	"github.com/sigstore/sigstore/pkg/signature"
@@ -48,19 +50,19 @@ func newMockProvider() *mockKeyProvider {
 	}
 }
 
-func (m *mockKeyProvider) RetrieveKey(id string) (*key.Key, error) {
+func (m *mockKeyProvider) RetrieveKey(ctx context.Context, id string) (*key.Key, error) {
 	if key, ok := m.collector[id]; ok {
 		return &key, nil
 	}
 	return nil, nil
 }
 
-func (m *mockKeyProvider) StoreKey(id string, pk *key.Key) error {
+func (m *mockKeyProvider) StoreKey(ctx context.Context, id string, pk *key.Key) error {
 	m.collector[id] = *pk
 	return nil
 }
 
-func (m *mockKeyProvider) DeleteKey(id string) error {
+func (m *mockKeyProvider) DeleteKey(ctx context.Context, id string) error {
 	delete(m.collector, id)
 	return nil
 }
@@ -70,14 +72,18 @@ func (m *mockKeyProvider) Type() key.KeyProviderType {
 }
 
 func setupOneProvider(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider := newMockProvider()
-	key.RegisterKeyProvider(provider, "mock")
+	err := key.RegisterKeyProvider(provider, "mock")
+	if err != nil {
+		t.Log(err)
+	}
 
-	err := key.Store(ecdsaKeyID, []byte(ecdsaPub), "mock")
+	err = key.Store(ctx, ecdsaKeyID, []byte(ecdsaPub), "mock")
 	if err != nil {
 		t.Fatal("failed to store into mock key provider")
 	}
-	err = key.Store(rsaKeyID, []byte(rsapub), "mock")
+	err = key.Store(ctx, rsaKeyID, []byte(rsapub), "mock")
 	if err != nil {
 		t.Fatal("failed to store into mock key provider")
 	}
@@ -94,12 +100,13 @@ func randomData(t *testing.T, n int) []byte {
 }
 
 func TestSigstoreVerifier_Verify(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	setupOneProvider(t)
-	foundECDSAKey, err := key.Find(ecdsaKeyID)
+	foundECDSAKey, err := key.Find(ctx, ecdsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
-	foundRSAKey, err := key.Find(rsaKeyID)
+	foundRSAKey, err := key.Find(ctx, rsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
@@ -208,7 +215,7 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sigVerifier := NewSigstoreVerifier()
-			got, err := sigVerifier.Verify(tt.doc.Blob)
+			got, err := sigVerifier.Verify(ctx, tt.doc.Blob)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SigstoreVerifier.Verify() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -226,12 +233,13 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 }
 
 func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	setupOneProvider(t)
-	foundECDSAKey, err := key.Find(ecdsaKeyID)
+	foundECDSAKey, err := key.Find(ctx, ecdsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
-	foundRSAKey, err := key.Find(rsaKeyID)
+	foundRSAKey, err := key.Find(ctx, rsaKeyID)
 	if err != nil {
 		t.Fatal("failed to find key in mock key provider")
 	}
@@ -325,7 +333,7 @@ func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sigVerifier := NewSigstoreVerifier()
-			got, err := sigVerifier.Verify(tt.doc.Blob)
+			got, err := sigVerifier.Verify(ctx, tt.doc.Blob)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SigstoreVerifier.Verify() error = %v, wantErr %v", err, tt.wantErr)
 				return

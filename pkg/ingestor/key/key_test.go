@@ -16,18 +16,21 @@
 package key
 
 import (
+	"context"
 	"crypto"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
 func TestFind_OneProvider(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider, _, wantKey := setupOneProvider(t)
-	provider.collector["ecdsa"] = *wantKey
+	provider.collector["ecdsa"] = wantKey
 	tests := []struct {
 		name    string
 		id      string
@@ -45,7 +48,7 @@ func TestFind_OneProvider(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Find(tt.id)
+			got, err := Find(ctx, tt.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -61,9 +64,10 @@ func TestFind_OneProvider(t *testing.T) {
 }
 
 func TestFind_MultiProvider(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider, _, wantKey := setupTwoProvider(t)
-	provider[0].collector["ecdsa"] = *wantKey[0]
-	provider[1].collector["rsa"] = *wantKey[1]
+	provider[0].collector["ecdsa"] = wantKey[0]
+	provider[1].collector["rsa"] = wantKey[1]
 	tests := []struct {
 		name    string
 		id      string
@@ -86,7 +90,7 @@ func TestFind_MultiProvider(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Find(tt.id)
+			got, err := Find(ctx, tt.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -101,9 +105,10 @@ func TestFind_MultiProvider(t *testing.T) {
 }
 
 func TestRetrieve(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider, _, wantKey := setupTwoProvider(t)
-	provider[0].collector["ecdsa"] = *wantKey[0]
-	provider[1].collector["rsa"] = *wantKey[1]
+	provider[0].collector["ecdsa"] = wantKey[0]
+	provider[1].collector["rsa"] = wantKey[1]
 	type args struct {
 		id           string
 		providerType KeyProviderType
@@ -149,7 +154,7 @@ func TestRetrieve(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Retrieve(tt.args.id, tt.args.providerType)
+			got, err := Retrieve(ctx, tt.args.id, tt.args.providerType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -169,6 +174,7 @@ func TestRetrieve(t *testing.T) {
 }
 
 func TestStore(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	_, pubBytes, wantKey := setupTwoProvider(t)
 	type args struct {
 		id           string
@@ -211,7 +217,7 @@ func TestStore(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Store(tt.args.id, tt.args.pk, tt.args.providerType)
+			err := Store(ctx, tt.args.id, tt.args.pk, tt.args.providerType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Store() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -220,7 +226,7 @@ func TestStore(t *testing.T) {
 					t.Errorf("Retrieve() error = %s, wantErrMessage %s", err, tt.wantErrMessage)
 				}
 			} else {
-				found, _ := Find(tt.args.id)
+				found, _ := Find(ctx, tt.args.id)
 				if !reflect.DeepEqual(found, tt.want) {
 					t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", found, tt.want)
 				}
@@ -230,14 +236,21 @@ func TestStore(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	provider := newMockProvider()
 	provider2 := newMockProvider()
-	RegisterKeyProvider(provider, "mock1")
-	RegisterKeyProvider(provider2, "mock2")
-	provider.collector["ecdsa"] = Key{
+	err := RegisterKeyProvider(provider, "mock4")
+	if err != nil {
+		t.Log(err)
+	}
+	err = RegisterKeyProvider(provider2, "mock5")
+	if err != nil {
+		t.Log(err)
+	}
+	provider.collector["ecdsa"] = &Key{
 		Type: "ecdsa",
 	}
-	provider2.collector["rsa"] = Key{
+	provider2.collector["rsa"] = &Key{
 		Type: "rsa",
 	}
 	type args struct {
@@ -253,28 +266,28 @@ func TestDelete(t *testing.T) {
 		name: "delete in provider 1",
 		args: args{
 			id:           "ecdsa",
-			providerType: "mock1",
+			providerType: "mock4",
 		},
 		wantErr: false,
 	}, {
-		name: "store in provider 2",
+		name: "delete in provider 2",
 		args: args{
 			id:           "rsa",
-			providerType: "mock2",
+			providerType: "mock5",
 		},
 		wantErr: false,
 	}, {
 		name: "provider not found",
 		args: args{
 			id:           "rsa",
-			providerType: "mock3",
+			providerType: "mock6",
 		},
 		wantErr:        true,
-		wantErrMessage: "key provider not initialized for mock3",
+		wantErrMessage: "key provider not initialized for mock6",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Delete(tt.args.id, tt.args.providerType)
+			err := Delete(ctx, tt.args.id, tt.args.providerType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -297,28 +310,28 @@ func TestDelete(t *testing.T) {
 }
 
 type mockKeyProvider struct {
-	collector map[string]Key
+	collector map[string]*Key
 }
 
 func newMockProvider() *mockKeyProvider {
 	return &mockKeyProvider{
-		collector: map[string]Key{},
+		collector: map[string]*Key{},
 	}
 }
 
-func (m *mockKeyProvider) RetrieveKey(id string) (*Key, error) {
+func (m *mockKeyProvider) RetrieveKey(ctx context.Context, id string) (*Key, error) {
 	if key, ok := m.collector[id]; ok {
-		return &key, nil
+		return key, nil
 	}
 	return nil, nil
 }
 
-func (m *mockKeyProvider) StoreKey(id string, pk *Key) error {
-	m.collector[id] = *pk
+func (m *mockKeyProvider) StoreKey(ctx context.Context, id string, pk *Key) error {
+	m.collector[id] = pk
 	return nil
 }
 
-func (m *mockKeyProvider) DeleteKey(id string) error {
+func (m *mockKeyProvider) DeleteKey(ctx context.Context, id string) error {
 	delete(m.collector, id)
 	return nil
 }
@@ -333,8 +346,10 @@ func setupOneProvider(t *testing.T) (*mockKeyProvider, []byte, *Key) {
 		t.Fatalf("failed to get ecdsa key. Error: %v", err)
 	}
 	provider := newMockProvider()
-	RegisterKeyProvider(provider, "mock1")
-
+	err = RegisterKeyProvider(provider, "mock1")
+	if err != nil {
+		t.Log(err)
+	}
 	keyHash, err := dsse.SHA256KeyID(ecdsaPub)
 	if err != nil {
 		t.Fatal("failed to get key hash for test")
@@ -368,10 +383,28 @@ func setupTwoProvider(t *testing.T) ([]*mockKeyProvider, [][]byte, []*Key) {
 		t.Fatalf("failed to get ed25519 key. Error: %v", err)
 	}
 
-	provider := newMockProvider()
-	provider2 := newMockProvider()
-	RegisterKeyProvider(provider, "mock1")
-	RegisterKeyProvider(provider2, "mock2")
+	var provider *mockKeyProvider
+	var provider2 *mockKeyProvider
+
+	if foundProvider, ok := keyProviders["mock1"]; ok {
+		provider = foundProvider.(*mockKeyProvider)
+	} else {
+		provider = newMockProvider()
+		err = RegisterKeyProvider(provider, "mock1")
+		if err != nil {
+			t.Log(err)
+		}
+	}
+
+	if foundProvider, ok := keyProviders["mock2"]; ok {
+		provider2 = foundProvider.(*mockKeyProvider)
+	} else {
+		provider2 = newMockProvider()
+		err = RegisterKeyProvider(provider2, "mock2")
+		if err != nil {
+			t.Log(err)
+		}
+	}
 
 	keyHash, err := dsse.SHA256KeyID(ecdsaPub)
 	if err != nil {

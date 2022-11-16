@@ -16,6 +16,7 @@
 package verifier
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"reflect"
@@ -25,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/key"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
@@ -98,7 +100,7 @@ func newMockSigstoreVerifier() *mockSigstoreVerifier {
 	return &mockSigstoreVerifier{}
 }
 
-func (m *mockSigstoreVerifier) Verify(payloadBytes []byte) ([]Identity, error) {
+func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]Identity, error) {
 	keyHash, err := dsse.SHA256KeyID(ecdsaPubKey)
 	if err != nil {
 		return nil, err
@@ -122,6 +124,7 @@ func (m *mockSigstoreVerifier) Type() VerifierType {
 }
 
 func TestVerifyIdentity(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	err := RegisterVerifier(newMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("RegisterVerifier() failed with error: %v", err)
@@ -166,7 +169,7 @@ func TestVerifyIdentity(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := VerifyIdentity(tt.doc)
+			got, err := VerifyIdentity(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("VerifyIdentity() error = %v, wantErr %v", err, tt.wantErr)
 				return

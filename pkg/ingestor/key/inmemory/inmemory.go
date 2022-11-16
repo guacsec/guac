@@ -16,36 +16,40 @@
 package inmemory
 
 import (
+	"context"
+
 	"github.com/guacsec/guac/pkg/ingestor/key"
-	"github.com/sirupsen/logrus"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type inmemory struct {
-	collector map[string]key.Key
+	collector map[string]*key.Key
 }
 
 func newInmemoryProvider() *inmemory {
 	return &inmemory{
-		collector: map[string]key.Key{},
+		collector: map[string]*key.Key{},
 	}
 }
 
-func (m *inmemory) RetrieveKey(id string) (*key.Key, error) {
+func (m *inmemory) RetrieveKey(ctx context.Context, id string) (*key.Key, error) {
 	if key, ok := m.collector[id]; ok {
-		return &key, nil
+		return key, nil
 	}
 	return nil, nil
 }
 
-func (m *inmemory) StoreKey(id string, pk *key.Key) error {
-	m.collector[id] = *pk
-	logrus.Warnf("key is being overwritten: %s", id)
+func (m *inmemory) StoreKey(ctx context.Context, id string, pk *key.Key) error {
+	logger := logging.FromContext(ctx)
+	m.collector[id] = pk
+	logger.Warnf("key is being overwritten: %s", id)
 	return nil
 }
 
-func (m *inmemory) DeleteKey(id string) error {
+func (m *inmemory) DeleteKey(ctx context.Context, id string) error {
+	logger := logging.FromContext(ctx)
 	delete(m.collector, id)
-	logrus.Warnf("key is being deleted: %s", id)
+	logger.Warnf("key is being deleted: %s", id)
 	return nil
 }
 
