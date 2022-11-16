@@ -28,35 +28,37 @@ import (
 )
 
 type cyclonedxParser struct {
-	doc         *processor.Document
-	rootPackage parentPackages
+	doc           *processor.Document
+	rootComponent component
+	pkgMap        map[string]*component
 }
 
-type parentPackages struct {
+type component struct {
 	curPackage  assembler.PackageNode
-	depPackages []*parentPackages
+	depPackages []*component
 }
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
-		rootPackage: parentPackages{},
+		rootComponent: component{},
+		pkgMap:        map[string]*component{},
 	}
 }
 
 func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
-	addNodes(c.rootPackage, &nodes)
+	addNodes(c.rootComponent, &nodes)
 	return nodes
 }
 
-func addNodes(curPkg parentPackages, nodes *[]assembler.GuacNode) {
+func addNodes(curPkg component, nodes *[]assembler.GuacNode) {
 	*nodes = append(*nodes, curPkg.curPackage)
 	for _, d := range curPkg.depPackages {
 		addNodes(*d, nodes)
 	}
 }
 
-func addEdges(curPkg parentPackages, edges *[]assembler.GuacEdge) {
+func addEdges(curPkg component, edges *[]assembler.GuacEdge) {
 	// this could happen if we image purl creation fails for rootPackage
 	// we need better solution to support different image name formats in SBOM
 	if curPkg.curPackage.Name == "" {
@@ -88,7 +90,7 @@ func (c *cyclonedxParser) GetIdentities(ctx context.Context) []assembler.Identit
 
 func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
-	addEdges(c.rootPackage, &edges)
+	addEdges(c.rootComponent, &edges)
 	return edges
 }
 
@@ -111,15 +113,14 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 				rootPackage.Tags = []string{"CONTAINER"}
 			}
 		}
-		c.rootPackage = parentPackages{
+		c.rootComponent = component{
 			curPackage:  rootPackage,
-			depPackages: []*parentPackages{},
+			depPackages: []*component{},
 		}
 	}
 }
 
 func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
-	pkgMap := map[string]*parentPackages{}
 	for _, comp := range *cdxBom.Components {
 		curPkg := assembler.PackageNode{
 			Name: comp.Name,
@@ -129,22 +130,25 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 			CPEs:     []string{comp.CPE},
 			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
 		}
-		parentPkg := parentPackages{
+		parentPkg := component{
 			curPackage:  curPkg,
-			depPackages: []*parentPackages{},
+			depPackages: []*component{},
 		}
-		c.rootPackage.depPackages = append(c.rootPackage.depPackages, &parentPkg)
-		pkgMap[comp.BOMRef] = &parentPkg
+		c.rootComponent.depPackages = append(c.rootComponent.depPackages, &parentPkg)
+		c.pkgMap[comp.BOMRef] = &parentPkg
 	}
 
-	if cdxBom.Dependencies != nil {
-		for _, deps := range *cdxBom.Dependencies {
-			if topPkg, found := pkgMap[deps.Ref]; found {
-				for _, depPkg := range *deps.Dependencies {
-					if depPkg, exist := pkgMap[depPkg]; exist {
-						topPkg.depPackages = append(topPkg.depPackages, depPkg)
-					}
-				}
+	if cdxBom.Dependencies == nil {
+		return
+	}
+	for _, deps := range *cdxBom.Dependencies {
+		currPkg, found := c.pkgMap[deps.Ref]
+		if !found {
+			continue
+		}
+		for _, depPkg := range *deps.Dependencies {
+			if depPkg, exist := c.pkgMap[depPkg]; exist {
+				currPkg.depPackages = append(currPkg.depPackages, depPkg)
 			}
 		}
 	}
