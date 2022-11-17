@@ -53,8 +53,8 @@ func Test_Ite6TypeGuesser(t *testing.T) {
 		expected: processor.DocumentITE6Generic,
 	}, {
 		name:     "valid OSV ITE6 Document",
-		blob:     testdata.ITE6OSVExmple,
-		expected: processor.DocumentITE6OSV,
+		blob:     testdata.ITE6OSVExample,
+		expected: processor.DocumentITE6Vul,
 	}}
 
 	for _, tt := range testCases {

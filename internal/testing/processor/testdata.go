@@ -62,5 +62,5 @@ var (
 	ITE6ReviewExample []byte
 
 	//go:embed testdata/certify-osv.json
-	ITE6OSVExmple []byte
+	ITE6OSVExample []byte
 )

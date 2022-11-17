@@ -182,12 +182,12 @@ func Test_GuessDocument(t *testing.T) {
 	}, {
 		name: "valid OSV ITE6 Document",
 		document: &processor.Document{
-			Blob:              testdata.ITE6OSVExmple,
+			Blob:              testdata.ITE6OSVExample,
 			Type:              processor.DocumentUnknown,
 			Format:            processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expectedType:   processor.DocumentITE6OSV,
+		expectedType:   processor.DocumentITE6Vul,
 		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {
