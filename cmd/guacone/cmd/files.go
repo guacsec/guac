@@ -95,6 +95,7 @@ var exampleCmd = &cobra.Command{
 		}
 
 		totalNum := 0
+		gotErr := false
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
@@ -102,16 +103,19 @@ var exampleCmd = &cobra.Command{
 
 			docTree, err := processorFunc(d)
 			if err != nil {
+				gotErr = true
 				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
 			}
 
 			graphs, err := ingestorFunc(docTree)
 			if err != nil {
+				gotErr = true
 				return fmt.Errorf("unable to ingest doc tree: %v", err)
 			}
 
 			err = assemblerFunc(graphs)
 			if err != nil {
+				gotErr = true
 				return fmt.Errorf("unable to assemble graphs: %v", err)
 			}
 			t := time.Now()
@@ -132,7 +136,12 @@ var exampleCmd = &cobra.Command{
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
-		logger.Infof("completed ingesting %v documents", totalNum)
+
+		if gotErr {
+			logger.Fatalf("completed ingestion with errors")
+		} else {
+			logger.Infof("completed ingesting %v documents", totalNum)
+		}
 	},
 }
 
