@@ -12,7 +12,7 @@
         "parameters": [],
         "uri": "guac",
         "event_id": "",
-        "producer.id": "guac"
+        "producer_id": "guac"
       },
       "scanner": {
         "uri": "osv.dev",
@@ -22,7 +22,7 @@
           "version": ""
         },
         "result": [{
-            "vulnerabilityID": "",
+            "vulnerability_id": "",
             "aliases": [""]
           }]
       },
