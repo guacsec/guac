@@ -114,9 +114,9 @@ func TestITE6Processor_ValidateSchema(t *testing.T) {
 		},
 		wantErr: false,
 	}, {
-		name: "ITE6 OSV with valid payload",
+		name: "ITE6 Vuln with valid payload",
 		args: &processor.Document{
-			Blob:   []byte(testdata.ITE6OSVExample),
+			Blob:   []byte(testdata.ITE6VulnExample),
 			Type:   processor.DocumentITE6Vul,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
