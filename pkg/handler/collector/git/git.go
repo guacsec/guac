@@ -18,11 +18,11 @@ package git_collector
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/go-git/go-git/v5"
 	. "github.com/go-git/go-git/v5/_examples"
-	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -42,40 +42,88 @@ type GitCol struct {
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
 func (g *GitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) {
-	/*
-		1. Import and get go-git
-		2. Check if g.dir exists, if it doesn't clone the repo, if it does, just
-		do a git reset HEAD followed by a git pull.
-		3. Check for errors
-		4. Create a file collector look under collector/file and pass the
-		docChannel to the file collector
-		5. create tests.
-	*/
-	// Clones the given repository, creating the remote, the local branches
-	// and fetching the objects, everything in memory:
-	Info("git clone https://github.com/shafeeshafee/go-test-examples")
-	inMemoryStorage := memory.NewStorage()
-
-	r, err := git.Clone(inMemoryStorage, nil, &git.CloneOptions{
-		URL: "https://github.com/shafeeshafee/go-test-examples",
-	})
+	ok, err := checkIfDirExists("./test")
 	if err != nil {
-		return
+		fmt.Println(err)
 	}
 
-	ref, err := r.Head()
-	fmt.Println(ref)
-
-	if err != nil {
-		fmt.Println("There was an error cloning.")
-		os.Exit(1)
-		return
+	if ok {
+		fmt.Println("Clone a repo down: ")
+		cloneRepoToTemp()
+	} else {
+		fmt.Println("Pull repo")
+		pullRepo()
 	}
-
-	Info("git log")
 }
 
 // Type returns the collector type
 func (g *GitCol) Type() string {
 	return CollectorGit
+}
+
+func checkIfDirExists(name string) (bool, error) {
+	f, err := os.Open(name)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	// Check if there are things already in the directory
+	_, err = f.Readdir(1)
+	// If the file is end of file, the dir is empty.
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err
+}
+
+func cloneRepoToTemp() {
+	CheckArgs("<url>", "<directory>")
+	url := os.Args[1]
+	directory := os.Args[2]
+
+	// Clone to directory
+	Info("git clone %s %s --recursive", url, directory)
+
+	r, err := git.PlainClone(directory, false, &git.CloneOptions{
+		URL:               url,
+		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+	})
+
+	CheckIfError(err)
+
+	// Retrieve the branch being pointed by HEAD
+	ref, err := r.Head()
+	CheckIfError(err)
+	// Retrieve the commit object
+	commit, err := r.CommitObject(ref.Hash())
+	CheckIfError(err)
+
+	fmt.Println("Commit: ", commit)
+}
+
+func pullRepo() {
+	CheckArgs("<path>")
+	path := os.Args[1]
+
+	// We instantiate a new repository targeting the given path (the .git folder)
+	r, err := git.PlainOpen(path)
+	CheckIfError(err)
+
+	// Get the working directory for the repository
+	w, err := r.Worktree()
+	CheckIfError(err)
+
+	// Pull the latest changes from the origin remote and merge into the current branch
+	Info("git pull origin")
+	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+	CheckIfError(err)
+
+	// Print the latest commit that was just pulled
+	ref, err := r.Head()
+	CheckIfError(err)
+	commit, err := r.CommitObject(ref.Hash())
+	CheckIfError(err)
+
+	fmt.Println(commit)
 }
