@@ -93,6 +93,7 @@ require (
 	github.com/vbatts/tar-split v0.11.2 // indirect
 	go.uber.org/goleak v1.1.12 // indirect
 	gocloud.dev v0.26.0 // indirect
+	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/term v0.2.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -106,4 +107,5 @@ require (
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/sigstore/sigstore v1.4.6
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
+	golang.org/x/vuln v0.0.0-20221116204841-fac3670c993c
 )
