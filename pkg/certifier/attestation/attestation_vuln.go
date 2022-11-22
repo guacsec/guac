@@ -21,20 +21,18 @@ import (
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 )
 
+// This is a new predicate type for vulnerabilities based off
+// https://github.com/sigstore/cosign/blob/main/specs/COSIGN_VULN_ATTESTATION_SPEC.md.
+// This is used by the certifier to attest to vulnerabilities in an artifact.
+// Currently the predicate is defined here but the intention is to upstream this to
+// https://github.com/in-toto/attestation in the near future once the quirks are worked out.
 const (
 	PredicateVuln = "https://in-toto.io/attestation/vuln/v0.1"
 )
 
-// StatementHeader defines the common fields for all statements
-type StatementHeader struct {
-	Type          string           `json:"_type"`
-	PredicateType string           `json:"predicateType"`
-	Subject       []intoto.Subject `json:"subject"`
-}
-
 // VulnerabilityStatement defines the statement header and the vulnerability predicate
 type VulnerabilityStatement struct {
-	StatementHeader
+	intoto.StatementHeader
 	// Predicate contains type specific metadata.
 	Predicate VulnerabilityPredicate `json:"predicate"`
 }
@@ -51,7 +49,7 @@ type Result struct {
 	Aliases         []string `json:"aliases,omitempty"`
 }
 
-// DB defines when scanners database
+// DB defines the scanner database used at the time of scan
 type DB struct {
 	Uri     string `json:"uri,omitempty"`
 	Version string `json:"version,omitempty"`

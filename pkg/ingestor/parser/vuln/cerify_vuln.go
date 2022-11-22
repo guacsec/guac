@@ -13,6 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// The Vulnerability attestation parser parses the attestation defined by
+// by the certifier using the predicate type"https://in-toto.io/attestation/vuln/v0.1"
+// Based on the information contained, a package node is generated with just purl and
+// digest (if found). This package node is merged into the graph database as it already exists.
+//
+// An attestation node is generated that contains the information stored in the attestation document.
+// The attestation node is linked to the package node via a "attestation" edge type.
+//
+// Depending on the number of vulnerabilities found, vulnerability nodes are generated that
+// contain just the vulnerability ID that can be used to query for more information as needed.
+// The vulnerability node is linked to the attestation node via a "vulnerable" edge type.
 package certify_vuln
 
 import (
@@ -66,12 +77,10 @@ func (c *vulnCertificationParser) Parse(ctx context.Context, doc *processor.Docu
 
 func (c *vulnCertificationParser) getSubject(statement *attestation_vuln.VulnerabilityStatement) {
 	currentPackage := assembler.PackageNode{}
-	for _, sub := range statement.Subject {
+	for _, sub := range statement.StatementHeader.Subject {
 		currentPackage.Purl = sub.Name
-		if len(sub.Digest) > 0 {
-			for alg, ds := range sub.Digest {
-				currentPackage.Digest = append(currentPackage.Digest, strings.ToLower(alg+":"+strings.Trim(ds, "'")))
-			}
+		for alg, ds := range sub.Digest {
+			currentPackage.Digest = append(currentPackage.Digest, strings.ToLower(alg+":"+strings.Trim(ds, "'")))
 		}
 		c.packageNode = append(c.packageNode, currentPackage)
 	}
@@ -96,17 +105,18 @@ func (c *vulnCertificationParser) getAttestation(blob []byte, source string, sta
 	attNode.Payload["scanner_db_version"] = statement.Predicate.Scanner.Database.Version
 	attNode.Payload["metadata_scannedOn"] = statement.Predicate.Metadata.ScannedOn.String()
 	for i, result := range statement.Predicate.Scanner.Result {
-		attNode.Payload["result_vulnerabilityID"+strconv.Itoa(i)] = result.VulnerabilityId
-		attNode.Payload["result_alias"+strconv.Itoa(i)] = result.Aliases
+		attNode.Payload["result_vulnerabilityID_"+strconv.Itoa(i)] = result.VulnerabilityId
+		attNode.Payload["result_alias_"+strconv.Itoa(i)] = result.Aliases
 	}
 	c.attestation = attNode
 }
 
 func (c *vulnCertificationParser) getVulns(blob []byte, source string, statement *attestation_vuln.VulnerabilityStatement) {
 	for _, id := range statement.Predicate.Scanner.Result {
-		vulNode := assembler.VulnerabilityNode{}
-		vulNode.ID = id.VulnerabilityId
-		vulNode.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
+		vulNode := assembler.VulnerabilityNode{
+			ID:       id.VulnerabilityId,
+			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
+		}
 		c.vulns = append(c.vulns, vulNode)
 	}
 }
