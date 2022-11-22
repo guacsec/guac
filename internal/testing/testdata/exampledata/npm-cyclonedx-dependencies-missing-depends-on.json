@@ -1,0 +1,35 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2022-11-22T17:14:57Z",
+    "tools": [
+      {
+        "vendor": "Vendor",
+        "name": "SBOM Exporter"
+      }
+    ],
+    "component": {
+      "bom-ref": "web-app@1.0.0",
+      "type": "application",
+      "name": "web-app",
+      "version": "1.0.0",
+      "purl": "pkg:npm/web-app@1.0.0"
+    }
+  },
+  "components": [
+    {
+      "name": "bootstrap",
+      "version": "4.0.0-beta.2",
+      "purl": "pkg:npm/bootstrap@4.0.0-beta.2",
+      "type": "library",
+      "bom-ref": "bootstrap@4.0.0-beta.2"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "bootstrap@4.0.0-beta.2"
+    }
+  ]
+}

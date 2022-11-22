@@ -72,6 +72,9 @@ var (
 	//go:embed exampledata/big-mongo-cyclonedx.json
 	CycloneDXBigExample []byte
 
+	//go:embed exampledata/npm-cyclonedx-dependencies-missing-depends-on.json
+	CycloneDXDependenciesMissingDependsOn []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
@@ -540,6 +543,45 @@ var (
 		assembler.DependsOnEdge{
 			PackageDependency: cdxReactiveCommonPack,
 			PackageNode:       cdxResteasyPack,
+		},
+	}
+
+	cdxWebAppPackage = assembler.PackageNode{
+		Name:    "web-app",
+		Digest:  nil,
+		Version: "1.0.0",
+		Purl:    "pkg:npm/web-app@1.0.0",
+		Tags:    []string{"application"},
+		CPEs:    nil,
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
+	}
+	cdxBootstrapPackage = assembler.PackageNode{
+		Name:    "bootstrap",
+		Digest:  nil,
+		Version: "4.0.0-beta.2",
+		Purl:    "pkg:npm/bootstrap@4.0.0-beta.2",
+		CPEs:    nil,
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
+	}
+
+	NpmMissingDependsOnCycloneDXNodes = []assembler.GuacNode{
+		cdxWebAppPackage,
+		cdxBootstrapPackage,
+	}
+	NpmMissingDependsOnCycloneDXEdges = []assembler.GuacEdge{
+		assembler.DependsOnEdge{
+			PackageDependency: cdxBootstrapPackage,
+			PackageNode:       cdxWebAppPackage,
 		},
 	}
 

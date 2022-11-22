@@ -61,6 +61,20 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantNodes: testdata.CycloneDXQuarkusNodes,
 		wantEdges: testdata.CyloneDXQuarkusEdges,
 		wantErr:   false,
+	}, {
+		name: "valid CycloneDX document where dependencies are missing dependsOn properties",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXDependenciesMissingDependsOn,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+			SourceInformation: processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		},
+		wantNodes: testdata.NpmMissingDependsOnCycloneDXNodes,
+		wantEdges: testdata.NpmMissingDependsOnCycloneDXEdges,
+		wantErr:   false,
 	},
 	}
 	for _, tt := range tests {
