@@ -24,6 +24,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(exampleCmd)
+	rootCmd.AddCommand(certifierCmd)
 }
 
 var rootCmd = &cobra.Command{
