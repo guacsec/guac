@@ -23,6 +23,9 @@ import (
 )
 
 type Certifier interface {
+	// CertifyVulns takes the type Component and recursively scans each dependency
+	// aggregating the results for the top/root level artifact. As attestation documents are generated
+	// they are push to the docChannel to be ingested
 	CertifyVulns(ctx context.Context, rootComponent *Component, docChannel chan<- *processor.Document) error
 }
 
@@ -33,14 +36,14 @@ type Emitter func(*processor.Document) error
 // the error was able to be gracefully handled
 type ErrHandler func(error) bool
 
-// DocumentType describes the type of the document contents for schema checks
+// CertfierType describes the type of the certifier
 type CertfierType string
 
-// Document* is the enumerables of DocumentType
 const (
 	CertifierOSV CertfierType = "OSV"
 )
 
+// Component represents the top level package node and its dependencies
 type Component struct {
 	CurPackage  assembler.PackageNode
 	DepPackages []*Component

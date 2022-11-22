@@ -49,7 +49,37 @@ func WriteQueryForTesting(client Client, query string, args map[string]interface
 //
 // Returns the result as an interface to be handled by the caller (as records),
 // but this is not optimal to use in production!
-func ReadQueryForTesting(client Client, query string, args map[string]interface{}) ([]interface{}, error) {
+func ReadQueryForTesting(client Client, query string, args map[string]interface{}) ([][]interface{}, error) {
+	session := client.NewSession(neo4j.SessionConfig{})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		// For this testing function, we just collect all values.
+		func(tx Transaction) (interface{}, error) {
+			records, err := tx.Run(query, args)
+			if err != nil {
+				return nil, err
+			}
+			values := make([][]interface{}, 0)
+			// Since `records` is valid only while `tx` is in
+			// scope, we have to process all data here.
+			for records.Next() {
+				record := records.Record()
+				values = append(values, record.Values)
+			}
+			if err = records.Err(); err != nil {
+				return nil, err
+			}
+			return values, err
+		})
+
+	if err != nil {
+		return nil, err
+	}
+	return result.([][]interface{}), nil
+}
+
+func ReadQuery(client Client, query string, args map[string]interface{}) ([]interface{}, error) {
 	session := client.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 

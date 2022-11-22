@@ -40,6 +40,7 @@ var (
 	documentCertifier = map[certifier.CertfierType]func() certifier.Certifier{}
 )
 
+// RegisterCertifier registers the active certifier for to generate attestations
 func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.CertfierType) error {
 	if _, ok := documentCertifier[certifierType]; ok {
 		return fmt.Errorf("the certifier is being overwritten: %s", certifierType)
@@ -49,6 +50,9 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 	return nil
 }
 
+// Certify queries the graph DB to get the packages to scan. Utilizing the registered certifiers,
+// it scans and generate vulnerability attestation for each package. Aggregating the results to the
+// top/root level package
 func Certify(ctx context.Context, client graphdb.Client, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
@@ -63,7 +67,7 @@ func Certify(ctx context.Context, client graphdb.Client, emitter certifier.Emitt
 	}()
 
 	componentsCaptured := false
-	for componentsCaptured != true {
+	for !componentsCaptured {
 		select {
 		case d := <-compChan:
 			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
@@ -86,6 +90,8 @@ func Certify(ctx context.Context, client graphdb.Client, emitter certifier.Emitt
 	return nil
 }
 
+// generateDocuments runs CertifyVulns as a goroutine to scan and generate a vulnerability certification that
+// are emitted as processor documents to be ingested
 func generateDocuments(ctx context.Context, collectedComponent *certifier.Component, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
@@ -127,6 +133,8 @@ func generateDocuments(ctx context.Context, collectedComponent *certifier.Compon
 	return nil
 }
 
+// getComponents runs as a goroutine to query for root level and dependent packages to scan and passes them
+// to the compChan as they are found
 func getComponents(ctx context.Context, client graphdb.Client, compChan chan<- *certifier.Component) error {
 	// Get top level package MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p
 	// Get all packages that the top level package depends on MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
@@ -134,7 +142,7 @@ func getComponents(ctx context.Context, client graphdb.Client, compChan chan<- *
 
 	// TODO: How to handle if a package already has been scanned? Rescan and just merge the nodes?...
 
-	roots, err := graphdb.ReadQueryForTesting(client, "MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p", nil)
+	roots, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p", nil)
 	if err != nil {
 		return err
 	}
@@ -144,6 +152,7 @@ func getComponents(ctx context.Context, client graphdb.Client, compChan chan<- *
 		rootPackage.Purl = foundNode.Props["purl"].(string)
 		deps, err := getCompHelper(ctx, client, rootPackage.Purl)
 		if err != nil {
+
 			return err
 		}
 		rootComponent := &certifier.Component{
@@ -156,7 +165,7 @@ func getComponents(ctx context.Context, client graphdb.Client, compChan chan<- *
 }
 
 func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string) ([]*certifier.Component, error) {
-	dependencies, err := graphdb.ReadQueryForTesting(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
+	dependencies, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
 		map[string]any{"rootPurl": parentPurl})
 	if err != nil {
 		return nil, err

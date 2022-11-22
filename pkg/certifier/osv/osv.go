@@ -24,7 +24,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
-	attestation_osv "github.com/guacsec/guac/pkg/certifier/attestation"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/osv/internal/osv_query"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
@@ -32,18 +32,25 @@ import (
 	osv_scanner "golang.org/x/vuln/osv"
 )
 
-type OSVCertifier struct {
+const (
+	URI         string = "osv.dev"
+	VERSION     string = "0.0.14"
+	INVOC_URI   string = "guac"
+	PRODUCER_ID string = "guecsec/guac"
+)
+
+type osvCertifier struct {
 	rootComponents *certifier.Component
 }
 
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
-	return &OSVCertifier{}
+	return &osvCertifier{}
 }
 
 // CertifyVulns takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
-func (o *OSVCertifier) CertifyVulns(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
+func (o *osvCertifier) CertifyVulns(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
 	o.rootComponents = rootComponent
 	_, err := o.certifyHelper(ctx, rootComponent, rootComponent.DepPackages, docChannel)
 	if err != nil {
@@ -52,7 +59,7 @@ func (o *OSVCertifier) CertifyVulns(ctx context.Context, rootComponent *certifie
 	return nil
 }
 
-func (o *OSVCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, depPackages []*certifier.Component, docChannel chan<- *processor.Document) ([]osv_scanner.Entry, error) {
+func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, depPackages []*certifier.Component, docChannel chan<- *processor.Document) ([]osv_scanner.Entry, error) {
 	packNodes := []assembler.PackageNode{}
 	totalDepVul := []osv_scanner.Entry{}
 	for _, depPack := range depPackages {
@@ -62,8 +69,9 @@ func (o *OSVCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Co
 				return nil, nil
 			}
 			totalDepVul = append(totalDepVul, depVulns...)
+		} else {
+			packNodes = append(packNodes, depPack.CurPackage)
 		}
-		packNodes = append(packNodes, depPack.CurPackage)
 	}
 
 	i := 0
@@ -89,6 +97,7 @@ func getQuery(lastIndex int, packNodes []assembler.PackageNode) (osv_query.Batch
 	var query osv_query.BatchedQuery
 	var stoppedIndex int
 	j := 1
+	// limit of 1000 per batch query
 	for i := lastIndex; i < len(packNodes); i++ {
 		purlQuery := osv_query.MakePURLRequest(packNodes[i].Purl)
 		purlQuery.Package.PURL = packNodes[i].Purl
@@ -124,7 +133,7 @@ func getVulnerabilities(query osv_query.BatchedQuery, docChannel chan<- *process
 }
 
 func generateDocument(purl string, digest []string, vulns []osv_scanner.Entry) (*processor.Document, error) {
-	payload, err := parseOSVCertifyPredicate(createAttestation(purl, digest, vulns))
+	payload, err := generateOSVCertifyPredicateBlob(createAttestation(purl, digest, vulns))
 	if err != nil {
 		return nil, err
 	}
@@ -133,20 +142,20 @@ func generateDocument(purl string, digest []string, vulns []osv_scanner.Entry) (
 		Type:   processor.DocumentITE6Vul,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
-			Collector: "guac",
-			Source:    "guac",
+			Collector: INVOC_URI,
+			Source:    INVOC_URI,
 		},
 	}
 	return doc, nil
 }
 
-func createAttestation(purl string, digest []string, vulns []osv_scanner.Entry) *attestation_osv.VulnerabilityStatement {
+func createAttestation(purl string, digest []string, vulns []osv_scanner.Entry) *attestation_vuln.VulnerabilityStatement {
 	currentTime := time.Now()
 	var subjects []intoto.Subject
 
-	attestation := &attestation_osv.VulnerabilityStatement{}
-	attestation.StatementHeader.Type = "https://in-toto.io/Statement/v0.1"
-	attestation.StatementHeader.PredicateType = "https://in-toto.io/attestation/vuln/v0.1"
+	attestation := &attestation_vuln.VulnerabilityStatement{}
+	attestation.StatementHeader.Type = intoto.StatementInTotoV01
+	attestation.StatementHeader.PredicateType = attestation_vuln.PredicateVuln
 	if len(digest) > 0 {
 		for _, digest := range digest {
 			digestSplit := strings.Split(digest, ":")
@@ -164,22 +173,21 @@ func createAttestation(purl string, digest []string, vulns []osv_scanner.Entry) 
 	}
 
 	attestation.StatementHeader.Subject = subjects
-	attestation.Predicate.Invocation.Uri = "guac"
-	attestation.Predicate.Invocation.ProducerID = "guecsec/guac"
-	attestation.Predicate.Scanner.Uri = "osv.dev"
-	attestation.Predicate.Scanner.Version = "0.0.14"
+	attestation.Predicate.Invocation.Uri = INVOC_URI
+	attestation.Predicate.Invocation.ProducerID = PRODUCER_ID
+	attestation.Predicate.Scanner.Uri = URI
+	attestation.Predicate.Scanner.Version = VERSION
 	attestation.Predicate.Metadata.ScannedOn = &currentTime
 
 	for _, vuln := range vulns {
-
-		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, attestation_osv.Result{
+		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, attestation_vuln.Result{
 			VulnerabilityId: vuln.ID,
 		})
 	}
 	return attestation
 }
 
-func parseOSVCertifyPredicate(p *attestation_osv.VulnerabilityStatement) ([]byte, error) {
+func generateOSVCertifyPredicateBlob(p *attestation_vuln.VulnerabilityStatement) ([]byte, error) {
 	blob, err := json.Marshal(p)
 	if err != nil {
 		return nil, err
