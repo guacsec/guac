@@ -564,6 +564,13 @@ func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
 						break
 					}
 				}
+			} else if node1.Type() == "Vulnerability" && node2.Type() == "Vulnerability" {
+				if node1.(assembler.VulnerabilityNode).ID == node2.(assembler.VulnerabilityNode).ID {
+					if reflect.DeepEqual(node1, node2) {
+						e = true
+						break
+					}
+				}
 			}
 		}
 		if !e {
@@ -604,6 +611,11 @@ func GuacEdgeSliceEqual(slice1, slice2 []assembler.GuacEdge) bool {
 					break
 				}
 			} else if edge1.Type() == "BuiltBy" && edge2.Type() == "BuiltBy" {
+				if reflect.DeepEqual(edge1, edge2) {
+					e = true
+					break
+				}
+			} else if edge1.Type() == "Vulnerable" && edge2.Type() == "Vulnerable" {
 				if reflect.DeepEqual(edge1, edge2) {
 					e = true
 					break
