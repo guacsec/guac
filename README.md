@@ -1,6 +1,8 @@
 # GUAC: Graph for Understanding Artifact Composition
 
-![image](https://user-images.githubusercontent.com/3060102/182691308-d3c7e4d5-b6bd-4b5c-85c5-24dfa19875e2.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/3060102/204297133-9bf702c6-b4e2-46df-a029-42b5060b19a4.png">
+</p>
 
 **Note:** GUAC is under active development - if you are interested in contributing, please look at [contributor guide](CONTRIBUTING.md)
 and the ["express interest" issue](https://github.com/guacsec/guac/issues/1)
