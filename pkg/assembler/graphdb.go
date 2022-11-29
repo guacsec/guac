@@ -16,11 +16,17 @@
 package assembler
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Note: This module is experimental and might change often!
@@ -123,7 +129,7 @@ func queryPartForMergeNode(sb *strings.Builder, n GuacNode, label string) error 
 		if _, ok := node_data[key]; ok {
 			writeKeyValToQuery(sb, key, label, false, ix == 0)
 		} else {
-			return fmt.Errorf("Node %v has no value for property %v", n, key)
+			return fmt.Errorf("node %v has no value for property %v", n, key)
 		}
 	}
 	sb.WriteString("})\n")
@@ -183,4 +189,48 @@ func writeKeyValToQuery(sb *strings.Builder, key string, label string, set bool,
 	sb.WriteString(label) // not user controlled
 	sb.WriteString("_")
 	sb.WriteString(key) // not user controlled, will be as a prepared statement parameter
+}
+
+func Subscribe(ctx context.Context, client graphdb.Client) error {
+	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
+	id := uuid.NewV4().String()
+	sub, err := js.PullSubscribe(emitter.SubjectNameDocParsed, "assembler")
+	if err != nil {
+		logger.Errorf("[assembler: %s] subscribe failed: %v", id, err)
+		return err
+	}
+	for {
+		// if the context is canceled we want to break out of the loop
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		msgs, err := sub.Fetch(1)
+		if err != nil {
+			logger.Infof("[assembler: %s] error consuming, backoff for a second: %v", id, err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		if len(msgs) > 0 {
+			err := msgs[0].Ack()
+			if err != nil {
+				logger.Errorf("[assembler: %s] unable to Ack: %v", id, err)
+				return err
+			}
+			combined := Graph{
+				Nodes: []GuacNode{},
+				Edges: []GuacEdge{},
+			}
+			err = json.Unmarshal(msgs[0].Data, &combined)
+			if err != nil {
+				logger.Warnf("[assembler: %s] failed unmarshal assembler Input bytes: %v", id, err)
+			}
+
+			if err := StoreGraph(combined, client); err != nil {
+				return err
+			}
+
+			logger.Infof("[assembler: %s] assembled inputs to graph", id)
+		}
+	}
 }

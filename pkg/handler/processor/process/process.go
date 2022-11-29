@@ -30,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -56,8 +55,9 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 	return nil
 }
 
-func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
+func Subscribe(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
 	id := uuid.NewV4().String()
 	sub, err := js.PullSubscribe(emitter.SubjectNameDocCollected, "processor")
 	if err != nil {
@@ -86,7 +86,7 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 			if err != nil {
 				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
 			}
-			docTree, err := Process(ctx, js, &doc)
+			docTree, err := Process(ctx, &doc)
 			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree)
 			if err != nil {
 				return err
@@ -95,17 +95,18 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 	}
 }
 
-func Process(ctx context.Context, js nats.JetStreamContext, i *processor.Document) (processor.DocumentTree, error) {
+func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
 	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
 	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
 	}
-	docTreeJSON, err := json.Marshal(processor.DocumentTree(node))
-	if err != nil {
-		return nil, err
-	}
 	if js != nil {
+		docTreeJSON, err := json.Marshal(processor.DocumentTree(node))
+		if err != nil {
+			return nil, err
+		}
 		_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
 		if err != nil {
 			return nil, err

@@ -20,16 +20,19 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
 )
 
@@ -44,24 +47,21 @@ type options struct {
 	user   string
 	pass   string
 	realm  string
-
 	// path to folder with documents to collect
 	path string
 }
 
 func init() {
-	exampleCmd.PersistentFlags().StringVar(&flags.dbAddr, "db-addr", "neo4j://localhost:7687", "address to neo4j db")
-	exampleCmd.PersistentFlags().StringVar(&flags.creds, "creds", "", "credentials to access neo4j in 'user:pass' format")
-	exampleCmd.PersistentFlags().StringVar(&flags.realm, "realm", "neo4j", "realm to connecto graph db")
-	_ = exampleCmd.MarkPersistentFlagRequired("creds")
+	pubsubCmd.PersistentFlags().StringVar(&flags.dbAddr, "db-addr", "neo4j://localhost:7687", "address to neo4j db")
+	pubsubCmd.PersistentFlags().StringVar(&flags.creds, "creds", "", "credentials to access neo4j in 'user:pass' format")
+	pubsubCmd.PersistentFlags().StringVar(&flags.realm, "realm", "neo4j", "realm to connecto graph db")
+	_ = pubsubCmd.MarkPersistentFlagRequired("creds")
 }
 
-var exampleCmd = &cobra.Command{
+var pubsubCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
-	Short: "take a folder of files and create a GUAC graph",
+	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
 
 		opts, err := validateFlags(args)
 		if err != nil {
@@ -70,6 +70,23 @@ var exampleCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+
+		/* 		// Register collector
+		   		// We create our own MockCollector and register it
+		   		mc := mockcollector.NewMockCollector()
+		   		if err := collector.RegisterDocumentCollector(mc, mc.Type()); err != nil {
+		   			logger.Error(err)
+		   		}
+		   		if err := process.RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType); err != nil {
+		   			logger.Error(err)
+		   		}
+		   		if err := guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser"); err != nil {
+		   			logger.Error(err)
+		   		}
+		*/
+
 		// Register collector
 		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
@@ -77,7 +94,21 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("unable to register file collector: %v", err)
 		}
 
+		// initialize jetstream
+		// TODO: pass in credentials file for NATS secure login
+		config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
+		ctx, err = emitter.JetStreamInit(ctx, config)
+		if err != nil {
+			logger.Error(err)
+			os.Exit(1)
+		}
+
 		// Get pipeline of components
+		collectorFunc, err := getCollector(ctx)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
 		processorFunc, err := getProcessor(ctx)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -88,7 +119,7 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(opts)
+		assemblerFunc, err := getAssembler(ctx, opts)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -101,23 +132,52 @@ var exampleCmd = &cobra.Command{
 			totalNum += 1
 			start := time.Now()
 
-			docTree, err := processorFunc(d)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
-			}
+			// Assuming that publisher and consumer are different processes.
+			var wg sync.WaitGroup
 
-			graphs, err := ingestorFunc(docTree)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to ingest doc tree: %v", err)
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				err = collectorFunc(d)
+				if err != nil {
+					logger.Error(err)
+					os.Exit(1)
+				}
+			}()
 
-			err = assemblerFunc(graphs)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to assemble graphs: %v", err)
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				err := processorFunc()
+				if err != nil {
+					gotErr = true
+					logger.Errorf("processor ended with error: %v", err)
+				}
+			}()
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				err := ingestorFunc()
+				if err != nil {
+					gotErr = true
+					logger.Errorf("parser ended with error: %v", err)
+				}
+			}()
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				err := assemblerFunc()
+				if err != nil {
+					gotErr = true
+					logger.Errorf("parser ended with error: %v", err)
+				}
+			}()
+
+			wg.Wait()
+			emitter.Close()
+
 			t := time.Now()
 			elapsed := t.Sub(start)
 			logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
@@ -163,23 +223,29 @@ func validateFlags(args []string) (options, error) {
 	return opts, nil
 }
 
-func getProcessor(ctx context.Context) (func(*processor.Document) (processor.DocumentTree, error), error) {
-	return func(d *processor.Document) (processor.DocumentTree, error) {
-		return process.Process(ctx, d)
+func getCollector(ctx context.Context) (func(*processor.Document) error, error) {
+	return func(d *processor.Document) error {
+		return collector.Publish(ctx, d)
 	}, nil
 }
 
-func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
-	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
-		inputs, err := parser.ParseDocumentTree(ctx, doc)
+func getProcessor(ctx context.Context) (func() error, error) {
+	return func() error {
+		return process.Subscribe(ctx)
+	}, nil
+}
+
+func getIngestor(ctx context.Context) (func() error, error) {
+	return func() error {
+		err := parser.Subscribe(ctx)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return inputs, nil
+		return nil
 	}, nil
 }
 
-func getAssembler(opts options) (func([]assembler.Graph) error, error) {
+func getAssembler(ctx context.Context, opts options) (func() error, error) {
 	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
 	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
 	if err != nil {
@@ -191,18 +257,10 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 		return nil, err
 	}
 
-	return func(gs []assembler.Graph) error {
-		combined := assembler.Graph{
-			Nodes: []assembler.GuacNode{},
-			Edges: []assembler.GuacEdge{},
-		}
-		for _, g := range gs {
-			combined.AppendGraph(g)
-		}
-		if err := assembler.StoreGraph(combined, client); err != nil {
+	return func() error {
+		if err := assembler.Subscribe(ctx, client); err != nil {
 			return err
 		}
-
 		return nil
 	}, nil
 }

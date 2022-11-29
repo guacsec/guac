@@ -54,7 +54,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 
 	ctx := context.Background()
 	config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
-	js, err := emitter.JetStreamInit(ctx, config)
+	ctx, err = emitter.JetStreamInit(ctx, config)
 	if err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
 	}
@@ -541,7 +541,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			docTree, err := Process(ctx, js, &tt.doc)
+			docTree, err := Process(ctx, &tt.doc)
 			if err != nil {
 				if tt.expectErr {
 					return

@@ -17,11 +17,9 @@ package emitter
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats.go"
 )
@@ -33,6 +31,7 @@ const (
 	StreamSubjects          string = "DOCUMENTS.*"
 	SubjectNameDocCollected string = "DOCUMENTS.collected"
 	SubjectNameDocProcessed string = "DOCUMENTS.processed"
+	SubjectNameDocParsed    string = "DOCUMENTS.parsed"
 )
 
 var (
@@ -59,7 +58,7 @@ func NewJetStreamConfig(url string, creds string, nKeyFile string) *jetStreamCon
 	}
 }
 
-func JetStreamInit(ctx context.Context, config *jetStreamConfig) (nats.JetStreamContext, error) {
+func JetStreamInit(ctx context.Context, config *jetStreamConfig) (context.Context, error) {
 	logger := logging.FromContext(ctx)
 	var err error
 	// Connect Options.
@@ -93,7 +92,7 @@ func JetStreamInit(ctx context.Context, config *jetStreamConfig) (nats.JetStream
 	if err != nil {
 		return nil, fmt.Errorf("failed to create stream: %w", err)
 	}
-	return js, nil
+	return withJetstream(ctx), nil
 
 }
 
@@ -119,20 +118,17 @@ func createStreamOrExists(ctx context.Context) error {
 	return nil
 }
 
-func Emit(ctx context.Context, d *processor.Document) error {
-	logger := logging.FromContext(ctx)
-	docByte, err := json.Marshal(d)
-	if err != nil {
-		return fmt.Errorf("failed marshal of document: %w", err)
-	}
-	_, err = js.Publish(SubjectNameDocCollected, docByte)
-	if err != nil {
-		return fmt.Errorf("failed to publish document on stream: %w", err)
-	}
-	logger.Infof("doc published: %+v", d)
-	return nil
-}
-
 func Close() {
 	nc.Close()
+}
+
+func withJetstream(ctx context.Context) context.Context {
+	return context.WithValue(ctx, jetStreamConfig{}, js)
+}
+
+func FromContext(ctx context.Context) nats.JetStreamContext {
+	if js, ok := ctx.Value(jetStreamConfig{}).(nats.JetStreamContext); ok {
+		return js
+	}
+	return nil
 }

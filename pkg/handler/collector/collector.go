@@ -17,8 +17,10 @@ package collector
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -56,6 +58,23 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 	}
 	documentCollectors[collectorType] = c
 
+	return nil
+}
+
+func Publish(ctx context.Context, d *processor.Document) error {
+	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
+	if js != nil {
+		docByte, err := json.Marshal(d)
+		if err != nil {
+			return fmt.Errorf("failed marshal of document: %w", err)
+		}
+		_, err = js.Publish(emitter.SubjectNameDocCollected, docByte)
+		if err != nil {
+			return fmt.Errorf("failed to publish document on stream: %w", err)
+		}
+		logger.Infof("doc published: %+v", d)
+	}
 	return nil
 }
 

@@ -17,10 +17,13 @@ package emitter
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats-server/v2/server"
 	natsserver "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
@@ -82,12 +85,27 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 	defer s.Shutdown()
 	ctx := context.Background()
 	config := NewJetStreamConfig(nats.DefaultURL, "", "")
-	_, err = JetStreamInit(ctx, config)
+	ctx, err = JetStreamInit(ctx, config)
 	if err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
 	}
-	err = Emit(ctx, &ite6SLSADoc)
+	err = testPublish(ctx, &ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
+}
+
+func testPublish(ctx context.Context, d *processor.Document) error {
+	logger := logging.FromContext(ctx)
+	js := FromContext(ctx)
+	docByte, err := json.Marshal(d)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document: %w", err)
+	}
+	_, err = js.Publish(SubjectNameDocCollected, docByte)
+	if err != nil {
+		return fmt.Errorf("failed to publish document on stream: %w", err)
+	}
+	logger.Infof("doc published: %+v", d)
+	return nil
 }

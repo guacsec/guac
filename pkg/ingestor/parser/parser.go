@@ -32,9 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	certify_vuln "github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
-	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -70,12 +68,13 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 	return nil
 }
 
-func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
+func Subscribe(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
 	id := uuid.NewV4().String()
 	sub, err := js.PullSubscribe(emitter.SubjectNameDocProcessed, "ingestor")
 	if err != nil {
-		logrus.Errorf("[ingestor: %s] subscribe failed: %v", id, err)
+		logger.Errorf("[ingestor: %s] subscribe failed: %v", id, err)
 		return err
 	}
 	for {
@@ -101,7 +100,7 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 				logger.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
 			}
 
-			_, err = ParseDocumentTree(processor.DocumentTree(&doc))
+			_, err = ParseDocumentTree(ctx, processor.DocumentTree(&doc))
 			if err != nil {
 				return err
 			}
@@ -111,16 +110,38 @@ func Subscribe(ctx context.Context, js nats.JetStreamContext) error {
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
-	assemblerinputs := []assembler.AssemblerInput{}
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, error) {
+	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
+
+	assemblerInputs := []assembler.Graph{}
 	docTreeBuilder := newDocTreeBuilder()
 	err := docTreeBuilder.parse(ctx, docTree)
 	if err != nil {
 		return nil, err
 	}
 	for _, builder := range docTreeBuilder.graphBuilders {
-		assemblerinput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities)
-		assemblerinputs = append(assemblerinputs, assemblerinput)
+		assemblerInput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities)
+		assemblerInputs = append(assemblerInputs, assemblerInput)
+	}
+
+	if js != nil {
+		combined := assembler.Graph{
+			Nodes: []assembler.GuacNode{},
+			Edges: []assembler.GuacEdge{},
+		}
+		for _, g := range assemblerInputs {
+			combined.AppendGraph(g)
+		}
+		assemblerInputsJSON, err := json.Marshal(combined)
+		if err != nil {
+			return nil, err
+		}
+		_, err = js.Publish(emitter.SubjectNameDocParsed, assemblerInputsJSON)
+		if err != nil {
+			return nil, err
+		}
+		logger.Infof("doc parsed: %+v", docTree)
 	}
 
 	return assemblerInputs, nil

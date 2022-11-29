@@ -13,12 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
 import (
-	"github.com/guacsec/guac/cmd/collector/cmd"
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	cmd.Execute()
+func init() {
+	rootCmd.AddCommand(pubsubCmd)
+}
+
+var rootCmd = &cobra.Command{
+	Use:   "pubsub",
+	Short: "pubsub is a cmdline for GUAC that utilizes Nats for pubsub",
+}
+
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
