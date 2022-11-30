@@ -18,7 +18,7 @@ package git_collector
 import (
 	"context"
 	"fmt"
-	"io"
+	"log"
 	"os"
 
 	"github.com/go-git/go-git/v5"
@@ -42,12 +42,15 @@ type GitCol struct {
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
 func (g *GitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) {
-	ok, err := checkIfDirExists("./test")
+	exists, err := checkIfDirExists("./temp")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	if ok {
+	if !exists {
+		if err := os.Mkdir("temp", os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
 		fmt.Println("Clone a repo down: ")
 		cloneRepoToTemp()
 	} else {
@@ -62,19 +65,11 @@ func (g *GitCol) Type() string {
 }
 
 func checkIfDirExists(name string) (bool, error) {
-	f, err := os.Open(name)
-	if err != nil {
+	if _, err := os.Stat("./temp"); os.IsNotExist(err) {
 		return false, err
+	} else {
+		return true, err
 	}
-	defer f.Close()
-
-	// Check if there are things already in the directory
-	_, err = f.Readdir(1)
-	// If the file is end of file, the dir is empty.
-	if err == io.EOF {
-		return true, nil
-	}
-	return false, err
 }
 
 func cloneRepoToTemp() {
