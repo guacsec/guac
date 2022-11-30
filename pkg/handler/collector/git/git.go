@@ -65,7 +65,7 @@ func (g *GitCol) Type() string {
 }
 
 func checkIfDirExists(name string) (bool, error) {
-	if _, err := os.Stat("./temp"); os.IsNotExist(err) {
+	if _, err := os.Stat(name); os.IsNotExist(err) {
 		return false, err
 	} else {
 		return true, err

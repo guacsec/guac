@@ -5,10 +5,10 @@ import (
 )
 
 func TestGitCollector(t *testing.T) {
-	t.Run("Git directory exists", func(t *testing.T) {
+	t.Run("Directory exists", func(t *testing.T) {
 	})
 
-	t.Run("Git directory doesn't exist", func(t *testing.T) {
+	t.Run("Directory doesn't exist", func(t *testing.T) {
 	})
 }
 
