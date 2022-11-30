@@ -17,11 +17,12 @@ package git_collector
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/guacsec/guac/pkg/handler/collector"
+	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"go.uber.org/zap"
@@ -32,19 +33,28 @@ const (
 )
 
 type gitCol struct {
-	url         string
-	dir         string
-	lastChecked time.Time
-	poll        bool
-	interval    time.Duration
+	url           string
+	dir           string
+	lastChecked   time.Time
+	poll          bool
+	interval      time.Duration
+	fileCollector *file.FileCollector
 }
 
 func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitCol {
+	logger := logging.FromContext(ctx)
+	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
+	err := collector.RegisterDocumentCollector(fileCollector, file.FileCollectorType)
+	if err != nil {
+		logger.Errorf("unable to register file collector: %v", err)
+	}
+
 	return &gitCol{
-		url:      url,
-		dir:      dir,
-		poll:     poll,
-		interval: interval,
+		url:           url,
+		dir:           dir,
+		poll:          poll,
+		interval:      interval,
+		fileCollector: fileCollector,
 	}
 }
 
@@ -62,7 +72,7 @@ func (g *gitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *proce
 			if ctx.Err() != nil {
 				return nil
 			}
-			err := createOrPull(logger, g.url, g.dir)
+			err := g.createOrPull(ctx, logger, docChannel)
 			if err != nil {
 				return err
 			}
@@ -70,7 +80,7 @@ func (g *gitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *proce
 			time.Sleep(g.interval)
 		}
 	} else {
-		err := createOrPull(logger, g.url, g.dir)
+		err := g.createOrPull(ctx, logger, docChannel)
 		if err != nil {
 			return err
 		}
@@ -80,23 +90,32 @@ func (g *gitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *proce
 	return nil
 }
 
-func createOrPull(logger *zap.SugaredLogger, url string, directory string) error {
-	exists := checkIfDirExists(directory)
+func (g *gitCol) createOrPull(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
+	exists := checkIfDirExists(g.dir)
 
 	if !exists {
-		if err := os.Mkdir(directory, os.ModePerm); err != nil {
-			logger.Fatal(err)
+		if err := os.Mkdir(g.dir, os.ModePerm); err != nil {
+			return err
 		}
-		fmt.Println("Clone a repo down: ")
-		err := cloneRepoToTemp(logger, url, directory)
+		err := cloneRepoToTemp(logger, g.url, g.dir)
+		if err != nil {
+			return err
+		}
+		err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
 		if err != nil {
 			return err
 		}
 	} else {
-		fmt.Println("Pull repo")
-		err := pullRepo(logger, directory)
-		if err != nil {
+		err := pullRepo(logger, g.dir)
+		if err != nil && err != git.NoErrAlreadyUpToDate {
 			return err
+		} else {
+			if err == nil {
+				err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
@@ -153,22 +172,10 @@ func pullRepo(logger *zap.SugaredLogger, directory string) error {
 	}
 
 	// Pull the latest changes from the origin remote and merge into the current branch
-	logger.Info("git pull origin")
 	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
-	if err != nil && err != git.NoErrAlreadyUpToDate {
-		return err
-	}
-
-	// Print the latest commit that was just pulled
-	ref, err := r.Head()
-	if err != nil {
-		return err
-	}
-	commit, err := r.CommitObject(ref.Hash())
 	if err != nil {
 		return err
 	}
 
-	logger.Info(commit)
 	return nil
 }

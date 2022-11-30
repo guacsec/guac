@@ -36,44 +36,48 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 		interval time.Duration
 	}
 	tests := []struct {
-		name         string
-		fields       fields
-		preCreateDir bool
-		wantDirEmpty bool
-		wantErr      bool
+		name                   string
+		fields                 fields
+		preCreateDir           bool
+		wantDirEmpty           bool
+		wantErr                bool
+		numberOfFilesCollected int
 	}{{
 		name: "get repo",
 		fields: fields{
-			url:      "https://github.com/git-fixtures/basic.git",
+			url:      "https://github.com/shafeeshafee/test-123.git",
 			dir:      "./guac-data-test",
 			poll:     false,
 			interval: time.Millisecond,
 		},
-		preCreateDir: false,
-		wantDirEmpty: false,
-		wantErr:      false,
+		preCreateDir:           false,
+		wantDirEmpty:           false,
+		wantErr:                false,
+		numberOfFilesCollected: 9,
 	}, {
 		name: "if repo exist",
 		fields: fields{
-			url:      "https://github.com/git-fixtures/basic.git",
+			url:      "https://github.com/shafeeshafee/test-123.git",
 			dir:      "./guac-data-test",
 			poll:     false,
 			interval: time.Millisecond,
 		},
-		preCreateDir: true,
-		wantDirEmpty: false,
-		wantErr:      false,
+		preCreateDir:           true,
+		wantDirEmpty:           false,
+		wantErr:                false,
+		numberOfFilesCollected: 0,
 	}, {
 		name: "get repo poll",
 		fields: fields{
-			url:      "https://github.com/git-fixtures/basic.git",
+			url:      "https://github.com/shafeeshafee/test-123.git",
 			dir:      "./guac-data-test",
 			poll:     true,
 			interval: time.Millisecond,
 		},
-		preCreateDir: false,
-		wantDirEmpty: false,
-		wantErr:      false,
+		preCreateDir:           false,
+		wantDirEmpty:           false,
+		wantErr:                false,
+		numberOfFilesCollected: 9,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -98,15 +102,44 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			}
 
 			docChan := make(chan *processor.Document, 1)
-			defer close(docChan)
 			defer os.RemoveAll(tt.fields.dir) // clean up
-			if err := g.RetrieveArtifacts(ctx, docChan); (err != nil) != tt.wantErr {
-				t.Errorf("gitCol.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
+			errChan := make(chan error, 1)
+			defer close(docChan)
+			defer close(errChan)
+			go func() {
+				errChan <- g.RetrieveArtifacts(ctx, docChan)
+			}()
+
+			numCollectors := 1
+			collectorsDone := 0
+
+			collectedDocs := []*processor.Document{}
+
+			for collectorsDone < numCollectors {
+				select {
+				case d := <-docChan:
+					collectedDocs = append(collectedDocs, d)
+				case err := <-errChan:
+					if (err != nil) != tt.wantErr {
+						t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
+					}
+					collectorsDone += 1
+				}
+			}
+
+			// Drain anything in document channel
+			for len(docChan) > 0 {
+				d := <-docChan
+				collectedDocs = append(collectedDocs, d)
 			}
 
 			dirEmpty, err := isDirEmpty(tt.fields.dir)
 			if err != nil {
 				t.Errorf("isDirEmpty error = %v", err)
+			}
+
+			if len(collectedDocs) != tt.numberOfFilesCollected {
+				t.Errorf("number of files collected does not match test = %v, want %v", len(collectedDocs), tt.numberOfFilesCollected)
 			}
 
 			if dirEmpty != tt.wantDirEmpty {
