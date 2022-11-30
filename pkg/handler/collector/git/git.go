@@ -62,12 +62,18 @@ func (g *gitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *proce
 			if ctx.Err() != nil {
 				return nil
 			}
-			createOrPull(logger, g.url, g.dir)
+			err := createOrPull(logger, g.url, g.dir)
+			if err != nil {
+				return err
+			}
 			g.lastChecked = time.Now()
 			time.Sleep(g.interval)
 		}
 	} else {
-		createOrPull(logger, g.url, g.dir)
+		err := createOrPull(logger, g.url, g.dir)
+		if err != nil {
+			return err
+		}
 		g.lastChecked = time.Now()
 	}
 
