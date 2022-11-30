@@ -109,12 +109,10 @@ func (g *gitCol) createOrPull(ctx context.Context, logger *zap.SugaredLogger, do
 		err := pullRepo(logger, g.dir)
 		if err != nil && err != git.NoErrAlreadyUpToDate {
 			return err
-		} else {
-			if err == nil {
-				err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
-				if err != nil {
-					return err
-				}
+		} else if err == nil {
+			err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
+			if err != nil {
+				return err
 			}
 		}
 	}
