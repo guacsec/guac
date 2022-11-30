@@ -9,3 +9,4 @@ bin/
 coverage.txt
 go.work
 .idea
+/pkg/handler/collector/git/guac-data-test

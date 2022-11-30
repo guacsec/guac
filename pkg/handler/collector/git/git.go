@@ -18,21 +18,34 @@ package git_collector
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
+	"time"
 
 	"github.com/go-git/go-git/v5"
-	. "github.com/go-git/go-git/v5/_examples"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
+	"go.uber.org/zap"
 )
 
 const (
 	CollectorGit = "GIT"
 )
 
-type GitCol struct {
-	url string
-	dir string
+type gitCol struct {
+	url         string
+	dir         string
+	lastChecked time.Time
+	poll        bool
+	interval    time.Duration
+}
+
+func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitCol {
+	return &gitCol{
+		url:      url,
+		dir:      dir,
+		poll:     poll,
+		interval: interval,
+	}
 }
 
 // RetrieveArtifacts collects the documents from the collector. It emits each collected
@@ -41,84 +54,115 @@ type GitCol struct {
 // or return an error from the collector crashing. This function can keep running and check
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
-func (g *GitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) {
-	exists, err := checkIfDirExists("./temp")
-	if err != nil {
-		fmt.Println(err)
+func (g *gitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
+
+	if g.poll {
+		for {
+			if ctx.Err() != nil {
+				return nil
+			}
+			createOrPull(logger, g.url, g.dir)
+			g.lastChecked = time.Now()
+			time.Sleep(g.interval)
+		}
+	} else {
+		createOrPull(logger, g.url, g.dir)
+		g.lastChecked = time.Now()
 	}
 
+	return nil
+}
+
+func createOrPull(logger *zap.SugaredLogger, url string, directory string) error {
+	exists := checkIfDirExists(directory)
+
 	if !exists {
-		if err := os.Mkdir("temp", os.ModePerm); err != nil {
-			log.Fatal(err)
+		if err := os.Mkdir(directory, os.ModePerm); err != nil {
+			logger.Fatal(err)
 		}
 		fmt.Println("Clone a repo down: ")
-		cloneRepoToTemp()
+		err := cloneRepoToTemp(logger, url, directory)
+		if err != nil {
+			return err
+		}
 	} else {
 		fmt.Println("Pull repo")
-		pullRepo()
+		err := pullRepo(logger, directory)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // Type returns the collector type
-func (g *GitCol) Type() string {
+func (g *gitCol) Type() string {
 	return CollectorGit
 }
 
-func checkIfDirExists(name string) (bool, error) {
-	if _, err := os.Stat(name); os.IsNotExist(err) {
-		return false, err
-	} else {
-		return true, err
-	}
+func checkIfDirExists(name string) bool {
+	_, err := os.Stat(name)
+	return !os.IsNotExist(err)
 }
 
-func cloneRepoToTemp() {
-	CheckArgs("<url>", "<directory>")
-	url := os.Args[1]
-	directory := os.Args[2]
+func cloneRepoToTemp(logger *zap.SugaredLogger, url string, directory string) error {
 
 	// Clone to directory
-	Info("git clone %s %s --recursive", url, directory)
+	logger.Infof("git clone %s %s --recursive", url, directory)
 
 	r, err := git.PlainClone(directory, false, &git.CloneOptions{
 		URL:               url,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
-
-	CheckIfError(err)
+	if err != nil {
+		return err
+	}
 
 	// Retrieve the branch being pointed by HEAD
 	ref, err := r.Head()
-	CheckIfError(err)
+	if err != nil {
+		return err
+	}
 	// Retrieve the commit object
 	commit, err := r.CommitObject(ref.Hash())
-	CheckIfError(err)
+	if err != nil {
+		return err
+	}
 
-	fmt.Println("Commit: ", commit)
+	logger.Infof("Commit: %s", commit)
+	return nil
 }
 
-func pullRepo() {
-	CheckArgs("<path>")
-	path := os.Args[1]
-
+func pullRepo(logger *zap.SugaredLogger, directory string) error {
 	// We instantiate a new repository targeting the given path (the .git folder)
-	r, err := git.PlainOpen(path)
-	CheckIfError(err)
-
+	r, err := git.PlainOpen(directory)
+	if err != nil {
+		return err
+	}
 	// Get the working directory for the repository
 	w, err := r.Worktree()
-	CheckIfError(err)
+	if err != nil {
+		return err
+	}
 
 	// Pull the latest changes from the origin remote and merge into the current branch
-	Info("git pull origin")
+	logger.Info("git pull origin")
 	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
-	CheckIfError(err)
+	if err != nil && err != git.NoErrAlreadyUpToDate {
+		return err
+	}
 
 	// Print the latest commit that was just pulled
 	ref, err := r.Head()
-	CheckIfError(err)
+	if err != nil {
+		return err
+	}
 	commit, err := r.CommitObject(ref.Hash())
-	CheckIfError(err)
+	if err != nil {
+		return err
+	}
 
-	fmt.Println(commit)
+	logger.Info(commit)
+	return nil
 }
