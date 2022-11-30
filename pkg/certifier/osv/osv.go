@@ -48,29 +48,37 @@ func NewOSVCertificationParser() certifier.Certifier {
 	return &osvCertifier{}
 }
 
-// CertifyVulns takes in the root component from the gauc database and does a recursive scan
+// CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
-func (o *osvCertifier) CertifyVulns(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
+func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
 	o.rootComponents = rootComponent
-	_, err := o.certifyHelper(ctx, rootComponent, rootComponent.DepPackages, docChannel)
+	_, err := o.certifyHelper(ctx, rootComponent, docChannel)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, depPackages []*certifier.Component, docChannel chan<- *processor.Document) ([]osv_scanner.Entry, error) {
+// certifyHelper recursively checks each component for dependencies.
+// If it has dependencies, certifyHelper is re-called until no more dependencies are found.
+// The dependency node is appended to the package node array and sent to be queried by OSV
+// Once the vulnerabilities are found, an attestation is generated for that package node
+// All the vulnerabilities for each dependent package node are collected and the parent package node's
+// attestation is generated containing all the vulnerabilities of its dependencies
+// these vulnerabilities are passed up until it reaches the root level node which contains an attestation
+// with all the aggregate vulnerabilities
+func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, docChannel chan<- *processor.Document) ([]osv_scanner.Entry, error) {
 	packNodes := []assembler.PackageNode{}
 	totalDepVul := []osv_scanner.Entry{}
-	for _, depPack := range depPackages {
+	for _, depPack := range topLevel.DepPackages {
 		if len(depPack.DepPackages) > 0 {
-			depVulns, err := o.certifyHelper(ctx, depPack, depPack.DepPackages, docChannel)
+			depVulns, err := o.certifyHelper(ctx, depPack, docChannel)
 			if err != nil {
-				return nil, nil
+				return nil, err
 			}
 			totalDepVul = append(totalDepVul, depVulns...)
 		} else {
-			packNodes = append(packNodes, depPack.CurPackage)
+			packNodes = append(packNodes, depPack.Package)
 		}
 	}
 
@@ -85,7 +93,7 @@ func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Co
 		totalDepVul = append(totalDepVul, vulns...)
 	}
 
-	doc, err := generateDocument(topLevel.CurPackage.Purl, topLevel.CurPackage.Digest, totalDepVul)
+	doc, err := generateDocument(topLevel.Package.Purl, topLevel.Package.Digest, totalDepVul)
 	if err != nil {
 		return nil, err
 	}

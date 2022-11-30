@@ -191,33 +191,41 @@ var (
 
 func TestOSVCertifier_CertifyVulns(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
-	rootPackage := assembler.PackageNode{}
-	rootPackage.Purl = "pkg:oci/vul-image-latest?repository_url=grc.io"
-	secondLevelPackage := assembler.PackageNode{}
-	secondLevelPackage.Purl = "pkg:oci/vul-secondLevel-latest?repository_url=grc.io"
-	secondLevelPackage.Digest = []string{"sha256:fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1"}
-	log4JPackage := assembler.PackageNode{}
-	log4JPackage.Purl = "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
-	text4ShelPackage := assembler.PackageNode{}
-	text4ShelPackage.Purl = "pkg:maven/org.apache.commons/commons-text@1.9"
+
+	rootPackage := assembler.PackageNode{
+		Purl: "pkg:oci/vul-image-latest?repository_url=grc.io",
+	}
+
+	secondLevelPackage := assembler.PackageNode{
+		Purl:   "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
+		Digest: []string{"sha256:fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1"},
+	}
+
+	log4JPackage := assembler.PackageNode{
+		Purl: "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
+	}
+
+	text4ShelPackage := assembler.PackageNode{
+		Purl: "pkg:maven/org.apache.commons/commons-text@1.9",
+	}
 
 	text4shell := &certifier.Component{
-		CurPackage:  text4ShelPackage,
+		Package:     text4ShelPackage,
 		DepPackages: []*certifier.Component{},
 	}
 
 	log4j := &certifier.Component{
-		CurPackage:  log4JPackage,
+		Package:     log4JPackage,
 		DepPackages: []*certifier.Component{},
 	}
 
 	secondLevel := &certifier.Component{
-		CurPackage:  secondLevelPackage,
+		Package:     secondLevelPackage,
 		DepPackages: []*certifier.Component{text4shell},
 	}
 
 	rootComponent := &certifier.Component{
-		CurPackage:  rootPackage,
+		Package:     rootPackage,
 		DepPackages: []*certifier.Component{secondLevel, log4j},
 	}
 	tests := []struct {
@@ -277,7 +285,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 			defer close(docChan)
 			defer close(errChan)
 			go func() {
-				errChan <- o.CertifyVulns(ctx, tt.rootComponent, docChan)
+				errChan <- o.CertifyComponent(ctx, tt.rootComponent, docChan)
 			}()
 			numCollectors := 1
 			certifiersDone := 0
@@ -290,7 +298,12 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
 						return
 					}
+					if err != nil {
+						t.Errorf("collector ended with error: %v", err)
+						return
+					}
 					certifiersDone += 1
+
 				}
 			}
 			// Drain anything left in document channel

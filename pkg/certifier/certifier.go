@@ -23,10 +23,10 @@ import (
 )
 
 type Certifier interface {
-	// CertifyVulns takes the type Component and recursively scans each dependency
+	// CertifyComponent takes the type Component and recursively scans each dependency
 	// aggregating the results for the top/root level artifact. As attestation documents are generated
 	// they are push to the docChannel to be ingested
-	CertifyVulns(ctx context.Context, rootComponent *Component, docChannel chan<- *processor.Document) error
+	CertifyComponent(ctx context.Context, rootComponent *Component, docChannel chan<- *processor.Document) error
 }
 
 // Emitter processes a document
@@ -45,6 +45,6 @@ const (
 
 // Component represents the top level package node and its dependencies
 type Component struct {
-	CurPackage  assembler.PackageNode
+	Package     assembler.PackageNode
 	DepPackages []*Component
 }

@@ -17,6 +17,7 @@ package certify
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -105,7 +106,7 @@ func generateDocuments(ctx context.Context, collectedComponent *certifier.Compon
 		c := certifier()
 		go func() {
 
-			errChan <- c.CertifyVulns(ctx, collectedComponent, docChan)
+			errChan <- c.CertifyComponent(ctx, collectedComponent, docChan)
 		}()
 	}
 
@@ -147,16 +148,21 @@ func getComponents(ctx context.Context, client graphdb.Client, compChan chan<- *
 		return err
 	}
 	for _, result := range roots {
-		foundNode := result.(dbtype.Node)
+		foundNode, ok := result.(dbtype.Node)
+		if !ok {
+			return errors.New("failed to cast to node type")
+		}
 		rootPackage := assembler.PackageNode{}
-		rootPackage.Purl = foundNode.Props["purl"].(string)
+		rootPackage.Purl, ok = foundNode.Props["purl"].(string)
+		if !ok {
+			return errors.New("failed to cast purl property to string type")
+		}
 		deps, err := getCompHelper(ctx, client, rootPackage.Purl)
 		if err != nil {
-
 			return err
 		}
 		rootComponent := &certifier.Component{
-			CurPackage:  rootPackage,
+			Package:     rootPackage,
 			DepPackages: deps,
 		}
 		compChan <- rootComponent
@@ -172,15 +178,21 @@ func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string
 	}
 	depPackages := []*certifier.Component{}
 	for _, dep := range dependencies {
-		foundDep := dep.(dbtype.Node)
+		foundDep, ok := dep.(dbtype.Node)
+		if !ok {
+			return nil, errors.New("failed to cast to node type")
+		}
 		foundDepPack := assembler.PackageNode{}
-		foundDepPack.Purl = foundDep.Props["purl"].(string)
+		foundDepPack.Purl, ok = foundDep.Props["purl"].(string)
+		if !ok {
+			return nil, errors.New("failed to cast purl property to string type")
+		}
 		deps, err := getCompHelper(ctx, client, foundDepPack.Purl)
 		if err != nil {
 			return nil, err
 		}
 		depPackages = append(depPackages, &certifier.Component{
-			CurPackage:  foundDepPack,
+			Package:     foundDepPack,
 			DepPackages: deps,
 		})
 	}
