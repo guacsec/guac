@@ -217,15 +217,20 @@ func Subscribe(ctx context.Context, client graphdb.Client) error {
 				logger.Errorf("[assembler: %s] unable to Ack: %v", id, err)
 				return err
 			}
-			combined := Graph{
-				Nodes: []GuacNode{},
-				Edges: []GuacEdge{},
-			}
-			err = json.Unmarshal(msgs[0].Data, &combined)
+
+			gs := []Graph{}
+			err = json.Unmarshal(msgs[0].Data, &gs)
 			if err != nil {
 				logger.Warnf("[assembler: %s] failed unmarshal assembler Input bytes: %v", id, err)
 			}
 
+			combined := Graph{
+				Nodes: []GuacNode{},
+				Edges: []GuacEdge{},
+			}
+			for _, g := range gs {
+				combined.AppendGraph(g)
+			}
 			if err := StoreGraph(combined, client); err != nil {
 				return err
 			}

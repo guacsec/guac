@@ -104,7 +104,7 @@ func Subscribe(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc))
+			logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc).Document.SourceInformation)
 		}
 	}
 }
@@ -126,14 +126,7 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 	}
 
 	if js != nil {
-		combined := assembler.Graph{
-			Nodes: []assembler.GuacNode{},
-			Edges: []assembler.GuacEdge{},
-		}
-		for _, g := range assemblerInputs {
-			combined.AppendGraph(g)
-		}
-		assemblerInputsJSON, err := json.Marshal(combined)
+		assemblerInputsJSON, err := json.Marshal(assemblerInputs)
 		if err != nil {
 			return nil, err
 		}
@@ -141,7 +134,7 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 		if err != nil {
 			return nil, err
 		}
-		logger.Infof("doc parsed: %+v", docTree)
+		logger.Infof("doc parsed: %+v", docTree.Document.SourceInformation)
 	}
 
 	return assemblerInputs, nil

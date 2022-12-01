@@ -168,7 +168,6 @@ func getProcessor(ctx context.Context) (func(*processor.Document) (processor.Doc
 		return process.Process(ctx, d)
 	}, nil
 }
-
 func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
 	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
 		inputs, err := parser.ParseDocumentTree(ctx, doc)

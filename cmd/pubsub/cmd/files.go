@@ -73,20 +73,6 @@ var pubsubCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		/* 		// Register collector
-		   		// We create our own MockCollector and register it
-		   		mc := mockcollector.NewMockCollector()
-		   		if err := collector.RegisterDocumentCollector(mc, mc.Type()); err != nil {
-		   			logger.Error(err)
-		   		}
-		   		if err := process.RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType); err != nil {
-		   			logger.Error(err)
-		   		}
-		   		if err := guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser"); err != nil {
-		   			logger.Error(err)
-		   		}
-		*/
-
 		// Register collector
 		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
@@ -99,7 +85,7 @@ var pubsubCmd = &cobra.Command{
 		config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
 		ctx, err = emitter.JetStreamInit(ctx, config)
 		if err != nil {
-			logger.Error(err)
+			logger.Errorf("jetstream initialization failed with error: %v", err)
 			os.Exit(1)
 		}
 
@@ -129,58 +115,11 @@ var pubsubCmd = &cobra.Command{
 		gotErr := false
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
-			totalNum += 1
-			start := time.Now()
-
-			// Assuming that publisher and consumer are different processes.
-			var wg sync.WaitGroup
-
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				err = collectorFunc(d)
-				if err != nil {
-					logger.Error(err)
-					os.Exit(1)
-				}
-			}()
-
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				err := processorFunc()
-				if err != nil {
-					gotErr = true
-					logger.Errorf("processor ended with error: %v", err)
-				}
-			}()
-
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				err := ingestorFunc()
-				if err != nil {
-					gotErr = true
-					logger.Errorf("parser ended with error: %v", err)
-				}
-			}()
-
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				err := assemblerFunc()
-				if err != nil {
-					gotErr = true
-					logger.Errorf("parser ended with error: %v", err)
-				}
-			}()
-
-			wg.Wait()
-			emitter.Close()
-
-			t := time.Now()
-			elapsed := t.Sub(start)
-			logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
+			err = collectorFunc(d)
+			if err != nil {
+				logger.Errorf("collector ended with error: %v", err)
+				os.Exit(1)
+			}
 			return nil
 		}
 
@@ -193,6 +132,39 @@ var pubsubCmd = &cobra.Command{
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
+
+		// Assuming that publisher and consumer are different processes.
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := processorFunc()
+			if err != nil {
+				gotErr = true
+				logger.Errorf("processor ended with error: %v", err)
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := ingestorFunc()
+			if err != nil {
+				gotErr = true
+				logger.Errorf("parser ended with error: %v", err)
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := assemblerFunc()
+			if err != nil {
+				gotErr = true
+				logger.Errorf("parser ended with error: %v", err)
+			}
+		}()
+
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
@@ -202,6 +174,9 @@ var pubsubCmd = &cobra.Command{
 		} else {
 			logger.Infof("completed ingesting %v documents", totalNum)
 		}
+
+		wg.Wait()
+		emitter.Close()
 	},
 }
 

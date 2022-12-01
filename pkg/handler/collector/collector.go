@@ -73,7 +73,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		if err != nil {
 			return fmt.Errorf("failed to publish document on stream: %w", err)
 		}
-		logger.Infof("doc published: %+v", d)
+		logger.Infof("doc published: %+v", d.SourceInformation.Source)
 	}
 	return nil
 }

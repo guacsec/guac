@@ -87,7 +87,7 @@ func Subscribe(ctx context.Context) error {
 				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
 			}
 			docTree, err := Process(ctx, &doc)
-			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree)
+			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
 			if err != nil {
 				return err
 			}
@@ -111,7 +111,7 @@ func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree
 		if err != nil {
 			return nil, err
 		}
-		logger.Infof("doc processed: %+v", node)
+		logger.Infof("doc processed: %+v", node.Document.SourceInformation)
 	}
 	return processor.DocumentTree(node), nil
 }
