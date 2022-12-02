@@ -66,18 +66,19 @@ var (
 
 const TEST_PORT = 4222
 
-func RunServerOnPort(port int) *server.Server {
+func runServerOnPort(port int) *server.Server {
 	opts := natsserver.DefaultTestOptions
 	opts.Port = port
-	return RunServerWithOptions(&opts)
+	return runServerWithOptions(&opts)
 }
 
-func RunServerWithOptions(opts *server.Options) *server.Server {
+func runServerWithOptions(opts *server.Options) *server.Server {
 	return natsserver.RunServer(opts)
 }
 
+// Need to move nats server from here
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
-	s := RunServerOnPort(TEST_PORT)
+	s := runServerOnPort(TEST_PORT)
 	err := s.EnableJetStream(&server.JetStreamConfig{})
 	if err != nil {
 		t.Fatalf("unexpected error initializing test NATS: %v", err)

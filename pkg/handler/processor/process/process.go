@@ -55,6 +55,8 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 	return nil
 }
 
+// Subscribe is used by NATS JetStream to stream the documents received from the collector
+// and process them them via Process
 func Subscribe(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 	js := emitter.FromContext(ctx)
@@ -95,6 +97,9 @@ func Subscribe(ctx context.Context) error {
 	}
 }
 
+// Process processes the documents received from the collector to determine
+// their format and document type. If NATS JetStream is used, Process also
+// stream the documents and send them to the ingestor
 func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
 	logger := logging.FromContext(ctx)
 	js := emitter.FromContext(ctx)

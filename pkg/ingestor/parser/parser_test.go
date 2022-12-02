@@ -20,11 +20,11 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
+	"github.com/guacsec/guac/internal/testing/nats"
 	processor_data "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
-	"github.com/guacsec/guac/pkg/logging"
 )
 
 var (
@@ -66,8 +66,14 @@ var (
 )
 
 func TestParseDocumentTree(t *testing.T) {
-	ctx := logging.WithLogger(context.Background())
-	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
+	ctx := context.Background()
+	natsTest := nats.NewNatsTestServer()
+	ctx, err := natsTest.EnableJetStreamForTest(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer natsTest.Shutdown()
+	err = verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}

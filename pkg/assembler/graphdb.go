@@ -191,6 +191,8 @@ func writeKeyValToQuery(sb *strings.Builder, key string, label string, set bool,
 	sb.WriteString(key) // not user controlled, will be as a prepared statement parameter
 }
 
+// Subscribe is used by NATS JetStream to stream the documents received from the ingestor
+// and add them to the graph database via StoreGraph
 func Subscribe(ctx context.Context, client graphdb.Client) error {
 	logger := logging.FromContext(ctx)
 	js := emitter.FromContext(ctx)

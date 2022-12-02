@@ -21,44 +21,22 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
-	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
-	"github.com/nats-io/nats-server/v2/server"
-	natsserver "github.com/nats-io/nats-server/v2/test"
-	"github.com/nats-io/nats.go"
 )
 
-const TEST_PORT = 4222
-
-func RunServerOnPort(port int) *server.Server {
-	opts := natsserver.DefaultTestOptions
-	opts.Port = port
-	return RunServerWithOptions(&opts)
-}
-
-func RunServerWithOptions(opts *server.Options) *server.Server {
-	return natsserver.RunServer(opts)
-}
-
 func Test_SimpleDocProcessTest(t *testing.T) {
-	s := RunServerOnPort(TEST_PORT)
-	err := s.EnableJetStream(&server.JetStreamConfig{})
-	if err != nil {
-		t.Fatalf("unexpected error initializing test NATS: %v", err)
-	}
-	time.Sleep(time.Second * 5)
 
 	ctx := context.Background()
-	config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
-	ctx, err = emitter.JetStreamInit(ctx, config)
+	natsTest := nats.NewNatsTestServer()
+	ctx, err := natsTest.EnableJetStreamForTest(ctx)
 	if err != nil {
-		t.Fatalf("unexpected error initializing jetstream: %v", err)
+		t.Fatal(err)
 	}
-	defer s.Shutdown()
+	defer natsTest.Shutdown()
 	testCases := []struct {
 		name      string
 		doc       processor.Document
@@ -570,6 +548,104 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 		})
 	}
 }
+
+/* func Test_ProcessSubscribeTest(t *testing.T) {
+	s := runServerOnPort(TEST_PORT)
+	err := s.EnableJetStream(&server.JetStreamConfig{})
+	if err != nil {
+		t.Fatalf("unexpected error initializing test NATS: %v", err)
+	}
+	time.Sleep(time.Second * 5)
+
+	ctx := context.Background()
+	config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
+	ctx, err = emitter.JetStreamInit(ctx, config)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
+	defer s.Shutdown()
+	testCases := []struct {
+		name      string
+		doc       processor.Document
+		expectErr bool
+	}{{
+
+		name: "simple test",
+		doc: processor.Document{
+			Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+	}, {
+
+		name: "unpack test",
+		doc: processor.Document{
+			Blob: []byte(`{
+						 "issuer": "google.com",
+						 "info": "this is a cool document",
+						 "nested": [{
+							 "issuer": "google.com",
+							 "info": "this is a cooler nested doc 1"
+						 },{
+							 "issuer": "google.com",
+							 "info": "this is a cooler nested doc 2"
+						 }]
+						}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+	}, {
+
+		name: "bad format",
+		doc: processor.Document{
+			Blob: []byte(`{ NOT JSON YO
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectErr: true,
+	}}
+
+	documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
+
+	// Register
+	err = RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
+	if err != nil {
+		//t.Errorf("unexpected error: %v", err)
+	}
+
+	err = guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
+	if err != nil {
+		//t.Errorf("unexpected error: %v", err)
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			collector.Publish(ctx, &tt.doc)
+
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, 3*time.Second)
+			defer cancel()
+			go func() {
+				err := Subscribe(ctx)
+				if err != nil {
+					if tt.expectErr {
+						return
+					}
+					t.Errorf("unexpected error: %v", err)
+					return
+				}
+			}()
+		})
+	}
+} */
 
 func existAndPop(nodes []*processor.DocumentNode, n *processor.DocumentNode) bool {
 	for i, nn := range nodes {

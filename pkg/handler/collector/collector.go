@@ -61,6 +61,7 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 	return nil
 }
 
+// Publish is used by NATS JetStream to stream the documents and send them to the processor
 func Publish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	js := emitter.FromContext(ctx)
