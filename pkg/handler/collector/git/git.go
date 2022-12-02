@@ -32,7 +32,7 @@ const (
 	CollectorGit = "GIT"
 )
 
-type gitCol struct {
+type gitCollector struct {
 	url           string
 	dir           string
 	lastChecked   time.Time
@@ -41,7 +41,7 @@ type gitCol struct {
 	fileCollector *file.FileCollector
 }
 
-func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitCol {
+func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitCollector {
 	logger := logging.FromContext(ctx)
 	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
 	err := collector.RegisterDocumentCollector(fileCollector, file.FileCollectorType)
@@ -49,7 +49,7 @@ func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval 
 		logger.Errorf("unable to register file collector: %v", err)
 	}
 
-	return &gitCol{
+	return &gitCollector{
 		url:           url,
 		dir:           dir,
 		poll:          poll,
@@ -64,7 +64,7 @@ func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval 
 // or return an error from the collector crashing. This function can keep running and check
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
-func (g *gitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+func (g *gitCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 
 	if g.poll {
@@ -90,7 +90,7 @@ func (g *gitCol) RetrieveArtifacts(ctx context.Context, docChannel chan<- *proce
 	return nil
 }
 
-func (g *gitCol) createOrPull(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
+func (g *gitCollector) createOrPull(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
 	exists := checkIfDirExists(g.dir)
 
 	if !exists {
@@ -120,7 +120,7 @@ func (g *gitCol) createOrPull(ctx context.Context, logger *zap.SugaredLogger, do
 }
 
 // Type returns the collector type
-func (g *gitCol) Type() string {
+func (g *gitCollector) Type() string {
 	return CollectorGit
 }
 
