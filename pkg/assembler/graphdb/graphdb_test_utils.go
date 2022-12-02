@@ -79,6 +79,36 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 	return result.([][]interface{}), nil
 }
 
+func ReadQuery(client Client, query string, args map[string]interface{}) ([]interface{}, error) {
+	session := client.NewSession(neo4j.SessionConfig{})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		// For this testing function, we just collect all values.
+		func(tx Transaction) (interface{}, error) {
+			records, err := tx.Run(query, args)
+			if err != nil {
+				return nil, err
+			}
+			values := make([]interface{}, 0)
+			// Since `records` is valid only while `tx` is in
+			// scope, we have to process all data here.
+			for records.Next() {
+				record := records.Record().Values[0]
+				values = append(values, record)
+			}
+			if err = records.Err(); err != nil {
+				return nil, err
+			}
+			return values, err
+		})
+
+	if err != nil {
+		return nil, err
+	}
+	return result.([]interface{}), nil
+}
+
 // ClearDBForTesting clears the entire database.
 //
 // It is very slow on large amounts of data!
