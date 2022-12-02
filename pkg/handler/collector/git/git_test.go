@@ -89,7 +89,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 				if err := os.Mkdir(tt.fields.dir, os.ModePerm); err != nil {
 					t.Fatal(err)
 				}
-				err := cloneRepoToTemp(logger, tt.fields.url, tt.fields.dir)
+				err := cloneRepoToDir(logger, tt.fields.url, tt.fields.dir)
 				if err != nil {
 					t.Fatal(err)
 				}

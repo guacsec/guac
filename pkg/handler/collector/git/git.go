@@ -97,7 +97,7 @@ func (g *gitCollector) createOrPull(ctx context.Context, logger *zap.SugaredLogg
 		if err := os.Mkdir(g.dir, os.ModePerm); err != nil {
 			return err
 		}
-		err := cloneRepoToTemp(logger, g.url, g.dir)
+		err := cloneRepoToDir(logger, g.url, g.dir)
 		if err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func checkIfDirExists(name string) bool {
 	return !os.IsNotExist(err)
 }
 
-func cloneRepoToTemp(logger *zap.SugaredLogger, url string, directory string) error {
+func cloneRepoToDir(logger *zap.SugaredLogger, url string, directory string) error {
 
 	// Clone to directory
 	logger.Infof("git clone %s %s --recursive", url, directory)
