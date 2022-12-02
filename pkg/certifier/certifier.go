@@ -29,6 +29,11 @@ type Certifier interface {
 	CertifyComponent(ctx context.Context, rootComponent *Component, docChannel chan<- *processor.Document) error
 }
 
+type QueryComponents interface {
+	// GetComponents runs as a goroutine to get the components that will be certified by the Certifier interface
+	GetComponents(ctx context.Context, compChan chan<- *Component) error
+}
+
 // Emitter processes a document
 type Emitter func(*processor.Document) error
 

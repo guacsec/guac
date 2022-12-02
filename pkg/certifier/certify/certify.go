@@ -17,16 +17,12 @@ package certify
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
 const (
@@ -54,7 +50,7 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 // Certify queries the graph DB to get the packages to scan. Utilizing the registered certifiers,
 // it scans and generate vulnerability attestation for each package. Aggregating the results to the
 // top/root level package
-func Certify(ctx context.Context, client graphdb.Client, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
+func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
 	compChan := make(chan *certifier.Component, BufferChannelSize)
@@ -64,7 +60,7 @@ func Certify(ctx context.Context, client graphdb.Client, emitter certifier.Emitt
 	logger := logging.FromContext(ctx)
 
 	go func() {
-		errChan <- getComponents(ctx, client, compChan)
+		errChan <- query.GetComponents(ctx, compChan)
 	}()
 
 	componentsCaptured := false
@@ -105,7 +101,6 @@ func generateDocuments(ctx context.Context, collectedComponent *certifier.Compon
 	for _, certifier := range documentCertifier {
 		c := certifier()
 		go func() {
-
 			errChan <- c.CertifyComponent(ctx, collectedComponent, docChan)
 		}()
 	}
@@ -132,69 +127,4 @@ func generateDocuments(ctx context.Context, collectedComponent *certifier.Compon
 		}
 	}
 	return nil
-}
-
-// getComponents runs as a goroutine to query for root level and dependent packages to scan and passes them
-// to the compChan as they are found
-func getComponents(ctx context.Context, client graphdb.Client, compChan chan<- *certifier.Component) error {
-	// Get top level package MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p
-	// Get all packages that the top level package depends on MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
-	// MATCH (p:Package) WHERE p.purl = "pkg:oci/vul-image-latest?repository_url=ppatel1989" WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
-
-	// TODO: How to handle if a package already has been scanned? Rescan and just merge the nodes?...
-
-	roots, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p", nil)
-	if err != nil {
-		return err
-	}
-	for _, result := range roots {
-		foundNode, ok := result.(dbtype.Node)
-		if !ok {
-			return errors.New("failed to cast to node type")
-		}
-		rootPackage := assembler.PackageNode{}
-		rootPackage.Purl, ok = foundNode.Props["purl"].(string)
-		if !ok {
-			return errors.New("failed to cast purl property to string type")
-		}
-		deps, err := getCompHelper(ctx, client, rootPackage.Purl)
-		if err != nil {
-			return err
-		}
-		rootComponent := &certifier.Component{
-			Package:     rootPackage,
-			DepPackages: deps,
-		}
-		compChan <- rootComponent
-	}
-	return nil
-}
-
-func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string) ([]*certifier.Component, error) {
-	dependencies, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
-		map[string]any{"rootPurl": parentPurl})
-	if err != nil {
-		return nil, err
-	}
-	depPackages := []*certifier.Component{}
-	for _, dep := range dependencies {
-		foundDep, ok := dep.(dbtype.Node)
-		if !ok {
-			return nil, errors.New("failed to cast to node type")
-		}
-		foundDepPack := assembler.PackageNode{}
-		foundDepPack.Purl, ok = foundDep.Props["purl"].(string)
-		if !ok {
-			return nil, errors.New("failed to cast purl property to string type")
-		}
-		deps, err := getCompHelper(ctx, client, foundDepPack.Purl)
-		if err != nil {
-			return nil, err
-		}
-		depPackages = append(depPackages, &certifier.Component{
-			Package:     foundDepPack,
-			DepPackages: deps,
-		})
-	}
-	return depPackages, nil
 }
