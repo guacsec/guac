@@ -32,7 +32,7 @@ const (
 	CollectorGit = "GIT"
 )
 
-type gitCollector struct {
+type gitDocumentCollector struct {
 	url           string
 	dir           string
 	lastChecked   time.Time
@@ -41,7 +41,7 @@ type gitCollector struct {
 	fileCollector *file.FileCollector
 }
 
-func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitCollector {
+func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitDocumentCollector {
 	logger := logging.FromContext(ctx)
 	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
 	err := collector.RegisterDocumentCollector(fileCollector, file.FileCollectorType)
@@ -49,7 +49,7 @@ func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval 
 		logger.Errorf("unable to register file collector: %v", err)
 	}
 
-	return &gitCollector{
+	return &gitDocumentCollector{
 		url:           url,
 		dir:           dir,
 		poll:          poll,
@@ -64,7 +64,7 @@ func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval 
 // or return an error from the collector crashing. This function can keep running and check
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
-func (g *gitCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+func (g *gitDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 
 	if g.poll {
@@ -90,7 +90,7 @@ func (g *gitCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 	return nil
 }
 
-func (g *gitCollector) createOrPull(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
+func (g *gitDocumentCollector) createOrPull(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
 	exists := checkIfDirExists(g.dir)
 
 	if !exists {
@@ -120,7 +120,7 @@ func (g *gitCollector) createOrPull(ctx context.Context, logger *zap.SugaredLogg
 }
 
 // Type returns the collector type
-func (g *gitCollector) Type() string {
+func (g *gitDocumentCollector) Type() string {
 	return CollectorGit
 }
 
