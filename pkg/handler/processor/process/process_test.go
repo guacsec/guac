@@ -23,20 +23,27 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
-	"github.com/guacsec/guac/internal/testing/nats"
+	nats_test "github.com/guacsec/guac/internal/testing/nats"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 )
 
 func Test_SimpleDocProcessTest(t *testing.T) {
-
-	ctx := context.Background()
-	natsTest := nats.NewNatsTestServer()
-	ctx, err := natsTest.EnableJetStreamForTest(ctx)
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer natsTest.Shutdown()
+
+	ctx := context.Background()
+	jetStream := emitter.NewJetStream(url, "", "")
+	defer jetStream.Close()
+	ctx, err = jetStream.JetStreamInit(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
 	testCases := []struct {
 		name      string
 		doc       processor.Document

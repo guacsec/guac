@@ -20,11 +20,13 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
-	"github.com/guacsec/guac/internal/testing/nats"
+	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	processor_data "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 var (
@@ -66,17 +68,26 @@ var (
 )
 
 func TestParseDocumentTree(t *testing.T) {
-	ctx := context.Background()
-	natsTest := nats.NewNatsTestServer()
-	ctx, err := natsTest.EnableJetStreamForTest(ctx)
+	ctx := logging.WithLogger(context.Background())
+	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
+	if err != nil {
+		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
+	}
+
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer natsTest.Shutdown()
-	err = verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
+
+	jetStream := emitter.NewJetStream(url, "", "")
+	defer jetStream.Close()
+	ctx, err = jetStream.JetStreamInit(ctx)
 	if err != nil {
-		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
 	}
+
 	tests := []struct {
 		name    string
 		tree    processor.DocumentTree

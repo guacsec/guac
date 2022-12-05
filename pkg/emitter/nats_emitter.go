@@ -34,12 +34,7 @@ const (
 	SubjectNameDocParsed    string = "DOCUMENTS.parsed"
 )
 
-var (
-	nc *nats.Conn
-	js nats.JetStreamContext
-)
-
-type jetStreamConfig struct {
+type jetStream struct {
 	// url of the NATS server to connect to
 	url string
 	// creds is the user credentials file for NATS authentication
@@ -48,30 +43,32 @@ type jetStreamConfig struct {
 	// nKeyFile is the alternative method of login for NATS
 	// either user credentials or NKey needs to be specified
 	nKeyFile string
+	nc       *nats.Conn
+	js       nats.JetStreamContext
 }
 
-func NewJetStreamConfig(url string, creds string, nKeyFile string) *jetStreamConfig {
-	return &jetStreamConfig{
+func NewJetStream(url string, creds string, nKeyFile string) *jetStream {
+	return &jetStream{
 		url:      url,
 		creds:    creds,
 		nKeyFile: nKeyFile,
 	}
 }
 
-func JetStreamInit(ctx context.Context, config *jetStreamConfig) (context.Context, error) {
+func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) {
 	logger := logging.FromContext(ctx)
 	var err error
 	// Connect Options.
 	opts := []nats.Option{nats.Name(NatsName)}
 
 	// Use UserCredentials
-	if config.creds != "" {
-		opts = append(opts, nats.UserCredentials(config.creds))
+	if j.creds != "" {
+		opts = append(opts, nats.UserCredentials(j.creds))
 	}
 
 	// Use Nkey authentication.
-	if config.nKeyFile != "" {
-		opt, err := nats.NkeyOptionFromSeed(config.nKeyFile)
+	if j.nKeyFile != "" {
+		opt, err := nats.NkeyOptionFromSeed(j.nKeyFile)
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -79,24 +76,26 @@ func JetStreamInit(ctx context.Context, config *jetStreamConfig) (context.Contex
 	}
 
 	// Connect to NATS
-	nc, err = nats.Connect(config.url, opts...)
+	nc, err := nats.Connect(j.url, opts...)
+	j.nc = nc
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to nats server: %w", err)
 	}
 	// Create JetStream Context
-	js, err = nc.JetStream()
+	js, err := nc.JetStream()
+	j.js = js
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to nats jetstream: %w", err)
 	}
-	err = createStreamOrExists(ctx)
+	err = createStreamOrExists(ctx, js)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create stream: %w", err)
 	}
-	return withJetstream(ctx), nil
+	return withJetstream(ctx, js), nil
 
 }
 
-func createStreamOrExists(ctx context.Context) error {
+func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 	logger := logging.FromContext(ctx)
 	stream, err := js.StreamInfo(StreamName)
 
@@ -118,16 +117,16 @@ func createStreamOrExists(ctx context.Context) error {
 	return nil
 }
 
-func Close() {
-	nc.Close()
+func (j *jetStream) Close() {
+	j.nc.Close()
 }
 
-func withJetstream(ctx context.Context) context.Context {
-	return context.WithValue(ctx, jetStreamConfig{}, js)
+func withJetstream(ctx context.Context, js nats.JetStreamContext) context.Context {
+	return context.WithValue(ctx, jetStream{}, js)
 }
 
 func FromContext(ctx context.Context) nats.JetStreamContext {
-	if js, ok := ctx.Value(jetStreamConfig{}).(nats.JetStreamContext); ok {
+	if js, ok := ctx.Value(jetStream{}).(nats.JetStreamContext); ok {
 		return js
 	}
 	return nil

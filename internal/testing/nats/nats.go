@@ -16,17 +16,17 @@
 package nats
 
 import (
-	"context"
 	"fmt"
+	"net"
 	"time"
 
-	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/nats-io/nats-server/v2/server"
 	natsserver "github.com/nats-io/nats-server/v2/test"
-	"github.com/nats-io/nats.go"
 )
 
-const TEST_PORT = 4222
+const (
+	TEST_HOST string = "127.0.0.1"
+)
 
 type natsTestServer struct {
 	server *server.Server
@@ -36,32 +36,49 @@ func NewNatsTestServer() *natsTestServer {
 	return &natsTestServer{}
 }
 
-func runServerOnPort(port int) *server.Server {
+func runServerOnPort(port int) (*server.Server, error) {
 	opts := natsserver.DefaultTestOptions
+	opts.Host = TEST_HOST
 	opts.Port = port
-	return runServerWithOptions(&opts)
+	return runServerWithOptions(&opts), nil
 }
 
 func runServerWithOptions(opts *server.Options) *server.Server {
 	return natsserver.RunServer(opts)
 }
 
-func (n *natsTestServer) EnableJetStreamForTest(ctx context.Context) (context.Context, error) {
-	s := runServerOnPort(TEST_PORT)
-	err := s.EnableJetStream(&server.JetStreamConfig{})
+func (n *natsTestServer) EnableJetStreamForTest() (string, error) {
+	port, err := getFreePort()
 	if err != nil {
-		return nil, fmt.Errorf("unexpected error initializing test NATS: %v", err)
+		return "", err
+	}
+	s, err := runServerOnPort(port)
+	if err != nil {
+		return "", err
+	}
+	err = s.EnableJetStream(&server.JetStreamConfig{})
+	if err != nil {
+		return "", fmt.Errorf("unexpected error initializing test NATS: %v", err)
 	}
 	time.Sleep(time.Second * 5)
 	n.server = s
-	config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
-	ctx, err = emitter.JetStreamInit(ctx, config)
-	if err != nil {
-		return nil, fmt.Errorf("unexpected error initializing jetstream: %v", err)
-	}
-	return ctx, nil
+	url := fmt.Sprintf("nats://%s:%d", TEST_HOST, port)
+	return url, nil
 }
 
 func (n *natsTestServer) Shutdown() {
 	n.server.Shutdown()
+}
+
+// GetFreePort asks the kernel for a free open port that is ready to use.
+func getFreePort() (port int, err error) {
+	var a *net.TCPAddr
+	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+		var l *net.TCPListener
+		if l, err = net.ListenTCP("tcp", a); err == nil {
+			defer l.Close()
+			return l.Addr().(*net.TCPAddr).Port, nil
+		}
+	}
+	return
 }

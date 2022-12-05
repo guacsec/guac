@@ -82,10 +82,10 @@ var pubsubCmd = &cobra.Command{
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		config := emitter.NewJetStreamConfig(nats.DefaultURL, "", "")
-		ctx, err = emitter.JetStreamInit(ctx, config)
+		jetStream := emitter.NewJetStream(nats.DefaultURL, "", "")
+		ctx, err = jetStream.JetStreamInit(ctx)
 		if err != nil {
-			logger.Errorf("jetstream initialization failed with error: %v", err)
+			logger.Errorf("jetStream initialization failed with error: %v", err)
 			os.Exit(1)
 		}
 
@@ -176,7 +176,7 @@ var pubsubCmd = &cobra.Command{
 		}
 
 		wg.Wait()
-		emitter.Close()
+		jetStream.Close()
 	},
 }
 

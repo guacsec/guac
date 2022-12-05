@@ -93,13 +93,12 @@ func Subscribe(ctx context.Context) error {
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logger.Errorf("[ingestor: %s] unable to Ack: %v", id, err)
-				return err
+				return fmt.Errorf("[ingestor: %s] unable to Ack: %v", id, err)
 			}
 			doc := processor.DocumentNode{}
 			err = json.Unmarshal(msgs[0].Data, &doc)
 			if err != nil {
-				logger.Warnf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+				return fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
 			}
 
 			_, err = ParseDocumentTree(ctx, processor.DocumentTree(&doc))

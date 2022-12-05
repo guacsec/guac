@@ -22,11 +22,9 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
+	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats-server/v2/server"
-	natsserver "github.com/nats-io/nats-server/v2/test"
-	"github.com/nats-io/nats.go"
 )
 
 var (
@@ -64,29 +62,19 @@ var (
 	}
 )
 
-const TEST_PORT = 4222
-
-func runServerOnPort(port int) *server.Server {
-	opts := natsserver.DefaultTestOptions
-	opts.Port = port
-	return runServerWithOptions(&opts)
-}
-
-func runServerWithOptions(opts *server.Options) *server.Server {
-	return natsserver.RunServer(opts)
-}
-
 // Need to move nats server from here
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
-	s := runServerOnPort(TEST_PORT)
-	err := s.EnableJetStream(&server.JetStreamConfig{})
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
 	if err != nil {
-		t.Fatalf("unexpected error initializing test NATS: %v", err)
+		t.Fatal(err)
 	}
-	defer s.Shutdown()
+	defer natsTest.Shutdown()
+
 	ctx := context.Background()
-	config := NewJetStreamConfig(nats.DefaultURL, "", "")
-	ctx, err = JetStreamInit(ctx, config)
+	jetStream := NewJetStream(url, "", "")
+	defer jetStream.Close()
+	ctx, err = jetStream.JetStreamInit(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
 	}
