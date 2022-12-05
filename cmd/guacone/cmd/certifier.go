@@ -23,10 +23,12 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	root_package "github.com/guacsec/guac/pkg/certifier/components"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/cobra"
 )
 
@@ -51,6 +53,19 @@ var certifierCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
+		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
+
+		processorFunc, err := getProcessor(ctx)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
+
 		ingestorFunc, err := getIngestor(ctx)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -62,26 +77,34 @@ var certifierCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		packageQueryFunc, err := getPackageQuery(client)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
+
 		totalNum := 0
+		gotErr := false
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 			start := time.Now()
 
-			docNode := &processor.DocumentNode{
-				Document: d,
-				Children: nil,
+			docTree, err := processorFunc(d)
+			if err != nil {
+				gotErr = true
+				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
 			}
-
-			docTree := processor.DocumentTree(docNode)
 
 			graphs, err := ingestorFunc(docTree)
 			if err != nil {
+				gotErr = true
 				return fmt.Errorf("unable to ingest doc tree: %v", err)
 			}
 
 			err = assemblerFunc(graphs)
 			if err != nil {
+				gotErr = true
 				return fmt.Errorf("unable to assemble graphs: %v", err)
 			}
 			t := time.Now()
@@ -100,17 +123,14 @@ var certifierCmd = &cobra.Command{
 			return false
 		}
 
-		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
-		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-		packageQuery := root_package.NewPackageQuery(client)
-		if err := certify.Certify(ctx, packageQuery, emit, errHandler); err != nil {
+		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
-		logger.Infof("completed ingesting %v documents", totalNum)
+		if gotErr {
+			logger.Fatalf("completed ingestion with errors")
+		} else {
+			logger.Infof("completed ingesting %v documents", totalNum)
+		}
 	},
 }
 
@@ -125,4 +145,11 @@ func validateCertifierFlags() (options, error) {
 	opts.dbAddr = flags.dbAddr
 
 	return opts, nil
+}
+
+func getPackageQuery(client neo4j.Driver) (func() certifier.QueryComponents, error) {
+	return func() certifier.QueryComponents {
+		packageQuery := root_package.NewPackageQuery(client)
+		return packageQuery
+	}, nil
 }
