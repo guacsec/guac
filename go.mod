@@ -90,7 +90,12 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/minio/highwayhash v1.0.2 // indirect
+	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/moby/buildkit v0.10.3 // indirect
+	github.com/nats-io/jwt/v2 v2.3.0 // indirect
+	github.com/nats-io/nkeys v0.3.0 // indirect
+	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
@@ -120,6 +125,8 @@ require (
 	golang.org/x/term v0.3.0 // indirect
 	golang.org/x/tools v0.2.1-0.20221108172846-9474ca31d0df // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	golang.org/x/term v0.2.0 // indirect
+	golang.org/x/time v0.2.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -132,6 +139,8 @@ require (
 	github.com/CycloneDX/cyclonedx-go v0.7.0
 	github.com/go-git/go-git/v5 v5.5.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/nats-io/nats-server/v2 v2.9.8
+	github.com/nats-io/nats.go v1.20.0
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/sigstore/sigstore v1.5.0
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
