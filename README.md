@@ -33,6 +33,15 @@ Here is an overview of the architecture of GUAC:
 
 ![image](https://user-images.githubusercontent.com/3060102/182689908-477f4770-1142-4c18-8fa9-16d93dcf84b4.png)
 
+## Supported input formats
+
+- [CycloneDX](https://github.com/CycloneDX/specification)
+- [Dead Simple Signing Envelope](https://github.com/secure-systems-lab/dsse)
+- [In-toto ITE6](https://github.com/in-toto/attestation)
+- [OpenSSF Scorecard](https://github.com/ossf/scorecard)
+- [SLSA](https://github.com/slsa-framework/slsa)
+- [SPDX](https://spdx.dev/specifications/)
+
 ## Additional References
 
 - [GUAC Intro Slides](https://docs.google.com/presentation/d/1WF4dsJiwR6URWPgn1aiHAE3iLVl-oGP4SJRWFpcOlao/edit#slide=id.p)
