@@ -24,6 +24,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier/certify"
+	root_package "github.com/guacsec/guac/pkg/certifier/components"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
@@ -105,7 +106,8 @@ var certifierCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		if err := certify.Certify(ctx, client, emit, errHandler); err != nil {
+		packageQuery := root_package.NewPackageQuery(client)
+		if err := certify.Certify(ctx, packageQuery, emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
 		logger.Infof("completed ingesting %v documents", totalNum)
