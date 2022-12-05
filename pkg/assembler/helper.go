@@ -24,26 +24,26 @@ import (
 
 // objectMetadata appends metadata associated with the node
 type objectMetadata struct {
-	// sourceInfo is the file location from which the node was created
-	sourceInfo string
-	// collectorInfo is the collector from which the file that created the node came from
-	collectorInfo string
+	// Source is the file location from which the node was created
+	Source string
+	// Collector is the collector from which the file that created the node came from
+	Collector string
 }
 
 // NewObjectMetadata creates a new instance to add metadata to nodes
 func NewObjectMetadata(s processor.SourceInformation) *objectMetadata {
 	return &objectMetadata{
-		sourceInfo:    s.Source,
-		collectorInfo: s.Collector,
+		Source:    s.Source,
+		Collector: s.Collector,
 	}
 }
 
 func (o *objectMetadata) addProperties(prop map[string]interface{}) {
-	if len(o.sourceInfo) > 0 {
-		prop["source"] = o.sourceInfo
+	if len(o.Source) > 0 {
+		prop["source"] = o.Source
 	}
-	if len(o.collectorInfo) > 0 {
-		prop["collector"] = o.collectorInfo
+	if len(o.Collector) > 0 {
+		prop["collector"] = o.Collector
 	}
 }
 

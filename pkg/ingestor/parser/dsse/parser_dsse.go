@@ -60,7 +60,7 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 			return fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
 		}
 		d.identities = append(d.identities, assembler.IdentityNode{
-			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
+			IdentityID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
 			KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), NodeData: *assembler.NewObjectMetadata(d.doc.SourceInformation)})
 	}
 	return nil

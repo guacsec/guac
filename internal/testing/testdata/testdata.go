@@ -202,11 +202,11 @@ var (
 	keyHash, _               = dsse.SHA256KeyID(EcdsaPubKey)
 
 	Ident = assembler.IdentityNode{
-		ID:        "test",
-		Digest:    keyHash,
-		Key:       base64.StdEncoding.EncodeToString(pemBytes),
-		KeyType:   "ecdsa",
-		KeyScheme: "ecdsa",
+		IdentityID: "test",
+		Digest:     keyHash,
+		Key:        base64.StdEncoding.EncodeToString(pemBytes),
+		KeyType:    "ecdsa",
+		KeyScheme:  "ecdsa",
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -581,14 +581,14 @@ func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
 					}
 				}
 			} else if node1.Type() == "Identity" && node2.Type() == "Identity" {
-				if node1.(assembler.IdentityNode).ID == node2.(assembler.IdentityNode).ID {
+				if node1.(assembler.IdentityNode).IdentityID == node2.(assembler.IdentityNode).IdentityID {
 					if reflect.DeepEqual(node1, node2) {
 						e = true
 						break
 					}
 				}
 			} else if node1.Type() == "Vulnerability" && node2.Type() == "Vulnerability" {
-				if node1.(assembler.VulnerabilityNode).ID == node2.(assembler.VulnerabilityNode).ID {
+				if node1.(assembler.VulnerabilityNode).VulnerabilityID == node2.(assembler.VulnerabilityNode).VulnerabilityID {
 					if reflect.DeepEqual(node1, node2) {
 						e = true
 						break
