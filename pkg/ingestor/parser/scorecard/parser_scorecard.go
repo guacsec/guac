@@ -100,7 +100,7 @@ func metadataId(s *sc.JSONScorecardResultV2) string {
 func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
 	mnNode := assembler.MetadataNode{
 		MetadataType: "scorecard",
-		ID:           metadataId(s),
+		MetadataID:   metadataId(s),
 		Details:      map[string]interface{}{},
 	}
 

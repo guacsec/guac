@@ -77,7 +77,7 @@ var (
 	}
 
 	vulNode1 = assembler.VulnerabilityNode{
-		ID: "GHSA-7rjr-3q55-vv33",
+		VulnerabilityID: "GHSA-7rjr-3q55-vv33",
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -86,7 +86,7 @@ var (
 		),
 	}
 	vulNode2 = assembler.VulnerabilityNode{
-		ID: "GHSA-8489-44mv-ggj8",
+		VulnerabilityID: "GHSA-8489-44mv-ggj8",
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -95,7 +95,7 @@ var (
 		),
 	}
 	vulNode3 = assembler.VulnerabilityNode{
-		ID: "GHSA-fxph-q3j8-mv87",
+		VulnerabilityID: "GHSA-fxph-q3j8-mv87",
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -104,7 +104,7 @@ var (
 		),
 	}
 	vulNode4 = assembler.VulnerabilityNode{
-		ID: "GHSA-jfh8-c2jp-5v3q",
+		VulnerabilityID: "GHSA-jfh8-c2jp-5v3q",
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -113,7 +113,7 @@ var (
 		),
 	}
 	vulNode5 = assembler.VulnerabilityNode{
-		ID: "GHSA-p6xc-xr62-6r2g",
+		VulnerabilityID: "GHSA-p6xc-xr62-6r2g",
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -122,7 +122,7 @@ var (
 		),
 	}
 	vulNode6 = assembler.VulnerabilityNode{
-		ID: "GHSA-vwqq-5vrc-xw9h",
+		VulnerabilityID: "GHSA-vwqq-5vrc-xw9h",
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",

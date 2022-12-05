@@ -18,6 +18,9 @@
 package assembler
 
 import (
+	"encoding/json"
+	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -30,15 +33,28 @@ const (
 )
 
 type MockNode struct {
-	Id       string
-	Address  string
-	Name     string
-	Age      *int
-	Score    *int
-	digest   string
-	digests  []string
-	Payload  map[string]interface{}
-	NodeData objectMetadata
+	NodeId   string                 `json:"node_id"`
+	Address  string                 `json:"address"`
+	Name     string                 `json:"name"`
+	Age      *int                   `json:"age"`
+	Score    *int                   `json:"score"`
+	digest   string                 `json:"digest"`
+	digests  []string               `json:"digests"`
+	Payload  map[string]interface{} `json:"payload"`
+	NodeData objectMetadata         `json:"nodedata"`
+}
+
+func (n MockNode) MarshalJSON() ([]byte, error) {
+	marshalProperties := make(map[string]interface{})
+
+	for k, v := range n.Properties() {
+		marshalProperties[k] = v
+	}
+
+	marshalProperties["type"] = n.Type()
+	marshalProperties["nodedata"] = n.NodeData
+	marshalProperties["payload"] = n.Payload
+	return json.Marshal(marshalProperties)
 }
 
 func (n MockNode) Type() string {
@@ -47,7 +63,7 @@ func (n MockNode) Type() string {
 
 func (n MockNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["id"] = n.Id
+	properties["node_id"] = n.NodeId
 	properties["address"] = n.Address
 	properties["name"] = n.Name
 	properties["digest"] = strings.ToLower(n.digest)
@@ -66,7 +82,7 @@ func (n MockNode) Properties() map[string]interface{} {
 }
 
 func (n MockNode) PropertyNames() []string {
-	keys := []string{"id", "address", "name", "digest", "digests"}
+	keys := []string{"node_id", "address", "name", "digest", "digests"}
 	if n.Age != nil {
 		keys = append(keys, "age")
 	}
@@ -85,12 +101,27 @@ func (n MockNode) IdentifiablePropertyNames() []string {
 	if n.Age != nil {
 		return []string{"name", "age"}
 	}
-	return []string{"id"}
+	return []string{"node_id"}
 }
 
 type MockEdge struct {
-	A, B MockNode
-	Id   *int
+	A      MockNode `json:"a"`
+	B      MockNode `json:"b"`
+	EdgeId *int     `json:"edge_id"`
+}
+
+func (e MockEdge) MarshalJSON() ([]byte, error) {
+	marshalProperties := make(map[string]interface{})
+
+	for k, v := range e.Properties() {
+		marshalProperties[k] = v
+	}
+
+	marshalProperties["a"] = e.A
+	marshalProperties["b"] = e.B
+	marshalProperties["type"] = e.Type()
+
+	return json.Marshal(marshalProperties)
 }
 
 func (e MockEdge) Type() string {
@@ -103,24 +134,183 @@ func (e MockEdge) Nodes() (v, u GuacNode) {
 
 func (e MockEdge) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	if e.Id != nil {
-		properties["id"] = *e.Id
+	if e.EdgeId != nil {
+		properties["edge_id"] = *e.EdgeId
 	}
 	return properties
 }
 
 func (e MockEdge) PropertyNames() []string {
-	if e.Id != nil {
-		return []string{"id"}
+	if e.EdgeId != nil {
+		return []string{"edge_id"}
 	}
 	return []string{}
 }
 
 func (e MockEdge) IdentifiablePropertyNames() []string {
-	if e.Id != nil {
-		return []string{"id"}
+	if e.EdgeId != nil {
+		return []string{"edge_id"}
 	}
 	return []string{}
+}
+
+func Test_MarshalMockNode(t *testing.T) {
+	expectedN1MockJSON := []byte(
+		`{
+		"node_id":"id1",
+		"address": "addr1",
+		"age": 42,
+		"collector": "TestCollector",
+		"digest": "sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		"digests": [
+		  "sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		  "sha256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"
+		],
+		"id": "TestID",
+		"name": "name1",
+		"nodedata": {
+		  "Source": "TestSource",
+		  "Collector": "TestCollector"
+		},
+		"payload": {
+		  "id": "TestID",
+		  "uri": "TestURI"
+		},
+		"source": "TestSource",
+		"type": "MockNode",
+		"uri": "TestURI"
+	}`)
+
+	age := 42
+	n1 := MockNode{"id1", "addr1", "name1", &age, nil,
+		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		map[string]interface{}{
+			"id":  "TestID",
+			"uri": "TestURI",
+		},
+		*NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			})}
+
+	n1JSON, err := n1.MarshalJSON()
+	fmt.Print(string(n1JSON))
+	if err != nil {
+		t.Fatalf("n1.MarshalJSON failed with error: %v", err)
+	}
+	if !json.Valid(n1JSON) {
+		t.Fatalf("n1.MarshalJSON produced invalid JSON")
+	}
+	if !reflect.DeepEqual(consistentJsonBytes(n1JSON), consistentJsonBytes(expectedN1MockJSON)) {
+		t.Fatalf("n1.MarshalJSON failed to match expected output")
+	}
+}
+
+// consistentJsonBytes makes sure that the blob byte comparison
+// does not differ due to whitespace in testing definitions.
+func consistentJsonBytes(b []byte) []byte {
+	var v interface{}
+	err := json.Unmarshal(b, &v)
+	if err != nil {
+		panic(err)
+	}
+	out, _ := json.Marshal(v)
+	return out
+}
+
+func Test_MarshalMockEdge(t *testing.T) {
+	expectedE1MockJSON := []byte(`
+	{
+		"a":{
+		   "address":"addr1",
+		   "age":42,
+		   "collector":"TestCollector",
+		   "digest":"sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		   "digests":[
+			  "sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+			  "sha256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"
+		   ],
+		   "id":"TestID",
+		   "name":"name1",
+		   "node_id":"id1",
+		   "nodedata":{
+			  "Source":"TestSource",
+			  "Collector":"TestCollector"
+		   },
+		   "payload":{
+			  "id":"TestID",
+			  "uri":"TestURI"
+		   },
+		   "source":"TestSource",
+		   "type":"MockNode",
+		   "uri":"TestURI"
+		},
+		"b":{
+		   "address":"addr1",
+		   "collector":"TestCollector",
+		   "digest":"sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		   "digests":[
+			  "sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+			  "sha256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"
+		   ],
+		   "name":"name2",
+		   "node_id":"id2",
+		   "nodedata":{
+			  "Source":"TestSource",
+			  "Collector":"TestCollector"
+		   },
+		   "payload":{
+			  "uri":"TestURI"
+		   },
+		   "score":0,
+		   "source":"TestSource",
+		   "type":"MockNode",
+		   "uri":"TestURI"
+		},
+		"edge_id":0,
+		"type":"MockEdge"
+	 }`)
+
+	score1 := 0
+	age := 42
+	n1 := MockNode{"id1", "addr1", "name1", &age, nil,
+		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		map[string]interface{}{
+			"id":  "TestID",
+			"uri": "TestURI",
+		},
+		*NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			})}
+	n2 := MockNode{"id2", "addr1", "name2", nil, &score1,
+		"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
+		[]string{"SHA256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", "SHA256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4"},
+		map[string]interface{}{
+			"uri": "TestURI",
+		},
+		*NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			})}
+	edge_id := 0
+	e1 := MockEdge{n1, n2, &edge_id}
+
+	e1JSON, err := e1.MarshalJSON()
+	if err != nil {
+		t.Fatalf("e1.MarshalJSON failed with error: %v", err)
+	}
+	if !json.Valid(e1JSON) {
+		t.Fatalf("e1.MarshalJSON produced invalid JSON")
+	}
+	if !reflect.DeepEqual(consistentJsonBytes(e1JSON), consistentJsonBytes(expectedE1MockJSON)) {
+		t.Fatalf("e1.MarshalJSON failed to match expected output")
+	}
 }
 
 func Test_MockNodes(t *testing.T) {

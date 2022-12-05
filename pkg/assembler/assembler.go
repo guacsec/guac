@@ -15,6 +15,12 @@
 
 package assembler
 
+import (
+	"encoding/json"
+	"errors"
+	"reflect"
+)
+
 type assembler struct{} //nolint: unused
 
 // NOTE: `GuacNode` and `GuacEdge` interfaces are very experimental and might
@@ -140,3 +146,118 @@ func (g *Graph) AppendGraph(gs ...Graph) {
 
 // AssemblerInput represents the inputs to add to the graph
 type AssemblerInput = Graph
+
+// UnmarshalJSON deserializes back to graph struct with GuacNode and GuacEdge
+func (g *Graph) UnmarshalJSON(b []byte) error {
+
+	var objMap map[string]*json.RawMessage
+	err := json.Unmarshal(b, &objMap)
+	if err != nil {
+		return err
+	}
+
+	var rawMessagesForGuacNodes []*json.RawMessage
+	err = json.Unmarshal(*objMap["Nodes"], &rawMessagesForGuacNodes)
+	if err != nil {
+		return err
+	}
+
+	var rawMessagesForGuacEdges []*json.RawMessage
+	err = json.Unmarshal(*objMap["Edges"], &rawMessagesForGuacEdges)
+	if err != nil {
+		return err
+	}
+
+	g.Nodes = make([]GuacNode, len(rawMessagesForGuacNodes))
+	g.Edges = make([]GuacEdge, len(rawMessagesForGuacEdges))
+
+	foundNodes, err := unmarshalNodeType(rawMessagesForGuacNodes, map[string]reflect.Type{
+		ArtifactNodeType:      reflect.TypeOf(ArtifactNode{}),
+		PackageNodeType:       reflect.TypeOf(PackageNode{}),
+		IdentityNodeType:      reflect.TypeOf(IdentityNode{}),
+		AttestationNodeType:   reflect.TypeOf(AttestationNode{}),
+		BuilderNodeType:       reflect.TypeOf(BuilderNode{}),
+		MetadataNodeType:      reflect.TypeOf(MetadataNode{}),
+		VulnerabilityNodeType: reflect.TypeOf(VulnerabilityNode{}),
+	})
+	if err != nil {
+		return err
+	}
+
+	foundEdges, err := unmarshalEdgeType(rawMessagesForGuacEdges, map[string]reflect.Type{
+		IdentityForEdgeType:    reflect.TypeOf(IdentityForEdge{}),
+		AttestationForEdgeType: reflect.TypeOf(AttestationForEdge{}),
+		BuiltByEdgeType:        reflect.TypeOf(BuiltByEdge{}),
+		DependsOnEdgeType:      reflect.TypeOf(DependsOnEdge{}),
+		ContainsEdgeType:       reflect.TypeOf(ContainsEdge{}),
+		MetadataForEdgeType:    reflect.TypeOf(MetadataForEdge{}),
+		VulnerableEdgeType:     reflect.TypeOf(VulnerableEdge{}),
+	})
+	if err != nil {
+		return err
+	}
+
+	g.Nodes = foundNodes
+	g.Edges = foundEdges
+
+	return nil
+}
+
+func unmarshalNodeType(rawMessagesForGuacNodes []*json.RawMessage, customTypes map[string]reflect.Type) ([]GuacNode, error) {
+	foundNodes := make([]GuacNode, len(rawMessagesForGuacNodes))
+
+	var m map[string]interface{}
+	for index, rawMessage := range rawMessagesForGuacNodes {
+		err := json.Unmarshal(*rawMessage, &m)
+		if err != nil {
+			return nil, err
+		}
+		foundType, ok := m["type"].(string)
+		if !ok {
+			return nil, errors.New("failed to cast type to string when calling unmarshal")
+		}
+
+		var value GuacNode
+		if ty, found := customTypes[foundType]; found {
+			value = reflect.New(ty).Interface().(GuacNode)
+		} else {
+			return nil, errors.New("unsupported type found")
+		}
+
+		err = json.Unmarshal(*rawMessage, &value)
+		if err != nil {
+			return nil, err
+		}
+		foundNodes[index] = value
+	}
+	return foundNodes, nil
+}
+
+func unmarshalEdgeType(rawMessagesForGuacEdges []*json.RawMessage, customTypes map[string]reflect.Type) ([]GuacEdge, error) {
+	foundEdges := make([]GuacEdge, len(rawMessagesForGuacEdges))
+	var m map[string]interface{}
+	for index, rawMessage := range rawMessagesForGuacEdges {
+		err := json.Unmarshal(*rawMessage, &m)
+		if err != nil {
+			return nil, err
+		}
+		foundType, ok := m["type"].(string)
+		if !ok {
+			return nil, errors.New("failed to cast type to string when calling unmarshal")
+		}
+
+		var value GuacEdge
+		if ty, found := customTypes[foundType]; found {
+			value = reflect.New(ty).Interface().(GuacEdge)
+		} else {
+			return nil, errors.New("unsupported type found")
+		}
+
+		err = json.Unmarshal(*rawMessage, &value)
+		if err != nil {
+			return nil, err
+		}
+		foundEdges[index] = value
+	}
+	return foundEdges, nil
+}

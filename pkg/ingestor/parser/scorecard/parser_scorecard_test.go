@@ -45,7 +45,7 @@ func Test_scorecardParser(t *testing.T) {
 		wantNodes: []assembler.GuacNode{
 			assembler.MetadataNode{
 				MetadataType: "scorecard",
-				ID:           "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
+				MetadataID:   "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
 				Details: map[string]interface{}{
 					"repo":                "git+https://github.com/kubernetes/kubernetes",
 					"commit":              "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
@@ -72,7 +72,7 @@ func Test_scorecardParser(t *testing.T) {
 			assembler.MetadataForEdge{
 				MetadataNode: assembler.MetadataNode{
 					MetadataType: "scorecard",
-					ID:           "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
+					MetadataID:   "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
 					Details: map[string]interface{}{
 						"repo":                "git+https://github.com/kubernetes/kubernetes",
 						"commit":              "sha1:5835544ca568b757a8ecae5c153f317e5736700e",

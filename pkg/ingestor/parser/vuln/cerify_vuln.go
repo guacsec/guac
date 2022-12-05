@@ -114,8 +114,8 @@ func (c *vulnCertificationParser) getAttestation(blob []byte, source string, sta
 func (c *vulnCertificationParser) getVulns(blob []byte, source string, statement *attestation_vuln.VulnerabilityStatement) {
 	for _, id := range statement.Predicate.Scanner.Result {
 		vulNode := assembler.VulnerabilityNode{
-			ID:       id.VulnerabilityId,
-			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
+			VulnerabilityID: id.VulnerabilityId,
+			NodeData:        *assembler.NewObjectMetadata(c.doc.SourceInformation),
 		}
 		c.vulns = append(c.vulns, vulNode)
 	}
