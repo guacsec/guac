@@ -58,8 +58,10 @@ func (n *natsTestServer) EnableJetStreamForTest() (string, error) {
 	}
 	err = s.EnableJetStream(&server.JetStreamConfig{})
 	if err != nil {
+		s.Shutdown()
 		return "", fmt.Errorf("unexpected error initializing test NATS: %v", err)
 	}
+	// sleep added to ensure NATS and JetStream full functional before test continue
 	time.Sleep(time.Second * 5)
 	n.server = s
 	url := fmt.Sprintf("nats://%s:%d", TEST_HOST, port)
@@ -71,14 +73,14 @@ func (n *natsTestServer) Shutdown() {
 }
 
 // GetFreePort asks the kernel for a free open port that is ready to use.
-func getFreePort() (port int, err error) {
-	var a *net.TCPAddr
-	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+func getFreePort() (int, error) {
+	a, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err == nil {
 		var l *net.TCPListener
 		if l, err = net.ListenTCP("tcp", a); err == nil {
 			defer l.Close()
 			return l.Addr().(*net.TCPAddr).Port, nil
 		}
 	}
-	return
+	return 0, err
 }

@@ -60,7 +60,6 @@ func NewJetStream(url string, creds string, nKeyFile string) *jetStream {
 
 // JetStreamInit initializes NATS and enabled Jet Stream to be used for GUAC
 func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) {
-	logger := logging.FromContext(ctx)
 	var err error
 	// Connect Options.
 	opts := []nats.Option{nats.Name(NatsName)}
@@ -74,40 +73,44 @@ func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) 
 	if j.nKeyFile != "" {
 		opt, err := nats.NkeyOptionFromSeed(j.nKeyFile)
 		if err != nil {
-			logger.Fatal(err)
+			return ctx, fmt.Errorf("failed to load nKeyFile for nats: %w", err)
 		}
 		opts = append(opts, opt)
 	}
 
 	// Connect to NATS
 	nc, err := nats.Connect(j.url, opts...)
-	j.nc = nc
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to nats server: %w", err)
+		return ctx, fmt.Errorf("unable to connect to nats server: %w", err)
 	}
 	// Create JetStream Context
 	js, err := nc.JetStream()
-	j.js = js
+
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to nats jetstream: %w", err)
+		nc.Close()
+		return ctx, fmt.Errorf("unable to connect to nats jetstream: %w", err)
 	}
 	err = createStreamOrExists(ctx, js)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create stream: %w", err)
+		nc.Close()
+		return ctx, fmt.Errorf("failed to create stream: %w", err)
 	}
-	return withJetstream(ctx, js), nil
 
+	j.nc = nc
+	j.js = js
+
+	return withJetstream(ctx, js), nil
 }
 
 func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 	logger := logging.FromContext(ctx)
-	stream, err := js.StreamInfo(StreamName)
+	_, err := js.StreamInfo(StreamName)
 
 	if err != nil && !errors.Is(err, nats.ErrStreamNotFound) {
 		return err
 	}
 	// stream not found, create it
-	if stream == nil {
+	if errors.Is(err, nats.ErrStreamNotFound) {
 		logger.Infof("creating stream %q and subjects %q", StreamName, StreamSubjects)
 		_, err = js.AddStream(&nats.StreamConfig{
 			Name:      StreamName,
@@ -123,7 +126,25 @@ func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 
 // Close closes the NATS connection
 func (j *jetStream) Close() {
-	j.nc.Close()
+	if j.nc != nil {
+		j.nc.Close()
+	}
+}
+
+// Recreate stream closes the NATS connection
+func (j *jetStream) RecreateStream(ctx context.Context) error {
+	if j.js != nil {
+		err := j.js.DeleteStream(StreamName)
+		if err != nil {
+			return fmt.Errorf("failed to delete stream: %w", err)
+		}
+	}
+	err := createStreamOrExists(ctx, j.js)
+	if err != nil {
+		j.Close()
+		return fmt.Errorf("failed to create stream: %w", err)
+	}
+	return nil
 }
 
 func withJetstream(ctx context.Context, js nats.JetStreamContext) context.Context {

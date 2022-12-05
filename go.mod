@@ -143,6 +143,8 @@ require (
 	github.com/nats-io/nats.go v1.20.0
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/sigstore/sigstore v1.5.0
+	github.com/satori/go.uuid v1.2.0
+	github.com/sigstore/sigstore v1.4.6
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
 	github.com/spf13/viper v1.14.0
 	golang.org/x/vuln v0.0.0-20221122171214-05fb7250142c

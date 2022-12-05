@@ -18,51 +18,23 @@ package emitter
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
+	"time"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/simpledoc"
+	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
+	procssor_testdata "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/logging"
-)
-
-var (
-	// Taken from: https://slsa.dev/provenance/v0.1#example
-	ite6SLSA = `
-	{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"subject": [{"name": "_", "digest": {"sha256": "5678..."}}],
-		"predicateType": "https://slsa.dev/provenance/v0.2",
-		"predicate": {
-		  "buildType": "https://example.com/Makefile",
-		  "builder": { "id": "mailto:person@example.com" },
-		  "invocation": {
-			"configSource": {
-			  "uri": "https://example.com/example-1.2.3.tar.gz",
-			  "digest": {"sha256": "1234..."},
-			  "entryPoint": "src:foo",                
-			},
-			"parameters": {"CFLAGS": "-O3"}           
-		  },
-		  "materials": [{
-			"uri": "https://example.com/example-1.2.3.tar.gz",
-			"digest": {"sha256": "1234..."}
-		  }]
-		}
-	}`
-	ite6SLSADoc = processor.Document{
-		Blob:   []byte(ite6SLSA),
-		Type:   simpledoc.SimpleDocType,
-		Format: processor.FormatJSON,
-		SourceInformation: processor.SourceInformation{
-			Collector: "TestCollector",
-			Source:    "TestSource",
-		},
-	}
+	uuid "github.com/satori/go.uuid"
 )
 
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
+	expectedDocTree := procssor_testdata.DocNode(&testdata.Ite6SLSADoc)
+
 	natsTest := nats_test.NewNatsTestServer()
 	url, err := natsTest.EnableJetStreamForTest()
 	if err != nil {
@@ -72,15 +44,49 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 
 	ctx := context.Background()
 	jetStream := NewJetStream(url, "", "")
-	defer jetStream.Close()
 	ctx, err = jetStream.JetStreamInit(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
 	}
-	err = testPublish(ctx, &ite6SLSADoc)
+	err = jetStream.RecreateStream(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error recreating jetstream: %v", err)
+	}
+	defer jetStream.Close()
+	err = testPublish(ctx, &testdata.Ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
+
+	var cancel context.CancelFunc
+
+	ctx, cancel = context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	docChan := make(chan processor.DocumentTree, 1)
+	errChan := make(chan error, 1)
+	defer close(errChan)
+	go func() {
+		errChan <- testSubscribe(ctx, docChan)
+	}()
+
+	numSubscribers := 1
+	subscribersDone := 0
+
+	for subscribersDone < numSubscribers {
+		select {
+		case d := <-docChan:
+			if !procssor_testdata.DocTreeEqual(d, expectedDocTree) {
+				t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", procssor_testdata.StringTree(d), procssor_testdata.StringTree(expectedDocTree))
+			}
+		case err := <-errChan:
+			if err != nil && !errors.Is(err, context.DeadlineExceeded) {
+				t.Errorf("nats emitter Subscribe test erroed = %v", err)
+			}
+			subscribersDone += 1
+		}
+	}
+
 }
 
 func testPublish(ctx context.Context, d *processor.Document) error {
@@ -96,4 +102,46 @@ func testPublish(ctx context.Context, d *processor.Document) error {
 	}
 	logger.Infof("doc published: %+v", d)
 	return nil
+}
+
+func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree) error {
+	logger := logging.FromContext(ctx)
+	js := FromContext(ctx)
+	id := uuid.NewV4().String()
+	sub, err := js.PullSubscribe(SubjectNameDocCollected, "processor")
+	if err != nil {
+		logger.Errorf("processor subscribe failed: %s", err)
+		return err
+	}
+	for {
+		// if the context is canceled we want to break out of the loop
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		msgs, err := sub.Fetch(1)
+		if err != nil {
+			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		if len(msgs) > 0 {
+			err := msgs[0].Ack()
+			if err != nil {
+				logger.Errorf("[processor: %v] unable to Ack: %v", id, err)
+				return err
+			}
+			doc := processor.Document{}
+			err = json.Unmarshal(msgs[0].Data, &doc)
+			if err != nil {
+				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+			}
+
+			docTree, err := process.Process(ctx, &doc)
+			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
+			if err != nil {
+				return err
+			}
+			docChannel <- docTree
+		}
+	}
 }
