@@ -17,11 +17,13 @@ package testdata
 
 import (
 	_ "embed"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"reflect"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
 var (
@@ -76,6 +78,68 @@ var (
 
 	//go:embed testdata/certify-vuln.json
 	ITE6VulnExample []byte
+
+	// DSSE/SLSA Testdata
+	// Taken from: https://slsa.dev/provenance/v0.1#example
+	ite6SLSA = `
+	{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"subject": [{"name": "helloworld", "digest": {"sha256": "5678..."}}],
+		"predicateType": "https://slsa.dev/provenance/v0.2",
+		"predicate": {
+			"builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
+			"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+			"invocation": {
+			  "configSource": {
+				"uri": "git+https://github.com/curl/curl-docker@master",
+				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },   
+				"entryPoint": "build.yaml:maketgz"
+			  }
+			},
+			"metadata": {
+			  "buildStartedOn": "2020-08-19T08:38:00Z",
+			  "completeness": {
+				  "environment": true
+			  }
+			},
+			"materials": [
+			  {
+				"uri": "git+https://github.com/curl/curl-docker@master",
+				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
+			  }, {
+				"uri": "github_hosted_vm:ubuntu-18.04:20210123.1",
+				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
+			  }
+			]
+		}
+	}`
+	b64ITE6SLSA    = base64.StdEncoding.EncodeToString([]byte(ite6SLSA))
+	ite6Payload, _ = json.Marshal(dsse.Envelope{
+		PayloadType: "https://in-toto.io/Statement/v0.1",
+		Payload:     b64ITE6SLSA,
+		Signatures: []dsse.Signature{{
+			KeyID: "id1",
+			Sig:   "test",
+		}},
+	})
+	Ite6DSSEDoc = processor.Document{
+		Blob:   ite6Payload,
+		Type:   processor.DocumentDSSE,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	}
+	Ite6SLSADoc = processor.Document{
+		Blob:   []byte(ite6SLSA),
+		Type:   processor.DocumentITE6SLSA,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	}
 )
 
 func existAndPop(nodes []*processor.DocumentNode, n *processor.DocumentNode) bool {
