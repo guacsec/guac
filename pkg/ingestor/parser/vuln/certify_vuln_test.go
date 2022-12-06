@@ -19,8 +19,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
-	processor_data "github.com/guacsec/guac/internal/testing/processor"
+	testdata "github.com/guacsec/guac/internal/testing"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -175,7 +174,7 @@ func Test_vulnCertificationParser(t *testing.T) {
 	}{{
 		name: "valid vulnerability certifier document",
 		doc: &processor.Document{
-			Blob:   processor_data.ITE6VulnExample,
+			Blob:   testdata.ITE6VulnExample,
 			Format: processor.FormatJSON,
 			Type:   processor.DocumentITE6Vul,
 			SourceInformation: processor.SourceInformation{

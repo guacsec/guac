@@ -19,8 +19,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
-	processor_data "github.com/guacsec/guac/internal/testing/processor"
+	testdata "github.com/guacsec/guac/internal/testing"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
@@ -40,7 +39,7 @@ var (
 
 	spdxDocTree = processor.DocumentNode{
 		Document: &processor.Document{
-			Blob:   processor_data.SpdxExampleAlpine,
+			Blob:   testdata.SpdxExampleAlpine,
 			Format: processor.FormatJSON,
 			Type:   processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{

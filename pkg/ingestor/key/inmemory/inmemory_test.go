@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
+	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"

@@ -20,8 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	testdata_ing "github.com/guacsec/guac/internal/testing/ingestor/testdata"
-	testdata "github.com/guacsec/guac/internal/testing/processor"
+	testdata "github.com/guacsec/guac/internal/testing"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -108,7 +107,7 @@ func Test_scorecardParser(t *testing.T) {
 			if nodes := s.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
 				t.Errorf("scorecard.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
 			}
-			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata_ing.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
+			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
 				t.Errorf("scorecard.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
 		})
