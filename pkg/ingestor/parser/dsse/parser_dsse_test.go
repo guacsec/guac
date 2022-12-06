@@ -43,7 +43,7 @@ func Test_DsseParser(t *testing.T) {
 		wantErr      bool
 	}{{
 		name:         "testing",
-		doc:          &processor_data.Ite6DSSEDoc,
+		doc:          &testdata.Ite6DSSEDoc,
 		wantNodes:    testdata.DsseNodes,
 		wantEdges:    testdata.DsseEdges,
 		wantIdentity: testdata.Ident,
