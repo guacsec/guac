@@ -16,82 +16,68 @@
 package testdata
 
 import (
-	"context"
+	_ "embed"
 	"encoding/base64"
-	"encoding/json"
 	"reflect"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
+	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/ingestor/key"
-	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
 var (
-	// DSSE/SLSA Testdata
+	// based off https://github.com/spdx/spdx-examples/blob/master/example7/spdx/example7-third-party-modules.spdx.json
+	//go:embed exampledata/small-spdx.json
+	SpdxExampleSmall []byte
 
-	// Taken from: https://slsa.dev/provenance/v0.1#example
-	ite6SLSA = `
-	{
-		"_type": "https://in-toto.io/Statement/v0.1",
-		"subject": [{"name": "helloworld", "digest": {"sha256": "5678..."}}],
-		"predicateType": "https://slsa.dev/provenance/v0.2",
-		"predicate": {
-			"builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
-			"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
-			"invocation": {
-			  "configSource": {
-				"uri": "git+https://github.com/curl/curl-docker@master",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },   
-				"entryPoint": "build.yaml:maketgz"
-			  }
-			},
-			"metadata": {
-			  "buildStartedOn": "2020-08-19T08:38:00Z",
-			  "completeness": {
-				  "environment": true
-			  }
-			},
-			"materials": [
-			  {
-				"uri": "git+https://github.com/curl/curl-docker@master",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
-			  }, {
-				"uri": "github_hosted_vm:ubuntu-18.04:20210123.1",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
-			  }
-			]
-		}
-	}`
-	b64ITE6SLSA    = base64.StdEncoding.EncodeToString([]byte(ite6SLSA))
-	ite6Payload, _ = json.Marshal(dsse.Envelope{
-		PayloadType: "https://in-toto.io/Statement/v0.1",
-		Payload:     b64ITE6SLSA,
-		Signatures: []dsse.Signature{{
-			KeyID: "id1",
-			Sig:   "test",
-		}},
-	})
-	Ite6DSSEDoc = processor.Document{
-		Blob:   ite6Payload,
-		Type:   processor.DocumentDSSE,
-		Format: processor.FormatJSON,
-		SourceInformation: processor.SourceInformation{
-			Collector: "TestCollector",
-			Source:    "TestSource",
-		},
-	}
-	Ite6SLSADoc = processor.Document{
-		Blob:   []byte(ite6SLSA),
-		Type:   processor.DocumentITE6SLSA,
-		Format: processor.FormatJSON,
-		SourceInformation: processor.SourceInformation{
-			Collector: "TestCollector",
-			Source:    "TestSource",
-		},
-	}
+	//go:embed exampledata/alpine-spdx.json
+	SpdxExampleBig []byte
+
+	//go:embed exampledata/alpine-small-spdx.json
+	SpdxExampleAlpine []byte
+
+	// Invalid types for field spdxVersion
+	//go:embed exampledata/invalid-spdx.json
+	SpdxInvalidExample []byte
+
+	// Example scorecard
+	//go:embed exampledata/kubernetes-scorecard.json
+	ScorecardExample []byte
+
+	// Invalid scorecard
+	//go:embed exampledata/invalid-scorecard.json
+	ScorecardInvalid []byte
+
+	//go:embed exampledata/alpine-cyclonedx.json
+	CycloneDXExampleAlpine []byte
+
+	//go:embed exampledata/quarkus-deps-cyclonedx.json
+	CycloneDXExampleQuarkusDeps []byte
+
+	//go:embed exampledata/small-deps-cyclonedx.json
+	CycloneDXExampleSmallDeps []byte
+
+	//go:embed exampledata/invalid-cyclonedx.json
+	CycloneDXInvalidExample []byte
+
+	//go:embed exampledata/distroless-cyclonedx.json
+	CycloneDXDistrolessExample []byte
+
+	//go:embed exampledata/busybox-cyclonedx.json
+	CycloneDXBusyboxExample []byte
+
+	//go:embed exampledata/big-mongo-cyclonedx.json
+	CycloneDXBigExample []byte
+
+	//go:embed exampledata/crev-review.json
+	ITE6CREVExample []byte
+
+	//go:embed exampledata/github-review.json
+	ITE6ReviewExample []byte
+
+	//go:embed exampledata/certify-vuln.json
+	ITE6VulnExample []byte
 
 	art = assembler.ArtifactNode{
 		Name:   "helloworld",
@@ -148,8 +134,8 @@ var (
 		),
 	}
 
-	ecdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
-	keyHash, _               = dsse.SHA256KeyID(ecdsaPubKey)
+	EcdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
+	keyHash, _               = dsse.SHA256KeyID(EcdsaPubKey)
 
 	Ident = assembler.IdentityNode{
 		ID:        "test",
@@ -491,33 +477,6 @@ var (
 		},
 	}
 )
-
-type mockSigstoreVerifier struct{}
-
-func NewMockSigstoreVerifier() *mockSigstoreVerifier {
-	return &mockSigstoreVerifier{}
-}
-
-func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]verifier.Identity, error) {
-
-	keyHash, _ := dsse.SHA256KeyID(ecdsaPubKey)
-	return []verifier.Identity{
-		{
-			ID: "test",
-			Key: key.Key{
-				Hash:   keyHash,
-				Type:   "ecdsa",
-				Val:    ecdsaPubKey,
-				Scheme: "ecdsa",
-			},
-			Verified: true,
-		},
-	}, nil
-}
-
-func (m *mockSigstoreVerifier) Type() verifier.VerifierType {
-	return "sigstore"
-}
 
 func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
 	if len(slice1) != len(slice2) {

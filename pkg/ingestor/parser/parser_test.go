@@ -19,8 +19,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
-	processor_data "github.com/guacsec/guac/internal/testing/processor"
+	"github.com/guacsec/guac/internal/testing/dochelper"
+	"github.com/guacsec/guac/internal/testing/mockverifier"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
@@ -29,10 +30,10 @@ import (
 
 var (
 	dsseDocTree = processor.DocumentNode{
-		Document: &testdata.Ite6DSSEDoc,
+		Document: &dochelper.Ite6DSSEDoc,
 		Children: []*processor.DocumentNode{
 			{
-				Document: &testdata.Ite6SLSADoc,
+				Document: &dochelper.Ite6SLSADoc,
 				Children: []*processor.DocumentNode{},
 			},
 		},
@@ -40,7 +41,7 @@ var (
 
 	spdxDocTree = processor.DocumentNode{
 		Document: &processor.Document{
-			Blob:   processor_data.SpdxExampleAlpine,
+			Blob:   testdata.SpdxExampleAlpine,
 			Format: processor.FormatJSON,
 			Type:   processor.DocumentSPDX,
 			SourceInformation: processor.SourceInformation{
@@ -67,7 +68,7 @@ var (
 
 func TestParseDocumentTree(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
-	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
+	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}

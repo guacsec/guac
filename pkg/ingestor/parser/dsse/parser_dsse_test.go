@@ -20,7 +20,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
+	"github.com/guacsec/guac/internal/testing/dochelper"
+	"github.com/guacsec/guac/internal/testing/mockverifier"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
@@ -29,7 +31,7 @@ import (
 
 func Test_DsseParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
-	err := verifier.RegisterVerifier(testdata.NewMockSigstoreVerifier(), "sigstore")
+	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}
@@ -42,7 +44,7 @@ func Test_DsseParser(t *testing.T) {
 		wantErr      bool
 	}{{
 		name:         "testing",
-		doc:          &testdata.Ite6DSSEDoc,
+		doc:          &dochelper.Ite6DSSEDoc,
 		wantNodes:    testdata.DsseNodes,
 		wantEdges:    testdata.DsseEdges,
 		wantIdentity: testdata.Ident,
