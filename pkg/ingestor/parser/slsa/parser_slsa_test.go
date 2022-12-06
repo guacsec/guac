@@ -36,7 +36,7 @@ func Test_slsaParser(t *testing.T) {
 		wantErr   bool
 	}{{
 		name:      "testing",
-		doc:       &testdata.Ite6SLSADoc,
+		doc:       &processor_data.Ite6SLSADoc,
 		wantNodes: testdata.SlsaNodes,
 		wantEdges: testdata.SlsaEdges,
 		wantErr:   false,

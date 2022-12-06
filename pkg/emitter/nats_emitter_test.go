@@ -23,9 +23,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
-	procssor_testdata "github.com/guacsec/guac/internal/testing/processor"
+	processor_data "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/logging"
@@ -33,7 +32,7 @@ import (
 )
 
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
-	expectedDocTree := procssor_testdata.DocNode(&testdata.Ite6SLSADoc)
+	expectedDocTree := processor_data.DocNode(&processor_data.Ite6SLSADoc)
 
 	natsTest := nats_test.NewNatsTestServer()
 	url, err := natsTest.EnableJetStreamForTest()
@@ -53,7 +52,7 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
 	defer jetStream.Close()
-	err = testPublish(ctx, &testdata.Ite6SLSADoc)
+	err = testPublish(ctx, &processor_data.Ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
@@ -76,12 +75,12 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 	for subscribersDone < numSubscribers {
 		select {
 		case d := <-docChan:
-			if !procssor_testdata.DocTreeEqual(d, expectedDocTree) {
-				t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", procssor_testdata.StringTree(d), procssor_testdata.StringTree(expectedDocTree))
+			if !processor_data.DocTreeEqual(d, expectedDocTree) {
+				t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", processor_data.StringTree(d), processor_data.StringTree(expectedDocTree))
 			}
 		case err := <-errChan:
 			if err != nil && !errors.Is(err, context.DeadlineExceeded) {
-				t.Errorf("nats emitter Subscribe test erroed = %v", err)
+				t.Errorf("nats emitter Subscribe test errored = %v", err)
 			}
 			subscribersDone += 1
 		}
