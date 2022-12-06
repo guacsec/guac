@@ -29,10 +29,10 @@ import (
 
 var (
 	dsseDocTree = processor.DocumentNode{
-		Document: &processor_data.Ite6DSSEDoc,
+		Document: &testdata.Ite6DSSEDoc,
 		Children: []*processor.DocumentNode{
 			{
-				Document: &processor_data.Ite6SLSADoc,
+				Document: &testdata.Ite6SLSADoc,
 				Children: []*processor.DocumentNode{},
 			},
 		},

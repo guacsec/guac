@@ -131,7 +131,7 @@ func (j *jetStream) Close() {
 	}
 }
 
-// Recreate stream closes the NATS connection
+// RecreateStream deletes the current existing stream and recreates it
 func (j *jetStream) RecreateStream(ctx context.Context) error {
 	if j.js != nil {
 		err := j.js.DeleteStream(StreamName)

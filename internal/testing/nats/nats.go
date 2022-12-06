@@ -18,7 +18,6 @@ package nats
 import (
 	"fmt"
 	"net"
-	"time"
 
 	"github.com/nats-io/nats-server/v2/server"
 	natsserver "github.com/nats-io/nats-server/v2/test"
@@ -61,8 +60,6 @@ func (n *natsTestServer) EnableJetStreamForTest() (string, error) {
 		s.Shutdown()
 		return "", fmt.Errorf("unexpected error initializing test NATS: %v", err)
 	}
-	// sleep added to ensure NATS and JetStream full functional before test continue
-	time.Sleep(time.Second * 5)
 	n.server = s
 	url := fmt.Sprintf("nats://%s:%d", TEST_HOST, port)
 	return url, nil

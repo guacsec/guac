@@ -23,16 +23,62 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
-	processor_data "github.com/guacsec/guac/internal/testing/processor"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/logging"
 	uuid "github.com/satori/go.uuid"
 )
 
+var (
+	// Taken from: https://slsa.dev/provenance/v0.1#example
+	ite6SLSA = `
+	{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"subject": [{"name": "helloworld", "digest": {"sha256": "5678..."}}],
+		"predicateType": "https://slsa.dev/provenance/v0.2",
+		"predicate": {
+			"builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
+			"buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+			"invocation": {
+			  "configSource": {
+				"uri": "git+https://github.com/curl/curl-docker@master",
+				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },   
+				"entryPoint": "build.yaml:maketgz"
+			  }
+			},
+			"metadata": {
+			  "buildStartedOn": "2020-08-19T08:38:00Z",
+			  "completeness": {
+				  "environment": true
+			  }
+			},
+			"materials": [
+			  {
+				"uri": "git+https://github.com/curl/curl-docker@master",
+				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
+			  }, {
+				"uri": "github_hosted_vm:ubuntu-18.04:20210123.1",
+				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
+			  }
+			]
+		}
+	}`
+
+	ite6SLSADoc = processor.Document{
+		Blob:   []byte(ite6SLSA),
+		Type:   processor.DocumentITE6SLSA,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	}
+)
+
 func TestNatsEmitter_PublishOnEmit(t *testing.T) {
-	expectedDocTree := processor_data.DocNode(&processor_data.Ite6SLSADoc)
+	expectedDocTree := dochelper.DocNode(&ite6SLSADoc)
 
 	natsTest := nats_test.NewNatsTestServer()
 	url, err := natsTest.EnableJetStreamForTest()
@@ -52,7 +98,7 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
 	defer jetStream.Close()
-	err = testPublish(ctx, &processor_data.Ite6SLSADoc)
+	err = testPublish(ctx, &ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
@@ -75,8 +121,8 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 	for subscribersDone < numSubscribers {
 		select {
 		case d := <-docChan:
-			if !processor_data.DocTreeEqual(d, expectedDocTree) {
-				t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", processor_data.StringTree(d), processor_data.StringTree(expectedDocTree))
+			if !dochelper.DocTreeEqual(d, expectedDocTree) {
+				t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
 			}
 		case err := <-errChan:
 			if err != nil && !errors.Is(err, context.DeadlineExceeded) {
