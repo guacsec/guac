@@ -107,5 +107,5 @@ require (
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/sigstore/sigstore v1.4.6
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
-	golang.org/x/vuln v0.0.0-20221116204841-fac3670c993c
+	golang.org/x/vuln v0.0.0-20221122171214-05fb7250142c
 )
