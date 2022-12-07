@@ -101,6 +101,8 @@ func Subscribe(ctx context.Context) error {
 // Process processes the documents received from the collector to determine
 // their format and document type.
 func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
+	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
 	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
