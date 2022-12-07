@@ -505,7 +505,7 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	}
 
 	// Register
-	err = RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
+	err := RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
 	if err != nil {
 		if !strings.Contains(err.Error(), "the document processor is being overwritten") {
 			t.Errorf("unexpected error: %v", err)
