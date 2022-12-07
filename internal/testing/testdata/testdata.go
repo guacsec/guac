@@ -23,6 +23,7 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
@@ -115,6 +116,7 @@ var (
 			]
 		}
 	}`
+
 	b64ITE6SLSA    = base64.StdEncoding.EncodeToString([]byte(ite6SLSA))
 	ite6Payload, _ = json.Marshal(dsse.Envelope{
 		PayloadType: "https://in-toto.io/Statement/v0.1",
@@ -539,6 +541,203 @@ var (
 			PackageDependency: cdxReactiveCommonPack,
 			PackageNode:       cdxResteasyPack,
 		},
+	}
+
+	// ceritifer testdata
+
+	Text4ShellVulAttestation = `{
+		"_type":"https://in-toto.io/Statement/v0.1",
+		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"subject":[
+		   {
+			  "name":"pkg:maven/org.apache.commons/commons-text@1.9",
+			  "digest":null
+		   }
+		],
+		"predicate":{
+		   "invocation":{
+			  "uri":"guac",
+			  "producer_id":"guecsec/guac"
+		   },
+		   "scanner":{
+			  "uri":"osv.dev",
+			  "version":"0.0.14",
+			  "db":{
+				 
+			  },
+			  "result":[
+				 {
+					"vulnerability_id":"GHSA-599f-7c49-w659"
+				 }
+			  ]
+		   },
+		   "metadata":{
+			  "scannedOn":"2022-11-22T13:18:58.063182-05:00"
+		   }
+		}
+	 }`
+	SecondLevelVulAttestation = `{
+		"_type":"https://in-toto.io/Statement/v0.1",
+		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"subject":[
+		   {
+			  "name":"pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
+			  "digest":{"sha256":"fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1"}
+		   }
+		],
+		"predicate":{
+		   "invocation":{
+			  "uri":"guac",
+			  "producer_id":"guecsec/guac"
+		   },
+		   "scanner":{
+			  "uri":"osv.dev",
+			  "version":"0.0.14",
+			  "db":{
+				 
+			  },
+			  "result":[
+				 {
+					"vulnerability_id":"GHSA-599f-7c49-w659"
+				 }
+			  ]
+		   },
+		   "metadata":{
+			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
+		   }
+		}
+	 }`
+	RootVulAttestation = `{
+		"_type":"https://in-toto.io/Statement/v0.1",
+		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"subject":[
+		   {
+			  "name":"pkg:oci/vul-image-latest?repository_url=grc.io",
+			  "digest":null
+		   }
+		],
+		"predicate":{
+		   "invocation":{
+			  "uri":"guac",
+			  "producer_id":"guecsec/guac"
+		   },
+		   "scanner":{
+			  "uri":"osv.dev",
+			  "version":"0.0.14",
+			  "db":{
+				 
+			  },
+			  "result":[
+				 {
+					"vulnerability_id":"GHSA-599f-7c49-w659"
+				 },
+				 {
+					"vulnerability_id":"GHSA-7rjr-3q55-vv33"
+				 },
+				 {
+					"vulnerability_id":"GHSA-8489-44mv-ggj8"
+				 },
+				 {
+					"vulnerability_id":"GHSA-fxph-q3j8-mv87"
+				 },
+				 {
+					"vulnerability_id":"GHSA-jfh8-c2jp-5v3q"
+				 },
+				 {
+					"vulnerability_id":"GHSA-p6xc-xr62-6r2g"
+				 },
+				 {
+					"vulnerability_id":"GHSA-vwqq-5vrc-xw9h"
+				 }
+			  ]
+		   },
+		   "metadata":{
+			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
+		   }
+		}
+	 }`
+	Log4JVulAttestation = `{
+		"_type":"https://in-toto.io/Statement/v0.1",
+		"predicateType":"https://in-toto.io/attestation/vuln/v0.1",
+		"subject":[
+		   {
+			  "name":"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
+			  "digest":null
+		   }
+		],
+		"predicate":{
+		   "invocation":{
+			  "uri":"guac",
+			  "producer_id":"guecsec/guac"
+		   },
+		   "scanner":{
+			  "uri":"osv.dev",
+			  "version":"0.0.14",
+			  "db":{
+				 
+			  },
+			  "result":[
+				 {
+					"vulnerability_id":"GHSA-7rjr-3q55-vv33"
+				 },
+				 {
+					"vulnerability_id":"GHSA-8489-44mv-ggj8"
+				 },
+				 {
+					"vulnerability_id":"GHSA-fxph-q3j8-mv87"
+				 },
+				 {
+					"vulnerability_id":"GHSA-jfh8-c2jp-5v3q"
+				 },
+				 {
+					"vulnerability_id":"GHSA-p6xc-xr62-6r2g"
+				 },
+				 {
+					"vulnerability_id":"GHSA-vwqq-5vrc-xw9h"
+				 }
+			  ]
+		   },
+		   "metadata":{
+			  "scannedOn":"2022-11-22T13:18:31.607996-05:00"
+		   }
+		}
+	 }`
+
+	rootPackage = assembler.PackageNode{
+		Purl: "pkg:oci/vul-image-latest?repository_url=grc.io",
+	}
+
+	secondLevelPackage = assembler.PackageNode{
+		Purl:   "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
+		Digest: []string{"sha256:fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1"},
+	}
+
+	log4JPackage = assembler.PackageNode{
+		Purl: "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
+	}
+
+	text4ShelPackage = assembler.PackageNode{
+		Purl: "pkg:maven/org.apache.commons/commons-text@1.9",
+	}
+
+	text4shell = &certifier.Component{
+		Package:     text4ShelPackage,
+		DepPackages: []*certifier.Component{},
+	}
+
+	log4j = &certifier.Component{
+		Package:     log4JPackage,
+		DepPackages: []*certifier.Component{},
+	}
+
+	secondLevel = &certifier.Component{
+		Package:     secondLevelPackage,
+		DepPackages: []*certifier.Component{text4shell},
+	}
+
+	RootComponent = &certifier.Component{
+		Package:     rootPackage,
+		DepPackages: []*certifier.Component{secondLevel, log4j},
 	}
 )
 
