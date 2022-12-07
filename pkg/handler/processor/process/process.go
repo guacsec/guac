@@ -19,7 +19,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/cyclonedx"
 	"github.com/guacsec/guac/pkg/handler/processor/dsse"
@@ -27,6 +29,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/ite6"
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
+	"github.com/guacsec/guac/pkg/logging"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -51,12 +55,69 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 	return nil
 }
 
+// Subscribe is used by NATS JetStream to stream the documents received from the collector
+// and process them them via Process
+func Subscribe(ctx context.Context) error {
+	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
+	id := uuid.NewV4().String()
+	sub, err := js.PullSubscribe(emitter.SubjectNameDocCollected, "processor")
+	if err != nil {
+		logger.Errorf("processor subscribe failed: %s", err)
+		return err
+	}
+	for {
+		// if the context is canceled we want to break out of the loop
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		msgs, err := sub.Fetch(1)
+		if err != nil {
+			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		if len(msgs) > 0 {
+			err := msgs[0].Ack()
+			if err != nil {
+				logger.Errorf("[processor: %v] unable to Ack: %v", id, err)
+				return err
+			}
+			doc := processor.Document{}
+			err = json.Unmarshal(msgs[0].Data, &doc)
+			if err != nil {
+				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+			}
+			docTree, err := Process(ctx, &doc)
+			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
+			if err != nil {
+				return err
+			}
+		}
+	}
+}
+
+// Process processes the documents received from the collector to determine
+// their format and document type. If NATS JetStream is used, Process also
+// stream the documents and send them to the ingestor
 func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
+	logger := logging.FromContext(ctx)
+	js := emitter.FromContext(ctx)
 	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
 	}
-
+	if js != nil {
+		docTreeJSON, err := json.Marshal(processor.DocumentTree(node))
+		if err != nil {
+			return nil, err
+		}
+		_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
+		if err != nil {
+			return nil, err
+		}
+		logger.Infof("doc processed: %+v", node.Document.SourceInformation)
+	}
 	return processor.DocumentTree(node), nil
 }
 

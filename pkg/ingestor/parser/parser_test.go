@@ -17,11 +17,17 @@ package parser
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/guacsec/guac/internal/testing/mockverifier"
+	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/logging"
@@ -69,8 +75,29 @@ func TestParseDocumentTree(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
 	if err != nil {
-		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
+		if !strings.Contains(err.Error(), "the verification provider is being overwritten") {
+			t.Errorf("unexpected error: %v", err)
+		}
 	}
+
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer natsTest.Shutdown()
+
+	jetStream := emitter.NewJetStream(url, "", "")
+	ctx, err = jetStream.JetStreamInit(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
+	err = jetStream.RecreateStream(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error recreating jetstream: %v", err)
+	}
+	defer jetStream.Close()
+
 	tests := []struct {
 		name    string
 		tree    processor.DocumentTree
@@ -115,4 +142,91 @@ func compare(t *testing.T, gotEdges, wantEdges []assembler.GuacEdge, gotNodes, w
 	if !testdata.GuacNodeSliceEqual(gotNodes, wantNodes) {
 		t.Errorf("ParseDocumentTree() = %v, want %v", gotNodes, wantNodes)
 	}
+}
+
+func Test_ParserSubscribe(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
+	if err != nil {
+		if !strings.Contains(err.Error(), "the verification provider is being overwritten") {
+			t.Errorf("unexpected error: %v", err)
+		}
+	}
+
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer natsTest.Shutdown()
+
+	jetStream := emitter.NewJetStream(url, "", "")
+	ctx, err = jetStream.JetStreamInit(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
+	err = jetStream.RecreateStream(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error recreating jetstream: %v", err)
+	}
+	defer jetStream.Close()
+
+	testCases := []struct {
+		name    string
+		tree    processor.DocumentTree
+		want    []assembler.AssemblerInput
+		wantErr bool
+	}{{
+		name:    "testing",
+		tree:    processor.DocumentTree(&dsseDocTree),
+		want:    graphInput,
+		wantErr: false,
+	}, {
+		name:    "valid big SPDX document",
+		tree:    processor.DocumentTree(&spdxDocTree),
+		want:    spdxGraphInput,
+		wantErr: false,
+	}}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			err := testPublish(ctx, tt.tree)
+			if err != nil {
+				t.Fatalf("unexpected error on emit: %v", err)
+			}
+			var cancel context.CancelFunc
+
+			ctx, cancel = context.WithTimeout(ctx, time.Second)
+			defer cancel()
+
+			errChan := make(chan error, 1)
+			defer close(errChan)
+			go func() {
+				errChan <- Subscribe(ctx)
+			}()
+
+			numSubscribers := 1
+			subscribersDone := 0
+
+			for subscribersDone < numSubscribers {
+				err := <-errChan
+				if err != nil && !errors.Is(err, context.DeadlineExceeded) {
+					t.Errorf("nats emitter Subscribe test errored = %v", err)
+				}
+				subscribersDone += 1
+			}
+		})
+	}
+}
+
+func testPublish(ctx context.Context, documentTree processor.DocumentTree) error {
+	js := emitter.FromContext(ctx)
+	docTreeJSON, err := json.Marshal(documentTree)
+	if err != nil {
+		return err
+	}
+	_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
+	if err != nil {
+		return err
+	}
+	return nil
 }
