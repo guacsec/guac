@@ -20,7 +20,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/mockverifier"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -44,7 +43,7 @@ func Test_DsseParser(t *testing.T) {
 		wantErr      bool
 	}{{
 		name:         "testing",
-		doc:          &dochelper.Ite6DSSEDoc,
+		doc:          &testdata.Ite6DSSEDoc,
 		wantNodes:    testdata.DsseNodes,
 		wantEdges:    testdata.DsseEdges,
 		wantIdentity: testdata.Ident,

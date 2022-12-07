@@ -19,7 +19,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/mockverifier"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -30,10 +29,10 @@ import (
 
 var (
 	dsseDocTree = processor.DocumentNode{
-		Document: &dochelper.Ite6DSSEDoc,
+		Document: &testdata.Ite6DSSEDoc,
 		Children: []*processor.DocumentNode{
 			{
-				Document: &dochelper.Ite6SLSADoc,
+				Document: &testdata.Ite6SLSADoc,
 				Children: []*processor.DocumentNode{},
 			},
 		},

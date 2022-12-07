@@ -20,7 +20,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -37,7 +36,7 @@ func Test_slsaParser(t *testing.T) {
 		wantErr   bool
 	}{{
 		name:      "testing",
-		doc:       &dochelper.Ite6SLSADoc,
+		doc:       &testdata.Ite6SLSADoc,
 		wantNodes: testdata.SlsaNodes,
 		wantEdges: testdata.SlsaEdges,
 		wantErr:   false,
