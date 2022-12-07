@@ -26,7 +26,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/logging"
 	uuid "github.com/satori/go.uuid"
 )
@@ -181,7 +180,13 @@ func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree
 				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
 			}
 
-			docTree, err := process.Process(ctx, &doc)
+			docNode := &processor.DocumentNode{
+				Document: &doc,
+				Children: nil,
+			}
+
+			docTree := processor.DocumentTree(docNode)
+
 			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
 			if err != nil {
 				return err
