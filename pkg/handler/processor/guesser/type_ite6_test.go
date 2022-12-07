@@ -18,7 +18,7 @@ package guesser
 import (
 	"testing"
 
-	testdata "github.com/guacsec/guac/internal/testing/processor"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 

@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/testdata"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"

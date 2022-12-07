@@ -16,20 +16,70 @@
 package testdata
 
 import (
-	"context"
+	_ "embed"
 	"encoding/base64"
 	"encoding/json"
 	"reflect"
 
-	"github.com/guacsec/guac/internal/testing/ingestor/keyutil"
+	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/ingestor/key"
-	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
 var (
+	// based off https://github.com/spdx/spdx-examples/blob/master/example7/spdx/example7-third-party-modules.spdx.json
+	//go:embed exampledata/small-spdx.json
+	SpdxExampleSmall []byte
+
+	//go:embed exampledata/alpine-spdx.json
+	SpdxExampleBig []byte
+
+	//go:embed exampledata/alpine-small-spdx.json
+	SpdxExampleAlpine []byte
+
+	// Invalid types for field spdxVersion
+	//go:embed exampledata/invalid-spdx.json
+	SpdxInvalidExample []byte
+
+	// Example scorecard
+	//go:embed exampledata/kubernetes-scorecard.json
+	ScorecardExample []byte
+
+	// Invalid scorecard
+	//go:embed exampledata/invalid-scorecard.json
+	ScorecardInvalid []byte
+
+	//go:embed exampledata/alpine-cyclonedx.json
+	CycloneDXExampleAlpine []byte
+
+	//go:embed exampledata/quarkus-deps-cyclonedx.json
+	CycloneDXExampleQuarkusDeps []byte
+
+	//go:embed exampledata/small-deps-cyclonedx.json
+	CycloneDXExampleSmallDeps []byte
+
+	//go:embed exampledata/invalid-cyclonedx.json
+	CycloneDXInvalidExample []byte
+
+	//go:embed exampledata/distroless-cyclonedx.json
+	CycloneDXDistrolessExample []byte
+
+	//go:embed exampledata/busybox-cyclonedx.json
+	CycloneDXBusyboxExample []byte
+
+	//go:embed exampledata/big-mongo-cyclonedx.json
+	CycloneDXBigExample []byte
+
+	//go:embed exampledata/crev-review.json
+	ITE6CREVExample []byte
+
+	//go:embed exampledata/github-review.json
+	ITE6ReviewExample []byte
+
+	//go:embed exampledata/certify-vuln.json
+	ITE6VulnExample []byte
+
 	// DSSE/SLSA Testdata
 
 	// Taken from: https://slsa.dev/provenance/v0.1#example
@@ -148,8 +198,8 @@ var (
 		),
 	}
 
-	ecdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
-	keyHash, _               = dsse.SHA256KeyID(ecdsaPubKey)
+	EcdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
+	keyHash, _               = dsse.SHA256KeyID(EcdsaPubKey)
 
 	Ident = assembler.IdentityNode{
 		ID:        "test",
@@ -491,33 +541,6 @@ var (
 		},
 	}
 )
-
-type mockSigstoreVerifier struct{}
-
-func NewMockSigstoreVerifier() *mockSigstoreVerifier {
-	return &mockSigstoreVerifier{}
-}
-
-func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]verifier.Identity, error) {
-
-	keyHash, _ := dsse.SHA256KeyID(ecdsaPubKey)
-	return []verifier.Identity{
-		{
-			ID: "test",
-			Key: key.Key{
-				Hash:   keyHash,
-				Type:   "ecdsa",
-				Val:    ecdsaPubKey,
-				Scheme: "ecdsa",
-			},
-			Verified: true,
-		},
-	}, nil
-}
-
-func (m *mockSigstoreVerifier) Type() verifier.VerifierType {
-	return "sigstore"
-}
 
 func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
 	if len(slice1) != len(slice2) {
