@@ -32,13 +32,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	certifierCmd.PersistentFlags().StringVar(&flags.dbAddr, "db-addr", "neo4j://localhost:7687", "address to neo4j db")
-	certifierCmd.PersistentFlags().StringVar(&flags.creds, "creds", "", "credentials to access neo4j in 'user:pass' format")
-	certifierCmd.PersistentFlags().StringVar(&flags.realm, "realm", "neo4j", "realm to connecto graph db")
-	_ = certifierCmd.MarkPersistentFlagRequired("creds")
-}
-
 var certifierCmd = &cobra.Command{
 	Use:   "certifier",
 	Short: "certifies packages in GUAC graph",
@@ -152,4 +145,8 @@ func getPackageQuery(client neo4j.Driver) (func() certifier.QueryComponents, err
 		packageQuery := root_package.NewPackageQuery(client)
 		return packageQuery
 	}, nil
+}
+
+func init() {
+	rootCmd.AddCommand(certifierCmd)
 }

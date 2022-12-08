@@ -49,13 +49,6 @@ type options struct {
 	path string
 }
 
-func init() {
-	exampleCmd.PersistentFlags().StringVar(&flags.dbAddr, "db-addr", "neo4j://localhost:7687", "address to neo4j db")
-	exampleCmd.PersistentFlags().StringVar(&flags.creds, "creds", "", "credentials to access neo4j in 'user:pass' format")
-	exampleCmd.PersistentFlags().StringVar(&flags.realm, "realm", "neo4j", "realm to connecto graph db")
-	_ = exampleCmd.MarkPersistentFlagRequired("creds")
-}
-
 var exampleCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
 	Short: "take a folder of files and create a GUAC graph",
@@ -225,4 +218,8 @@ func createIndices(client graphdb.Client) error {
 	}
 
 	return nil
+}
+
+func init() {
+	rootCmd.AddCommand(exampleCmd)
 }
