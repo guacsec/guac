@@ -75,6 +75,12 @@ var (
 	//go:embed exampledata/npm-cyclonedx-dependencies-missing-depends-on.json
 	CycloneDXDependenciesMissingDependsOn []byte
 
+	//go:embed exampledata/laravel-cyclonedx.xml
+	CycloneDXExampleLaravelXML []byte
+
+	//go:embed exampledata/invalid-cyclonedx.xml
+	CycloneDXInvalidExampleXML []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
