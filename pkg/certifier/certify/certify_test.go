@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package osv
+package certify
 
 import (
 	"context"
@@ -26,25 +26,43 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-func TestOSVCertifier_CertifyVulns(t *testing.T) {
+type mockQuery struct {
+}
+
+// NewMockQuery initializes the mockQuery to query for tests
+func newMockQuery() certifier.QueryComponents {
+	return &mockQuery{}
+}
+
+// GetComponents returns components for test
+func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- *certifier.Component) error {
+	compChan <- testdata.RootComponent
+	return nil
+}
+
+func TestCertify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
+	errHandler := func(err error) bool {
+		return err == nil
+	}
+
 	tests := []struct {
-		name          string
-		rootComponent *certifier.Component
-		want          []*processor.Document
-		wantErr       bool
+		name    string
+		query   certifier.QueryComponents
+		want    []*processor.Document
+		wantErr bool
 	}{{
-		name:          "query and generate attestation for OSV",
-		rootComponent: testdata.RootComponent,
+		name:  "query and generate attestation",
+		query: newMockQuery(),
 		want: []*processor.Document{
 			{
 				Blob:   []byte(testdata.Text4ShellVulAttestation),
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: INVOC_URI,
-					Source:    INVOC_URI,
+					Collector: "guac",
+					Source:    "guac",
 				},
 			},
 			{
@@ -52,8 +70,8 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: INVOC_URI,
-					Source:    INVOC_URI,
+					Collector: "guac",
+					Source:    "guac",
 				},
 			},
 			{
@@ -61,8 +79,8 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: INVOC_URI,
-					Source:    INVOC_URI,
+					Collector: "guac",
+					Source:    "guac",
 				},
 			},
 			{
@@ -70,8 +88,8 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				Type:   processor.DocumentITE6Vul,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: INVOC_URI,
-					Source:    INVOC_URI,
+					Collector: "guac",
+					Source:    "guac",
 				},
 			},
 		},
@@ -79,46 +97,26 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewOSVCertificationParser()
-			collectedDocs := []*processor.Document{}
-			docChan := make(chan *processor.Document, 1)
-			errChan := make(chan error, 1)
-			defer close(docChan)
-			defer close(errChan)
-			go func() {
-				errChan <- o.CertifyComponent(ctx, tt.rootComponent, docChan)
-			}()
-			numCollectors := 1
-			certifiersDone := 0
-			for certifiersDone < numCollectors {
-				select {
-				case d := <-docChan:
-					collectedDocs = append(collectedDocs, d)
-				case err := <-errChan:
-					if (err != nil) != tt.wantErr {
-						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
-						return
-					}
-					if err != nil {
-						t.Errorf("collector ended with error: %v", err)
-						return
-					}
-					certifiersDone += 1
+			var collectedDocs []*processor.Document
 
-				}
-			}
-			// Drain anything left in document channel
-			for len(docChan) > 0 {
-				d := <-docChan
+			emit := func(d *processor.Document) error {
 				collectedDocs = append(collectedDocs, d)
+				return nil
 			}
-			for i := range collectedDocs {
-				result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
-				if err != nil {
-					t.Error(err)
-				}
-				if !result {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+
+			err := Certify(ctx, tt.query, emit, errHandler)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err == nil {
+				for i := range collectedDocs {
+					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
+					if err != nil {
+						t.Error(err)
+					}
+					if !result {
+						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+					}
 				}
 			}
 		})

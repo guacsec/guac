@@ -19,7 +19,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"time"
 
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -104,4 +106,32 @@ func DocNode(v *processor.Document, children ...*processor.DocumentNode) *proces
 		Document: v,
 		Children: children,
 	}
+}
+
+func DocEqualWithTimestamp(gotDoc, wantDoc *processor.Document) (bool, error) {
+	var testTime = time.Unix(1597826280, 0)
+
+	got, err := parseVulnCertifyPredicate(gotDoc.Blob)
+	if err != nil {
+		return false, fmt.Errorf("failed to unmarshal json: %s", err)
+	}
+
+	want, err := parseVulnCertifyPredicate(wantDoc.Blob)
+	if err != nil {
+		return false, fmt.Errorf("failed to unmarshal json: %s", err)
+	}
+
+	// change the timestamp to match else it will fail to compare
+	want.Predicate.Metadata.ScannedOn = &testTime
+	got.Predicate.Metadata.ScannedOn = &testTime
+
+	return reflect.DeepEqual(want, got), nil
+}
+
+func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStatement, error) {
+	predicate := attestation_vuln.VulnerabilityStatement{}
+	if err := json.Unmarshal(p, &predicate); err != nil {
+		return nil, err
+	}
+	return &predicate, nil
 }
