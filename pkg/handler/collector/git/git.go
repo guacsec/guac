@@ -90,7 +90,10 @@ func (g *gitDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel
 }
 
 func (g *gitDocumentCollector) createOrPull(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
-	exists := checkIfDirExists(g.dir)
+	exists, err := checkIfDirExists(g.dir)
+	if err != nil {
+		return err
+	}
 
 	if !exists {
 		if err := os.Mkdir(g.dir, os.ModePerm); err != nil {
@@ -123,9 +126,15 @@ func (g *gitDocumentCollector) Type() string {
 	return CollectorGitDocument
 }
 
-func checkIfDirExists(name string) bool {
+func checkIfDirExists(name string) (bool, error) {
 	_, err := os.Stat(name)
-	return !os.IsNotExist(err)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 func cloneRepoToDir(logger *zap.SugaredLogger, url string, directory string) error {
