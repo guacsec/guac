@@ -145,8 +145,8 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			if dirEmpty != tt.wantDirEmpty {
 				t.Errorf("isDirEmpty = %v, wantErr %v", dirEmpty, tt.wantDirEmpty)
 			}
-			if g.Type() != CollectorGit {
-				t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGit)
+			if g.Type() != CollectorGitDocument {
+				t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGitDocument)
 			}
 		})
 	}

@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	CollectorGit = "GIT"
+	CollectorGitDocument = "GitCollector"
 )
 
 // This code is a git collector that collects documents from a Git repository (GitHub, GitLab, etc.)
@@ -120,7 +120,7 @@ func (g *gitDocumentCollector) createOrPull(ctx context.Context, logger *zap.Sug
 
 // Type returns the collector type
 func (g *gitDocumentCollector) Type() string {
-	return CollectorGit
+	return CollectorGitDocument
 }
 
 func checkIfDirExists(name string) bool {
