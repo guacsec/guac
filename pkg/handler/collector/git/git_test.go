@@ -83,7 +83,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// incase the file exists from a failed run, delete it
 			os.RemoveAll(tt.fields.dir)
-			g := NewGitCol(ctx, tt.fields.url, tt.fields.dir, tt.fields.poll, tt.fields.interval)
+			g := NewGitDocumentCollector(ctx, tt.fields.url, tt.fields.dir, tt.fields.poll, tt.fields.interval)
 
 			if tt.preCreateDir {
 				if err := os.Mkdir(tt.fields.dir, os.ModePerm); err != nil {
