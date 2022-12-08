@@ -32,22 +32,21 @@ const (
 	CollectorGit = "GIT"
 )
 
+// This code is a git collector that collects documents from a Git repository.
+// The collector clones the repository to a local directory or pulls any updates from the repository if it has been cloned previously.
+// It emits each collected document to the collector to be processed.
+// The collector can either run once and grab all the artifacts or keep running and check for new artifacts based on the polling rate.
 type gitDocumentCollector struct {
 	url           string
 	dir           string
 	lastChecked   time.Time
 	poll          bool
 	interval      time.Duration
-	fileCollector *file.FileCollector
+	fileCollector collector.Collector
 }
 
 func NewGitCol(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitDocumentCollector {
-	logger := logging.FromContext(ctx)
 	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
-	err := collector.RegisterDocumentCollector(fileCollector, file.FileCollectorType)
-	if err != nil {
-		logger.Errorf("unable to register file collector: %v", err)
-	}
 
 	return &gitDocumentCollector{
 		url:           url,

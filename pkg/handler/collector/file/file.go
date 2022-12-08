@@ -29,18 +29,18 @@ import (
 )
 
 const (
-	FileCollectorType = "FileCollector"
+	FileCollector = "FileCollector"
 )
 
-type FileCollector struct {
+type fileCollector struct {
 	path        string
 	lastChecked time.Time
 	poll        bool
 	interval    time.Duration
 }
 
-func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration) *FileCollector {
-	return &FileCollector{
+func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration) *fileCollector {
+	return &fileCollector{
 		path:     path,
 		poll:     poll,
 		interval: interval,
@@ -53,7 +53,7 @@ func NewFileCollector(ctx context.Context, path string, poll bool, interval time
 // or return an error from the collector crashing. This function can keep running and check
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
-func (f *FileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	if _, err := os.Stat(f.path); os.IsExist(err) {
 		return fmt.Errorf("path: %s does not exist", f.path)
 	}
@@ -87,7 +87,7 @@ func (f *FileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollectorType),
+				Collector: string(FileCollector),
 				Source:    fmt.Sprintf("file:///%s", path),
 			},
 		}
@@ -121,6 +121,6 @@ func (f *FileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 }
 
 // Type returns the collector type
-func (f *FileCollector) Type() string {
-	return FileCollectorType
+func (f *fileCollector) Type() string {
+	return FileCollector
 }

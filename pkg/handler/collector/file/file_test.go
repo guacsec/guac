@@ -59,7 +59,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollectorType),
+				Collector: string(FileCollector),
 				Source:    "file:///testdata/hello",
 			}},
 		},
@@ -77,7 +77,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollectorType),
+				Collector: string(FileCollector),
 				Source:    "file:///testdata/hello",
 			}},
 		},
@@ -85,7 +85,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &FileCollector{
+			f := &fileCollector{
 				path:        tt.fields.path,
 				lastChecked: tt.fields.lastChecked,
 				poll:        tt.fields.poll,
@@ -135,8 +135,8 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			if !reflect.DeepEqual(s, tt.want) {
 				t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", s, tt.want)
 			}
-			if f.Type() != FileCollectorType {
-				t.Errorf("fileCollector.Type() = %s, want %s", f.Type(), FileCollectorType)
+			if f.Type() != FileCollector {
+				t.Errorf("fileCollector.Type() = %s, want %s", f.Type(), FileCollector)
 			}
 		})
 	}
