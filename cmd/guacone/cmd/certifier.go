@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
@@ -30,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var certifierCmd = &cobra.Command{
@@ -39,7 +39,13 @@ var certifierCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateCertifierFlags()
+		opts, err := validateCertifierFlags(
+			viper.GetString("gdbuser"),
+			viper.GetString("gdbpass"),
+			viper.GetString("gdbaddr"),
+			viper.GetString("realm"),
+		)
+
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -127,15 +133,12 @@ var certifierCmd = &cobra.Command{
 	},
 }
 
-func validateCertifierFlags() (options, error) {
+func validateCertifierFlags(user string, pass string, dbAddr string, realm string) (options, error) {
 	var opts options
-	credsSplit := strings.Split(flags.creds, ":")
-	if len(credsSplit) != 2 {
-		return opts, fmt.Errorf("creds flag not in correct format user:pass")
-	}
-	opts.user = credsSplit[0]
-	opts.pass = credsSplit[1]
-	opts.dbAddr = flags.dbAddr
+	opts.user = user
+	opts.pass = pass
+	opts.dbAddr = dbAddr
+	opts.realm = realm
 
 	return opts, nil
 }

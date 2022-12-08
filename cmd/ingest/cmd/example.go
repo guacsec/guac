@@ -17,9 +17,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
-	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
@@ -27,12 +25,14 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var flags = struct {
-	dbAddr string
-	creds  string
-	realm  string
+	dbAddr  string
+	gdbuser string
+	gdbpass string
+	realm   string
 }{}
 
 type options struct {
@@ -44,13 +44,6 @@ type options struct {
 
 var docs []processor.DocumentTree
 
-func init() {
-	exampleCmd.PersistentFlags().StringVar(&flags.dbAddr, "db-addr", "neo4j://localhost:7687", "address to neo4j db")
-	exampleCmd.PersistentFlags().StringVar(&flags.creds, "creds", "", "credentials to access neo4j in 'user:pass' format")
-	exampleCmd.PersistentFlags().StringVar(&flags.realm, "realm", "neo4j", "realm to connecto graph db")
-	_ = exampleCmd.MarkPersistentFlagRequired("creds")
-}
-
 var exampleCmd = &cobra.Command{
 	Use:   "example",
 	Short: "example ingestor for ingesting a set of example documents and populating a graph for GUAC",
@@ -58,7 +51,12 @@ var exampleCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateFlags()
+		opts, err := validateFlags(
+			viper.GetString("gdbuser"),
+			viper.GetString("gdbpass"),
+			viper.GetString("gdbaddr"),
+			viper.GetString("realm"),
+		)
 		if err != nil {
 			logger.Errorf("unable to validate flags: %v", err)
 			os.Exit(1)
@@ -96,15 +94,16 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func validateFlags() (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string) (options, error) {
 	var opts options
-	credsSplit := strings.Split(flags.creds, ":")
-	if len(credsSplit) != 2 {
-		return opts, fmt.Errorf("creds flag not in correct format user:pass")
-	}
-	opts.user = credsSplit[0]
-	opts.pass = credsSplit[1]
-	opts.dbAddr = flags.dbAddr
+
+	opts.user = user
+	opts.pass = pass
+	opts.dbAddr = dbAddr
 
 	return opts, nil
+}
+
+func init() {
+	rootCmd.AddCommand(exampleCmd)
 }

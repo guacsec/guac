@@ -68,7 +68,7 @@ make build
 Once compiled, use the `guacone` client on the set of downloaded documents:
 
 ```bash
-bin/guacone files --creds neo4j:s3cr3t ${GUACSEC_HOME}/guac-data/docs
+bin/guacone files --gdbuser neo4j --gdbpass s3cr3t ${GUACSEC_HOME}/guac-data/docs
 ```
 
 This will take a couple minutes (should not be more than 5 minutes - if so, please
