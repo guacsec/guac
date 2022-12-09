@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	
+
 	"github.com/guacsec/guac/pkg/logging"
 
 	homedir "github.com/mitchellh/go-homedir"
