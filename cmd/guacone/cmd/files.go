@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -31,12 +30,14 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var flags = struct {
-	dbAddr string
-	creds  string
-	realm  string
+	dbAddr  string
+	gdbuser string
+	gdbpass string
+	realm   string
 }{}
 
 type options struct {
@@ -44,7 +45,6 @@ type options struct {
 	user   string
 	pass   string
 	realm  string
-
 	// path to folder with documents to collect
 	path string
 }
@@ -56,7 +56,12 @@ var exampleCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateFlags(args)
+		opts, err := validateFlags(
+			viper.GetString("gdbuser"),
+			viper.GetString("gdbpass"),
+			viper.GetString("gdbaddr"),
+			viper.GetString("realm"),
+			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -138,19 +143,17 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
 	var opts options
-	credsSplit := strings.Split(flags.creds, ":")
-	if len(credsSplit) != 2 {
-		return opts, fmt.Errorf("creds flag not in correct format user:pass")
-	}
-	opts.user = credsSplit[0]
-	opts.pass = credsSplit[1]
-	opts.dbAddr = flags.dbAddr
+	opts.user = user
+	opts.pass = pass
+	opts.dbAddr = dbAddr
+	opts.realm = realm
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")
 	}
+
 	opts.path = args[0]
 
 	return opts, nil
@@ -172,7 +175,12 @@ func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler
 }
 
 func getAssembler(opts options) (func([]assembler.Graph) error, error) {
-	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
+	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
+		opts.user,
+		opts.pass,
+		opts.realm,
+	)
+
 	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
 	if err != nil {
 		return nil, err
