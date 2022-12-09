@@ -19,8 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
-
+	
 	"github.com/guacsec/guac/pkg/logging"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -66,10 +65,6 @@ func initConfig() {
 
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("guac")
-	// The following line is needed to replace - with _ in env variables
-	// e.g. GUAC_DB_ADDR will be read as GUAC_gdbaddr
-	// The POSIX standard does not allow - in env variables
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
 	if err := viper.ReadInConfig(); err == nil {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
