@@ -23,8 +23,10 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(exampleCmd)
-	rootCmd.AddCommand(certifierCmd)
+	rootCmd.PersistentFlags().StringVar(&flags.dbAddr, "db-addr", "neo4j://localhost:7687", "address to neo4j db")
+	rootCmd.PersistentFlags().StringVar(&flags.creds, "creds", "", "credentials to access neo4j in 'user:pass' format")
+	rootCmd.PersistentFlags().StringVar(&flags.realm, "realm", "neo4j", "realm to connecto graph db")
+	_ = rootCmd.MarkPersistentFlagRequired("creds")
 }
 
 var rootCmd = &cobra.Command{
