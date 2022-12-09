@@ -48,7 +48,6 @@ func init() {
 	}
 }
 
-
 func initConfig() {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
