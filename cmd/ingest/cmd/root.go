@@ -40,10 +40,14 @@ func init() {
 	flagNames := []string{"dbAddr", "gdbuser", "gdbuser", "realm"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
-			viper.BindPFlag(name, flag)
+			if err := viper.BindPFlag(name, flag); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to bind flag: %v", err)
+				os.Exit(1)
+			}
 		}
 	}
 }
+
 
 func initConfig() {
 	ctx := logging.WithLogger(context.Background())
