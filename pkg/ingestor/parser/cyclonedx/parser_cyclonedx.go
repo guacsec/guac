@@ -150,9 +150,11 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 		if !found {
 			continue
 		}
-		for _, depPkg := range *deps.Dependencies {
-			if depPkg, exist := c.pkgMap[depPkg]; exist {
-				currPkg.depPackages = append(currPkg.depPackages, depPkg)
+		if deps.Dependencies != nil {
+			for _, depPkg := range *deps.Dependencies {
+				if depPkg, exist := c.pkgMap[depPkg]; exist {
+					currPkg.depPackages = append(currPkg.depPackages, depPkg)
+				}
 			}
 		}
 	}
