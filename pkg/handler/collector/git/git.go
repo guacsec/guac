@@ -140,7 +140,7 @@ func checkIfDirExists(name string) (bool, error) {
 func cloneRepoToDir(logger *zap.SugaredLogger, url string, directory string) error {
 
 	// Clone to directory
-	logger.Infof("git clone %s %s --recursive", url, directory)
+	logger.Debugf("git clone %s %s --recursive", url, directory)
 
 	r, err := git.PlainClone(directory, false, &git.CloneOptions{
 		URL:               url,
@@ -161,7 +161,7 @@ func cloneRepoToDir(logger *zap.SugaredLogger, url string, directory string) err
 		return err
 	}
 
-	logger.Infof("Commit: %s", commit)
+	logger.Debugf("Commit: %s", commit)
 	return nil
 }
 
