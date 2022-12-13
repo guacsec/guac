@@ -17,7 +17,6 @@ package git_collector
 
 import (
 	"context"
-	"io"
 	"os"
 	"testing"
 	"time"
@@ -39,7 +38,6 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 		name                   string
 		fields                 fields
 		preCreateDir           bool
-		wantDirEmpty           bool
 		wantErr                bool
 		numberOfFilesCollected int
 	}{{
@@ -51,7 +49,6 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			interval: time.Millisecond,
 		},
 		preCreateDir:           false,
-		wantDirEmpty:           false,
 		wantErr:                false,
 		numberOfFilesCollected: 9,
 	}, {
@@ -63,7 +60,6 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			interval: time.Millisecond,
 		},
 		preCreateDir:           true,
-		wantDirEmpty:           false,
 		wantErr:                false,
 		numberOfFilesCollected: 0,
 	}, {
@@ -75,7 +71,6 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			interval: time.Millisecond,
 		},
 		preCreateDir:           false,
-		wantDirEmpty:           false,
 		wantErr:                false,
 		numberOfFilesCollected: 9,
 	}}
@@ -133,38 +128,13 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 				collectedDocs = append(collectedDocs, d)
 			}
 
-			dirEmpty, err := isDirEmpty(tt.fields.dir)
-			if err != nil {
-				t.Errorf("isDirEmpty error = %v", err)
-			}
-
 			if len(collectedDocs) != tt.numberOfFilesCollected {
 				t.Errorf("number of files collected does not match test = %v, want %v", len(collectedDocs), tt.numberOfFilesCollected)
 			}
 
-			if dirEmpty != tt.wantDirEmpty {
-				t.Errorf("isDirEmpty = %v, wantErr %v", dirEmpty, tt.wantDirEmpty)
-			}
 			if g.Type() != CollectorGitDocument {
 				t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGitDocument)
 			}
 		})
 	}
-}
-
-func isDirEmpty(name string) (bool, error) {
-	f, err := os.Open(name)
-	if err != nil {
-		return false, err
-	}
-	defer f.Close()
-
-	// read in ONLY one file
-	_, err = f.Readdir(1)
-
-	// and if the file is EOF... well, the dir is empty.
-	if err == io.EOF {
-		return true, nil
-	}
-	return false, err
 }
