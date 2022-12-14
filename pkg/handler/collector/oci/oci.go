@@ -23,8 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/pkg/errors"
 	"github.com/sigstore/cosign/cmd/cosign/cli/options"
@@ -39,15 +41,15 @@ const (
 )
 
 type ociCollector struct {
-	imageRef    string
+	repoRef     string
 	lastChecked time.Time
 	poll        bool
 	interval    time.Duration
 }
 
-func NewOCICollector(ctx context.Context, imageRef string, poll bool, interval time.Duration) *ociCollector {
+func NewOCICollector(ctx context.Context, repoRef string, poll bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
-		imageRef: imageRef,
+		repoRef:  repoRef,
 		poll:     poll,
 		interval: interval,
 	}
@@ -68,48 +70,65 @@ func NewOCICollector(ctx context.Context, imageRef string, poll bool, interval t
 // new ones that have not been ingested via the v1.image config file/
 
 func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-
+	opts := crane.GetOptions()
 	if o.poll {
-		/* 	opts := crane.GetOptions()
 		for {
-			tags, err := crane.ListTags(o.imageRef)
+			err := o.getTagsAndFetch(ctx, opts, docChannel)
 			if err != nil {
-				return fmt.Errorf("reading tags for %s: %w", repo, err)
-			}
-
-			for _, tag := range tags {
-				fmt.Println(tag)
-				imageTag := fmt.Sprintf("%v:%v", o.imageRef, tag)
-				ref, err := name.ParseReference(imageTag, opts.Name...)
-				if err != nil {
-					return fmt.Errorf("parsing reference %q: %w", imageTag, err)
-				}
-				img, err := remote.Image(ref, opts.Remote...)
-				if err != nil {
-					return fmt.Errorf("reading image %q: %w", ref, err)
-				}
-				imgConfig, err := img.ConfigFile()
-				if err != nil {
-					return err
-				}
-				if imgConfig.Created.After(o.lastChecked) {
-					err := fetchOCIArtifacts(ctx, imageTag, docChannel)
-					if err != nil {
-						return err
-					}
-				}
+				return err
 			}
 			o.lastChecked = time.Now()
 			time.Sleep(o.interval)
-		} */
+		}
 	} else {
-		err := fetchOCIArtifacts(ctx, o.imageRef, docChannel)
+		err := o.getTagsAndFetch(ctx, opts, docChannel)
 		if err != nil {
 			return err
 		}
 		o.lastChecked = time.Now()
 	}
 
+	return nil
+}
+
+func (o *ociCollector) getTagsAndFetch(ctx context.Context, opts crane.Options, docChannel chan<- *processor.Document) error {
+	tags, err := crane.ListTags(o.repoRef)
+	if err != nil {
+		return fmt.Errorf("reading tags for %s: %w", o.repoRef, err)
+	}
+
+	for _, tag := range tags {
+		fmt.Println(tag)
+		if !strings.HasSuffix(tag, "sbom") && !strings.HasSuffix(tag, "att") && !strings.HasSuffix(tag, "sig") {
+			imageTag := fmt.Sprintf("%v:%v", o.repoRef, tag)
+			ref, err := name.ParseReference(imageTag, opts.Name...)
+			if err != nil {
+				return fmt.Errorf("parsing reference %q: %w", imageTag, err)
+			}
+			img, err := remote.Image(ref, opts.Remote...)
+			if err != nil {
+				return fmt.Errorf("reading image %q: %w", ref, err)
+			}
+			imgConfig, err := img.ConfigFile()
+			if err != nil {
+				return err
+			}
+			if o.poll {
+				fmt.Println(imgConfig.Created.String())
+				if imgConfig.Created.After(o.lastChecked) {
+					err := fetchOCIArtifacts(ctx, imageTag, docChannel)
+					if err != nil {
+						return err
+					}
+				}
+			} else {
+				err := fetchOCIArtifacts(ctx, imageTag, docChannel)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
 
@@ -147,19 +166,21 @@ func fetchOCIArtifacts(ctx context.Context, image string, docChannel chan<- *pro
 	}
 
 	sbomBlob, err := fetchSBOM(ctx, ociremoteOpts, ref)
-	if err != nil {
+	if err != nil && errors.Is(err, errors.New("no sbom attached to reference")) {
 		return err
 	}
-	doc := &processor.Document{
-		Blob:   sbomBlob,
-		Type:   processor.DocumentUnknown,
-		Format: processor.FormatUnknown,
-		SourceInformation: processor.SourceInformation{
-			Collector: string(OCICollector),
-			Source:    fmt.Sprintf("oci:///%s", image),
-		},
+	if len(sbomBlob) > 0 {
+		doc := &processor.Document{
+			Blob:   sbomBlob,
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: string(OCICollector),
+				Source:    fmt.Sprintf("oci:///%s", image),
+			},
+		}
+		docChannel <- doc
 	}
-	docChannel <- doc
 	return nil
 }
 

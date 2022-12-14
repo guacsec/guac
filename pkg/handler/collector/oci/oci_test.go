@@ -17,7 +17,6 @@ package oci
 
 import (
 	"context"
-	"reflect"
 	"testing"
 	"time"
 
@@ -26,7 +25,7 @@ import (
 
 func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	type fields struct {
-		imageRef    string
+		repoRef     string
 		lastChecked time.Time
 		poll        bool
 		interval    time.Duration
@@ -38,9 +37,18 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		wantErr bool
 		want    []*processor.Document
 	}{{
+		name: "poll true attestation and sbom",
+		fields: fields{
+			repoRef:     "ghcr.io/clearalpha/multi-manager-model",
+			lastChecked: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+			poll:        true,
+			interval:    0,
+		},
+		wantErr: false,
+	}, {
 		name: "get attestation and sbom",
 		fields: fields{
-			imageRef:    "ghcr.io/clearalpha/multi-manager-model:fe3c25abff9c0bf82543f066bb7160f62b05028c",
+			repoRef:     "ghcr.io/clearalpha/multi-manager-model",
 			lastChecked: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			poll:        false,
 			interval:    0,
@@ -50,11 +58,18 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := &ociCollector{
-				imageRef:    tt.fields.imageRef,
+				repoRef:     tt.fields.repoRef,
 				lastChecked: tt.fields.lastChecked,
 				poll:        tt.fields.poll,
 				interval:    tt.fields.interval,
 			}
+
+			// var cancel context.CancelFunc
+			// if tt.fields.poll {
+			// 	ctx, cancel = context.WithTimeout(ctx, time.Second)
+			// 	defer cancel()
+			// }
+
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
 			defer close(docChan)
@@ -64,12 +79,13 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			}()
 			numCollectors := 1
 			collectorsDone := 0
+
+			collectedDocs := []*processor.Document{}
+
 			for collectorsDone < numCollectors {
 				select {
 				case d := <-docChan:
-					if !reflect.DeepEqual(d, tt.want) {
-						t.Errorf("g.RetrieveArtifacts() = %v, want %v", d, tt.want)
-					}
+					collectedDocs = append(collectedDocs, d)
 				case err := <-errChan:
 					if (err != nil) != tt.wantErr {
 						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
@@ -80,8 +96,10 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			}
 			// Drain anything left in document channel
 			for len(docChan) > 0 {
-				<-docChan
+				d := <-docChan
+				collectedDocs = append(collectedDocs, d)
 			}
+
 			if g.Type() != OCICollector {
 				t.Errorf("g.Type() = %s, want %s", g.Type(), OCICollector)
 			}
