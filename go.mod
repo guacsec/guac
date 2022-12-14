@@ -36,7 +36,7 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
-	golang.org/x/oauth2 v0.2.0 // indirect
+	golang.org/x/oauth2 v0.2.0
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
@@ -103,6 +103,7 @@ require (
 
 require (
 	github.com/CycloneDX/cyclonedx-go v0.7.0
+	github.com/google/go-github v17.0.0+incompatible
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/sigstore/sigstore v1.4.6
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01

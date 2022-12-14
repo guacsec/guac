@@ -43,7 +43,7 @@ func NewGitHubDocumentCollector(ctx context.Context, url string, dir string, pol
 }
 
 func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	// Replace with your own personal access token
+	// Replace with your own personal access token, export to use
 	token := os.Getenv("API_KEY")
 
 	// Replace with the owner and name of the repository
@@ -121,6 +121,17 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 		}
 	}
 	return nil
+}
+
+func checkIfDirExists(name string) (bool, error) {
+	_, err := os.Stat(name)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 // Type returns the collector type
