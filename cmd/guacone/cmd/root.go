@@ -36,7 +36,7 @@ func init() {
 	persistentFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
 	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
-	flagNames := []string{"dbAddr", "gdbuser", "gdbuser", "realm"}
+	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
