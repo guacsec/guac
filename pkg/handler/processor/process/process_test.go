@@ -655,7 +655,7 @@ func Test_ProcessSubscribe(t *testing.T) {
 			}
 			var cancel context.CancelFunc
 
-			ctx, cancel = context.WithTimeout(ctx, time.Second)
+			ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
 			defer cancel()
 
 			errChan := make(chan error, 1)

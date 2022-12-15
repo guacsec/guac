@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -116,7 +117,7 @@ func Test_Publish(t *testing.T) {
 
 	var cancel context.CancelFunc
 
-	ctx, cancel = context.WithTimeout(ctx, time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	docChan := make(chan processor.DocumentTree, 1)
@@ -160,7 +161,7 @@ func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree
 			return ctx.Err()
 		}
 		msgs, err := sub.Fetch(1)
-		if err != nil {
+		if err != nil && errors.Is(err, nats.ErrTimeout) {
 			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
 			time.Sleep(1 * time.Second)
 			continue
