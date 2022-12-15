@@ -18,6 +18,7 @@ package parser
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -32,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	certify_vuln "github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -85,7 +87,7 @@ func Subscribe(ctx context.Context) error {
 			return ctx.Err()
 		}
 		msgs, err := sub.Fetch(1)
-		if err != nil {
+		if err != nil && errors.Is(err, nats.ErrTimeout) {
 			logger.Infof("[ingestor: %s] error consuming, backoff for a second: %v", id, err)
 			time.Sleep(1 * time.Second)
 			continue
@@ -113,9 +115,6 @@ func Subscribe(ctx context.Context) error {
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
 // If NATS JetStream is used, ParseDocumentTree also stream the documents and send them to the assembler
 func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, error) {
-	logger := logging.FromContext(ctx)
-	js := emitter.FromContext(ctx)
-
 	assemblerInputs := []assembler.Graph{}
 	docTreeBuilder := newDocTreeBuilder()
 	err := docTreeBuilder.parse(ctx, docTree)
@@ -127,17 +126,18 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 		assemblerInputs = append(assemblerInputs, assemblerInput)
 	}
 
-	if js != nil {
-		assemblerInputsJSON, err := json.Marshal(assemblerInputs)
-		if err != nil {
-			return nil, err
-		}
-		_, err = js.Publish(emitter.SubjectNameDocParsed, assemblerInputsJSON)
-		if err != nil {
-			return nil, err
-		}
-		logger.Infof("doc parsed: %+v", docTree.Document.SourceInformation)
-	}
+	// TODO: Once the graphDB is abstracted via GraphQL, add NATS back to ingestor. See issue https://github.com/guacsec/guac/issues/299
+	// if js != nil {
+	// 	assemblerInputsJSON, err := json.Marshal(assemblerInputs)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	_, err = js.Publish(emitter.SubjectNameDocParsed, assemblerInputsJSON)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	logger.Infof("doc parsed: %+v", docTree.Document.SourceInformation)
+	// }
 
 	return assemblerInputs, nil
 }

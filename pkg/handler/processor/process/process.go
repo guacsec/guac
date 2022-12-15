@@ -18,6 +18,7 @@ package process
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -30,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -72,7 +74,7 @@ func Subscribe(ctx context.Context) error {
 			return ctx.Err()
 		}
 		msgs, err := sub.Fetch(1)
-		if err != nil {
+		if err != nil && errors.Is(err, nats.ErrTimeout) {
 			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
 			time.Sleep(1 * time.Second)
 			continue
