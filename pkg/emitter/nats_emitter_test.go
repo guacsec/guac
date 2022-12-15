@@ -27,6 +27,7 @@ import (
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -104,7 +105,7 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 
 	var cancel context.CancelFunc
 
-	ctx, cancel = context.WithTimeout(ctx, time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	docChan := make(chan processor.DocumentTree, 1)
@@ -131,6 +132,60 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 		}
 	}
 
+}
+
+func TestNatsEmitter_RecreateStream(t *testing.T) {
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer natsTest.Shutdown()
+
+	ctx := context.Background()
+	jetStream := NewJetStream(url, "", "")
+	ctx, err = jetStream.JetStreamInit(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
+	defer jetStream.Close()
+	tests := []struct {
+		name           string
+		deleteStream   bool
+		wantErrMessage error
+	}{{
+		name:           "no new stream",
+		deleteStream:   false,
+		wantErrMessage: nats.ErrStreamNotFound,
+	}, {
+		name:           "delete stream and recreate",
+		deleteStream:   true,
+		wantErrMessage: nats.ErrStreamNotFound,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.deleteStream {
+				err := jetStream.js.DeleteStream(StreamName)
+				if err != nil {
+					t.Errorf("failed to delete stream: %v", err)
+				}
+				_, err = jetStream.js.StreamInfo(StreamName)
+				if err == nil || (err != nil) && !errors.Is(err, tt.wantErrMessage) {
+					t.Errorf("RecreateStream() error = %v, wantErr %v", err, tt.wantErrMessage)
+					return
+				}
+			}
+			err = jetStream.RecreateStream(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error recreating jetstream: %v", err)
+			}
+			_, err = jetStream.js.StreamInfo(StreamName)
+			if err != nil {
+				t.Errorf("RecreateStream() failed to create stream with error = %v", err)
+				return
+			}
+		})
+	}
 }
 
 func testPublish(ctx context.Context, d *processor.Document) error {
@@ -164,9 +219,13 @@ func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree
 		}
 		msgs, err := sub.Fetch(1)
 		if err != nil {
-			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
-			time.Sleep(1 * time.Second)
-			continue
+			if errors.Is(err, nats.ErrTimeout) {
+				logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
+				time.Sleep(1 * time.Second)
+				continue
+			} else {
+				return err
+			}
 		}
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()

@@ -135,7 +135,7 @@ func (j *jetStream) Close() {
 func (j *jetStream) RecreateStream(ctx context.Context) error {
 	if j.js != nil {
 		err := j.js.DeleteStream(StreamName)
-		if err != nil {
+		if err != nil && !errors.Is(err, nats.ErrStreamNotFound) {
 			return fmt.Errorf("failed to delete stream: %w", err)
 		}
 	}
