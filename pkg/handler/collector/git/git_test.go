@@ -43,7 +43,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 	}{{
 		name: "get repo",
 		fields: fields{
-			url:      "https://github.com/shafeeshafee/test-123.git",
+			url:      "https://github.com/guacsec/git-collector-test",
 			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			interval: time.Millisecond,
@@ -54,7 +54,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "if repo exist",
 		fields: fields{
-			url:      "https://github.com/shafeeshafee/test-123.git",
+			url:      "https://github.com/guacsec/git-collector-test",
 			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			interval: time.Millisecond,
@@ -65,7 +65,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "get repo poll",
 		fields: fields{
-			url:      "https://github.com/shafeeshafee/test-123.git",
+			url:      "https://github.com/guacsec/git-collector-test",
 			dir:      os.TempDir() + "/guac-data-test",
 			poll:     true,
 			interval: time.Millisecond,
