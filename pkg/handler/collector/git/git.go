@@ -32,7 +32,7 @@ const (
 	CollectorGitDocument = "GitCollector"
 )
 
-// This code is a git collector that collects documents from a Git repository (GitHub, GitLab, etc.)
+// gitDocumentCollector collects documents from a Git repository (GitHub, GitLab, etc.)
 // The collector clones the repository to a local directory or pulls any updates from the repository if it has been cloned previously.
 // It emits each collected document to the collector to be processed.
 // The collector can either run once and grab all the artifacts or keep running and check for new artifacts based on the polling rate.
