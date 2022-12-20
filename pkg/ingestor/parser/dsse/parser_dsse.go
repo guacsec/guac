@@ -17,10 +17,14 @@ package dsse
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
 type dsseParser struct {
@@ -46,8 +50,7 @@ func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
 }
 
 func (d *dsseParser) getIdentity(ctx context.Context) error {
-	// We dont have a way to feed in the public key at the this time. So commenting out.
-	/* identities, err := verifier.VerifyIdentity(ctx, d.doc)
+	identities, err := verifier.VerifyIdentity(ctx, d.doc)
 	if err != nil {
 		return err
 	}
@@ -59,7 +62,7 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 		d.identities = append(d.identities, assembler.IdentityNode{
 			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
 			KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), NodeData: *assembler.NewObjectMetadata(d.doc.SourceInformation)})
-	} */
+	}
 	return nil
 }
 

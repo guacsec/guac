@@ -84,6 +84,12 @@ var (
 	//go:embed exampledata/certify-vuln.json
 	ITE6VulnExample []byte
 
+	//go:embed exampledata/oci-dsse-att.json
+	OCIDsseAttExample []byte
+
+	//go:embed exampledata/oci-spdx.json
+	OCISPDXExample []byte
+
 	// DSSE/SLSA Testdata
 
 	// Taken from: https://slsa.dev/provenance/v0.1#example

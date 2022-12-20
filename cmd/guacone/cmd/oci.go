@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/handler/collector"
@@ -36,7 +37,7 @@ var ociCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateFlags(
+		opts, err := validateOCIFlags(
 			viper.GetString("gdbuser"),
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
@@ -49,7 +50,7 @@ var ociCmd = &cobra.Command{
 		}
 
 		// Register collector
-		ociCollector := oci.NewOCICollector(ctx, opts.path, false, time.Second)
+		ociCollector := oci.NewOCICollector(ctx, opts.path, opts.tag, false, 10*time.Minute)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -121,6 +122,25 @@ var ociCmd = &cobra.Command{
 			logger.Infof("completed ingesting %v documents", totalNum)
 		}
 	},
+}
+
+func validateOCIFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
+	var opts options
+	opts.user = user
+	opts.pass = pass
+	opts.dbAddr = dbAddr
+	opts.realm = realm
+
+	if len(args) != 1 {
+		return opts, fmt.Errorf("expected positional argument for image_path")
+	}
+
+	stringSplit := strings.Split(args[0], ":")
+
+	opts.path = stringSplit[0]
+	opts.tag = stringSplit[1]
+
+	return opts, nil
 }
 
 func init() {

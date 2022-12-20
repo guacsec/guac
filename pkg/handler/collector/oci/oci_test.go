@@ -20,55 +20,68 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/internal/testing/dochelper"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
+// TODO (parth): Add other test cases for multi-platform to capture attestation/SBOM
+// for each level
+// TODO (parth): Another way to testing the polling functionality? Currently
+// context cancel fails as context is used by regclient and causes a timeout
 func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
-	type fields struct {
-		repoRef     string
-		lastChecked time.Time
-		poll        bool
-		interval    time.Duration
-	}
 	ctx := context.Background()
+	type fields struct {
+		repo     string
+		tag      string
+		poll     bool
+		interval time.Duration
+	}
+
 	tests := []struct {
 		name    string
 		fields  fields
 		wantErr bool
 		want    []*processor.Document
 	}{{
-		name: "poll true attestation and sbom",
-		fields: fields{
-			repoRef:     "ghcr.io/clearalpha/multi-manager-model",
-			lastChecked: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
-			poll:        true,
-			interval:    0,
-		},
-		wantErr: false,
-	}, {
 		name: "get attestation and sbom",
 		fields: fields{
-			repoRef:     "ghcr.io/clearalpha/multi-manager-model",
-			lastChecked: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
-			poll:        false,
-			interval:    0,
+			repo:     "ppatel1989/guac-test-image",
+			tag:      "e26f2e514682726fa808a849c863e5feca71e0c3",
+			poll:     false,
+			interval: 0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ppatel1989/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ppatel1989/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
+				},
+			},
 		},
 		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &ociCollector{
-				repoRef:     tt.fields.repoRef,
-				lastChecked: tt.fields.lastChecked,
-				poll:        tt.fields.poll,
-				interval:    tt.fields.interval,
-			}
+			g := NewOCICollector(ctx, tt.fields.repo, tt.fields.tag, tt.fields.poll, tt.fields.interval)
 
-			// var cancel context.CancelFunc
-			// if tt.fields.poll {
-			// 	ctx, cancel = context.WithTimeout(ctx, time.Second)
-			// 	defer cancel()
-			// }
+			var cancel context.CancelFunc
+			if tt.fields.poll {
+				ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
+				defer cancel()
+			}
 
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
@@ -98,6 +111,13 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			for len(docChan) > 0 {
 				d := <-docChan
 				collectedDocs = append(collectedDocs, d)
+			}
+
+			for i := range collectedDocs {
+				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
+				if !result {
+					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+				}
 			}
 
 			if g.Type() != OCICollector {

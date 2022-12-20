@@ -46,7 +46,10 @@ type options struct {
 	pass   string
 	realm  string
 	// path to folder with documents to collect
+	// or oci image repo
 	path string
+	// optional tag for image
+	tag string
 }
 
 var exampleCmd = &cobra.Command{

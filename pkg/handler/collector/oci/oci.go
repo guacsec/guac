@@ -17,112 +17,106 @@ package oci
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/google/go-containerregistry/pkg/crane"
-	"github.com/google/go-containerregistry/pkg/name"
-	v1 "github.com/google/go-containerregistry/pkg/v1"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/pkg/errors"
-	"github.com/sigstore/cosign/cmd/cosign/cli/options"
-	"github.com/sigstore/cosign/pkg/cosign"
-	"github.com/sigstore/cosign/pkg/oci"
-	ociremote "github.com/sigstore/cosign/pkg/oci/remote"
+	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/types/manifest"
+	"github.com/regclient/regclient/types/ref"
 )
 
 const (
-	OCICollector     = "OCICollector"
-	DockerAPIVersion = "1.38"
+	OCICollector = "OCICollector"
 )
 
 type ociCollector struct {
-	repoRef     string
-	lastChecked time.Time
-	poll        bool
-	interval    time.Duration
+	repo          string
+	tag           string
+	checkedDigest []string
+	poll          bool
+	interval      time.Duration
 }
 
-func NewOCICollector(ctx context.Context, repoRef string, poll bool, interval time.Duration) *ociCollector {
+func NewOCICollector(ctx context.Context, repo string, tag string, poll bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
-		repoRef:  repoRef,
-		poll:     poll,
-		interval: interval,
+		repo:          repo,
+		tag:           tag,
+		checkedDigest: []string{},
+		poll:          poll,
+		interval:      interval,
 	}
 }
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
-
-// need to figure out the polling piece. How to when know when to pull again
-// Based on the image find all its tags and keep track of the tags we have
-// already looked at? Most likely will have to do it based on the timestamp
-// grab the newest tags and pull down the attestation, sbom and signature.
-// for all configured images in the specified registry
-
-// need to ask BMITCH or someone to know when to pull again...
-
-// v1.Image does contain a configuration file that contains the created at...
-// list all the tags and check the time stamp on them all to which one are the
-// new ones that have not been ingested via the v1.image config file/
-
 func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	opts := crane.GetOptions()
 	if o.poll {
 		for {
-			err := o.getTagsAndFetch(ctx, opts, docChannel)
+			err := o.getTagsAndFetch(ctx, docChannel)
 			if err != nil {
 				return err
 			}
-			o.lastChecked = time.Now()
+			// set interval to about 5 mins or more
 			time.Sleep(o.interval)
 		}
 	} else {
-		err := o.getTagsAndFetch(ctx, opts, docChannel)
-		if err != nil {
-			return err
+		if o.tag != "" {
+			err := o.getTagsAndFetch(ctx, docChannel)
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.New("image tag not specified to fetch")
 		}
-		o.lastChecked = time.Now()
 	}
 
 	return nil
 }
 
-func (o *ociCollector) getTagsAndFetch(ctx context.Context, opts crane.Options, docChannel chan<- *processor.Document) error {
-	tags, err := crane.ListTags(o.repoRef)
-	if err != nil {
-		return fmt.Errorf("reading tags for %s: %w", o.repoRef, err)
-	}
+func (o *ociCollector) getTagsAndFetch(ctx context.Context, docChannel chan<- *processor.Document) error {
+	rcOpts := []regclient.Opt{}
+	rcOpts = append(rcOpts, regclient.WithDockerCreds())
+	rcOpts = append(rcOpts, regclient.WithDockerCerts())
 
-	for _, tag := range tags {
-		fmt.Println(tag)
-		if !strings.HasSuffix(tag, "sbom") && !strings.HasSuffix(tag, "att") && !strings.HasSuffix(tag, "sig") {
-			imageTag := fmt.Sprintf("%v:%v", o.repoRef, tag)
-			ref, err := name.ParseReference(imageTag, opts.Name...)
-			if err != nil {
-				return fmt.Errorf("parsing reference %q: %w", imageTag, err)
-			}
-			img, err := remote.Image(ref, opts.Remote...)
-			if err != nil {
-				return fmt.Errorf("reading image %q: %w", ref, err)
-			}
-			imgConfig, err := img.ConfigFile()
-			if err != nil {
-				return err
-			}
-			if o.poll {
-				fmt.Println(imgConfig.Created.String())
-				if imgConfig.Created.After(o.lastChecked) {
-					err := fetchOCIArtifacts(ctx, imageTag, docChannel)
-					if err != nil {
-						return err
-					}
+	if o.tag != "" {
+		imageTag := fmt.Sprintf("%v:%v", o.repo, o.tag)
+		r, err := ref.New(imageTag)
+		if err != nil {
+			return err
+		}
+
+		rc := regclient.New(rcOpts...)
+		defer rc.Close(ctx, r)
+
+		err = o.fetchOCIArtifacts(ctx, rc, r, docChannel)
+		if err != nil {
+			return err
+		}
+	} else {
+		r, err := ref.New(o.repo)
+		if err != nil {
+			return err
+		}
+
+		rc := regclient.New(rcOpts...)
+		defer rc.Close(ctx, r)
+
+		tags, err := rc.TagList(ctx, r)
+		if err != nil {
+			return fmt.Errorf("reading tags for %s: %w", o.repo, err)
+		}
+
+		for _, tag := range tags.Tags {
+			if !strings.HasSuffix(tag, "sbom") && !strings.HasSuffix(tag, "att") && !strings.HasSuffix(tag, "sig") {
+				imageTag := fmt.Sprintf("%v:%v", o.repo, tag)
+				r, err := ref.New(imageTag)
+				if err != nil {
+					return err
 				}
-			} else {
-				err := fetchOCIArtifacts(ctx, imageTag, docChannel)
+				err = o.fetchOCIArtifacts(ctx, rc, r, docChannel)
 				if err != nil {
 					return err
 				}
@@ -132,198 +126,97 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, opts crane.Options, 
 	return nil
 }
 
-func fetchOCIArtifacts(ctx context.Context, image string, docChannel chan<- *processor.Document) error {
-	regOpts := &options.RegistryOptions{}
+func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, rc *regclient.RegClient, image ref.Ref, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
 
-	ref, err := name.ParseReference(image)
+	// attempt to request only the headers, avoids Docker Hub rate limits
+	m, err := rc.ManifestHead(ctx, image)
 	if err != nil {
 		return err
 	}
-	ociremoteOpts, err := regOpts.ClientOpts(ctx)
-	if err != nil {
-		return err
-	}
-	attestations, err := cosign.FetchAttestationsForReference(ctx, ref, ociremoteOpts...)
-	if err != nil {
-		return err
-	}
-	for _, att := range attestations {
-		blob, err := json.Marshal(att)
-		if err != nil {
-			return err
-		}
 
-		doc := &processor.Document{
-			Blob:   blob,
-			Type:   processor.DocumentUnknown,
-			Format: processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{
-				Collector: string(OCICollector),
-				Source:    fmt.Sprintf("oci:///%s", image),
-			},
+	for m.IsList() {
+		pl, _ := manifest.GetPlatformList(m)
+		for _, p := range pl {
+			desc, err := manifest.GetPlatformDesc(m, p)
+			if err != nil {
+				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
+			}
+			image.Digest = desc.Digest.String()
+			err = o.fetchOCIArtifacts(ctx, rc, image, docChannel)
+			if err != nil {
+				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
+			}
 		}
-		docChannel <- doc
 	}
 
-	sbomBlob, err := fetchSBOM(ctx, ociremoteOpts, ref)
-	if err != nil && errors.Is(err, errors.New("no sbom attached to reference")) {
-		return err
-	}
-	if len(sbomBlob) > 0 {
-		doc := &processor.Document{
-			Blob:   sbomBlob,
-			Type:   processor.DocumentUnknown,
-			Format: processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{
-				Collector: string(OCICollector),
-				Source:    fmt.Sprintf("oci:///%s", image),
-			},
+	digest := manifest.GetDigest(m)
+	digestFormatted := fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded())
+	// check to see if the digest has already been collected
+	if !contains(o.checkedDigest, digestFormatted) {
+		suffixList := []string{"att", "sbom"}
+		for _, suffix := range suffixList {
+			digestTag := fmt.Sprintf("%v.%v", digestFormatted, suffix)
+			imageTag := fmt.Sprintf("%v:%v", o.repo, digestTag)
+			r, err := ref.New(imageTag)
+			if err != nil {
+				return err
+			}
+
+			// if `.att` or `.sbom`` do not exist for specified digest
+			// log error and continue
+			m, err = rc.ManifestGet(ctx, r)
+			if err != nil {
+				logger.Error(err)
+				continue
+			}
+
+			// go through layers in reverse
+			mi, ok := m.(manifest.Imager)
+			if !ok {
+				return fmt.Errorf("reference is not a known image media type")
+			}
+			layers, err := mi.GetLayers()
+			if err != nil {
+				return err
+			}
+			for i := len(layers) - 1; i >= 0; i-- {
+				blob, err := rc.BlobGet(ctx, r, layers[i])
+				if err != nil {
+					return fmt.Errorf("failed pulling layer %d: %w", i, err)
+				}
+				btr1, err := blob.RawBody()
+				if err != nil {
+					return err
+				}
+				doc := &processor.Document{
+					Blob:   btr1,
+					Type:   processor.DocumentUnknown,
+					Format: processor.FormatUnknown,
+					SourceInformation: processor.SourceInformation{
+						Collector: string(OCICollector),
+						Source:    imageTag,
+					},
+				}
+				docChannel <- doc
+			}
+			o.checkedDigest = append(o.checkedDigest, fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded()))
 		}
-		docChannel <- doc
 	}
+
 	return nil
 }
 
-// Type returns the collector type
+func contains(elems []string, v string) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+// Type is the collector type of the collector
 func (o *ociCollector) Type() string {
 	return OCICollector
-}
-
-type platformList []struct {
-	hash     v1.Hash
-	platform *v1.Platform
-}
-
-func (pl *platformList) String() string {
-	r := []string{}
-	for _, p := range *pl {
-		r = append(r, p.platform.String())
-	}
-	return strings.Join(r, ", ")
-}
-
-func fetchSBOM(ctx context.Context, ociremoteOpts []ociremote.Option, ref name.Reference) ([]byte, error) {
-	dnOpts := &options.SBOMDownloadOptions{}
-	se, err := ociremote.SignedEntity(ref, ociremoteOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	idx, isIndex := se.(oci.SignedImageIndex)
-
-	// We only allow --platform on multiarch indexes
-	if dnOpts.Platform != "" && !isIndex {
-		return nil, fmt.Errorf("specified reference is not a multiarch image")
-	}
-
-	if dnOpts.Platform != "" && isIndex {
-		targetPlatform, err := v1.ParsePlatform(dnOpts.Platform)
-		if err != nil {
-			return nil, fmt.Errorf("parsing platform: %w", err)
-		}
-		platforms, err := getIndexPlatforms(idx)
-		if err != nil {
-			return nil, fmt.Errorf("getting available platforms: %w", err)
-		}
-
-		platforms = matchPlatform(targetPlatform, platforms)
-		if len(platforms) == 0 {
-			return nil, fmt.Errorf("unable to find an SBOM for %s", targetPlatform.String())
-		}
-		if len(platforms) > 1 {
-			return nil, fmt.Errorf(
-				"platform spec matches more than one image architecture: %s",
-				platforms.String(),
-			)
-		}
-
-		nse, err := idx.SignedImage(platforms[0].hash)
-		if err != nil {
-			return nil, fmt.Errorf("searching for %s image: %w", platforms[0].hash.String(), err)
-		}
-		if nse == nil {
-			return nil, fmt.Errorf("unable to find image %s", platforms[0].hash.String())
-		}
-		se = nse
-	}
-
-	file, err := se.Attachment("sbom")
-	if errors.Is(err, ociremote.ErrImageNotFound) {
-		if !isIndex {
-			return nil, errors.New("no sbom attached to reference")
-		}
-		// Help the user with the available architectures
-		pl, err := getIndexPlatforms(idx)
-		if len(pl) > 0 && err == nil {
-			fmt.Fprintf(
-				os.Stderr,
-				"\nThis multiarch image does not have an SBOM attached at the index level.\n"+
-					"Try using --platform with one of the following architectures:\n%s\n\n",
-				pl.String(),
-			)
-		}
-		return nil, fmt.Errorf("no SBOM found attached to image index")
-	} else if err != nil {
-		return nil, fmt.Errorf("getting sbom attachment: %w", err)
-	}
-
-	sbom, err := file.Payload()
-	if err != nil {
-		return nil, err
-	}
-	return sbom, nil
-}
-
-func getIndexPlatforms(idx oci.SignedImageIndex) (platformList, error) {
-	im, err := idx.IndexManifest()
-	if err != nil {
-		return nil, fmt.Errorf("fetching index manifest: %w", err)
-	}
-
-	platforms := platformList{}
-	for _, m := range im.Manifests {
-		if m.Platform == nil {
-			continue
-		}
-		platforms = append(platforms, struct {
-			hash     v1.Hash
-			platform *v1.Platform
-		}{m.Digest, m.Platform})
-	}
-	return platforms, nil
-}
-
-// matchPlatform filters a list of platforms returning only those matching
-// a base. "Based" on ko's internal equivalent while it moves to GGCR.
-// https://github.com/google/ko/blob/e6a7a37e26d82a8b2bb6df991c5a6cf6b2728794/pkg/build/gobuild.go#L1020
-func matchPlatform(base *v1.Platform, list platformList) platformList {
-	ret := platformList{}
-	for _, p := range list {
-		if base.OS != "" && base.OS != p.platform.OS {
-			continue
-		}
-		if base.Architecture != "" && base.Architecture != p.platform.Architecture {
-			continue
-		}
-		if base.Variant != "" && base.Variant != p.platform.Variant {
-			continue
-		}
-
-		if base.OSVersion != "" && p.platform.OSVersion != base.OSVersion {
-			if base.OS != "windows" {
-				continue
-			} else {
-				if pcount, bcount := strings.Count(base.OSVersion, "."), strings.Count(p.platform.OSVersion, "."); pcount == 2 && bcount == 3 {
-					if base.OSVersion != p.platform.OSVersion[:strings.LastIndex(p.platform.OSVersion, ".")] {
-						continue
-					}
-				} else {
-					continue
-				}
-			}
-		}
-		ret = append(ret, p)
-	}
-
-	return ret
 }
