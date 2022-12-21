@@ -90,6 +90,15 @@ var (
 	//go:embed exampledata/oci-spdx.json
 	OCISPDXExample []byte
 
+	//go:embed exampledata/go-spdx-multi-arch_1.json
+	OCIGoSPDXMulti1 []byte
+
+	//go:embed exampledata/go-spdx-multi-arch_2.json
+	OCIGoSPDXMulti2 []byte
+
+	//go:embed exampledata/go-spdx-multi-arch_3.json
+	OCIGoSPDXMulti3 []byte
+
 	// DSSE/SLSA Testdata
 
 	// Taken from: https://slsa.dev/provenance/v0.1#example

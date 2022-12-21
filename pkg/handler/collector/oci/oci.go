@@ -135,7 +135,11 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, rc *regclient.RegC
 		return err
 	}
 
-	for m.IsList() {
+	if m.IsList() {
+		m, err := rc.ManifestGet(ctx, image)
+		if err != nil {
+			return err
+		}
 		pl, _ := manifest.GetPlatformList(m)
 		for _, p := range pl {
 			desc, err := manifest.GetPlatformDesc(m, p)
@@ -189,6 +193,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, rc *regclient.RegC
 				if err != nil {
 					return err
 				}
+
 				doc := &processor.Document{
 					Blob:   btr1,
 					Type:   processor.DocumentUnknown,

@@ -17,6 +17,8 @@ package oci
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,8 +27,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
-// TODO (parth): Add other test cases for multi-platform to capture attestation/SBOM
-// for each level
 // TODO (parth): Another way to testing the polling functionality? Currently
 // context cancel fails as context is used by regclient and causes a timeout
 func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
@@ -39,11 +39,50 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
-		want    []*processor.Document
+		name       string
+		fields     fields
+		wantErr    bool
+		errMessage error
+		want       []*processor.Document
 	}{{
+		name: "multi-platform sbom",
+		fields: fields{
+			repo:     "ppatel1989/go-multi-test",
+			tag:      "7ddfb3e035b42cd70649cc33393fe32c",
+			poll:     false,
+			interval: 0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIGoSPDXMulti1),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ppatel1989/go-multi-test:sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10.sbom",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIGoSPDXMulti2),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ppatel1989/go-multi-test:sha256-1bc7e53e25de5c00ecaeca1473ab56bfaf4e39cea747edcf7db467389a287931.sbom",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIGoSPDXMulti3),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ppatel1989/go-multi-test:sha256-534035553d1270a98dab3512fde0987e7709ec6b878c8fd60fdaf0d8e1611979.sbom",
+				},
+			},
+		},
+		wantErr: false,
+	}, {
 		name: "get attestation and sbom",
 		fields: fields{
 			repo:     "ppatel1989/guac-test-image",
@@ -72,6 +111,16 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name: "tag not specified not polling",
+		fields: fields{
+			repo:     "ppatel1989/guac-test-image",
+			tag:      "",
+			poll:     false,
+			interval: 0,
+		},
+		errMessage: errors.New("image tag not specified to fetch"),
+		wantErr:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -83,6 +132,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				defer cancel()
 			}
 
+			var err error
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
 			defer close(docChan)
@@ -99,10 +149,16 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				select {
 				case d := <-docChan:
 					collectedDocs = append(collectedDocs, d)
-				case err := <-errChan:
-					if (err != nil) != tt.wantErr {
-						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
-						return
+				case err = <-errChan:
+					if err != nil {
+						if !tt.wantErr {
+							t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
+							return
+						}
+						if !strings.Contains(err.Error(), tt.errMessage.Error()) {
+							t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.errMessage)
+							return
+						}
 					}
 					collectorsDone += 1
 				}
@@ -112,17 +168,19 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				d := <-docChan
 				collectedDocs = append(collectedDocs, d)
 			}
+			if err == nil {
+				for i := range collectedDocs {
+					result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
+					if !result {
+						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+					}
+				}
 
-			for i := range collectedDocs {
-				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
-				if !result {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+				if g.Type() != OCICollector {
+					t.Errorf("g.Type() = %s, want %s", g.Type(), OCICollector)
 				}
 			}
 
-			if g.Type() != OCICollector {
-				t.Errorf("g.Type() = %s, want %s", g.Type(), OCICollector)
-			}
 		})
 	}
 }
