@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	neturl "net/url"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
@@ -23,7 +24,6 @@ const (
 )
 
 type githubDocumentCollector struct {
-	url           string
 	dir           string
 	lastChecked   time.Time
 	poll          bool
@@ -34,11 +34,10 @@ type githubDocumentCollector struct {
 	repo          string
 }
 
-func NewGitHubDocumentCollector(ctx context.Context, url string, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string) *githubDocumentCollector {
+func NewGitHubDocumentCollector(ctx context.Context, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string) *githubDocumentCollector {
 	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
 
 	return &githubDocumentCollector{
-		url:           url,
 		dir:           dir,
 		poll:          poll,
 		interval:      interval,
@@ -50,12 +49,13 @@ func NewGitHubDocumentCollector(ctx context.Context, url string, dir string, pol
 }
 
 func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
 	if g.poll {
 		for {
 			if ctx.Err() != nil {
 				return nil
 			}
-			err := g.collectAssets(g.url, g.dir, g.owner, g.repo, g.token, docChannel)
+			err := g.collectAssets(g.dir, g.owner, g.repo, g.token, logger, docChannel)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 			time.Sleep(g.interval)
 		}
 	} else {
-		err := g.collectAssets(g.url, g.dir, g.owner, g.repo, g.token, docChannel)
+		err := g.collectAssets(g.dir, g.owner, g.repo, g.token, logger, docChannel)
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ func (g *githubDocumentCollector) Type() string {
 }
 
 // Getting files from assets
-func (g *githubDocumentCollector) collectAssets(url string, directory string, owner string, repo string, token string, docChannel chan<- *processor.Document) error {
+func (g *githubDocumentCollector) collectAssets(directory string, owner string, repo string, token string, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
 	// API_KEY needs to be stored as an environmental variable: export API_KEY="YOUR_KEY_HERE"
 
 	// Create the directory if it doesn't exist
@@ -120,7 +120,7 @@ func (g *githubDocumentCollector) collectAssets(url string, directory string, ow
 
 		// NOTE: Asset download stpe 1
 		// Get the asset's URL
-		assetURL, err := neturl.Parse(asset.GetBrowserDownloadURL())
+		assetURL, err := url.Parse(asset.GetBrowserDownloadURL())
 		if err != nil {
 			fmt.Println(err)
 			continue
