@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
+	neturl "net/url"
 	"os"
 	"strings"
 	"time"
@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
 
@@ -28,9 +29,12 @@ type githubDocumentCollector struct {
 	poll          bool
 	interval      time.Duration
 	fileCollector collector.Collector
+	token         string
+	owner         string
+	repo          string
 }
 
-func NewGitHubDocumentCollector(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *githubDocumentCollector {
+func NewGitHubDocumentCollector(ctx context.Context, url string, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string) *githubDocumentCollector {
 	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
 
 	return &githubDocumentCollector{
@@ -39,36 +43,61 @@ func NewGitHubDocumentCollector(ctx context.Context, url string, dir string, pol
 		poll:          poll,
 		interval:      interval,
 		fileCollector: fileCollector,
+		token:         token,
+		owner:         owner,
+		repo:          repo,
 	}
 }
 
 func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	// Replace with your own personal access token, export to use
-	token := os.Getenv("API_KEY")
+	if g.poll {
+		for {
+			if ctx.Err() != nil {
+				return nil
+			}
+			err := g.collectAssets(g.url, g.dir, g.owner, g.repo, g.token, docChannel)
+			if err != nil {
+				return err
+			}
+			g.lastChecked = time.Now()
+			time.Sleep(g.interval)
+		}
+	} else {
+		err := g.collectAssets(g.url, g.dir, g.owner, g.repo, g.token, docChannel)
+		if err != nil {
+			return err
+		}
+		g.lastChecked = time.Now()
+	}
 
-	// Replace with the owner and name of the repository
-	owner := "slsa-framework"
-	repo := "slsa-github-generator"
+	return nil
+}
 
-	// Replace with the path of the directory where you want to download the assets
-	dir := "temp"
+// Type returns the collector type
+func (g *githubDocumentCollector) Type() string {
+	return CollectorGitHubDocument
+}
+
+// Getting files from assets
+func (g *githubDocumentCollector) collectAssets(url string, directory string, owner string, repo string, token string, docChannel chan<- *processor.Document) error {
+	// API_KEY needs to be stored as an environmental variable: export API_KEY="YOUR_KEY_HERE"
 
 	// Create the directory if it doesn't exist
-	err := os.MkdirAll(dir, 0755)
+	err := os.MkdirAll(directory, 0755)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
 	// Change the current working directory to the directory
-	err = os.Chdir(dir)
+	err = os.Chdir(directory)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
 	// Authenticate with GitHub
-	ctx = context.Background()
+	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -82,20 +111,22 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 		return err
 	}
 
-	// Download each SBOM (.jsonl) asset in the release
+	// Download each asset in the release
 	for _, asset := range release.Assets {
 		// Check if the asset's name ends with .jsonl
 		if !strings.HasSuffix(asset.GetName(), ".jsonl") {
 			continue
 		}
 
+		// NOTE: Asset download stpe 1
 		// Get the asset's URL
-		assetURL, err := url.Parse(asset.GetBrowserDownloadURL())
+		assetURL, err := neturl.Parse(asset.GetBrowserDownloadURL())
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
+		// NOTE: Asset download step 2
 		// Create the file
 		filename := asset.GetName()
 		file, err := os.Create(filename)
@@ -105,6 +136,7 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 		}
 		defer file.Close()
 
+		// NOTE: Asset download step 3
 		// Download the asset
 		resp, err := http.Get(assetURL.String())
 		if err != nil {
@@ -113,28 +145,19 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 		}
 		defer resp.Body.Close()
 
+		// NOTE: Asset download step 4
 		// Write the asset to the file
 		_, err = io.Copy(file, resp.Body)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-	}
-	return nil
-}
 
-func checkIfDirExists(name string) (bool, error) {
-	_, err := os.Stat(name)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
+		err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
+		if err != nil {
+			return err
 		}
-		return false, err
 	}
-	return true, nil
-}
 
-// Type returns the collector type
-func (g *githubDocumentCollector) Type() string {
-	return CollectorGitHubDocument
+	return nil
 }
