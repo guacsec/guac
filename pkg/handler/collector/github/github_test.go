@@ -10,6 +10,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
+// FIXME: Test is not running properly due to a bad credentials error
 func Test_github_RetrieveArtifacts(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
