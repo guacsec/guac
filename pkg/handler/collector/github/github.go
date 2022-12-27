@@ -6,13 +6,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/google/go-github/github"
-	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"go.uber.org/zap"
@@ -28,23 +25,24 @@ type githubDocumentCollector struct {
 	lastChecked   time.Time
 	poll          bool
 	interval      time.Duration
-	fileCollector collector.Collector
 	token         string
 	owner         string
 	repo          string
+	tag           string
+	tagList       []string
+	latestRelease bool
 }
 
-func NewGitHubDocumentCollector(ctx context.Context, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string) *githubDocumentCollector {
-	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
-
+func NewGitHubDocumentCollector(ctx context.Context, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string, latestRelease bool) *githubDocumentCollector {
 	return &githubDocumentCollector{
 		dir:           dir,
 		poll:          poll,
 		interval:      interval,
-		fileCollector: fileCollector,
 		token:         token,
 		owner:         owner,
 		repo:          repo,
+		tag:           tag,
+		latestRelease: latestRelease,
 	}
 }
 
@@ -55,7 +53,7 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 			if ctx.Err() != nil {
 				return nil
 			}
-			err := g.collectAssets(g.dir, g.owner, g.repo, g.token, logger, docChannel)
+			err := g.fetchAssets(ctx, logger, docChannel)
 			if err != nil {
 				return err
 			}
@@ -63,7 +61,7 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 			time.Sleep(g.interval)
 		}
 	} else {
-		err := g.collectAssets(g.dir, g.owner, g.repo, g.token, logger, docChannel)
+		err := g.fetchAssets(ctx, logger, docChannel)
 		if err != nil {
 			return err
 		}
@@ -79,38 +77,29 @@ func (g *githubDocumentCollector) Type() string {
 }
 
 // Getting files from assets
-func (g *githubDocumentCollector) collectAssets(directory string, owner string, repo string, token string, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
-	// API_KEY needs to be stored as an environmental variable: export API_KEY="YOUR_KEY_HERE"
-
-	// Create the directory if it doesn't exist
-	err := os.MkdirAll(directory, 0755)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	// Change the current working directory to the directory
-	err = os.Chdir(directory)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
+func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
 	// Authenticate with GitHub
-	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
+		&oauth2.Token{AccessToken: g.token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	// Get information about the latest release
-	release, _, err := client.Repositories.GetLatestRelease(ctx, owner, repo)
+	// Get information about the release
+	var release *github.RepositoryRelease
+	var err error
+
+	if g.tag == "" {
+		// get the latest release
+		release, _, err = client.Repositories.GetLatestRelease(ctx, g.owner, g.repo)
+	} else {
+		// get the release with the specified tag
+		release, _, err = client.Repositories.GetReleaseByTag(ctx, g.owner, g.repo, g.tag)
+	}
 	if err != nil {
-		fmt.Println(err)
+		logger.Debug(err)
 		return err
 	}
-
 	// Download each asset in the release
 	for _, asset := range release.Assets {
 		// Check if the asset's name ends with .jsonl
@@ -118,46 +107,46 @@ func (g *githubDocumentCollector) collectAssets(directory string, owner string, 
 			continue
 		}
 
-		// NOTE: Asset download stpe 1
 		// Get the asset's URL
 		assetURL, err := url.Parse(asset.GetBrowserDownloadURL())
 		if err != nil {
-			fmt.Println(err)
+			logger.Debug(err)
 			continue
 		}
 
-		// NOTE: Asset download step 2
-		// Create the file
-		filename := asset.GetName()
-		file, err := os.Create(filename)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		defer file.Close()
-
-		// NOTE: Asset download step 3
 		// Download the asset
 		resp, err := http.Get(assetURL.String())
 		if err != nil {
-			fmt.Println(err)
+			logger.Debug(err)
 			continue
 		}
 		defer resp.Body.Close()
 
-		// NOTE: Asset download step 4
-		// Write the asset to the file
-		_, err = io.Copy(file, resp.Body)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
+		bytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
+
+		var sourceString string
+
+		if g.latestRelease {
+			sourceString = fmt.Sprintf("repos/%s/%s/releases/latest", g.owner, g.repo)
+		} else {
+			sourceString = fmt.Sprintf("repos/%s/%s/releases/tags/%s", g.owner, g.repo, g.tag)
+		}
+		doc := &processor.Document{
+			Blob:   bytes,
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: string(CollectorGitHubDocument),
+				Source:    sourceString,
+			},
+		}
+		docChannel <- doc
 	}
+	// TODO: append tags to list
+	g.tagList = append(g.tagList, fmt.Sprintf("%v-%v"))
 
 	return nil
 }
