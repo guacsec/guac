@@ -95,8 +95,7 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 		return err
 	}
 	// Add the current tag to the tagList if it has not been seen before
-	currentTag := release.GetTagName()
-	if !contains(g.tagList, currentTag) {
+	if !contains(g.tagList, g.tag) {
 		// Download each asset in the release
 		for _, asset := range release.Assets {
 			// Check if the asset's name ends with .jsonl
@@ -143,7 +142,7 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 			docChannel <- doc
 		}
 
-		g.tagList = append(g.tagList, currentTag)
+		g.tagList = append(g.tagList, g.tag)
 	}
 
 	return nil
