@@ -16,12 +16,12 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	logger := logging.FromContext(ctx)
 
 	type fields struct {
-		dir      string
 		poll     bool
 		token    string
 		owner    string
 		repo     string
 		tag      string
+		tagList  []string
 		interval time.Duration
 	}
 	tests := []struct {
@@ -33,7 +33,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		// TODO: Fix fields for test cases below
 		name: "Get assets",
 		fields: fields{
-			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
 			owner:    "slsa-framework",
@@ -46,7 +45,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "Tag not specified",
 		fields: fields{
-			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
 			owner:    "slsa-framework",
@@ -56,7 +54,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "No tag or release specified",
 		fields: fields{
-			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
 			owner:    "slsa-framework",
@@ -67,7 +64,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "Poll latest release",
 		fields: fields{
-			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
 			owner:    "slsa-framework",
@@ -78,10 +74,9 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a new githubDocumentCollector
-			gitHubCollector := NewGitHubDocumentCollector(ctx, tt.fields.dir, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag)
+			gitHubCollector := NewGitHubDocumentCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
 			// Create a channel to collect the documents emitted by RetrieveArtifacts
 			docChan := make(chan *processor.Document, 1)
-			defer os.RemoveAll(tt.fields.dir) // clean up
 			errChan := make(chan error, 1)
 			defer close(docChan)
 			defer close(errChan)

@@ -21,7 +21,6 @@ const (
 )
 
 type githubDocumentCollector struct {
-	dir      string
 	poll     bool
 	interval time.Duration
 	token    string
@@ -31,15 +30,15 @@ type githubDocumentCollector struct {
 	tagList  []string
 }
 
-func NewGitHubDocumentCollector(ctx context.Context, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string) *githubDocumentCollector {
+func NewGitHubDocumentCollector(ctx context.Context, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string, tagList []string) *githubDocumentCollector {
 	return &githubDocumentCollector{
-		dir:      dir,
 		poll:     poll,
 		interval: interval,
 		token:    token,
 		owner:    owner,
 		repo:     repo,
 		tag:      tag,
+		tagList:  tagList,
 	}
 }
 
@@ -97,14 +96,7 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 	}
 	// Add the current tag to the tagList if it has not been seen before
 	currentTag := release.GetTagName()
-	found := false
-	for _, t := range g.tagList {
-		if t == currentTag {
-			found = true
-			break
-		}
-	}
-	if !found {
+	if !contains(g.tagList, g.tag) {
 		// Download each asset in the release
 		for _, asset := range release.Assets {
 			// Check if the asset's name ends with .jsonl
@@ -155,4 +147,13 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 	}
 
 	return nil
+}
+
+func contains(elems []string, v string) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }
