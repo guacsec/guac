@@ -21,27 +21,25 @@ const (
 )
 
 type githubDocumentCollector struct {
-	dir           string
-	poll          bool
-	interval      time.Duration
-	token         string
-	owner         string
-	repo          string
-	tag           string
-	tagList       []string
-	latestRelease bool
+	dir      string
+	poll     bool
+	interval time.Duration
+	token    string
+	owner    string
+	repo     string
+	tag      string
+	tagList  []string
 }
 
 func NewGitHubDocumentCollector(ctx context.Context, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string, latestRelease bool) *githubDocumentCollector {
 	return &githubDocumentCollector{
-		dir:           dir,
-		poll:          poll,
-		interval:      interval,
-		token:         token,
-		owner:         owner,
-		repo:          repo,
-		tag:           tag,
-		latestRelease: latestRelease,
+		dir:      dir,
+		poll:     poll,
+		interval: interval,
+		token:    token,
+		owner:    owner,
+		repo:     repo,
+		tag:      tag,
 	}
 }
 
