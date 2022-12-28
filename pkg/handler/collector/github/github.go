@@ -49,9 +49,12 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 			if ctx.Err() != nil {
 				return nil
 			}
-			err := g.fetchAssets(ctx, logger, docChannel)
-			if err != nil {
-				return err
+			// Check if no poll is passed in, should only poll for latest releases
+			if g.tag == "" {
+				err := g.fetchAssets(ctx, logger, docChannel)
+				if err != nil {
+					return err
+				}
 			}
 			time.Sleep(g.interval)
 		}
