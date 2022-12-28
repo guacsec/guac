@@ -100,53 +100,64 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 		logger.Debug(err)
 		return err
 	}
-	// Download each asset in the release
-	for _, asset := range release.Assets {
-		// Check if the asset's name ends with .jsonl
-		if !strings.HasSuffix(asset.GetName(), ".jsonl") {
-			continue
+	// Add the current tag to the tagList if it has not been seen before
+	currentTag := release.GetTagName()
+	found := false
+	for _, t := range g.tagList {
+		if t == currentTag {
+			found = true
+			break
 		}
-
-		// Get the asset's URL
-		assetURL, err := url.Parse(asset.GetBrowserDownloadURL())
-		if err != nil {
-			logger.Debug(err)
-			continue
-		}
-
-		// Download the asset
-		resp, err := http.Get(assetURL.String())
-		if err != nil {
-			logger.Debug(err)
-			continue
-		}
-		defer resp.Body.Close()
-
-		bytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-
-		var sourceString string
-
-		if g.latestRelease {
-			sourceString = fmt.Sprintf("repos/%s/%s/releases/latest", g.owner, g.repo)
-		} else {
-			sourceString = fmt.Sprintf("repos/%s/%s/releases/tags/%s", g.owner, g.repo, g.tag)
-		}
-		doc := &processor.Document{
-			Blob:   bytes,
-			Type:   processor.DocumentUnknown,
-			Format: processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{
-				Collector: string(CollectorGitHubDocument),
-				Source:    sourceString,
-			},
-		}
-		docChannel <- doc
 	}
-	// TODO: append tags to list
-	g.tagList = append(g.tagList, fmt.Sprintf("%v-%v"))
+	if !found {
+		// Download each asset in the release
+		for _, asset := range release.Assets {
+			// Check if the asset's name ends with .jsonl
+			if !strings.HasSuffix(asset.GetName(), ".jsonl") {
+				continue
+			}
+
+			// Get the asset's URL
+			assetURL, err := url.Parse(asset.GetBrowserDownloadURL())
+			if err != nil {
+				logger.Error(err)
+				continue
+			}
+
+			// Download the asset
+			resp, err := http.Get(assetURL.String())
+			if err != nil {
+				logger.Error(err)
+				continue
+			}
+			defer resp.Body.Close()
+
+			bytes, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return err
+			}
+
+			var sourceString string
+
+			if g.latestRelease {
+				sourceString = fmt.Sprintf("repos/%s/%s/releases/latest", g.owner, g.repo)
+			} else {
+				sourceString = fmt.Sprintf("repos/%s/%s/releases/tags/%s", g.owner, g.repo, g.tag)
+			}
+			doc := &processor.Document{
+				Blob:   bytes,
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(CollectorGitHubDocument),
+					Source:    sourceString,
+				},
+			}
+			docChannel <- doc
+		}
+
+		g.tagList = append(g.tagList, currentTag)
+	}
 
 	return nil
 }
