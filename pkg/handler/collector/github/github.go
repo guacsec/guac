@@ -3,7 +3,6 @@ package github
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -131,20 +130,13 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 				return err
 			}
 
-			var sourceString string
-
-			if g.tag == "" {
-				sourceString = fmt.Sprintf("repos/%s/%s/releases/latest", g.owner, g.repo)
-			} else {
-				sourceString = fmt.Sprintf("repos/%s/%s/releases/tags/%s", g.owner, g.repo, g.tag)
-			}
 			doc := &processor.Document{
 				Blob:   bytes,
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(CollectorGitHubDocument),
-					Source:    sourceString,
+					Source:    currentTag,
 				},
 			}
 			docChannel <- doc
