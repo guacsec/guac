@@ -16,12 +16,14 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	logger := logging.FromContext(ctx)
 
 	type fields struct {
-		dir      string
-		poll     bool
-		token    string
-		owner    string
-		repo     string
-		interval time.Duration
+		dir           string
+		poll          bool
+		token         string
+		owner         string
+		repo          string
+		tag           string
+		latestRelease bool
+		interval      time.Duration
 	}
 	tests := []struct {
 		name                   string
@@ -29,7 +31,22 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		numberOfFilesCollected int
 		wantErr                bool
 	}{{
+		// TODO: Fix fields for test cases below
 		name: "Get assets",
+		fields: fields{
+			dir:           os.TempDir() + "/guac-data-test",
+			poll:          false,
+			token:         os.Getenv("API_KEY"),
+			owner:         "slsa-framework",
+			repo:          "slsa-github-generator",
+			tag:           "",
+			latestRelease: true,
+			interval:      time.Millisecond,
+		},
+		numberOfFilesCollected: 3,
+		wantErr:                false,
+	}, {
+		name: "Tag not specified",
 		fields: fields{
 			dir:      os.TempDir() + "/guac-data-test",
 			poll:     false,
@@ -38,13 +55,32 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			repo:     "slsa-github-generator",
 			interval: time.Millisecond,
 		},
-		numberOfFilesCollected: 3,
-		wantErr:                false,
+	}, {
+		name: "No tag or release specified",
+		fields: fields{
+			dir:      os.TempDir() + "/guac-data-test",
+			poll:     false,
+			token:    os.Getenv("API_KEY"),
+			owner:    "slsa-framework",
+			repo:     "slsa-github-generator",
+			interval: time.Millisecond,
+		},
+		wantErr: true,
+	}, {
+		name: "Poll latest release",
+		fields: fields{
+			dir:      os.TempDir() + "/guac-data-test",
+			poll:     false,
+			token:    os.Getenv("API_KEY"),
+			owner:    "slsa-framework",
+			repo:     "slsa-github-generator",
+			interval: time.Millisecond,
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a new githubDocumentCollector
-			gitHubCollector := NewGitHubDocumentCollector(ctx, tt.fields.dir, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo)
+			gitHubCollector := NewGitHubDocumentCollector(ctx, tt.fields.dir, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.latestRelease)
 			// Create a channel to collect the documents emitted by RetrieveArtifacts
 			docChan := make(chan *processor.Document, 1)
 			defer os.RemoveAll(tt.fields.dir) // clean up
