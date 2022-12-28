@@ -22,7 +22,6 @@ const (
 
 type githubDocumentCollector struct {
 	dir           string
-	lastChecked   time.Time
 	poll          bool
 	interval      time.Duration
 	token         string
@@ -57,7 +56,6 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 			if err != nil {
 				return err
 			}
-			g.lastChecked = time.Now()
 			time.Sleep(g.interval)
 		}
 	} else {
@@ -65,7 +63,6 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 		if err != nil {
 			return err
 		}
-		g.lastChecked = time.Now()
 	}
 
 	return nil
@@ -139,7 +136,7 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 
 			var sourceString string
 
-			if g.latestRelease {
+			if g.tag == "" {
 				sourceString = fmt.Sprintf("repos/%s/%s/releases/latest", g.owner, g.repo)
 			} else {
 				sourceString = fmt.Sprintf("repos/%s/%s/releases/tags/%s", g.owner, g.repo, g.tag)
