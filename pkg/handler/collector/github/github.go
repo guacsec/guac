@@ -31,7 +31,7 @@ type githubDocumentCollector struct {
 	tagList  []string
 }
 
-func NewGitHubDocumentCollector(ctx context.Context, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string, latestRelease bool) *githubDocumentCollector {
+func NewGitHubDocumentCollector(ctx context.Context, dir string, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string) *githubDocumentCollector {
 	return &githubDocumentCollector{
 		dir:      dir,
 		poll:     poll,

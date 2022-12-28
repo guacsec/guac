@@ -16,14 +16,13 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	logger := logging.FromContext(ctx)
 
 	type fields struct {
-		dir           string
-		poll          bool
-		token         string
-		owner         string
-		repo          string
-		tag           string
-		latestRelease bool
-		interval      time.Duration
+		dir      string
+		poll     bool
+		token    string
+		owner    string
+		repo     string
+		tag      string
+		interval time.Duration
 	}
 	tests := []struct {
 		name                   string
@@ -34,14 +33,13 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		// TODO: Fix fields for test cases below
 		name: "Get assets",
 		fields: fields{
-			dir:           os.TempDir() + "/guac-data-test",
-			poll:          false,
-			token:         os.Getenv("API_KEY"),
-			owner:         "slsa-framework",
-			repo:          "slsa-github-generator",
-			tag:           "",
-			latestRelease: true,
-			interval:      time.Millisecond,
+			dir:      os.TempDir() + "/guac-data-test",
+			poll:     false,
+			token:    os.Getenv("API_KEY"),
+			owner:    "slsa-framework",
+			repo:     "slsa-github-generator",
+			tag:      "",
+			interval: time.Millisecond,
 		},
 		numberOfFilesCollected: 3,
 		wantErr:                false,
@@ -80,7 +78,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a new githubDocumentCollector
-			gitHubCollector := NewGitHubDocumentCollector(ctx, tt.fields.dir, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.latestRelease)
+			gitHubCollector := NewGitHubDocumentCollector(ctx, tt.fields.dir, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag)
 			// Create a channel to collect the documents emitted by RetrieveArtifacts
 			docChan := make(chan *processor.Document, 1)
 			defer os.RemoveAll(tt.fields.dir) // clean up
