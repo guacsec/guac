@@ -54,6 +54,9 @@ func NewOCICollector(ctx context.Context, repo string, tag string, poll bool, in
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	if o.poll {
+		if o.tag != "" {
+			return errors.New("image tag should not specified when using polling")
+		}
 		for {
 			err := o.getTagsAndFetch(ctx, docChannel)
 			if err != nil {
@@ -63,13 +66,12 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 			time.Sleep(o.interval)
 		}
 	} else {
-		if o.tag != "" {
-			err := o.getTagsAndFetch(ctx, docChannel)
-			if err != nil {
-				return err
-			}
-		} else {
+		if o.tag == "" {
 			return errors.New("image tag not specified to fetch")
+		}
+		err := o.getTagsAndFetch(ctx, docChannel)
+		if err != nil {
+			return err
 		}
 	}
 
