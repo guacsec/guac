@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -50,6 +51,9 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 				return nil
 			}
 			// Check if no poll is passed in, should only poll for latest releases
+			if g.tag != "" {
+				return errors.New("release tag should not specified when using polling")
+			}
 			if g.tag == "" {
 				err := g.fetchAssets(ctx, logger, docChannel)
 				if err != nil {
