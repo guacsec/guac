@@ -38,7 +38,7 @@ func NewGitHubDocumentCollector(ctx context.Context, poll bool, interval time.Du
 		owner:    owner,
 		repo:     repo,
 		tag:      tag,
-		tagList:  tagList,
+		tagList:  []string{},
 	}
 }
 
