@@ -157,16 +157,6 @@ var (
 			Source:    "TestSource",
 		},
 	}
-
-	// go:embed sbom-example-data/slsa-builder-go-linux-amd64.intoto.jsonl
-	GitHubAssetExample1 []byte
-
-	// go:embed sbom-example-data/slsa-generator-container-linux-amd64.intoto.jsonl
-	GitHubAssetExample2 []byte
-
-	// go:embed sbom-example-data/slsa-generator-generic-linux-amd64.intoto.jsonl
-	GitHubAssetExample3 []byte
-
 	art = assembler.ArtifactNode{
 		Name:   "helloworld",
 		Digest: "sha256:5678...",
