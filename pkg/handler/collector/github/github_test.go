@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"os"
 	"strings"
 	"testing"
@@ -36,13 +37,13 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		want                   []*processor.Document
 	}{{
 		// TODO: Fix fields for test cases below
-		name: "Get assets",
+		name: "Get all sboms",
 		fields: fields{
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
 			owner:    "slsa-framework",
 			repo:     "slsa-github-generator",
-			tag:      "",
+			tag:      "v1.4.0",
 			interval: time.Millisecond,
 		},
 		numberOfFilesCollected: 3,
@@ -76,34 +77,37 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				},
 			},
 		},
-		// }, {
-		// 	name: "Tag not specified",
-		// 	fields: fields{
-		// 		poll:     false,
-		// 		token:    os.Getenv("API_KEY"),
-		// 		owner:    "",
-		// 		repo:     "",
-		// 		interval: time.Millisecond,
-		// 	},
-		// }, {
-		// 	name: "No tag or release specified",
-		// 	fields: fields{
-		// 		poll:     false,
-		// 		token:    os.Getenv("API_KEY"),
-		// 		owner:    "",
-		// 		repo:     "",
-		// 		interval: time.Millisecond,
-		// 	},
-		// 	wantErr: true,
-		// }, {
-		// 	name: "Poll latest release",
-		// 	fields: fields{
-		// 		poll:     false,
-		// 		token:    os.Getenv("API_KEY"),
-		// 		owner:    "",
-		// 		repo:     "",
-		// 		interval: time.Millisecond,
-		// 	},
+	}, {
+		name: "Tag not specified",
+		fields: fields{
+			poll:     false,
+			token:    os.Getenv("API_KEY"),
+			owner:    "slsa-framework",
+			repo:     "slsa-github-generator",
+			tag:      "",
+			interval: time.Millisecond,
+		},
+		wantErr: false,
+	}, {
+		name: "No tag or latest release specified",
+		fields: fields{
+			poll:     false,
+			token:    os.Getenv("API_KEY"),
+			owner:    "",
+			repo:     "",
+			interval: time.Millisecond,
+		},
+		errMessage: errors.New("Error, no tag or release information specified."),
+		wantErr:    true,
+	}, {
+		name: "Poll latest release",
+		fields: fields{
+			poll:     true,
+			token:    os.Getenv("API_KEY"),
+			owner:    "slsa-framework",
+			repo:     "slsa-github-generator",
+			interval: time.Millisecond,
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
