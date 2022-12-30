@@ -50,7 +50,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		wantErr:                false,
 		want: []*processor.Document{
 			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample1),
+				Blob:   dochelper.ConsistentJsonLBytes(testdata.GitHubAssetExample1),
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
@@ -59,7 +59,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				},
 			},
 			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample2),
+				Blob:   dochelper.ConsistentJsonLBytes(testdata.GitHubAssetExample2),
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
@@ -68,7 +68,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				},
 			},
 			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample3),
+				Blob:   dochelper.ConsistentJsonLBytes(testdata.GitHubAssetExample3),
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{

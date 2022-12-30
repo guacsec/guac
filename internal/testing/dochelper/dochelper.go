@@ -16,6 +16,8 @@
 package dochelper
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -82,6 +84,22 @@ func ConsistentJsonBytes(b []byte) []byte {
 		panic(err)
 	}
 	out, _ := json.Marshal(v)
+	return out
+}
+
+func ConsistentJsonLBytes(b []byte) []byte {
+	var v interface{}
+	var out []byte
+	scanner := bufio.NewScanner(bytes.NewReader(b))
+	for scanner.Scan() {
+		line := scanner.Text()
+		err := json.Unmarshal([]byte(line), &v)
+		if err != nil {
+			panic(err)
+		}
+		obj, _ := json.Marshal(v)
+		out = append(out, obj...)
+	}
 	return out
 }
 
