@@ -85,13 +85,13 @@ var (
 	ITE6VulnExample []byte
 
 	// GitHub SBOM .jsonl examples
-	// go:embed sbom-example-data/slsa-builder-go-linux-amd64.intoto.jsonl
+	//go:embed sbom-examples/slsa-builder-go-linux-amd64.intoto.jsonl
 	GitHubAssetExample1 []byte
 
-	// go:embed sbom-example-data/slsa-generator-container-linux-amd64.intoto.jsonl
+	//go:embed sbom-examples/slsa-generator-container-linux-amd64.intoto.jsonl
 	GitHubAssetExample2 []byte
 
-	// go:embed sbom-example-data/slsa-generator-generic-linux-amd64.intoto.jsonl
+	//go:embed sbom-examples/slsa-generator-generic-linux-amd64.intoto.jsonl
 	GitHubAssetExample3 []byte
 
 	// DSSE/SLSA Testdata

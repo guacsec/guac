@@ -46,7 +46,7 @@ func DocTreeEqual(a, b processor.DocumentTree) bool {
 		return false
 	}
 
-	// check if a and b Docuemnts are equal
+	// check if a and b Documents are equal
 	if !docEqual(a.Document, b.Document) {
 		return false
 	}

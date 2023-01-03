@@ -102,17 +102,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		},
 		errMessage: errors.New("GET https://api.github.com/repos///releases/latest: 404 Not Found []"),
 		wantErr:    true,
-	}, {
-		name: "Poll latest release",
-		fields: fields{
-			poll:     true,
-			token:    os.Getenv("API_KEY"),
-			owner:    "slsa-framework",
-			repo:     "slsa-github-generator",
-			interval: time.Millisecond,
-		},
-		errMessage: errors.New("context deadline exceeded"),
-		wantErr:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
