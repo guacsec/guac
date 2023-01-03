@@ -4,9 +4,8 @@
 # Checks if a file has the correct copywrite
 #
 
-year=`date +%Y`
 header="//
-// Copyright ${year} The GUAC Authors.
+// Copyright * The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the \"License\");
 // you may not use this file except in compliance with the License.
