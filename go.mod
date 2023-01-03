@@ -138,7 +138,7 @@ require (
 	github.com/go-git/go-git/v5 v5.5.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.10
-	github.com/nats-io/nats.go v1.20.0
+	github.com/nats-io/nats.go v1.22.1
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sigstore/sigstore v1.5.0
