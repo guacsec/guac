@@ -41,6 +41,44 @@ type ociCollector struct {
 	interval      time.Duration
 }
 
+// NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
+// Note: Implementation of a registry collector, where the collector would query for all repositories and pull
+// all metadata stored for each, was put on hold as "_catalog" API is not implemented the same across all registries.
+// This would result in fixes and bugs depending on which registry (cloud or private) the user utilized.
+// Each cloud-hosted registry adds its own custom API for listing things within a single org.
+// We can revisit this later if needed but oci collector is currently setup such that it can be called by an
+// upstream "registry collector" to collect from all repos in a registry in the future if needed.
+// This can be done by the following using regclient API:
+/*
+   r, err := ref.New(o.registry)
+   if err != nil {
+     return fmt.Errorf("failed to parse ref %s: %v", r, err)
+   }
+   defer rc.Close(ctx, r)
+
+   rl, err := rc.RepoList(ctx, o.registry)
+   if err != nil && errors.Is(err, types.ErrNotImplemented) {
+     return fmt.Errorf("registry %s does not support underlying _catalog API: %w", o.registry, err)
+   }
+
+   for _, repo := range rl.Repositories {
+     r, err := ref.New(repo)
+     if err != nil {
+       return err
+     }
+     collectedTags, err := getTagList(ctx, rc, r)
+     if err != nil {
+       return err
+     }
+     for _, tag := range collectedTags {
+       ociRepoCollector := NewOCIRepoCollector(ctx, repo, tag, false, time.Second)
+       ociRepoCollector.checkedDigest = o.checkedDigest[repo]
+       ociRepoCollector.RetrieveArtifacts(ctx, docChannel)
+       o.checkedDigest[repo] = ociRepoCollector.checkedDigest
+     }
+   }
+   return nil
+*/
 func NewOCICollector(ctx context.Context, repo string, tag string, poll bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
 		repo:          repo,
