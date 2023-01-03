@@ -14,11 +14,42 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-// FIXME: Test is not running properly due JSONL parsing and bad credentials error
+// FIXME: Test is not running properly due to an indexing error
 func Test_github_RetrieveArtifacts(t *testing.T) {
-	ctx := logging.WithLogger(context.Background())
+	con, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+	ctx := logging.WithLogger(con)
 	logger := logging.FromContext(ctx)
 
+	docs := []*processor.Document{
+		{
+			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample1),
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: string(CollectorGitHubDocument),
+				Source:    "v1.4.0",
+			},
+		},
+		{
+			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample2),
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: string(CollectorGitHubDocument),
+				Source:    "v1.4.0",
+			},
+		},
+		{
+			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample3),
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: string(CollectorGitHubDocument),
+				Source:    "v1.4.0",
+			},
+		},
+	}
 	type fields struct {
 		poll     bool
 		token    string
@@ -48,35 +79,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		},
 		numberOfFilesCollected: 3,
 		wantErr:                false,
-		want: []*processor.Document{
-			{
-				Blob:   testdata.GitHubAssetExample1,
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(CollectorGitHubDocument),
-					Source:    "v1.4.0",
-				},
-			},
-			{
-				Blob:   testdata.GitHubAssetExample2,
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(CollectorGitHubDocument),
-					Source:    "v1.4.0",
-				},
-			},
-			{
-				Blob:   testdata.GitHubAssetExample3,
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
-				SourceInformation: processor.SourceInformation{
-					Collector: string(CollectorGitHubDocument),
-					Source:    "v1.4.0",
-				},
-			},
-		},
+		want:                   docs,
 	}, {
 		name: "Tag not specified",
 		fields: fields{
@@ -87,9 +90,10 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			tag:      "",
 			interval: time.Millisecond,
 		},
+		want:    docs,
 		wantErr: false,
 	}, {
-		name: "No tag or latest release specified",
+		name: "No repo provided",
 		fields: fields{
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
@@ -97,7 +101,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			repo:     "",
 			interval: time.Millisecond,
 		},
-		errMessage: errors.New("Error, no tag or release information specified."),
+		errMessage: errors.New("GET https://api.github.com/repos///releases/latest: 404 Not Found []"),
 		wantErr:    true,
 	}, {
 		name: "Poll latest release",
@@ -108,6 +112,8 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			repo:     "slsa-github-generator",
 			interval: time.Millisecond,
 		},
+		errMessage: errors.New("context deadline exceeded"),
+		wantErr:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
