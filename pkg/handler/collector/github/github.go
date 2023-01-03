@@ -42,6 +42,7 @@ func NewGitHubDocumentCollector(ctx context.Context, poll bool, interval time.Du
 	}
 }
 
+// RetrieveArtifacts collects the metadata documents from a specified Github repository's release
 func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	if g.poll {

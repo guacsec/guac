@@ -77,9 +77,8 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			tag:      "v1.4.0",
 			interval: time.Millisecond,
 		},
-		numberOfFilesCollected: 3,
-		wantErr:                false,
-		want:                   docs,
+		wantErr: false,
+		want:    docs,
 	}, {
 		name: "Tag not specified",
 		fields: fields{
