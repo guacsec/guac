@@ -14,7 +14,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-// FIXME: Test is not running properly due to an indexing error
 func Test_github_RetrieveArtifacts(t *testing.T) {
 	con, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -67,7 +66,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		errMessage             error
 		want                   []*processor.Document
 	}{{
-		// TODO: Fix fields for test cases below
 		name: "Get all sboms",
 		fields: fields{
 			poll:     false,
