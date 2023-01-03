@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -34,7 +35,7 @@ func NewGitHubDocumentCollector(ctx context.Context, poll bool, interval time.Du
 	return &githubDocumentCollector{
 		poll:     poll,
 		interval: interval,
-		token:    token,
+		token:    os.Getenv("API_KEY"),
 		owner:    owner,
 		repo:     repo,
 		tag:      tag,
