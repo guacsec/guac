@@ -57,8 +57,16 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		mock.WithRequestMatch(
 			mock.GetReposReleasesLatestByOwnerByRepo,
 			github.RepositoryRelease{
-				ID:  github.Int64(123),
-				URL: github.String("URL"),
+				ID:      github.Int64(123),
+				URL:     github.String("URL"),
+				TagName: github.String("v1.4.0"),
+				Assets: []github.ReleaseAsset{{
+					Name:               github.String("test.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-builder-go-linux-amd64.intoto.jsonl"),
+				}, {
+					Name:               github.String("slsa-generator-container-linux-amd64.intoto.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-container-linux-amd64.intoto.jsonl"),
+				}},
 			},
 		),
 		mock.WithRequestMatch(
@@ -66,12 +74,25 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			github.RepositoryRelease{
 				ID:      github.Int64(123),
 				URL:     github.String("URL"),
-				TagName: github.String("testTag"),
+				TagName: github.String("v1.4.0"),
 				Assets: []github.ReleaseAsset{{
 					Name:               github.String("test.jsonl"),
 					BrowserDownloadURL: github.String("http://localhost:9000/slsa-builder-go-linux-amd64.intoto.jsonl"),
+				}, {
+					Name:               github.String("slsa-generator-container-linux-amd64.intoto.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-container-linux-amd64.intoto.jsonl"),
 				}},
 			},
+		),
+		mock.WithRequestMatchHandler(
+			mock.GetReposReleasesLatestByOwnerByRepo,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(
+					w,
+					http.StatusNotFound,
+					"https://api.github.com/repos///releases/latest",
+				)
+			}),
 		),
 	)
 
