@@ -40,6 +40,7 @@ type githubDocumentCollector struct {
 	poll     bool
 	interval time.Duration
 	token    string
+	client   *github.Client
 	owner    string
 	repo     string
 	tag      string
@@ -47,10 +48,19 @@ type githubDocumentCollector struct {
 }
 
 func NewGitHubDocumentCollector(ctx context.Context, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string, tagList []string) *githubDocumentCollector {
+
+	// Authenticate with GitHub
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+
 	return &githubDocumentCollector{
 		poll:     poll,
 		interval: interval,
 		token:    os.Getenv("API_KEY"),
+		client:   client,
 		owner:    owner,
 		repo:     repo,
 		tag:      tag,
@@ -95,12 +105,6 @@ func (g *githubDocumentCollector) Type() string {
 
 // Getting files from assets
 func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
-	// Authenticate with GitHub
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: g.token},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
 
 	// Get information about the release
 	var release *github.RepositoryRelease
@@ -108,10 +112,10 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 
 	if g.tag == "" {
 		// get the latest release
-		release, _, err = client.Repositories.GetLatestRelease(ctx, g.owner, g.repo)
+		release, _, err = g.client.Repositories.GetLatestRelease(ctx, g.owner, g.repo)
 	} else {
 		// get the release with the specified tag
-		release, _, err = client.Repositories.GetReleaseByTag(ctx, g.owner, g.repo, g.tag)
+		release, _, err = g.client.Repositories.GetReleaseByTag(ctx, g.owner, g.repo, g.tag)
 	}
 	if err != nil {
 		logger.Debug(err)

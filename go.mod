@@ -74,6 +74,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/google/go-containerregistry v0.12.1 // indirect
 	github.com/google/go-github/v38 v38.1.0 // indirect
+	github.com/google/go-github/v41 v41.0.0 // indirect
 	github.com/google/go-github/v45 v45.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
@@ -132,6 +133,7 @@ require (
 	github.com/CycloneDX/cyclonedx-go v0.7.0
 	github.com/go-git/go-git/v5 v5.5.1
 	github.com/google/go-github v17.0.0+incompatible
+	github.com/migueleliasweb/go-github-mock v0.0.13
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/sigstore/sigstore v1.5.0
