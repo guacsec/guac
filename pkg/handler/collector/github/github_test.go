@@ -18,26 +18,98 @@ package github
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/google/go-github/github"
 	"github.com/guacsec/guac/internal/testing/dochelper"
-	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/migueleliasweb/go-github-mock/src/mock"
+)
+
+var (
+	// GitHub SBOM .jsonl examples
+	//go:embed testdata/slsa-builder-go-linux-amd64.intoto.jsonl
+	gitHubAssetExample1 []byte
+
+	//go:embed testdata/slsa-generator-container-linux-amd64.intoto.jsonl
+	gitHubAssetExample2 []byte
+
+	//go:embed testdata/slsa-generator-generic-linux-amd64.intoto.jsonl
+	gitHubAssetExample3 []byte
 )
 
 func Test_github_RetrieveArtifacts(t *testing.T) {
 	con, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	ctx := logging.WithLogger(con)
-	logger := logging.FromContext(ctx)
+	//logger := logging.FromContext(ctx)
+
+	go func() {
+		path, err := os.Getwd()
+		if err != nil {
+			log.Println(err)
+		}
+		fmt.Print(path)
+		// create file server handler
+		fs := http.FileServer(http.Dir(path + "/testdata"))
+
+		// start HTTP server with `fs` as the default handler
+		log.Fatal(http.ListenAndServe(":9000", fs))
+	}()
+
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mock.WithRequestMatch(
+			mock.GetReposReleasesLatestByOwnerByRepo,
+			github.RepositoryRelease{
+				ID:      github.Int64(123),
+				URL:     github.String("URL"),
+				TagName: github.String("v1.4.0"),
+				Assets: []github.ReleaseAsset{{
+					Name:               github.String("test.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-builder-go-linux-amd64.intoto.jsonl"),
+				}, {
+					Name:               github.String("slsa-generator-container-linux-amd64.intoto.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-container-linux-amd64.intoto.jsonl"),
+				}},
+			},
+		),
+		mock.WithRequestMatch(
+			mock.GetReposReleasesTagsByOwnerByRepoByTag,
+			github.RepositoryRelease{
+				ID:      github.Int64(123),
+				URL:     github.String("URL"),
+				TagName: github.String("v1.4.0"),
+				Assets: []github.ReleaseAsset{{
+					Name:               github.String("test.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-builder-go-linux-amd64.intoto.jsonl"),
+				}, {
+					Name:               github.String("slsa-generator-container-linux-amd64.intoto.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-container-linux-amd64.intoto.jsonl"),
+				}},
+			},
+		),
+		mock.WithRequestMatchHandler(
+			mock.GetReposReleasesLatestByOwnerByRepo,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(
+					w,
+					http.StatusNotFound,
+					"https://api.github.com/repos///releases/latest",
+				)
+			}),
+		),
+	)
 
 	docs := []*processor.Document{
 		{
-			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample1),
+			Blob:   dochelper.ConsistentJsonBytes(gitHubAssetExample1),
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
@@ -46,7 +118,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		{
-			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample2),
+			Blob:   dochelper.ConsistentJsonBytes(gitHubAssetExample2),
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
@@ -55,7 +127,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		{
-			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample3),
+			Blob:   dochelper.ConsistentJsonBytes(gitHubAssetExample3),
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
@@ -67,6 +139,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	type fields struct {
 		poll     bool
 		token    string
+		client   *github.Client
 		owner    string
 		repo     string
 		tag      string
@@ -85,6 +158,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		fields: fields{
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
+			client:   github.NewClient(mockedHTTPClient),
 			owner:    "slsa-framework",
 			repo:     "slsa-github-generator",
 			tag:      "v1.4.0",
@@ -97,6 +171,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		fields: fields{
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
+			client:   github.NewClient(mockedHTTPClient),
 			owner:    "slsa-framework",
 			repo:     "slsa-github-generator",
 			tag:      "",
@@ -109,6 +184,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		fields: fields{
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
+			client:   github.NewClient(mockedHTTPClient),
 			owner:    "",
 			repo:     "",
 			interval: time.Millisecond,
@@ -119,7 +195,17 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a new githubDocumentCollector
-			g := NewGitHubDocumentCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
+			g := &githubDocumentCollector{
+				poll:     tt.fields.poll,
+				interval: tt.fields.interval,
+				token:    tt.fields.token,
+				client:   tt.fields.client,
+				owner:    tt.fields.owner,
+				repo:     tt.fields.repo,
+				tag:      tt.fields.tag,
+				tagList:  []string{},
+			}
+			//g := NewGitHubDocumentCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
 			// Create a channel to collect the documents emitted by RetrieveArtifacts
 			var err error
 			docChan := make(chan *processor.Document, 1)

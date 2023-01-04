@@ -84,16 +84,6 @@ var (
 	//go:embed exampledata/certify-vuln.json
 	ITE6VulnExample []byte
 
-	// GitHub SBOM .jsonl examples
-	//go:embed sbom-examples/slsa-builder-go-linux-amd64.intoto.jsonl
-	GitHubAssetExample1 []byte
-
-	//go:embed sbom-examples/slsa-generator-container-linux-amd64.intoto.jsonl
-	GitHubAssetExample2 []byte
-
-	//go:embed sbom-examples/slsa-generator-generic-linux-amd64.intoto.jsonl
-	GitHubAssetExample3 []byte
-
 	// DSSE/SLSA Testdata
 
 	// Taken from: https://slsa.dev/provenance/v0.1#example
