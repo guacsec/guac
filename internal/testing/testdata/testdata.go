@@ -599,7 +599,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
@@ -630,7 +630,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
@@ -661,7 +661,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
@@ -710,7 +710,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
