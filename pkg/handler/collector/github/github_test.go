@@ -28,10 +28,21 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/guacsec/guac/internal/testing/dochelper"
-	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
+)
+
+var (
+	// GitHub SBOM .jsonl examples
+	//go:embed testdata/slsa-builder-go-linux-amd64.intoto.jsonl
+	gitHubAssetExample1 []byte
+
+	//go:embed testdata/slsa-generator-container-linux-amd64.intoto.jsonl
+	gitHubAssetExample2 []byte
+
+	//go:embed testdata/slsa-generator-generic-linux-amd64.intoto.jsonl
+	gitHubAssetExample3 []byte
 )
 
 func Test_github_RetrieveArtifacts(t *testing.T) {
@@ -98,7 +109,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 
 	docs := []*processor.Document{
 		{
-			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample1),
+			Blob:   dochelper.ConsistentJsonBytes(gitHubAssetExample1),
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
@@ -107,7 +118,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		{
-			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample2),
+			Blob:   dochelper.ConsistentJsonBytes(gitHubAssetExample2),
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
@@ -116,7 +127,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		{
-			Blob:   dochelper.ConsistentJsonBytes(testdata.GitHubAssetExample3),
+			Blob:   dochelper.ConsistentJsonBytes(gitHubAssetExample3),
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
