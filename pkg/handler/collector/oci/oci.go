@@ -137,6 +137,8 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 	return nil
 }
 
+// Note: fetchOCIArtifacts currently does not re-check if a new sbom or attestation get reuploaded during polling with the same image digest.
+// A workaround for this would be to run the collector again with a specific tag without polling and ingest like normal
 func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *regclient.RegClient, image ref.Ref, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 
@@ -167,11 +169,11 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 
 	digest := manifest.GetDigest(m)
 	digestFormatted := fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded())
-	// check to see if the digest has already been collected
-	if !contains(o.checkedDigest[repo], digestFormatted) {
-		suffixList := []string{"att", "sbom"}
-		for _, suffix := range suffixList {
-			digestTag := fmt.Sprintf("%v.%v", digestFormatted, suffix)
+	suffixList := []string{"att", "sbom"}
+	for _, suffix := range suffixList {
+		digestTag := fmt.Sprintf("%v.%v", digestFormatted, suffix)
+		// check to see if the digest + suffix has already been collected
+		if !contains(o.checkedDigest[repo], digestTag) {
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
 			r, err := ref.New(imageTag)
 			if err != nil {
@@ -216,7 +218,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 				}
 				docChannel <- doc
 			}
-			o.checkedDigest[repo] = append(o.checkedDigest[repo], fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded()))
+			o.checkedDigest[repo] = append(o.checkedDigest[repo], digestTag)
 		}
 	}
 
