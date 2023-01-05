@@ -31,8 +31,9 @@ import (
 )
 
 var ociCmd = &cobra.Command{
-	Use:   "image [flags] image_path",
-	Short: "take an image and download sbom and attestation to add to GUAC graph",
+	Use:   "image [flags] image_path1 image_path2...",
+	Short: "takes images to download sbom and attestation stored in OCI to add to GUAC graph",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
@@ -50,7 +51,7 @@ var ociCmd = &cobra.Command{
 		}
 
 		// Register collector
-		ociCollector := oci.NewOCICollector(ctx, opts.path, opts.tag, false, 10*time.Minute)
+		ociCollector := oci.NewOCICollector(ctx, opts.repoTags, false, 10*time.Minute)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -130,15 +131,19 @@ func validateOCIFlags(user string, pass string, dbAddr string, realm string, arg
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.repoTags = map[string][]string{}
 
-	if len(args) != 1 {
+	if len(args) < 1 {
 		return opts, fmt.Errorf("expected positional argument for image_path")
 	}
-
-	stringSplit := strings.Split(args[0], ":")
-
-	opts.path = stringSplit[0]
-	opts.tag = stringSplit[1]
+	for _, arg := range args {
+		stringSplit := strings.Split(arg, ":")
+		if len(stringSplit) == 2 {
+			opts.repoTags[stringSplit[0]] = append(opts.repoTags[stringSplit[0]], stringSplit[1])
+		} else {
+			return opts, fmt.Errorf("image_path parsing error. require format repo:tag")
+		}
+	}
 
 	return opts, nil
 }

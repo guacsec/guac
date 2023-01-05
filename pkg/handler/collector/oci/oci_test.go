@@ -17,7 +17,6 @@ package oci
 
 import (
 	"context"
-	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -25,15 +24,13 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/pkg/errors"
 )
 
-// TODO (parth): Another way to testing the polling functionality? Currently
-// context cancel fails as context is used by regclient and causes a timeout
 func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	ctx := context.Background()
 	type fields struct {
-		repo     string
-		tag      string
+		repoTags map[string][]string
 		poll     bool
 		interval time.Duration
 	}
@@ -47,8 +44,9 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}{{
 		name: "multi-platform sbom",
 		fields: fields{
-			repo:     "ppatel1989/go-multi-test",
-			tag:      "7ddfb3e035b42cd70649cc33393fe32c",
+			repoTags: map[string][]string{
+				"ghcr.io/guacsec/go-multi-test": {"7ddfb3e035b42cd70649cc33393fe32c"},
+			},
 			poll:     false,
 			interval: 0,
 		},
@@ -59,7 +57,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
-					Source:    "ppatel1989/go-multi-test:sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10.sbom",
+					Source:    "ghcr.io/guacsec/go-multi-test:sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10.sbom",
 				},
 			},
 			{
@@ -68,7 +66,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
-					Source:    "ppatel1989/go-multi-test:sha256-1bc7e53e25de5c00ecaeca1473ab56bfaf4e39cea747edcf7db467389a287931.sbom",
+					Source:    "ghcr.io/guacsec/go-multi-test:sha256-1bc7e53e25de5c00ecaeca1473ab56bfaf4e39cea747edcf7db467389a287931.sbom",
 				},
 			},
 			{
@@ -77,7 +75,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
-					Source:    "ppatel1989/go-multi-test:sha256-534035553d1270a98dab3512fde0987e7709ec6b878c8fd60fdaf0d8e1611979.sbom",
+					Source:    "ghcr.io/guacsec/go-multi-test:sha256-534035553d1270a98dab3512fde0987e7709ec6b878c8fd60fdaf0d8e1611979.sbom",
 				},
 			},
 		},
@@ -85,8 +83,9 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "get attestation and sbom",
 		fields: fields{
-			repo:     "ppatel1989/guac-test-image",
-			tag:      "e26f2e514682726fa808a849c863e5feca71e0c3",
+			repoTags: map[string][]string{
+				"ghcr.io/guacsec/guac-test-image": {"e26f2e514682726fa808a849c863e5feca71e0c3"},
+			},
 			poll:     false,
 			interval: 0,
 		},
@@ -97,7 +96,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
-					Source:    "ppatel1989/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
 				},
 			},
 			{
@@ -106,7 +105,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
 					Collector: string(OCICollector),
-					Source:    "ppatel1989/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
 				},
 			},
 		},
@@ -114,8 +113,39 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "tag not specified not polling",
 		fields: fields{
-			repo:     "ppatel1989/guac-test-image",
-			tag:      "",
+			repoTags: map[string][]string{
+				"ghcr.io/guacsec/guac-test-image": {},
+			},
+			poll:     false,
+			interval: 0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
+				},
+			},
+		},
+		wantErr: false,
+	}, {
+		name: "tag empty string",
+		fields: fields{
+			repoTags: map[string][]string{
+				"ghcr.io/guacsec/guac-test-image": {""},
+			},
 			poll:     false,
 			interval: 0,
 		},
@@ -124,7 +154,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewOCICollector(ctx, tt.fields.repo, tt.fields.tag, tt.fields.poll, tt.fields.interval)
+			g := NewOCICollector(ctx, tt.fields.repoTags, tt.fields.poll, tt.fields.interval)
 
 			var cancel context.CancelFunc
 			if tt.fields.poll {
