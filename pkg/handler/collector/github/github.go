@@ -18,6 +18,7 @@ package github
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -47,24 +48,24 @@ type githubDocumentCollector struct {
 }
 
 type GithubCollectorOpts struct {
-	ctx      context.Context
 	poll     bool
 	interval time.Duration
-	logger   *zap.SugaredLogger
 	token    string
 	owner    string
 	repo     string
 	tag      string
-	tagList  []string
 }
 
-func NewGitHubDocumentCollector(gco GithubCollectorOpts) *githubDocumentCollector {
-
+func NewGitHubDocumentCollector(ctx context.Context, gco GithubCollectorOpts) (*githubDocumentCollector, error) {
+	err := validateOpts(gco)
+	if err != nil {
+		return nil, err
+	}
 	// Authenticate with GitHub
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: gco.token},
 	)
-	tc := oauth2.NewClient(gco.ctx, ts)
+	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
 	return &githubDocumentCollector{
@@ -76,7 +77,21 @@ func NewGitHubDocumentCollector(gco GithubCollectorOpts) *githubDocumentCollecto
 		repo:     gco.repo,
 		tag:      gco.tag,
 		tagList:  []string{},
+	}, nil
+}
+
+func validateOpts(gco GithubCollectorOpts) error {
+
+	if gco.owner == "" {
+		return fmt.Errorf("expected positional argument for file_path")
 	}
+	if gco.repo == "" {
+		return fmt.Errorf("expected positional argument for file_path")
+	}
+	if gco.token == "" {
+		return fmt.Errorf("expected positional argument for file_path")
+	}
+	return nil
 }
 
 // RetrieveArtifacts collects the metadata documents and assets from a specified Github repository's release

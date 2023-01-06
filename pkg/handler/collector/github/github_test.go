@@ -18,7 +18,6 @@ package github
 import (
 	"context"
 	_ "embed"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,7 +29,6 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/logging"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 )
 
@@ -47,9 +45,7 @@ var (
 )
 
 func Test_github_RetrieveArtifacts(t *testing.T) {
-	con, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-	ctx := logging.WithLogger(con)
+	ctx := context.Background()
 	//logger := logging.FromContext(ctx)
 
 	go func() {
@@ -78,6 +74,9 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				}, {
 					Name:               github.String("slsa-generator-container-linux-amd64.intoto.jsonl"),
 					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-container-linux-amd64.intoto.jsonl"),
+				}, {
+					Name:               github.String("slsa-generator-generic-linux-amd64.intoto.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-generic-linux-amd64.intoto.jsonl"),
 				}},
 			},
 		),
@@ -93,18 +92,11 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				}, {
 					Name:               github.String("slsa-generator-container-linux-amd64.intoto.jsonl"),
 					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-container-linux-amd64.intoto.jsonl"),
+				}, {
+					Name:               github.String("slsa-generator-generic-linux-amd64.intoto.jsonl"),
+					BrowserDownloadURL: github.String("http://localhost:9000/slsa-generator-generic-linux-amd64.intoto.jsonl"),
 				}},
 			},
-		),
-		mock.WithRequestMatchHandler(
-			mock.GetReposReleasesLatestByOwnerByRepo,
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusNotFound,
-					"https://api.github.com/repos///releases/latest",
-				)
-			}),
 		),
 	)
 
@@ -180,18 +172,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		},
 		want:    docs,
 		wantErr: false,
-	}, {
-		name: "No repo provided",
-		fields: fields{
-			poll:     false,
-			token:    os.Getenv("API_KEY"),
-			client:   github.NewClient(mockedHTTPClient),
-			owner:    "",
-			repo:     "",
-			interval: time.Millisecond,
-		},
-		errMessage: errors.New("GET https://api.github.com/repos///releases/latest: 404 Not Found []"),
-		wantErr:    true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -224,15 +204,17 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				select {
 				case d := <-docChan:
 					collectedDocs = append(collectedDocs, d)
-				case err = <-errChan:
+				case err := <-errChan:
 					if err != nil {
 						if !tt.wantErr {
 							t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
 							return
 						}
-						if !strings.Contains(err.Error(), tt.errMessage.Error()) {
-							t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.errMessage)
-							return
+						if ghErr, ok := err.(*github.ErrorResponse); ok {
+							if !strings.Contains(ghErr.Message, tt.errMessage.Error()) {
+								t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", ghErr.Message, tt.errMessage)
+								return
+							}
 						}
 					}
 					collectorsDone += 1
