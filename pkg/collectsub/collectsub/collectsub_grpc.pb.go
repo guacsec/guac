@@ -38,9 +38,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ColectSubscriberServiceClient interface {
-	AddCollectEntry(ctx context.Context, opts ...grpc.CallOption) (ColectSubscriberService_AddCollectEntryClient, error)
+	AddCollectEntry(ctx context.Context, in *AddCollectEntriesRequest, opts ...grpc.CallOption) (*AddCollectEntriesResponse, error)
 	//rpc GetCollectEntries (d Datatype, t time.Time)
-	GetCollectEntries(ctx context.Context, in *GetCollectEntriesRequest, opts ...grpc.CallOption) (ColectSubscriberService_GetCollectEntriesClient, error)
+	GetCollectEntries(ctx context.Context, in *GetCollectEntriesRequest, opts ...grpc.CallOption) (*GetCollectEntriesResponse, error)
 	// rpc GetCollectRequestStatus (reqs []CollectRequest) [](Collector, CollectRequestStatus)
 	GetCollectStatus(ctx context.Context, in *GetCollectStatusRequest, opts ...grpc.CallOption) (*GetCollectStatusResponse, error)
 }
@@ -53,70 +53,22 @@ func NewColectSubscriberServiceClient(cc grpc.ClientConnInterface) ColectSubscri
 	return &colectSubscriberServiceClient{cc}
 }
 
-func (c *colectSubscriberServiceClient) AddCollectEntry(ctx context.Context, opts ...grpc.CallOption) (ColectSubscriberService_AddCollectEntryClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ColectSubscriberService_ServiceDesc.Streams[0], "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/AddCollectEntry", opts...)
+func (c *colectSubscriberServiceClient) AddCollectEntry(ctx context.Context, in *AddCollectEntriesRequest, opts ...grpc.CallOption) (*AddCollectEntriesResponse, error) {
+	out := new(AddCollectEntriesResponse)
+	err := c.cc.Invoke(ctx, "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/AddCollectEntry", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &colectSubscriberServiceAddCollectEntryClient{stream}
-	return x, nil
+	return out, nil
 }
 
-type ColectSubscriberService_AddCollectEntryClient interface {
-	Send(*AddCollectEntriesRequest) error
-	CloseAndRecv() (*AddCollectEntriesResponse, error)
-	grpc.ClientStream
-}
-
-type colectSubscriberServiceAddCollectEntryClient struct {
-	grpc.ClientStream
-}
-
-func (x *colectSubscriberServiceAddCollectEntryClient) Send(m *AddCollectEntriesRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *colectSubscriberServiceAddCollectEntryClient) CloseAndRecv() (*AddCollectEntriesResponse, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(AddCollectEntriesResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *colectSubscriberServiceClient) GetCollectEntries(ctx context.Context, in *GetCollectEntriesRequest, opts ...grpc.CallOption) (ColectSubscriberService_GetCollectEntriesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ColectSubscriberService_ServiceDesc.Streams[1], "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/GetCollectEntries", opts...)
+func (c *colectSubscriberServiceClient) GetCollectEntries(ctx context.Context, in *GetCollectEntriesRequest, opts ...grpc.CallOption) (*GetCollectEntriesResponse, error) {
+	out := new(GetCollectEntriesResponse)
+	err := c.cc.Invoke(ctx, "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/GetCollectEntries", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &colectSubscriberServiceGetCollectEntriesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type ColectSubscriberService_GetCollectEntriesClient interface {
-	Recv() (*GetCollectEntriesResponse, error)
-	grpc.ClientStream
-}
-
-type colectSubscriberServiceGetCollectEntriesClient struct {
-	grpc.ClientStream
-}
-
-func (x *colectSubscriberServiceGetCollectEntriesClient) Recv() (*GetCollectEntriesResponse, error) {
-	m := new(GetCollectEntriesResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *colectSubscriberServiceClient) GetCollectStatus(ctx context.Context, in *GetCollectStatusRequest, opts ...grpc.CallOption) (*GetCollectStatusResponse, error) {
@@ -132,9 +84,9 @@ func (c *colectSubscriberServiceClient) GetCollectStatus(ctx context.Context, in
 // All implementations must embed UnimplementedColectSubscriberServiceServer
 // for forward compatibility
 type ColectSubscriberServiceServer interface {
-	AddCollectEntry(ColectSubscriberService_AddCollectEntryServer) error
+	AddCollectEntry(context.Context, *AddCollectEntriesRequest) (*AddCollectEntriesResponse, error)
 	//rpc GetCollectEntries (d Datatype, t time.Time)
-	GetCollectEntries(*GetCollectEntriesRequest, ColectSubscriberService_GetCollectEntriesServer) error
+	GetCollectEntries(context.Context, *GetCollectEntriesRequest) (*GetCollectEntriesResponse, error)
 	// rpc GetCollectRequestStatus (reqs []CollectRequest) [](Collector, CollectRequestStatus)
 	GetCollectStatus(context.Context, *GetCollectStatusRequest) (*GetCollectStatusResponse, error)
 	mustEmbedUnimplementedColectSubscriberServiceServer()
@@ -144,11 +96,11 @@ type ColectSubscriberServiceServer interface {
 type UnimplementedColectSubscriberServiceServer struct {
 }
 
-func (UnimplementedColectSubscriberServiceServer) AddCollectEntry(ColectSubscriberService_AddCollectEntryServer) error {
-	return status.Errorf(codes.Unimplemented, "method AddCollectEntry not implemented")
+func (UnimplementedColectSubscriberServiceServer) AddCollectEntry(context.Context, *AddCollectEntriesRequest) (*AddCollectEntriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddCollectEntry not implemented")
 }
-func (UnimplementedColectSubscriberServiceServer) GetCollectEntries(*GetCollectEntriesRequest, ColectSubscriberService_GetCollectEntriesServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetCollectEntries not implemented")
+func (UnimplementedColectSubscriberServiceServer) GetCollectEntries(context.Context, *GetCollectEntriesRequest) (*GetCollectEntriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCollectEntries not implemented")
 }
 func (UnimplementedColectSubscriberServiceServer) GetCollectStatus(context.Context, *GetCollectStatusRequest) (*GetCollectStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCollectStatus not implemented")
@@ -167,51 +119,40 @@ func RegisterColectSubscriberServiceServer(s grpc.ServiceRegistrar, srv ColectSu
 	s.RegisterService(&ColectSubscriberService_ServiceDesc, srv)
 }
 
-func _ColectSubscriberService_AddCollectEntry_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ColectSubscriberServiceServer).AddCollectEntry(&colectSubscriberServiceAddCollectEntryServer{stream})
-}
-
-type ColectSubscriberService_AddCollectEntryServer interface {
-	SendAndClose(*AddCollectEntriesResponse) error
-	Recv() (*AddCollectEntriesRequest, error)
-	grpc.ServerStream
-}
-
-type colectSubscriberServiceAddCollectEntryServer struct {
-	grpc.ServerStream
-}
-
-func (x *colectSubscriberServiceAddCollectEntryServer) SendAndClose(m *AddCollectEntriesResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *colectSubscriberServiceAddCollectEntryServer) Recv() (*AddCollectEntriesRequest, error) {
-	m := new(AddCollectEntriesRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _ColectSubscriberService_AddCollectEntry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddCollectEntriesRequest)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
-}
-
-func _ColectSubscriberService_GetCollectEntries_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetCollectEntriesRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+	if interceptor == nil {
+		return srv.(ColectSubscriberServiceServer).AddCollectEntry(ctx, in)
 	}
-	return srv.(ColectSubscriberServiceServer).GetCollectEntries(m, &colectSubscriberServiceGetCollectEntriesServer{stream})
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/AddCollectEntry",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ColectSubscriberServiceServer).AddCollectEntry(ctx, req.(*AddCollectEntriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-type ColectSubscriberService_GetCollectEntriesServer interface {
-	Send(*GetCollectEntriesResponse) error
-	grpc.ServerStream
-}
-
-type colectSubscriberServiceGetCollectEntriesServer struct {
-	grpc.ServerStream
-}
-
-func (x *colectSubscriberServiceGetCollectEntriesServer) Send(m *GetCollectEntriesResponse) error {
-	return x.ServerStream.SendMsg(m)
+func _ColectSubscriberService_GetCollectEntries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCollectEntriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ColectSubscriberServiceServer).GetCollectEntries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/GetCollectEntries",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ColectSubscriberServiceServer).GetCollectEntries(ctx, req.(*GetCollectEntriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _ColectSubscriberService_GetCollectStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -240,21 +181,18 @@ var ColectSubscriberService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ColectSubscriberServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "AddCollectEntry",
+			Handler:    _ColectSubscriberService_AddCollectEntry_Handler,
+		},
+		{
+			MethodName: "GetCollectEntries",
+			Handler:    _ColectSubscriberService_GetCollectEntries_Handler,
+		},
+		{
 			MethodName: "GetCollectStatus",
 			Handler:    _ColectSubscriberService_GetCollectStatus_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "AddCollectEntry",
-			Handler:       _ColectSubscriberService_AddCollectEntry_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "GetCollectEntries",
-			Handler:       _ColectSubscriberService_GetCollectEntries_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "pkg/collectsub/collectsub/collectsub.proto",
 }
