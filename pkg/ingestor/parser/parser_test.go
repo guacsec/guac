@@ -86,7 +86,7 @@ func TestParseDocumentTree(t *testing.T) {
 		want    []assembler.AssemblerInput
 		wantErr bool
 	}{{
-		name:    "testing",
+		name:    "valid dsse",
 		tree:    processor.DocumentTree(&dsseDocTree),
 		want:    graphInput,
 		wantErr: false,
@@ -154,30 +154,35 @@ func Test_ParserSubscribe(t *testing.T) {
 	defer jetStream.Close()
 
 	testCases := []struct {
-		name    string
-		tree    processor.DocumentTree
-		want    []assembler.AssemblerInput
-		wantErr bool
+		name       string
+		tree       processor.DocumentTree
+		want       []assembler.AssemblerInput
+		wantErr    bool
+		errMessage error
 	}{{
-		name:    "testing",
-		tree:    processor.DocumentTree(&dsseDocTree),
-		want:    graphInput,
-		wantErr: false,
+		name:       "valid dsse",
+		tree:       processor.DocumentTree(&dsseDocTree),
+		want:       graphInput,
+		wantErr:    true,
+		errMessage: context.DeadlineExceeded,
 	}, {
-		name:    "valid big SPDX document",
-		tree:    processor.DocumentTree(&spdxDocTree),
-		want:    spdxGraphInput,
-		wantErr: false,
+		name:       "valid big SPDX document",
+		tree:       processor.DocumentTree(&spdxDocTree),
+		want:       spdxGraphInput,
+		wantErr:    true,
+		errMessage: context.DeadlineExceeded,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			ctx, err = jetStream.JetStreamInit(ctx)
 			err := testPublish(ctx, tt.tree)
 			if err != nil {
 				t.Fatalf("unexpected error on emit: %v", err)
 			}
 			var cancel context.CancelFunc
 
-			ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
+			ctx, cancel = context.WithTimeout(ctx, time.Second)
 			defer cancel()
 
 			errChan := make(chan error, 1)
@@ -191,8 +196,13 @@ func Test_ParserSubscribe(t *testing.T) {
 
 			for subscribersDone < numSubscribers {
 				err := <-errChan
-				if err != nil && !errors.Is(err, context.DeadlineExceeded) {
-					t.Errorf("nats emitter Subscribe test errored = %v", err)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
+				}
+				if err != nil {
+					if !errors.Is(err, tt.errMessage) {
+						t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
+					}
 				}
 				subscribersDone += 1
 			}

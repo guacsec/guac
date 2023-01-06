@@ -118,7 +118,7 @@ func Test_Publish(t *testing.T) {
 
 	var cancel context.CancelFunc
 
-	ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
 	docChan := make(chan processor.DocumentTree, 1)
