@@ -75,9 +75,9 @@ message GetCollectStatusResponse {
 
 
 service ColectSubscriberService {
-  rpc AddCollectEntry(stream AddCollectEntriesRequest) returns (AddCollectEntriesResponse);
+  rpc AddCollectEntry(AddCollectEntriesRequest) returns (AddCollectEntriesResponse);
   //rpc GetCollectEntries (d Datatype, t time.Time)
-  rpc GetCollectEntries (GetCollectEntriesRequest) returns (stream GetCollectEntriesResponse);
+  rpc GetCollectEntries (GetCollectEntriesRequest) returns (GetCollectEntriesResponse);
 
   // rpc GetCollectRequestStatus (reqs []CollectRequest) [](Collector, CollectRequestStatus)
   rpc GetCollectStatus (GetCollectStatusRequest) returns (GetCollectStatusResponse);
