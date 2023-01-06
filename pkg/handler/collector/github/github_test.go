@@ -17,6 +17,7 @@ package github
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"log"
@@ -31,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
+	"go.uber.org/zap"
 )
 
 var (
@@ -154,7 +156,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		errMessage             error
 		want                   []*processor.Document
 	}{{
-		name: "Get all sboms",
+		name: "Get all slsa files",
 		fields: fields{
 			poll:     false,
 			token:    os.Getenv("API_KEY"),
@@ -195,16 +197,18 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a new githubDocumentCollector
-			g := &githubDocumentCollector{
+			gco := GithubCollectorOpts{
+				ctx:      ctx,
 				poll:     tt.fields.poll,
 				interval: tt.fields.interval,
+				logger:   &zap.SugaredLogger{},
 				token:    tt.fields.token,
-				client:   tt.fields.client,
 				owner:    tt.fields.owner,
 				repo:     tt.fields.repo,
 				tag:      tt.fields.tag,
 				tagList:  []string{},
 			}
+			g := NewGitHubDocumentCollector(gco)
 			//g := NewGitHubDocumentCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
 			// Create a channel to collect the documents emitted by RetrieveArtifacts
 			var err error

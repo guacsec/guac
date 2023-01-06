@@ -21,7 +21,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -47,23 +46,35 @@ type githubDocumentCollector struct {
 	tagList  []string
 }
 
-func NewGitHubDocumentCollector(ctx context.Context, poll bool, interval time.Duration, logger *zap.SugaredLogger, token string, owner string, repo string, tag string, tagList []string) *githubDocumentCollector {
+type GithubCollectorOpts struct {
+	ctx      context.Context
+	poll     bool
+	interval time.Duration
+	logger   *zap.SugaredLogger
+	token    string
+	owner    string
+	repo     string
+	tag      string
+	tagList  []string
+}
+
+func NewGitHubDocumentCollector(gco GithubCollectorOpts) *githubDocumentCollector {
 
 	// Authenticate with GitHub
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
+		&oauth2.Token{AccessToken: gco.token},
 	)
-	tc := oauth2.NewClient(ctx, ts)
+	tc := oauth2.NewClient(gco.ctx, ts)
 	client := github.NewClient(tc)
 
 	return &githubDocumentCollector{
-		poll:     poll,
-		interval: interval,
-		token:    os.Getenv("API_KEY"),
+		poll:     gco.poll,
+		interval: gco.interval,
+		token:    gco.token,
 		client:   client,
-		owner:    owner,
-		repo:     repo,
-		tag:      tag,
+		owner:    gco.owner,
+		repo:     gco.repo,
+		tag:      gco.tag,
 		tagList:  []string{},
 	}
 }
