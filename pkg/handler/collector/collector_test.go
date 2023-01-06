@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -123,6 +124,8 @@ func Test_Publish(t *testing.T) {
 	docChan := make(chan processor.DocumentTree, 1)
 	errChan := make(chan error, 1)
 	defer close(errChan)
+	defer close(docChan)
+
 	go func() {
 		errChan <- testSubscribe(ctx, docChan)
 	}()
@@ -143,7 +146,12 @@ func Test_Publish(t *testing.T) {
 			subscribersDone += 1
 		}
 	}
-
+	for len(docChan) > 0 {
+		d := <-docChan
+		if !dochelper.DocTreeEqual(d, expectedDocTree) {
+			t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
+		}
+	}
 }
 
 func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree) error {
@@ -161,21 +169,29 @@ func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree
 			return ctx.Err()
 		}
 		msgs, err := sub.Fetch(1)
-		if err != nil && errors.Is(err, nats.ErrTimeout) {
-			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
-			time.Sleep(1 * time.Second)
-			continue
+		if err != nil {
+			if errors.Is(err, nats.ErrTimeout) {
+				logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
+				time.Sleep(1 * time.Second)
+				continue
+			} else {
+				return fmt.Errorf("[processor: %s] unexpected NATS fetch error: %v", id, err)
+			}
 		}
+
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logger.Errorf("[processor: %v] unable to Ack: %v", id, err)
-				return err
+				fmtErr := fmt.Errorf("[processor: %v] unable to Ack: %v", id, err)
+				logger.Error(fmtErr)
+				return fmtErr
 			}
 			doc := processor.Document{}
 			err = json.Unmarshal(msgs[0].Data, &doc)
 			if err != nil {
-				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+				fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+				logger.Error(fmtErr)
+				return err
 			}
 
 			docNode := &processor.DocumentNode{

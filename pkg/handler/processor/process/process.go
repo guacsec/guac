@@ -74,27 +74,36 @@ func Subscribe(ctx context.Context) error {
 			return ctx.Err()
 		}
 		msgs, err := sub.Fetch(1)
-		if err != nil && errors.Is(err, nats.ErrTimeout) {
-			logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
-			time.Sleep(1 * time.Second)
-			continue
+		if err != nil {
+			if errors.Is(err, nats.ErrTimeout) {
+				logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
+				time.Sleep(1 * time.Second)
+				continue
+			} else {
+				return fmt.Errorf("[processor: %s] unexpected NATS fetch error: %v", id, err)
+			}
 		}
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logger.Errorf("[processor: %v] unable to Ack: %v", id, err)
-				return err
+				fmtErr := fmt.Errorf("[processor: %v] unable to Ack: %v", id, err)
+				logger.Error(fmtErr)
+				return fmtErr
 			}
 			doc := processor.Document{}
 			err = json.Unmarshal(msgs[0].Data, &doc)
 			if err != nil {
-				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
-			}
-			docTree, err := Process(ctx, &doc)
-			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
-			if err != nil {
+				fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+				logger.Error(fmtErr)
 				return err
 			}
+			docTree, err := Process(ctx, &doc)
+			if err != nil {
+				fmtErr := fmt.Errorf("[processor: %s] failed process document: %v", id, err)
+				logger.Error(fmtErr)
+				return fmtErr
+			}
+			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
 		}
 	}
 }
