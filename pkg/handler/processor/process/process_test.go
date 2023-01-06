@@ -18,7 +18,6 @@ package process
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -588,9 +587,10 @@ func Test_ProcessSubscribe(t *testing.T) {
 	defer jetStream.Close()
 
 	testCases := []struct {
-		name      string
-		doc       processor.Document
-		expectErr bool
+		name       string
+		doc        processor.Document
+		wantErr    bool
+		errMessage string
 	}{{
 		name: "simple test",
 		doc: processor.Document{
@@ -602,6 +602,8 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
+		wantErr:    true,
+		errMessage: "context deadline exceeded",
 	}, {
 		name: "unpack test",
 		doc: processor.Document{
@@ -620,6 +622,8 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
+		wantErr:    true,
+		errMessage: "context deadline exceeded",
 	}, {
 		name: "bad format",
 		doc: processor.Document{
@@ -631,7 +635,8 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		expectErr: true,
+		wantErr:    true,
+		errMessage: "failed process document: invalid JSON document",
 	}}
 
 	// Register
@@ -649,13 +654,15 @@ func Test_ProcessSubscribe(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			ctx, err = jetStream.JetStreamInit(ctx)
 			err := testPublish(ctx, &tt.doc)
 			if err != nil {
 				t.Fatalf("unexpected error on emit: %v", err)
 			}
 			var cancel context.CancelFunc
 
-			ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
+			ctx, cancel = context.WithTimeout(ctx, time.Second)
 			defer cancel()
 
 			errChan := make(chan error, 1)
@@ -669,8 +676,13 @@ func Test_ProcessSubscribe(t *testing.T) {
 
 			for subscribersDone < numSubscribers {
 				err := <-errChan
-				if err != nil && !errors.Is(err, context.DeadlineExceeded) {
-					t.Errorf("nats emitter Subscribe test errored = %v", err)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
+				}
+				if err != nil {
+					if !strings.Contains(err.Error(), tt.errMessage) {
+						t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
+					}
 				}
 				subscribersDone += 1
 			}
