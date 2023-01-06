@@ -81,15 +81,15 @@ func NewGitHubDocumentCollector(ctx context.Context, gco GithubCollectorOpts) (*
 }
 
 func validateOpts(gco GithubCollectorOpts) error {
-
+	// TODO: Fix the error messages below
 	if gco.owner == "" {
-		return fmt.Errorf("expected positional argument for file_path")
+		return fmt.Errorf("expected to receive GitHub owner")
 	}
 	if gco.repo == "" {
-		return fmt.Errorf("expected positional argument for file_path")
+		return fmt.Errorf("expected to receive GitHub repo")
 	}
 	if gco.token == "" {
-		return fmt.Errorf("expected positional argument for file_path")
+		return fmt.Errorf("expected to receive GitHub token")
 	}
 	return nil
 }
@@ -144,7 +144,8 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 		release, _, err = g.client.Repositories.GetReleaseByTag(ctx, g.owner, g.repo, g.tag)
 	}
 	if err != nil {
-		logger.Debug(err)
+		new_error := fmt.Errorf("unable to fetch assets...%w", err)
+		logger.Debug(new_error)
 		return err
 	}
 	// Add the current tag to the tagList if it has not been seen before
@@ -160,14 +161,16 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 			// Get the asset's URL
 			assetURL, err := url.Parse(asset.GetBrowserDownloadURL())
 			if err != nil {
-				logger.Error(err)
+				new_err := fmt.Errorf("unable to get asset URLs... %w", err)
+				logger.Error(new_err)
 				continue
 			}
 
 			// Download the asset
 			resp, err := http.Get(assetURL.String())
 			if err != nil {
-				logger.Error(err)
+				new_err := fmt.Errorf("unable to download asset URLs... %w", err)
+				logger.Error(new_err)
 				continue
 			}
 			defer resp.Body.Close()
