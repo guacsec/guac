@@ -111,6 +111,8 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 	docChan := make(chan processor.DocumentTree, 1)
 	errChan := make(chan error, 1)
 	defer close(errChan)
+	defer close(docChan)
+
 	go func() {
 		errChan <- testSubscribe(ctx, docChan)
 	}()
@@ -131,7 +133,12 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 			subscribersDone += 1
 		}
 	}
-
+	for len(docChan) > 0 {
+		d := <-docChan
+		if !dochelper.DocTreeEqual(d, expectedDocTree) {
+			t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
+		}
+	}
 }
 
 func TestNatsEmitter_RecreateStream(t *testing.T) {
@@ -224,19 +231,22 @@ func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree
 				time.Sleep(1 * time.Second)
 				continue
 			} else {
-				return err
+				return fmt.Errorf("[processor: %s] unexpected NATS fetch error: %v", id, err)
 			}
 		}
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				logger.Errorf("[processor: %v] unable to Ack: %v", id, err)
-				return err
+				fmtErr := fmt.Errorf("[processor: %v] unable to Ack: %v", id, err)
+				logger.Error(fmtErr)
+				return fmtErr
 			}
 			doc := processor.Document{}
 			err = json.Unmarshal(msgs[0].Data, &doc)
 			if err != nil {
-				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+				fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+				logger.Error(fmtErr)
+				return err
 			}
 
 			docNode := &processor.DocumentNode{
@@ -247,9 +257,7 @@ func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree
 			docTree := processor.DocumentTree(docNode)
 
 			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
-			if err != nil {
-				return err
-			}
+
 			docChannel <- docTree
 		}
 	}

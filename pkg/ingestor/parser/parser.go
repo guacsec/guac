@@ -87,25 +87,35 @@ func Subscribe(ctx context.Context) error {
 			return ctx.Err()
 		}
 		msgs, err := sub.Fetch(1)
-		if err != nil && errors.Is(err, nats.ErrTimeout) {
-			logger.Infof("[ingestor: %s] error consuming, backoff for a second: %v", id, err)
-			time.Sleep(1 * time.Second)
-			continue
+		if err != nil {
+			if errors.Is(err, nats.ErrTimeout) {
+				logger.Infof("[ingestor: %s] error consuming, backing off for a second: %v", id, err)
+				time.Sleep(1 * time.Second)
+				continue
+			} else {
+				return fmt.Errorf("[ingestor: %s] unexpected NATS fetch error: %v", id, err)
+			}
 		}
 		if len(msgs) > 0 {
 			err := msgs[0].Ack()
 			if err != nil {
-				return fmt.Errorf("[ingestor: %s] unable to Ack: %v", id, err)
+				fmtErr := fmt.Errorf("[ingestor: %s] unable to Ack: %v", id, err)
+				logger.Error(fmtErr)
+				return fmtErr
 			}
 			doc := processor.DocumentNode{}
 			err = json.Unmarshal(msgs[0].Data, &doc)
 			if err != nil {
-				return fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+				fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+				logger.Error(fmtErr)
+				return fmtErr
 			}
 
 			_, err = ParseDocumentTree(ctx, processor.DocumentTree(&doc))
 			if err != nil {
-				return err
+				fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %v", id, err)
+				logger.Error(fmtErr)
+				return fmtErr
 			}
 			logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc).Document.SourceInformation)
 		}
