@@ -574,18 +574,6 @@ func Test_ProcessSubscribe(t *testing.T) {
 	}
 	defer natsTest.Shutdown()
 
-	ctx := context.Background()
-	jetStream := emitter.NewJetStream(url, "", "")
-	ctx, err = jetStream.JetStreamInit(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error initializing jetstream: %v", err)
-	}
-	err = jetStream.RecreateStream(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error recreating jetstream: %v", err)
-	}
-	defer jetStream.Close()
-
 	testCases := []struct {
 		name       string
 		doc        processor.Document
@@ -655,14 +643,24 @@ func Test_ProcessSubscribe(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
+			jetStream := emitter.NewJetStream(url, "", "")
 			ctx, err = jetStream.JetStreamInit(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error initializing jetstream: %v", err)
+			}
+			err = jetStream.RecreateStream(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error recreating jetstream: %v", err)
+			}
+			defer jetStream.Close()
+
 			err := testPublish(ctx, &tt.doc)
 			if err != nil {
 				t.Fatalf("unexpected error on emit: %v", err)
 			}
 			var cancel context.CancelFunc
 
-			ctx, cancel = context.WithTimeout(ctx, time.Second)
+			ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
 			defer cancel()
 
 			errChan := make(chan error, 1)

@@ -142,17 +142,6 @@ func Test_ParserSubscribe(t *testing.T) {
 	}
 	defer natsTest.Shutdown()
 
-	jetStream := emitter.NewJetStream(url, "", "")
-	ctx, err = jetStream.JetStreamInit(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error initializing jetstream: %v", err)
-	}
-	err = jetStream.RecreateStream(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error recreating jetstream: %v", err)
-	}
-	defer jetStream.Close()
-
 	testCases := []struct {
 		name       string
 		tree       processor.DocumentTree
@@ -174,8 +163,16 @@ func Test_ParserSubscribe(t *testing.T) {
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.Background()
+			jetStream := emitter.NewJetStream(url, "", "")
 			ctx, err = jetStream.JetStreamInit(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error initializing jetstream: %v", err)
+			}
+			err = jetStream.RecreateStream(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error recreating jetstream: %v", err)
+			}
+			defer jetStream.Close()
 			err := testPublish(ctx, tt.tree)
 			if err != nil {
 				t.Fatalf("unexpected error on emit: %v", err)
