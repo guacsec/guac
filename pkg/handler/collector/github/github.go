@@ -33,10 +33,10 @@ import (
 )
 
 const (
-	CollectorGitHubDocument = "GitHubCollector"
+	CollectorGitHub = "GitHubCollector"
 )
 
-type githubDocumentCollector struct {
+type githubCollector struct {
 	poll     bool
 	interval time.Duration
 	token    string
@@ -56,7 +56,7 @@ type GithubCollectorOpts struct {
 	tag      string
 }
 
-func NewGitHubDocumentCollector(ctx context.Context, gco GithubCollectorOpts) (*githubDocumentCollector, error) {
+func NewGitHubCollector(ctx context.Context, gco GithubCollectorOpts) (*githubCollector, error) {
 	err := validateOpts(gco)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func NewGitHubDocumentCollector(ctx context.Context, gco GithubCollectorOpts) (*
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	return &githubDocumentCollector{
+	return &githubCollector{
 		poll:     gco.poll,
 		interval: gco.interval,
 		token:    gco.token,
@@ -81,7 +81,6 @@ func NewGitHubDocumentCollector(ctx context.Context, gco GithubCollectorOpts) (*
 }
 
 func validateOpts(gco GithubCollectorOpts) error {
-	// TODO: Fix the error messages below
 	if gco.owner == "" {
 		return fmt.Errorf("expected to receive GitHub owner")
 	}
@@ -95,7 +94,7 @@ func validateOpts(gco GithubCollectorOpts) error {
 }
 
 // RetrieveArtifacts collects the metadata documents and assets from a specified Github repository's release
-func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	if g.poll {
 		for {
@@ -125,12 +124,12 @@ func (g *githubDocumentCollector) RetrieveArtifacts(ctx context.Context, docChan
 }
 
 // Type returns the collector type
-func (g *githubDocumentCollector) Type() string {
-	return CollectorGitHubDocument
+func (g *githubCollector) Type() string {
+	return CollectorGitHub
 }
 
 // Getting files from assets
-func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
+func (g *githubCollector) fetchAssets(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
 
 	// Get information about the release
 	var release *github.RepositoryRelease
@@ -185,7 +184,7 @@ func (g *githubDocumentCollector) fetchAssets(ctx context.Context, logger *zap.S
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
-					Collector: string(CollectorGitHubDocument),
+					Collector: string(CollectorGitHub),
 					Source:    currentTag,
 				},
 			}

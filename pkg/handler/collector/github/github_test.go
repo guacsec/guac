@@ -106,7 +106,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(CollectorGitHubDocument),
+				Collector: string(CollectorGitHub),
 				Source:    "v1.4.0",
 			},
 		},
@@ -115,7 +115,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(CollectorGitHubDocument),
+				Collector: string(CollectorGitHub),
 				Source:    "v1.4.0",
 			},
 		},
@@ -124,7 +124,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(CollectorGitHubDocument),
+				Collector: string(CollectorGitHub),
 				Source:    "v1.4.0",
 			},
 		},
@@ -175,8 +175,8 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a new githubDocumentCollector
-			g := &githubDocumentCollector{
+			// Create a new githubCollector
+			g := &githubCollector{
 				poll:     tt.fields.poll,
 				interval: tt.fields.interval,
 				token:    tt.fields.token,
@@ -186,7 +186,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				tag:      tt.fields.tag,
 				tagList:  []string{},
 			}
-			//g := NewGitHubDocumentCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
+			//g := NewGitHubCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
 			// Create a channel to collect the documents emitted by RetrieveArtifacts
 			var err error
 			docChan := make(chan *processor.Document, 1)
@@ -233,8 +233,8 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 					}
 				}
 
-				if g.Type() != CollectorGitHubDocument {
-					t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGitHubDocument)
+				if g.Type() != CollectorGitHub {
+					t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGitHub)
 				}
 			}
 		})
