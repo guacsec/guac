@@ -27,7 +27,7 @@ type PubSub struct {
 	errChan  <-chan error
 }
 
-func NewProcessorSubscriber(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (*PubSub, error) {
+func NewPubSub(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (*PubSub, error) {
 	dataChan, errchan, err := createSubscriber(ctx, id, subj, durable, backOffTimer)
 	if err != nil {
 		return nil, err
@@ -38,15 +38,19 @@ func NewProcessorSubscriber(ctx context.Context, id string, subj string, durable
 	}, nil
 }
 
-func (psub *PubSub) GetProcessorDataFromNats(ctx context.Context, processFunc DataFunc) error {
+func (psub *PubSub) GetDataFromNats(ctx context.Context, dataFunc DataFunc) error {
 	for {
 		select {
 		case d := <-psub.dataChan:
-			if err := processFunc(d); err != nil {
+			if err := dataFunc(d); err != nil {
 				return err
 			}
 		case err := <-psub.errChan:
 			return err
 		}
 	}
+}
+
+func (psub *PubSub) SendDataToNats(ctx context.Context, subj string, data []byte) error {
+	return Publish(ctx, subj, data)
 }

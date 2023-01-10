@@ -196,12 +196,11 @@ func Test_ParserSubscribe(t *testing.T) {
 }
 
 func testPublish(ctx context.Context, documentTree processor.DocumentTree) error {
-	js := emitter.FromContext(ctx)
 	docTreeJSON, err := json.Marshal(documentTree)
 	if err != nil {
 		return err
 	}
-	_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
+	err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeJSON)
 	if err != nil {
 		return err
 	}
