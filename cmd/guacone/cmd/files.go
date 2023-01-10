@@ -39,15 +39,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
-	keyPath string
-	keyID   string
-}{}
-
 type options struct {
 	dbAddr string
 	user   string

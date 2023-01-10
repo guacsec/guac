@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/server/db"
 	"github.com/guacsec/guac/pkg/collectsub/server/db/simpledb"
+	"github.com/guacsec/guac/pkg/logging"
 	"google.golang.org/grpc"
 )
 
@@ -55,15 +55,18 @@ func (s *server) GetCollectStatus(ctx context.Context, in *pb.GetCollectStatusRe
 	return nil, fmt.Errorf("unimplemented")
 }
 
-func (s *server) Serve(ctx context.Context) {
+func (s *server) Serve(ctx context.Context) error {
+	logger := logging.FromContext(ctx)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return err
 	}
 	gs := grpc.NewServer()
 	pb.RegisterColectSubscriberServiceServer(gs, s)
-	log.Printf("server listening at %v", lis.Addr())
+	logger.Infof("server listening at %v", lis.Addr())
 	if err := gs.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		return err
 	}
+
+	return nil
 }
