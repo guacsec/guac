@@ -44,7 +44,7 @@ type githubCollector struct {
 	owner    string
 	repo     string
 	tag      string
-	tagList  []string
+	tagMap   map[string]string
 }
 
 type GithubCollectorOpts struct {
@@ -54,6 +54,7 @@ type GithubCollectorOpts struct {
 	owner    string
 	repo     string
 	tag      string
+	tagMap   map[string]string
 }
 
 func NewGitHubCollector(ctx context.Context, gco GithubCollectorOpts) (*githubCollector, error) {
@@ -76,7 +77,7 @@ func NewGitHubCollector(ctx context.Context, gco GithubCollectorOpts) (*githubCo
 		owner:    gco.owner,
 		repo:     gco.repo,
 		tag:      gco.tag,
-		tagList:  []string{},
+		tagMap:   gco.tagMap,
 	}, nil
 }
 
@@ -145,11 +146,17 @@ func (g *githubCollector) fetchAssets(ctx context.Context, logger *zap.SugaredLo
 	if err != nil {
 		new_error := fmt.Errorf("unable to fetch assets...%w", err)
 		logger.Debug(new_error)
-		return err
+		return new_error
 	}
-	// Add the current tag to the tagList if it has not been seen before
+	// Add the current tag to the tagMap if it has not been seen before
 	currentTag := release.GetTagName()
-	if !contains(g.tagList, currentTag) {
+	currentHash, _, err := g.client.Repositories.GetCommitSHA1(ctx, g.owner, g.repo, g.tag, "")
+	if err != nil {
+		new_error := fmt.Errorf("unable to fetch commit for tag...%w", err)
+		logger.Error(new_error)
+		return new_error
+	}
+	if g.tagMap[currentTag] != currentHash {
 		// Download each asset in the release
 		for _, asset := range release.Assets {
 			// Check if the asset's name ends with .jsonl
@@ -191,17 +198,8 @@ func (g *githubCollector) fetchAssets(ctx context.Context, logger *zap.SugaredLo
 			docChannel <- doc
 		}
 
-		g.tagList = append(g.tagList, currentTag)
+		g.tagMap[currentTag] = currentHash
 	}
 
 	return nil
-}
-
-func contains(elems []string, v string) bool {
-	for _, s := range elems {
-		if v == s {
-			return true
-		}
-	}
-	return false
 }
