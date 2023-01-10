@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package github
 
 import (
@@ -83,6 +81,11 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			},
 		),
 		mock.WithRequestMatch(
+			mock.GetReposCommitsByOwnerByRepoByRef,
+			[]byte("01234567890"),
+			[]byte("01234567890"),
+		),
+		mock.WithRequestMatch(
 			mock.GetReposReleasesTagsByOwnerByRepoByTag,
 			github.RepositoryRelease{
 				ID:      github.Int64(123),
@@ -138,7 +141,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		owner    string
 		repo     string
 		tag      string
-		tagList  []string
 		interval time.Duration
 	}
 	tests := []struct {
@@ -186,7 +188,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				owner:    tt.fields.owner,
 				repo:     tt.fields.repo,
 				tag:      tt.fields.tag,
-				tagList:  []string{},
+				tagMap:   map[string]string{},
 			}
 			//g := NewGitHubCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
 			// Create a channel to collect the documents emitted by RetrieveArtifacts
