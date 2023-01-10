@@ -663,26 +663,14 @@ func Test_ProcessSubscribe(t *testing.T) {
 			ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
 			defer cancel()
 
-			errChan := make(chan error, 1)
-			defer close(errChan)
-			go func() {
-				errChan <- Subscribe(ctx)
-			}()
-
-			numSubscribers := 1
-			subscribersDone := 0
-
-			for subscribersDone < numSubscribers {
-				err := <-errChan
-				if (err != nil) != tt.wantErr {
-					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
+			err = Subscribe(ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
+			}
+			if err != nil {
+				if !strings.Contains(err.Error(), tt.errMessage) {
+					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
 				}
-				if err != nil {
-					if !strings.Contains(err.Error(), tt.errMessage) {
-						t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
-					}
-				}
-				subscribersDone += 1
 			}
 		})
 	}

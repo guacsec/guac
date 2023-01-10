@@ -18,9 +18,7 @@ package parser
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -33,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	certify_vuln "github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -71,55 +68,39 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // Subscribe is used by NATS JetStream to stream the documents received from the processor
-// and parse them via ParseDocumentTree
+// and parse them them via ParseDocumentTree
 func Subscribe(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
-	js := emitter.FromContext(ctx)
+
 	id := uuid.NewV4().String()
-	sub, err := js.PullSubscribe(emitter.SubjectNameDocProcessed, "ingestor")
+	psub, err := emitter.NewProcessorSubscriber(ctx, id, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
 	if err != nil {
-		logger.Errorf("[ingestor: %s] subscribe failed: %v", id, err)
 		return err
 	}
-	for {
-		// if the context is canceled we want to break out of the loop
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-		msgs, err := sub.Fetch(1)
-		if err != nil {
-			if errors.Is(err, nats.ErrTimeout) {
-				logger.Infof("[ingestor: %s] error consuming, backing off for a second: %v", id, err)
-				time.Sleep(1 * time.Second)
-				continue
-			} else {
-				return fmt.Errorf("[ingestor: %s] unexpected NATS fetch error: %v", id, err)
-			}
-		}
-		if len(msgs) > 0 {
-			err := msgs[0].Ack()
-			if err != nil {
-				fmtErr := fmt.Errorf("[ingestor: %s] unable to Ack: %v", id, err)
-				logger.Error(fmtErr)
-				return fmtErr
-			}
-			doc := processor.DocumentNode{}
-			err = json.Unmarshal(msgs[0].Data, &doc)
-			if err != nil {
-				fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
-				logger.Error(fmtErr)
-				return fmtErr
-			}
 
-			_, err = ParseDocumentTree(ctx, processor.DocumentTree(&doc))
-			if err != nil {
-				fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %v", id, err)
-				logger.Error(fmtErr)
-				return fmtErr
-			}
-			logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&doc).Document.SourceInformation)
+	parserFunc := func(d []byte) error {
+		docNode := processor.DocumentNode{}
+		err := json.Unmarshal(d, &docNode)
+		if err != nil {
+			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+			logger.Error(fmtErr)
+			return err
 		}
+		_, err = ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
+		if err != nil {
+			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %v", id, err)
+			logger.Error(fmtErr)
+			return fmtErr
+		}
+		logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&docNode).Document.SourceInformation)
+		return nil
 	}
+
+	err = psub.GetProcessorDataFromNats(ctx, parserFunc)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.

@@ -105,17 +105,14 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 // Publish is used by NATS JetStream to stream the documents and send them to the processor
 func Publish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
-	js := emitter.FromContext(ctx)
-	if js != nil {
-		docByte, err := json.Marshal(d)
-		if err != nil {
-			return fmt.Errorf("failed marshal of document: %w", err)
-		}
-		_, err = js.Publish(emitter.SubjectNameDocCollected, docByte)
-		if err != nil {
-			return fmt.Errorf("failed to publish document on stream: %w", err)
-		}
-		logger.Infof("doc published: %+v", d.SourceInformation.Source)
+	docByte, err := json.Marshal(d)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document: %w", err)
 	}
+	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
+	if err != nil {
+		return err
+	}
+	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
 }
