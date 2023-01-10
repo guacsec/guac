@@ -12,6 +12,7 @@ import (
 
 type Client struct {
 	client pb.ColectSubscriberServiceClient
+	conn   *grpc.ClientConn
 }
 
 func NewClient(addr string) (*Client, error) {
@@ -20,12 +21,16 @@ func NewClient(addr string) (*Client, error) {
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	defer conn.Close()
 	c := pb.NewColectSubscriberServiceClient(conn)
 
 	return &Client{
 		client: c,
+		conn:   conn,
 	}, nil
+}
+
+func (c *Client) Close() {
+	c.conn.Close()
 }
 
 func (c *Client) AddCollectEntry(ctx context.Context, entries []*pb.CollectEntry) error {

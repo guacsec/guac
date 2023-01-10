@@ -52,7 +52,7 @@ func init() {
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.keyPath, "verifier-keyPath", "", "path to pem file to verify dsse")
 	persistentFlags.StringVar(&flags.keyID, "verifier-keyID", "", "ID of the key to be stored")
-	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "http://localhost:2782", "address to connect to collect-sub service")
+	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
 
 	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm",
