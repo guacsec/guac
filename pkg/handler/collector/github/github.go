@@ -54,7 +54,6 @@ type GithubCollectorOpts struct {
 	owner    string
 	repo     string
 	tag      string
-	tagMap   map[string]string
 }
 
 func NewGitHubCollector(ctx context.Context, gco GithubCollectorOpts) (*githubCollector, error) {
@@ -77,7 +76,7 @@ func NewGitHubCollector(ctx context.Context, gco GithubCollectorOpts) (*githubCo
 		owner:    gco.owner,
 		repo:     gco.repo,
 		tag:      gco.tag,
-		tagMap:   gco.tagMap,
+		tagMap:   map[string]string{},
 	}, nil
 }
 
@@ -150,7 +149,7 @@ func (g *githubCollector) fetchAssets(ctx context.Context, logger *zap.SugaredLo
 	}
 	// Add the current tag to the tagMap if it has not been seen before
 	currentTag := release.GetTagName()
-	currentHash, _, err := g.client.Repositories.GetCommitSHA1(ctx, g.owner, g.repo, g.tag, "")
+	currentHash, _, err := g.client.Repositories.GetCommitSHA1(ctx, g.owner, g.repo, currentTag, "")
 	if err != nil {
 		new_error := fmt.Errorf("unable to fetch commit for tag...%w", err)
 		logger.Error(new_error)
