@@ -206,7 +206,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 	return dataChan, errChan, nil
 }
 
-// CreateSubscriber would implement the loop as a go routine and put documents into the
+// Publish publishes the data onto the NATS stream for consumption by upstream services
 func Publish(ctx context.Context, subj string, data []byte) error {
 	js := FromContext(ctx)
 	if js == nil {

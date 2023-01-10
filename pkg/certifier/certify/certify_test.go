@@ -30,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -198,53 +197,36 @@ func Test_Publish(t *testing.T) {
 
 func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree) error {
 	logger := logging.FromContext(ctx)
-	js := emitter.FromContext(ctx)
 	id := uuid.NewV4().String()
-	sub, err := js.PullSubscribe(emitter.SubjectNameDocCollected, "processor")
+
+	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
-		logger.Errorf("processor subscribe failed: %s", err)
 		return err
 	}
-	for {
-		// if the context is canceled we want to break out of the loop
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-		msgs, err := sub.Fetch(1)
+
+	processFunc := func(d []byte) error {
+		doc := processor.Document{}
+		err := json.Unmarshal(d, &doc)
 		if err != nil {
-			if errors.Is(err, nats.ErrTimeout) {
-				logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
-				time.Sleep(1 * time.Second)
-				continue
-			} else {
-				return fmt.Errorf("[processor: %s] unexpected NATS fetch error: %v", id, err)
-			}
+			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+			logger.Error(fmtErr)
+			return err
 		}
-		if len(msgs) > 0 {
-			err := msgs[0].Ack()
-			if err != nil {
-				fmtErr := fmt.Errorf("[processor: %v] unable to Ack: %v", id, err)
-				logger.Error(fmtErr)
-				return fmtErr
-			}
-			doc := processor.Document{}
-			err = json.Unmarshal(msgs[0].Data, &doc)
-			if err != nil {
-				fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
-				logger.Error(fmtErr)
-				return err
-			}
 
-			docNode := &processor.DocumentNode{
-				Document: &doc,
-				Children: nil,
-			}
-
-			docTree := processor.DocumentTree(docNode)
-
-			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
-
-			docChannel <- docTree
+		docNode := &processor.DocumentNode{
+			Document: &doc,
+			Children: nil,
 		}
+
+		docTree := processor.DocumentTree(docNode)
+		docChannel <- docTree
+		logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
+		return nil
 	}
+
+	err = psub.GetDataFromNats(ctx, processFunc)
+	if err != nil {
+		return err
+	}
+	return nil
 }

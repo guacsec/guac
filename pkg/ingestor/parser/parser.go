@@ -73,7 +73,7 @@ func Subscribe(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 
 	id := uuid.NewV4().String()
-	psub, err := emitter.NewProcessorSubscriber(ctx, id, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
+	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}
@@ -92,11 +92,25 @@ func Subscribe(ctx context.Context) error {
 			logger.Error(fmtErr)
 			return fmtErr
 		}
+
+		// TODO: Once the graphDB is abstracted via GraphQL, add NATS back to ingestor. See issue https://github.com/guacsec/guac/issues/299
+		//
+		// 	assemblerInputsJSON, err := json.Marshal(assemblerInputs)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// err = psub.SendDataToNats(ctx, emitter.SubjectNameDocParsed, assemblerInputsJSON)
+		// if err != nil {
+		// 	return err
+		// }
+		// 	logger.Infof("doc parsed: %+v", docTree.Document.SourceInformation)
+		//
+
 		logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&docNode).Document.SourceInformation)
 		return nil
 	}
 
-	err = psub.GetProcessorDataFromNats(ctx, parserFunc)
+	err = psub.GetDataFromNats(ctx, parserFunc)
 	if err != nil {
 		return err
 	}
@@ -104,7 +118,6 @@ func Subscribe(ctx context.Context) error {
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-// If NATS JetStream is used, ParseDocumentTree also stream the documents and send them to the assembler
 func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, error) {
 	assemblerInputs := []assembler.Graph{}
 	docTreeBuilder := newDocTreeBuilder()
@@ -116,20 +129,6 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 		assemblerInput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities)
 		assemblerInputs = append(assemblerInputs, assemblerInput)
 	}
-
-	// TODO: Once the graphDB is abstracted via GraphQL, add NATS back to ingestor. See issue https://github.com/guacsec/guac/issues/299
-	// if js != nil {
-	// 	assemblerInputsJSON, err := json.Marshal(assemblerInputs)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	_, err = js.Publish(emitter.SubjectNameDocParsed, assemblerInputsJSON)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	logger.Infof("doc parsed: %+v", docTree.Document.SourceInformation)
-	// }
-
 	return assemblerInputs, nil
 }
 

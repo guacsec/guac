@@ -60,7 +60,7 @@ func Subscribe(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 
 	id := uuid.NewV4().String()
-	psub, err := emitter.NewProcessorSubscriber(ctx, id, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}
@@ -79,11 +79,19 @@ func Subscribe(ctx context.Context) error {
 			logger.Error(fmtErr)
 			return fmtErr
 		}
+		docTreeBytes, err := json.Marshal(docTree)
+		if err != nil {
+			return fmt.Errorf("failed marshal of document: %w", err)
+		}
+		err = psub.SendDataToNats(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
+		if err != nil {
+			return err
+		}
 		logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
 		return nil
 	}
 
-	err = psub.GetProcessorDataFromNats(ctx, processFunc)
+	err = psub.GetDataFromNats(ctx, processFunc)
 	if err != nil {
 		return err
 	}
@@ -91,25 +99,11 @@ func Subscribe(ctx context.Context) error {
 }
 
 // Process processes the documents received from the collector to determine
-// their format and document type. If NATS JetStream is used, Process also
-// stream the documents and send them to the ingestor
+// their format and document type.
 func Process(ctx context.Context, i *processor.Document) (processor.DocumentTree, error) {
-	logger := logging.FromContext(ctx)
-	js := emitter.FromContext(ctx)
 	node, err := processHelper(ctx, i)
 	if err != nil {
 		return nil, err
-	}
-	if js != nil {
-		docTreeJSON, err := json.Marshal(processor.DocumentTree(node))
-		if err != nil {
-			return nil, err
-		}
-		_, err = js.Publish(emitter.SubjectNameDocProcessed, docTreeJSON)
-		if err != nil {
-			return nil, err
-		}
-		logger.Infof("doc processed: %+v", node.Document.SourceInformation)
 	}
 	return processor.DocumentTree(node), nil
 }
