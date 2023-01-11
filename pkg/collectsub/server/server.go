@@ -6,15 +6,17 @@ import (
 	"net"
 
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
-	"github.com/guacsec/guac/pkg/collectsub/server/db"
 	"github.com/guacsec/guac/pkg/collectsub/server/db/simpledb"
+	db "github.com/guacsec/guac/pkg/collectsub/server/db/types"
 	"github.com/guacsec/guac/pkg/logging"
 	"google.golang.org/grpc"
 )
 
 type server struct {
 	pb.UnimplementedColectSubscriberServiceServer
-	db   db.CollectSubscriberDb
+
+	// Db points to the backend DB, public for mocking testing purposes.
+	Db   db.CollectSubscriberDb
 	port int
 }
 
@@ -25,13 +27,13 @@ func NewServer(port int) (*server, error) {
 	}
 
 	return &server{
-		db:   db,
+		Db:   db,
 		port: port,
 	}, nil
 }
 
 func (s *server) AddCollectEntry(ctx context.Context, in *pb.AddCollectEntriesRequest) (*pb.AddCollectEntriesResponse, error) {
-	err := s.db.AddCollectEntries(ctx, in.Entries)
+	err := s.Db.AddCollectEntries(ctx, in.Entries)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add entry to db: %w", err)
 	}
@@ -42,7 +44,7 @@ func (s *server) AddCollectEntry(ctx context.Context, in *pb.AddCollectEntriesRe
 }
 
 func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntriesRequest) (*pb.GetCollectEntriesResponse, error) {
-	ret, err := s.db.GetCollectEntries(ctx, in.Filters)
+	ret, err := s.Db.GetCollectEntries(ctx, in.Filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get collect entries from db: %w", err)
 	}
