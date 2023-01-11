@@ -27,6 +27,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
+	"github.com/guacsec/guac/pkg/ingestor/key"
+	"github.com/guacsec/guac/pkg/ingestor/key/inmemory"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
@@ -38,6 +40,7 @@ var flags = struct {
 	gdbuser string
 	gdbpass string
 	realm   string
+	key     string
 }{}
 
 type options struct {
@@ -45,6 +48,7 @@ type options struct {
 	user   string
 	pass   string
 	realm  string
+	key    string
 	// path to folder with documents to collect
 	path string
 	// map of image repo and tags
@@ -63,11 +67,24 @@ var exampleCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
+			viper.GetString("key"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
+		}
+
+		// Register Keystore
+
+		inmemory := inmemory.NewInmemoryProvider()
+		err = key.RegisterKeyProvider(inmemory, inmemory.Type())
+		if err != nil {
+			logger.Errorf("unable to register key provider: %v", err)
+		}
+
+		if opts.key != "" {
+			key.Store(ctx)
 		}
 
 		// Register collector
@@ -145,12 +162,13 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, key string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.key = key
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")

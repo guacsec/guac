@@ -214,7 +214,7 @@ func setupProvider(t *testing.T) (*inmemory, []*key.Key) {
 		Scheme: "ed25519",
 	}
 
-	provider := newInmemoryProvider()
+	provider := NewInmemoryProvider()
 
 	return provider, []*key.Key{ecdsaKey, rsaKey, ed25519Key}
 }
