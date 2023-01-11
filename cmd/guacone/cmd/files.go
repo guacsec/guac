@@ -17,8 +17,10 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -30,6 +32,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/ingestor/key/inmemory"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
+	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/guacsec/guac/pkg/ingestor/verifier/sigstore_verifier"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,7 +44,8 @@ var flags = struct {
 	gdbuser string
 	gdbpass string
 	realm   string
-	key     string
+	keyPath string
+	keyID   string
 }{}
 
 type options struct {
@@ -48,7 +53,10 @@ type options struct {
 	user   string
 	pass   string
 	realm  string
-	key    string
+	// path to the pem file
+	keyPath string
+	// ID related to the key being stored
+	keyID string
 	// path to folder with documents to collect
 	path string
 	// map of image repo and tags
@@ -67,7 +75,8 @@ var exampleCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-			viper.GetString("key"),
+			viper.GetString("keyPath"),
+			viper.GetString("keyID"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -76,15 +85,30 @@ var exampleCmd = &cobra.Command{
 		}
 
 		// Register Keystore
-
 		inmemory := inmemory.NewInmemoryProvider()
 		err = key.RegisterKeyProvider(inmemory, inmemory.Type())
 		if err != nil {
 			logger.Errorf("unable to register key provider: %v", err)
 		}
 
-		if opts.key != "" {
-			key.Store(ctx)
+		if opts.keyPath != "" && opts.keyID != "" {
+			keyRaw, err := os.ReadFile(opts.keyPath)
+			if err != nil {
+				logger.Errorf("error: %v", err)
+				os.Exit(1)
+			}
+			err = key.Store(ctx, opts.keyID, keyRaw, inmemory.Type())
+			if err != nil {
+				logger.Errorf("error: %v", err)
+				os.Exit(1)
+			}
+		}
+
+		// Register Verifier
+		sigstore := sigstore_verifier.NewSigstoreVerifier()
+		err = verifier.RegisterVerifier(sigstore, sigstore.Type())
+		if err != nil {
+			logger.Errorf("unable to register key provider: %v", err)
 		}
 
 		// Register collector
@@ -162,13 +186,23 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, key string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, keyPath string, keyID string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
-	opts.key = key
+
+	if keyPath != "" {
+		if strings.HasSuffix(keyPath, "pem") {
+			opts.keyPath = keyPath
+		} else {
+			return opts, errors.New("key must be passed in as a pem file")
+		}
+	}
+	if keyPath != "" {
+		opts.keyID = keyID
+	}
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")
