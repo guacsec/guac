@@ -46,6 +46,12 @@ func (psub *PubSub) GetDataFromNats(ctx context.Context, dataFunc DataFunc) erro
 				return err
 			}
 		case err := <-psub.errChan:
+			for len(psub.dataChan) > 0 {
+				d := <-psub.dataChan
+				if err := dataFunc(d); err != nil {
+					return err
+				}
+			}
 			return err
 		}
 	}
