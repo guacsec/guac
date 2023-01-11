@@ -17,9 +17,11 @@ package parser
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
@@ -28,6 +30,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	certify_vuln "github.com/guacsec/guac/pkg/ingestor/parser/vuln"
+	"github.com/guacsec/guac/pkg/logging"
+	uuid "github.com/satori/go.uuid"
 )
 
 func init() {
@@ -63,20 +67,69 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 	return nil
 }
 
-// ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.AssemblerInput, error) {
-	assemblerinputs := []assembler.AssemblerInput{}
+// Subscribe is used by NATS JetStream to stream the documents received from the processor
+// and parse them them via ParseDocumentTree
+func Subscribe(ctx context.Context) error {
+	logger := logging.FromContext(ctx)
+
+	id := uuid.NewV4().String()
+	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
+	if err != nil {
+		return err
+	}
+
+	parserFunc := func(d []byte) error {
+		docNode := processor.DocumentNode{}
+		err := json.Unmarshal(d, &docNode)
+		if err != nil {
+			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+			logger.Error(fmtErr)
+			return err
+		}
+		_, err = ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
+		if err != nil {
+			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %v", id, err)
+			logger.Error(fmtErr)
+			return fmtErr
+		}
+
+		// TODO: Once the graphDB is abstracted via GraphQL, add NATS back to ingestor. See issue https://github.com/guacsec/guac/issues/299
+		//
+		// 	assemblerInputsJSON, err := json.Marshal(assemblerInputs)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// err = psub.SendDataToNats(ctx, emitter.SubjectNameDocParsed, assemblerInputsJSON)
+		// if err != nil {
+		// 	return err
+		// }
+		// 	logger.Infof("doc parsed: %+v", docTree.Document.SourceInformation)
+		//
+
+		logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&docNode).Document.SourceInformation)
+		return nil
+	}
+
+	err = psub.GetDataFromNats(ctx, parserFunc)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, error) {
+	assemblerInputs := []assembler.Graph{}
 	docTreeBuilder := newDocTreeBuilder()
 	err := docTreeBuilder.parse(ctx, docTree)
 	if err != nil {
 		return nil, err
 	}
 	for _, builder := range docTreeBuilder.graphBuilders {
-		assemblerinput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities)
-		assemblerinputs = append(assemblerinputs, assemblerinput)
+		assemblerInput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities)
+		assemblerInputs = append(assemblerInputs, assemblerInput)
 	}
-
-	return assemblerinputs, nil
+	return assemblerInputs, nil
 }
 
 func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree) error {

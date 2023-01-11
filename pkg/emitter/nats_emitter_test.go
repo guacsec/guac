@@ -105,12 +105,14 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 
 	var cancel context.CancelFunc
 
-	ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, time.Second)
 	defer cancel()
 
 	docChan := make(chan processor.DocumentTree, 1)
 	errChan := make(chan error, 1)
 	defer close(errChan)
+	defer close(docChan)
+
 	go func() {
 		errChan <- testSubscribe(ctx, docChan)
 	}()
@@ -131,7 +133,12 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 			subscribersDone += 1
 		}
 	}
-
+	for len(docChan) > 0 {
+		d := <-docChan
+		if !dochelper.DocTreeEqual(d, expectedDocTree) {
+			t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
+		}
+	}
 }
 
 func TestNatsEmitter_RecreateStream(t *testing.T) {
@@ -190,12 +197,11 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 
 func testPublish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
-	js := FromContext(ctx)
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	_, err = js.Publish(SubjectNameDocCollected, docByte)
+	err = Publish(ctx, SubjectNameDocCollected, docByte)
 	if err != nil {
 		return fmt.Errorf("failed to publish document on stream: %w", err)
 	}
@@ -205,52 +211,36 @@ func testPublish(ctx context.Context, d *processor.Document) error {
 
 func testSubscribe(ctx context.Context, docChannel chan<- processor.DocumentTree) error {
 	logger := logging.FromContext(ctx)
-	js := FromContext(ctx)
 	id := uuid.NewV4().String()
-	sub, err := js.PullSubscribe(SubjectNameDocCollected, "processor")
+
+	psub, err := NewPubSub(ctx, id, SubjectNameDocCollected, DurableProcessor, BackOffTimer)
 	if err != nil {
-		logger.Errorf("processor subscribe failed: %s", err)
 		return err
 	}
-	for {
-		// if the context is canceled we want to break out of the loop
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-		msgs, err := sub.Fetch(1)
+
+	processFunc := func(d []byte) error {
+		doc := processor.Document{}
+		err := json.Unmarshal(d, &doc)
 		if err != nil {
-			if errors.Is(err, nats.ErrTimeout) {
-				logger.Infof("[processor: %s] error consuming, backing off for a second: %v", id, err)
-				time.Sleep(1 * time.Second)
-				continue
-			} else {
-				return err
-			}
+			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+			logger.Error(fmtErr)
+			return err
 		}
-		if len(msgs) > 0 {
-			err := msgs[0].Ack()
-			if err != nil {
-				logger.Errorf("[processor: %v] unable to Ack: %v", id, err)
-				return err
-			}
-			doc := processor.Document{}
-			err = json.Unmarshal(msgs[0].Data, &doc)
-			if err != nil {
-				logger.Warnf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
-			}
 
-			docNode := &processor.DocumentNode{
-				Document: &doc,
-				Children: nil,
-			}
-
-			docTree := processor.DocumentTree(docNode)
-
-			logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
-			if err != nil {
-				return err
-			}
-			docChannel <- docTree
+		docNode := &processor.DocumentNode{
+			Document: &doc,
+			Children: nil,
 		}
+
+		docTree := processor.DocumentTree(docNode)
+		docChannel <- docTree
+		logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
+		return nil
 	}
+
+	err = psub.GetDataFromNats(ctx, processFunc)
+	if err != nil {
+		return err
+	}
+	return nil
 }

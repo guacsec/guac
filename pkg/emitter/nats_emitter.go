@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/nats-io/nats.go"
@@ -26,12 +27,16 @@ import (
 
 // NATS stream
 const (
-	NatsName                string = "GUAC"
-	StreamName              string = "DOCUMENTS"
-	StreamSubjects          string = "DOCUMENTS.*"
-	SubjectNameDocCollected string = "DOCUMENTS.collected"
-	SubjectNameDocProcessed string = "DOCUMENTS.processed"
-	SubjectNameDocParsed    string = "DOCUMENTS.parsed"
+	NatsName                string        = "GUAC"
+	StreamName              string        = "DOCUMENTS"
+	StreamSubjects          string        = "DOCUMENTS.*"
+	SubjectNameDocCollected string        = "DOCUMENTS.collected"
+	SubjectNameDocProcessed string        = "DOCUMENTS.processed"
+	SubjectNameDocParsed    string        = "DOCUMENTS.parsed"
+	DurableProcessor        string        = "processor"
+	DurableIngestor         string        = "ingestor"
+	BufferChannelSize       int           = 1000
+	BackOffTimer            time.Duration = 5 * time.Second
 )
 
 type jetStream struct {
@@ -155,6 +160,61 @@ func withJetstream(ctx context.Context, js nats.JetStreamContext) context.Contex
 func FromContext(ctx context.Context) nats.JetStreamContext {
 	if js, ok := ctx.Value(jetStream{}).(nats.JetStreamContext); ok {
 		return js
+	}
+	return nil
+}
+
+func createSubscriber(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (<-chan []byte, <-chan error, error) {
+	// docChan to collect artifacts
+	dataChan := make(chan []byte, BufferChannelSize)
+	// errChan to receive error from collectors
+	errChan := make(chan error, 1)
+	logger := logging.FromContext(ctx)
+	js := FromContext(ctx)
+	sub, err := js.PullSubscribe(subj, durable)
+	if err != nil {
+		logger.Errorf("%s subscribe failed: %s", durable, err)
+		return nil, nil, err
+	}
+	go func() {
+		for {
+			// if the context is canceled we want to break out of the loop
+			if ctx.Err() != nil {
+				errChan <- ctx.Err()
+			}
+			msgs, err := sub.Fetch(1)
+			if err != nil {
+				if errors.Is(err, nats.ErrTimeout) {
+					logger.Infof("[%s: %s] error consuming, backing off for a second: %v", durable, id, err)
+					time.Sleep(backOffTimer)
+					continue
+				} else {
+					errChan <- fmt.Errorf("[%s: %s] unexpected NATS fetch error: %v", durable, id, err)
+				}
+			}
+			if len(msgs) > 0 {
+				err := msgs[0].Ack()
+				if err != nil {
+					fmtErr := fmt.Errorf("[%s: %v] unable to Ack: %v", durable, id, err)
+					logger.Error(fmtErr)
+					errChan <- fmtErr
+				}
+				dataChan <- msgs[0].Data
+			}
+		}
+	}()
+	return dataChan, errChan, nil
+}
+
+// Publish publishes the data onto the NATS stream for consumption by upstream services
+func Publish(ctx context.Context, subj string, data []byte) error {
+	js := FromContext(ctx)
+	if js == nil {
+		return errors.New("jetstream not found from context")
+	}
+	_, err := js.Publish(subj, data)
+	if err != nil {
+		return fmt.Errorf("failed to publish document on stream: %w", err)
 	}
 	return nil
 }
