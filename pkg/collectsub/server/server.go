@@ -32,7 +32,7 @@ func NewServer(port int) (*server, error) {
 	}, nil
 }
 
-func (s *server) AddCollectEntry(ctx context.Context, in *pb.AddCollectEntriesRequest) (*pb.AddCollectEntriesResponse, error) {
+func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntriesRequest) (*pb.AddCollectEntriesResponse, error) {
 	err := s.Db.AddCollectEntries(ctx, in.Entries)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add entry to db: %w", err)
