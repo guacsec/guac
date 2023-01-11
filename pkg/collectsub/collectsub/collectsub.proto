@@ -16,7 +16,7 @@
 syntax = "proto3";
 option go_package = "github.com/guacsec/guac/pkg/collectsub";
 
-package gaucsec.guac.collect_subscriber.schema;
+package guacsec.guac.collect_subscriber.schema;
 
 enum CollectDataType {
     DATATYPE_GIT = 0;
