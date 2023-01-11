@@ -190,8 +190,6 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 				tag:      tt.fields.tag,
 				tagMap:   map[string]string{},
 			}
-			//g := NewGitHubCollector(ctx, tt.fields.poll, tt.fields.interval, logger, tt.fields.token, tt.fields.owner, tt.fields.repo, tt.fields.tag, tt.fields.tagList)
-			// Create a channel to collect the documents emitted by RetrieveArtifacts
 			var err error
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
