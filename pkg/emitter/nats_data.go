@@ -20,25 +20,29 @@ import (
 	"time"
 )
 
+// DataFunc determines how the data return from NATS is transformed based on implementation per module
 type DataFunc func([]byte) error
 
-type PubSub struct {
+type pubSub struct {
 	dataChan <-chan []byte
 	errChan  <-chan error
 }
 
-func NewPubSub(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (*PubSub, error) {
+// NewPubSub initializes the subscriber via the valid subject and durable string. Returning a dataChan and errChan to fetch
+// data on the stream
+func NewPubSub(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (*pubSub, error) {
 	dataChan, errchan, err := createSubscriber(ctx, id, subj, durable, backOffTimer)
 	if err != nil {
 		return nil, err
 	}
-	return &PubSub{
+	return &pubSub{
 		dataChan: dataChan,
 		errChan:  errchan,
 	}, nil
 }
 
-func (psub *PubSub) GetDataFromNats(ctx context.Context, dataFunc DataFunc) error {
+// GetDataFromNats retrieves the data from the channels and transforms it via the DataFunc defined per module
+func (psub *pubSub) GetDataFromNats(ctx context.Context, dataFunc DataFunc) error {
 	for {
 		select {
 		case d := <-psub.dataChan:
@@ -57,6 +61,7 @@ func (psub *PubSub) GetDataFromNats(ctx context.Context, dataFunc DataFunc) erro
 	}
 }
 
-func (psub *PubSub) SendDataToNats(ctx context.Context, subj string, data []byte) error {
+// SendDataToNats publishes the data in bytes to the stream based on the subject
+func (psub *pubSub) SendDataToNats(ctx context.Context, subj string, data []byte) error {
 	return Publish(ctx, subj, data)
 }
