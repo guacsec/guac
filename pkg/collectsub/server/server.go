@@ -53,10 +53,6 @@ func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntries
 	}, nil
 }
 
-func (s *server) GetCollectStatus(ctx context.Context, in *pb.GetCollectStatusRequest) (*pb.GetCollectStatusResponse, error) {
-	return nil, fmt.Errorf("unimplemented")
-}
-
 func (s *server) Serve(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))

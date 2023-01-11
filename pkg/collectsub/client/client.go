@@ -33,8 +33,8 @@ func (c *Client) Close() {
 	c.conn.Close()
 }
 
-func (c *Client) AddCollectEntry(ctx context.Context, entries []*pb.CollectEntry) error {
-	res, err := c.client.AddCollectEntry(ctx, &pb.AddCollectEntriesRequest{
+func (c *Client) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
+	res, err := c.client.AddCollectEntries(ctx, &pb.AddCollectEntriesRequest{
 		Entries: entries,
 	})
 	if err != nil {

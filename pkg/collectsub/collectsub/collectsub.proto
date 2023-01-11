@@ -28,7 +28,6 @@ enum CollectDataType {
 message CollectEntry {
     CollectDataType type = 1;
     string value = 2;
-    optional CollectStatus status = 3;
 }
 
 // rpc AddCollectEntry 
@@ -57,65 +56,7 @@ message GetCollectEntriesResponse {
     repeated CollectEntry entries = 1;
 }
 
-// rpc GetCollectRequestStatus
-enum CollectStatus {
-    COLLECTSTATUS_UNSEEN = 0;
-    COLLECTSTATUS_NOTED = 1;
-    COLLECTSTATUS_COLLECTED = 2;
-}
-
-
-message GetCollectStatusRequest {
-    repeated CollectEntryFilter filters = 1;
-}
-
-message GetCollectStatusResponse {
-    repeated CollectEntry entries = 1;
-}
-
-
 service ColectSubscriberService {
-  rpc AddCollectEntry(AddCollectEntriesRequest) returns (AddCollectEntriesResponse);
-  //rpc GetCollectEntries (d Datatype, t time.Time)
+  rpc AddCollectEntries(AddCollectEntriesRequest) returns (AddCollectEntriesResponse);
   rpc GetCollectEntries (GetCollectEntriesRequest) returns (GetCollectEntriesResponse);
-
-  // rpc GetCollectRequestStatus (reqs []CollectRequest) [](Collector, CollectRequestStatus)
-  rpc GetCollectStatus (GetCollectStatusRequest) returns (GetCollectStatusResponse);
-
-  // UpdateCollectRequestStatus (req CollectRequest, c Collector, s CollectRequestStatus)
-
 }
-// 
-// type CollectRequestStatus struct {
-//     // Status is one of Unseen, Noted, Collected, Written
-//     Status string
-//     // Timestamp is the time of which status is updated.
-//     Timestamp time.Time
-// }
-// 
-// 
-// type CollectRequestDBState struct {
-//     Req CloudRequest // Indexed Key
-//     Col Collector // Indexed key
-//     Status CollectRequestStatus
-// }
-// 
-// 
-// Type CollectRequestAPI interface {
-//     // AddCollectRequest will take a CollectRequest and insert it into the configured CollectRequest DB
-//     AddCollectRequest (req CollectRequest) error
-// 
-// 
-//     // GetCollectRequestStatus (reqs []CollectRequest)
-//     GetCollectRequestStatus (reqs []CollectRequest) [](Collector, CollectRequestStatus)
-// 
-// 
-// 
-//     // USED ONLY BY COLLECTORS
-// 
-// 
-// 
-//     // RegisterCollector registers a collector the the CollectRequest API to tell it that the collector is serving CollectRequests and listening on only data types d, as well as the type of feedback it is providing (for example, some collectors by default may not update “COLLECTED” information)
-//     RegisterCollector (c Collector, d DataType, s StatusInformation)
-// }
-// 

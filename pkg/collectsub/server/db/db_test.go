@@ -180,9 +180,7 @@ func addFn(entries []*pb.CollectEntry, expectErr bool) testCall {
 
 // Helper function fuzzy equal for tests
 func entriesEqual(e1, e2 []*pb.CollectEntry) bool {
-	trans := cmp.Transformer("canonicalize", func(e *pb.CollectEntry) string {
-		return fmt.Sprintf("%v:%v:%v", e.GetType(), e.GetValue(), e.GetStatus())
-	})
+	trans := cmp.Transformer("canonicalize", canonicalize)
 
 	return cmp.Equal(e1, e2, cmpopts.EquateEmpty(), trans, cmpopts.SortSlices(entryCmp))
 }
@@ -192,5 +190,5 @@ func entryCmp(e1, e2 *pb.CollectEntry) bool {
 }
 
 func canonicalize(e *pb.CollectEntry) string {
-	return fmt.Sprintf("%v:%v:%v", e.GetType(), e.GetValue(), e.GetStatus())
+	return fmt.Sprintf("%v:%v", e.GetType(), e.GetValue())
 }

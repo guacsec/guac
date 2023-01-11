@@ -74,7 +74,7 @@ var csubAddCollectEntriesCmd = &cobra.Command{
 		defer csubClient.Close()
 
 		// TODO: Get input from STDIN
-		err := csubClient.AddCollectEntry(ctx, []*collectsub.CollectEntry{})
+		err := csubClient.AddCollectEntries(ctx, []*collectsub.CollectEntry{})
 		if err != nil {
 			logger.Fatalf("call to AddCollectEntry failed: %v", err)
 		}
