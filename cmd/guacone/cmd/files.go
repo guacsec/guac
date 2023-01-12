@@ -75,8 +75,8 @@ var exampleCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-			viper.GetString("keyPath"),
-			viper.GetString("keyID"),
+			viper.GetString("verifier-keyPath"),
+			viper.GetString("verifier-keyID"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -105,8 +105,8 @@ var exampleCmd = &cobra.Command{
 		}
 
 		// Register Verifier
-		sigstore := sigstore_verifier.NewSigstoreVerifier()
-		err = verifier.RegisterVerifier(sigstore, sigstore.Type())
+		sigstoreAndKeyVerifier := sigstore_verifier.NewSigstoreAndKeyVerifier()
+		err = verifier.RegisterVerifier(sigstoreAndKeyVerifier, sigstoreAndKeyVerifier.Type())
 		if err != nil {
 			logger.Errorf("unable to register key provider: %v", err)
 		}

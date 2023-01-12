@@ -33,7 +33,7 @@ type sigstoreVerifier struct {
 }
 
 // NewSigstoreVerifier initializes the sigstore verifier
-func NewSigstoreVerifier() *sigstoreVerifier {
+func NewSigstoreAndKeyVerifier() *sigstoreVerifier {
 	return &sigstoreVerifier{}
 }
 
