@@ -17,10 +17,12 @@ package certify
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/osv"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -126,5 +128,20 @@ func generateDocuments(ctx context.Context, collectedComponent *certifier.Compon
 			logger.Errorf("emit error: %v", err)
 		}
 	}
+	return nil
+}
+
+// Publish is used by NATS JetStream to stream the documents and send them to the processor
+func Publish(ctx context.Context, d *processor.Document) error {
+	logger := logging.FromContext(ctx)
+	docByte, err := json.Marshal(d)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document: %w", err)
+	}
+	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
+	if err != nil {
+		return err
+	}
+	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
 }

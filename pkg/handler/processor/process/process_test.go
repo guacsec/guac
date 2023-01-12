@@ -17,15 +17,23 @@ package process
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
+	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/simpledoc"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 func Test_SimpleDocProcessTest(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 	testCases := []struct {
 		name      string
 		doc       processor.Document
@@ -499,16 +507,19 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 	// Register
 	err := RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
 	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+		if !strings.Contains(err.Error(), "the document processor is being overwritten") {
+			t.Errorf("unexpected error: %v", err)
+		}
 	}
-
 	err = guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
 	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+		if !strings.Contains(err.Error(), "the document type guesser is being overwritten") {
+			t.Errorf("unexpected error: %v", err)
+		}
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			docTree, err := Process(context.TODO(), &tt.doc)
+			docTree, err := Process(ctx, &tt.doc)
 			if err != nil {
 				if tt.expectErr {
 					return
@@ -536,4 +547,126 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 			*/
 		})
 	}
+}
+
+func Test_ProcessSubscribe(t *testing.T) {
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer natsTest.Shutdown()
+
+	testCases := []struct {
+		name       string
+		doc        processor.Document
+		wantErr    bool
+		errMessage string
+	}{{
+		name: "simple test",
+		doc: processor.Document{
+			Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		wantErr:    true,
+		errMessage: "context deadline exceeded",
+	}, {
+		name: "unpack test",
+		doc: processor.Document{
+			Blob: []byte(`{
+						 "issuer": "google.com",
+						 "info": "this is a cool document",
+						 "nested": [{
+							 "issuer": "google.com",
+							 "info": "this is a cooler nested doc 1"
+						 },{
+							 "issuer": "google.com",
+							 "info": "this is a cooler nested doc 2"
+						 }]
+						}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		wantErr:    true,
+		errMessage: "context deadline exceeded",
+	}, {
+		name: "bad format",
+		doc: processor.Document{
+			Blob: []byte(`{ NOT JSON YO
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		wantErr:    true,
+		errMessage: "failed process document: invalid JSON document",
+	}}
+
+	// Register
+	err = RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)
+	if err != nil {
+		if !strings.Contains(err.Error(), "the document processor is being overwritten") {
+			t.Errorf("unexpected error: %v", err)
+		}
+	}
+	err = guesser.RegisterDocumentTypeGuesser(&simpledoc.SimpleDocProc{}, "simple-doc-guesser")
+	if err != nil {
+		if !strings.Contains(err.Error(), "the document type guesser is being overwritten") {
+			t.Errorf("unexpected error: %v", err)
+		}
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			jetStream := emitter.NewJetStream(url, "", "")
+			ctx, err = jetStream.JetStreamInit(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error initializing jetstream: %v", err)
+			}
+			err = jetStream.RecreateStream(ctx)
+			if err != nil {
+				t.Fatalf("unexpected error recreating jetstream: %v", err)
+			}
+			defer jetStream.Close()
+
+			err := testPublish(ctx, &tt.doc)
+			if err != nil {
+				t.Fatalf("unexpected error on emit: %v", err)
+			}
+			var cancel context.CancelFunc
+
+			ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
+			defer cancel()
+
+			err = Subscribe(ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
+			}
+			if err != nil {
+				if !strings.Contains(err.Error(), tt.errMessage) {
+					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
+				}
+			}
+		})
+	}
+}
+
+func testPublish(ctx context.Context, d *processor.Document) error {
+	docByte, err := json.Marshal(d)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document: %w", err)
+	}
+	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
+	if err != nil {
+		return fmt.Errorf("failed to publish document on stream: %w", err)
+	}
+	return nil
 }

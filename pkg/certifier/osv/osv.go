@@ -36,7 +36,7 @@ const (
 	URI         string = "osv.dev"
 	VERSION     string = "0.0.14"
 	INVOC_URI   string = "guac"
-	PRODUCER_ID string = "guecsec/guac"
+	PRODUCER_ID string = "guacsec/guac"
 )
 
 type osvCertifier struct {

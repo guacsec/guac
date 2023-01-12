@@ -19,46 +19,26 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/collector/file"
+	"github.com/guacsec/guac/pkg/handler/collector/oci"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/process"
-	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
-}{}
-
-type options struct {
-	dbAddr string
-	user   string
-	pass   string
-	realm  string
-	// path to folder with documents to collect
-	path string
-	// map of image repo and tags
-	repoTags map[string][]string
-}
-
-var exampleCmd = &cobra.Command{
-	Use:   "files [flags] file_path",
-	Short: "take a folder of files and create a GUAC graph",
+var ociCmd = &cobra.Command{
+	Use:   "image [flags] image_path1 image_path2...",
+	Short: "takes images to download sbom and attestation stored in OCI to add to GUAC graph",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateFlags(
+		opts, err := validateOCIFlags(
 			viper.GetString("gdbuser"),
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
@@ -71,10 +51,10 @@ var exampleCmd = &cobra.Command{
 		}
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
-		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
+		ociCollector := oci.NewOCICollector(ctx, opts.repoTags, false, 10*time.Minute)
+		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
-			logger.Errorf("unable to register file collector: %v", err)
+			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
 		// Get pipeline of components
@@ -145,91 +125,29 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
+func validateOCIFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.repoTags = map[string][]string{}
 
-	if len(args) != 1 {
-		return opts, fmt.Errorf("expected positional argument for file_path")
+	if len(args) < 1 {
+		return opts, fmt.Errorf("expected positional argument for image_path")
 	}
-
-	opts.path = args[0]
+	for _, arg := range args {
+		stringSplit := strings.Split(arg, ":")
+		if len(stringSplit) == 2 {
+			opts.repoTags[stringSplit[0]] = append(opts.repoTags[stringSplit[0]], stringSplit[1])
+		} else {
+			return opts, fmt.Errorf("image_path parsing error. require format repo:tag")
+		}
+	}
 
 	return opts, nil
 }
 
-func getProcessor(ctx context.Context) (func(*processor.Document) (processor.DocumentTree, error), error) {
-	return func(d *processor.Document) (processor.DocumentTree, error) {
-		return process.Process(ctx, d)
-	}, nil
-}
-func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
-	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
-		inputs, err := parser.ParseDocumentTree(ctx, doc)
-		if err != nil {
-			return nil, err
-		}
-		return inputs, nil
-	}, nil
-}
-
-func getAssembler(opts options) (func([]assembler.Graph) error, error) {
-	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
-		opts.user,
-		opts.pass,
-		opts.realm,
-	)
-
-	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-	if err != nil {
-		return nil, err
-	}
-
-	err = createIndices(client)
-	if err != nil {
-		return nil, err
-	}
-
-	return func(gs []assembler.Graph) error {
-		combined := assembler.Graph{
-			Nodes: []assembler.GuacNode{},
-			Edges: []assembler.GuacEdge{},
-		}
-		for _, g := range gs {
-			combined.AppendGraph(g)
-		}
-		if err := assembler.StoreGraph(combined, client); err != nil {
-			return err
-		}
-
-		return nil
-	}, nil
-}
-
-func createIndices(client graphdb.Client) error {
-	indices := map[string][]string{
-		"Artifact":      {"digest", "name"},
-		"Package":       {"purl", "name"},
-		"Metadata":      {"id"},
-		"Attestation":   {"digest"},
-		"Vulnerability": {"id"},
-	}
-
-	for label, attributes := range indices {
-		for _, attribute := range attributes {
-			err := assembler.CreateIndexOn(client, label, attribute)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 func init() {
-	rootCmd.AddCommand(exampleCmd)
+	rootCmd.AddCommand(ociCmd)
 }

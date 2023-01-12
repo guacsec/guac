@@ -84,6 +84,21 @@ var (
 	//go:embed exampledata/certify-vuln.json
 	ITE6VulnExample []byte
 
+	//go:embed exampledata/oci-dsse-att.json
+	OCIDsseAttExample []byte
+
+	//go:embed exampledata/oci-spdx.json
+	OCISPDXExample []byte
+
+	//go:embed exampledata/go-spdx-multi-arch_1.json
+	OCIGoSPDXMulti1 []byte
+
+	//go:embed exampledata/go-spdx-multi-arch_2.json
+	OCIGoSPDXMulti2 []byte
+
+	//go:embed exampledata/go-spdx-multi-arch_3.json
+	OCIGoSPDXMulti3 []byte
+
 	// DSSE/SLSA Testdata
 
 	// Taken from: https://slsa.dev/provenance/v0.1#example
@@ -599,7 +614,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
@@ -630,7 +645,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
@@ -661,7 +676,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
@@ -710,7 +725,7 @@ var (
 		"predicate":{
 		   "invocation":{
 			  "uri":"guac",
-			  "producer_id":"guecsec/guac"
+			  "producer_id":"guacsec/guac"
 		   },
 		   "scanner":{
 			  "uri":"osv.dev",
