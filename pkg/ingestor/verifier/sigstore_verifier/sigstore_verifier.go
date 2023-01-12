@@ -33,7 +33,7 @@ type sigstoreVerifier struct {
 }
 
 // NewSigstoreVerifier initializes the sigstore verifier
-func NewSigstoreVerifier() *sigstoreVerifier {
+func NewSigstoreAndKeyVerifier() *sigstoreVerifier {
 	return &sigstoreVerifier{}
 }
 
@@ -51,6 +51,11 @@ func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]v
 			return nil, err
 		}
 
+		// currently keyID needs to be the hash of the public key
+		// see:
+		// https://github.com/sigstore/sigstore/blob/main/pkg/signature/dsse/dsse.go#L107
+		// and
+		// https://github.com/secure-systems-lab/go-securesystemslib/blob/main/dsse/verify.go#L69
 		foundIdentity := verifier.Identity{
 			ID:  signature.KeyID,
 			Key: *key,
