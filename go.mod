@@ -36,7 +36,7 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/oauth2 v0.3.0 // indirect
+	golang.org/x/oauth2 v0.3.0
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
@@ -140,9 +140,9 @@ require (
 
 require (
 	github.com/CycloneDX/cyclonedx-go v0.7.0
+	github.com/go-git/go-git/v5 v5.5.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/migueleliasweb/go-github-mock v0.0.13
-	github.com/go-git/go-git/v5 v5.5.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.11
 	github.com/nats-io/nats.go v1.22.1
