@@ -88,7 +88,7 @@ var csubAddCollectEntriesCmd = &cobra.Command{
 		var entries []input.CollectEntryInput
 		err = json.Unmarshal(bytes, &entries)
 		if err != nil {
-			logger.Fatalf("unmarshallign input: %v", err)
+			logger.Fatalf("unmarshalling input: %v", err)
 		}
 
 		pbEntries := make([]*collectsub.CollectEntry, len(entries))
