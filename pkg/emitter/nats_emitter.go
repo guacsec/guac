@@ -36,7 +36,7 @@ const (
 	DurableProcessor        string        = "processor"
 	DurableIngestor         string        = "ingestor"
 	BufferChannelSize       int           = 1000
-	BackOffTimer            time.Duration = 5 * time.Second
+	BackOffTimer            time.Duration = 1 * time.Second
 )
 
 type jetStream struct {
@@ -185,7 +185,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 			msgs, err := sub.Fetch(1)
 			if err != nil {
 				if errors.Is(err, nats.ErrTimeout) {
-					logger.Infof("[%s: %s] error consuming, backing off for a second: %v", durable, id, err)
+					logger.Infof("[%s: %s] nothing to consume, backing off for %s: %v", durable, id, backOffTimer.String(), err)
 					time.Sleep(backOffTimer)
 					continue
 				} else {

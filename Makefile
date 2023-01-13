@@ -39,6 +39,7 @@ build: ## Build a version
 	go build -ldflags ${LDFLAGS} -o bin/collector cmd/collector/main.go
 	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
+	go build -ldflags ${LDFLAGS} -o bin/pubsub_test cmd/pubsub_test/main.go
 
 .PHONY: clean
 clean: ## Remove temporary files

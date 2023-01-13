@@ -60,8 +60,3 @@ func (psub *pubSub) GetDataFromNats(ctx context.Context, dataFunc DataFunc) erro
 		}
 	}
 }
-
-// SendDataToNats publishes the data in bytes to the stream based on the subject
-func (psub *pubSub) SendDataToNats(ctx context.Context, subj string, data []byte) error {
-	return Publish(ctx, subj, data)
-}
