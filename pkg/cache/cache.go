@@ -17,73 +17,69 @@ package cache
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"time"
-
-	"github.com/go-redis/redis/v9"
 )
 
-type RedisCache struct {
-	redisOptions Options
-	client       *redis.Client
+type Cache interface {
+	SetValue(ctx context.Context, key string, value interface{}, expiration time.Duration) error
+	// NOTE: error must return fmt.Errorf("key not found: %w", err) for key not found
+	GetValue(ctx context.Context, key string) (interface{}, error)
+	RemoveKey(ctx context.Context, key string) error
 }
 
-type Options struct {
-	Enabled      bool
-	DBAddr       string
-	User         string
-	Pass         string
-	DB           int
-	Certificates []tls.Certificate
-}
+// CacheType describes the type of the cache
+type CacheType string
 
-func NewRedisCache(opts Options) *RedisCache {
-	//  "localhost:6379"
-	if opts.Enabled {
-		var opt *redis.Options
-		if len(opts.Certificates) > 0 {
-			opt = &redis.Options{
-				Addr:     opts.DBAddr,
-				Password: opts.Pass,
-				DB:       opts.DB,
-				TLSConfig: &tls.Config{
-					MinVersion:   tls.VersionTLS12,
-					Certificates: opts.Certificates,
-				},
-			}
-		} else {
-			opt = &redis.Options{
-				Addr:     opts.DBAddr,
-				Password: opts.Pass,
-				DB:       opts.DB,
-			}
-		}
-		rdb := redis.NewClient(opt)
-		return &RedisCache{
-			redisOptions: opts,
-			client:       rdb,
-		}
+const (
+	NotSet     CacheType = "unset"
+	CacheRedis CacheType = "redis"
+)
+
+var (
+	registeredCache = map[CacheType]Cache{}
+)
+
+func RegisterCache(c Cache, d CacheType) error {
+	if _, ok := registeredCache[d]; ok {
+		return fmt.Errorf("cache is being overwritten: %s", d)
 	}
+	registeredCache[d] = c
 	return nil
 }
 
-func (r *RedisCache) SetValue(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
-	err := r.client.Set(ctx, key, value, expiration).Err()
-	if err != nil {
-		return err
+func Set(ctx context.Context, key string, value interface{}, expiration time.Duration, cacheType CacheType) error {
+	if cache, ok := registeredCache[cacheType]; ok {
+		err := cache.SetValue(ctx, key, value, expiration)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return fmt.Errorf("cache not initialized for %s", cacheType)
 	}
-	return nil
 }
 
-func (r *RedisCache) GetValue(ctx context.Context, key string) (string, error) {
-	val, err := r.client.Get(ctx, key).Result()
-	if err != nil {
-		if err == redis.Nil {
-			return "", fmt.Errorf("key not found: %w", err)
-		} else {
-			return "", fmt.Errorf("unknown redis error: %w", err)
+func Get(ctx context.Context, key string, cacheType CacheType) (interface{}, error) {
+	if cache, ok := registeredCache[cacheType]; ok {
+		val, err := cache.GetValue(ctx, key)
+		if err != nil {
+			return "", err
 		}
+		return val, nil
+	} else {
+		return "", fmt.Errorf("cache not initialized for %s", cacheType)
 	}
-	return val, nil
+}
+
+func Delete(ctx context.Context, key string, cacheType CacheType) error {
+	if cache, ok := registeredCache[cacheType]; ok {
+		err := cache.RemoveKey(ctx, key)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return fmt.Errorf("cache not initialized for %s", cacheType)
+	}
 }

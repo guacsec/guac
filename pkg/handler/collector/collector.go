@@ -68,13 +68,11 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 
 // Collect takes all the collectors and starts collecting artifacts
 // after Collect is called, no calls to RegisterDocumentCollector should happen.
-func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler, cacheOpts cache.Options) error {
+func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler, cacheType cache.CacheType) error {
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, len(documentCollectors))
-	// cacheL1Policy utlizes redis cache to collects the hash of the processor.document to check for duplicates
-	redisCache := cache.NewRedisCache(cacheOpts)
 	// logger
 	logger := logging.FromContext(ctx)
 
@@ -90,7 +88,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler, cacheOp
 	for collectorsDone < numCollectors {
 		select {
 		case d := <-docChan:
-			err := callEmitter(ctx, d, emitter, redisCache, logger)
+			err := callEmitter(ctx, d, emitter, cacheType, logger)
 			if err != nil {
 				return err
 			}
@@ -103,7 +101,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler, cacheOp
 	}
 	for len(docChan) > 0 {
 		d := <-docChan
-		err := callEmitter(ctx, d, emitter, redisCache, logger)
+		err := callEmitter(ctx, d, emitter, cacheType, logger)
 		if err != nil {
 			return err
 		}
@@ -126,13 +124,13 @@ func Publish(ctx context.Context, d *processor.Document) error {
 	return nil
 }
 
-func callEmitter(ctx context.Context, d *processor.Document, emitter Emitter, redisCache *cache.RedisCache, logger *zap.SugaredLogger) error {
-	if redisCache != nil {
+func callEmitter(ctx context.Context, d *processor.Document, emitter Emitter, cacheType cache.CacheType, logger *zap.SugaredLogger) error {
+	if cacheType != cache.NotSet {
 		hash, err := getHash(d)
 		if err != nil {
 			return err
 		}
-		found, err := checkCache(ctx, redisCache, hash)
+		found, err := checkCache(ctx, hash, cacheType)
 		if err != nil {
 			return err
 		}
@@ -140,7 +138,7 @@ func callEmitter(ctx context.Context, d *processor.Document, emitter Emitter, re
 			if err := emitter(d); err != nil {
 				logger.Errorf("emit error: %v", err)
 			}
-			err = addToCache(ctx, redisCache, hash)
+			err = addToCache(ctx, hash, cacheType)
 			if err != nil {
 				return err
 			}
@@ -163,8 +161,8 @@ func getHash(d *processor.Document) (string, error) {
 	return hash, nil
 }
 
-func checkCache(ctx context.Context, redisCache *cache.RedisCache, hash string) (bool, error) {
-	_, err := redisCache.GetValue(ctx, hash)
+func checkCache(ctx context.Context, hash string, cacheType cache.CacheType) (bool, error) {
+	_, err := cache.Get(ctx, hash, cacheType)
 	if err != nil {
 		if strings.Contains(err.Error(), "key not found") {
 			return false, nil
@@ -175,8 +173,8 @@ func checkCache(ctx context.Context, redisCache *cache.RedisCache, hash string) 
 	return true, nil
 }
 
-func addToCache(ctx context.Context, redisCache *cache.RedisCache, hash string) error {
-	err := redisCache.SetValue(ctx, hash, "", 0)
+func addToCache(ctx context.Context, hash string, cacheType cache.CacheType) error {
+	err := cache.Set(ctx, hash, "", 0, cacheType)
 	if err != nil {
 		return fmt.Errorf("failed to add to redis cache: %w", err)
 	}

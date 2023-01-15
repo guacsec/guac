@@ -175,8 +175,7 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
-		cacheOpts := cache.Options{Enabled: false}
-		if err := collector.Collect(ctx, emit, errHandler, cacheOpts); err != nil {
+		if err := collector.Collect(ctx, emit, errHandler, cache.NotSet); err != nil {
 			logger.Fatal(err)
 		}
 

@@ -59,8 +59,7 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
-		cacheOpts := cache.Options{Enabled: false}
-		err := collector.Collect(ctx, emit, errHandler, cacheOpts)
+		err := collector.Collect(ctx, emit, errHandler, cache.NotSet)
 		if err != nil {
 			os.Exit(1)
 		}

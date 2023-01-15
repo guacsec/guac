@@ -30,6 +30,7 @@ import (
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/cache"
+	"github.com/guacsec/guac/pkg/cache/redis"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -39,7 +40,6 @@ import (
 
 func TestCollect(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
-	cacheOpts := cache.Options{Enabled: false}
 	errHandler := func(err error) bool {
 		return err == nil
 	}
@@ -80,7 +80,7 @@ func TestCollect(t *testing.T) {
 				return nil
 			}
 
-			err = Collect(ctx, emit, errHandler, cacheOpts)
+			err = Collect(ctx, emit, errHandler, cache.NotSet)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Collect() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -101,7 +101,12 @@ func TestL1PolicyCollect(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer mockRedis.Close()
-	cacheOpts := cache.Options{Enabled: true, DBAddr: addr, DB: 0, Pass: "", Certificates: []tls.Certificate{}}
+	cacheOpts := redis.Options{DBAddr: addr, DB: 0, Pass: "", Certificates: []tls.Certificate{}}
+	redisCache := redis.NewRedisCache(cacheOpts)
+	err = cache.RegisterCache(redisCache, cache.CacheRedis)
+	if err != nil {
+		t.Error(err)
+	}
 	errHandler := func(err error) bool {
 		return err == nil
 	}
@@ -146,7 +151,7 @@ func TestL1PolicyCollect(t *testing.T) {
 			}
 
 			if tt.wantDuplicate {
-				redisCache := cache.NewRedisCache(cacheOpts)
+				redisCache := redis.NewRedisCache(cacheOpts)
 				err := redisCache.SetValue(ctx, tt.duplicateHash, "", 0)
 				if err != nil {
 					t.Error("failed to add to redis cache: %w", err)
@@ -157,7 +162,7 @@ func TestL1PolicyCollect(t *testing.T) {
 				collectedDoc = append(collectedDoc, d)
 				return nil
 			}
-			err = Collect(ctx, emit, errHandler, cacheOpts)
+			err = Collect(ctx, emit, errHandler, cache.CacheRedis)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Collect() error = %v, wantErr %v", err, tt.wantErr)
 			}

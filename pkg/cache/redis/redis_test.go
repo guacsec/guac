@@ -13,11 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cache
+package redis
 
 import (
 	"context"
 	"crypto/tls"
+	"reflect"
 	"testing"
 	"time"
 
@@ -33,7 +34,7 @@ func TestNewRedisCache(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer mockRedis.Close()
-	opts := Options{Enabled: true, DBAddr: addr, DB: 0, Pass: "", Certificates: []tls.Certificate{}}
+	opts := Options{DBAddr: addr, DB: 0, Pass: "", Certificates: []tls.Certificate{}}
 	got := NewRedisCache(opts)
 	assert.Equal(t, got.redisOptions.DBAddr, addr)
 }
@@ -59,7 +60,7 @@ func Test_redisCache_SetValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &RedisCache{
+			r := &redisCache{
 				redisOptions: tt.fields.redisOptions,
 				client:       tt.fields.client,
 			}
@@ -83,14 +84,14 @@ func Test_redisCache_GetValue(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    string
+		want    []byte
 		wantErr bool
 	}{
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &RedisCache{
+			r := &redisCache{
 				redisOptions: tt.fields.redisOptions,
 				client:       tt.fields.client,
 			}
@@ -99,7 +100,7 @@ func Test_redisCache_GetValue(t *testing.T) {
 				t.Errorf("redisCache.GetValue() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("redisCache.GetValue() = %v, want %v", got, tt.want)
 			}
 		})
