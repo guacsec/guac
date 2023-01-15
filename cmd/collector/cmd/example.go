@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/guacsec/guac/cmd/collector/cmd/mockcollector"
+	"github.com/guacsec/guac/pkg/cache"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -58,7 +59,8 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
-		err := collector.Collect(ctx, emit, errHandler)
+		cacheOpts := cache.Options{Enabled: false}
+		err := collector.Collect(ctx, emit, errHandler, cacheOpts)
 		if err != nil {
 			os.Exit(1)
 		}

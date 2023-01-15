@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/cache"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/oci"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -113,7 +114,8 @@ var ociCmd = &cobra.Command{
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
-		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+		cacheOpts := cache.Options{Enabled: false}
+		if err := collector.Collect(ctx, emit, errHandler, cacheOpts); err != nil {
 			logger.Fatal(err)
 		}
 

@@ -17,12 +17,17 @@ package collector
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/guacsec/guac/pkg/cache"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"go.uber.org/zap"
 )
 
 const (
@@ -63,11 +68,13 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 
 // Collect takes all the collectors and starts collecting artifacts
 // after Collect is called, no calls to RegisterDocumentCollector should happen.
-func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
+func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler, cacheOpts cache.Options) error {
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, len(documentCollectors))
+	// cacheL1Policy utlizes redis cache to collects the hash of the processor.document to check for duplicates
+	redisCache := cache.NewRedisCache(cacheOpts)
 	// logger
 	logger := logging.FromContext(ctx)
 
@@ -83,8 +90,9 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	for collectorsDone < numCollectors {
 		select {
 		case d := <-docChan:
-			if err := emitter(d); err != nil {
-				logger.Errorf("emit error: %v", err)
+			err := callEmitter(ctx, d, emitter, redisCache, logger)
+			if err != nil {
+				return err
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -95,8 +103,9 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	}
 	for len(docChan) > 0 {
 		d := <-docChan
-		if err := emitter(d); err != nil {
-			logger.Errorf("emit error: %v", err)
+		err := callEmitter(ctx, d, emitter, redisCache, logger)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -114,5 +123,62 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return err
 	}
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
+	return nil
+}
+
+func callEmitter(ctx context.Context, d *processor.Document, emitter Emitter, redisCache *cache.RedisCache, logger *zap.SugaredLogger) error {
+	if redisCache != nil {
+		hash, err := getHash(d)
+		if err != nil {
+			return err
+		}
+		found, err := checkCache(ctx, redisCache, hash)
+		if err != nil {
+			return err
+		}
+		if !found {
+			if err := emitter(d); err != nil {
+				logger.Errorf("emit error: %v", err)
+			}
+			err = addToCache(ctx, redisCache, hash)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		if err := emitter(d); err != nil {
+			logger.Errorf("emit error: %v", err)
+		}
+	}
+	return nil
+}
+
+func getHash(d *processor.Document) (string, error) {
+	docByte, err := json.Marshal(d)
+	if err != nil {
+		return "", fmt.Errorf("failed marshal of document: %w", err)
+	}
+	sha256sum := sha256.Sum256(docByte)
+	hash := base64.RawStdEncoding.EncodeToString(sha256sum[:])
+	return hash, nil
+}
+
+func checkCache(ctx context.Context, redisCache *cache.RedisCache, hash string) (bool, error) {
+	_, err := redisCache.GetValue(ctx, hash)
+	if err != nil {
+		if strings.Contains(err.Error(), "key not found") {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+	return true, nil
+}
+
+func addToCache(ctx context.Context, redisCache *cache.RedisCache, hash string) error {
+	err := redisCache.SetValue(ctx, hash, "", 0)
+	if err != nil {
+		return fmt.Errorf("failed to add to redis cache: %w", err)
+	}
 	return nil
 }

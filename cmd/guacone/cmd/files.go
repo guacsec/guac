@@ -25,6 +25,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/cache"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -174,7 +175,8 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
-		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+		cacheOpts := cache.Options{Enabled: false}
+		if err := collector.Collect(ctx, emit, errHandler, cacheOpts); err != nil {
 			logger.Fatal(err)
 		}
 
