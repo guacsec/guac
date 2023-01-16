@@ -77,7 +77,7 @@ var (
 	}
 )
 
-func TestNatsEmitter_PublishOnEmit(t *testing.T) {
+func TestNatsEmitter_PublishOnEmit_DeDuplication(t *testing.T) {
 	expectedDocTree := dochelper.DocNode(&ite6SLSADoc)
 
 	natsTest := nats_test.NewNatsTestServer()
@@ -98,26 +98,48 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
 	defer jetStream.Close()
+
+	// publish document once
+	err = testPublish(ctx, &ite6SLSADoc)
+	if err != nil {
+		t.Fatalf("unexpected error on emit: %v", err)
+	}
+
+	// publish same document again to check that data deduplication works
+	err = testPublish(ctx, &ite6SLSADoc)
+	if err != nil {
+		t.Fatalf("unexpected error on emit: %v", err)
+	}
+
+	// publish third time the same document to check that data deduplication works
 	err = testPublish(ctx, &ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
 
 	var cancel context.CancelFunc
-
-	ctx, cancel = context.WithTimeout(ctx, time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
+	listDocument := []processor.DocumentTree{}
+
 	transportFunc := func(d processor.DocumentTree) error {
-		if !dochelper.DocTreeEqual(d, expectedDocTree) {
-			t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
-		}
+		listDocument = append(listDocument, d)
 		return nil
 	}
 
 	err = testSubscribe(ctx, transportFunc)
 	if err != nil {
-		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
+		if errors.Is(err, context.DeadlineExceeded) {
+			if len(listDocument) != 1 {
+				t.Error("expected only 1 document fetched")
+			}
+			for _, d := range listDocument {
+				if !dochelper.DocTreeEqual(d, expectedDocTree) {
+					t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
+				}
+			}
+		} else {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)
 		}
 	}
@@ -204,7 +226,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", id, err)
+			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %w", id, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
@@ -217,7 +239,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		docTree := processor.DocumentTree(docNode)
 		err = transportFunc(docTree)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %v", id, err)
+			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %w", id, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}

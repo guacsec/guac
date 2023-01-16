@@ -171,6 +171,7 @@ var certifierCmd = &cobra.Command{
 		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
+
 		wg.Wait()
 	},
 }
