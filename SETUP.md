@@ -6,6 +6,7 @@
 - [npm] (some makefile tasks use [npx])
 - [docker]
 - [golang] 1.18+
+- [protoc/protoc-gen-go/protoc-gen-go-grpc]
 
 ## Prepare the working directories
 
@@ -201,3 +202,4 @@ MATCH (n) DETACH DELETE n;
 [npx]: https://docs.npmjs.com/cli/v7/commands/npx
 [cleanup]: #Clean-up
 [apoc]: https://neo4j.com/labs/apoc/
+[protoc/protoc-gen-go/protoc-gen-go-grpc]: https://grpc.io/docs/languages/go/quickstart/

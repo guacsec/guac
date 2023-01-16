@@ -40,6 +40,12 @@ build: ## Build a version
 	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
 
+.PHONY: proto
+proto: pkg/collectsub/collectsub/collectsub.proto
+	protoc --go_out=. --go_opt=paths=source_relative \
+		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		$^
+
 .PHONY: clean
 clean: ## Remove temporary files
 	go clean

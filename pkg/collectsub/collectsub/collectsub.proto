@@ -1,0 +1,62 @@
+//
+// Copyright 2023 The GUAC Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+option go_package = "github.com/guacsec/guac/pkg/collectsub";
+
+package guacsec.guac.collect_subscriber.schema;
+
+enum CollectDataType {
+    DATATYPE_GIT = 0;
+    DATATYPE_OCI = 1;
+    DATATYPE_UNKNOWN = 999;
+}
+
+// Generic types
+message CollectEntry {
+    CollectDataType type = 1;
+    string value = 2;
+}
+
+// rpc AddCollectEntry 
+message AddCollectEntriesRequest {
+    repeated CollectEntry entries = 1;
+}
+
+message AddCollectEntriesResponse {
+    bool success = 1;
+}
+
+
+// rpc GetCollectEntries
+message CollectEntryFilter {
+    CollectDataType type = 1;
+    string glob = 2;
+}
+
+message GetCollectEntriesRequest {
+    repeated CollectEntryFilter filters = 1;
+    // since_time in unix epoch
+    int64 since_time = 2;
+}
+
+message GetCollectEntriesResponse {
+    repeated CollectEntry entries = 1;
+}
+
+service ColectSubscriberService {
+  rpc AddCollectEntries(AddCollectEntriesRequest) returns (AddCollectEntriesResponse);
+  rpc GetCollectEntries (GetCollectEntriesRequest) returns (GetCollectEntriesResponse);
+}

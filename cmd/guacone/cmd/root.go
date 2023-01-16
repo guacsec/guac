@@ -27,6 +27,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+var flags = struct {
+	dbAddr  string
+	gdbuser string
+	gdbpass string
+	realm   string
+
+	keyPath string
+	keyID   string
+
+	// collect-sub flags
+	collectSubAddr       string
+	collectSubListenPort int
+}{}
+
 var cfgFile string
 
 func init() {
@@ -38,7 +52,12 @@ func init() {
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.keyPath, "verifier-keyPath", "", "path to pem file to verify dsse")
 	persistentFlags.StringVar(&flags.keyID, "verifier-keyID", "", "ID of the key to be stored")
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "verifier-keyPath", "verifier-keyID"}
+	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
+	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
+
+	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm",
+		"verifier-keyPath", "verifier-keyID",
+		"csub-addr", "csub-listen-port"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
