@@ -561,6 +561,7 @@ func Test_ProcessSubscribe(t *testing.T) {
 		name       string
 		doc        processor.Document
 		wantErr    bool
+		expected   processor.DocumentTree
 		errMessage string
 	}{{
 		name: "simple test",
@@ -573,7 +574,16 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		wantErr:    true,
+		wantErr: true,
+		expected: dochelper.DocNode(&processor.Document{
+			Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+			Type:              simpledoc.SimpleDocType,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		}),
 		errMessage: "context deadline exceeded",
 	}, {
 		name: "unpack test",
@@ -593,7 +603,42 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		wantErr:    true,
+		wantErr: true,
+		expected: dochelper.DocNode(
+			&processor.Document{ //root
+				Blob: []byte(`{
+                           "issuer": "google.com",
+                           "info": "this is a cool document",
+                           "nested": [{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 1"
+                           },{
+                               "issuer": "google.com",
+                               "info": "this is a cooler nested doc 2"
+                           }]
+                          }`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			dochelper.DocNode(&processor.Document{ // child 1
+				Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cooler nested doc 1"
+					}`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			}),
+			dochelper.DocNode(&processor.Document{ //child 2
+				Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cooler nested doc 2"
+					}`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			})),
 		errMessage: "context deadline exceeded",
 	}, {
 		name: "bad format",
@@ -646,7 +691,14 @@ func Test_ProcessSubscribe(t *testing.T) {
 			ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
 			defer cancel()
 
-			err = Subscribe(ctx)
+			transportFunc := func(d processor.DocumentTree) error {
+				if !dochelper.DocTreeEqual(d, tt.expected) {
+					t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(tt.expected))
+				}
+				return nil
+			}
+
+			err = Subscribe(ctx, transportFunc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
 			}

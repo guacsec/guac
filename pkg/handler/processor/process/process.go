@@ -56,7 +56,7 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 
 // Subscribe is used by NATS JetStream to stream the documents received from the collector
 // and process them them via Process
-func Subscribe(ctx context.Context) error {
+func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
 	logger := logging.FromContext(ctx)
 
 	id := uuid.NewV4().String()
@@ -79,14 +79,14 @@ func Subscribe(ctx context.Context) error {
 			logger.Error(fmtErr)
 			return fmtErr
 		}
-		docTreeBytes, err := json.Marshal(docTree)
+
+		err = transportFunc(docTree)
 		if err != nil {
-			return fmt.Errorf("failed marshal of document: %w", err)
+			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %v", id, err)
+			logger.Error(fmtErr)
+			return fmtErr
 		}
-		err = psub.SendDataToNats(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
-		if err != nil {
-			return err
-		}
+
 		logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
 		return nil
 	}
