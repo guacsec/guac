@@ -77,6 +77,52 @@ var (
 	}
 )
 
+func TestNatsEmitter_PublishOnEmit(t *testing.T) {
+	expectedDocTree := dochelper.DocNode(&ite6SLSADoc)
+
+	natsTest := nats_test.NewNatsTestServer()
+	url, err := natsTest.EnableJetStreamForTest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer natsTest.Shutdown()
+
+	ctx := context.Background()
+	jetStream := NewJetStream(url, "", "")
+	ctx, err = jetStream.JetStreamInit(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error initializing jetstream: %v", err)
+	}
+	err = jetStream.RecreateStream(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error recreating jetstream: %v", err)
+	}
+	defer jetStream.Close()
+	err = testPublish(ctx, &ite6SLSADoc)
+	if err != nil {
+		t.Fatalf("unexpected error on emit: %v", err)
+	}
+
+	var cancel context.CancelFunc
+
+	ctx, cancel = context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	transportFunc := func(d processor.DocumentTree) error {
+		if !dochelper.DocTreeEqual(d, expectedDocTree) {
+			t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
+		}
+		return nil
+	}
+
+	err = testSubscribe(ctx, transportFunc)
+	if err != nil {
+		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
+			t.Errorf("nats emitter Subscribe test errored = %v", err)
+		}
+	}
+}
+
 func TestNatsEmitter_PublishOnEmit_DeDuplication(t *testing.T) {
 	expectedDocTree := dochelper.DocNode(&ite6SLSADoc)
 
