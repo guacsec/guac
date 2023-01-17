@@ -45,9 +45,6 @@ var (
 )
 
 func Test_github_RetrieveArtifacts(t *testing.T) {
-	ctx := context.Background()
-	//logger := logging.FromContext(ctx)
-
 	go func() {
 		path, err := os.Getwd()
 		if err != nil {
@@ -178,6 +175,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		wantErr: false,
 	}}
 	for _, tt := range tests {
+		ctx := context.Background()
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a new githubCollector
 			g := &githubCollector{
