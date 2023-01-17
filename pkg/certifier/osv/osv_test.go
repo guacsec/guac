@@ -17,7 +17,14 @@ package osv
 
 import (
 	"context"
+	"reflect"
 	"testing"
+	"time"
+
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
+	osv_scanner "golang.org/x/vuln/osv"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -123,4 +130,102 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_createAttestation(t *testing.T) {
+	currentTime := time.Now()
+	type args struct {
+		projectURL string
+		digests    []string
+		vulns      []osv_scanner.Entry
+	}
+	tests := []struct {
+		name string
+		args args
+		want *attestation_vuln.VulnerabilityStatement
+	}{
+		{
+			name: "default",
+			args: args{
+				vulns: []osv_scanner.Entry{
+					{
+						ID: "testId",
+					},
+				},
+			},
+			want: &attestation_vuln.VulnerabilityStatement{
+				StatementHeader: intoto.StatementHeader{
+					Type:          intoto.StatementInTotoV01,
+					PredicateType: attestation_vuln.PredicateVuln,
+					Subject:       []intoto.Subject{{Name: ""}},
+				},
+				Predicate: attestation_vuln.VulnerabilityPredicate{
+					Invocation: attestation_vuln.Invocation{
+						Uri:        INVOC_URI,
+						ProducerID: PRODUCER_ID,
+					},
+					Scanner: attestation_vuln.Scanner{
+						Uri:     URI,
+						Version: VERSION,
+						Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
+					},
+					Metadata: attestation_vuln.Metadata{
+						ScannedOn: &currentTime,
+					},
+				},
+			},
+		},
+		{
+			name: "has digests",
+			args: args{
+				digests: []string{"test:Digest"},
+			},
+			want: &attestation_vuln.VulnerabilityStatement{
+				StatementHeader: intoto.StatementHeader{
+					Type:          intoto.StatementInTotoV01,
+					PredicateType: attestation_vuln.PredicateVuln,
+					Subject: []intoto.Subject{
+						{
+							Name: "",
+							Digest: slsa.DigestSet{
+								"test": "Digest",
+							},
+						},
+					},
+				},
+				Predicate: attestation_vuln.VulnerabilityPredicate{
+					Invocation: attestation_vuln.Invocation{
+						Uri:        INVOC_URI,
+						ProducerID: PRODUCER_ID,
+					},
+					Scanner: attestation_vuln.Scanner{
+						Uri:     URI,
+						Version: VERSION,
+					},
+					Metadata: attestation_vuln.Metadata{
+						ScannedOn: &currentTime,
+					},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := createAttestation(test.args.projectURL, test.args.digests, test.args.vulns)
+			if !deepEqualIgnoreTimestamp(got, test.want) {
+				t.Errorf("createAttestation() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) bool {
+	// create a copy of a and b, and set the ScannedOn field to nil because the timestamps will be different
+	aCopy := a
+	bCopy := b
+	aCopy.Predicate.Metadata.ScannedOn = nil
+	bCopy.Predicate.Metadata.ScannedOn = nil
+
+	// use DeepEqual to compare the copies
+	return reflect.DeepEqual(aCopy, bCopy)
 }
