@@ -26,7 +26,8 @@ import (
 )
 
 func Test_gitCol_RetrieveArtifacts(t *testing.T) {
-
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
 	type fields struct {
 		url      string
 		dir      string
@@ -74,8 +75,6 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 		numberOfFilesCollected: 9,
 	}}
 	for _, tt := range tests {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
 		t.Run(tt.name, func(t *testing.T) {
 			// incase the file exists from a failed run, delete it
 			os.RemoveAll(tt.fields.dir)
