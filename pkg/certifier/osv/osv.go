@@ -157,7 +157,7 @@ func generateDocument(purl string, digest []string, vulns []osv_scanner.Entry) (
 	return doc, nil
 }
 
-func createAttestation(projectURL string, digests []string, vulns []osv_scanner.Entry) *attestation_vuln.VulnerabilityStatement {
+func createAttestation(packageURL string, digests []string, vulns []osv_scanner.Entry) *attestation_vuln.VulnerabilityStatement {
 	currentTime := time.Now()
 	var subjects []intoto.Subject
 
@@ -184,7 +184,7 @@ func createAttestation(projectURL string, digests []string, vulns []osv_scanner.
 	for _, digest := range digests {
 		digestSplit := strings.Split(digest, ":")
 		subjects = append(subjects, intoto.Subject{
-			Name: projectURL,
+			Name: packageURL,
 			Digest: slsa.DigestSet{
 				digestSplit[0]: digestSplit[1],
 			},
@@ -192,7 +192,7 @@ func createAttestation(projectURL string, digests []string, vulns []osv_scanner.
 	}
 	if len(digests) == 0 {
 		subjects = append(subjects, intoto.Subject{
-			Name: projectURL,
+			Name: packageURL,
 		})
 	}
 

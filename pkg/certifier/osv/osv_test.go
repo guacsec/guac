@@ -135,7 +135,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 func Test_createAttestation(t *testing.T) {
 	currentTime := time.Now()
 	type args struct {
-		projectURL string
+		packageURL string
 		digests    []string
 		vulns      []osv_scanner.Entry
 	}
@@ -211,7 +211,7 @@ func Test_createAttestation(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := createAttestation(test.args.projectURL, test.args.digests, test.args.vulns)
+			got := createAttestation(test.args.packageURL, test.args.digests, test.args.vulns)
 			if !deepEqualIgnoreTimestamp(got, test.want) {
 				t.Errorf("createAttestation() = %v, want %v", got, test.want)
 			}
