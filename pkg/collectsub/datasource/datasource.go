@@ -22,19 +22,18 @@ package datasource
 // similar way to prevent configuration drift among collectors, and
 // provide a way to centrally manage collector source targets.
 type CollectSource interface {
-	// GetDataSource returns a data source containing targets for the
+	// GetDataSources returns a data source containing targets for the
 	// collector to collect
-	GetDataSource() (*DataSource, error)
+	GetDataSources() (*DataSources, error)
 
-	// DataSourceUpdate will return a channel which will get an element
+	// DataSourcesUpdate will return a channel which will get an element
 	// if the CollectSource has new data
-	DataSourceUpdate() <-chan error
+	DataSourcesUpdate() (<-chan error, error)
 }
 
-type DataSource struct {
-	OciDataSource  []Source
-	GitDataSource  []Source
-	PurlDataSource []Source
+type DataSources struct {
+	OciDataSources []Source
+	GitDataSources []Source
 }
 
 type Source struct {

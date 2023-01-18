@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+package filesource
 
 import (
 	"fmt"
@@ -21,40 +21,45 @@ import (
 	"os"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"gopkg.in/yaml.v3"
 )
 
-type fileDataSource struct {
+type fileDataSources struct {
 	filePath string
 }
 
 type FileFormat struct {
-	OciDataSource  []string `yaml:"oci"`
-	GitDataSource  []string `yaml:"git"`
-	PurlDataSource []string `yaml:"purl"`
+	OciDataSources []string `yaml:"oci"`
+	GitDataSources []string `yaml:"git"`
 }
 
 /*
+
+NewFileDataSources creates a datasource which gets its data sources
+from a configuration file. This configuration file is in YAML and
+follows the sturcture outlined in the FileFormat struct. An example
+is as follows:
 
 sources.yaml
 ----
 oci:
 - oci://abc
 - oci://def
-purl:
-- pkg://deb....
+git:
+- git+https://github.com/...
 
 */
 
-func NewFileDataSource(path string) (CollectSource, error) {
-	return &fileDataSource{
+func NewFileDataSources(path string) (datasource.CollectSource, error) {
+	return &fileDataSources{
 		filePath: path,
 	}, nil
 }
 
-// GetDataSource returns a data source containing targets for the
+// GetDataSources returns a data source containing targets for the
 // collector to collect
-func (d *fileDataSource) GetDataSource() (*DataSource, error) {
+func (d *fileDataSources) GetDataSources() (*datasource.DataSources, error) {
 	f, err := os.Open(d.filePath)
 	if err != nil {
 		return nil, err
@@ -69,14 +74,14 @@ func (d *fileDataSource) GetDataSource() (*DataSource, error) {
 	if err := yaml.Unmarshal(b, &df); err != nil {
 		return nil, err
 	}
-	return toDataSource(&df), nil
+	return toDataSources(&df), nil
 }
 
-// DataSourceUpdate will return a channel which will get an element
+// DataSourcesUpdate will return a channel which will get an element
 // if the CollectSource has new data. Upon update, nil is inserted
 // into the channel and non-nil if the channel no longer is able to
 // serve updates.
-func (d *fileDataSource) DataSourceUpdate() <-chan error {
+func (d *fileDataSources) DataSourcesUpdate() (<-chan error, error) {
 	updateChan := make(chan error)
 	go func() {
 		watcher, err := fsnotify.NewWatcher()
@@ -84,6 +89,7 @@ func (d *fileDataSource) DataSourceUpdate() <-chan error {
 			updateChan <- err
 		}
 		defer watcher.Close()
+		watcher.Add(d.filePath)
 
 		for {
 			select {
@@ -93,6 +99,7 @@ func (d *fileDataSource) DataSourceUpdate() <-chan error {
 					return
 
 				}
+				fmt.Printf("GOT EVENT: %+v\n", ev)
 				if ev.Has(fsnotify.Write) {
 					updateChan <- nil
 				}
@@ -102,27 +109,24 @@ func (d *fileDataSource) DataSourceUpdate() <-chan error {
 					return
 				}
 				updateChan <- err
+				fmt.Printf("got err while watching: %+v\n", err)
 				return
 			}
 		}
 	}()
-	return updateChan
+	return updateChan, nil
 }
 
-func toDataSource(f *FileFormat) *DataSource {
-	var ociVals, gitVals, purlVals []Source
-	for _, s := range f.OciDataSource {
-		ociVals = append(ociVals, Source{Value: s})
+func toDataSources(f *FileFormat) *datasource.DataSources {
+	var ociVals, gitVals []datasource.Source
+	for _, s := range f.OciDataSources {
+		ociVals = append(ociVals, datasource.Source{Value: s})
 	}
-	for _, s := range f.GitDataSource {
-		gitVals = append(gitVals, Source{Value: s})
+	for _, s := range f.GitDataSources {
+		gitVals = append(gitVals, datasource.Source{Value: s})
 	}
-	for _, s := range f.PurlDataSource {
-		purlVals = append(purlVals, Source{Value: s})
-	}
-	return &DataSource{
-		OciDataSource:  ociVals,
-		GitDataSource:  gitVals,
-		PurlDataSource: purlVals,
+	return &datasource.DataSources{
+		OciDataSources: ociVals,
+		GitDataSources: gitVals,
 	}
 }
