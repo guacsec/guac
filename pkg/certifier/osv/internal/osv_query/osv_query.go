@@ -15,8 +15,9 @@
 
 // This package is currently copied from
 // https://github.com/google/osv-scanner/blob/main/internal/osv/osv.go.
-// Currently this is not exposed by the upstream project. Once it is
+// Currently, this is not exposed by the upstream project. Once it is
 // exposed, this will be removed.
+
 package osv_query
 
 import (
@@ -35,8 +36,6 @@ const (
 	QueryEndpoint = "https://api.osv.dev/v1/querybatch"
 	// GetEndpoint is the URL for getting vulenrabilities from OSV.
 	GetEndpoint = "https://api.osv.dev/v1/vulns"
-	// BaseVulnerabilityURL is the base URL for detailed vulnerability views.
-	BaseVulnerabilityURL = "https://osv.dev/vulnerability/"
 	// MaxQueriesPerRequest splits up querybatch into multiple requests if
 	// number of queries exceed this number
 	MaxQueriesPerRequest = 1000
@@ -72,26 +71,9 @@ type Response struct {
 	Vulns []osv.Entry `json:"vulns"`
 }
 
-// MinimalResponse represents an unhydrated response from OSV.
-type MinimalResponse struct {
-	Vulns []osv.Entry `json:"vulns"`
-}
-
 // BatchedResponse represents an unhydrated batched response from OSV.
 type BatchedResponse struct {
-	Results []MinimalResponse `json:"results"`
-}
-
-// HydratedBatchedResponse represents a hydrated batched response from OSV.
-type HydratedBatchedResponse struct {
 	Results []Response `json:"results"`
-}
-
-// MakeCommitRequest makes a commit hash request.
-func MakeCommitRequest(commit string) *Query {
-	return &Query{
-		Commit: commit,
-	}
 }
 
 // MakePURLRequest makes a PURL request.
@@ -159,46 +141,4 @@ func MakeRequest(request BatchedQuery) (*BatchedResponse, error) {
 	}
 
 	return &totalOsvResp, nil
-}
-
-// Get a Vulnerabiltiy for the given ID.
-func Get(id string) (*osv.Entry, error) {
-	resp, err := http.Get(GetEndpoint + "/" + id)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if err := checkResponseError(resp); err != nil {
-		return nil, err
-	}
-
-	var entry osv.Entry
-	decoder := json.NewDecoder(resp.Body)
-	err = decoder.Decode(&entry)
-	if err != nil {
-		return nil, err
-	}
-	return &entry, nil
-}
-
-// Hydrate fills the results of the batched response with the full
-// Vulnerability details.
-func Hydrate(resp *BatchedResponse) (*HydratedBatchedResponse, error) {
-	// TODO(ochang): Parallelize requests, or implement batch GET.
-	hydrated := HydratedBatchedResponse{}
-
-	for _, response := range resp.Results {
-		result := Response{}
-		for _, vuln := range response.Vulns {
-			vuln, err := Get(vuln.ID)
-			if err != nil {
-				return nil, err
-			}
-
-			result.Vulns = append(result.Vulns, *vuln)
-		}
-		hydrated.Results = append(hydrated.Results, result)
-	}
-	return &hydrated, nil
 }
