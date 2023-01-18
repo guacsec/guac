@@ -9,3 +9,5 @@ bin/
 coverage.txt
 go.work
 .idea
+*.DS_Store
+*pkg/.DS_Store
