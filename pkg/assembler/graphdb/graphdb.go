@@ -35,7 +35,10 @@ func CreateAuthTokenWithUsernameAndPassword(username string, password string, re
 
 // Client represents a client to the graph database.
 // TODO(mihaimaruseac): Switch to v5 and `...WithContext` API when v5 is released.
-type Client = neo4j.Driver
+type Client interface {
+	NewSession(config neo4j.SessionConfig) neo4j.Session
+	Close() error
+}
 
 // NewGraphClient creates a new connection to the graph database given by
 // `uri`, performing authentication via `authToken`.

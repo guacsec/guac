@@ -27,7 +27,6 @@ import (
 	root_package "github.com/guacsec/guac/pkg/certifier/components"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -143,7 +142,7 @@ func validateCertifierFlags(user string, pass string, dbAddr string, realm strin
 	return opts, nil
 }
 
-func getPackageQuery(client neo4j.Driver) (func() certifier.QueryComponents, error) {
+func getPackageQuery(client graphdb.Client) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
 		packageQuery := root_package.NewPackageQuery(client)
 		return packageQuery
