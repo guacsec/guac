@@ -34,27 +34,22 @@ type FileFormat struct {
 	GitDataSources []string `yaml:"git"`
 }
 
-/*
-
-NewFileDataSources creates a datasource which gets its data sources
-from a configuration file. This configuration file is in YAML and
-follows the sturcture outlined in the FileFormat struct. An example
-is as follows:
-
-sources.yaml
-----
-oci:
-- oci://abc
-- oci://def
-git:
-- git+https://github.com/...
-
-*/
-
-func NewFileDataSources(path string) (datasource.CollectSource, error) {
+// NewFileDataSources creates a datasource which gets its data sources
+// from a configuration file. This configuration file is in YAML and
+// follows the sturcture outlined in the FileFormat struct. An example
+// is as follows:
+//
+// sources.yaml
+// ----
+// oci:
+// - oci://abc
+// - oci://def
+// git:
+// - git+https://github.com/...
+func NewFileDataSources(path string) datasource.CollectSource {
 	return &fileDataSources{
 		filePath: path,
-	}, nil
+	}
 }
 
 // GetDataSources returns a data source containing targets for the
