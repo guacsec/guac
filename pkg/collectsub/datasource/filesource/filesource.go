@@ -46,10 +46,14 @@ type FileFormat struct {
 // - oci://def
 // git:
 // - git+https://github.com/...
-func NewFileDataSources(path string) datasource.CollectSource {
+func NewFileDataSources(path string) (datasource.CollectSource, error) {
+	if _, err := os.Stat(path); err != nil {
+		return nil, err
+	}
+
 	return &fileDataSources{
 		filePath: path,
-	}
+	}, nil
 }
 
 // GetDataSources returns a data source containing targets for the
