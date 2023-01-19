@@ -53,6 +53,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
+	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/bombsimon/logrusr/v2 v2.0.1 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0 // indirect
 	github.com/caarlos0/env/v6 v6.10.0 // indirect
@@ -79,7 +80,9 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
 	github.com/google/wire v0.5.0 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
@@ -137,6 +140,7 @@ require (
 )
 
 require (
+	github.com/99designs/gqlgen v0.17.22
 	github.com/CycloneDX/cyclonedx-go v0.7.0
 	github.com/go-git/go-git/v5 v5.5.2
 	github.com/gobwas/glob v0.2.3
@@ -150,5 +154,6 @@ require (
 	github.com/sigstore/sigstore v1.5.1
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
 	github.com/spf13/viper v1.15.0
+	github.com/vektah/gqlparser/v2 v2.5.1
 	golang.org/x/vuln v0.0.0-20221122171214-05fb7250142c
 )
