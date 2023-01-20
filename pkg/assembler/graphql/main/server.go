@@ -25,10 +25,10 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
-	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	neo4j "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	testing "github.com/guacsec/guac/pkg/assembler/backends/testing"
+	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 )
 
 const defaultPort = "8080"
@@ -43,9 +43,9 @@ func main() {
 	if true {
 		// TODO: use viper and flags
 		args := neo4j.Neo4jCredentials{
-			User: "neo4j",
-			Pass: "s3cr3t",
-			Realm: "neo4j",
+			User:   "neo4j",
+			Pass:   "s3cr3t",
+			Realm:  "neo4j",
 			DBAddr: "neo4j://localhost:7687",
 		}
 		backend, err := neo4j.GetBackend(&args)
