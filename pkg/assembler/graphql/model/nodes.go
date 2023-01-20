@@ -44,7 +44,7 @@ type Artifact struct {
 	Tags          []string            `json:"tags"`
 	SourceInfo    *string             `json:"sourceInfo"`
 	CollectorInfo *string             `json:"collectorInfo"`
-	BuiltBy       *Builder            `json:"builtBy"`
+	BuiltBy       []*Builder          `json:"builtBy"`
 	DependsOn     []ArtifactOrPackage `json:"dependsOn"`
 }
 
@@ -146,10 +146,10 @@ type Metadata struct {
 	// id is the id of metadata. Coupled with type, it uniquely identifies the metadata.
 	ID string `json:"id"`
 	// payload is additional payload on the attestation, depending on type
-	Payload       MetadataPayload   `json:"payload"`
-	SourceInfo    *string           `json:"sourceInfo"`
-	CollectorInfo *string           `json:"collectorInfo"`
-	AttachedTo    ArtifactOrPackage `json:"attachedTo"`
+	Payload       MetadataPayload     `json:"payload"`
+	SourceInfo    *string             `json:"sourceInfo"`
+	CollectorInfo *string             `json:"collectorInfo"`
+	AttachedTo    []ArtifactOrPackage `json:"attachedTo"`
 }
 
 func (Metadata) IsNodeInfo() {}
