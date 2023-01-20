@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -77,7 +76,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			return err
 		}
 
-		blob, err := ioutil.ReadFile(path)
+		blob, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
