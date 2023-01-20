@@ -97,3 +97,42 @@ func Test_cyclonedxParser(t *testing.T) {
 		})
 	}
 }
+func Test_addEdgesRecursive(t *testing.T) {
+	packageA := component{curPackage: assembler.PackageNode{Name: "A"}}
+	packageB := component{curPackage: assembler.PackageNode{Name: "B"}}
+	packageC := component{curPackage: assembler.PackageNode{Name: "C"}}
+	packageD := component{curPackage: assembler.PackageNode{Name: "D"}}
+
+	packageA.depPackages = []*component{&packageB}
+	packageB.depPackages = []*component{&packageC}
+	packageC.depPackages = []*component{&packageD}
+	packageD.depPackages = []*component{&packageA}
+	/*
+		A -> B -> C -> D -> A
+		This should result in a cycle, and it shouldn't blow up the stack.
+	*/
+	var edges []assembler.GuacEdge
+	visited := make(map[string]bool)
+	addEdges(packageA, &edges, visited)
+
+	packageE := component{curPackage: assembler.PackageNode{Name: "E"}}
+	packageF := component{curPackage: assembler.PackageNode{Name: "F"}}
+	packageG := component{curPackage: assembler.PackageNode{Name: "G"}}
+	/*
+		This test case creates seven packages: A, B, C, D, E, F, and G.
+		It sets up a cycle in the dependencies such that D, E, F, and G depend on A, B and C depend on D, E, F, and G.
+		Calling addEdges(packageA, &edges) should not cause the function to recursively call itself indefinitely,
+		leading to a stack overflow.
+	*/
+	packageA.depPackages = []*component{&packageB, &packageC}
+	packageB.depPackages = []*component{&packageD, &packageE}
+	packageC.depPackages = []*component{&packageF, &packageG}
+	packageD.depPackages = []*component{&packageA}
+	packageE.depPackages = []*component{&packageA}
+	packageF.depPackages = []*component{&packageA}
+	packageG.depPackages = []*component{&packageA}
+
+	var e []assembler.GuacEdge
+	visited = make(map[string]bool)
+	addEdges(packageA, &e, visited)
+}
