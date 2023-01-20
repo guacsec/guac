@@ -4,6 +4,9 @@
 # Checks if a file has the correct copywrite
 #
 
+# Ignore generated files where we cannot use a template
+grep -q "$1" .github/scripts/excluded_from_copywrite && exit 0
+
 header="//
 // Copyright * The GUAC Authors.
 //

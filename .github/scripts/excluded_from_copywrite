@@ -1,0 +1,5 @@
+./pkg/assembler/graphql/model/nodes.go
+./pkg/assembler/graphql/resolvers/schema.resolvers.go
+./pkg/assembler/graphql/generated/root_.generated.go
+./pkg/assembler/graphql/generated/schema.generated.go
+./pkg/assembler/graphql/generated/prelude.generated.go
