@@ -30,4 +30,4 @@ type Backend interface {
 
 // BackendArgs interface allows each backend to specify the arguments needed to
 // initialize (e.g., credentials).
-type BackendArgs interface {}
+type BackendArgs interface{}

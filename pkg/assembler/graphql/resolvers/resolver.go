@@ -23,6 +23,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 )
 
-type Resolver struct{
+type Resolver struct {
 	Backend backends.Backend
 }

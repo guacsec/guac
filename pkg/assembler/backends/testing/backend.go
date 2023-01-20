@@ -23,9 +23,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-type DemoCredentials struct {}
+type DemoCredentials struct{}
 
-type demoClient struct {}
+type demoClient struct{}
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	return &demoClient{}, nil

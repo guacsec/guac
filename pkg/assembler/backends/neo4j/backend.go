@@ -24,9 +24,9 @@ import (
 )
 
 type Neo4jCredentials struct {
-	User string
-	Pass string
-	Realm string
+	User   string
+	Pass   string
+	Realm  string
 	DBAddr string
 }
 
