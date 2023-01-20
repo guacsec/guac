@@ -8,14 +8,14 @@ LDFLAGS="-X $(PKG).version=$(VERSION) -X $(PKG).commit=$(COMMIT) -X $(PKG).date=
 .DEFAULT_GOAL := build
 
 .PHONY: all
-all: test cover fmt lint ci build
+all: test cover fmt lint ci build generate
 
 .PHONY: test
-test: ## Run the unit tests
+test: generate ## Run the unit tests
 	echo 'mode: atomic' > coverage.txt && go test -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
 
 .PHONY: integration-test
-integration-test: ## Run the integration tests
+integration-test: generate ## Run the integration tests
 	go test -tags=integration ./...
 
 .PHONY: cover
@@ -35,7 +35,7 @@ lint: ## Run all the linters
 ci: fmt lint test ## Run all the tests and code checks
 
 .PHONY: build
-build: ## Build a version
+build: generate ## Build a version
 	go build -ldflags ${LDFLAGS} -o bin/collector cmd/collector/main.go
 	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
@@ -62,3 +62,6 @@ format: fmt-md ##  Run all the formatting tasks
 fmt-md: ## Format all the markdown files
 	npx --yes prettier --write --prose-wrap always **/*.md
 
+.PHONY: generate # generate code from autogen tools (gqlgen, genqlclient)
+generate:
+	go generate ./...
