@@ -715,7 +715,7 @@ type Artifact implements NodeInfo {
   collectorInfo: String
 
   # Links to other nodes
-  builtBy: Builder
+  builtBy: [Builder!]!
   dependsOn: [ArtifactOrPackage!]!
 }
 
@@ -820,7 +820,7 @@ type Metadata implements NodeInfo {
   collectorInfo: String
 
   # Links to other nodes
-  attachedTo: ArtifactOrPackage!
+  attachedTo: [ArtifactOrPackage!]!
 }
 
 # Right now we only support ScorecardPayload as metadata payloads.

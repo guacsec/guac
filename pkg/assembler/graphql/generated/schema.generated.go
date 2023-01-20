@@ -281,11 +281,14 @@ func (ec *executionContext) _Artifact_builtBy(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Builder)
+	res := resTmp.([]*model.Builder)
 	fc.Result = res
-	return ec.marshalOBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder(ctx, field.Selections, res)
+	return ec.marshalNBuilder2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Artifact_builtBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1462,9 +1465,9 @@ func (ec *executionContext) _Metadata_attachedTo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.ArtifactOrPackage)
+	res := resTmp.([]model.ArtifactOrPackage)
 	fc.Result = res
-	return ec.marshalNArtifactOrPackage2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactOrPackage(ctx, field.Selections, res)
+	return ec.marshalNArtifactOrPackage2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactOrPackageᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metadata_attachedTo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3268,6 +3271,9 @@ func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet,
 
 			out.Values[i] = ec._Artifact_builtBy(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "dependsOn":
 
 			out.Values[i] = ec._Artifact_dependsOn(ctx, field, obj)
@@ -4091,6 +4097,60 @@ func (ec *executionContext) marshalNAttestation2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._Attestation(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNBuilder2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Builder) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder(ctx context.Context, sel ast.SelectionSet, v *model.Builder) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Builder(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNVEXInvocation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVEXInvocation(ctx context.Context, sel ast.SelectionSet, v *model.VEXInvocation) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4224,13 +4284,6 @@ func (ec *executionContext) marshalOAttestationPayload2githubᚗcomᚋguacsecᚋ
 		return graphql.Null
 	}
 	return ec._AttestationPayload(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder(ctx context.Context, sel ast.SelectionSet, v *model.Builder) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Builder(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOMetadataPayload2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐMetadataPayload(ctx context.Context, sel ast.SelectionSet, v model.MetadataPayload) graphql.Marshaler {
