@@ -34,8 +34,6 @@ import (
 const (
 	// QueryEndpoint is the URL for posting queries to OSV.
 	QueryEndpoint = "https://api.osv.dev/v1/querybatch"
-	// GetEndpoint is the URL for getting vulenrabilities from OSV.
-	GetEndpoint = "https://api.osv.dev/v1/vulns"
 	// MaxQueriesPerRequest splits up querybatch into multiple requests if
 	// number of queries exceed this number
 	MaxQueriesPerRequest = 1000
@@ -124,7 +122,7 @@ func MakeRequest(request BatchedQuery) (*BatchedResponse, error) {
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
+		defer resp.Body.Close() // nolint: errcheck
 
 		if err := checkResponseError(resp); err != nil {
 			return nil, err

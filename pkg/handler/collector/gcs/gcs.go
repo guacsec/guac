@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -191,9 +190,20 @@ func (g *gcs) getObject(ctx context.Context, object string) ([]byte, error) {
 		return nil, err
 	}
 	defer reader.Close()
-	payload, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return nil, err
+
+	var payload []byte
+	buffer := make([]byte, 1024)
+
+	for {
+		n, err := reader.Read(buffer)
+		if err != nil && err != io.EOF {
+			return nil, err
+		}
+		if n == 0 {
+			break
+		}
+		payload = append(payload, buffer[:n]...)
 	}
 	return payload, nil
+
 }
