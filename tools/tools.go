@@ -1,7 +1,7 @@
 //go:build tools
 // +build tools
 
-package guac_tools
+package tools
 
 import (
 	_ "github.com/99designs/gqlgen"
