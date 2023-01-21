@@ -54,15 +54,24 @@ func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode 
 	return nodes
 }
 
-func addEdges(curPkg component, edges *[]assembler.GuacEdge) {
+func addEdges(curPkg component, edges *[]assembler.GuacEdge, visited map[string]bool) {
 	// this could happen if we image purl creation fails for rootPackage
 	// we need better solution to support different image name formats in SBOM
 	if curPkg.curPackage.Name == "" {
 		return
 	}
-	for _, d := range curPkg.depPackages {
-		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: curPkg.curPackage, PackageDependency: d.curPackage})
-		addEdges(*d, edges)
+	// Exit the function if the package has already been visited
+	if visited[curPkg.curPackage.Name] {
+		return
+	}
+	visited[curPkg.curPackage.Name] = true
+
+	for _, dep := range curPkg.depPackages {
+		// Append the dependency edge to the edges slice
+		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: curPkg.curPackage, PackageDependency: dep.curPackage})
+
+		// Recursively call addEdges for each dependent package
+		addEdges(*dep, edges, visited)
 	}
 }
 
@@ -86,7 +95,8 @@ func (c *cyclonedxParser) GetIdentities(ctx context.Context) []assembler.Identit
 
 func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
-	addEdges(c.rootComponent, &edges)
+	visited := make(map[string]bool)
+	addEdges(c.rootComponent, &edges, visited)
 	return edges
 }
 
@@ -95,7 +105,6 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 	if cdxBom.Metadata.Component != nil {
 		rootPackage := assembler.PackageNode{}
 		rootPackage.Name = cdxBom.Metadata.Component.Name
-		// rootPackage.CPEs = nil
 		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
 		if cdxBom.Metadata.Component.PackageURL != "" {
 			rootPackage.Purl = cdxBom.Metadata.Component.PackageURL
