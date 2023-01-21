@@ -15,7 +15,7 @@
 
 //go:build integration
 
-package graphdb
+package neo4j
 
 import (
 	"testing"
@@ -51,7 +51,7 @@ func Test_ConnectAuthToken(t *testing.T) {
 	performBasicTest(client, t)
 }
 
-func performBasicTest(client Client, t *testing.T) {
+func performBasicTest(client Neo4jClient, t *testing.T) {
 	nodes := []string{"Hello world!", "Welcome to GUAC."}
 	for _, msg := range nodes {
 		err := WriteQueryForTesting(

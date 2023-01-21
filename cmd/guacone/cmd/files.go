@@ -19,12 +19,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/assembler/graphdb/neo4j"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -229,13 +230,13 @@ func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler
 }
 
 func getAssembler(opts options) (func([]assembler.Graph) error, error) {
-	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
+	authToken := neo4j.CreateAuthTokenWithUsernameAndPassword(
 		opts.user,
 		opts.pass,
 		opts.realm,
 	)
 
-	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
+	client, err := neo4j.NewGraphClient(opts.dbAddr, authToken)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +254,7 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 		for _, g := range gs {
 			combined.AppendGraph(g)
 		}
-		if err := assembler.StoreGraph(combined, client); err != nil {
+		if err := graphdb.StoreGraph(combined, client); err != nil {
 			return err
 		}
 
@@ -261,7 +262,7 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 	}, nil
 }
 
-func createIndices(client graphdb.Client) error {
+func createIndices(client neo4j.Neo4jClient) error {
 	indices := map[string][]string{
 		"Artifact":      {"digest", "name"},
 		"Package":       {"purl", "name"},
@@ -272,7 +273,7 @@ func createIndices(client graphdb.Client) error {
 
 	for label, attributes := range indices {
 		for _, attribute := range attributes {
-			err := assembler.CreateIndexOn(client, label, attribute)
+			err := graphdb.CreateIndexOn(client, label, attribute)
 			if err != nil {
 				return err
 			}

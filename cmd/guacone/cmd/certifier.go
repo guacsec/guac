@@ -18,10 +18,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/assembler/graphdb/neo4j"
 	"os"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	root_package "github.com/guacsec/guac/pkg/certifier/components"
@@ -51,8 +51,8 @@ var certifierCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
-		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
+		authToken := neo4j.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
+		client, err := neo4j.NewGraphClient(opts.dbAddr, authToken)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -142,7 +142,7 @@ func validateCertifierFlags(user string, pass string, dbAddr string, realm strin
 	return opts, nil
 }
 
-func getPackageQuery(client graphdb.Client) (func() certifier.QueryComponents, error) {
+func getPackageQuery(client neo4j.Neo4jClient) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
 		packageQuery := root_package.NewPackageQuery(client)
 		return packageQuery

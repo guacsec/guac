@@ -17,10 +17,11 @@ package cmd
 
 import (
 	"context"
+	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/assembler/graphdb/neo4j"
 	"os"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
@@ -64,8 +65,8 @@ var exampleCmd = &cobra.Command{
 
 		// Access graphDB
 
-		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
-		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
+		authToken := neo4j.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
+		client, err := neo4j.NewGraphClient(opts.dbAddr, authToken)
 		if err != nil {
 			logger.Errorf("unable to initialize graph client: %v", err)
 			os.Exit(1)
@@ -87,7 +88,7 @@ var exampleCmd = &cobra.Command{
 		}
 		logger.Infof("graph nodes: %v, edges: %v", len(g.Nodes), len(g.Edges))
 
-		if err := assembler.StoreGraph(g, client); err != nil {
+		if err := graphdb.StoreGraph(g, client); err != nil {
 			logger.Errorf("unable to store graph: %v", err)
 			os.Exit(1)
 		}

@@ -13,54 +13,175 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Note: All this code here is temporary and will change often. This module
-// must be a leaf in the dependency tree!
-
 package graphdb
 
 import (
+	"fmt"
+	"github.com/guacsec/guac/pkg/assembler"
+	neo4j2 "github.com/guacsec/guac/pkg/assembler/graphdb/neo4j"
+	"strings"
+
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
-// AuthToken is the authentication token needed for connecting to the graph
-// database. Use the `CreateAuthToken...` functions to create a token.
-type AuthToken = neo4j.AuthToken
+// Note: This module is experimental and might change often!
 
-// CreateAuthTokenWithUsernameAndPassword creates a simple authentication token
-// with username, password and authentication realm. This is the method to call
-// in most scenarios when you need an `AuthToken`.
-func CreateAuthTokenWithUsernameAndPassword(username string, password string, realm string) AuthToken {
-	return neo4j.BasicAuth(username, password, realm)
-}
+// StoreSubgraph stores a Graph to the graph database given by Neo4jClient
+func StoreGraph(g assembler.Graph, client neo4j2.Neo4jClient) error {
+	session := client.NewSession(neo4j.SessionConfig{})
+	defer session.Close()
 
-// Client represents a client to the graph database.
-// TODO(mihaimaruseac): Switch to v5 and `...WithContext` API when v5 is released.
-type Client interface {
-	NewSession(config neo4j.SessionConfig) neo4j.Session
-	Close() error
-}
-
-// NewGraphClient creates a new connection to the graph database given by
-// `uri`, performing authentication via `authToken`.
-func NewGraphClient(uri string, authToken AuthToken) (Client, error) {
-	// TODO(mihaimaruseac): Allow configuration to control internal
-	// attributes of the connection (e.g., max connection pool size, etc.)
-	driver, err := neo4j.NewDriver(uri, authToken)
-	if err != nil {
-		return nil, err
+	node_queries := make([]string, len(g.Nodes))
+	node_dicts := make([]map[string]interface{}, len(g.Nodes))
+	for i, n := range g.Nodes {
+		var sb strings.Builder
+		if err := queryPartForMergeNode(&sb, n, "n"); err != nil {
+			return err
+		}
+		queryPartForNodeAttributes(&sb, true, n, "n")
+		queryPartForNodeAttributes(&sb, false, n, "n")
+		node_queries[i] = sb.String()
+		node_dicts[i] = map[string]interface{}{}
+		for k, v := range n.Properties() {
+			node_dicts[i]["n_"+k] = v
+		}
 	}
 
-	if err = driver.VerifyConnectivity(); err != nil {
-		driver.Close()
-		return nil, err
+	edge_queries := make([]string, len(g.Edges))
+	edge_dicts := make([]map[string]interface{}, len(g.Edges))
+	for i, e := range g.Edges {
+		a, b := e.Nodes()
+		var sb strings.Builder
+		if err := queryPartForMergeNode(&sb, a, "a"); err != nil {
+			return err
+		}
+		if err := queryPartForMergeNode(&sb, b, "b"); err != nil {
+			return err
+		}
+		queryPartForEdgeConnection(&sb, e)
+		edge_queries[i] = sb.String()
+		edge_dicts[i] = map[string]interface{}{}
+		for k, v := range a.Properties() {
+			edge_dicts[i]["a_"+k] = v
+		}
+		for k, v := range b.Properties() {
+			edge_dicts[i]["b_"+k] = v
+		}
+		for k, v := range e.Properties() {
+			edge_dicts[i]["e_"+k] = v
+		}
 	}
-	return driver, nil
+
+	queries := append(node_queries, edge_queries...)
+	params := append(node_dicts, edge_dicts...)
+	_, err := session.WriteTransaction(
+		func(tx neo4j2.Transaction) (interface{}, error) {
+			for i, query := range queries {
+				result, err := tx.Run(query, params[i])
+				if err != nil {
+					return nil, err
+				}
+				_, err = result.Consume()
+				if err != nil {
+					return nil, err
+				}
+			}
+			return nil, nil
+		})
+
+	return err
 }
 
-// Transaction is a transaction in the database
-type Transaction = neo4j.Transaction
+// CreateIndexOn creates database indixes in the graph database given by Neo4jClient
+// to optimize performance.
+func CreateIndexOn(client neo4j2.Neo4jClient, nodeLabel string, nodeAttribute string) error {
+	session := client.NewSession(neo4j.SessionConfig{})
+	defer session.Close()
 
-// TransactionWork represents work done inside a `Transaction`.
-type TransactionWork = neo4j.TransactionWork
+	var sb strings.Builder
+	sb.WriteString("CREATE INDEX IF NOT EXISTS FOR (n:")
+	sb.WriteString(nodeLabel) // not user controlled
+	sb.WriteString(") ON n.")
+	sb.WriteString(nodeAttribute) // not user controlled
 
-// TODO(mihaimaruseac): Define queries needed for GUAC production
+	_, err := session.WriteTransaction(
+		func(tx neo4j2.Transaction) (interface{}, error) {
+			return tx.Run(sb.String(), nil)
+		})
+
+	return err
+}
+
+// Creates the "MERGE (n:${NODE_TYPE} {${ATTR}:${VALUE}, ...})" part of the query
+func queryPartForMergeNode(sb *strings.Builder, n assembler.GuacNode, label string) error {
+	node_data := n.Properties()
+	sb.WriteString("MERGE (")
+	sb.WriteString(label) // not user controlled
+	sb.WriteString(":")
+	sb.WriteString(n.Type()) // not user controlled
+	sb.WriteString(" {")
+	for ix, key := range n.IdentifiablePropertyNames() {
+		if _, ok := node_data[key]; ok {
+			writeKeyValToQuery(sb, key, label, false, ix == 0)
+		} else {
+			return fmt.Errorf("Node %v has no value for property %v", n, key)
+		}
+	}
+	sb.WriteString("})\n")
+
+	return nil
+}
+
+// Creates the "ON CREATE SET ${ATTR}=${VALUE}, ..." part of the query
+// Creates the "ON MATCH SET ${ATTR}=${VALUE}, ..." part of the query
+func queryPartForNodeAttributes(sb *strings.Builder, onCreate bool, n assembler.GuacNode, label string) {
+	node_data := n.Properties()
+	if onCreate {
+		sb.WriteString("ON CREATE SET ")
+	} else {
+		sb.WriteString("ON MATCH SET ")
+	}
+	first := true
+	for key := range node_data {
+		writeKeyValToQuery(sb, key, label, true, first)
+		first = false
+	}
+	sb.WriteString("\n")
+}
+
+// Creates the "(a) -[e:${EDGE_TYPE}] -> (b)" part of the query and sets the edge attributes
+func queryPartForEdgeConnection(sb *strings.Builder, e assembler.GuacEdge) {
+	sb.WriteString("MERGE (a) -[e:")
+	sb.WriteString(e.Type()) // not user controlled
+	sb.WriteString("]-> (b)")
+	if edge_data := e.Properties(); len(edge_data) > 0 {
+		sb.WriteString("\nSET ")
+		first := true
+		for key := range edge_data {
+			writeKeyValToQuery(sb, key, "e", true, first)
+			first = false
+		}
+	}
+	sb.WriteString("\n")
+}
+
+// Creates either the "${ATTR}:${VALUE}" part (set=false) or the "n.${ATTR}=${VALUE}" one (set=true).
+// Uses first to determine if we need to add comma from what comes before
+func writeKeyValToQuery(sb *strings.Builder, key string, label string, set bool, first bool) {
+	if !first {
+		sb.WriteString(", ")
+	}
+	if set {
+		sb.WriteString(label) // not user controlled
+		sb.WriteString(".")
+	}
+	sb.WriteString(key) // not user controlled
+	if set {
+		sb.WriteString("=$")
+	} else {
+		sb.WriteString(":$")
+	}
+	sb.WriteString(label) // not user controlled
+	sb.WriteString("_")
+	sb.WriteString(key) // not user controlled, will be as a prepared statement parameter
+}

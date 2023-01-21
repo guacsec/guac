@@ -18,10 +18,11 @@
 package assembler
 
 import (
+	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/assembler/graphdb/neo4j"
 	"strings"
 	"testing"
 
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -124,7 +125,7 @@ func (e MockEdge) IdentifiablePropertyNames() []string {
 }
 
 func Test_MockNodes(t *testing.T) {
-	client, err := graphdb.EmptyClientForTesting(dbUri)
+	client, err := neo4j.EmptyClientForTesting(dbUri)
 	if err != nil {
 		t.Fatalf("Could not obtain testing database: %v", err)
 	}
@@ -172,7 +173,7 @@ func Test_MockNodes(t *testing.T) {
 	e2 := MockEdge{n2, n3, nil}
 	graph := Graph{[]GuacNode{n1, n2, n3}, []GuacEdge{e1, e2}}
 
-	err = StoreGraph(graph, client)
+	err = graphdb.StoreGraph(graph, client)
 	if err != nil {
 		t.Errorf("Could not store graph: %v", err)
 	}

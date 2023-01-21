@@ -18,19 +18,19 @@ package root_package
 import (
 	"context"
 	"errors"
+	"github.com/guacsec/guac/pkg/assembler/graphdb/neo4j"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
 type packageQuery struct {
-	client graphdb.Client
+	client neo4j.Neo4jClient
 }
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
-func NewPackageQuery(client graphdb.Client) certifier.QueryComponents {
+func NewPackageQuery(client neo4j.Neo4jClient) certifier.QueryComponents {
 	return &packageQuery{
 		client: client,
 	}
@@ -43,7 +43,7 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- *certi
 	// Get all packages that the top level package depends on MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
 	// MATCH (p:Package) WHERE p.purl = "pkg:oci/vul-image-latest?repository_url=ppatel1989" WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
 
-	roots, err := graphdb.ReadQuery(q.client, "MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p", nil)
+	roots, err := neo4j.ReadQuery(q.client, "MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p", nil)
 	if err != nil {
 		return err
 	}
@@ -70,8 +70,8 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- *certi
 	return nil
 }
 
-func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string) ([]*certifier.Component, error) {
-	dependencies, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
+func getCompHelper(ctx context.Context, client neo4j.Neo4jClient, parentPurl string) ([]*certifier.Component, error) {
+	dependencies, err := neo4j.ReadQuery(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
 		map[string]any{"rootPurl": parentPurl})
 	if err != nil {
 		return nil, err

@@ -16,7 +16,7 @@
 // Note: All this code here is temporary and will change often. This module
 // must be a leaf in the dependency tree!
 
-package graphdb
+package neo4j
 
 import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -29,7 +29,7 @@ func CreateAuthTokenForTesting() AuthToken {
 }
 
 // WriteQueryForTesting runs a simple write query against the graph database.
-func WriteQueryForTesting(client Client, query string, args map[string]interface{}) error {
+func WriteQueryForTesting(client Neo4jClient, query string, args map[string]interface{}) error {
 	session := client.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
@@ -49,7 +49,7 @@ func WriteQueryForTesting(client Client, query string, args map[string]interface
 //
 // Returns the result as an interface to be handled by the caller (as records),
 // but this is not optimal to use in production!
-func ReadQueryForTesting(client Client, query string, args map[string]interface{}) ([][]interface{}, error) {
+func ReadQueryForTesting(client Neo4jClient, query string, args map[string]interface{}) ([][]interface{}, error) {
 	session := client.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
@@ -79,7 +79,7 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 	return result.([][]interface{}), nil
 }
 
-func ReadQuery(client Client, query string, args map[string]interface{}) ([]interface{}, error) {
+func ReadQuery(client Neo4jClient, query string, args map[string]interface{}) ([]interface{}, error) {
 	session := client.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
@@ -112,7 +112,7 @@ func ReadQuery(client Client, query string, args map[string]interface{}) ([]inte
 // ClearDBForTesting clears the entire database.
 //
 // It is very slow on large amounts of data!
-func ClearDBForTesting(client Client) error {
+func ClearDBForTesting(client Neo4jClient) error {
 	session := client.NewSession(neo4j.SessionConfig{})
 	defer session.Close()
 
@@ -131,7 +131,7 @@ func ClearDBForTesting(client Client) error {
 // EmptyClientForTesting returns a client to an empty database.
 //
 // Should only be used for testing.
-func EmptyClientForTesting(dbUri string) (Client, error) {
+func EmptyClientForTesting(dbUri string) (Neo4jClient, error) {
 	tk := CreateAuthTokenForTesting()
 	client, err := NewGraphClient(dbUri, tk)
 	if err != nil {
