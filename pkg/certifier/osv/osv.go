@@ -52,7 +52,8 @@ func NewOSVCertificationParser() certifier.Certifier {
 // to generate vulnerability attestations
 func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
 	o.rootComponents = rootComponent
-	_, err := o.certifyHelper(ctx, rootComponent, docChannel)
+	m := make(map[string]bool)
+	_, err := o.certifyHelper(ctx, rootComponent, docChannel, m)
 	if err != nil {
 		return err
 	}
@@ -66,17 +67,27 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *cert
 // All the vulnerabilities for each dependent package node are collected and the parent package node's
 // attestation is generated containing all the vulnerabilities of its dependencies
 // these vulnerabilities are passed up until it reaches the root level node which contains an attestation
-// with all the aggregate vulnerabilities
-func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, docChannel chan<- *processor.Document) ([]osv_scanner.Entry, error) {
+// with all the aggregate vulnerabilities. The visited map is used to prevent infinite recursion.
+func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, docChannel chan<- *processor.Document,
+	visited map[string]bool) ([]osv_scanner.Entry, error) {
+	if visited == nil {
+		return nil, fmt.Errorf("visited map is nil")
+	}
 	packNodes := []assembler.PackageNode{}
 	totalDepVul := []osv_scanner.Entry{}
+	if visited[topLevel.Package.Purl] {
+		return nil, nil
+	}
+	visited[topLevel.Package.Purl] = true
 	for _, depPack := range topLevel.DepPackages {
 		if len(depPack.DepPackages) > 0 {
-			depVulns, err := o.certifyHelper(ctx, depPack, docChannel)
+			depVulns, err := o.certifyHelper(ctx, depPack, docChannel, visited)
 			if err != nil {
 				return nil, err
 			}
-			totalDepVul = append(totalDepVul, depVulns...)
+			if depVulns != nil {
+				totalDepVul = append(totalDepVul, depVulns...)
+			}
 		} else {
 			packNodes = append(packNodes, depPack.Package)
 		}
@@ -97,7 +108,9 @@ func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Co
 	if err != nil {
 		return nil, err
 	}
-	docChannel <- doc
+	if doc != nil {
+		docChannel <- doc
+	}
 	return totalDepVul, nil
 }
 

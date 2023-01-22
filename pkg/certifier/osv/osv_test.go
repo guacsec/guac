@@ -21,6 +21,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler"
+
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
@@ -228,4 +230,42 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 
 	// use DeepEqual to compare the copies
 	return reflect.DeepEqual(aCopy, bCopy)
+}
+
+func TestCertifyHelperStackOverflow(t *testing.T) {
+	var A, B, C *certifier.Component
+	// Create a cyclical dependency between two components
+	A = &certifier.Component{
+		Package: assembler.PackageNode{
+			Name: "example.com/A",
+		},
+	}
+
+	B = &certifier.Component{
+		Package: assembler.PackageNode{
+			Purl: "example.com/B",
+		},
+	}
+	C = &certifier.Component{
+		Package: assembler.PackageNode{
+			Purl: "example.com/C",
+		},
+	}
+	A.DepPackages = []*certifier.Component{B, C}
+	B.DepPackages = []*certifier.Component{C, A}
+	C.DepPackages = []*certifier.Component{A, B}
+	// Create a channel to receive the generated documents
+	docChannel := make(chan *processor.Document, 10)
+	o := NewOSVCertificationParser()
+	// Create a context to cancel the function if it takes too long
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	err := o.CertifyComponent(ctx, A, docChannel)
+	// Call certifyHelper with the cyclical dependency
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if err == context.DeadlineExceeded {
+		t.Errorf("Function did not return an error, but it took too long to execute, which indicates stack overflow")
+	}
 }
