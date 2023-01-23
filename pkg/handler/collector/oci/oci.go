@@ -148,83 +148,110 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 		return err
 	}
 
+	pl, _ := manifest.GetPlatformList(m)
+	digestList := make([]string, 0, len(pl))
+	// If the image is a manifest list, we need to find the manifest for the desired platform.
+	// Otherwise, we can just get the digest of the manifest.
+	if m.IsList() {
+		// Get the manifest from the remote registry
+		m, err := rc.ManifestGet(ctx, image)
+		if err != nil {
+			return err
+		}
+
+		// For each platform specified, get the digest of the platform-specific manifest
+		for _, p := range pl {
+			// Get the platform-specific manifest descriptor
+			desc, err := manifest.GetPlatformDesc(m, p)
+			if err != nil {
+				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
+			}
+			// Add the digest to the list of digests
+			digestList = append(digestList, desc.Digest.String())
+		}
+	} else {
+		// Get the digest of the manifest
+		digest := manifest.GetDigest(m)
+		// Add the digest to the list of digests
+		digestList = append(digestList, fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded()))
+	}
+
 	if m.IsList() {
 		m, err := rc.ManifestGet(ctx, image)
 		if err != nil {
 			return err
 		}
-		pl, _ := manifest.GetPlatformList(m)
+
+		// Get the digest of the image manifest for each platform in the manifest list.
 		for _, p := range pl {
 			desc, err := manifest.GetPlatformDesc(m, p)
 			if err != nil {
 				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
 			}
-			image.Digest = desc.Digest.String()
-			err = o.fetchOCIArtifacts(ctx, repo, rc, image, docChannel)
-			if err != nil {
-				return fmt.Errorf("failed retrieving platform specific digest: %w", err)
-			}
+			digestList = append(digestList, desc.Digest.String())
 		}
+
+	} else {
+		digest := manifest.GetDigest(m)
+		digestList = append(digestList, fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded()))
 	}
 
-	digest := manifest.GetDigest(m)
-	digestFormatted := fmt.Sprintf("%v-%v", digest.Algorithm(), digest.Encoded())
 	suffixList := []string{"att", "sbom"}
-	for _, suffix := range suffixList {
-		digestTag := fmt.Sprintf("%v.%v", digestFormatted, suffix)
-		// check to see if the digest + suffix has already been collected
-		if !contains(o.checkedDigest[repo], digestTag) {
-			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
-			r, err := ref.New(imageTag)
-			if err != nil {
-				return err
-			}
-
-			// if `.att` or `.sbom`` do not exist for specified digest
-			// log error and continue
-			m, err = rc.ManifestGet(ctx, r)
-			if err != nil {
-				logger.Error(err)
-				continue
-			}
-
-			// go through layers in reverse
-			mi, ok := m.(manifest.Imager)
-			if !ok {
-				return fmt.Errorf("reference is not a known image media type")
-			}
-			layers, err := mi.GetLayers()
-			if err != nil {
-				return err
-			}
-			for i := len(layers) - 1; i >= 0; i-- {
-				blob, err := rc.BlobGet(ctx, r, layers[i])
-				if err != nil {
-					return fmt.Errorf("failed pulling layer %d: %w", i, err)
-				}
-				btr1, err := blob.RawBody()
+	for _, digest := range digestList {
+		for _, suffix := range suffixList {
+			digestTag := fmt.Sprintf("%v.%v", digest, suffix)
+			// check to see if the digest + suffix has already been collected
+			if !contains(o.checkedDigest[repo], digestTag) {
+				imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
+				r, err := ref.New(imageTag)
 				if err != nil {
 					return err
 				}
 
-				doc := &processor.Document{
-					Blob:   btr1,
-					Type:   processor.DocumentUnknown,
-					Format: processor.FormatUnknown,
-					SourceInformation: processor.SourceInformation{
-						Collector: string(OCICollector),
-						Source:    imageTag,
-					},
+				// if `.att` or `.sbom`` do not exist for specified digest
+				// log error and continue
+				m, err = rc.ManifestGet(ctx, r)
+				if err != nil {
+					logger.Error(err)
+					continue
 				}
-				docChannel <- doc
+
+				// go through layers in reverse
+				mi, ok := m.(manifest.Imager)
+				if !ok {
+					return fmt.Errorf("reference is not a known image media type")
+				}
+				layers, err := mi.GetLayers()
+				if err != nil {
+					return err
+				}
+				for i := len(layers) - 1; i >= 0; i-- {
+					blob, err := rc.BlobGet(ctx, r, layers[i])
+					if err != nil {
+						return fmt.Errorf("failed pulling layer %d: %w", i, err)
+					}
+					btr1, err := blob.RawBody()
+					if err != nil {
+						return err
+					}
+					doc := &processor.Document{
+						Blob:   btr1,
+						Type:   processor.DocumentUnknown,
+						Format: processor.FormatUnknown,
+						SourceInformation: processor.SourceInformation{
+							Collector: string(OCICollector),
+							Source:    imageTag,
+						},
+					}
+					docChannel <- doc
+				}
+				o.checkedDigest[repo] = append(o.checkedDigest[repo], digestTag)
 			}
-			o.checkedDigest[repo] = append(o.checkedDigest[repo], digestTag)
 		}
 	}
 
 	return nil
 }
-
 func contains(elems []string, v string) bool {
 	for _, s := range elems {
 		if v == s {
