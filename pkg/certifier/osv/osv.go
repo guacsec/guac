@@ -50,10 +50,10 @@ func NewOSVCertificationParser() certifier.Certifier {
 
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
-func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
-	o.rootComponents = rootComponent
+func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+	o.rootComponents = rootComponent.(*certifier.Component)
 	m := make(map[string]bool)
-	_, err := o.certifyHelper(ctx, rootComponent, docChannel, m)
+	_, err := o.certifyHelper(ctx, o.rootComponents, docChannel, m)
 	if err != nil {
 		return err
 	}

@@ -23,15 +23,14 @@ import (
 )
 
 type Certifier interface {
-	// CertifyComponent takes the type Component and recursively scans each dependency
-	// aggregating the results for the top/root level artifact. As attestation documents are generated
-	// they are push to the docChannel to be ingested
-	CertifyComponent(ctx context.Context, rootComponent *Component, docChannel chan<- *processor.Document) error
+	// CertifyComponent takes a guac component and generates processor.documents that are
+	// push to the docChannel to be ingested
+	CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error
 }
 
 type QueryComponents interface {
-	// GetComponents runs as a goroutine to get the components that will be certified by the Certifier interface
-	GetComponents(ctx context.Context, compChan chan<- *Component) error
+	// GetComponents runs as a goroutine to get the guac components that will be certified by the Certifier interface
+	GetComponents(ctx context.Context, compChan chan<- interface{}) error
 }
 
 // Emitter processes a document

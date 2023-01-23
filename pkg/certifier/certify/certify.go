@@ -55,7 +55,7 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
-	compChan := make(chan *certifier.Component, BufferChannelSize)
+	compChan := make(chan interface{}, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, 1)
 	// logger
@@ -91,7 +91,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 
 // generateDocuments runs CertifyVulns as a goroutine to scan and generate a vulnerability certification that
 // are emitted as processor documents to be ingested
-func generateDocuments(ctx context.Context, collectedComponent *certifier.Component, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
+func generateDocuments(ctx context.Context, collectedComponent interface{}, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)

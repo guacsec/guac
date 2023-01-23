@@ -42,7 +42,7 @@ func newMockQuery() certifier.QueryComponents {
 }
 
 // GetComponents returns components for test
-func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- *certifier.Component) error {
+func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	compChan <- testdata.RootComponent
 	return nil
 }

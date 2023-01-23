@@ -38,7 +38,7 @@ func NewPackageQuery(client graphdb.Client) certifier.QueryComponents {
 
 // GetComponents runs as a goroutine to query for root level and dependent packages to scan and passes them
 // to the compChan as they are found
-func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- *certifier.Component) error {
+func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	// Get top level package MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p
 	// Get all packages that the top level package depends on MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
 	// MATCH (p:Package) WHERE p.purl = "pkg:oci/vul-image-latest?repository_url=ppatel1989" WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
