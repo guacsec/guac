@@ -20,12 +20,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -125,6 +127,58 @@ func TestCertify(t *testing.T) {
 						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
 					}
 				}
+			}
+		})
+	}
+}
+
+type mockUnknownQuery struct {
+}
+
+// NewMockQuery initializes the mockQuery to query for tests
+func newMockUnknownQuery() certifier.QueryComponents {
+	return &mockUnknownQuery{}
+}
+
+// GetComponents returns components for test
+func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
+	compChan <- assembler.AttestationNode{}
+	return nil
+}
+
+func TestUnknownTypeCertify(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
+
+	errHandler := func(err error) bool {
+		return err == nil
+	}
+
+	tests := []struct {
+		name       string
+		query      certifier.QueryComponents
+		wantErr    bool
+		errMessage string
+	}{{
+		name:       "unknown type for collected component",
+		query:      newMockUnknownQuery(),
+		wantErr:    true,
+		errMessage: "certifier failed to determine type of collectedComponent",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var collectedDocs []*processor.Document
+
+			emit := func(d *processor.Document) error {
+				collectedDocs = append(collectedDocs, d)
+				return nil
+			}
+
+			err := Certify(ctx, tt.query, emit, errHandler)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !strings.Contains(err.Error(), tt.errMessage) {
+				t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
 			}
 		})
 	}

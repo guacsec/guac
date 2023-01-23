@@ -18,6 +18,7 @@ package certify
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/certifier"
@@ -70,7 +71,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		select {
 		case d := <-compChan:
 			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
-				logger.Errorf("generate certifier documents error: %v", err)
+				return fmt.Errorf("generate certifier documents error: %w", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -82,7 +83,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 	for len(compChan) > 0 {
 		d := <-compChan
 		if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
-			logger.Errorf("generate certifier documents error: %v", err)
+			logger.Errorf("generate certifier documents error: %w", err)
 		}
 	}
 
@@ -100,20 +101,31 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 	// logger
 	logger := logging.FromContext(ctx)
 
-	for _, certifier := range documentCertifier {
+	selectedCertifier := []func() certifier.Certifier{}
+
+	// depending on the type of the collectedComponent, select the certifier to use.
+	// there can be more than one document certifier selected per collectedComponent type
+	switch collectedComponent.(type) {
+	case *certifier.Component:
+		selectedCertifier = append(selectedCertifier, documentCertifier[certifier.CertifierOSV])
+	default:
+		return errors.New("certifier failed to determine type of collectedComponent")
+	}
+
+	for _, certifier := range selectedCertifier {
 		c := certifier()
 		go func() {
 			errChan <- c.CertifyComponent(ctx, collectedComponent, docChan)
 		}()
 	}
 
-	numCertifiers := len(documentCertifier)
+	numCertifiers := len(selectedCertifier)
 	certifiersDone := 0
 	for certifiersDone < numCertifiers {
 		select {
 		case d := <-docChan:
 			if err := emitter(d); err != nil {
-				logger.Errorf("emit error: %v", err)
+				logger.Errorf("emit error: %w", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -125,7 +137,7 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 	for len(docChan) > 0 {
 		d := <-docChan
 		if err := emitter(d); err != nil {
-			logger.Errorf("emit error: %v", err)
+			logger.Errorf("emit error: %w", err)
 		}
 	}
 	return nil
