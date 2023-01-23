@@ -50,6 +50,20 @@ func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- interface
 	return nil
 }
 
+type mockUnknownQuery struct {
+}
+
+// NewMockQuery initializes the mockQuery to query for tests
+func newMockUnknownQuery() certifier.QueryComponents {
+	return &mockUnknownQuery{}
+}
+
+// GetComponents returns components for test
+func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
+	compChan <- assembler.AttestationNode{}
+	return nil
+}
+
 func TestCertify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
@@ -63,10 +77,11 @@ func TestCertify(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		query   certifier.QueryComponents
-		want    []*processor.Document
-		wantErr bool
+		name       string
+		query      certifier.QueryComponents
+		want       []*processor.Document
+		wantErr    bool
+		errMessage string
 	}{{
 		name:  "query and generate attestation",
 		query: newMockQuery(),
@@ -109,6 +124,11 @@ func TestCertify(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name:       "unknown type for collected component",
+		query:      newMockUnknownQuery(),
+		wantErr:    true,
+		errMessage: "rootComponent type is not *certifier.Component",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -133,63 +153,10 @@ func TestCertify(t *testing.T) {
 						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
 					}
 				}
-			}
-		})
-	}
-}
-
-type mockUnknownQuery struct {
-}
-
-// NewMockQuery initializes the mockQuery to query for tests
-func newMockUnknownQuery() certifier.QueryComponents {
-	return &mockUnknownQuery{}
-}
-
-// GetComponents returns components for test
-func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
-	compChan <- assembler.AttestationNode{}
-	return nil
-}
-
-func TestUnknownTypeCertify(t *testing.T) {
-	ctx := logging.WithLogger(context.Background())
-
-	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-	if err != nil && !strings.Contains(err.Error(), "the certifier is being overwritten") {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	errHandler := func(err error) bool {
-		return err == nil
-	}
-
-	tests := []struct {
-		name       string
-		query      certifier.QueryComponents
-		wantErr    bool
-		errMessage string
-	}{{
-		name:       "unknown type for collected component",
-		query:      newMockUnknownQuery(),
-		wantErr:    true,
-		errMessage: "rootComponent type is not *certifier.Component",
-	}}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var collectedDocs []*processor.Document
-
-			emit := func(d *processor.Document) error {
-				collectedDocs = append(collectedDocs, d)
-				return nil
-			}
-
-			err := Certify(ctx, tt.query, emit, errHandler)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if !strings.Contains(err.Error(), tt.errMessage) {
-				t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
+			} else {
+				if !strings.Contains(err.Error(), tt.errMessage) {
+					t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
+				}
 			}
 		})
 	}
