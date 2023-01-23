@@ -23,13 +23,13 @@ import (
 )
 
 type Certifier interface {
-	// CertifyComponent takes a guac component and generates processor.documents that are
+	// CertifyComponent takes a GUAC component and generates processor.documents that are
 	// push to the docChannel to be ingested
 	CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error
 }
 
 type QueryComponents interface {
-	// GetComponents runs as a goroutine to get the guac components that will be certified by the Certifier interface
+	// GetComponents runs as a goroutine to get the GUAC components that will be certified by the Certifier interface
 	GetComponents(ctx context.Context, compChan chan<- interface{}) error
 }
 

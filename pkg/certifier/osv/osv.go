@@ -18,7 +18,6 @@ package osv
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -55,7 +54,7 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 	if component, ok := rootComponent.(*certifier.Component); ok {
 		o.rootComponents = component
 	} else {
-		return errors.New("rootComponent type is not *certifier.Component")
+		return fmt.Errorf("rootComponent type is not *certifier.Component")
 	}
 	m := make(map[string]bool)
 	_, err := o.certifyHelper(ctx, o.rootComponents, docChannel, m)

@@ -57,10 +57,8 @@ var certifierCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		err = certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-		if err != nil {
-			logger.Errorf("unable to register key provider: %w", err)
-			os.Exit(1)
+		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+			logger.Fatalf("unable to register certifier: %w", err)
 		}
 
 		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)

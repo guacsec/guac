@@ -68,7 +68,7 @@ func TestCertify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
 	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-	if err != nil && !strings.Contains(err.Error(), "the certifier is being overwritten") {
+	if err != nil && !errors.Is(err, fmt.Errorf("the certifier is being overwritten: %s", certifier.CertifierOSV)) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
@@ -164,7 +164,7 @@ func TestCertify(t *testing.T) {
 
 func Test_Publish(t *testing.T) {
 	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-	if err != nil && !strings.Contains(err.Error(), "the certifier is being overwritten") {
+	if err != nil && !errors.Is(err, fmt.Errorf("the certifier is being overwritten: %s", certifier.CertifierOSV)) {
 		t.Errorf("unexpected error: %v", err)
 	}
 	expectedDocTree := dochelper.DocNode(&testdata.Ite6SLSADoc)
