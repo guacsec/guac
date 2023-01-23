@@ -143,7 +143,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.11
-	github.com/nats-io/nats.go v1.22.1
+	github.com/nats-io/nats.go v1.23.0
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/regclient/regclient v0.4.5
