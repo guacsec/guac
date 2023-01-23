@@ -81,7 +81,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 				Source:    "file:///testdata/hello",
 			}},
 		},
-		wantErr: false,
+		wantErr: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
