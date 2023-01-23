@@ -18,6 +18,7 @@ package osv
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -51,7 +52,11 @@ func NewOSVCertificationParser() certifier.Certifier {
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
 func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
-	o.rootComponents = rootComponent.(*certifier.Component)
+	if component, ok := rootComponent.(*certifier.Component); ok {
+		o.rootComponents = component
+	} else {
+		return errors.New("rootComponent type is not *certifier.Component")
+	}
 	m := make(map[string]bool)
 	_, err := o.certifyHelper(ctx, o.rootComponents, docChannel, m)
 	if err != nil {

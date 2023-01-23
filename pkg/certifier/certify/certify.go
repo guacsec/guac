@@ -18,11 +18,9 @@ package certify
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -31,10 +29,6 @@ import (
 const (
 	BufferChannelSize int = 1000
 )
-
-func init() {
-	_ = RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-}
 
 var (
 	documentCertifier = map[certifier.CertifierType]func() certifier.Certifier{}
@@ -101,25 +95,14 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 	// logger
 	logger := logging.FromContext(ctx)
 
-	selectedCertifier := []func() certifier.Certifier{}
-
-	// depending on the type of the collectedComponent, select the certifier to use.
-	// there can be more than one document certifier selected per collectedComponent type
-	switch collectedComponent.(type) {
-	case *certifier.Component:
-		selectedCertifier = append(selectedCertifier, documentCertifier[certifier.CertifierOSV])
-	default:
-		return errors.New("certifier failed to determine type of collectedComponent")
-	}
-
-	for _, certifier := range selectedCertifier {
+	for _, certifier := range documentCertifier {
 		c := certifier()
 		go func() {
 			errChan <- c.CertifyComponent(ctx, collectedComponent, docChan)
 		}()
 	}
 
-	numCertifiers := len(selectedCertifier)
+	numCertifiers := len(documentCertifier)
 	certifiersDone := 0
 	for certifiersDone < numCertifiers {
 		select {

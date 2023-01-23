@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -51,6 +52,11 @@ func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- interface
 
 func TestCertify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
+
+	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+	if err != nil && !strings.Contains(err.Error(), "the certifier is being overwritten") {
+		t.Errorf("unexpected error: %v", err)
+	}
 
 	errHandler := func(err error) bool {
 		return err == nil
@@ -149,6 +155,11 @@ func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- in
 func TestUnknownTypeCertify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
+	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+	if err != nil && !strings.Contains(err.Error(), "the certifier is being overwritten") {
+		t.Errorf("unexpected error: %v", err)
+	}
+
 	errHandler := func(err error) bool {
 		return err == nil
 	}
@@ -162,7 +173,7 @@ func TestUnknownTypeCertify(t *testing.T) {
 		name:       "unknown type for collected component",
 		query:      newMockUnknownQuery(),
 		wantErr:    true,
-		errMessage: "certifier failed to determine type of collectedComponent",
+		errMessage: "rootComponent type is not *certifier.Component",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -185,6 +196,10 @@ func TestUnknownTypeCertify(t *testing.T) {
 }
 
 func Test_Publish(t *testing.T) {
+	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+	if err != nil && !strings.Contains(err.Error(), "the certifier is being overwritten") {
+		t.Errorf("unexpected error: %v", err)
+	}
 	expectedDocTree := dochelper.DocNode(&testdata.Ite6SLSADoc)
 
 	natsTest := nats_test.NewNatsTestServer()

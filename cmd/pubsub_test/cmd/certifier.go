@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	root_package "github.com/guacsec/guac/pkg/certifier/components"
+	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -53,6 +54,12 @@ var certifierCmd = &cobra.Command{
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
+			os.Exit(1)
+		}
+
+		err = certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+		if err != nil {
+			logger.Errorf("unable to register key provider: %w", err)
 			os.Exit(1)
 		}
 

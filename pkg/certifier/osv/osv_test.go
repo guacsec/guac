@@ -18,6 +18,7 @@ package osv
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -40,9 +41,10 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		rootComponent *certifier.Component
+		rootComponent interface{}
 		want          []*processor.Document
 		wantErr       bool
+		errMessage    string
 	}{{
 		name:          "query and generate attestation for OSV",
 		rootComponent: testdata.RootComponent,
@@ -85,6 +87,11 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name:          "bad type",
+		rootComponent: assembler.AttestationNode{},
+		wantErr:       true,
+		errMessage:    "rootComponent type is not *certifier.Component",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -99,17 +106,20 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 			}()
 			numCollectors := 1
 			certifiersDone := 0
+			var err error
 			for certifiersDone < numCollectors {
 				select {
 				case d := <-docChan:
 					collectedDocs = append(collectedDocs, d)
-				case err := <-errChan:
+				case err = <-errChan:
 					if (err != nil) != tt.wantErr {
 						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
 						return
 					}
 					if err != nil {
-						t.Errorf("collector ended with error: %v", err)
+						if !strings.Contains(err.Error(), tt.errMessage) {
+							t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
+						}
 						return
 					}
 					certifiersDone += 1
@@ -121,13 +131,15 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				d := <-docChan
 				collectedDocs = append(collectedDocs, d)
 			}
-			for i := range collectedDocs {
-				result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
-				if err != nil {
-					t.Error(err)
-				}
-				if !result {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+			if err == nil {
+				for i := range collectedDocs {
+					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
+					if err != nil {
+						t.Error(err)
+					}
+					if !result {
+						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+					}
 				}
 			}
 		})
