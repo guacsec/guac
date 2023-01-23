@@ -46,7 +46,6 @@ func setupCsubClient(cmd *cobra.Command, args []string) (context.Context, *clien
 	opts, err := validateCsubClientFlags(
 		viper.GetString("csub-addr"),
 	)
-
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
 		_ = cmd.Help()
@@ -68,10 +67,10 @@ func validateCsubClientFlags(addr string) (csubClientOptions, error) {
 }
 
 /*
-	Examples:
+Examples:
 
-	# add two entries
-	echo '[{"type":"DATATYPE_GIT", "value":"git+somerepo"},{"type":"DATATYPE_OCI", "value":"oci://abc"}]' | bin/guacone csub-client  add-collect-entries
+# add two entries
+echo '[{"type":"DATATYPE_GIT", "value":"git+somerepo"},{"type":"DATATYPE_OCI", "value":"oci://abc"}]' | bin/guacone csub-client  add-collect-entries
 */
 var csubAddCollectEntriesCmd = &cobra.Command{
 	Use:   "add-collect-entries",
@@ -115,13 +114,13 @@ var getAllFilters = []*collectsub.CollectEntryFilter{
 }
 
 /*
-	Examples:
+Examples:
 
-	# get all entries (default)
-	guacone csub-client get-collect-entries
+# get all entries (default)
+guacone csub-client get-collect-entries
 
-	# use custom filters
-	echo '[{"type":"DATAYPE_GIT", "value":"*"}]' | guacone csub-client get-collect-entries stdin
+# use custom filters
+echo '[{"type":"DATAYPE_GIT", "value":"*"}]' | guacone csub-client get-collect-entries stdin
 */
 var csubGetCollectEntriesCmd = &cobra.Command{
 	Use:   "get-collect-entries [all | stdin] (defaults to all)",
