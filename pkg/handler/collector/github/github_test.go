@@ -24,7 +24,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-github/github"
 	"github.com/guacsec/guac/internal/testing/dochelper"
@@ -132,13 +131,7 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 		},
 	}
 	type fields struct {
-		poll     bool
-		token    string
-		client   *github.Client
-		owner    string
-		repo     string
-		tag      string
-		interval time.Duration
+		gco GithubCollectorOpts
 	}
 	tests := []struct {
 		name                   string
@@ -150,26 +143,27 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	}{{
 		name: "Get all slsa packages",
 		fields: fields{
-			poll:     false,
-			token:    os.Getenv("API_KEY"),
-			client:   github.NewClient(mockedHTTPClient),
-			owner:    "slsa-framework",
-			repo:     "slsa-github-generator",
-			tag:      "v1.4.0",
-			interval: time.Millisecond,
+			gco: GithubCollectorOpts{
+				poll:   false,
+				token:  "mockedKey",
+				client: github.NewClient(mockedHTTPClient),
+				owner:  "slsa-framework",
+				repo:   "slsa-github-generator",
+				tag:    "v1.4.0",
+			},
 		},
 		wantErr: false,
 		want:    docs,
 	}, {
 		name: "Tag not specified",
 		fields: fields{
-			poll:     false,
-			token:    os.Getenv("API_KEY"),
-			client:   github.NewClient(mockedHTTPClient),
-			owner:    "slsa-framework",
-			repo:     "slsa-github-generator",
-			tag:      "",
-			interval: time.Millisecond,
+			gco: GithubCollectorOpts{
+				poll:   false,
+				token:  "mockedKey",
+				client: github.NewClient(mockedHTTPClient),
+				owner:  "slsa-framework",
+				repo:   "slsa-github-generator",
+			},
 		},
 		want:    docs,
 		wantErr: false,
@@ -177,18 +171,10 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 	for _, tt := range tests {
 		ctx := context.Background()
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a new githubCollector
-			g := &githubCollector{
-				poll:     tt.fields.poll,
-				interval: tt.fields.interval,
-				token:    tt.fields.token,
-				client:   tt.fields.client,
-				owner:    tt.fields.owner,
-				repo:     tt.fields.repo,
-				tag:      tt.fields.tag,
-				tagMap:   map[string]string{},
+			g, err := NewGitHubCollector(ctx, tt.fields.gco)
+			if err != nil {
+				t.Errorf("Failed creating GitHubCollector: %v", err)
 			}
-			var err error
 			docChan := make(chan *processor.Document, 1)
 			errChan := make(chan error, 1)
 			defer close(docChan)
@@ -239,5 +225,4 @@ func Test_github_RetrieveArtifacts(t *testing.T) {
 			}
 		})
 	}
-
 }
