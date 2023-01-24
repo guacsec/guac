@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -68,7 +67,7 @@ func TestCertify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
 	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-	if err != nil && !errors.Is(err, fmt.Errorf("the certifier is being overwritten: %s", certifier.CertifierOSV)) {
+	if err != nil && !errors.Is(err, errCertifierOverwrite) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
@@ -81,7 +80,7 @@ func TestCertify(t *testing.T) {
 		query      certifier.QueryComponents
 		want       []*processor.Document
 		wantErr    bool
-		errMessage string
+		errMessage error
 	}{{
 		name:  "query and generate attestation",
 		query: newMockQuery(),
@@ -128,7 +127,7 @@ func TestCertify(t *testing.T) {
 		name:       "unknown type for collected component",
 		query:      newMockUnknownQuery(),
 		wantErr:    true,
-		errMessage: "rootComponent type is not *certifier.Component",
+		errMessage: osv.ErrOSVComponenetTypeMismatch,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -154,7 +153,7 @@ func TestCertify(t *testing.T) {
 					}
 				}
 			} else {
-				if !strings.Contains(err.Error(), tt.errMessage) {
+				if !errors.Is(err, tt.errMessage) {
 					t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
 				}
 			}
@@ -164,7 +163,7 @@ func TestCertify(t *testing.T) {
 
 func Test_Publish(t *testing.T) {
 	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-	if err != nil && !errors.Is(err, fmt.Errorf("the certifier is being overwritten: %s", certifier.CertifierOSV)) {
+	if err != nil && !errors.Is(err, errCertifierOverwrite) {
 		t.Errorf("unexpected error: %v", err)
 	}
 	expectedDocTree := dochelper.DocNode(&testdata.Ite6SLSADoc)

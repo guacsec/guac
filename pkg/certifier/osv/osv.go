@@ -39,6 +39,8 @@ const (
 	PRODUCER_ID string = "guacsec/guac"
 )
 
+var ErrOSVComponenetTypeMismatch error = fmt.Errorf("rootComponent type is not *certifier.Component")
+
 type osvCertifier struct {
 	rootComponents *certifier.Component
 }
@@ -54,7 +56,7 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 	if component, ok := rootComponent.(*certifier.Component); ok {
 		o.rootComponents = component
 	} else {
-		return fmt.Errorf("rootComponent type is not *certifier.Component")
+		return ErrOSVComponenetTypeMismatch
 	}
 	m := make(map[string]bool)
 	_, err := o.certifyHelper(ctx, o.rootComponents, docChannel, m)

@@ -31,13 +31,18 @@ const (
 )
 
 var (
-	documentCertifier = map[certifier.CertifierType]func() certifier.Certifier{}
+	documentCertifier     = map[certifier.CertifierType]func() certifier.Certifier{}
+	errCertifierOverwrite = fmt.Errorf("the certifier is being overwritten")
 )
+
+func certifierTypeOverwriteError(certifierType certifier.CertifierType) error {
+	return fmt.Errorf("%w: %s", errCertifierOverwrite, certifierType)
+}
 
 // RegisterCertifier registers the active certifier for to generate attestations
 func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.CertifierType) error {
 	if _, ok := documentCertifier[certifierType]; ok {
-		return fmt.Errorf("the certifier is being overwritten: %s", certifierType)
+		return certifierTypeOverwriteError(certifierType)
 	}
 	documentCertifier[certifierType] = c
 
