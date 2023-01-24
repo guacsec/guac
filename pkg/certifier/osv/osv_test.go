@@ -25,13 +25,13 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
 	osv_scanner "golang.org/x/vuln/osv"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -245,27 +245,27 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 }
 
 func TestCertifyHelperStackOverflow(t *testing.T) {
-	var A, B, C *certifier.Component
+	var A, B, C *root_package.PackageComponent
 	// Create a cyclical dependency between two components
-	A = &certifier.Component{
+	A = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
 			Name: "example.com/A",
 		},
 	}
 
-	B = &certifier.Component{
+	B = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
 			Purl: "example.com/B",
 		},
 	}
-	C = &certifier.Component{
+	C = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
 			Purl: "example.com/C",
 		},
 	}
-	A.DepPackages = []*certifier.Component{B, C}
-	B.DepPackages = []*certifier.Component{C, A}
-	C.DepPackages = []*certifier.Component{A, B}
+	A.DepPackages = []*root_package.PackageComponent{B, C}
+	B.DepPackages = []*root_package.PackageComponent{C, A}
+	C.DepPackages = []*root_package.PackageComponent{A, B}
 	// Create a channel to receive the generated documents
 	docChannel := make(chan *processor.Document, 10)
 	o := NewOSVCertificationParser()
