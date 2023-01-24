@@ -111,7 +111,14 @@ func TestCertify(t *testing.T) {
 				return nil
 			}
 
-			err := Certify(ctx, tt.query, emit, errHandler)
+			c, err := NewCertifier()
+
+			if err != nil {
+				t.Errorf("NewCertifier() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			err = c.Certify(ctx, tt.query, emit, errHandler)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -31,20 +31,26 @@ const (
 	BufferChannelSize int = 1000
 )
 
-func init() {
-	_ = RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+type cert struct {
+	documentCertifier map[certifier.CertifierType]func() certifier.Certifier
 }
 
-var (
-	documentCertifier = map[certifier.CertifierType]func() certifier.Certifier{}
-)
+// NewCertifier returns a certifier.
+func NewCertifier() (*cert, error) {
+	c := &cert{map[certifier.CertifierType]func() certifier.Certifier{}}
+
+	if err := c.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
 
 // RegisterCertifier registers the active certifier for to generate attestations
-func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.CertifierType) error {
-	if _, ok := documentCertifier[certifierType]; ok {
+func (c *cert) RegisterCertifier(certifier func() certifier.Certifier, certifierType certifier.CertifierType) error {
+	if _, ok := c.documentCertifier[certifierType]; ok {
 		return fmt.Errorf("the certifier is being overwritten: %s", certifierType)
 	}
-	documentCertifier[certifierType] = c
+	c.documentCertifier[certifierType] = certifier
 
 	return nil
 }
@@ -52,7 +58,7 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 // Certify queries the graph DB to get the packages to scan. Utilizing the registered certifiers,
 // it scans and generate vulnerability attestation for each package. Aggregating the results to the
 // top/root level package
-func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
+func (c *cert) Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
 	compChan := make(chan *certifier.Component, BufferChannelSize)
@@ -69,7 +75,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 	for !componentsCaptured {
 		select {
 		case d := <-compChan:
-			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
+			if err := c.generateDocuments(ctx, d, emitter, handleErr); err != nil {
 				logger.Errorf("generate certifier documents error: %v", err)
 			}
 		case err := <-errChan:
@@ -81,7 +87,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 	}
 	for len(compChan) > 0 {
 		d := <-compChan
-		if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
+		if err := c.generateDocuments(ctx, d, emitter, handleErr); err != nil {
 			logger.Errorf("generate certifier documents error: %v", err)
 		}
 	}
@@ -91,23 +97,23 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 
 // generateDocuments runs CertifyVulns as a goroutine to scan and generate a vulnerability certification that
 // are emitted as processor documents to be ingested
-func generateDocuments(ctx context.Context, collectedComponent *certifier.Component, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
+func (c *cert) generateDocuments(ctx context.Context, collectedComponent *certifier.Component, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
-	errChan := make(chan error, len(documentCertifier))
+	errChan := make(chan error, len(c.documentCertifier))
 	// logger
 	logger := logging.FromContext(ctx)
 
-	for _, certifier := range documentCertifier {
-		c := certifier()
+	for _, certifier := range c.documentCertifier {
+		c2 := certifier()
 		go func() {
-			errChan <- c.CertifyComponent(ctx, collectedComponent, docChan)
+			errChan <- c2.CertifyComponent(ctx, collectedComponent, docChan)
 		}()
 	}
 
-	numCertifiers := len(documentCertifier)
+	numCertifiers := len(c.documentCertifier)
 	certifiersDone := 0
 	for certifiersDone < numCertifiers {
 		select {

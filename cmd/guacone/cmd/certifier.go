@@ -122,7 +122,12 @@ var certifierCmd = &cobra.Command{
 			return false
 		}
 
-		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler); err != nil {
+		cert, err := certify.NewCertifier()
+		if err != nil {
+			logger.Fatalf("error: %v", err)
+		}
+
+		if err := cert.Certify(ctx, packageQueryFunc(), emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
 		if gotErr {
