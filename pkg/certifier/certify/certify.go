@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -31,18 +30,19 @@ const (
 	BufferChannelSize int = 1000
 )
 
-func init() {
-	_ = RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-}
-
 var (
-	documentCertifier = map[certifier.CertifierType]func() certifier.Certifier{}
+	documentCertifier     = map[certifier.CertifierType]func() certifier.Certifier{}
+	errCertifierOverwrite = fmt.Errorf("the certifier is being overwritten")
 )
+
+func certifierTypeOverwriteError(certifierType certifier.CertifierType) error {
+	return fmt.Errorf("%w: %s", errCertifierOverwrite, certifierType)
+}
 
 // RegisterCertifier registers the active certifier for to generate attestations
 func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.CertifierType) error {
 	if _, ok := documentCertifier[certifierType]; ok {
-		return fmt.Errorf("the certifier is being overwritten: %s", certifierType)
+		return certifierTypeOverwriteError(certifierType)
 	}
 	documentCertifier[certifierType] = c
 
@@ -55,7 +55,7 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
-	compChan := make(chan *certifier.Component, BufferChannelSize)
+	compChan := make(chan interface{}, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, 1)
 	// logger
@@ -70,7 +70,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		select {
 		case d := <-compChan:
 			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
-				logger.Errorf("generate certifier documents error: %v", err)
+				return fmt.Errorf("generate certifier documents error: %w", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -82,7 +82,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 	for len(compChan) > 0 {
 		d := <-compChan
 		if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
-			logger.Errorf("generate certifier documents error: %v", err)
+			logger.Errorf("generate certifier documents error: %w", err)
 		}
 	}
 
@@ -91,7 +91,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 
 // generateDocuments runs CertifyVulns as a goroutine to scan and generate a vulnerability certification that
 // are emitted as processor documents to be ingested
-func generateDocuments(ctx context.Context, collectedComponent *certifier.Component, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
+func generateDocuments(ctx context.Context, collectedComponent interface{}, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
@@ -113,7 +113,7 @@ func generateDocuments(ctx context.Context, collectedComponent *certifier.Compon
 		select {
 		case d := <-docChan:
 			if err := emitter(d); err != nil {
-				logger.Errorf("emit error: %v", err)
+				logger.Errorf("emit error: %w", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -125,7 +125,7 @@ func generateDocuments(ctx context.Context, collectedComponent *certifier.Compon
 	for len(docChan) > 0 {
 		d := <-docChan
 		if err := emitter(d); err != nil {
-			logger.Errorf("emit error: %v", err)
+			logger.Errorf("emit error: %w", err)
 		}
 	}
 	return nil

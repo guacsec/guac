@@ -26,7 +26,9 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -42,23 +44,43 @@ func newMockQuery() certifier.QueryComponents {
 }
 
 // GetComponents returns components for test
-func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- *certifier.Component) error {
+func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	compChan <- testdata.RootComponent
+	return nil
+}
+
+type mockUnknownQuery struct {
+}
+
+// NewMockQuery initializes the mockQuery to query for tests
+func newMockUnknownQuery() certifier.QueryComponents {
+	return &mockUnknownQuery{}
+}
+
+// GetComponents returns components for test
+func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
+	compChan <- assembler.AttestationNode{}
 	return nil
 }
 
 func TestCertify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
+	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+	if err != nil && !errors.Is(err, errCertifierOverwrite) {
+		t.Errorf("unexpected error: %v", err)
+	}
+
 	errHandler := func(err error) bool {
 		return err == nil
 	}
 
 	tests := []struct {
-		name    string
-		query   certifier.QueryComponents
-		want    []*processor.Document
-		wantErr bool
+		name       string
+		query      certifier.QueryComponents
+		want       []*processor.Document
+		wantErr    bool
+		errMessage error
 	}{{
 		name:  "query and generate attestation",
 		query: newMockQuery(),
@@ -101,6 +123,11 @@ func TestCertify(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name:       "unknown type for collected component",
+		query:      newMockUnknownQuery(),
+		wantErr:    true,
+		errMessage: osv.ErrOSVComponenetTypeMismatch,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -125,12 +152,20 @@ func TestCertify(t *testing.T) {
 						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
 					}
 				}
+			} else {
+				if !errors.Is(err, tt.errMessage) {
+					t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
+				}
 			}
 		})
 	}
 }
 
 func Test_Publish(t *testing.T) {
+	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
+	if err != nil && !errors.Is(err, errCertifierOverwrite) {
+		t.Errorf("unexpected error: %v", err)
+	}
 	expectedDocTree := dochelper.DocNode(&testdata.Ite6SLSADoc)
 
 	natsTest := nats_test.NewNatsTestServer()

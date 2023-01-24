@@ -18,19 +18,20 @@ package osv
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
 	osv_scanner "golang.org/x/vuln/osv"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -40,9 +41,10 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		rootComponent *certifier.Component
+		rootComponent interface{}
 		want          []*processor.Document
 		wantErr       bool
+		errMessage    string
 	}{{
 		name:          "query and generate attestation for OSV",
 		rootComponent: testdata.RootComponent,
@@ -85,6 +87,11 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name:          "bad type",
+		rootComponent: assembler.AttestationNode{},
+		wantErr:       true,
+		errMessage:    "rootComponent type is not *certifier.Component",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -99,17 +106,20 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 			}()
 			numCollectors := 1
 			certifiersDone := 0
+			var err error
 			for certifiersDone < numCollectors {
 				select {
 				case d := <-docChan:
 					collectedDocs = append(collectedDocs, d)
-				case err := <-errChan:
+				case err = <-errChan:
 					if (err != nil) != tt.wantErr {
 						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
 						return
 					}
 					if err != nil {
-						t.Errorf("collector ended with error: %v", err)
+						if !strings.Contains(err.Error(), tt.errMessage) {
+							t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
+						}
 						return
 					}
 					certifiersDone += 1
@@ -121,13 +131,15 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				d := <-docChan
 				collectedDocs = append(collectedDocs, d)
 			}
-			for i := range collectedDocs {
-				result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
-				if err != nil {
-					t.Error(err)
-				}
-				if !result {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+			if err == nil {
+				for i := range collectedDocs {
+					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
+					if err != nil {
+						t.Error(err)
+					}
+					if !result {
+						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
+					}
 				}
 			}
 		})
@@ -233,27 +245,27 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 }
 
 func TestCertifyHelperStackOverflow(t *testing.T) {
-	var A, B, C *certifier.Component
+	var A, B, C *root_package.PackageComponent
 	// Create a cyclical dependency between two components
-	A = &certifier.Component{
+	A = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
 			Name: "example.com/A",
 		},
 	}
 
-	B = &certifier.Component{
+	B = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
 			Purl: "example.com/B",
 		},
 	}
-	C = &certifier.Component{
+	C = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
 			Purl: "example.com/C",
 		},
 	}
-	A.DepPackages = []*certifier.Component{B, C}
-	B.DepPackages = []*certifier.Component{C, A}
-	C.DepPackages = []*certifier.Component{A, B}
+	A.DepPackages = []*root_package.PackageComponent{B, C}
+	B.DepPackages = []*root_package.PackageComponent{C, A}
+	C.DepPackages = []*root_package.PackageComponent{A, B}
 	// Create a channel to receive the generated documents
 	docChannel := make(chan *processor.Document, 10)
 	o := NewOSVCertificationParser()

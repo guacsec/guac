@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv/internal/osv_query"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
@@ -39,8 +40,10 @@ const (
 	PRODUCER_ID string = "guacsec/guac"
 )
 
+var ErrOSVComponenetTypeMismatch error = fmt.Errorf("rootComponent type is not *certifier.Component")
+
 type osvCertifier struct {
-	rootComponents *certifier.Component
+	rootComponents *root_package.PackageComponent
 }
 
 // NewOSVCertificationParser initializes the OSVCertifier
@@ -50,10 +53,14 @@ func NewOSVCertificationParser() certifier.Certifier {
 
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
-func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
-	o.rootComponents = rootComponent
+func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+	if component, ok := rootComponent.(*root_package.PackageComponent); ok {
+		o.rootComponents = component
+	} else {
+		return ErrOSVComponenetTypeMismatch
+	}
 	m := make(map[string]bool)
-	_, err := o.certifyHelper(ctx, rootComponent, docChannel, m)
+	_, err := o.certifyHelper(ctx, o.rootComponents, docChannel, m)
 	if err != nil {
 		return err
 	}
@@ -68,7 +75,7 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *cert
 // attestation is generated containing all the vulnerabilities of its dependencies
 // these vulnerabilities are passed up until it reaches the root level node which contains an attestation
 // with all the aggregate vulnerabilities. The visited map is used to prevent infinite recursion.
-func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, docChannel chan<- *processor.Document,
+func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *root_package.PackageComponent, docChannel chan<- *processor.Document,
 	visited map[string]bool) ([]osv_scanner.Entry, error) {
 	if visited == nil {
 		return nil, fmt.Errorf("visited map is nil")

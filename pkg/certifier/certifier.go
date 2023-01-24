@@ -18,20 +18,22 @@ package certifier
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 type Certifier interface {
-	// CertifyComponent takes the type Component and recursively scans each dependency
-	// aggregating the results for the top/root level artifact. As attestation documents are generated
-	// they are push to the docChannel to be ingested
-	CertifyComponent(ctx context.Context, rootComponent *Component, docChannel chan<- *processor.Document) error
+	// CertifyComponent takes a GUAC component and generates processor.documents that are
+	// push to the docChannel to be ingested.
+	// Note: there is an implicit contract with "QueryComponents" where the compChan type must be the same as
+	// the one used by "components"
+	CertifyComponent(ctx context.Context, components interface{}, docChannel chan<- *processor.Document) error
 }
 
 type QueryComponents interface {
-	// GetComponents runs as a goroutine to get the components that will be certified by the Certifier interface
-	GetComponents(ctx context.Context, compChan chan<- *Component) error
+	// GetComponents runs as a goroutine to get the GUAC components that will be certified by the Certifier interface
+	// Note: there is an implicit contract with "CertifyComponent" where the components type must be the same as
+	// the one used by "compChan"
+	GetComponents(ctx context.Context, compChan chan<- interface{}) error
 }
 
 // Emitter processes a document
@@ -47,9 +49,3 @@ type CertifierType string
 const (
 	CertifierOSV CertifierType = "OSV"
 )
-
-// Component represents the top level package node and its dependencies
-type Component struct {
-	Package     assembler.PackageNode
-	DepPackages []*Component
-}

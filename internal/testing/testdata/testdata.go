@@ -23,7 +23,7 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
@@ -777,24 +777,24 @@ var (
 		Purl: "pkg:maven/org.apache.commons/commons-text@1.9",
 	}
 
-	text4shell = &certifier.Component{
+	text4shell = &root_package.PackageComponent{
 		Package:     text4ShelPackage,
-		DepPackages: []*certifier.Component{},
+		DepPackages: []*root_package.PackageComponent{},
 	}
 
-	log4j = &certifier.Component{
+	log4j = &root_package.PackageComponent{
 		Package:     log4JPackage,
-		DepPackages: []*certifier.Component{},
+		DepPackages: []*root_package.PackageComponent{},
 	}
 
-	secondLevel = &certifier.Component{
+	secondLevel = &root_package.PackageComponent{
 		Package:     secondLevelPackage,
-		DepPackages: []*certifier.Component{text4shell},
+		DepPackages: []*root_package.PackageComponent{text4shell},
 	}
 
-	RootComponent = &certifier.Component{
+	RootComponent = &root_package.PackageComponent{
 		Package:     rootPackage,
-		DepPackages: []*certifier.Component{secondLevel, log4j},
+		DepPackages: []*root_package.PackageComponent{secondLevel, log4j},
 	}
 )
 

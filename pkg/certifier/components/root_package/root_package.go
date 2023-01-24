@@ -25,6 +25,12 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
+// PackageComponent represents the top level package node and its dependencies
+type PackageComponent struct {
+	Package     assembler.PackageNode
+	DepPackages []*PackageComponent
+}
+
 type packageQuery struct {
 	client graphdb.Client
 }
@@ -37,8 +43,8 @@ func NewPackageQuery(client graphdb.Client) certifier.QueryComponents {
 }
 
 // GetComponents runs as a goroutine to query for root level and dependent packages to scan and passes them
-// to the compChan as they are found
-func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- *certifier.Component) error {
+// to the compChan as they are found. The interface will be type "*Component"
+func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	// Get top level package MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p
 	// Get all packages that the top level package depends on MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
 	// MATCH (p:Package) WHERE p.purl = "pkg:oci/vul-image-latest?repository_url=ppatel1989" WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2
@@ -61,7 +67,7 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- *certi
 		if err != nil {
 			return err
 		}
-		rootComponent := &certifier.Component{
+		rootComponent := &PackageComponent{
 			Package:     rootPackage,
 			DepPackages: deps,
 		}
@@ -70,13 +76,13 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- *certi
 	return nil
 }
 
-func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string) ([]*certifier.Component, error) {
+func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string) ([]*PackageComponent, error) {
 	dependencies, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
 		map[string]any{"rootPurl": parentPurl})
 	if err != nil {
 		return nil, err
 	}
-	depPackages := []*certifier.Component{}
+	depPackages := []*PackageComponent{}
 	for _, dep := range dependencies {
 		foundDep, ok := dep.(dbtype.Node)
 		if !ok {
@@ -91,7 +97,7 @@ func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string
 		if err != nil {
 			return nil, err
 		}
-		depPackages = append(depPackages, &certifier.Component{
+		depPackages = append(depPackages, &PackageComponent{
 			Package:     foundDepPack,
 			DepPackages: deps,
 		})

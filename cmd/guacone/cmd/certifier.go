@@ -24,7 +24,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
-	root_package "github.com/guacsec/guac/pkg/certifier/components"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
+	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -50,6 +51,10 @@ var certifierCmd = &cobra.Command{
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
+		}
+
+		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
+			logger.Fatalf("unable to register certifier: %w", err)
 		}
 
 		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
