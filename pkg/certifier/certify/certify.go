@@ -39,6 +39,7 @@ type cert struct {
 func NewCertifier() (*cert, error) {
 	c := &cert{map[certifier.CertifierType]func() certifier.Certifier{}}
 
+	// Currently, error will never fire as c.documentCertifier is always empty
 	if err := c.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
 		return nil, err
 	}

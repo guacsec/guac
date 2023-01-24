@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/certifier/osv"
+
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -222,4 +224,48 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return err
 	}
 	return nil
+}
+
+func Test_cert_RegisterCertifier(t *testing.T) {
+	type args struct {
+		certifier     func() certifier.Certifier
+		certifierType certifier.CertifierType
+	}
+	tests := []struct {
+		name              string
+		documentCertifier map[certifier.CertifierType]func() certifier.Certifier
+		args              args
+		wantErr           bool
+	}{
+		{
+			name: "overwriting certifier",
+			documentCertifier: map[certifier.CertifierType]func() certifier.Certifier{
+				certifier.CertifierOSV: osv.NewOSVCertificationParser,
+			},
+			args: args{
+				certifier:     osv.NewOSVCertificationParser,
+				certifierType: certifier.CertifierOSV,
+			},
+			wantErr: true,
+		},
+		{
+			name:              "registering new certifier",
+			documentCertifier: map[certifier.CertifierType]func() certifier.Certifier{},
+			args: args{
+				certifier:     osv.NewOSVCertificationParser,
+				certifierType: certifier.CertifierOSV,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := &cert{
+				documentCertifier: test.documentCertifier,
+			}
+			if err := c.RegisterCertifier(test.args.certifier, test.args.certifierType); (err != nil) != test.wantErr {
+				t.Errorf("RegisterCertifier() error = %v, wantErr %v", err, test.wantErr)
+			}
+		})
+	}
 }
