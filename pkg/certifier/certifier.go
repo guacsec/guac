@@ -41,11 +41,11 @@ type Emitter func(*processor.Document) error
 // the error was able to be gracefully handled
 type ErrHandler func(error) bool
 
-// CertfierType describes the type of the certifier
-type CertfierType string
+// CertifierType describes the type of the certifier
+type CertifierType string
 
 const (
-	CertifierOSV CertfierType = "OSV"
+	CertifierOSV CertifierType = "OSV"
 )
 
 // Component represents the top level package node and its dependencies

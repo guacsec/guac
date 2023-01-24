@@ -182,7 +182,17 @@ func Test_ParserSubscribe(t *testing.T) {
 			ctx, cancel = context.WithTimeout(ctx, time.Second)
 			defer cancel()
 
-			err = Subscribe(ctx)
+			transportFunc := func(d []assembler.Graph) error {
+				if len(d) != len(tt.want) {
+					t.Errorf("ParseDocumentTree() = %v, want %v", d, tt.want)
+				}
+				for i := range d {
+					compare(t, d[i].Edges, tt.want[i].Edges, d[i].Nodes, tt.want[i].Nodes)
+				}
+				return nil
+			}
+
+			err = Subscribe(ctx, transportFunc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
 			}

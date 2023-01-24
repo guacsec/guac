@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The GUAC Authors.
+// Copyright 2023 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,27 +17,36 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
-	"github.com/guacsec/guac/pkg/ingestor/key"
-	"github.com/guacsec/guac/pkg/ingestor/key/inmemory"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
-	"github.com/guacsec/guac/pkg/ingestor/verifier"
-	"github.com/guacsec/guac/pkg/ingestor/verifier/sigstore_verifier"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var flags = struct {
+	dbAddr  string
+	gdbuser string
+	gdbpass string
+	realm   string
+	keyPath string
+	keyID   string
+}{}
 
 type options struct {
 	dbAddr string
@@ -50,16 +59,12 @@ type options struct {
 	keyID string
 	// path to folder with documents to collect
 	path string
-	// map of image repo and tags
-	repoTags map[string][]string
 }
 
-var exampleCmd = &cobra.Command{
+var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
-	Short: "take a folder of files and create a GUAC graph",
+	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
 
 		opts, err := validateFlags(
 			viper.GetString("gdbuser"),
@@ -75,32 +80,8 @@ var exampleCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// Register Keystore
-		inmemory := inmemory.NewInmemoryProvider()
-		err = key.RegisterKeyProvider(inmemory, inmemory.Type())
-		if err != nil {
-			logger.Errorf("unable to register key provider: %v", err)
-		}
-
-		if opts.keyPath != "" && opts.keyID != "" {
-			keyRaw, err := os.ReadFile(opts.keyPath)
-			if err != nil {
-				logger.Errorf("error: %v", err)
-				os.Exit(1)
-			}
-			err = key.Store(ctx, opts.keyID, keyRaw, inmemory.Type())
-			if err != nil {
-				logger.Errorf("error: %v", err)
-				os.Exit(1)
-			}
-		}
-
-		// Register Verifier
-		sigstoreAndKeyVerifier := sigstore_verifier.NewSigstoreAndKeyVerifier()
-		err = verifier.RegisterVerifier(sigstoreAndKeyVerifier, sigstoreAndKeyVerifier.Type())
-		if err != nil {
-			logger.Errorf("unable to register key provider: %v", err)
-		}
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
 
 		// Register collector
 		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
@@ -109,50 +90,73 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("unable to register file collector: %v", err)
 		}
 
+		// initialize jetstream
+		// TODO: pass in credentials file for NATS secure login
+		jetStream := emitter.NewJetStream(nats.DefaultURL, "", "")
+		ctx, err = jetStream.JetStreamInit(ctx)
+		if err != nil {
+			logger.Errorf("jetStream initialization failed with error: %v", err)
+			os.Exit(1)
+		}
+		// recreate stream to remove any old lingering documents
+		// NOT TO BE USED IN PRODUCTION
+		err = jetStream.RecreateStream(ctx)
+		if err != nil {
+			logger.Errorf("unexpected error recreating jetstream: %v", err)
+		}
+		defer jetStream.Close()
+
 		// Get pipeline of components
-		processorFunc, err := getProcessor(ctx)
+		collectorPubFunc, err := getCollectorPublish(ctx)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		ingestorFunc, err := getIngestor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+
 		assemblerFunc, err := getAssembler(opts)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
 
-		totalNum := 0
-		gotErr := false
+		processorTransportFunc := func(d processor.DocumentTree) error {
+			docTreeBytes, err := json.Marshal(d)
+			if err != nil {
+				return fmt.Errorf("failed marshal of document: %w", err)
+			}
+			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		ingestorTransportFunc := func(d []assembler.Graph) error {
+			err := assemblerFunc(d)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		processorFunc, err := getProcessor(ctx, processorTransportFunc)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
+		ingestorFunc, err := getIngestor(ctx, ingestorTransportFunc)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
+
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
-			totalNum += 1
-			start := time.Now()
-
-			docTree, err := processorFunc(d)
+			err = collectorPubFunc(d)
 			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
+				logger.Errorf("collector ended with error: %v", err)
+				os.Exit(1)
 			}
-
-			graphs, err := ingestorFunc(docTree)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to ingest doc tree: %v", err)
-			}
-
-			err = assemblerFunc(graphs)
-			if err != nil {
-				gotErr = true
-				return fmt.Errorf("unable to assemble graphs: %v", err)
-			}
-			t := time.Now()
-			elapsed := t.Sub(start)
-			logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
 			return nil
 		}
 
@@ -165,15 +169,32 @@ var exampleCmd = &cobra.Command{
 			logger.Errorf("collector ended with error: %v", err)
 			return false
 		}
+
+		// Assuming that publisher and consumer are different processes.
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := processorFunc()
+			if err != nil {
+				logger.Errorf("processor ended with error: %v", err)
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := ingestorFunc()
+			if err != nil {
+				logger.Errorf("parser ended with error: %v", err)
+			}
+		}()
+
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
 
-		if gotErr {
-			logger.Fatalf("completed ingestion with errors")
-		} else {
-			logger.Infof("completed ingesting %v documents", totalNum)
-		}
+		wg.Wait()
 	},
 }
 
@@ -204,18 +225,25 @@ func validateFlags(user string, pass string, dbAddr string, realm string, keyPat
 	return opts, nil
 }
 
-func getProcessor(ctx context.Context) (func(*processor.Document) (processor.DocumentTree, error), error) {
-	return func(d *processor.Document) (processor.DocumentTree, error) {
-		return process.Process(ctx, d)
+func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, error) {
+	return func(d *processor.Document) error {
+		return collector.Publish(ctx, d)
 	}, nil
 }
-func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
-	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
-		inputs, err := parser.ParseDocumentTree(ctx, doc)
+
+func getProcessor(ctx context.Context, transportFunc func(processor.DocumentTree) error) (func() error, error) {
+	return func() error {
+		return process.Subscribe(ctx, transportFunc)
+	}, nil
+}
+
+func getIngestor(ctx context.Context, transportFunc func([]assembler.Graph) error) (func() error, error) {
+	return func() error {
+		err := parser.Subscribe(ctx, transportFunc)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return inputs, nil
+		return nil
 	}, nil
 }
 
@@ -274,5 +302,5 @@ func createIndices(client graphdb.Client) error {
 }
 
 func init() {
-	rootCmd.AddCommand(exampleCmd)
+	rootCmd.AddCommand(filesCmd)
 }

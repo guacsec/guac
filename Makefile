@@ -24,8 +24,8 @@ cover: test ## Run all the tests and opens the coverage report
 
 .PHONY: fmt
 fmt: ## Check the formatting
-	test -z "$(shell goimports -l -e .)"
-	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -exec .github/scripts/copywrite.sh {} \;)"
+	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
+	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copywrite.sh {} \;)"
 
 .PHONY: lint
 lint: ## Run all the linters
@@ -39,6 +39,13 @@ build: ## Build a version
 	go build -ldflags ${LDFLAGS} -o bin/collector cmd/collector/main.go
 	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
+	go build -ldflags ${LDFLAGS} -o bin/pubsub_test cmd/pubsub_test/main.go
+
+.PHONY: proto
+proto: pkg/collectsub/collectsub/collectsub.proto
+	protoc --go_out=. --go_opt=paths=source_relative \
+		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		$^
 
 .PHONY: clean
 clean: ## Remove temporary files

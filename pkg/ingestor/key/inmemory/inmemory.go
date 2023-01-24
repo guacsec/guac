@@ -26,7 +26,7 @@ type inmemory struct {
 	collector map[string]*key.Key
 }
 
-func newInmemoryProvider() *inmemory {
+func NewInmemoryProvider() *inmemory {
 	return &inmemory{
 		collector: map[string]*key.Key{},
 	}

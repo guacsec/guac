@@ -6,6 +6,7 @@
 - [npm] (some makefile tasks use [npx])
 - [docker]
 - [golang] 1.18+
+- [protoc/protoc-gen-go/protoc-gen-go-grpc]
 
 ## Prepare the working directories
 
@@ -187,11 +188,87 @@ packages/files, and thus probably don't use the debian image.
 
 ## Clean-up
 
-If you'd like to delete the nodes in your database, you execute the query:
+To delete the nodes in your database, you execute the query:
 ```
 MATCH (n) DETACH DELETE n;
 ```
 
+# Example 3: OSV Certifier
+
+Perform a [cleanup] to remove all nodes and start from scratch.
+
+In this example, we will ingest an SPDX SBOM for a custom vulnerable image that contains `log4j` and `tesx4shell`.
+
+Running the OSV Certifier will allow all the packages to be evaluated against the OSV database. If a vulnerability
+is found, a vulnerability node will be generated containing the OSV ID that can be queried further for more information.
+Along with the vulnerability node, a vulnerability attestation node is also generated based on a custom predicate defined
+in [pkg/certifier/attestation/attestation_vuln.go](https://github.com/guacsec/guac/blob/main/pkg/certifier/attestation/attestation_vuln.go) and an example defined in 
+[internal/testing/testdata/exampledata/certify-vuln.json](https://github.com/guacsec/guac/blob/main/internal/testing/testdata/exampledata/certify-vuln.json). This attestation is generated
+for all packages that are evaluated, containing a list of vulnerabilities (if they exist). Future plans are that the `certifiers`
+would run periodically (or ad-hoc) to keep the information up to date.
+
+**NOTE:** 
+
+The vulnerability predicate is a work in progress and might eventually be replaced and moved to 
+[in-toto/attestation](https://github.com/in-toto/attestation) repo.
+
+We first ingest the vulnerable SPDX SBOM into GUAC:
+
+```bash
+bin/guacone files --gdbuser neo4j --gdbpass s3cr3t ${GUACSEC_HOME}/guac-data/docs/spdx/spdx_vuln.json
+```
+
+Once the SBOM is ingested, we can run the `certifier` so that all the packages to be evaluated against the OSV database.
+
+```bash
+bin/guacone certifier --gdbuser neo4j --gdbpass s3cr3t
+```
+
+You can take a look at the vulnerability nodes through a simple match query:
+
+```
+MATCH (n:Vulnerability) RETURN n LIMIT 25
+```
+
+![image](https://user-images.githubusercontent.com/88045217/213845716-d32cef13-98c6-4e6c-ba65-a8fc6ea8db6f.png)
+
+We can expand the vulnerability nodes into their associated attestations that map to the actual packages.
+
+![image](https://user-images.githubusercontent.com/88045217/213845759-59a5bfd5-8825-469c-8019-74ba287ff71f.png)
+
+We can query for a specific package `log4j` and expand out where the package is utilized:
+
+```
+MATCH (n:Package)
+WHERE n.purl = "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+RETURN n;
+```
+
+![image](https://user-images.githubusercontent.com/88045217/213845773-4f551873-0e66-4a5c-a27e-b4cd0e4c015f.png)
+
+We can also query for a specific OSV ID and work backward to the package and where it's utilized:
+
+**Note:** Future features will allow for the OSV ID to expand into more information about the package, CVEs...etc
+
+```
+MATCH (n:Vulnerability)
+WHERE n.id = "GHSA-fxph-q3j8-mv87"
+RETURN n;
+```
+
+![image](https://user-images.githubusercontent.com/88045217/213845911-88c8b393-7353-4937-b340-384631010277.png)
+
+Similarly, you can also query for `text4shell` and expand to find where it's utilized:
+
+```
+MATCH (n:Package)
+WHERE n.purl = "pkg:maven/org.apache.commons/commons-text@1.9"
+RETURN n;
+```
+
+![image](https://user-images.githubusercontent.com/88045217/213845953-51c349e8-952e-45bf-bf51-c5c071d924b4.png)
+
+You can perform a [cleanup] to remove all nodes when done.
 
 [docker]: https://www.docker.com/get-started/
 [golang]: https://go.dev/doc/install
@@ -201,3 +278,4 @@ MATCH (n) DETACH DELETE n;
 [npx]: https://docs.npmjs.com/cli/v7/commands/npx
 [cleanup]: #Clean-up
 [apoc]: https://neo4j.com/labs/apoc/
+[protoc/protoc-gen-go/protoc-gen-go-grpc]: https://grpc.io/docs/languages/go/quickstart/

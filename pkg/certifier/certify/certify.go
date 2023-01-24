@@ -36,11 +36,11 @@ func init() {
 }
 
 var (
-	documentCertifier = map[certifier.CertfierType]func() certifier.Certifier{}
+	documentCertifier = map[certifier.CertifierType]func() certifier.Certifier{}
 )
 
 // RegisterCertifier registers the active certifier for to generate attestations
-func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.CertfierType) error {
+func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.CertifierType) error {
 	if _, ok := documentCertifier[certifierType]; ok {
 		return fmt.Errorf("the certifier is being overwritten: %s", certifierType)
 	}

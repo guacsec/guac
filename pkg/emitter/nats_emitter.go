@@ -17,6 +17,8 @@ package emitter
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
@@ -36,7 +38,7 @@ const (
 	DurableProcessor        string        = "processor"
 	DurableIngestor         string        = "ingestor"
 	BufferChannelSize       int           = 1000
-	BackOffTimer            time.Duration = 5 * time.Second
+	BackOffTimer            time.Duration = 1 * time.Second
 )
 
 type jetStream struct {
@@ -121,6 +123,9 @@ func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 			Name:      StreamName,
 			Subjects:  []string{StreamSubjects},
 			Retention: nats.WorkQueuePolicy,
+			// window to track duplicates in the stream.
+			// see https://github.com/nats-io/nats.docs/blob/master/using-nats/jetstream/model_deep_dive.md#message-deduplication
+			Duplicates: 5 * time.Minute,
 		})
 		if err != nil {
 			return err
@@ -173,7 +178,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 	js := FromContext(ctx)
 	sub, err := js.PullSubscribe(subj, durable)
 	if err != nil {
-		logger.Errorf("%s subscribe failed: %s", durable, err)
+		logger.Errorf("%s subscribe failed: %w", durable, err)
 		return nil, nil, err
 	}
 	go func() {
@@ -185,17 +190,17 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 			msgs, err := sub.Fetch(1)
 			if err != nil {
 				if errors.Is(err, nats.ErrTimeout) {
-					logger.Infof("[%s: %s] error consuming, backing off for a second: %v", durable, id, err)
+					logger.Infof("[%s: %s] nothing to consume, backing off for %s: %w", durable, id, backOffTimer.String(), err)
 					time.Sleep(backOffTimer)
 					continue
 				} else {
-					errChan <- fmt.Errorf("[%s: %s] unexpected NATS fetch error: %v", durable, id, err)
+					errChan <- fmt.Errorf("[%s: %s] unexpected NATS fetch error: %w", durable, id, err)
 				}
 			}
 			if len(msgs) > 0 {
 				err := msgs[0].Ack()
 				if err != nil {
-					fmtErr := fmt.Errorf("[%s: %v] unable to Ack: %v", durable, id, err)
+					fmtErr := fmt.Errorf("[%s: %v] unable to Ack: %w", durable, id, err)
 					logger.Error(fmtErr)
 					errChan <- fmtErr
 				}
@@ -212,9 +217,17 @@ func Publish(ctx context.Context, subj string, data []byte) error {
 	if js == nil {
 		return errors.New("jetstream not found from context")
 	}
-	_, err := js.Publish(subj, data)
+	// messageID set using the hash to check for duplicate data on the stream
+	// see: https://github.com/nats-io/nats.docs/blob/master/using-nats/jetstream/model_deep_dive.md#message-deduplication
+	_, err := js.Publish(subj, data, nats.MsgId(getHash(data)))
 	if err != nil {
 		return fmt.Errorf("failed to publish document on stream: %w", err)
 	}
 	return nil
+}
+
+func getHash(data []byte) string {
+	sha256sum := sha256.Sum256(data)
+	hash := base64.RawStdEncoding.EncodeToString(sha256sum[:])
+	return hash
 }

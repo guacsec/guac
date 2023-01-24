@@ -21,10 +21,10 @@ import (
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 )
 
-// This is a new predicate type for vulnerabilities based off
+// PredicateVuln This is a new predicate type for vulnerabilities based off
 // https://github.com/sigstore/cosign/blob/main/specs/COSIGN_VULN_ATTESTATION_SPEC.md.
 // This is used by the certifier to attest to vulnerabilities in an artifact.
-// Currently the predicate is defined here but the intention is to upstream this to
+// Currently, the predicate is defined here but the intention is to upstream this to
 // https://github.com/in-toto/attestation in the near future once the quirks are worked out.
 const (
 	PredicateVuln = "https://in-toto.io/attestation/vuln/v0.1"

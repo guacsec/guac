@@ -52,7 +52,8 @@ func NewOSVCertificationParser() certifier.Certifier {
 // to generate vulnerability attestations
 func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *certifier.Component, docChannel chan<- *processor.Document) error {
 	o.rootComponents = rootComponent
-	_, err := o.certifyHelper(ctx, rootComponent, docChannel)
+	m := make(map[string]bool)
+	_, err := o.certifyHelper(ctx, rootComponent, docChannel, m)
 	if err != nil {
 		return err
 	}
@@ -66,17 +67,27 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent *cert
 // All the vulnerabilities for each dependent package node are collected and the parent package node's
 // attestation is generated containing all the vulnerabilities of its dependencies
 // these vulnerabilities are passed up until it reaches the root level node which contains an attestation
-// with all the aggregate vulnerabilities
-func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, docChannel chan<- *processor.Document) ([]osv_scanner.Entry, error) {
+// with all the aggregate vulnerabilities. The visited map is used to prevent infinite recursion.
+func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Component, docChannel chan<- *processor.Document,
+	visited map[string]bool) ([]osv_scanner.Entry, error) {
+	if visited == nil {
+		return nil, fmt.Errorf("visited map is nil")
+	}
 	packNodes := []assembler.PackageNode{}
 	totalDepVul := []osv_scanner.Entry{}
+	if visited[topLevel.Package.Purl] {
+		return nil, nil
+	}
+	visited[topLevel.Package.Purl] = true
 	for _, depPack := range topLevel.DepPackages {
 		if len(depPack.DepPackages) > 0 {
-			depVulns, err := o.certifyHelper(ctx, depPack, docChannel)
+			depVulns, err := o.certifyHelper(ctx, depPack, docChannel, visited)
 			if err != nil {
 				return nil, err
 			}
-			totalDepVul = append(totalDepVul, depVulns...)
+			if depVulns != nil {
+				totalDepVul = append(totalDepVul, depVulns...)
+			}
 		} else {
 			packNodes = append(packNodes, depPack.Package)
 		}
@@ -97,7 +108,9 @@ func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *certifier.Co
 	if err != nil {
 		return nil, err
 	}
-	docChannel <- doc
+	if doc != nil {
+		docChannel <- doc
+	}
 	return totalDepVul, nil
 }
 
@@ -141,7 +154,7 @@ func getVulnerabilities(query osv_query.BatchedQuery, docChannel chan<- *process
 }
 
 func generateDocument(purl string, digest []string, vulns []osv_scanner.Entry) (*processor.Document, error) {
-	payload, err := generateOSVCertifyPredicateBlob(createAttestation(purl, digest, vulns))
+	payload, err := json.Marshal(createAttestation(purl, digest, vulns))
 	if err != nil {
 		return nil, err
 	}
@@ -157,35 +170,46 @@ func generateDocument(purl string, digest []string, vulns []osv_scanner.Entry) (
 	return doc, nil
 }
 
-func createAttestation(purl string, digest []string, vulns []osv_scanner.Entry) *attestation_vuln.VulnerabilityStatement {
+func createAttestation(packageURL string, digests []string, vulns []osv_scanner.Entry) *attestation_vuln.VulnerabilityStatement {
 	currentTime := time.Now()
 	var subjects []intoto.Subject
 
-	attestation := &attestation_vuln.VulnerabilityStatement{}
-	attestation.StatementHeader.Type = intoto.StatementInTotoV01
-	attestation.StatementHeader.PredicateType = attestation_vuln.PredicateVuln
-	if len(digest) > 0 {
-		for _, digest := range digest {
-			digestSplit := strings.Split(digest, ":")
-			subjects = append(subjects, intoto.Subject{
-				Name: purl,
-				Digest: slsa.DigestSet{
-					digestSplit[0]: digestSplit[1],
-				},
-			})
-		}
-	} else {
+	attestation := &attestation_vuln.VulnerabilityStatement{
+		StatementHeader: intoto.StatementHeader{
+			Type:          intoto.StatementInTotoV01,
+			PredicateType: attestation_vuln.PredicateVuln,
+		},
+		Predicate: attestation_vuln.VulnerabilityPredicate{
+			Invocation: attestation_vuln.Invocation{
+				Uri:        INVOC_URI,
+				ProducerID: PRODUCER_ID,
+			},
+			Scanner: attestation_vuln.Scanner{
+				Uri:     URI,
+				Version: VERSION,
+			},
+			Metadata: attestation_vuln.Metadata{
+				ScannedOn: &currentTime,
+			},
+		},
+	}
+
+	for _, digest := range digests {
+		digestSplit := strings.Split(digest, ":")
 		subjects = append(subjects, intoto.Subject{
-			Name: purl,
+			Name: packageURL,
+			Digest: slsa.DigestSet{
+				digestSplit[0]: digestSplit[1],
+			},
+		})
+	}
+	if len(digests) == 0 {
+		subjects = append(subjects, intoto.Subject{
+			Name: packageURL,
 		})
 	}
 
 	attestation.StatementHeader.Subject = subjects
-	attestation.Predicate.Invocation.Uri = INVOC_URI
-	attestation.Predicate.Invocation.ProducerID = PRODUCER_ID
-	attestation.Predicate.Scanner.Uri = URI
-	attestation.Predicate.Scanner.Version = VERSION
-	attestation.Predicate.Metadata.ScannedOn = &currentTime
 
 	for _, vuln := range vulns {
 		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, attestation_vuln.Result{
@@ -193,12 +217,4 @@ func createAttestation(purl string, digest []string, vulns []osv_scanner.Entry) 
 		})
 	}
 	return attestation
-}
-
-func generateOSVCertifyPredicateBlob(p *attestation_vuln.VulnerabilityStatement) ([]byte, error) {
-	blob, err := json.Marshal(p)
-	if err != nil {
-		return nil, err
-	}
-	return blob, nil
 }

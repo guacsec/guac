@@ -69,7 +69,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 
 // Subscribe is used by NATS JetStream to stream the documents received from the processor
 // and parse them them via ParseDocumentTree
-func Subscribe(ctx context.Context) error {
+func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error) error {
 	logger := logging.FromContext(ctx)
 
 	id := uuid.NewV4().String()
@@ -82,29 +82,23 @@ func Subscribe(ctx context.Context) error {
 		docNode := processor.DocumentNode{}
 		err := json.Unmarshal(d, &docNode)
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", id, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %w", id, err)
 			logger.Error(fmtErr)
 			return err
 		}
-		_, err = ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
+		assemblerInputs, err := ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %v", id, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %w", id, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
 
-		// TODO: Once the graphDB is abstracted via GraphQL, add NATS back to ingestor. See issue https://github.com/guacsec/guac/issues/299
-		//
-		// 	assemblerInputsJSON, err := json.Marshal(assemblerInputs)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// err = psub.SendDataToNats(ctx, emitter.SubjectNameDocParsed, assemblerInputsJSON)
-		// if err != nil {
-		// 	return err
-		// }
-		// 	logger.Infof("doc parsed: %+v", docTree.Document.SourceInformation)
-		//
+		err = transportFunc(assemblerInputs)
+		if err != nil {
+			fmtErr := fmt.Errorf("[ingestor: %s] failed transportFunc: %w", id, err)
+			logger.Error(fmtErr)
+			return fmtErr
+		}
 
 		logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&docNode).Document.SourceInformation)
 		return nil

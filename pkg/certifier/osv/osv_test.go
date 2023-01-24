@@ -17,7 +17,16 @@ package osv
 
 import (
 	"context"
+	"reflect"
 	"testing"
+	"time"
+
+	"github.com/guacsec/guac/pkg/assembler"
+
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
+	osv_scanner "golang.org/x/vuln/osv"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -122,5 +131,141 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func Test_createAttestation(t *testing.T) {
+	currentTime := time.Now()
+	type args struct {
+		packageURL string
+		digests    []string
+		vulns      []osv_scanner.Entry
+	}
+	tests := []struct {
+		name string
+		args args
+		want *attestation_vuln.VulnerabilityStatement
+	}{
+		{
+			name: "default",
+			args: args{
+				vulns: []osv_scanner.Entry{
+					{
+						ID: "testId",
+					},
+				},
+			},
+			want: &attestation_vuln.VulnerabilityStatement{
+				StatementHeader: intoto.StatementHeader{
+					Type:          intoto.StatementInTotoV01,
+					PredicateType: attestation_vuln.PredicateVuln,
+					Subject:       []intoto.Subject{{Name: ""}},
+				},
+				Predicate: attestation_vuln.VulnerabilityPredicate{
+					Invocation: attestation_vuln.Invocation{
+						Uri:        INVOC_URI,
+						ProducerID: PRODUCER_ID,
+					},
+					Scanner: attestation_vuln.Scanner{
+						Uri:     URI,
+						Version: VERSION,
+						Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
+					},
+					Metadata: attestation_vuln.Metadata{
+						ScannedOn: &currentTime,
+					},
+				},
+			},
+		},
+		{
+			name: "has digests",
+			args: args{
+				digests: []string{"test:Digest"},
+			},
+			want: &attestation_vuln.VulnerabilityStatement{
+				StatementHeader: intoto.StatementHeader{
+					Type:          intoto.StatementInTotoV01,
+					PredicateType: attestation_vuln.PredicateVuln,
+					Subject: []intoto.Subject{
+						{
+							Name: "",
+							Digest: slsa.DigestSet{
+								"test": "Digest",
+							},
+						},
+					},
+				},
+				Predicate: attestation_vuln.VulnerabilityPredicate{
+					Invocation: attestation_vuln.Invocation{
+						Uri:        INVOC_URI,
+						ProducerID: PRODUCER_ID,
+					},
+					Scanner: attestation_vuln.Scanner{
+						Uri:     URI,
+						Version: VERSION,
+					},
+					Metadata: attestation_vuln.Metadata{
+						ScannedOn: &currentTime,
+					},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := createAttestation(test.args.packageURL, test.args.digests, test.args.vulns)
+			if !deepEqualIgnoreTimestamp(got, test.want) {
+				t.Errorf("createAttestation() = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) bool {
+	// create a copy of a and b, and set the ScannedOn field to nil because the timestamps will be different
+	aCopy := a
+	bCopy := b
+	aCopy.Predicate.Metadata.ScannedOn = nil
+	bCopy.Predicate.Metadata.ScannedOn = nil
+
+	// use DeepEqual to compare the copies
+	return reflect.DeepEqual(aCopy, bCopy)
+}
+
+func TestCertifyHelperStackOverflow(t *testing.T) {
+	var A, B, C *certifier.Component
+	// Create a cyclical dependency between two components
+	A = &certifier.Component{
+		Package: assembler.PackageNode{
+			Name: "example.com/A",
+		},
+	}
+
+	B = &certifier.Component{
+		Package: assembler.PackageNode{
+			Purl: "example.com/B",
+		},
+	}
+	C = &certifier.Component{
+		Package: assembler.PackageNode{
+			Purl: "example.com/C",
+		},
+	}
+	A.DepPackages = []*certifier.Component{B, C}
+	B.DepPackages = []*certifier.Component{C, A}
+	C.DepPackages = []*certifier.Component{A, B}
+	// Create a channel to receive the generated documents
+	docChannel := make(chan *processor.Document, 10)
+	o := NewOSVCertificationParser()
+	// Create a context to cancel the function if it takes too long
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	err := o.CertifyComponent(ctx, A, docChannel)
+	// Call certifyHelper with the cyclical dependency
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if err == context.DeadlineExceeded {
+		t.Errorf("Function did not return an error, but it took too long to execute, which indicates stack overflow")
 	}
 }
