@@ -17,7 +17,6 @@ package file
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -53,7 +52,7 @@ func NewFileCollector(ctx context.Context, path string, poll bool, interval time
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
 func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	if _, err := os.Stat(f.path); os.IsExist(err) {
+	if _, err := os.Stat(f.path); os.IsNotExist(err) {
 		return fmt.Errorf("path: %s does not exist", f.path)
 	}
 
@@ -98,15 +97,18 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 
 	if f.poll {
 		for {
-			err := filepath.WalkDir(f.path, readFunc)
-			if err != nil {
-				if errors.Is(err, ctx.Err()) {
-					return nil
+			select {
+			// If the context has been canceled it contains an err which we can throw.
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+				err := filepath.WalkDir(f.path, readFunc)
+				if err != nil {
+					return err
 				}
-				return err
+				f.lastChecked = time.Now()
+				time.Sleep(f.interval)
 			}
-			f.lastChecked = time.Now()
-			time.Sleep(f.interval)
 		}
 	} else {
 		err := filepath.WalkDir(f.path, readFunc)
