@@ -168,6 +168,17 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 		},
 		wantPurl: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
 	}, {
+		name: "gcr.io/distroless/static - purl not provided, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "gcr.io/distroless/static",
+					Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+				},
+			},
+		},
+		wantPurl: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=",
+	}, {
 		name: "library/debian:latest - purl not provided, assume docker.io",
 		cdxBom: &cdx.BOM{
 			Metadata: &cdx.Metadata{
@@ -178,6 +189,17 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			},
 		},
 		wantPurl: "pkg:oci/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=library/debian&tag=latest",
+	}, {
+		name: "library/debian - purl not provided, assume docker.io, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "library/debian",
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantPurl: "pkg:oci/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=library/debian&tag=",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

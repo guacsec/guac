@@ -118,9 +118,10 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 				if len(splitTag) == 2 {
 					rootPackage.Purl = "pkg:oci/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
 						"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "/" + splitTag[0] + "&tag=" + splitTag[1]
-					rootPackage.Version = cdxBom.Metadata.Component.Version
-					rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
-					rootPackage.Tags = []string{"CONTAINER"}
+				} else {
+					// no tag specified
+					rootPackage.Purl = "pkg:oci/" + splitImage[2] + "@" + cdxBom.Metadata.Component.Version +
+						"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "/" + splitImage[2] + "&tag="
 				}
 			} else if len(splitImage) == 2 {
 				// example: library/debian:latest
@@ -128,11 +129,15 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 				if len(splitTag) == 2 {
 					rootPackage.Purl = "pkg:oci/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
 						"?repository_url=" + splitImage[0] + "/" + splitTag[0] + "&tag=" + splitTag[1]
-					rootPackage.Version = cdxBom.Metadata.Component.Version
-					rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
-					rootPackage.Tags = []string{"CONTAINER"}
+				} else {
+					// no tag specified
+					rootPackage.Purl = "pkg:oci/" + splitImage[1] + "@" + cdxBom.Metadata.Component.Version +
+						"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "&tag="
 				}
 			}
+			rootPackage.Version = cdxBom.Metadata.Component.Version
+			rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
+			rootPackage.Tags = []string{"CONTAINER"}
 		}
 		c.rootComponent = component{
 			curPackage:  rootPackage,
