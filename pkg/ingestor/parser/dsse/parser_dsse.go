@@ -42,9 +42,9 @@ func NewDSSEParser() common.DocumentParser {
 // Parse breaks out the document into the graph components
 func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
 	d.doc = doc
-	err := d.getIdentity(ctx)
-	if err != nil {
-		return err
+
+	if err := d.getIdentity(ctx); err != nil {
+		return fmt.Errorf("getIdentity returned error: %v", err)
 	}
 	return nil
 }
@@ -52,12 +52,12 @@ func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
 func (d *dsseParser) getIdentity(ctx context.Context) error {
 	identities, err := verifier.VerifyIdentity(ctx, d.doc)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to verify identity: %w", err)
 	}
 	for _, i := range identities {
 		pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(i.Key.Val)
 		if err != nil {
-			return fmt.Errorf("MarshalPublicKeyToPEM returned error: %v", err)
+			return fmt.Errorf("MarshalPublicKeyToPEM returned error: %w", err)
 		}
 		d.identities = append(d.identities, assembler.IdentityNode{
 			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
@@ -72,7 +72,7 @@ func (d *dsseParser) GetIdentities(ctx context.Context) []assembler.IdentityNode
 }
 
 // CreateNodes creates the GuacNode for the graph inputs
-func (d *dsseParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
+func (d *dsseParser) CreateNodes(_ context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, i := range d.identities {
 		nodes = append(nodes, i)
@@ -81,6 +81,6 @@ func (d *dsseParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 }
 
 // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (d *dsseParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (d *dsseParser) CreateEdges(_ context.Context, _ []assembler.IdentityNode) []assembler.GuacEdge {
 	return []assembler.GuacEdge{}
 }
