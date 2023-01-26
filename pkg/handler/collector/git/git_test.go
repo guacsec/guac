@@ -105,12 +105,10 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 				errChan <- g.RetrieveArtifacts(ctx, docChan)
 			}()
 
-			numCollectors := 1
-			collectorsDone := 0
-
+			hasErrored := false
 			collectedDocs := []*processor.Document{}
 
-			for collectorsDone < numCollectors {
+			for !hasErrored {
 				select {
 				case d := <-docChan:
 					collectedDocs = append(collectedDocs, d)
@@ -118,7 +116,8 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 					if (err != nil) != tt.wantErr {
 						t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
 					}
-					collectorsDone += 1
+
+					hasErrored = true
 				}
 			}
 
