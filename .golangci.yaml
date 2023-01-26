@@ -1,2 +1,6 @@
 run:
   timeout: 2m
+  skip-files:
+    - ".*\\.pb\\.go$"
+    - "pkg/assembler/generated/.*"
+    - "resolvers/schema\\.resolvers\\.go"
