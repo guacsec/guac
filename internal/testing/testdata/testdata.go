@@ -430,7 +430,7 @@ var (
 		Name:    "gcr.io/distroless/static:nonroot",
 		Digest:  []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
 		Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
-		Purl:    "pkg:oci/static:nonroot?repository_url=gcr.io/distroless",
+		Purl:    "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
 		Tags:    []string{"CONTAINER"},
 		CPEs:    nil,
 		NodeData: *assembler.NewObjectMetadata(

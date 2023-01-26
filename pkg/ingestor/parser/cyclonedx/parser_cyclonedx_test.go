@@ -17,8 +17,10 @@ package cyclonedx
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
+	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -135,4 +137,86 @@ func Test_addEdgesRecursive(t *testing.T) {
 	var e []assembler.GuacEdge
 	visited = make(map[string]bool)
 	addEdges(packageA, &e, visited)
+}
+
+func Test_cyclonedxParser_addRootPackage(t *testing.T) {
+	tests := []struct {
+		name     string
+		cdxBom   *cdx.BOM
+		wantPurl string
+	}{{
+		name: "purl provided",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:       "gcr.io/distroless/static:nonroot",
+					Version:    "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+					PackageURL: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
+				},
+			},
+		},
+		wantPurl: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
+	}, {
+		name: "gcr.io/distroless/static:nonroot - purl not provided",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "gcr.io/distroless/static:nonroot",
+					Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+				},
+			},
+		},
+		wantPurl: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
+	}, {
+		name: "gcr.io/distroless/static - purl not provided, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "gcr.io/distroless/static",
+					Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
+				},
+			},
+		},
+		wantPurl: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=",
+	}, {
+		name: "library/debian:latest - purl not provided, assume docker.io",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "library/debian:latest",
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantPurl: "pkg:oci/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=library/debian&tag=latest",
+	}, {
+		name: "library/debian - purl not provided, assume docker.io, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "library/debian",
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantPurl: "pkg:oci/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=library/debian&tag=",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &cyclonedxParser{
+				doc: &processor.Document{
+					SourceInformation: processor.SourceInformation{
+						Collector: "test",
+						Source:    "test",
+					},
+				},
+				rootComponent: component{},
+				pkgMap:        map[string]*component{},
+			}
+			c.addRootPackage(tt.cdxBom)
+			if !reflect.DeepEqual(c.rootComponent.curPackage.Purl, tt.wantPurl) {
+				t.Errorf("addRootPackage failed to produce expected purl = %v, want %v", c.rootComponent.curPackage.Purl, tt.wantPurl)
+			}
+		})
+	}
 }
