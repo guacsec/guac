@@ -146,7 +146,7 @@ require (
 )
 
 require (
-	github.com/99designs/gqlgen v0.17.22
+	github.com/99designs/gqlgen v0.17.24
 	github.com/CycloneDX/cyclonedx-go v0.7.0
 	github.com/Khan/genqlient v0.5.0
 	github.com/go-git/go-git/v5 v5.5.2
