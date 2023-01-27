@@ -51,7 +51,8 @@ func main() {
 		fmt.Printf("Error creating Neo4J Backend: %v", err)
 		os.Exit(1)
 	}
-	topResolver := resolvers.Resolver{backend}
+
+	topResolver := resolvers.Resolver{Backend: backend}
 
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
