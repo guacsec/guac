@@ -61,6 +61,7 @@ func newDocTreeBuilder() *docTreeBuilder {
 
 func RegisterDocumentParser(p func() common.DocumentParser, d processor.DocumentType) error {
 	if _, ok := documentParser[d]; ok {
+		documentParser[d] = p
 		return fmt.Errorf("the document parser is being overwritten: %s", d)
 	}
 	documentParser[d] = p

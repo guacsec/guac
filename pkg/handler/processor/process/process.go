@@ -48,6 +48,7 @@ func init() {
 
 func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.DocumentType) error {
 	if _, ok := documentProcessors[d]; ok {
+		documentProcessors[d] = p
 		return fmt.Errorf("the document processor is being overwritten: %s", d)
 	}
 	documentProcessors[d] = p

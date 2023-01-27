@@ -54,6 +54,7 @@ var (
 
 func RegisterDocumentCollector(c Collector, collectorType string) error {
 	if _, ok := documentCollectors[collectorType]; ok {
+		documentCollectors[collectorType] = c
 		return fmt.Errorf("the document collector is being overwritten: %s", collectorType)
 	}
 	documentCollectors[collectorType] = c

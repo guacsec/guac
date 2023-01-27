@@ -75,6 +75,7 @@ var (
 
 func RegisterKeyProvider(k KeyProvider, providerType KeyProviderType) error {
 	if _, ok := keyProviders[providerType]; ok {
+		keyProviders[providerType] = k
 		return fmt.Errorf("the key provider is being overwritten: %s", providerType)
 	}
 	keyProviders[providerType] = k

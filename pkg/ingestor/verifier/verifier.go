@@ -60,6 +60,7 @@ var (
 // RegisterVerifier registers the providers that are available for verification
 func RegisterVerifier(k Verifier, providerType VerifierType) error {
 	if _, ok := verifierProviders[providerType]; ok {
+		verifierProviders[providerType] = k
 		return fmt.Errorf("the verification provider is being overwritten: %s", providerType)
 	}
 	verifierProviders[providerType] = k
