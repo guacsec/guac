@@ -49,9 +49,8 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 	return nil
 }
 
-// Certify queries the graph DB to get the packages to scan. Utilizing the registered certifiers,
-// it scans and generate vulnerability attestation for each package. Aggregating the results to the
-// top/root level package
+// Certify queries the graph DB to get the components to scan. Utilizing the registered certifiers,
+// it generated new nodes and attestations.
 func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
@@ -89,7 +88,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 	return nil
 }
 
-// generateDocuments runs CertifyVulns as a goroutine to scan and generate a vulnerability certification that
+// generateDocuments runs CertifyVulns as a goroutine to scan and generates attestations that
 // are emitted as processor documents to be ingested
 func generateDocuments(ctx context.Context, collectedComponent *certifier.Component, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
