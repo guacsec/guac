@@ -26,7 +26,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	neo4j "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
-	testing "github.com/guacsec/guac/pkg/assembler/backends/testing"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 )
@@ -39,30 +38,19 @@ func main() {
 		port = defaultPort
 	}
 
-	var topResolver resolvers.Resolver
-	if true {
-		// TODO: use viper and flags
-		args := neo4j.Neo4jCredentials{
-			User:   "neo4j",
-			Pass:   "s3cr3t",
-			Realm:  "neo4j",
-			DBAddr: "neo4j://localhost:7687",
-		}
-		backend, err := neo4j.GetBackend(&args)
-		if err != nil {
-			print(err)
-			os.Exit(1)
-		}
-		topResolver = resolvers.Resolver{backend}
-	} else {
-		args := testing.DemoCredentials{}
-		backend, err := testing.GetBackend(&args)
-		if err != nil {
-			print(err)
-			os.Exit(1)
-		}
-		topResolver = resolvers.Resolver{backend}
+	// TODO: use viper and flags
+	args := neo4j.Neo4jCredentials{
+		User:   "neo4j",
+		Pass:   "s3cr3t",
+		Realm:  "neo4j",
+		DBAddr: "neo4j://localhost:7687",
 	}
+	backend, err := neo4j.GetBackend(&args)
+	if err != nil {
+		print(err)
+		os.Exit(1)
+	}
+	topResolver := resolvers.Resolver{backend}
 
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
