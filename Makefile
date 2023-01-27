@@ -25,7 +25,7 @@ cover: test ## Run all the tests and opens the coverage report
 .PHONY: fmt
 fmt: ## Check the formatting
 	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
-	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copywrite.sh {} \;)"
+	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copyright.sh {} \;)"
 
 .PHONY: lint
 lint: ## Run all the linters

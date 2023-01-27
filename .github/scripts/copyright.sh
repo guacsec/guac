@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 #
-# Checks if a file has the correct copywrite
+# Checks if a file has the correct copyright
 #
 
 # Ignore generated files where we cannot use a template
-grep -q "$1" .github/scripts/excluded_from_copywrite && exit 0
+grep -q "$1" .github/scripts/excluded_from_copyright && exit 0
 
 header="//
 // Copyright * The GUAC Authors.
