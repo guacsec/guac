@@ -42,6 +42,7 @@ var (
 
 func RegisterDocumentTypeGuesser(g DocumentTypeGuesser, name string) error {
 	if _, ok := documentTypeGuessers[name]; ok {
+		documentTypeGuessers[name] = g
 		return fmt.Errorf("the document type guesser is being overwritten: %s", name)
 	}
 	documentTypeGuessers[name] = g

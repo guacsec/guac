@@ -42,6 +42,7 @@ func certifierTypeOverwriteError(certifierType certifier.CertifierType) error {
 // RegisterCertifier registers the active certifier for to generate attestations
 func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.CertifierType) error {
 	if _, ok := documentCertifier[certifierType]; ok {
+		documentCertifier[certifierType] = c
 		return certifierTypeOverwriteError(certifierType)
 	}
 	documentCertifier[certifierType] = c
