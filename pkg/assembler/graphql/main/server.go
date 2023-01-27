@@ -19,6 +19,7 @@ package main
 // development. Do not use in production!
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -47,7 +48,7 @@ func main() {
 	}
 	backend, err := neo4j.GetBackend(&args)
 	if err != nil {
-		print(err)
+		fmt.Printf("Error creating Neo4J Backend: %v", err)
 		os.Exit(1)
 	}
 	topResolver := resolvers.Resolver{backend}
