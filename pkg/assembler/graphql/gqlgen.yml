@@ -1,0 +1,52 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Where is the schema defined?
+schema:
+  - schema.graphql
+
+# Where does the generated boilerplate code go?
+exec:
+  layout: follow-schema
+  dir: generated
+  package: generated
+
+# Where should the generated models go?
+model:
+  filename: model/nodes.go
+  package: model
+
+# Where are the resolvers situated?
+resolver:
+  layout: follow-schema
+  dir: resolvers
+  package: resolvers
+
+# Use these existing types instead of generating
+autobind:
+# currently empty
+
+# Map between GraphQL types and Go types
+#
+# First line is used as default for resolver arguments, the next ones will be
+# allowed when binding to fields. Implicit casts are generated.
+#
+# We add mapping for `Int` to support multiple integral types
+models:
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/99designs/gqlgen/graphql.Int64

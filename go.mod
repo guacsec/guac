@@ -53,6 +53,9 @@ require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
+	github.com/agnivade/levenshtein v1.1.1 // indirect
+	github.com/alexflint/go-arg v1.4.2 // indirect
+	github.com/alexflint/go-scalar v1.0.0 // indirect
 	github.com/bombsimon/logrusr/v2 v2.0.1 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0 // indirect
 	github.com/caarlos0/env/v6 v6.10.0 // indirect
@@ -60,6 +63,7 @@ require (
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.12.1 // indirect
 	github.com/containerd/typeurl v1.0.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/docker/cli v20.10.21+incompatible // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/docker v20.10.21+incompatible // indirect
@@ -79,7 +83,9 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
 	github.com/google/wire v0.5.0 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
@@ -106,6 +112,7 @@ require (
 	github.com/rhysd/actionlint v1.6.15 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shurcooL/githubv4 v0.0.0-20201206200315-234843c633fa // indirect
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
@@ -117,9 +124,11 @@ require (
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/theupdateframework/go-tuf v0.5.2-0.20220930112810-3890c1e7ace4 // indirect
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
+	github.com/urfave/cli/v2 v2.8.1 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.uber.org/goleak v1.2.0 // indirect
 	gocloud.dev v0.26.0 // indirect
 	golang.org/x/mod v0.7.0 // indirect
@@ -137,7 +146,9 @@ require (
 )
 
 require (
+	github.com/99designs/gqlgen v0.17.22
 	github.com/CycloneDX/cyclonedx-go v0.7.0
+	github.com/Khan/genqlient v0.5.0
 	github.com/go-git/go-git/v5 v5.5.2
 	github.com/gobwas/glob v0.2.3
 	github.com/mitchellh/go-homedir v1.1.0
@@ -150,5 +161,6 @@ require (
 	github.com/sigstore/sigstore v1.5.1
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
 	github.com/spf13/viper v1.15.0
+	github.com/vektah/gqlparser/v2 v2.5.1
 	golang.org/x/vuln v0.0.0-20221122171214-05fb7250142c
 )

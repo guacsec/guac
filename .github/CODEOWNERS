@@ -1,0 +1,3 @@
+# Make sure @mihaimaruseac is notified for any changes to assembler (in
+# particular the GraphQL interface) while it is in flux
+/pkg/assembler @mihaimaruseac
