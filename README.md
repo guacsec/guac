@@ -53,6 +53,8 @@ We encourage discussions to be done on github issues.
 We also have a [public slack channel](https://openssf.slack.com/archives/C03U677QD46) on
 the OpenSSF slack.
 
+For future updates, announcements, and community meetings, join our [GUAC community google group](https://groups.google.com/forum/#!forum/guac-community/join).
+
 For security issues or code of conduct concerns, an e-mail should be sent to
 guac-maintainers@googlegroups.com.
 
