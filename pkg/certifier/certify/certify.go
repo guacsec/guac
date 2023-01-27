@@ -50,7 +50,7 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 }
 
 // Certify queries the graph DB to get the components to scan. Utilizing the registered certifiers,
-// it generated new nodes and attestations.
+// it generates new nodes and attestations.
 func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
 	// docChan to collect artifacts
