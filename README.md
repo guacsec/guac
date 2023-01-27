@@ -42,6 +42,12 @@ Here is an overview of the architecture of GUAC:
 - [SLSA](https://github.com/slsa-framework/slsa)
 - [SPDX](https://spdx.dev/specifications/)
 
+Note that GUAC uses software identifiers standards to help link metadata
+together. However, these identifiers are not always available and heuristics
+need to be used to link them. Therefore, there may be unhandled edge cases and
+errors occuring when ingesting data. We appreciate if a comment can be made on
+the [metadata quality issue](https://github.com/guacsec/guac/issues/169).
+
 ## Additional References
 
 - [GUAC Intro Slides](https://docs.google.com/presentation/d/1WF4dsJiwR6URWPgn1aiHAE3iLVl-oGP4SJRWFpcOlao/edit#slide=id.p)
