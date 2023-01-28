@@ -6,6 +6,11 @@ updates:
     schedule:
       interval: weekly
 
+  - package-ecosystem: gomod
+    directory: "/tools"
+    schedule:
+      interval: weekly
+
   # Maintain dependencies for GitHub Actions.
   - package-ecosystem: "github-actions"
     directory: "/"
