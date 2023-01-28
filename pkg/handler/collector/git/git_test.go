@@ -76,7 +76,7 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 		t.Run(tt.name, func(t *testing.T) {
-			// incase the file exists from a failed run, delete it
+			// in case the file exists from a failed run, delete it
 			os.RemoveAll(tt.fields.dir)
 			g := NewGitDocumentCollector(ctx, tt.fields.url, tt.fields.dir, tt.fields.poll, tt.fields.interval)
 

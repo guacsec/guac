@@ -17,6 +17,7 @@ package git_collector
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -73,7 +74,7 @@ func (g *gitDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel
 			}
 			err := g.createOrPull(ctx, logger, docChannel)
 			if err != nil {
-				return err
+				return fmt.Errorf("error creating or pulling git repo: %w", err)
 			}
 			g.lastChecked = time.Now()
 			time.Sleep(g.interval)
@@ -81,7 +82,7 @@ func (g *gitDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel
 	} else {
 		err := g.createOrPull(ctx, logger, docChannel)
 		if err != nil {
-			return err
+			return fmt.Errorf("error creating or pulling git repo: %w", err)
 		}
 		g.lastChecked = time.Now()
 	}
@@ -92,29 +93,29 @@ func (g *gitDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel
 func (g *gitDocumentCollector) createOrPull(ctx context.Context, logger *zap.SugaredLogger, docChannel chan<- *processor.Document) error {
 	exists, err := checkIfDirExists(g.dir)
 	if err != nil {
-		return err
+		return fmt.Errorf("error checking if directory exists: %w", err)
 	}
 
 	if !exists {
 		if err := os.Mkdir(g.dir, os.ModePerm); err != nil {
-			return err
+			return fmt.Errorf("error creating directory: %w", err)
 		}
 		err := cloneRepoToDir(logger, g.url, g.dir)
 		if err != nil {
-			return err
+			return fmt.Errorf("error cloning repo: %w", err)
 		}
 		err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
 		if err != nil {
-			return err
+			return fmt.Errorf("error retrieving artifacts: %w", err)
 		}
 	} else {
 		err := pullRepo(logger, g.dir)
 		if err != nil && err != git.NoErrAlreadyUpToDate {
-			return err
+			return fmt.Errorf("error pulling repo: %w", err)
 		} else if err == nil {
 			err = g.fileCollector.RetrieveArtifacts(ctx, docChannel)
 			if err != nil {
-				return err
+				return fmt.Errorf("error retrieving artifacts: %w", err)
 			}
 		}
 	}
@@ -132,7 +133,7 @@ func checkIfDirExists(name string) (bool, error) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return false, err
+		return false, fmt.Errorf("error checking if directory exists: %v", err)
 	}
 	return true, nil
 }
@@ -147,18 +148,18 @@ func cloneRepoToDir(logger *zap.SugaredLogger, url string, directory string) err
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("error cloning repo: %w", err)
 	}
 
 	// Retrieve the branch being pointed by HEAD
 	ref, err := r.Head()
 	if err != nil {
-		return err
+		return fmt.Errorf("error retrieving HEAD: %w", err)
 	}
 	// Retrieve the commit object
 	commit, err := r.CommitObject(ref.Hash())
 	if err != nil {
-		return err
+		return fmt.Errorf("error retrieving commit object: %w", err)
 	}
 
 	logger.Debugf("Commit: %s", commit)
@@ -169,17 +170,18 @@ func pullRepo(logger *zap.SugaredLogger, directory string) error {
 	// We instantiate a new repository targeting the given path (the .git folder)
 	r, err := git.PlainOpen(directory)
 	if err != nil {
-		return err
+		return fmt.Errorf("error opening repo: %w", err)
 	}
 	// Get the working directory for the repository
 	w, err := r.Worktree()
 	if err != nil {
-		return err
+		return fmt.Errorf("error getting worktree: %w", err)
 	}
 
 	// Pull the latest changes from the origin remote and merge into the current branch
 	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
 	if err != nil {
+		// Only returning err and not using fmt.Errorf() because the error can be git.NoErrAlreadyUpToDate
 		return err
 	}
 
