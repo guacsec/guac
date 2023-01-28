@@ -8,6 +8,13 @@
 - [golang] 1.18+
 - [protoc/protoc-gen-go/protoc-gen-go-grpc]
 
+## Important note
+
+This demo utilizes the [v0.0.1 release] version of GUAC, due to some major
+refactors in GUAC to support a more extensive data model with [GUAC beta], the
+HEAD of the main branch may not expose the same APIs and data structures used
+in this doc.
+
 ## Prepare the working directories
 
 The directories are expected to be located in the same folder, as they depend on
@@ -26,6 +33,13 @@ cd ${GUACSEC_HOME}
 # Clone the Guacsec repositories.
 git clone git@github.com:guacsec/guac-data.git
 git clone git@github.com:guacsec/guac.git
+
+# Set guac to v0.0.1 release
+cd guac
+git checkout tags/v0.0.1 -b v0.0.1-branch
+
+# Reset to ${GUACSEC_HOME}
+cd ${GUACSEC_HOME}
 ```
 
 ## Setup Neo4j
@@ -279,3 +293,5 @@ You can perform a [cleanup] to remove all nodes when done.
 [cleanup]: #Clean-up
 [apoc]: https://neo4j.com/labs/apoc/
 [protoc/protoc-gen-go/protoc-gen-go-grpc]: https://grpc.io/docs/languages/go/quickstart/
+[GUAC beta]: https://github.com/guacsec/guac/issues/251
+[v0.0.1 release]: https://github.com/guacsec/guac/releases/tag/v0.0.1
