@@ -169,7 +169,7 @@ We then run the following commands that finds other containers that share depend
 with the debian image, and counts the number of shared dependencies in descending order.
 
 ```
-MATCH (n:Package{purl:"pkg:oci/debian@sha256:9b0e3056b8cd8630271825665a0613cc27829d6a24906dc0122b3b4834312f7d?repository_url=docker.io/library/debian&tag=latest"}) -[:Contains|DependsOn*1..5]->(d)<-[*1..3]-(o:Package)
+MATCH (n:Package{purl:"pkg:oci/debian:latest?repository_url=docker.io/library",digest:["sha256:9b0e3056b8cd8630271825665a0613cc27829d6a24906dc0122b3b4834312f7d"]}) -[:Contains|DependsOn*1..5]->(d)<-[*1..3]-(o:Package)
 where "CONTAINER" in o.tags
 WITH o.purl AS target, collect(d.name) as shared_dep
 RETURN target, SIZE(shared_dep) as num_deps, shared_dep
