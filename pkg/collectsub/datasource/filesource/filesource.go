@@ -82,13 +82,18 @@ func (d *fileDataSources) GetDataSources() (*datasource.DataSources, error) {
 // serve updates.
 func (d *fileDataSources) DataSourcesUpdate() (<-chan error, error) {
 	updateChan := make(chan error)
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, err
+	}
+	err = watcher.Add(d.filePath)
+	if err != nil {
+		watcher.Close()
+		return nil, err
+	}
+
 	go func() {
-		watcher, err := fsnotify.NewWatcher()
-		if err != nil {
-			updateChan <- err
-		}
 		defer watcher.Close()
-		watcher.Add(d.filePath)
 
 		for {
 			select {
