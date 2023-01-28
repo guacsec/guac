@@ -36,7 +36,7 @@ type FileFormat struct {
 
 // NewFileDataSources creates a datasource which gets its data sources
 // from a configuration file. This configuration file is in YAML and
-// follows the sturcture outlined in the FileFormat struct. An example
+// follows the structure outlined in the FileFormat struct. An example
 // is as follows:
 //
 // sources.yaml
