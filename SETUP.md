@@ -197,7 +197,7 @@ MATCH (n) DETACH DELETE n;
 
 Perform a [cleanup] to remove all nodes and start from scratch.
 
-In this example, we will ingest an SPDX SBOM for a custom vulnerable image that contains `log4j` and `tesx4shell`.
+In this example, we will ingest an SPDX SBOM for a custom vulnerable image that contains `log4j` and `text4shell`.
 
 Running the OSV Certifier will allow all the packages to be evaluated against the OSV database. If a vulnerability
 is found, a vulnerability node will be generated containing the OSV ID that can be queried further for more information.
