@@ -17,18 +17,18 @@ package osv
 
 import (
 	"context"
+	"errors"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 
+	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
-	osv_scanner "golang.org/x/vuln/osv"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -44,7 +44,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		rootComponent interface{}
 		want          []*processor.Document
 		wantErr       bool
-		errMessage    string
+		errMessage    error
 	}{{
 		name:          "query and generate attestation for OSV",
 		rootComponent: testdata.RootComponent,
@@ -91,7 +91,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		name:          "bad type",
 		rootComponent: assembler.AttestationNode{},
 		wantErr:       true,
-		errMessage:    "rootComponent type is not *certifier.Component",
+		errMessage:    ErrOSVComponenetTypeMismatch,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -117,7 +117,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 						return
 					}
 					if err != nil {
-						if !strings.Contains(err.Error(), tt.errMessage) {
+						if !errors.Is(err, tt.errMessage) {
 							t.Errorf("Certify() errored with message = %v, wanted error message %v", err, tt.errMessage)
 						}
 						return
@@ -151,7 +151,7 @@ func Test_createAttestation(t *testing.T) {
 	type args struct {
 		packageURL string
 		digests    []string
-		vulns      []osv_scanner.Entry
+		vulns      []osv_scanner.MinimalVulnerability
 	}
 	tests := []struct {
 		name string
@@ -161,7 +161,7 @@ func Test_createAttestation(t *testing.T) {
 		{
 			name: "default",
 			args: args{
-				vulns: []osv_scanner.Entry{
+				vulns: []osv_scanner.MinimalVulnerability{
 					{
 						ID: "testId",
 					},

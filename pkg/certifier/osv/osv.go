@@ -22,15 +22,14 @@ import (
 	"strings"
 	"time"
 
+	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
-	"github.com/guacsec/guac/pkg/certifier/osv/internal/osv_query"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
 	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
-	osv_scanner "golang.org/x/vuln/osv"
 )
 
 const (
@@ -40,7 +39,7 @@ const (
 	PRODUCER_ID string = "guacsec/guac"
 )
 
-var ErrOSVComponenetTypeMismatch error = fmt.Errorf("rootComponent type is not *certifier.Component")
+var ErrOSVComponenetTypeMismatch error = fmt.Errorf("rootComponent type is not *root_package.PackageComponent")
 
 type osvCertifier struct {
 	rootComponents *root_package.PackageComponent
@@ -76,12 +75,12 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 // these vulnerabilities are passed up until it reaches the root level node which contains an attestation
 // with all the aggregate vulnerabilities. The visited map is used to prevent infinite recursion.
 func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *root_package.PackageComponent, docChannel chan<- *processor.Document,
-	visited map[string]bool) ([]osv_scanner.Entry, error) {
+	visited map[string]bool) ([]osv_scanner.MinimalVulnerability, error) {
 	if visited == nil {
 		return nil, fmt.Errorf("visited map is nil")
 	}
 	packNodes := []assembler.PackageNode{}
-	totalDepVul := []osv_scanner.Entry{}
+	totalDepVul := []osv_scanner.MinimalVulnerability{}
 	if visited[topLevel.Package.Purl] {
 		return nil, nil
 	}
@@ -100,10 +99,11 @@ func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *root_package
 		}
 	}
 
+	packDigest := map[string][]string{}
 	i := 0
 	for i < len(packNodes) {
-		query, lastIndex := getQuery(i, packNodes)
-		vulns, err := getVulnerabilities(query, docChannel)
+		query, lastIndex := getQuery(i, packNodes, packDigest)
+		vulns, err := getVulnerabilities(query, packDigest, docChannel)
 		if err != nil {
 			return nil, err
 		}
@@ -121,15 +121,14 @@ func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *root_package
 	return totalDepVul, nil
 }
 
-func getQuery(lastIndex int, packNodes []assembler.PackageNode) (osv_query.BatchedQuery, int) {
-	var query osv_query.BatchedQuery
+func getQuery(lastIndex int, packNodes []assembler.PackageNode, packDigest map[string][]string) (osv_scanner.BatchedQuery, int) {
+	var query osv_scanner.BatchedQuery
 	var stoppedIndex int
 	j := 1
 	// limit of 1000 per batch query
 	for i := lastIndex; i < len(packNodes); i++ {
-		purlQuery := osv_query.MakePURLRequest(packNodes[i].Purl)
-		purlQuery.Package.PURL = packNodes[i].Purl
-		purlQuery.Package.Digest = packNodes[i].Digest
+		purlQuery := osv_scanner.MakePURLRequest(packNodes[i].Purl)
+		packDigest[packNodes[i].Purl] = packNodes[i].Digest
 		query.Queries = append(query.Queries, purlQuery)
 		j++
 		if j == 1000 {
@@ -141,17 +140,17 @@ func getQuery(lastIndex int, packNodes []assembler.PackageNode) (osv_query.Batch
 	return query, stoppedIndex
 }
 
-func getVulnerabilities(query osv_query.BatchedQuery, docChannel chan<- *processor.Document) ([]osv_scanner.Entry, error) {
+func getVulnerabilities(query osv_scanner.BatchedQuery, packDigest map[string][]string, docChannel chan<- *processor.Document) ([]osv_scanner.MinimalVulnerability, error) {
 
-	resp, err := osv_query.MakeRequest(query)
+	resp, err := osv_scanner.MakeRequest(query)
 	if err != nil {
 		return nil, fmt.Errorf("scan failed: %v", err)
 	}
-	totalDepVul := []osv_scanner.Entry{}
+	totalDepVul := []osv_scanner.MinimalVulnerability{}
 	for i, query := range query.Queries {
 		response := resp.Results[i]
 		totalDepVul = append(totalDepVul, response.Vulns...)
-		doc, err := generateDocument(query.Package.PURL, query.Package.Digest, response.Vulns)
+		doc, err := generateDocument(query.Package.PURL, packDigest[query.Package.PURL], response.Vulns)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +159,7 @@ func getVulnerabilities(query osv_query.BatchedQuery, docChannel chan<- *process
 	return totalDepVul, nil
 }
 
-func generateDocument(purl string, digest []string, vulns []osv_scanner.Entry) (*processor.Document, error) {
+func generateDocument(purl string, digest []string, vulns []osv_scanner.MinimalVulnerability) (*processor.Document, error) {
 	payload, err := json.Marshal(createAttestation(purl, digest, vulns))
 	if err != nil {
 		return nil, err
@@ -177,7 +176,7 @@ func generateDocument(purl string, digest []string, vulns []osv_scanner.Entry) (
 	return doc, nil
 }
 
-func createAttestation(packageURL string, digests []string, vulns []osv_scanner.Entry) *attestation_vuln.VulnerabilityStatement {
+func createAttestation(packageURL string, digests []string, vulns []osv_scanner.MinimalVulnerability) *attestation_vuln.VulnerabilityStatement {
 	currentTime := time.Now()
 	var subjects []intoto.Subject
 
