@@ -134,7 +134,7 @@ In this next query we want to ask what are all the binaries in this container, a
 for each of them, is there any metadata tied to them?
 
 ```
-MATCH p=((n:Package{purl: "pkg:oci/kube-controller-manager-v1.24.6?repository_url=k8s.gcr.io"})-[:DependsOn|Contains*1..5]->(a))
+MATCH p=((n:Package{purl: "pkg:oci/kube-controller-manager-v1.24.6?repository_url=k8s.gcr.io/kube-controller-manager-v1.24.6"})-[:DependsOn|Contains*1..5]->(a))
 WHERE "BINARY" in a.tags
 WITH a,p
 OPTIONAL MATCH pp=((a)-[:DependsOn|Contains*0..5]->()<-[:MetadataFor|Attestation]-(k))

@@ -267,7 +267,7 @@ var (
 	topLevelPack = assembler.PackageNode{
 		Name:   "gcr.io/google-containers/alpine-latest",
 		Digest: nil,
-		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers",
+		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers/alpine-latest",
 		CPEs:   nil,
 		Tags:   []string{"container"},
 		NodeData: *assembler.NewObjectMetadata(
