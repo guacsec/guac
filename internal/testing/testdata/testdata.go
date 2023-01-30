@@ -269,7 +269,7 @@ var (
 		Digest: nil,
 		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers",
 		CPEs:   nil,
-		Tags:   []string{"CONTAINER"},
+		Tags:   []string{"container"},
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
