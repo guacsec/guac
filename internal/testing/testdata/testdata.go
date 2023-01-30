@@ -269,7 +269,7 @@ var (
 		Digest: nil,
 		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers",
 		CPEs:   nil,
-		Tags:   []string{"CONTAINER"},
+		Tags:   []string{"container"},
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{
 				Collector: "TestCollector",
@@ -431,7 +431,7 @@ var (
 		Digest:  []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
 		Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
 		Purl:    "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
-		Tags:    []string{"CONTAINER"},
+		Tags:    []string{"container"},
 		CPEs:    nil,
 		NodeData: *assembler.NewObjectMetadata(
 			processor.SourceInformation{

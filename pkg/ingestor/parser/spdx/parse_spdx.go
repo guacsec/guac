@@ -65,14 +65,14 @@ func (s *spdxParser) getTopLevelPackage() {
 		topPackage := assembler.PackageNode{}
 		topPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
 		topPackage.Name = s.spdxDoc.DocumentName
-		topPackage.Tags = []string{"CONTAINER"}
+		topPackage.Tags = []string{"container"}
 		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
 		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
 	} else if len(splitImage) == 2 {
 		topPackage := assembler.PackageNode{}
 		topPackage.Purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0]
 		topPackage.Name = s.spdxDoc.DocumentName
-		topPackage.Tags = []string{"CONTAINER"}
+		topPackage.Tags = []string{"container"}
 		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
 		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
 	}
@@ -102,7 +102,7 @@ func (s *spdxParser) getPackages() {
 
 func getPackageTags(p assembler.PackageNode) []string {
 	if strings.HasPrefix(p.Purl, "pkg:oci/") {
-		return []string{"CONTAINER"}
+		return []string{"container"}
 	}
 	return nil
 }
