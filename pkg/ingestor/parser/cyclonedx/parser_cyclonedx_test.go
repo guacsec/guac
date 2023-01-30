@@ -224,6 +224,32 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 		wantTag:  "container",
 		wantPurl: "pkg:oci/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=library/debian&tag=",
 	}, {
+		name: "library/debian:latest - purl not provided, registry not provided and repo not provided",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "debian:latest",
+					Type:    cdx.ComponentTypeContainer,
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantTag:  "container",
+		wantPurl: "pkg:oci/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=debian&tag=latest",
+	}, {
+		name: "library/debian - purl not provided, registry not provided and repo not provided, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "debian",
+					Type:    cdx.ComponentTypeContainer,
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantTag:  "container",
+		wantPurl: "pkg:oci/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=debian&tag=",
+	}, {
 		name: "file type - purl nor provided, version provided",
 		cdxBom: &cdx.BOM{
 			Metadata: &cdx.Metadata{
