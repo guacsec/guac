@@ -8,7 +8,7 @@ LDFLAGS="-X $(PKG).version=$(VERSION) -X $(PKG).commit=$(COMMIT) -X $(PKG).date=
 .DEFAULT_GOAL := build
 
 .PHONY: all
-all: test cover fmt lint ci build generate
+all: test cover fmt lint ci build generate generated_up_to_date
 
 .PHONY: test
 test: generate ## Run the unit tests
@@ -27,12 +27,17 @@ fmt: ## Check the formatting
 	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
 	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copyright.sh {} \;)"
 
+## Check that generated files are up to date
+.PHONY: generated_up_to_date
+generated_up_to_date: generate
+	test -z "$(git status -s)"
+
 .PHONY: lint
 lint: ## Run all the linters
 	golangci-lint run ./...
 
 .PHONY: ci
-ci: fmt lint test ## Run all the tests and code checks
+ci: fmt lint test generated_up_to_date ## Run all the tests and code checks
 
 .PHONY: build
 build: generate ## Build a version
