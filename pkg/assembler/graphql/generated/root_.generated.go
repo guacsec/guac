@@ -671,7 +671,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `#
+	{Name: "../schema/schema.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
