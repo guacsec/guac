@@ -8,7 +8,7 @@ LDFLAGS="-X $(PKG).version=$(VERSION) -X $(PKG).commit=$(COMMIT) -X $(PKG).date=
 .DEFAULT_GOAL := build
 
 .PHONY: all
-all: test cover fmt lint ci build generate
+all: test cover fmt lint ci build generate generated_up_to_date
 
 # Run the unit tests
 .PHONY: test
