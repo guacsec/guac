@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -97,8 +98,28 @@ type ComplexityRoot struct {
 		Version       func(childComplexity int) int
 	}
 
+	Package struct {
+		Namespaces func(childComplexity int) int
+		Type       func(childComplexity int) int
+	}
+
+	PackageName struct {
+		Name     func(childComplexity int) int
+		Versions func(childComplexity int) int
+	}
+
+	PackageNamespace struct {
+		Names     func(childComplexity int) int
+		Namespace func(childComplexity int) int
+	}
+
+	PackageVersion struct {
+		Version func(childComplexity int) int
+	}
+
 	Query struct {
 		Artifacts func(childComplexity int) int
+		Packages  func(childComplexity int, pkgSpec *model.PkgSpec) int
 	}
 
 	ScorecardPayload struct {
@@ -458,12 +479,73 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OldPackage.Version(childComplexity), true
 
+	case "Package.namespaces":
+		if e.complexity.Package.Namespaces == nil {
+			break
+		}
+
+		return e.complexity.Package.Namespaces(childComplexity), true
+
+	case "Package.type":
+		if e.complexity.Package.Type == nil {
+			break
+		}
+
+		return e.complexity.Package.Type(childComplexity), true
+
+	case "PackageName.name":
+		if e.complexity.PackageName.Name == nil {
+			break
+		}
+
+		return e.complexity.PackageName.Name(childComplexity), true
+
+	case "PackageName.versions":
+		if e.complexity.PackageName.Versions == nil {
+			break
+		}
+
+		return e.complexity.PackageName.Versions(childComplexity), true
+
+	case "PackageNamespace.names":
+		if e.complexity.PackageNamespace.Names == nil {
+			break
+		}
+
+		return e.complexity.PackageNamespace.Names(childComplexity), true
+
+	case "PackageNamespace.namespace":
+		if e.complexity.PackageNamespace.Namespace == nil {
+			break
+		}
+
+		return e.complexity.PackageNamespace.Namespace(childComplexity), true
+
+	case "PackageVersion.version":
+		if e.complexity.PackageVersion.Version == nil {
+			break
+		}
+
+		return e.complexity.PackageVersion.Version(childComplexity), true
+
 	case "Query.artifacts":
 		if e.complexity.Query.Artifacts == nil {
 			break
 		}
 
 		return e.complexity.Query.Artifacts(childComplexity), true
+
+	case "Query.packages":
+		if e.complexity.Query.Packages == nil {
+			break
+		}
+
+		args, err := ec.field_Query_packages_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(*model.PkgSpec)), true
 
 	case "ScorecardPayload.aggregate_score":
 		if e.complexity.ScorecardPayload.AggregateScore == nil {
@@ -626,7 +708,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputPkgSpec,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -671,6 +755,114 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/package.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the package trie/tree. This tree closely matches
+# the pURL specification (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst)
+# but deviates from it where GUAC rules state otherwise. In principle, we want
+# this to represent a trie for packages, so information that represents a
+# smaller collection of packages is being pushed downwards in the trie.
+
+"""
+Package represents a package.
+
+In the pURL representation, each Package matches a ` + "`" + `pkg:<type>` + "`" + ` partial pURL.
+The ` + "`" + `type` + "`" + ` field matches the pURL types but we might also use ` + "`" + `"guac"` + "`" + ` for the
+cases where the pURL representation is not complete or when we have custom
+rules.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same ` + "`" + `type` + "`" + ` value.
+
+Also note that this is named ` + "`" + `Package` + "`" + `, not ` + "`" + `PackageType` + "`" + `. This is only to make
+queries more readable.
+"""
+type Package {
+  type: String!
+  namespaces: [PackageNamespace!]!
+}
+
+"""
+PackageNamespace is a namespace for packages.
+
+In the pURL representation, each PackageNamespace matches the
+` + "`" + `pgk:<type>/<namespace>/` + "`" + ` partial pURL.
+
+Namespaces are optional and type specific. Because they are optional, we use
+empty string to denote missing namespaces.
+"""
+type PackageNamespace {
+  namespace: String!
+  names: [PackageName!]!
+}
+
+"""
+PackageName is a name for packages.
+
+In the pURL representation, each PackageName matches the
+` + "`" + `pgk:<type>/<namespace>/<name>` + "`" + ` partial pURL.
+
+Names are always mandatory.
+
+This is the first node in the trie that can be referred to by other parts of
+GUAC.
+"""
+type PackageName {
+  name: String!
+  versions: [PackageVersion!]!
+}
+
+"""
+PackageVersion is a package version.
+
+In the pURL representation, each PackageName matches the
+` + "`" + `pgk:<type>/<namespace>/<name>@<version>` + "`" + ` partial pURL.
+
+Versions are optional and each Package type defines own rules for handling them.
+For this level of GUAC, these are just opaque strings.
+
+This node can be referred to by other parts of GUAC.
+"""
+type PackageVersion {
+  version: String!
+}
+
+"""
+PkgSpec allows filtering the list of packages to return.
+
+Each field matches a qualifier from pURL. Use ` + "`" + `null` + "`" + ` to match on all values at
+that level. For example, to get all packages in GUAC backend, use a PkgSpec
+where every field is ` + "`" + `null` + "`" + `.
+
+Empty string at a field means matching with the empty string.
+"""
+input PkgSpec {
+  type: String
+  namespace: String
+  name: String
+  version: String
+}
+
+extend type Query {
+  "Returns all packages"
+  packages(pkgSpec: PkgSpec): [Package!]!
+}
+`, BuiltIn: false},
 	{Name: "../schema/schema.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
