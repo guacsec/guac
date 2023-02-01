@@ -103,7 +103,10 @@ func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	var packages []*model.Package
 	for _, p := range demo.packages {
 		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
-			packages = append(packages, filterNamespace(p, pkgSpec))
+			newPkg := filterNamespace(p, pkgSpec)
+			if newPkg != nil {
+				packages = append(packages, newPkg)
+			}
 		}
 	}
 	return packages, nil
@@ -113,8 +116,14 @@ func filterNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package 
 	var namespaces []*model.PackageNamespace
 	for _, ns := range pkg.Namespaces {
 		if pkgSpec.Namespace == nil || ns.Namespace == *pkgSpec.Namespace {
-			namespaces = append(namespaces, filterName(ns, pkgSpec))
+			newNs := filterName(ns, pkgSpec)
+			if newNs != nil {
+				namespaces = append(namespaces, newNs)
+			}
 		}
+	}
+	if len(namespaces) == 0 {
+		return nil
 	}
 	return &model.Package{
 		Type:       pkg.Type,
@@ -126,8 +135,14 @@ func filterName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.Packa
 	var names []*model.PackageName
 	for _, n := range ns.Names {
 		if pkgSpec.Name == nil || n.Name == *pkgSpec.Name {
-			names = append(names, filterVersion(n, pkgSpec))
+			newN := filterVersion(n, pkgSpec)
+			if newN != nil {
+				names = append(names, newN)
+			}
 		}
+	}
+	if len(names) == 0 {
+		return nil
 	}
 	return &model.PackageNamespace{
 		Namespace: ns.Namespace,
@@ -141,6 +156,9 @@ func filterVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageN
 		if pkgSpec.Version == nil || v.Version == *pkgSpec.Version {
 			versions = append(versions, v)
 		}
+	}
+	if len(versions) == 0 {
+		return nil
 	}
 	return &model.PackageName{
 		Name:     n.Name,
