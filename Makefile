@@ -10,32 +10,44 @@ LDFLAGS="-X $(PKG).version=$(VERSION) -X $(PKG).commit=$(COMMIT) -X $(PKG).date=
 .PHONY: all
 all: test cover fmt lint ci build generate
 
+# Run the unit tests
 .PHONY: test
-test: generate ## Run the unit tests
+test: generate
 	echo 'mode: atomic' > coverage.txt && go test -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
 
+# Run the integration tests
 .PHONY: integration-test
-integration-test: generate ## Run the integration tests
+integration-test: generate
 	go test -tags=integration ./...
 
+# Run all the tests and opens the coverage report
 .PHONY: cover
-cover: test ## Run all the tests and opens the coverage report
+cover: test
 	go tool cover -html=coverage.txt
 
+# Check the formatting
 .PHONY: fmt
-fmt: ## Check the formatting
+fmt:
 	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
 	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copyright.sh {} \;)"
 
+# Check that generated files are up to date
+.PHONY: generated_up_to_date
+generated_up_to_date: generate
+	test -z "$(git status -s)"
+
+# Run all the linters
 .PHONY: lint
-lint: ## Run all the linters
+lint:
 	golangci-lint run ./...
 
+# Run all the tests and code checks
 .PHONY: ci
-ci: fmt lint test ## Run all the tests and code checks
+ci: fmt lint test generated_up_to_date
 
+# Build a version
 .PHONY: build
-build: generate ## Build a version
+build: generate
 	go build -ldflags ${LDFLAGS} -o bin/collector cmd/collector/main.go
 	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
@@ -47,8 +59,9 @@ proto: pkg/collectsub/collectsub/collectsub.proto
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		$^
 
+# Remove temporary files
 .PHONY: clean
-clean: ## Remove temporary files
+clean:
 	go clean
 
 # Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -56,12 +69,16 @@ clean: ## Remove temporary files
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+#  Run all the formatting tasks
+.PHONY: format
+format: fmt-md
 
-.PHONY:format fmt-md
-format: fmt-md ##  Run all the formatting tasks
-fmt-md: ## Format all the markdown files
+# Format all the markdown files
+.PHONY: fmt-md
+fmt-md:
 	npx --yes prettier --write --prose-wrap always **/*.md
 
-.PHONY: generate # generate code from autogen tools (gqlgen, genqlclient)
+# generate code from autogen tools (gqlgen, genqlclient)
+.PHONY: generate
 generate:
 	go generate ./...
