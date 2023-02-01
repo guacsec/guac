@@ -242,6 +242,8 @@ func (ec *executionContext) fieldContext_PackageName_versions(ctx context.Contex
 			switch field.Name {
 			case "version":
 				return ec.fieldContext_PackageVersion_version(ctx, field)
+			case "qualifiers":
+				return ec.fieldContext_PackageVersion_qualifiers(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PackageVersion", field.Name)
 		},
@@ -343,6 +345,94 @@ func (ec *executionContext) fieldContext_PackageNamespace_names(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _PackageQualifier_key(ctx context.Context, field graphql.CollectedField, obj *model.PackageQualifier) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PackageQualifier_key(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PackageQualifier_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PackageQualifier",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PackageQualifier_value(ctx context.Context, field graphql.CollectedField, obj *model.PackageQualifier) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PackageQualifier_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PackageQualifier_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PackageQualifier",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PackageVersion_version(ctx context.Context, field graphql.CollectedField, obj *model.PackageVersion) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PackageVersion_version(ctx, field)
 	if err != nil {
@@ -382,6 +472,56 @@ func (ec *executionContext) fieldContext_PackageVersion_version(ctx context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PackageVersion_qualifiers(ctx context.Context, field graphql.CollectedField, obj *model.PackageVersion) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PackageVersion_qualifiers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Qualifiers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PackageQualifier)
+	fc.Result = res
+	return ec.marshalNPackageQualifier2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PackageVersion_qualifiers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PackageVersion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "key":
+				return ec.fieldContext_PackageQualifier_key(ctx, field)
+			case "value":
+				return ec.fieldContext_PackageQualifier_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PackageQualifier", field.Name)
 		},
 	}
 	return fc, nil
@@ -578,6 +718,42 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputPackageQualifierInput(ctx context.Context, obj interface{}) (model.PackageQualifierInput, error) {
+	var it model.PackageQualifierInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"key", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "key":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+			it.Key, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj interface{}) (model.PkgSpec, error) {
 	var it model.PkgSpec
 	asMap := map[string]interface{}{}
@@ -585,7 +761,7 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"type", "namespace", "name", "version"}
+	fieldsInOrder := [...]string{"type", "namespace", "name", "version", "qualifiers"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -621,6 +797,14 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
 			it.Version, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "qualifiers":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("qualifiers"))
+			it.Qualifiers, err = ec.unmarshalOPackageQualifierInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -743,6 +927,41 @@ func (ec *executionContext) _PackageNamespace(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var packageQualifierImplementors = []string{"PackageQualifier"}
+
+func (ec *executionContext) _PackageQualifier(ctx context.Context, sel ast.SelectionSet, obj *model.PackageQualifier) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, packageQualifierImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PackageQualifier")
+		case "key":
+
+			out.Values[i] = ec._PackageQualifier_key(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+
+			out.Values[i] = ec._PackageQualifier_value(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var packageVersionImplementors = []string{"PackageVersion"}
 
 func (ec *executionContext) _PackageVersion(ctx context.Context, sel ast.SelectionSet, obj *model.PackageVersion) graphql.Marshaler {
@@ -756,6 +975,13 @@ func (ec *executionContext) _PackageVersion(ctx context.Context, sel ast.Selecti
 		case "version":
 
 			out.Values[i] = ec._PackageVersion_version(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "qualifiers":
+
+			out.Values[i] = ec._PackageVersion_qualifiers(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -995,6 +1221,65 @@ func (ec *executionContext) marshalNPackageNamespace2ᚖgithubᚗcomᚋguacsec�
 	return ec._PackageNamespace(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPackageQualifier2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PackageQualifier) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPackageQualifier2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifier(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPackageQualifier2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifier(ctx context.Context, sel ast.SelectionSet, v *model.PackageQualifier) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PackageQualifier(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNPackageQualifierInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInput(ctx context.Context, v interface{}) (*model.PackageQualifierInput, error) {
+	res, err := ec.unmarshalInputPackageQualifierInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNPackageVersion2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageVersionᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PackageVersion) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -1047,6 +1332,26 @@ func (ec *executionContext) marshalNPackageVersion2ᚖgithubᚗcomᚋguacsecᚋg
 		return graphql.Null
 	}
 	return ec._PackageVersion(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOPackageQualifierInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputᚄ(ctx context.Context, v interface{}) ([]*model.PackageQualifierInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.PackageQualifierInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNPackageQualifierInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx context.Context, v interface{}) (*model.PkgSpec, error) {

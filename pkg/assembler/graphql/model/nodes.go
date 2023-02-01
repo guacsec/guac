@@ -22,7 +22,7 @@ type Package struct {
 // PackageName is a name for packages.
 //
 // In the pURL representation, each PackageName matches the
-// `pgk:<type>/<namespace>/<name>` partial pURL.
+// `pgk:<type>/<namespace>/<name>` pURL.
 //
 // Names are always mandatory.
 //
@@ -45,17 +45,48 @@ type PackageNamespace struct {
 	Names     []*PackageName `json:"names"`
 }
 
+// PackageQualifier is a qualifier for a package, a key-value pair.
+//
+// In the pURL representation, it is a part of the `<qualifiers>` part of the
+// `pgk:<type>/<namespace>/<name>@<version>?<qualifiers>` pURL.
+//
+// Qualifiers are optional, each Package type defines own rules for handling them,
+// and multiple qualifiers could be attached to the same package.
+//
+// This node cannot be directly referred by other parts of GUAC.
+type PackageQualifier struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// PackageQualifierInput is the same as PackageQualifier, but usable as query
+// input.
+//
+// GraphQL does not allow input types to contain composite types and does not allow
+// composite types to contain input types. So, although in this case these two
+// types are semantically the same, we have to duplicate the definition.
+//
+// Keys are mandatory, but values could also be `null` if we want to match all
+// values for a specific key.
+//
+// TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
+type PackageQualifierInput struct {
+	Key   string  `json:"key"`
+	Value *string `json:"value"`
+}
+
 // PackageVersion is a package version.
 //
 // In the pURL representation, each PackageName matches the
-// `pgk:<type>/<namespace>/<name>@<version>` partial pURL.
+// `pgk:<type>/<namespace>/<name>@<version>` pURL.
 //
 // Versions are optional and each Package type defines own rules for handling them.
 // For this level of GUAC, these are just opaque strings.
 //
 // This node can be referred to by other parts of GUAC.
 type PackageVersion struct {
-	Version string `json:"version"`
+	Version    string              `json:"version"`
+	Qualifiers []*PackageQualifier `json:"qualifiers"`
 }
 
 // PkgSpec allows filtering the list of packages to return.
@@ -64,10 +95,12 @@ type PackageVersion struct {
 // that level. For example, to get all packages in GUAC backend, use a PkgSpec
 // where every field is `null`.
 //
-// Empty string at a field means matching with the empty string.
+// Empty string at a field means matching with the empty string. If passing in
+// qualifiers, all of the values in the list must match.
 type PkgSpec struct {
-	Type      *string `json:"type"`
-	Namespace *string `json:"namespace"`
-	Name      *string `json:"name"`
-	Version   *string `json:"version"`
+	Type       *string                  `json:"type"`
+	Namespace  *string                  `json:"namespace"`
+	Name       *string                  `json:"name"`
+	Version    *string                  `json:"version"`
+	Qualifiers []*PackageQualifierInput `json:"qualifiers"`
 }
