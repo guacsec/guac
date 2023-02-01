@@ -306,7 +306,7 @@ func (c *demoClient) Artifacts(ctx context.Context) ([]*model.Artifact, error) {
 
 func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	var packages []*model.Package
-	for _, p := range demo.packages {
+	for _, p := range c.packages {
 		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
 			newPkg := filterNamespace(p, pkgSpec)
 			if newPkg != nil {
