@@ -101,54 +101,61 @@ func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []ass
 }
 
 func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
+	if cdxBom.Metadata.Component == nil {
+		return
+	}
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
-	if cdxBom.Metadata.Component != nil {
-		rootPackage := assembler.PackageNode{}
-		rootPackage.Name = cdxBom.Metadata.Component.Name
-		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
+	rootPackage := assembler.PackageNode{}
+	rootPackage.Name = cdxBom.Metadata.Component.Name
+	rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
+
+	switch cdxBom.Metadata.Component.Type {
+	case cdx.ComponentTypeContainer:
+		splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
+		const (
+			ociPrefix        = "pkg:oci/"
+			repositoryURLKey = "?repository_url="
+			tagKey           = "&tag="
+		)
+
+		splitTag := strings.Split(splitImage[len(splitImage)-1], ":")
+		var repositoryURL string
+		var tag string
+
+		switch len(splitImage) {
+		case 3:
+			repositoryURL = splitImage[0] + "/" + splitImage[1] + "/" + splitTag[0]
+		case 2:
+			repositoryURL = splitImage[0] + "/" + splitTag[0]
+		default:
+			repositoryURL = ""
+		}
+
+		if len(splitTag) == 2 {
+			tag = splitTag[1]
+		}
+
+		rootPackage.Purl = fmt.Sprintf("%s%s@%s%s%s%s%s", ociPrefix, splitTag[0],
+			cdxBom.Metadata.Component.Version, repositoryURLKey, repositoryURL, tagKey, tag)
+	case cdx.ComponentTypeFile:
+		// example: file type ("/home/work/test/build/webserver/")
+		rootPackage.Purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
+	default:
 		if cdxBom.Metadata.Component.PackageURL != "" {
 			rootPackage.Purl = cdxBom.Metadata.Component.PackageURL
 			rootPackage.Version = cdxBom.Metadata.Component.Version
 			rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
-		} else {
-			if cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
-				splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
-				if len(splitImage) == 3 {
-					// example: gcr.io/distroless/static:nonroot
-					splitTag := strings.Split(splitImage[2], ":")
-					if len(splitTag) == 2 {
-						rootPackage.Purl = "pkg:oci/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "/" + splitTag[0] + "&tag=" + splitTag[1]
-					} else {
-						// no tag specified
-						rootPackage.Purl = "pkg:oci/" + splitImage[2] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "/" + splitImage[2] + "&tag="
-					}
-				} else if len(splitImage) == 2 {
-					// example: library/debian:latest
-					splitTag := strings.Split(splitImage[1], ":")
-					if len(splitTag) == 2 {
-						rootPackage.Purl = "pkg:oci/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitTag[0] + "&tag=" + splitTag[1]
-					} else {
-						// no tag specified
-						rootPackage.Purl = "pkg:oci/" + splitImage[1] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "&tag="
-					}
-				}
-			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
-				// example: file type ("/home/work/test/build/webserver/")
-				rootPackage.Purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
-			}
-			rootPackage.Version = cdxBom.Metadata.Component.Version
-			rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
-			rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
-		}
-		c.rootComponent = component{
-			curPackage:  rootPackage,
-			depPackages: []*component{},
 		}
 	}
+	rootPackage.Version = cdxBom.Metadata.Component.Version
+	rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
+	rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
+
+	c.rootComponent = component{
+		curPackage:  rootPackage,
+		depPackages: []*component{},
+	}
+
 }
 
 func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
