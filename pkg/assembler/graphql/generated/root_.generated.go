@@ -84,7 +84,7 @@ type ComplexityRoot struct {
 		Type          func(childComplexity int) int
 	}
 
-	Package struct {
+	OldPackage struct {
 		CPEs          func(childComplexity int) int
 		CollectorInfo func(childComplexity int) int
 		Contains      func(childComplexity int) int
@@ -388,75 +388,75 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metadata.Type(childComplexity), true
 
-	case "Package.CPEs":
-		if e.complexity.Package.CPEs == nil {
+	case "OldPackage.CPEs":
+		if e.complexity.OldPackage.CPEs == nil {
 			break
 		}
 
-		return e.complexity.Package.CPEs(childComplexity), true
+		return e.complexity.OldPackage.CPEs(childComplexity), true
 
-	case "Package.collectorInfo":
-		if e.complexity.Package.CollectorInfo == nil {
+	case "OldPackage.collectorInfo":
+		if e.complexity.OldPackage.CollectorInfo == nil {
 			break
 		}
 
-		return e.complexity.Package.CollectorInfo(childComplexity), true
+		return e.complexity.OldPackage.CollectorInfo(childComplexity), true
 
-	case "Package.contains":
-		if e.complexity.Package.Contains == nil {
+	case "OldPackage.contains":
+		if e.complexity.OldPackage.Contains == nil {
 			break
 		}
 
-		return e.complexity.Package.Contains(childComplexity), true
+		return e.complexity.OldPackage.Contains(childComplexity), true
 
-	case "Package.dependsOn":
-		if e.complexity.Package.DependsOn == nil {
+	case "OldPackage.dependsOn":
+		if e.complexity.OldPackage.DependsOn == nil {
 			break
 		}
 
-		return e.complexity.Package.DependsOn(childComplexity), true
+		return e.complexity.OldPackage.DependsOn(childComplexity), true
 
-	case "Package.digest":
-		if e.complexity.Package.Digest == nil {
+	case "OldPackage.digest":
+		if e.complexity.OldPackage.Digest == nil {
 			break
 		}
 
-		return e.complexity.Package.Digest(childComplexity), true
+		return e.complexity.OldPackage.Digest(childComplexity), true
 
-	case "Package.name":
-		if e.complexity.Package.Name == nil {
+	case "OldPackage.name":
+		if e.complexity.OldPackage.Name == nil {
 			break
 		}
 
-		return e.complexity.Package.Name(childComplexity), true
+		return e.complexity.OldPackage.Name(childComplexity), true
 
-	case "Package.purl":
-		if e.complexity.Package.Purl == nil {
+	case "OldPackage.purl":
+		if e.complexity.OldPackage.Purl == nil {
 			break
 		}
 
-		return e.complexity.Package.Purl(childComplexity), true
+		return e.complexity.OldPackage.Purl(childComplexity), true
 
-	case "Package.sourceInfo":
-		if e.complexity.Package.SourceInfo == nil {
+	case "OldPackage.sourceInfo":
+		if e.complexity.OldPackage.SourceInfo == nil {
 			break
 		}
 
-		return e.complexity.Package.SourceInfo(childComplexity), true
+		return e.complexity.OldPackage.SourceInfo(childComplexity), true
 
-	case "Package.tags":
-		if e.complexity.Package.Tags == nil {
+	case "OldPackage.tags":
+		if e.complexity.OldPackage.Tags == nil {
 			break
 		}
 
-		return e.complexity.Package.Tags(childComplexity), true
+		return e.complexity.OldPackage.Tags(childComplexity), true
 
-	case "Package.version":
-		if e.complexity.Package.Version == nil {
+	case "OldPackage.version":
+		if e.complexity.OldPackage.Version == nil {
 			break
 		}
 
-		return e.complexity.Package.Version(childComplexity), true
+		return e.complexity.OldPackage.Version(childComplexity), true
 
 	case "Query.artifacts":
 		if e.complexity.Query.Artifacts == nil {
@@ -707,7 +707,7 @@ interface NodeInfo {
 }
 
 """
-Artifact nodes represent artifacts. These are files on disk (cf. Package).
+Artifact nodes represent artifacts. These are files on disk (cf. OldPackage).
 There could be artifacts not included in any package.
 """
 type Artifact implements NodeInfo {
@@ -735,13 +735,13 @@ type Artifact implements NodeInfo {
 }
 
 """
-Package nodes represent packages. These are packages from a package repository
+OldPackage nodes represent packages. These are packages from a package repository
 (cf. Artifact). Upon installing a package one or multiple artifacts could be
 generated.
 """
-type Package implements NodeInfo {
+type OldPackage implements NodeInfo {
   """
-  purl is the Package identifier, in purl format. Uniquely identifies the package.
+  purl is the OldPackage identifier, in purl format. Uniquely identifies the package.
   """
   purl: String!
   "name of the package"
@@ -767,7 +767,7 @@ type Package implements NodeInfo {
 """
 Currently artifacts and packages can depend on each other. Hence, we need a union for this edge.
 """
-union ArtifactOrPackage = Artifact | Package
+union ArtifactOrPackage = Artifact | OldPackage
 
 """
 Builder nodes represent builders of artifacts (from provenance documents).

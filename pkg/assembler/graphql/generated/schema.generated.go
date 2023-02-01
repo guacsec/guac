@@ -1482,8 +1482,8 @@ func (ec *executionContext) fieldContext_Metadata_attachedTo(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_purl(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_purl(ctx, field)
+func (ec *executionContext) _OldPackage_purl(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_purl(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1513,9 +1513,9 @@ func (ec *executionContext) _Package_purl(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_purl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_purl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1526,8 +1526,8 @@ func (ec *executionContext) fieldContext_Package_purl(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_name(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_name(ctx, field)
+func (ec *executionContext) _OldPackage_name(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1554,9 +1554,9 @@ func (ec *executionContext) _Package_name(ctx context.Context, field graphql.Col
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1567,8 +1567,8 @@ func (ec *executionContext) fieldContext_Package_name(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_version(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_version(ctx, field)
+func (ec *executionContext) _OldPackage_version(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_version(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1595,9 +1595,9 @@ func (ec *executionContext) _Package_version(ctx context.Context, field graphql.
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_version(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_version(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1608,8 +1608,8 @@ func (ec *executionContext) fieldContext_Package_version(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_digest(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_digest(ctx, field)
+func (ec *executionContext) _OldPackage_digest(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_digest(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1639,9 +1639,9 @@ func (ec *executionContext) _Package_digest(ctx context.Context, field graphql.C
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_digest(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_digest(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1652,8 +1652,8 @@ func (ec *executionContext) fieldContext_Package_digest(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_CPEs(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_CPEs(ctx, field)
+func (ec *executionContext) _OldPackage_CPEs(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_CPEs(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1683,9 +1683,9 @@ func (ec *executionContext) _Package_CPEs(ctx context.Context, field graphql.Col
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_CPEs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_CPEs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1696,8 +1696,8 @@ func (ec *executionContext) fieldContext_Package_CPEs(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_tags(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_tags(ctx, field)
+func (ec *executionContext) _OldPackage_tags(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_tags(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1727,9 +1727,9 @@ func (ec *executionContext) _Package_tags(ctx context.Context, field graphql.Col
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_tags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_tags(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1740,8 +1740,8 @@ func (ec *executionContext) fieldContext_Package_tags(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_sourceInfo(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_sourceInfo(ctx, field)
+func (ec *executionContext) _OldPackage_sourceInfo(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_sourceInfo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1768,9 +1768,9 @@ func (ec *executionContext) _Package_sourceInfo(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_sourceInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_sourceInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1781,8 +1781,8 @@ func (ec *executionContext) fieldContext_Package_sourceInfo(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_collectorInfo(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_collectorInfo(ctx, field)
+func (ec *executionContext) _OldPackage_collectorInfo(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_collectorInfo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1809,9 +1809,9 @@ func (ec *executionContext) _Package_collectorInfo(ctx context.Context, field gr
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_collectorInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_collectorInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1822,8 +1822,8 @@ func (ec *executionContext) fieldContext_Package_collectorInfo(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_contains(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_contains(ctx, field)
+func (ec *executionContext) _OldPackage_contains(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_contains(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1853,9 +1853,9 @@ func (ec *executionContext) _Package_contains(ctx context.Context, field graphql
 	return ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_contains(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_contains(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1882,8 +1882,8 @@ func (ec *executionContext) fieldContext_Package_contains(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Package_dependsOn(ctx context.Context, field graphql.CollectedField, obj *model.Package) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Package_dependsOn(ctx, field)
+func (ec *executionContext) _OldPackage_dependsOn(ctx context.Context, field graphql.CollectedField, obj *model.OldPackage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OldPackage_dependsOn(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1913,9 +1913,9 @@ func (ec *executionContext) _Package_dependsOn(ctx context.Context, field graphq
 	return ec.marshalNArtifactOrPackage2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactOrPackageᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Package_dependsOn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OldPackage_dependsOn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Package",
+		Object:     "OldPackage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3121,13 +3121,13 @@ func (ec *executionContext) _ArtifactOrPackage(ctx context.Context, sel ast.Sele
 			return graphql.Null
 		}
 		return ec._Artifact(ctx, sel, obj)
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
+	case model.OldPackage:
+		return ec._OldPackage(ctx, sel, &obj)
+	case *model.OldPackage:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._Package(ctx, sel, obj)
+		return ec._OldPackage(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -3176,13 +3176,13 @@ func (ec *executionContext) _NodeInfo(ctx context.Context, sel ast.SelectionSet,
 			return graphql.Null
 		}
 		return ec._Artifact(ctx, sel, obj)
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
+	case model.OldPackage:
+		return ec._OldPackage(ctx, sel, &obj)
+	case *model.OldPackage:
 		if obj == nil {
 			return graphql.Null
 		}
-		return ec._Package(ctx, sel, obj)
+		return ec._OldPackage(ctx, sel, obj)
 	case model.Builder:
 		return ec._Builder(ctx, sel, &obj)
 	case *model.Builder:
@@ -3509,70 +3509,70 @@ func (ec *executionContext) _Metadata(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var packageImplementors = []string{"Package", "NodeInfo", "ArtifactOrPackage"}
+var oldPackageImplementors = []string{"OldPackage", "NodeInfo", "ArtifactOrPackage"}
 
-func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, obj *model.Package) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, packageImplementors)
+func (ec *executionContext) _OldPackage(ctx context.Context, sel ast.SelectionSet, obj *model.OldPackage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oldPackageImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Package")
+			out.Values[i] = graphql.MarshalString("OldPackage")
 		case "purl":
 
-			out.Values[i] = ec._Package_purl(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_purl(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "name":
 
-			out.Values[i] = ec._Package_name(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_name(ctx, field, obj)
 
 		case "version":
 
-			out.Values[i] = ec._Package_version(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_version(ctx, field, obj)
 
 		case "digest":
 
-			out.Values[i] = ec._Package_digest(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_digest(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "CPEs":
 
-			out.Values[i] = ec._Package_CPEs(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_CPEs(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "tags":
 
-			out.Values[i] = ec._Package_tags(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_tags(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "sourceInfo":
 
-			out.Values[i] = ec._Package_sourceInfo(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_sourceInfo(ctx, field, obj)
 
 		case "collectorInfo":
 
-			out.Values[i] = ec._Package_collectorInfo(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_collectorInfo(ctx, field, obj)
 
 		case "contains":
 
-			out.Values[i] = ec._Package_contains(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_contains(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "dependsOn":
 
-			out.Values[i] = ec._Package_dependsOn(ctx, field, obj)
+			out.Values[i] = ec._OldPackage_dependsOn(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

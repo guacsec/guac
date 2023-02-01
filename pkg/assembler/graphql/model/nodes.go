@@ -28,7 +28,7 @@ type NodeInfo interface {
 	GetCollectorInfo() *string
 }
 
-// Artifact nodes represent artifacts. These are files on disk (cf. Package).
+// Artifact nodes represent artifacts. These are files on disk (cf. OldPackage).
 // There could be artifacts not included in any package.
 type Artifact struct {
 	// digest is the identifier of an artifact. It is in the format
@@ -162,11 +162,11 @@ func (this Metadata) GetSourceInfo() *string { return this.SourceInfo }
 // from
 func (this Metadata) GetCollectorInfo() *string { return this.CollectorInfo }
 
-// Package nodes represent packages. These are packages from a package repository
+// OldPackage nodes represent packages. These are packages from a package repository
 // (cf. Artifact). Upon installing a package one or multiple artifacts could be
 // generated.
-type Package struct {
-	// purl is the Package identifier, in purl format. Uniquely identifies the package.
+type OldPackage struct {
+	// purl is the OldPackage identifier, in purl format. Uniquely identifies the package.
 	Purl string `json:"purl"`
 	// name of the package
 	Name *string `json:"name"`
@@ -184,17 +184,17 @@ type Package struct {
 	DependsOn     []ArtifactOrPackage `json:"dependsOn"`
 }
 
-func (Package) IsNodeInfo() {}
+func (OldPackage) IsNodeInfo() {}
 
 // sourceInfo is the file location for the document from which the node was
 // created.
-func (this Package) GetSourceInfo() *string { return this.SourceInfo }
+func (this OldPackage) GetSourceInfo() *string { return this.SourceInfo }
 
 // collectorInfo is the collector from which the file that created the node came
 // from
-func (this Package) GetCollectorInfo() *string { return this.CollectorInfo }
+func (this OldPackage) GetCollectorInfo() *string { return this.CollectorInfo }
 
-func (Package) IsArtifactOrPackage() {}
+func (OldPackage) IsArtifactOrPackage() {}
 
 // ScorecardPayload are payloads of Scorecards metadata.
 type ScorecardPayload struct {
