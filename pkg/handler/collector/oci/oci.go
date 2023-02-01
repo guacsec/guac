@@ -54,28 +54,28 @@ func NewOCICollector(ctx context.Context, repoTags map[string][]string, poll boo
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	if o.poll {
-		for {
-			for repo, tags := range o.repoTags {
-				// when polling if tags are specified, it will never get any new tags
-				// that might be added after the fact. Defeating the point of the polling
-				if len(tags) > 0 {
-					return errors.New("image tag should not specified when using polling")
-				}
-				err := o.getTagsAndFetch(ctx, repo, tags, docChannel)
-				if err != nil {
-					return err
-				}
-				// set interval to about 5 mins or more
-				time.Sleep(o.interval)
+	if docChannel == nil {
+		return fmt.Errorf("nil channel passed to %s", OCICollector)
+	}
+
+	for {
+		for repo, tags := range o.repoTags {
+			if len(tags) > 0 && o.poll {
+				return errors.New("image tag should not specified when using polling")
+			}
+			if err := o.getTagsAndFetch(ctx, repo, tags, docChannel); err != nil {
+				return fmt.Errorf("fetching artifacts for %s: %w", repo, err)
 			}
 		}
-	} else {
-		for repo, tags := range o.repoTags {
-			err := o.getTagsAndFetch(ctx, repo, tags, docChannel)
-			if err != nil {
-				return err
-			}
+		if !o.poll {
+			break
+		}
+		select {
+		case <-ctx.Done():
+			// This way the function will not block for a fixed
+			// interval and can be stopped immediately when the context is canceled.
+			return ctx.Err()
+		case <-time.After(o.interval):
 		}
 	}
 
@@ -83,55 +83,65 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 }
 
 func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []string, docChannel chan<- *processor.Document) error {
-	rcOpts := []regclient.Opt{}
-	rcOpts = append(rcOpts, regclient.WithDockerCreds())
-	rcOpts = append(rcOpts, regclient.WithDockerCerts())
+	if repo == "" {
+		return errors.New("repository name not specified")
+	}
 
+	if docChannel == nil {
+		return errors.New("invalid document channel")
+	}
+	excludedSuffixes := []string{"sbom", "att", "sig"}
+
+	rcOpts := []regclient.Opt{
+		regclient.WithDockerCreds(),
+		regclient.WithDockerCerts(),
+	}
+
+	rc := regclient.New(rcOpts...)
+
+	repoRef, err := ref.New(repo)
+	defer rc.Close(ctx, repoRef)
+
+	if err != nil {
+		return fmt.Errorf("parsing repository reference: %w", err)
+	}
+
+	var fetchTags []string
 	if len(tags) > 0 {
-		for _, tag := range tags {
-			if tag == "" {
-				return errors.New("image tag not specified to fetch")
-			}
-			imageTag := fmt.Sprintf("%v:%v", repo, tag)
-			r, err := ref.New(imageTag)
-			if err != nil {
-				return err
-			}
-
-			rc := regclient.New(rcOpts...)
-			defer rc.Close(ctx, r)
-
-			err = o.fetchOCIArtifacts(ctx, repo, rc, r, docChannel)
-			if err != nil {
-				return err
-			}
-		}
+		fetchTags = tags
 	} else {
-		r, err := ref.New(repo)
-		if err != nil {
-			return err
-		}
-
-		rc := regclient.New(rcOpts...)
-		defer rc.Close(ctx, r)
-
-		tags, err := rc.TagList(ctx, r)
+		allTags, err := rc.TagList(ctx, repoRef)
 		if err != nil {
 			return fmt.Errorf("reading tags for %s: %w", repo, err)
 		}
 
-		for _, tag := range tags.Tags {
-			if !strings.HasSuffix(tag, "sbom") && !strings.HasSuffix(tag, "att") && !strings.HasSuffix(tag, "sig") {
-				imageTag := fmt.Sprintf("%v:%v", repo, tag)
-				r, err := ref.New(imageTag)
-				if err != nil {
-					return err
-				}
-				err = o.fetchOCIArtifacts(ctx, repo, rc, r, docChannel)
-				if err != nil {
-					return err
+		// Filter out tags that are not images
+		for _, tag := range allTags.Tags {
+			shouldInclude := true
+			for _, suffix := range excludedSuffixes {
+				if strings.HasSuffix(tag, suffix) {
+					shouldInclude = false
+					break
 				}
 			}
+			if shouldInclude {
+				fetchTags = append(fetchTags, tag)
+			}
+		}
+	}
+
+	for _, tag := range fetchTags {
+		if tag == "" {
+			return errors.New("image tag not specified to fetch")
+		}
+		imageTag := fmt.Sprintf("%v:%v", repo, tag)
+		tagRef, err := ref.New(imageTag)
+		if err != nil {
+			return fmt.Errorf("parsing tag reference: %w", err)
+		}
+
+		if err = o.fetchOCIArtifacts(ctx, repo, rc, tagRef, docChannel); err != nil {
+			return fmt.Errorf("fetching artifacts for %s: %w", imageTag, err)
 		}
 	}
 	return nil
@@ -225,7 +235,8 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	return nil
 }
 
-func contains(elems []string, v string) bool {
+// contains checks if a slice contains a value
+func contains[T comparable](elems []T, v T) bool {
 	for _, s := range elems {
 		if v == s {
 			return true
