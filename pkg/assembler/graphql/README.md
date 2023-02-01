@@ -13,7 +13,7 @@ Here is a description of the contents of this subtree:
 - `./gqlgen.yml`: the configuration file for
   [`gqlgen`](https://github.com/99designs/gqlgen) to generate Go code from
   GraphQL schema specification
-- `schema.graphql`: the GraphQL schema from which the codegen starts
+- `schema/: the GraphQL schema from which the codegen starts
 - `server.go`: A testing serving where we can test the 2 backends defined in
   `assembler/backends`
 - `graphql.go`: Mostly empty, contains load bearing comment to make sure Go code

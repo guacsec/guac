@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -31,10 +30,6 @@ type demoClient struct {
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	return registerAllPackages(), nil
-}
-
-func (c *demoClient) Artifacts(ctx context.Context) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: Artifacts - artifacts in testing backend"))
 }
 
 func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
