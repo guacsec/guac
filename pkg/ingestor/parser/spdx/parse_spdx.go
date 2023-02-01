@@ -61,21 +61,18 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 func (s *spdxParser) getTopLevelPackage() {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	splitImage := strings.Split(s.spdxDoc.DocumentName, "/")
+	topPackage := assembler.PackageNode{}
 	if len(splitImage) == 3 {
-		topPackage := assembler.PackageNode{}
-		topPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
-		topPackage.Name = s.spdxDoc.DocumentName
-		topPackage.Tags = []string{"container"}
-		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
-		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
+		topPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1] + "/" + splitImage[2]
 	} else if len(splitImage) == 2 {
-		topPackage := assembler.PackageNode{}
-		topPackage.Purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0]
-		topPackage.Name = s.spdxDoc.DocumentName
-		topPackage.Tags = []string{"container"}
-		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
-		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
+		topPackage.Purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
+	} else {
+		topPackage.Purl = "pkg:oci/" + splitImage[0] + "?repository_url=" + splitImage[0]
 	}
+	topPackage.Name = s.spdxDoc.DocumentName
+	topPackage.Tags = []string{"container"}
+	topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
+	s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
 }
 
 func (s *spdxParser) getPackages() {

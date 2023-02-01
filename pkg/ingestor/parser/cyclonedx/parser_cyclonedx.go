@@ -135,6 +135,17 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 						rootPackage.Purl = "pkg:oci/" + splitImage[1] + "@" + cdxBom.Metadata.Component.Version +
 							"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "&tag="
 					}
+				} else {
+					// example: debian:latest
+					splitTag := strings.Split(splitImage[0], ":")
+					if len(splitTag) == 2 {
+						rootPackage.Purl = "pkg:oci/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
+							"?repository_url=" + splitTag[0] + "&tag=" + splitTag[1]
+					} else {
+						// no tag specified
+						rootPackage.Purl = "pkg:oci/" + splitImage[0] + "@" + cdxBom.Metadata.Component.Version +
+							"?repository_url=" + splitImage[0] + "&tag="
+					}
 				}
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")

@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/spdx/tools-golang/spdx/v2_2"
 )
 
 func Test_spdxParser(t *testing.T) {
@@ -65,6 +66,48 @@ func Test_spdxParser(t *testing.T) {
 			if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
 				t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
 			}
+		})
+	}
+}
+
+func Test_spdxParser_getTopLevelPackage(t *testing.T) {
+	tests := []struct {
+		name     string
+		spdxDoc  *v2_2.Document
+		wantPurl string
+	}{{
+		name: "registry/repo/image provided",
+		spdxDoc: &v2_2.Document{
+			DocumentName: "k8s/k8s.gcr.io/kube-controller-manager-v1.25.1",
+		},
+		wantPurl: "pkg:oci/kube-controller-manager-v1.25.1?repository_url=k8s/k8s.gcr.io/kube-controller-manager-v1.25.1",
+	}, {
+		name: "repo/image provided",
+		spdxDoc: &v2_2.Document{
+			DocumentName: "k8s.gcr.io/kube-controller-manager-v1.25.1",
+		},
+		wantPurl: "pkg:oci/kube-controller-manager-v1.25.1?repository_url=k8s.gcr.io/kube-controller-manager-v1.25.1",
+	}, {
+		name: "image provided",
+		spdxDoc: &v2_2.Document{
+			DocumentName: "kube-controller-manager-v1.25.1",
+		},
+		wantPurl: "pkg:oci/kube-controller-manager-v1.25.1?repository_url=kube-controller-manager-v1.25.1",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &spdxParser{
+				doc: &processor.Document{
+					SourceInformation: processor.SourceInformation{
+						Collector: "test",
+						Source:    "test",
+					},
+				},
+				packages: map[string][]assembler.PackageNode{},
+				files:    map[string][]assembler.ArtifactNode{},
+				spdxDoc:  tt.spdxDoc,
+			}
+			s.getTopLevelPackage()
 		})
 	}
 }
