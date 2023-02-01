@@ -303,3 +303,52 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 func (c *demoClient) Artifacts(ctx context.Context) ([]*model.Artifact, error) {
 	panic(fmt.Errorf("not implemented: Artifacts - artifacts in testing backend"))
 }
+
+func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	var packages []*model.Package
+	for _, p := range demo.packages {
+		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
+			packages = append(packages, filterNamespace(p, pkgSpec))
+		}
+	}
+	return packages, nil
+}
+
+func filterNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
+	var namespaces []*model.PackageNamespace
+	for _, ns := range pkg.Namespaces {
+		if pkgSpec.Namespace == nil || ns.Namespace == *pkgSpec.Namespace {
+			namespaces = append(namespaces, filterName(ns, pkgSpec))
+		}
+	}
+	return &model.Package{
+		Type:       pkg.Type,
+		Namespaces: namespaces,
+	}
+}
+
+func filterName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.PackageNamespace {
+	var names []*model.PackageName
+	for _, n := range ns.Names {
+		if pkgSpec.Name == nil || n.Name == *pkgSpec.Name {
+			names = append(names, filterVersion(n, pkgSpec))
+		}
+	}
+	return &model.PackageNamespace{
+		Namespace: ns.Namespace,
+		Names:     names,
+	}
+}
+
+func filterVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageName {
+	var versions []*model.PackageVersion
+	for _, v := range n.Versions {
+		if pkgSpec.Version == nil || v.Version == *pkgSpec.Version {
+			versions = append(versions, v)
+		}
+	}
+	return &model.PackageName{
+		Name:     n.Name,
+		Versions: versions,
+	}
+}

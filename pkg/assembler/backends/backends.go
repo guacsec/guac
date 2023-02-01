@@ -26,6 +26,7 @@ import (
 // GraphQL interface and this is enforced by this interface.
 type Backend interface {
 	Artifacts(ctx context.Context) ([]*model.Artifact, error)
+	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to
