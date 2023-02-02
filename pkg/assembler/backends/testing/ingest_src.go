@@ -29,7 +29,7 @@ func registerAllSources(client *demoClient) {
 	// with no tag or commit
 	client.registerSource("git", "github", "github.com/guacsec/guac", "")
 	// gitlab namespace
-	client.registerSource("git", "gitlab", "github.com/guacsec/guac", "tag=v0.0.1")
+	client.registerSource("git", "gitlab", "github.com/guacsec/guacdata", "tag=v0.0.1")
 	// differnt type
 	client.registerSource("svn", "gitlab", "github.com/guacsec/guac", "")
 }
@@ -62,34 +62,43 @@ func registerSourceNamespace(s *model.Source, namespace, name, qualifier string)
 }
 
 func registerSourceName(ns *model.SourceNamespace, name, qualifier string) *model.SourceNamespace {
-	for i, n := range ns.Names {
+	for _, n := range ns.Names {
 		if n.Name == name {
-			ns.Names[i] = registerSourceQualifier(n, qualifier)
-			return ns
+			if checkQualifier(n, qualifier) {
+				return ns
+			}
 		}
 	}
-
 	newN := &model.SourceName{Name: name}
-	newN = registerSourceQualifier(newN, qualifier)
+	newN = sortQualifier(newN, qualifier)
 	ns.Names = append(ns.Names, newN)
 	return ns
 }
 
-func registerSourceQualifier(n *model.SourceName, qualifier string) *model.SourceName {
-	srcQualifier := &model.SourceQualifier{}
+func sortQualifier(n *model.SourceName, qualifier string) *model.SourceName {
 	if qualifier != "" {
 		pair := strings.Split(qualifier, "=")
 		if pair[0] == "tag" {
-			srcQualifier.Tag = pair[1]
-			srcQualifier.Commit = ""
+			n.Tag = &pair[1]
 		} else {
-			srcQualifier.Commit = pair[1]
-			srcQualifier.Tag = ""
+			n.Commit = &pair[1]
 		}
-	} else {
-		srcQualifier.Tag = ""
-		srcQualifier.Commit = ""
 	}
-	n.Qualifiers = append(n.Qualifiers, srcQualifier)
 	return n
+}
+
+func checkQualifier(n *model.SourceName, qualifier string) bool {
+	if qualifier != "" {
+		pair := strings.Split(qualifier, "=")
+		if pair[0] == "tag" {
+			if n.Tag == &pair[1] {
+				return true
+			}
+		} else {
+			if n.Commit == &pair[1] {
+				return true
+			}
+		}
+	}
+	return false
 }

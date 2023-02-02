@@ -20,6 +20,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type DemoCredentials struct{}
@@ -56,7 +57,10 @@ func (c *demoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) 
 	var sources []*model.Source
 	for _, s := range c.sources {
 		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
-			newSource := filterSourceNamespace(s, sourceSpec)
+			newSource, err := filterSourceNamespace(s, sourceSpec)
+			if err != nil {
+				return nil, err
+			}
 			if newSource != nil {
 				sources = append(sources, newSource)
 			}
@@ -155,56 +159,70 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 	return v
 }
 
-func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) *model.Source {
+func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*model.Source, error) {
 	var namespaces []*model.SourceNamespace
 	for _, ns := range src.Namespaces {
 		if sourceSpec.Namespace == nil || ns.Namespace == *sourceSpec.Namespace {
-			newNs := filterSourceName(ns, sourceSpec)
+			newNs, err := filterSourceName(ns, sourceSpec)
+			if err != nil {
+				return nil, err
+			}
 			if newNs != nil {
 				namespaces = append(namespaces, newNs)
 			}
 		}
 	}
 	if len(namespaces) == 0 {
-		return nil
+		return nil, nil
 	}
 	return &model.Source{
 		Type:       src.Type,
 		Namespaces: namespaces,
-	}
+	}, nil
 }
 
-func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) *model.SourceNamespace {
+func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (*model.SourceNamespace, error) {
+
 	var names []*model.SourceName
 	for _, n := range ns.Names {
 		if sourceSpec.Name == nil || n.Name == *sourceSpec.Name {
-			newN := filterSourceQualifier(n, sourceSpec)
-			if newN != nil {
-				names = append(names, newN)
+			n, err := filterQualifier(n, sourceSpec)
+			if err != nil {
+				return nil, err
+			}
+			if n != nil {
+				names = append(names, n)
 			}
 		}
 	}
 	if len(names) == 0 {
-		return nil
+		return nil, nil
 	}
 	return &model.SourceNamespace{
 		Namespace: ns.Namespace,
 		Names:     names,
-	}
+	}, nil
 }
 
-func filterSourceQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) *model.SourceName {
-	var qualifiers []*model.SourceQualifier
-	for _, v := range n.Qualifiers {
-		if sourceSpec.Qualifier == nil || v.Commit == *sourceSpec.Qualifier.Commit && v.Tag == *sourceSpec.Qualifier.Tag {
-			qualifiers = append(qualifiers, v)
+func filterQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
+	if sourceSpec.Qualifier != nil {
+		if sourceSpec.Qualifier.Commit != nil && sourceSpec.Qualifier.Tag != nil {
+			return nil, gqlerror.Errorf("can only pass in commit or tag")
 		}
+		if sourceSpec.Qualifier.Commit == nil && sourceSpec.Qualifier.Tag == nil {
+			if n.Tag == nil && n.Commit == nil {
+				return n, nil
+			}
+		} else if sourceSpec.Qualifier.Commit != nil && n.Commit != nil {
+			if *n.Commit == *sourceSpec.Qualifier.Commit {
+				return n, nil
+			}
+		} else if sourceSpec.Qualifier.Tag != nil && n.Tag != nil {
+			if *n.Tag == *sourceSpec.Qualifier.Tag {
+				return n, nil
+			}
+		}
+		return nil, nil
 	}
-	if len(qualifiers) == 0 {
-		return nil
-	}
-	return &model.SourceName{
-		Name:       n.Name,
-		Qualifiers: qualifiers,
-	}
+	return n, nil
 }

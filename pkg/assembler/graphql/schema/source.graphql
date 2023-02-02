@@ -49,28 +49,17 @@ type SourceNamespace {
 }
 
 """
-SourceName is a url of the repository.
+SourceName is a url of the repository and its tag or commit.
 
-SourceName is mandatory.
+SourceName is mandatory. Either a tag or commit needs to be specified.
 
 This is the first node in the trie that can be referred to by other parts of
 GUAC.
 """
 type SourceName {
   name: String!
-  qualifiers: [SourceQualifier!]!
-}
-
-"""
-SourceQualifier containers the commit or tag.
-
-Either a tag or commit needs to be specified.
-
-This node can be referred to by other parts of GUAC.
-"""
-type SourceQualifier {
-  tag: String!
-  commit: String!
+  tag: String
+  commit: String
 }
 
 """

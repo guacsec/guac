@@ -134,15 +134,16 @@ type Source struct {
 	Namespaces []*SourceNamespace `json:"namespaces"`
 }
 
-// SourceName is a url of the repository.
+// SourceName is a url of the repository and its tag or commit.
 //
-// SourceName is mandatory.
+// SourceName is mandatory. Either a tag or commit needs to be specified.
 //
 // This is the first node in the trie that can be referred to by other parts of
 // GUAC.
 type SourceName struct {
-	Name       string             `json:"name"`
-	Qualifiers []*SourceQualifier `json:"qualifiers"`
+	Name   string  `json:"name"`
+	Tag    *string `json:"tag"`
+	Commit *string `json:"commit"`
 }
 
 // SourceNamespace is a namespace for sources.
@@ -154,16 +155,6 @@ type SourceName struct {
 type SourceNamespace struct {
 	Namespace string        `json:"namespace"`
 	Names     []*SourceName `json:"names"`
-}
-
-// SourceQualifier containers the commit or tag.
-//
-// Either a tag or commit needs to be specified.
-//
-// This node can be referred to by other parts of GUAC.
-type SourceQualifier struct {
-	Tag    string `json:"tag"`
-	Commit string `json:"commit"`
 }
 
 // SourceQualifierInput is the same as SourceQualifier, but usable as query

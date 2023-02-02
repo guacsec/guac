@@ -74,18 +74,14 @@ type ComplexityRoot struct {
 	}
 
 	SourceName struct {
-		Name       func(childComplexity int) int
-		Qualifiers func(childComplexity int) int
+		Commit func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Tag    func(childComplexity int) int
 	}
 
 	SourceNamespace struct {
 		Names     func(childComplexity int) int
 		Namespace func(childComplexity int) int
-	}
-
-	SourceQualifier struct {
-		Commit func(childComplexity int) int
-		Tag    func(childComplexity int) int
 	}
 }
 
@@ -219,6 +215,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Source.Type(childComplexity), true
 
+	case "SourceName.commit":
+		if e.complexity.SourceName.Commit == nil {
+			break
+		}
+
+		return e.complexity.SourceName.Commit(childComplexity), true
+
 	case "SourceName.name":
 		if e.complexity.SourceName.Name == nil {
 			break
@@ -226,12 +229,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SourceName.Name(childComplexity), true
 
-	case "SourceName.qualifiers":
-		if e.complexity.SourceName.Qualifiers == nil {
+	case "SourceName.tag":
+		if e.complexity.SourceName.Tag == nil {
 			break
 		}
 
-		return e.complexity.SourceName.Qualifiers(childComplexity), true
+		return e.complexity.SourceName.Tag(childComplexity), true
 
 	case "SourceNamespace.names":
 		if e.complexity.SourceNamespace.Names == nil {
@@ -246,20 +249,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SourceNamespace.Namespace(childComplexity), true
-
-	case "SourceQualifier.commit":
-		if e.complexity.SourceQualifier.Commit == nil {
-			break
-		}
-
-		return e.complexity.SourceQualifier.Commit(childComplexity), true
-
-	case "SourceQualifier.tag":
-		if e.complexity.SourceQualifier.Tag == nil {
-			break
-		}
-
-		return e.complexity.SourceQualifier.Tag(childComplexity), true
 
 	}
 	return 0, false
@@ -495,11 +484,9 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the package trie/tree. This tree closely matches
-# the pURL specification (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst)
-# but deviates from it where GUAC rules state otherwise. In principle, we want
-# this to represent a trie for packages, so information that represents a
-# smaller collection of packages is being pushed downwards in the trie.
+# Defines a GraphQL schema for the source trie/tree. This tree is a derivative of
+# the pURL specification where it has a type, namespace, name and finally a qualifier that
+# contain the tag or commit. 
 
 """
 Source represents a source.
@@ -531,28 +518,17 @@ type SourceNamespace {
 }
 
 """
-SourceName is a url of the repository.
+SourceName is a url of the repository and its tag or commit.
 
-SourceName is mandatory.
+SourceName is mandatory. Either a tag or commit needs to be specified.
 
 This is the first node in the trie that can be referred to by other parts of
 GUAC.
 """
 type SourceName {
   name: String!
-  qualifiers: [SourceQualifier!]!
-}
-
-"""
-SourceQualifier containers the commit or tag.
-
-Either a tag or commit needs to be specified.
-
-This node can be referred to by other parts of GUAC.
-"""
-type SourceQualifier {
-  tag: String!
-  commit: String!
+  tag: String
+  commit: String
 }
 
 """
