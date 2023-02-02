@@ -52,8 +52,14 @@ type ComplexityRoot struct {
 		Namespace func(childComplexity int) int
 	}
 
+	PackageQualifier struct {
+		Key   func(childComplexity int) int
+		Value func(childComplexity int) int
+	}
+
 	PackageVersion struct {
-		Version func(childComplexity int) int
+		Qualifiers func(childComplexity int) int
+		Version    func(childComplexity int) int
 	}
 
 	Query struct {
@@ -118,6 +124,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PackageNamespace.Namespace(childComplexity), true
 
+	case "PackageQualifier.key":
+		if e.complexity.PackageQualifier.Key == nil {
+			break
+		}
+
+		return e.complexity.PackageQualifier.Key(childComplexity), true
+
+	case "PackageQualifier.value":
+		if e.complexity.PackageQualifier.Value == nil {
+			break
+		}
+
+		return e.complexity.PackageQualifier.Value(childComplexity), true
+
+	case "PackageVersion.qualifiers":
+		if e.complexity.PackageVersion.Qualifiers == nil {
+			break
+		}
+
+		return e.complexity.PackageVersion.Qualifiers(childComplexity), true
+
 	case "PackageVersion.version":
 		if e.complexity.PackageVersion.Version == nil {
 			break
@@ -145,6 +172,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputPackageQualifierInput,
 		ec.unmarshalInputPkgSpec,
 	)
 	first := true
@@ -237,7 +265,7 @@ type Package {
 PackageNamespace is a namespace for packages.
 
 In the pURL representation, each PackageNamespace matches the
-` + "`" + `pgk:<type>/<namespace>/` + "`" + ` partial pURL.
+` + "`" + `pkg:<type>/<namespace>/` + "`" + ` partial pURL.
 
 Namespaces are optional and type specific. Because they are optional, we use
 empty string to denote missing namespaces.
@@ -251,7 +279,7 @@ type PackageNamespace {
 PackageName is a name for packages.
 
 In the pURL representation, each PackageName matches the
-` + "`" + `pgk:<type>/<namespace>/<name>` + "`" + ` partial pURL.
+` + "`" + `pkg:<type>/<namespace>/<name>` + "`" + ` pURL.
 
 Names are always mandatory.
 
@@ -267,7 +295,7 @@ type PackageName {
 PackageVersion is a package version.
 
 In the pURL representation, each PackageName matches the
-` + "`" + `pgk:<type>/<namespace>/<name>@<version>` + "`" + ` partial pURL.
+` + "`" + `pkg:<type>/<namespace>/<name>@<version>` + "`" + ` pURL.
 
 Versions are optional and each Package type defines own rules for handling them.
 For this level of GUAC, these are just opaque strings.
@@ -276,6 +304,23 @@ This node can be referred to by other parts of GUAC.
 """
 type PackageVersion {
   version: String!
+  qualifiers: [PackageQualifier!]!
+}
+
+"""
+PackageQualifier is a qualifier for a package, a key-value pair.
+
+In the pURL representation, it is a part of the ` + "`" + `<qualifiers>` + "`" + ` part of the
+` + "`" + `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` + "`" + ` pURL.
+
+Qualifiers are optional, each Package type defines own rules for handling them,
+and multiple qualifiers could be attached to the same package.
+
+This node cannot be directly referred by other parts of GUAC.
+"""
+type PackageQualifier {
+  key: String!
+  value: String!
 }
 
 """
@@ -285,13 +330,33 @@ Each field matches a qualifier from pURL. Use ` + "`" + `null` + "`" + ` to matc
 that level. For example, to get all packages in GUAC backend, use a PkgSpec
 where every field is ` + "`" + `null` + "`" + `.
 
-Empty string at a field means matching with the empty string.
+Empty string at a field means matching with the empty string. If passing in
+qualifiers, all of the values in the list must match.
 """
 input PkgSpec {
   type: String
   namespace: String
   name: String
   version: String
+  qualifiers: [PackageQualifierInput!]
+}
+
+"""
+PackageQualifierInput is the same as PackageQualifier, but usable as query
+input.
+
+GraphQL does not allow input types to contain composite types and does not allow
+composite types to contain input types. So, although in this case these two
+types are semantically the same, we have to duplicate the definition.
+
+Keys are mandatory, but values could also be ` + "`" + `null` + "`" + ` if we want to match all
+values for a specific key.
+
+TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
+"""
+input PackageQualifierInput {
+  key: String!
+  value: String
 }
 
 extend type Query {

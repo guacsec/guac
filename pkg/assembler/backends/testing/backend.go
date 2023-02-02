@@ -87,7 +87,10 @@ func filterVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageN
 	var versions []*model.PackageVersion
 	for _, v := range n.Versions {
 		if pkgSpec.Version == nil || v.Version == *pkgSpec.Version {
-			versions = append(versions, v)
+			newV := filterQualifiers(v, pkgSpec)
+			if newV != nil {
+				versions = append(versions, newV)
+			}
 		}
 	}
 	if len(versions) == 0 {
@@ -97,4 +100,25 @@ func filterVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageN
 		Name:     n.Name,
 		Versions: versions,
 	}
+}
+
+func filterQualifiers(v *model.PackageVersion, pkgSpec *model.PkgSpec) *model.PackageVersion {
+	// Because we operate on GraphQL-generated structs directly we cannot
+	// use a key-value map, so this is O(n^2). Production resolvers will
+	// run queries that match the qualifiers faster.
+	for _, specQualifier := range pkgSpec.Qualifiers {
+		found := false
+		for _, versionQualifier := range v.Qualifiers {
+			if specQualifier.Key == versionQualifier.Key {
+				if specQualifier.Value == nil || *specQualifier.Value == versionQualifier.Value {
+					found = true
+					break
+				}
+			}
+		}
+		if !found {
+			return nil
+		}
+	}
+	return v
 }
