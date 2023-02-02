@@ -265,7 +265,7 @@ type Package {
 PackageNamespace is a namespace for packages.
 
 In the pURL representation, each PackageNamespace matches the
-` + "`" + `pgk:<type>/<namespace>/` + "`" + ` partial pURL.
+` + "`" + `pkg:<type>/<namespace>/` + "`" + ` partial pURL.
 
 Namespaces are optional and type specific. Because they are optional, we use
 empty string to denote missing namespaces.
@@ -279,7 +279,7 @@ type PackageNamespace {
 PackageName is a name for packages.
 
 In the pURL representation, each PackageName matches the
-` + "`" + `pgk:<type>/<namespace>/<name>` + "`" + ` pURL.
+` + "`" + `pkg:<type>/<namespace>/<name>` + "`" + ` pURL.
 
 Names are always mandatory.
 
@@ -295,7 +295,7 @@ type PackageName {
 PackageVersion is a package version.
 
 In the pURL representation, each PackageName matches the
-` + "`" + `pgk:<type>/<namespace>/<name>@<version>` + "`" + ` pURL.
+` + "`" + `pkg:<type>/<namespace>/<name>@<version>` + "`" + ` pURL.
 
 Versions are optional and each Package type defines own rules for handling them.
 For this level of GUAC, these are just opaque strings.
@@ -311,7 +311,7 @@ type PackageVersion {
 PackageQualifier is a qualifier for a package, a key-value pair.
 
 In the pURL representation, it is a part of the ` + "`" + `<qualifiers>` + "`" + ` part of the
-` + "`" + `pgk:<type>/<namespace>/<name>@<version>?<qualifiers>` + "`" + ` pURL.
+` + "`" + `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` + "`" + ` pURL.
 
 Qualifiers are optional, each Package type defines own rules for handling them,
 and multiple qualifiers could be attached to the same package.
