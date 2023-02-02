@@ -32,7 +32,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	return registerAllPackages(), nil
 }
 
-
 func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	var packages []*model.Package
 	for _, p := range c.packages {
@@ -117,7 +116,7 @@ func filterQualifiers(v *model.PackageVersion, pkgSpec *model.PkgSpec) *model.Pa
 				}
 			}
 		}
-		if found == false {
+		if !found {
 			return nil
 		}
 	}
