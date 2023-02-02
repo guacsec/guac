@@ -348,14 +348,19 @@ that level. For example, to get all packages in GUAC backend, use a PkgSpec
 where every field is ` + "`" + `null` + "`" + `.
 
 Empty string at a field means matching with the empty string. If passing in
-qualifiers, all of the values in the list must match.
+qualifiers, all of the values in the list must match. Since we want to return
+nodes with any number of qualifiers if no qualifiers are passed in the input, we
+must also return the same set of nodes it the qualifiers list is empty. To match
+on nodes that don't contain any qualifier, set ` + "`" + `matchOnlyEmptyQualifiers` + "`" + ` to
+true. If this field is true, then the qualifiers argument is ignored.
 """
 input PkgSpec {
   type: String
   namespace: String
   name: String
   version: String
-  qualifiers: [PackageQualifierInput!]
+  qualifiers: [PackageQualifierInput!] = []
+  matchOnlyEmptyQualifiers: Boolean = false
   subpath: String
 }
 

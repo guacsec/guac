@@ -108,6 +108,13 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 		return nil
 	}
 
+	// Allow matching on nodes with no qualifiers
+	if pkgSpec.MatchOnlyEmptyQualifiers != nil {
+		if *pkgSpec.MatchOnlyEmptyQualifiers && len(v.Qualifiers) != 0 {
+			return nil
+		}
+	}
+
 	// Because we operate on GraphQL-generated structs directly we cannot
 	// use a key-value map, so this is O(n^2). Production resolvers will
 	// run queries that match the qualifiers faster.

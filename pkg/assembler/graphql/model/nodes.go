@@ -105,12 +105,17 @@ type PackageVersion struct {
 // where every field is `null`.
 //
 // Empty string at a field means matching with the empty string. If passing in
-// qualifiers, all of the values in the list must match.
+// qualifiers, all of the values in the list must match. Since we want to return
+// nodes with any number of qualifiers if no qualifiers are passed in the input, we
+// must also return the same set of nodes it the qualifiers list is empty. To match
+// on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
+// true. If this field is true, then the qualifiers argument is ignored.
 type PkgSpec struct {
-	Type       *string                  `json:"type"`
-	Namespace  *string                  `json:"namespace"`
-	Name       *string                  `json:"name"`
-	Version    *string                  `json:"version"`
-	Qualifiers []*PackageQualifierInput `json:"qualifiers"`
-	Subpath    *string                  `json:"subpath"`
+	Type                     *string                  `json:"type"`
+	Namespace                *string                  `json:"namespace"`
+	Name                     *string                  `json:"name"`
+	Version                  *string                  `json:"version"`
+	Qualifiers               []*PackageQualifierInput `json:"qualifiers"`
+	MatchOnlyEmptyQualifiers *bool                    `json:"matchOnlyEmptyQualifiers"`
+	Subpath                  *string                  `json:"subpath"`
 }
