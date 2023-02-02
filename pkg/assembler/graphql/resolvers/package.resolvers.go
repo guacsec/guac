@@ -7,6 +7,7 @@ package resolvers
 import (
 	"context"
 
+	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -14,3 +15,8 @@ import (
 func (r *queryResolver) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	return r.Backend.Packages(ctx, pkgSpec)
 }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type queryResolver struct{ *Resolver }
