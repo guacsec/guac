@@ -16,7 +16,7 @@ type Cve struct {
 
 // CVEId is the actual ID that is given to a specific vulnerability
 //
-// id filed is mandatory.
+// id field is mandatory.
 //
 // This node can be referred to by other parts of GUAC.
 type CVEId struct {
@@ -36,7 +36,7 @@ type Ghsa struct {
 
 // GHSAId is the actual ID that is given to a specific vulnerability on github
 //
-// id filed is mandatory.
+// id field is mandatory.
 //
 // This node can be referred to by other parts of GUAC.
 type GHSAId struct {
@@ -55,7 +55,7 @@ type Osv struct {
 
 // OSVId is the actual ID that is given to a specific vulnerability
 //
-// id filed is mandatory. This maps to a GHSA or CVE ID
+// id field is mandatory. This maps to a GHSA or CVE ID
 //
 // This node can be referred to by other parts of GUAC.
 type OSVId struct {
