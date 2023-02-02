@@ -34,11 +34,13 @@ const (
 )
 
 type slsaParser struct {
-	doc          *processor.Document
-	subjects     []assembler.ArtifactNode
-	dependencies []assembler.ArtifactNode
-	attestations []assembler.AttestationNode
-	builders     []assembler.BuilderNode
+	doc                     *processor.Document
+	subjects                []assembler.ArtifactNode
+	dependencies            []assembler.ArtifactNode
+	attestations            []assembler.AttestationNode
+	builders                []assembler.BuilderNode
+	heuristicSubjectPackage []assembler.PackageNode
+	heuristicSubjectEdges   []assembler.DependsOnEdge
 }
 
 // NewSLSAParser initializes the slsaParser
@@ -68,10 +70,28 @@ func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
 func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 	// append artifact node for the subjects
 	for _, sub := range statement.Subject {
+		var nodes []assembler.ArtifactNode
 		for alg, ds := range sub.Digest {
-			s.subjects = append(s.subjects, assembler.ArtifactNode{
+			nodes = append(nodes, assembler.ArtifactNode{
 				Name: sub.Name, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
 		}
+		s.subjects = append(s.subjects, nodes...)
+
+		// Add heuristic to link an artifact to a package if the subject name starts with "pkg:"
+		if strings.HasPrefix(sub.Name, "pkg:") {
+			pkg := assembler.PackageNode{
+				Purl: sub.Name,
+			}
+			s.heuristicSubjectPackage = append(s.heuristicSubjectPackage, pkg)
+
+			for _, n := range nodes {
+				s.heuristicSubjectEdges = append(s.heuristicSubjectEdges, assembler.DependsOnEdge{
+					PackageNode:        pkg,
+					ArtifactDependency: n,
+				})
+			}
+		}
+
 	}
 }
 
@@ -121,6 +141,10 @@ func (s *slsaParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 	for _, b := range s.builders {
 		nodes = append(nodes, b)
 	}
+	for _, p := range s.heuristicSubjectPackage {
+		nodes = append(nodes, p)
+	}
+
 	return nodes
 }
 
@@ -142,6 +166,10 @@ func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assemble
 		for _, d := range s.dependencies {
 			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, ArtifactDependency: d})
 		}
+	}
+
+	for _, e := range s.heuristicSubjectEdges {
+		edges = append(edges, e)
 	}
 	return edges
 }
