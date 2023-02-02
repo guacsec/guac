@@ -26,6 +26,7 @@ type DemoCredentials struct{}
 
 type demoClient struct {
 	packages []*model.Package
+	sources  []*model.Source
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -36,7 +37,7 @@ func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	var packages []*model.Package
 	for _, p := range c.packages {
 		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
-			newPkg := filterNamespace(p, pkgSpec)
+			newPkg := filterPackageNamespace(p, pkgSpec)
 			if newPkg != nil {
 				packages = append(packages, newPkg)
 			}
@@ -45,11 +46,24 @@ func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	return packages, nil
 }
 
-func filterNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
+func (c *demoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
+	var sources []*model.Source
+	for _, s := range c.sources {
+		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
+			newSource := filterSourceNamespace(s, sourceSpec)
+			if newSource != nil {
+				sources = append(sources, newSource)
+			}
+		}
+	}
+	return sources, nil
+}
+
+func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
 	var namespaces []*model.PackageNamespace
 	for _, ns := range pkg.Namespaces {
 		if pkgSpec.Namespace == nil || ns.Namespace == *pkgSpec.Namespace {
-			newNs := filterName(ns, pkgSpec)
+			newNs := filterPackageName(ns, pkgSpec)
 			if newNs != nil {
 				namespaces = append(namespaces, newNs)
 			}
@@ -64,11 +78,11 @@ func filterNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package 
 	}
 }
 
-func filterName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.PackageNamespace {
+func filterPackageName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.PackageNamespace {
 	var names []*model.PackageName
 	for _, n := range ns.Names {
 		if pkgSpec.Name == nil || n.Name == *pkgSpec.Name {
-			newN := filterVersion(n, pkgSpec)
+			newN := filterPackageVersion(n, pkgSpec)
 			if newN != nil {
 				names = append(names, newN)
 			}
@@ -83,7 +97,7 @@ func filterName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.Packa
 	}
 }
 
-func filterVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageName {
+func filterPackageVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageName {
 	var versions []*model.PackageVersion
 	for _, v := range n.Versions {
 		if pkgSpec.Version == nil || v.Version == *pkgSpec.Version {
@@ -133,4 +147,58 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 		}
 	}
 	return v
+}
+
+func filterSourceNamespace(pkg *model.Source, sourceSpec *model.SourceSpec) *model.Source {
+	var namespaces []*model.SourceNamespace
+	for _, ns := range pkg.Namespaces {
+		if sourceSpec.Namespace == nil || ns.Namespace == *sourceSpec.Namespace {
+			newNs := filterSourceName(ns, sourceSpec)
+			if newNs != nil {
+				namespaces = append(namespaces, newNs)
+			}
+		}
+	}
+	if len(namespaces) == 0 {
+		return nil
+	}
+	return &model.Source{
+		Type:       pkg.Type,
+		Namespaces: namespaces,
+	}
+}
+
+func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) *model.SourceNamespace {
+	var names []*model.SourceName
+	for _, n := range ns.Names {
+		if sourceSpec.Name == nil || n.Name == *sourceSpec.Name {
+			newN := filterSourceQualifier(n, sourceSpec)
+			if newN != nil {
+				names = append(names, newN)
+			}
+		}
+	}
+	if len(names) == 0 {
+		return nil
+	}
+	return &model.SourceNamespace{
+		Namespace: ns.Namespace,
+		Names:     names,
+	}
+}
+
+func filterSourceQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) *model.SourceName {
+	var qualifiers []*model.SourceQualifier
+	for _, v := range n.Qualifiers {
+		if sourceSpec.Qualifier == nil || v.Commit == sourceSpec.Qualifier.Commit || v.Tag == sourceSpec.Qualifier.Tag {
+			qualifiers = append(qualifiers, v)
+		}
+	}
+	if len(qualifiers) == 0 {
+		return nil
+	}
+	return &model.SourceName{
+		Name:       n.Name,
+		Qualifiers: qualifiers,
+	}
 }

@@ -119,3 +119,70 @@ type PkgSpec struct {
 	MatchOnlyEmptyQualifiers *bool                    `json:"matchOnlyEmptyQualifiers"`
 	Subpath                  *string                  `json:"subpath"`
 }
+
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node with
+// the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type Source struct {
+	Type       string             `json:"type"`
+	Namespaces []*SourceNamespace `json:"namespaces"`
+}
+
+// SourceName is a url of the repository.
+//
+// SourceName is mandatory.
+//
+// This is the first node in the trie that can be referred to by other parts of
+// GUAC.
+type SourceName struct {
+	Name       string             `json:"name"`
+	Qualifiers []*SourceQualifier `json:"qualifiers"`
+}
+
+// SourceNamespace is a namespace for sources.
+//
+// This can be represented as the location of the repo (such as github/gitlab/bitbucket)
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type SourceNamespace struct {
+	Namespace string        `json:"namespace"`
+	Names     []*SourceName `json:"names"`
+}
+
+// SourceQualifier containers the commit or tag.
+//
+// Either a tag or commit needs to be specified.
+//
+// This node can be referred to by other parts of GUAC.
+type SourceQualifier struct {
+	Tag    string `json:"tag"`
+	Commit string `json:"commit"`
+}
+
+// SourceQualifierInput is the same as SourceQualifier, but usable as query
+// input.
+type SourceQualifierInput struct {
+	Tag    string `json:"tag"`
+	Commit string `json:"commit"`
+}
+
+// PkgSpec allows filtering the list of packages to return.
+//
+// Each field matches a qualifier from pURL. Use `null` to match on all values at
+// that level. For example, to get all packages in GUAC backend, use a PkgSpec
+// where every field is `null`.
+//
+// Empty string at a field means matching with the empty string.
+type SourceSpec struct {
+	Type      *string               `json:"type"`
+	Namespace *string               `json:"namespace"`
+	Name      *string               `json:"name"`
+	Qualifier *SourceQualifierInput `json:"qualifier"`
+}

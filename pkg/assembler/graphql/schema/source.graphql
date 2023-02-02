@@ -1,0 +1,106 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the package trie/tree. This tree closely matches
+# the pURL specification (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst)
+# but deviates from it where GUAC rules state otherwise. In principle, we want
+# this to represent a trie for packages, so information that represents a
+# smaller collection of packages is being pushed downwards in the trie.
+
+"""
+Source represents a source.
+
+This can be the version control system that is being used.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same `type` value.
+
+Also note that this is named `Source`, not `SourceType`. This is only to make
+queries more readable.
+"""
+type Source {
+  type: String!
+  namespaces: [SourceNamespace!]!
+}
+
+"""
+SourceNamespace is a namespace for sources.
+
+This can be represented as the location of the repo (such as github/gitlab/bitbucket)
+
+Namespaces are optional and type specific. Because they are optional, we use
+empty string to denote missing namespaces.
+"""
+type SourceNamespace {
+  namespace: String!
+  names: [SourceName!]!
+}
+
+"""
+SourceName is a url of the repository.
+
+SourceName is mandatory.
+
+This is the first node in the trie that can be referred to by other parts of
+GUAC.
+"""
+type SourceName {
+  name: String!
+  qualifiers: [SourceQualifier!]!
+}
+
+"""
+SourceQualifier containers the commit or tag.
+
+Either a tag or commit needs to be specified.
+
+This node can be referred to by other parts of GUAC.
+"""
+type SourceQualifier {
+  tag: String!
+  commit: String!
+}
+
+"""
+PkgSpec allows filtering the list of packages to return.
+
+Each field matches a qualifier from pURL. Use `null` to match on all values at
+that level. For example, to get all packages in GUAC backend, use a PkgSpec
+where every field is `null`.
+
+Empty string at a field means matching with the empty string.
+"""
+input SourceSpec {
+  type: String
+  namespace: String
+  name: String
+  qualifier: SourceQualifierInput
+}
+
+"""
+SourceQualifierInput is the same as SourceQualifier, but usable as query
+input.
+"""
+input SourceQualifierInput {
+  tag: String!
+  commit: String!
+}
+
+extend type Query {
+  "Returns all sources"
+  sources(sourceSpec: SourceSpec): [Source!]!
+}
