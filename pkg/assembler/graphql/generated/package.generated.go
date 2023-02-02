@@ -807,7 +807,14 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"type", "namespace", "name", "version", "qualifiers", "subpath"}
+	if _, present := asMap["qualifiers"]; !present {
+		asMap["qualifiers"] = []interface{}{}
+	}
+	if _, present := asMap["matchOnlyEmptyQualifiers"]; !present {
+		asMap["matchOnlyEmptyQualifiers"] = false
+	}
+
+	fieldsInOrder := [...]string{"type", "namespace", "name", "version", "qualifiers", "matchOnlyEmptyQualifiers", "subpath"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -851,6 +858,14 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("qualifiers"))
 			it.Qualifiers, err = ec.unmarshalOPackageQualifierInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "matchOnlyEmptyQualifiers":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("matchOnlyEmptyQualifiers"))
+			it.MatchOnlyEmptyQualifiers, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
