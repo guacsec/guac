@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -84,4 +85,8 @@ func (c *neo4jClient) Artifacts(ctx context.Context) ([]*model.Artifact, error) 
 	}
 
 	return result.([]*model.Artifact), nil
+}
+
+func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	panic(fmt.Errorf("not implemented: Packages - packages in Neo4j backend"))
 }

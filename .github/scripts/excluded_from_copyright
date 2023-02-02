@@ -3,3 +3,5 @@
 ./pkg/assembler/graphql/generated/root_.generated.go
 ./pkg/assembler/graphql/generated/schema.generated.go
 ./pkg/assembler/graphql/generated/prelude.generated.go
+./pkg/assembler/graphql/generated/package.generated.go
+./pkg/assembler/graphql/resolvers/package.resolvers.go

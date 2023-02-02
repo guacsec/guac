@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -84,7 +85,7 @@ type ComplexityRoot struct {
 		Type          func(childComplexity int) int
 	}
 
-	Package struct {
+	OldPackage struct {
 		CPEs          func(childComplexity int) int
 		CollectorInfo func(childComplexity int) int
 		Contains      func(childComplexity int) int
@@ -97,8 +98,28 @@ type ComplexityRoot struct {
 		Version       func(childComplexity int) int
 	}
 
+	Package struct {
+		Namespaces func(childComplexity int) int
+		Type       func(childComplexity int) int
+	}
+
+	PackageName struct {
+		Name     func(childComplexity int) int
+		Versions func(childComplexity int) int
+	}
+
+	PackageNamespace struct {
+		Names     func(childComplexity int) int
+		Namespace func(childComplexity int) int
+	}
+
+	PackageVersion struct {
+		Version func(childComplexity int) int
+	}
+
 	Query struct {
 		Artifacts func(childComplexity int) int
+		Packages  func(childComplexity int, pkgSpec *model.PkgSpec) int
 	}
 
 	ScorecardPayload struct {
@@ -388,75 +409,124 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metadata.Type(childComplexity), true
 
-	case "Package.CPEs":
-		if e.complexity.Package.CPEs == nil {
+	case "OldPackage.CPEs":
+		if e.complexity.OldPackage.CPEs == nil {
 			break
 		}
 
-		return e.complexity.Package.CPEs(childComplexity), true
+		return e.complexity.OldPackage.CPEs(childComplexity), true
 
-	case "Package.collectorInfo":
-		if e.complexity.Package.CollectorInfo == nil {
+	case "OldPackage.collectorInfo":
+		if e.complexity.OldPackage.CollectorInfo == nil {
 			break
 		}
 
-		return e.complexity.Package.CollectorInfo(childComplexity), true
+		return e.complexity.OldPackage.CollectorInfo(childComplexity), true
 
-	case "Package.contains":
-		if e.complexity.Package.Contains == nil {
+	case "OldPackage.contains":
+		if e.complexity.OldPackage.Contains == nil {
 			break
 		}
 
-		return e.complexity.Package.Contains(childComplexity), true
+		return e.complexity.OldPackage.Contains(childComplexity), true
 
-	case "Package.dependsOn":
-		if e.complexity.Package.DependsOn == nil {
+	case "OldPackage.dependsOn":
+		if e.complexity.OldPackage.DependsOn == nil {
 			break
 		}
 
-		return e.complexity.Package.DependsOn(childComplexity), true
+		return e.complexity.OldPackage.DependsOn(childComplexity), true
 
-	case "Package.digest":
-		if e.complexity.Package.Digest == nil {
+	case "OldPackage.digest":
+		if e.complexity.OldPackage.Digest == nil {
 			break
 		}
 
-		return e.complexity.Package.Digest(childComplexity), true
+		return e.complexity.OldPackage.Digest(childComplexity), true
 
-	case "Package.name":
-		if e.complexity.Package.Name == nil {
+	case "OldPackage.name":
+		if e.complexity.OldPackage.Name == nil {
 			break
 		}
 
-		return e.complexity.Package.Name(childComplexity), true
+		return e.complexity.OldPackage.Name(childComplexity), true
 
-	case "Package.purl":
-		if e.complexity.Package.Purl == nil {
+	case "OldPackage.purl":
+		if e.complexity.OldPackage.Purl == nil {
 			break
 		}
 
-		return e.complexity.Package.Purl(childComplexity), true
+		return e.complexity.OldPackage.Purl(childComplexity), true
 
-	case "Package.sourceInfo":
-		if e.complexity.Package.SourceInfo == nil {
+	case "OldPackage.sourceInfo":
+		if e.complexity.OldPackage.SourceInfo == nil {
 			break
 		}
 
-		return e.complexity.Package.SourceInfo(childComplexity), true
+		return e.complexity.OldPackage.SourceInfo(childComplexity), true
 
-	case "Package.tags":
-		if e.complexity.Package.Tags == nil {
+	case "OldPackage.tags":
+		if e.complexity.OldPackage.Tags == nil {
 			break
 		}
 
-		return e.complexity.Package.Tags(childComplexity), true
+		return e.complexity.OldPackage.Tags(childComplexity), true
 
-	case "Package.version":
-		if e.complexity.Package.Version == nil {
+	case "OldPackage.version":
+		if e.complexity.OldPackage.Version == nil {
 			break
 		}
 
-		return e.complexity.Package.Version(childComplexity), true
+		return e.complexity.OldPackage.Version(childComplexity), true
+
+	case "Package.namespaces":
+		if e.complexity.Package.Namespaces == nil {
+			break
+		}
+
+		return e.complexity.Package.Namespaces(childComplexity), true
+
+	case "Package.type":
+		if e.complexity.Package.Type == nil {
+			break
+		}
+
+		return e.complexity.Package.Type(childComplexity), true
+
+	case "PackageName.name":
+		if e.complexity.PackageName.Name == nil {
+			break
+		}
+
+		return e.complexity.PackageName.Name(childComplexity), true
+
+	case "PackageName.versions":
+		if e.complexity.PackageName.Versions == nil {
+			break
+		}
+
+		return e.complexity.PackageName.Versions(childComplexity), true
+
+	case "PackageNamespace.names":
+		if e.complexity.PackageNamespace.Names == nil {
+			break
+		}
+
+		return e.complexity.PackageNamespace.Names(childComplexity), true
+
+	case "PackageNamespace.namespace":
+		if e.complexity.PackageNamespace.Namespace == nil {
+			break
+		}
+
+		return e.complexity.PackageNamespace.Namespace(childComplexity), true
+
+	case "PackageVersion.version":
+		if e.complexity.PackageVersion.Version == nil {
+			break
+		}
+
+		return e.complexity.PackageVersion.Version(childComplexity), true
 
 	case "Query.artifacts":
 		if e.complexity.Query.Artifacts == nil {
@@ -464,6 +534,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Artifacts(childComplexity), true
+
+	case "Query.packages":
+		if e.complexity.Query.Packages == nil {
+			break
+		}
+
+		args, err := ec.field_Query_packages_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(*model.PkgSpec)), true
 
 	case "ScorecardPayload.aggregate_score":
 		if e.complexity.ScorecardPayload.AggregateScore == nil {
@@ -626,7 +708,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputPkgSpec,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -671,7 +755,115 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `#
+	{Name: "../schema/package.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the package trie/tree. This tree closely matches
+# the pURL specification (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst)
+# but deviates from it where GUAC rules state otherwise. In principle, we want
+# this to represent a trie for packages, so information that represents a
+# smaller collection of packages is being pushed downwards in the trie.
+
+"""
+Package represents a package.
+
+In the pURL representation, each Package matches a ` + "`" + `pkg:<type>` + "`" + ` partial pURL.
+The ` + "`" + `type` + "`" + ` field matches the pURL types but we might also use ` + "`" + `"guac"` + "`" + ` for the
+cases where the pURL representation is not complete or when we have custom
+rules.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same ` + "`" + `type` + "`" + ` value.
+
+Also note that this is named ` + "`" + `Package` + "`" + `, not ` + "`" + `PackageType` + "`" + `. This is only to make
+queries more readable.
+"""
+type Package {
+  type: String!
+  namespaces: [PackageNamespace!]!
+}
+
+"""
+PackageNamespace is a namespace for packages.
+
+In the pURL representation, each PackageNamespace matches the
+` + "`" + `pgk:<type>/<namespace>/` + "`" + ` partial pURL.
+
+Namespaces are optional and type specific. Because they are optional, we use
+empty string to denote missing namespaces.
+"""
+type PackageNamespace {
+  namespace: String!
+  names: [PackageName!]!
+}
+
+"""
+PackageName is a name for packages.
+
+In the pURL representation, each PackageName matches the
+` + "`" + `pgk:<type>/<namespace>/<name>` + "`" + ` partial pURL.
+
+Names are always mandatory.
+
+This is the first node in the trie that can be referred to by other parts of
+GUAC.
+"""
+type PackageName {
+  name: String!
+  versions: [PackageVersion!]!
+}
+
+"""
+PackageVersion is a package version.
+
+In the pURL representation, each PackageName matches the
+` + "`" + `pgk:<type>/<namespace>/<name>@<version>` + "`" + ` partial pURL.
+
+Versions are optional and each Package type defines own rules for handling them.
+For this level of GUAC, these are just opaque strings.
+
+This node can be referred to by other parts of GUAC.
+"""
+type PackageVersion {
+  version: String!
+}
+
+"""
+PkgSpec allows filtering the list of packages to return.
+
+Each field matches a qualifier from pURL. Use ` + "`" + `null` + "`" + ` to match on all values at
+that level. For example, to get all packages in GUAC backend, use a PkgSpec
+where every field is ` + "`" + `null` + "`" + `.
+
+Empty string at a field means matching with the empty string.
+"""
+input PkgSpec {
+  type: String
+  namespace: String
+  name: String
+  version: String
+}
+
+extend type Query {
+  "Returns all packages"
+  packages(pkgSpec: PkgSpec): [Package!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/schema.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -707,7 +899,7 @@ interface NodeInfo {
 }
 
 """
-Artifact nodes represent artifacts. These are files on disk (cf. Package).
+Artifact nodes represent artifacts. These are files on disk (cf. OldPackage).
 There could be artifacts not included in any package.
 """
 type Artifact implements NodeInfo {
@@ -735,13 +927,13 @@ type Artifact implements NodeInfo {
 }
 
 """
-Package nodes represent packages. These are packages from a package repository
+OldPackage nodes represent packages. These are packages from a package repository
 (cf. Artifact). Upon installing a package one or multiple artifacts could be
 generated.
 """
-type Package implements NodeInfo {
+type OldPackage implements NodeInfo {
   """
-  purl is the Package identifier, in purl format. Uniquely identifies the package.
+  purl is the OldPackage identifier, in purl format. Uniquely identifies the package.
   """
   purl: String!
   "name of the package"
@@ -767,7 +959,7 @@ type Package implements NodeInfo {
 """
 Currently artifacts and packages can depend on each other. Hence, we need a union for this edge.
 """
-union ArtifactOrPackage = Artifact | Package
+union ArtifactOrPackage = Artifact | OldPackage
 
 """
 Builder nodes represent builders of artifacts (from provenance documents).

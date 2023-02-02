@@ -34,7 +34,7 @@ interface NodeInfo {
 }
 
 """
-Artifact nodes represent artifacts. These are files on disk (cf. Package).
+Artifact nodes represent artifacts. These are files on disk (cf. OldPackage).
 There could be artifacts not included in any package.
 """
 type Artifact implements NodeInfo {
@@ -62,13 +62,13 @@ type Artifact implements NodeInfo {
 }
 
 """
-Package nodes represent packages. These are packages from a package repository
+OldPackage nodes represent packages. These are packages from a package repository
 (cf. Artifact). Upon installing a package one or multiple artifacts could be
 generated.
 """
-type Package implements NodeInfo {
+type OldPackage implements NodeInfo {
   """
-  purl is the Package identifier, in purl format. Uniquely identifies the package.
+  purl is the OldPackage identifier, in purl format. Uniquely identifies the package.
   """
   purl: String!
   "name of the package"
@@ -94,7 +94,7 @@ type Package implements NodeInfo {
 """
 Currently artifacts and packages can depend on each other. Hence, we need a union for this edge.
 """
-union ArtifactOrPackage = Artifact | Package
+union ArtifactOrPackage = Artifact | OldPackage
 
 """
 Builder nodes represent builders of artifacts (from provenance documents).

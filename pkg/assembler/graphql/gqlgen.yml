@@ -15,7 +15,7 @@
 
 # Where is the schema defined?
 schema:
-  - schema.graphql
+  - schema/*.graphql
 
 # Where does the generated boilerplate code go?
 exec:

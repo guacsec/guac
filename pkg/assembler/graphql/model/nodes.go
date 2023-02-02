@@ -28,7 +28,7 @@ type NodeInfo interface {
 	GetCollectorInfo() *string
 }
 
-// Artifact nodes represent artifacts. These are files on disk (cf. Package).
+// Artifact nodes represent artifacts. These are files on disk (cf. OldPackage).
 // There could be artifacts not included in any package.
 type Artifact struct {
 	// digest is the identifier of an artifact. It is in the format
@@ -162,11 +162,11 @@ func (this Metadata) GetSourceInfo() *string { return this.SourceInfo }
 // from
 func (this Metadata) GetCollectorInfo() *string { return this.CollectorInfo }
 
-// Package nodes represent packages. These are packages from a package repository
+// OldPackage nodes represent packages. These are packages from a package repository
 // (cf. Artifact). Upon installing a package one or multiple artifacts could be
 // generated.
-type Package struct {
-	// purl is the Package identifier, in purl format. Uniquely identifies the package.
+type OldPackage struct {
+	// purl is the OldPackage identifier, in purl format. Uniquely identifies the package.
 	Purl string `json:"purl"`
 	// name of the package
 	Name *string `json:"name"`
@@ -184,17 +184,87 @@ type Package struct {
 	DependsOn     []ArtifactOrPackage `json:"dependsOn"`
 }
 
-func (Package) IsNodeInfo() {}
+func (OldPackage) IsNodeInfo() {}
 
 // sourceInfo is the file location for the document from which the node was
 // created.
-func (this Package) GetSourceInfo() *string { return this.SourceInfo }
+func (this OldPackage) GetSourceInfo() *string { return this.SourceInfo }
 
 // collectorInfo is the collector from which the file that created the node came
 // from
-func (this Package) GetCollectorInfo() *string { return this.CollectorInfo }
+func (this OldPackage) GetCollectorInfo() *string { return this.CollectorInfo }
 
-func (Package) IsArtifactOrPackage() {}
+func (OldPackage) IsArtifactOrPackage() {}
+
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node with
+// the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type Package struct {
+	Type       string              `json:"type"`
+	Namespaces []*PackageNamespace `json:"namespaces"`
+}
+
+// PackageName is a name for packages.
+//
+// In the pURL representation, each PackageName matches the
+// `pgk:<type>/<namespace>/<name>` partial pURL.
+//
+// Names are always mandatory.
+//
+// This is the first node in the trie that can be referred to by other parts of
+// GUAC.
+type PackageName struct {
+	Name     string            `json:"name"`
+	Versions []*PackageVersion `json:"versions"`
+}
+
+// PackageNamespace is a namespace for packages.
+//
+// In the pURL representation, each PackageNamespace matches the
+// `pgk:<type>/<namespace>/` partial pURL.
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type PackageNamespace struct {
+	Namespace string         `json:"namespace"`
+	Names     []*PackageName `json:"names"`
+}
+
+// PackageVersion is a package version.
+//
+// In the pURL representation, each PackageName matches the
+// `pgk:<type>/<namespace>/<name>@<version>` partial pURL.
+//
+// Versions are optional and each Package type defines own rules for handling them.
+// For this level of GUAC, these are just opaque strings.
+//
+// This node can be referred to by other parts of GUAC.
+type PackageVersion struct {
+	Version string `json:"version"`
+}
+
+// PkgSpec allows filtering the list of packages to return.
+//
+// Each field matches a qualifier from pURL. Use `null` to match on all values at
+// that level. For example, to get all packages in GUAC backend, use a PkgSpec
+// where every field is `null`.
+//
+// Empty string at a field means matching with the empty string.
+type PkgSpec struct {
+	Type      *string `json:"type"`
+	Namespace *string `json:"namespace"`
+	Name      *string `json:"name"`
+	Version   *string `json:"version"`
+}
 
 // ScorecardPayload are payloads of Scorecards metadata.
 type ScorecardPayload struct {
