@@ -59,6 +59,7 @@ type ComplexityRoot struct {
 
 	PackageVersion struct {
 		Qualifiers func(childComplexity int) int
+		Subpath    func(childComplexity int) int
 		Version    func(childComplexity int) int
 	}
 
@@ -144,6 +145,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PackageVersion.Qualifiers(childComplexity), true
+
+	case "PackageVersion.subpath":
+		if e.complexity.PackageVersion.Subpath == nil {
+			break
+		}
+
+		return e.complexity.PackageVersion.Subpath(childComplexity), true
 
 	case "PackageVersion.version":
 		if e.complexity.PackageVersion.Version == nil {
@@ -301,10 +309,19 @@ Versions are optional and each Package type defines own rules for handling them.
 For this level of GUAC, these are just opaque strings.
 
 This node can be referred to by other parts of GUAC.
+
+Subpath and qualifiers are optional. Lack of qualifiers is represented by an
+empty list and lack of subpath by empty string (to be consistent with
+optionality of namespace and version). Two nodes that have different qualifiers
+and/or subpath but the same version mean two different packages in the trie
+(they are different). Two nodes that have same version but qualifiers of one are
+a subset of the qualifier of the other also mean two different packages in the
+trie.
 """
 type PackageVersion {
   version: String!
   qualifiers: [PackageQualifier!]!
+  subpath: String!
 }
 
 """
@@ -339,6 +356,7 @@ input PkgSpec {
   name: String
   version: String
   qualifiers: [PackageQualifierInput!]
+  subpath: String
 }
 
 """

@@ -87,7 +87,7 @@ func filterVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageN
 	var versions []*model.PackageVersion
 	for _, v := range n.Versions {
 		if pkgSpec.Version == nil || v.Version == *pkgSpec.Version {
-			newV := filterQualifiers(v, pkgSpec)
+			newV := filterQualifiersAndSubpath(v, pkgSpec)
 			if newV != nil {
 				versions = append(versions, newV)
 			}
@@ -102,7 +102,12 @@ func filterVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageN
 	}
 }
 
-func filterQualifiers(v *model.PackageVersion, pkgSpec *model.PkgSpec) *model.PackageVersion {
+func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec) *model.PackageVersion {
+	// First check for subpath matching
+	if pkgSpec.Subpath != nil && *pkgSpec.Subpath != v.Subpath {
+		return nil
+	}
+
 	// Because we operate on GraphQL-generated structs directly we cannot
 	// use a key-value map, so this is O(n^2). Production resolvers will
 	// run queries that match the qualifiers faster.
