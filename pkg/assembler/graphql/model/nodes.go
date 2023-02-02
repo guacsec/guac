@@ -84,9 +84,18 @@ type PackageQualifierInput struct {
 // For this level of GUAC, these are just opaque strings.
 //
 // This node can be referred to by other parts of GUAC.
+//
+// Subpath and qualifiers are optional. Lack of qualifiers is represented by an
+// empty list and lack of subpath by empty string (to be consistent with
+// optionality of namespace and version). Two nodes that have different qualifiers
+// and/or subpath but the same version mean two different packages in the trie
+// (they are different). Two nodes that have same version but qualifiers of one are
+// a subset of the qualifier of the other also mean two different packages in the
+// trie.
 type PackageVersion struct {
 	Version    string              `json:"version"`
 	Qualifiers []*PackageQualifier `json:"qualifiers"`
+	Subpath    string              `json:"subpath"`
 }
 
 // PkgSpec allows filtering the list of packages to return.
@@ -103,4 +112,5 @@ type PkgSpec struct {
 	Name       *string                  `json:"name"`
 	Version    *string                  `json:"version"`
 	Qualifiers []*PackageQualifierInput `json:"qualifiers"`
+	Subpath    *string                  `json:"subpath"`
 }
