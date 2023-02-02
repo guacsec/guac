@@ -21,9 +21,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func registerAllPackages() *demoClient {
+func registerAllPackages(client *demoClient) {
 	// TODO: add util to convert from pURL to package fields
-	client := demoClient{}
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
 	client.registerPackage("apk", "alpine", "apk", "2.12.9-r3", "", "arch=x86")
 	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
@@ -70,7 +69,6 @@ func registerAllPackages() *demoClient {
 	client.registerPackage("pypi", "", "django", "1.11.1", "")
 	// pkg:pypi/django@1.11.1#subpath
 	client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
-	return &client
 }
 
 func (c *demoClient) registerPackage(pkgType, namespace, name, version, subpath string, qualifiers ...string) {

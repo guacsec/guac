@@ -420,7 +420,7 @@ func (ec *executionContext) unmarshalInputSourceQualifierInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
-			it.Tag, err = ec.unmarshalNString2string(ctx, v)
+			it.Tag, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -428,7 +428,7 @@ func (ec *executionContext) unmarshalInputSourceQualifierInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commit"))
-			it.Commit, err = ec.unmarshalNString2string(ctx, v)
+			it.Commit, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -576,8 +576,8 @@ SourceQualifierInput is the same as SourceQualifier, but usable as query
 input.
 """
 input SourceQualifierInput {
-  tag: String!
-  commit: String!
+  tag: String
+  commit: String
 }
 
 extend type Query {

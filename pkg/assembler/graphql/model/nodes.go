@@ -169,8 +169,8 @@ type SourceQualifier struct {
 // SourceQualifierInput is the same as SourceQualifier, but usable as query
 // input.
 type SourceQualifierInput struct {
-	Tag    string `json:"tag"`
-	Commit string `json:"commit"`
+	Tag    *string `json:"tag"`
+	Commit *string `json:"commit"`
 }
 
 // PkgSpec allows filtering the list of packages to return.

@@ -30,7 +30,13 @@ type demoClient struct {
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
-	return registerAllPackages(), nil
+	client := &demoClient{
+		packages: []*model.Package{},
+		sources:  []*model.Source{},
+	}
+	registerAllPackages(client)
+	registerAllSources(client)
+	return client, nil
 }
 
 func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -149,9 +155,9 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 	return v
 }
 
-func filterSourceNamespace(pkg *model.Source, sourceSpec *model.SourceSpec) *model.Source {
+func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) *model.Source {
 	var namespaces []*model.SourceNamespace
-	for _, ns := range pkg.Namespaces {
+	for _, ns := range src.Namespaces {
 		if sourceSpec.Namespace == nil || ns.Namespace == *sourceSpec.Namespace {
 			newNs := filterSourceName(ns, sourceSpec)
 			if newNs != nil {
@@ -163,7 +169,7 @@ func filterSourceNamespace(pkg *model.Source, sourceSpec *model.SourceSpec) *mod
 		return nil
 	}
 	return &model.Source{
-		Type:       pkg.Type,
+		Type:       src.Type,
 		Namespaces: namespaces,
 	}
 }
@@ -190,7 +196,7 @@ func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) *
 func filterSourceQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) *model.SourceName {
 	var qualifiers []*model.SourceQualifier
 	for _, v := range n.Qualifiers {
-		if sourceSpec.Qualifier == nil || v.Commit == sourceSpec.Qualifier.Commit || v.Tag == sourceSpec.Qualifier.Tag {
+		if sourceSpec.Qualifier == nil || v.Commit == *sourceSpec.Qualifier.Commit && v.Tag == *sourceSpec.Qualifier.Tag {
 			qualifiers = append(qualifiers, v)
 		}
 	}
