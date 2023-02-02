@@ -15,11 +15,9 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the package trie/tree. This tree closely matches
-# the pURL specification (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst)
-# but deviates from it where GUAC rules state otherwise. In principle, we want
-# this to represent a trie for packages, so information that represents a
-# smaller collection of packages is being pushed downwards in the trie.
+# Defines a GraphQL schema for the source trie/tree. This tree is a derivative of
+# the pURL specification where it has a type, namespace, name and finally a qualifier that
+# contain the tag or commit. 
 
 """
 Source represents a source.
