@@ -2,6 +2,71 @@
 
 package model
 
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// year is mandatory.
+//
+// This node is a singleton: backends guarantee that there is exactly one node with
+// the same `year` value.
+type Cve struct {
+	Year  string   `json:"year"`
+	CveID []*CveID `json:"cve_id"`
+}
+
+// CVESpec allows filtering the list of cves to return.
+type CVESpec struct {
+	Year  *string `json:"year"`
+	CveID *string `json:"cve_id"`
+}
+
+// CVE_ID is the actual ID that is given to a specific vulnerability
+//
+// id filed is mandatory.
+//
+// This node can be referred to by other parts of GUAC.
+type CveID struct {
+	ID string `json:"id"`
+}
+
+// GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
+type Ghsa struct {
+	GhsaID []*CveID `json:"ghsa_id"`
+}
+
+// GHSASpec allows filtering the list of ghsa to return.
+type GHSASpec struct {
+	GhsaID *string `json:"ghsa_id"`
+}
+
+// GHSA_ID is the actual ID that is given to a specific vulnerability on github
+//
+// id filed is mandatory.
+//
+// This node can be referred to by other parts of GUAC.
+type GhsaID struct {
+	ID string `json:"id"`
+}
+
+// OSV represents Open Source Vulnerability . It contains a OSV ID.
+type Osv struct {
+	OsvID []*CveID `json:"osv_id"`
+}
+
+// OSVSpec allows filtering the list of osv to return.
+type OSVSpec struct {
+	OsvID *string `json:"osv_id"`
+}
+
+// OSV_ID is the actual ID that is given to a specific vulnerability
+//
+// id filed is mandatory. This maps to a GHSA or CVE ID
+//
+// This node can be referred to by other parts of GUAC.
+type OsvID struct {
+	ID string `json:"id"`
+}
+
 // Package represents a package.
 //
 // In the pURL representation, each Package matches a `pkg:<type>` partial pURL.

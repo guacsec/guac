@@ -1,0 +1,58 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the cve trie/tree. It contains the year
+# along with the id associated with vulnerability (cve id)
+"""
+CVE represents common vulnerabilities and exposures. It contains the year along
+with the CVE ID.
+
+year is mandatory.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same `year` value.
+
+"""
+type CVE {
+  year: String!
+  cve_id: [CVE_ID!]!
+}
+
+"""
+CVE_ID is the actual ID that is given to a specific vulnerability
+
+id filed is mandatory.
+
+This node can be referred to by other parts of GUAC.
+"""
+type CVE_ID {
+  id: String!
+}
+
+"""
+CVESpec allows filtering the list of cves to return.
+"""
+input CVESpec {
+  year: String
+  cve_id: String
+}
+
+
+extend type Query {
+  "Returns all packages"
+  cve(cveSpec: CVESpec): [CVE!]!
+}

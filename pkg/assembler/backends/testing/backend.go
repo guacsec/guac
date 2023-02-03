@@ -28,6 +28,9 @@ type DemoCredentials struct{}
 type demoClient struct {
 	packages []*model.Package
 	sources  []*model.Source
+	cve      []*model.Cve
+	ghsa     []*model.Ghsa
+	osv      []*model.Osv
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -56,6 +59,48 @@ func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 func (c *demoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	var sources []*model.Source
 	for _, s := range c.sources {
+		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
+			newSource, err := filterSourceNamespace(s, sourceSpec)
+			if err != nil {
+				return nil, err
+			}
+			if newSource != nil {
+				sources = append(sources, newSource)
+			}
+		}
+	}
+	return sources, nil
+}
+
+func (c *demoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+	var cve []*model.Cve
+	for _, s := range c.cve {
+		if cveSpec.Year == nil || s.Year == *cveSpec.Year {
+			newCve, err := filterCveID(s, cveSpec)
+			if err != nil {
+				return nil, err
+			}
+			if newCve != nil {
+				cve = append(cve, newCve)
+			}
+		}
+	}
+	return cve, nil
+}
+
+func (c *demoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
+	var ghsa []*model.Ghsa
+	for _, g := range c.ghsa {
+		if ghsaSpec.GhsaID == nil || g.GhsaID == *ghsaSpec.GhsaID {
+			sources = append(sources, newSource)
+		}
+	}
+	return sources, nil
+}
+
+func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
+	var sources []*model.Osv
+	for _, o := range c.osv {
 		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
 			newSource, err := filterSourceNamespace(s, sourceSpec)
 			if err != nil {
@@ -225,4 +270,20 @@ func filterSourceQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) (*
 		return nil, nil
 	}
 	return n, nil
+}
+
+func filterCveID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
+	var cveID []*model.CveID
+	for _, id := range cve.CveID {
+		if cveSpec.CveID == nil || id.ID == *cveSpec.CveID {
+			cveID = append(cveID, id)
+		}
+	}
+	if len(cveID) == 0 {
+		return nil, nil
+	}
+	return &model.Cve{
+		Year:  cve.Year,
+		CveID: cveID,
+	}, nil
 }

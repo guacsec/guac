@@ -10,7 +10,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// Packages is the resolver for the packages field.
-func (r *queryResolver) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	return r.Backend.Packages(ctx, pkgSpec)
+// Ghsa is the resolver for the ghsa field.
+func (r *queryResolver) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
+	return r.Backend.Ghsa(ctx, ghsaSpec)
 }

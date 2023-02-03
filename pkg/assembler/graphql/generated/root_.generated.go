@@ -37,6 +37,31 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	CVE struct {
+		CveID func(childComplexity int) int
+		Year  func(childComplexity int) int
+	}
+
+	CVE_ID struct {
+		ID func(childComplexity int) int
+	}
+
+	GHSA struct {
+		GhsaID func(childComplexity int) int
+	}
+
+	GHSA_ID struct {
+		ID func(childComplexity int) int
+	}
+
+	OSV struct {
+		OsvID func(childComplexity int) int
+	}
+
+	OSV_ID struct {
+		ID func(childComplexity int) int
+	}
+
 	Package struct {
 		Namespaces func(childComplexity int) int
 		Type       func(childComplexity int) int
@@ -64,6 +89,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Cve      func(childComplexity int, cveSpec *model.CVESpec) int
+		Ghsa     func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		Osv      func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Sources  func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
@@ -99,6 +127,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "CVE.cve_id":
+		if e.complexity.CVE.CveID == nil {
+			break
+		}
+
+		return e.complexity.CVE.CveID(childComplexity), true
+
+	case "CVE.year":
+		if e.complexity.CVE.Year == nil {
+			break
+		}
+
+		return e.complexity.CVE.Year(childComplexity), true
+
+	case "CVE_ID.id":
+		if e.complexity.CVE_ID.ID == nil {
+			break
+		}
+
+		return e.complexity.CVE_ID.ID(childComplexity), true
+
+	case "GHSA.ghsa_id":
+		if e.complexity.GHSA.GhsaID == nil {
+			break
+		}
+
+		return e.complexity.GHSA.GhsaID(childComplexity), true
+
+	case "GHSA_ID.id":
+		if e.complexity.GHSA_ID.ID == nil {
+			break
+		}
+
+		return e.complexity.GHSA_ID.ID(childComplexity), true
+
+	case "OSV.osv_id":
+		if e.complexity.OSV.OsvID == nil {
+			break
+		}
+
+		return e.complexity.OSV.OsvID(childComplexity), true
+
+	case "OSV_ID.id":
+		if e.complexity.OSV_ID.ID == nil {
+			break
+		}
+
+		return e.complexity.OSV_ID.ID(childComplexity), true
 
 	case "Package.namespaces":
 		if e.complexity.Package.Namespaces == nil {
@@ -176,6 +253,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PackageVersion.Version(childComplexity), true
+
+	case "Query.cve":
+		if e.complexity.Query.Cve == nil {
+			break
+		}
+
+		args, err := ec.field_Query_cve_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Cve(childComplexity, args["cveSpec"].(*model.CVESpec)), true
+
+	case "Query.ghsa":
+		if e.complexity.Query.Ghsa == nil {
+			break
+		}
+
+		args, err := ec.field_Query_ghsa_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(*model.GHSASpec)), true
+
+	case "Query.osv":
+		if e.complexity.Query.Osv == nil {
+			break
+		}
+
+		args, err := ec.field_Query_osv_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Osv(childComplexity, args["osvSpec"].(*model.OSVSpec)), true
 
 	case "Query.packages":
 		if e.complexity.Query.Packages == nil {
@@ -258,6 +371,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCVESpec,
+		ec.unmarshalInputGHSASpec,
+		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageQualifierInput,
 		ec.unmarshalInputPkgSpec,
 		ec.unmarshalInputSourceQualifierInput,
@@ -307,6 +423,167 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/cve.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the cve trie/tree. It contains the year
+# along with the id associated with vulnerability (cve id)
+"""
+CVE represents common vulnerabilities and exposures. It contains the year along
+with the CVE ID.
+
+year is mandatory.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same ` + "`" + `year` + "`" + ` value.
+
+"""
+type CVE {
+  year: String!
+  cve_id: [CVE_ID!]!
+}
+
+"""
+CVE_ID is the actual ID that is given to a specific vulnerability
+
+id filed is mandatory.
+
+This node can be referred to by other parts of GUAC.
+"""
+type CVE_ID {
+  id: String!
+}
+
+"""
+CVESpec allows filtering the list of cves to return.
+"""
+input CVESpec {
+  year: String
+  cve_id: String
+}
+
+
+extend type Query {
+  "Returns all packages"
+  cve(cveSpec: CVESpec): [CVE!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/ghsa.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the ghsa trie/tree. It contains 
+# id associated with vulnerability (ghsa id)
+"""
+GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
+
+"""
+type GHSA {
+  ghsa_id: [CVE_ID!]!
+}
+
+"""
+GHSA_ID is the actual ID that is given to a specific vulnerability on github
+
+id filed is mandatory.
+
+This node can be referred to by other parts of GUAC.
+"""
+type GHSA_ID {
+  id: String!
+}
+
+"""
+GHSASpec allows filtering the list of ghsa to return.
+"""
+input GHSASpec {
+  ghsa_id: String
+}
+
+
+extend type Query {
+  "Returns all packages"
+  ghsa(ghsaSpec: GHSASpec): [GHSA!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/osv.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the osv trie/tree. It contains 
+# id associated with vulnerability (osv id)
+"""
+OSV represents Open Source Vulnerability . It contains a OSV ID.
+
+"""
+type OSV {
+  osv_id: [CVE_ID!]!
+}
+
+"""
+OSV_ID is the actual ID that is given to a specific vulnerability
+
+id filed is mandatory. This maps to a GHSA or CVE ID
+
+This node can be referred to by other parts of GUAC.
+"""
+type OSV_ID {
+  id: String!
+}
+
+"""
+OSVSpec allows filtering the list of osv to return.
+"""
+input OSVSpec {
+  osv_id: String
+}
+
+
+extend type Query {
+  "Returns all packages"
+  osv(osvSpec: OSVSpec): [OSV!]!
+}
+`, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
