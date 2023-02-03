@@ -28,7 +28,7 @@ type OSV {
 """
 OSVId is the actual ID that is given to a specific vulnerability
 
-id filed is mandatory. This maps to a GHSA or CVE ID
+id field is mandatory. This maps to a GHSA or CVE ID
 
 This node can be referred to by other parts of GUAC.
 """
