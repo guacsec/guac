@@ -286,20 +286,6 @@ func filterCVEID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
 		if cveSpec.CveID == nil || id.ID == *cveSpec.CveID {
 			cveID = append(cveID, id)
 		}
-		if sourceSpec.Qualifier.Commit == nil && sourceSpec.Qualifier.Tag == nil {
-			if n.Tag == nil && n.Commit == nil {
-				return n, nil
-			}
-		} else if sourceSpec.Qualifier.Commit != nil && n.Commit != nil {
-			if *n.Commit == *sourceSpec.Qualifier.Commit {
-				return n, nil
-			}
-		} else if sourceSpec.Qualifier.Tag != nil && n.Tag != nil {
-			if *n.Tag == *sourceSpec.Qualifier.Tag {
-				return n, nil
-			}
-		}
-		return nil, nil
 	}
 	if len(cveID) == 0 {
 		return nil, nil
