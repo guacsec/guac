@@ -10,7 +10,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// Packages is the resolver for the packages field.
-func (r *queryResolver) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	return r.Backend.Packages(ctx, pkgSpec)
+// Osv is the resolver for the osv field.
+func (r *queryResolver) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
+	return r.Backend.Osv(ctx, osvSpec)
 }
