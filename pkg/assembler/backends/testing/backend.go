@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -130,14 +131,19 @@ func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.
 
 func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	var artifacts []*model.Artifact
+
+	// enforce lowercase for both the algorithm and digest when querying
+	lowerCaseDigest := strings.ToLower(*artifactSpec.Digest)
+	lowerCaseAlgorithm := strings.ToLower(*artifactSpec.Algorithm)
+
 	for _, a := range c.artifacts {
 		if artifactSpec.Digest == nil && artifactSpec.Algorithm == nil {
 			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == *artifactSpec.Digest {
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == lowerCaseDigest {
 			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == *artifactSpec.Algorithm {
+		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == lowerCaseAlgorithm {
 			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == *artifactSpec.Algorithm && a.Digest == *artifactSpec.Digest {
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == lowerCaseAlgorithm && a.Digest == lowerCaseDigest {
 			artifacts = append(artifacts, a)
 		}
 	}

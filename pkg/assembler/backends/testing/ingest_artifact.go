@@ -16,6 +16,8 @@
 package backend
 
 import (
+	"strings"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -27,11 +29,15 @@ func registerAllArtifacts(client *demoClient) {
 }
 
 func (c *demoClient) registerArtifact(algorithm, digest string) {
+	// enforce lowercase for both the algorithm and digest when ingesting
+	lowerCaseDigest := strings.ToLower(digest)
+	lowerCaseAlgorithm := strings.ToLower(algorithm)
+
 	for _, a := range c.artifacts {
-		if a.Digest == digest && a.Algorithm == algorithm {
+		if a.Digest == lowerCaseDigest && a.Algorithm == lowerCaseAlgorithm {
 			return
 		}
 	}
-	newArtifact := &model.Artifact{Digest: digest, Algorithm: algorithm}
+	newArtifact := &model.Artifact{Digest: lowerCaseDigest, Algorithm: lowerCaseAlgorithm}
 	c.artifacts = append(c.artifacts, newArtifact)
 }
