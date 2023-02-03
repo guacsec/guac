@@ -133,17 +133,14 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 	var artifacts []*model.Artifact
 
 	// enforce lowercase for both the algorithm and digest when querying
-	lowerCaseDigest := strings.ToLower(*artifactSpec.Digest)
-	lowerCaseAlgorithm := strings.ToLower(*artifactSpec.Algorithm)
-
 	for _, a := range c.artifacts {
 		if artifactSpec.Digest == nil && artifactSpec.Algorithm == nil {
 			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == lowerCaseDigest {
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == strings.ToLower(*artifactSpec.Digest) {
 			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == lowerCaseAlgorithm {
+		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) {
 			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == lowerCaseAlgorithm && a.Digest == lowerCaseDigest {
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) && a.Digest == strings.ToLower(*artifactSpec.Digest) {
 			artifacts = append(artifacts, a)
 		}
 	}
