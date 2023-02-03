@@ -186,7 +186,7 @@ func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (
 	var names []*model.SourceName
 	for _, n := range ns.Names {
 		if sourceSpec.Name == nil || n.Name == *sourceSpec.Name {
-			n, err := filterQualifier(n, sourceSpec)
+			n, err := filterSourceQualifier(n, sourceSpec)
 			if err != nil {
 				return nil, err
 			}
@@ -204,7 +204,7 @@ func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (
 	}, nil
 }
 
-func filterQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
+func filterSourceQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
 	if sourceSpec.Qualifier != nil {
 		if sourceSpec.Qualifier.Commit != nil && sourceSpec.Qualifier.Tag != nil {
 			return nil, gqlerror.Errorf("can only pass in commit or tag")
