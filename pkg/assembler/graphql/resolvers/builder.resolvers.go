@@ -10,7 +10,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// Cve is the resolver for the cve field.
-func (r *queryResolver) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-	return r.Backend.Cve(ctx, cveSpec)
+// Builders is the resolver for the builders field.
+func (r *queryResolver) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
+	return r.Backend.Builders(ctx, builderSpec)
 }

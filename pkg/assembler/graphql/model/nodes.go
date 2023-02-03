@@ -2,6 +2,36 @@
 
 package model
 
+// Artifact represents the artifact and contains a digest field
+//
+// digest is mandatory.
+//
+// This node is a singleton: backends guarantee that there is exactly one node with
+// the same `digest` value.
+type Artifact struct {
+	Digest string `json:"digest"`
+}
+
+// ArtifactSpec allows filtering the list of artifacts to return.
+type ArtifactSpec struct {
+	Digest *string `json:"digest"`
+}
+
+// Builder represents the builder such as (FRSCA or github actions) and contains a uri field
+//
+// uri is mandatory and represents the specific builder.
+//
+// This node is a singleton: backends guarantee that there is exactly one node with
+// the same `uri` value.
+type Builder struct {
+	URI string `json:"uri"`
+}
+
+// BuilderSpec allows filtering the list of builders to return.
+type BuilderSpec struct {
+	URI *string `json:"uri"`
+}
+
 // CVE represents common vulnerabilities and exposures. It contains the year along
 // with the CVE ID.
 //

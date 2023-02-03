@@ -26,11 +26,13 @@ import (
 type DemoCredentials struct{}
 
 type demoClient struct {
-	packages []*model.Package
-	sources  []*model.Source
-	cve      []*model.Cve
-	ghsa     []*model.Ghsa
-	osv      []*model.Osv
+	packages  []*model.Package
+	sources   []*model.Source
+	cve       []*model.Cve
+	ghsa      []*model.Ghsa
+	osv       []*model.Osv
+	artifacts []*model.Artifact
+	builders  []*model.Builder
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -109,6 +111,34 @@ func (c *demoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mod
 }
 
 func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
+	var osv []*model.Osv
+	for _, o := range c.osv {
+		newOSV, err := filterOSVID(o, osvSpec)
+		if err != nil {
+			return nil, err
+		}
+		if newOSV != nil {
+			osv = append(osv, newOSV)
+		}
+	}
+	return osv, nil
+}
+
+func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	var osv []*model.Osv
+	for _, o := range c.osv {
+		newOSV, err := filterOSVID(o, osvSpec)
+		if err != nil {
+			return nil, err
+		}
+		if newOSV != nil {
+			osv = append(osv, newOSV)
+		}
+	}
+	return osv, nil
+}
+
+func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	var osv []*model.Osv
 	for _, o := range c.osv {
 		newOSV, err := filterOSVID(o, osvSpec)

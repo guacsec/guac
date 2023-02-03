@@ -37,6 +37,14 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Artifact struct {
+		Digest func(childComplexity int) int
+	}
+
+	Builder struct {
+		URI func(childComplexity int) int
+	}
+
 	CVE struct {
 		CveID func(childComplexity int) int
 		Year  func(childComplexity int) int
@@ -89,11 +97,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Cve      func(childComplexity int, cveSpec *model.CVESpec) int
-		Ghsa     func(childComplexity int, ghsaSpec *model.GHSASpec) int
-		Osv      func(childComplexity int, osvSpec *model.OSVSpec) int
-		Packages func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Sources  func(childComplexity int, sourceSpec *model.SourceSpec) int
+		Artifacts func(childComplexity int, artifactSpec *model.ArtifactSpec) int
+		Builders  func(childComplexity int, builderSpec *model.BuilderSpec) int
+		Cve       func(childComplexity int, cveSpec *model.CVESpec) int
+		Ghsa      func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		Osv       func(childComplexity int, osvSpec *model.OSVSpec) int
+		Packages  func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Sources   func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
 
 	Source struct {
@@ -127,6 +137,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Artifact.digest":
+		if e.complexity.Artifact.Digest == nil {
+			break
+		}
+
+		return e.complexity.Artifact.Digest(childComplexity), true
+
+	case "Builder.uri":
+		if e.complexity.Builder.URI == nil {
+			break
+		}
+
+		return e.complexity.Builder.URI(childComplexity), true
 
 	case "CVE.cveId":
 		if e.complexity.CVE.CveID == nil {
@@ -254,6 +278,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PackageVersion.Version(childComplexity), true
 
+	case "Query.artifacts":
+		if e.complexity.Query.Artifacts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_artifacts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Artifacts(childComplexity, args["artifactSpec"].(*model.ArtifactSpec)), true
+
+	case "Query.builders":
+		if e.complexity.Query.Builders == nil {
+			break
+		}
+
+		args, err := ec.field_Query_builders_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Builders(childComplexity, args["builderSpec"].(*model.BuilderSpec)), true
+
 	case "Query.cve":
 		if e.complexity.Query.Cve == nil {
 			break
@@ -371,6 +419,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputArtifactSpec,
+		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputOSVSpec,
@@ -423,6 +473,94 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/artifact.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the artifact. It only contains the digest
+"""
+Artifact represents the artifact and contains a digest field
+
+digest is mandatory.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same ` + "`" + `digest` + "`" + ` value.
+
+"""
+type Artifact {
+  digest: String!
+}
+
+"""
+ArtifactSpec allows filtering the list of artifacts to return.
+"""
+input ArtifactSpec {
+  digest: String
+}
+
+
+extend type Query {
+  "Returns all artifacts"
+  artifacts(artifactSpec: ArtifactSpec): [Artifact!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/builder.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the builder. It only contains the uri
+"""
+Builder represents the builder such as (FRSCA or github actions) and contains a uri field
+
+uri is mandatory and represents the specific builder.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same ` + "`" + `uri` + "`" + ` value.
+
+"""
+type Builder {
+  uri: String!
+}
+
+"""
+BuilderSpec allows filtering the list of builders to return.
+"""
+input BuilderSpec {
+  uri: String
+}
+
+
+extend type Query {
+  "Returns all builders"
+  builders(builderSpec: BuilderSpec): [Builder!]!
+}
+`, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
