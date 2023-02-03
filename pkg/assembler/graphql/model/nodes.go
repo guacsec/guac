@@ -2,6 +2,36 @@
 
 package model
 
+// Artifact represents the artifact and contains a digest field
+//
+// algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
+// digest is mandatory in the form checksum.Value.
+type Artifact struct {
+	Algorithm string `json:"algorithm"`
+	Digest    string `json:"digest"`
+}
+
+// ArtifactSpec allows filtering the list of artifacts to return.
+type ArtifactSpec struct {
+	Algorithm *string `json:"algorithm"`
+	Digest    *string `json:"digest"`
+}
+
+// Builder represents the builder such as (FRSCA or github actions) and contains a uri field
+//
+// uri is mandatory and represents the specific builder.
+//
+// This node is a singleton: backends guarantee that there is exactly one node with
+// the same `uri` value.
+type Builder struct {
+	URI string `json:"uri"`
+}
+
+// BuilderSpec allows filtering the list of builders to return.
+type BuilderSpec struct {
+	URI *string `json:"uri"`
+}
+
 // CVE represents common vulnerabilities and exposures. It contains the year along
 // with the CVE ID.
 //
@@ -16,7 +46,7 @@ type Cve struct {
 
 // CVEId is the actual ID that is given to a specific vulnerability
 //
-// id filed is mandatory.
+// id field is mandatory.
 //
 // This node can be referred to by other parts of GUAC.
 type CVEId struct {
@@ -36,7 +66,7 @@ type Ghsa struct {
 
 // GHSAId is the actual ID that is given to a specific vulnerability on github
 //
-// id filed is mandatory.
+// id field is mandatory.
 //
 // This node can be referred to by other parts of GUAC.
 type GHSAId struct {
@@ -55,7 +85,7 @@ type Osv struct {
 
 // OSVId is the actual ID that is given to a specific vulnerability
 //
-// id filed is mandatory. This maps to a GHSA or CVE ID
+// id field is mandatory. This maps to a GHSA or CVE ID
 //
 // This node can be referred to by other parts of GUAC.
 type OSVId struct {

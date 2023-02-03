@@ -30,6 +30,8 @@ type Backend interface {
 	Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error)
 	Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error)
 	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
+	Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error)
+	Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

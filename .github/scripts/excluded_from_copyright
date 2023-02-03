@@ -13,3 +13,7 @@
 ./pkg/assembler/graphql/resolvers/ghsa.resolvers.go
 ./pkg/assembler/graphql/generated/osv.generated.go
 ./pkg/assembler/graphql/resolvers/osv.resolvers.go
+./pkg/assembler/graphql/generated/artifact.generated.go
+./pkg/assembler/graphql/resolvers/artifact.resolvers.go
+./pkg/assembler/graphql/generated/builder.generated.go
+./pkg/assembler/graphql/resolvers/builder.resolvers.go

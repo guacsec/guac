@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -26,26 +27,32 @@ import (
 type DemoCredentials struct{}
 
 type demoClient struct {
-	packages []*model.Package
-	sources  []*model.Source
-	cve      []*model.Cve
-	ghsa     []*model.Ghsa
-	osv      []*model.Osv
+	packages  []*model.Package
+	sources   []*model.Source
+	cve       []*model.Cve
+	ghsa      []*model.Ghsa
+	osv       []*model.Osv
+	artifacts []*model.Artifact
+	builders  []*model.Builder
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		packages: []*model.Package{},
-		sources:  []*model.Source{},
-		cve:      []*model.Cve{},
-		ghsa:     []*model.Ghsa{},
-		osv:      []*model.Osv{},
+		packages:  []*model.Package{},
+		sources:   []*model.Source{},
+		cve:       []*model.Cve{},
+		ghsa:      []*model.Ghsa{},
+		osv:       []*model.Osv{},
+		artifacts: []*model.Artifact{},
+		builders:  []*model.Builder{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
 	registerAllCVE(client)
 	registerAllGHSA(client)
 	registerAllOSV(client)
+	registerAllArtifacts(client)
+	registerAllBuilders(client)
 	return client, nil
 }
 
@@ -120,6 +127,34 @@ func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.
 		}
 	}
 	return osv, nil
+}
+
+func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	var artifacts []*model.Artifact
+
+	// enforce lowercase for both the algorithm and digest when querying
+	for _, a := range c.artifacts {
+		if artifactSpec.Digest == nil && artifactSpec.Algorithm == nil {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == strings.ToLower(*artifactSpec.Digest) {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) && a.Digest == strings.ToLower(*artifactSpec.Digest) {
+			artifacts = append(artifacts, a)
+		}
+	}
+	return artifacts, nil
+}
+
+func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
+	var builders []*model.Builder
+	for _, b := range c.builders {
+		if builderSpec.URI == nil || b.URI == *builderSpec.URI {
+			builders = append(builders, b)
+		}
+	}
+	return builders, nil
 }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {

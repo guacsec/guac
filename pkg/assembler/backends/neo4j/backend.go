@@ -70,3 +70,11 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
 	panic(fmt.Errorf("not implemented: Osv - osv in Neo4j backend"))
 }
+
+func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	panic(fmt.Errorf("not implemented: Artifacts - artifacts in Neo4j backend"))
+}
+
+func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
+	panic(fmt.Errorf("not implemented: Builders - builders in Neo4j backend"))
+}
