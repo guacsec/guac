@@ -47,8 +47,9 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		driver.Close()
 		return nil, err
 	}
-
-	return &neo4jClient{driver}, nil
+	client := &neo4jClient{driver}
+	registerAllArtifacts(client)
+	return client, nil
 }
 
 func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
