@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package neo4jBackend
 
 import (
 	"strings"
@@ -29,10 +29,10 @@ func registerAllArtifacts(client *neo4jClient) {
 }
 
 func (c *neo4jClient) registerArtifact(algorithm, digest string) {
-
-	collectedArtifact := ArtifactNode{
-		Algorithm: algorithm,
-		Digest:    digest,
+	// enforce lowercase for both the algorithm and digest when ingesting
+	collectedArtifact := artifactNode{
+		algorithm: strings.ToLower(algorithm),
+		digest:    strings.ToLower(digest),
 	}
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: []assembler.GuacNode{collectedArtifact},
@@ -41,28 +41,28 @@ func (c *neo4jClient) registerArtifact(algorithm, digest string) {
 }
 
 // ArtifactNode is a node that represents an artifact
-type ArtifactNode struct {
-	Algorithm string
-	Digest    string
+type artifactNode struct {
+	algorithm string
+	digest    string
 }
 
-func (an ArtifactNode) Type() string {
+func (an artifactNode) Type() string {
 	return "Artifact"
 }
 
-func (an ArtifactNode) Properties() map[string]interface{} {
+func (an artifactNode) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["algorithm"] = an.Algorithm
-	properties["digest"] = strings.ToLower(an.Digest)
+	properties["algorithm"] = an.algorithm
+	properties["digest"] = strings.ToLower(an.digest)
 	return properties
 }
 
-func (an ArtifactNode) PropertyNames() []string {
+func (an artifactNode) PropertyNames() []string {
 	fields := []string{"algorithm", "digest"}
 	return fields
 }
 
-func (an ArtifactNode) IdentifiablePropertyNames() []string {
-	// An artifact can be uniquely identified by digest
+func (an artifactNode) IdentifiablePropertyNames() []string {
+	// An artifact can be uniquely identified by algorithm and digest
 	return []string{"algorithm", "digest"}
 }
