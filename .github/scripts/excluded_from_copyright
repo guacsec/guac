@@ -7,3 +7,9 @@
 ./pkg/assembler/graphql/resolvers/package.resolvers.go
 ./pkg/assembler/graphql/generated/source.generated.go
 ./pkg/assembler/graphql/resolvers/source.resolvers.go
+./pkg/assembler/graphql/generated/cve.generated.go
+./pkg/assembler/graphql/resolvers/cve.resolvers.go
+./pkg/assembler/graphql/generated/ghsa.generated.go
+./pkg/assembler/graphql/resolvers/ghsa.resolvers.go
+./pkg/assembler/graphql/generated/osv.generated.go
+./pkg/assembler/graphql/resolvers/osv.resolvers.go
