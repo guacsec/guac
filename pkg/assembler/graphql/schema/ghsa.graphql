@@ -22,7 +22,7 @@ GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g
 
 """
 type GHSA {
-  ghsa_id: [CVE_ID!]!
+  ghsa_id: [GHSA_ID!]!
 }
 
 """

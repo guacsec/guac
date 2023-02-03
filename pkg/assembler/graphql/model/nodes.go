@@ -31,7 +31,7 @@ type CveID struct {
 
 // GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
 type Ghsa struct {
-	GhsaID []*CveID `json:"ghsa_id"`
+	GhsaID []*GhsaID `json:"ghsa_id"`
 }
 
 // GHSASpec allows filtering the list of ghsa to return.
@@ -50,7 +50,7 @@ type GhsaID struct {
 
 // OSV represents Open Source Vulnerability . It contains a OSV ID.
 type Osv struct {
-	OsvID []*CveID `json:"osv_id"`
+	OsvID []*OsvID `json:"osv_id"`
 }
 
 // OSVSpec allows filtering the list of osv to return.

@@ -40,6 +40,9 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
+	registerAllCVE(client)
+	registerAllGHSA(client)
+	registerAllOSV(client)
 	return client, nil
 }
 
@@ -76,7 +79,7 @@ func (c *demoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.
 	var cve []*model.Cve
 	for _, s := range c.cve {
 		if cveSpec.Year == nil || s.Year == *cveSpec.Year {
-			newCve, err := filterCveID(s, cveSpec)
+			newCve, err := filterCVEID(s, cveSpec)
 			if err != nil {
 				return nil, err
 			}
@@ -91,27 +94,29 @@ func (c *demoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.
 func (c *demoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
 	var ghsa []*model.Ghsa
 	for _, g := range c.ghsa {
-		if ghsaSpec.GhsaID == nil || g.GhsaID == *ghsaSpec.GhsaID {
-			sources = append(sources, newSource)
+		newGHSA, err := filterGHSAID(g, ghsaSpec)
+		if err != nil {
+			return nil, err
+		}
+		if newGHSA != nil {
+			ghsa = append(ghsa, newGHSA)
 		}
 	}
-	return sources, nil
+	return ghsa, nil
 }
 
 func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
-	var sources []*model.Osv
+	var osv []*model.Osv
 	for _, o := range c.osv {
-		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
-			newSource, err := filterSourceNamespace(s, sourceSpec)
-			if err != nil {
-				return nil, err
-			}
-			if newSource != nil {
-				sources = append(sources, newSource)
-			}
+		newOSV, err := filterOSVID(o, osvSpec)
+		if err != nil {
+			return nil, err
+		}
+		if newOSV != nil {
+			osv = append(osv, newOSV)
 		}
 	}
-	return sources, nil
+	return osv, nil
 }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
@@ -272,7 +277,7 @@ func filterSourceQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) (*
 	return n, nil
 }
 
-func filterCveID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
+func filterCVEID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
 	var cveID []*model.CveID
 	for _, id := range cve.CveID {
 		if cveSpec.CveID == nil || id.ID == *cveSpec.CveID {
@@ -285,5 +290,35 @@ func filterCveID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
 	return &model.Cve{
 		Year:  cve.Year,
 		CveID: cveID,
+	}, nil
+}
+
+func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, error) {
+	var ghsaID []*model.GhsaID
+	for _, id := range ghsa.GhsaID {
+		if ghsaSpec.GhsaID == nil || id.ID == *ghsaSpec.GhsaID {
+			ghsaID = append(ghsaID, id)
+		}
+	}
+	if len(ghsaID) == 0 {
+		return nil, nil
+	}
+	return &model.Ghsa{
+		GhsaID: ghsaID,
+	}, nil
+}
+
+func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
+	var osvID []*model.OsvID
+	for _, id := range ghsa.OsvID {
+		if osvSpec.OsvID == nil || id.ID == *osvSpec.OsvID {
+			osvID = append(osvID, id)
+		}
+	}
+	if len(osvID) == 0 {
+		return nil, nil
+	}
+	return &model.Osv{
+		OsvID: osvID,
 	}, nil
 }

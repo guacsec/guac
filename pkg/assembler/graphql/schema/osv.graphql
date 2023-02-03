@@ -22,7 +22,7 @@ OSV represents Open Source Vulnerability . It contains a OSV ID.
 
 """
 type OSV {
-  osv_id: [CVE_ID!]!
+  osv_id: [OSV_ID!]!
 }
 
 """

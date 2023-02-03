@@ -506,7 +506,7 @@ GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g
 
 """
 type GHSA {
-  ghsa_id: [CVE_ID!]!
+  ghsa_id: [GHSA_ID!]!
 }
 
 """
@@ -557,7 +557,7 @@ OSV represents Open Source Vulnerability . It contains a OSV ID.
 
 """
 type OSV {
-  osv_id: [CVE_ID!]!
+  osv_id: [OSV_ID!]!
 }
 
 """
