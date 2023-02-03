@@ -39,7 +39,7 @@ var csubClientCmd = &cobra.Command{
 	Short: "runs a client to exercise collect subscriber service for GUAC collectors",
 }
 
-func setupCsubClient(cmd *cobra.Command, args []string) (context.Context, *client.Client) {
+func setupCsubClient(cmd *cobra.Command, args []string) (context.Context, client.Client) {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
