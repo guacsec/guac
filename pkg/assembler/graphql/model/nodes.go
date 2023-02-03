@@ -4,17 +4,17 @@ package model
 
 // Artifact represents the artifact and contains a digest field
 //
-// digest is mandatory.
-//
-// This node is a singleton: backends guarantee that there is exactly one node with
-// the same `digest` value.
+// algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
+// digest is mandatory in the form checksum.Value.
 type Artifact struct {
-	Digest string `json:"digest"`
+	Algorithm string `json:"algorithm"`
+	Digest    string `json:"digest"`
 }
 
 // ArtifactSpec allows filtering the list of artifacts to return.
 type ArtifactSpec struct {
-	Digest *string `json:"digest"`
+	Algorithm *string `json:"algorithm"`
+	Digest    *string `json:"digest"`
 }
 
 // Builder represents the builder such as (FRSCA or github actions) and contains a uri field

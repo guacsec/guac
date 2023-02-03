@@ -159,6 +159,50 @@ func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Artifact_algorithm(ctx context.Context, field graphql.CollectedField, obj *model.Artifact) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Artifact_algorithm(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Algorithm, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Artifact_algorithm(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Artifact",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Artifact_digest(ctx context.Context, field graphql.CollectedField, obj *model.Artifact) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Artifact_digest(ctx, field)
 	if err != nil {
@@ -241,6 +285,8 @@ func (ec *executionContext) fieldContext_Query_artifacts(ctx context.Context, fi
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "algorithm":
+				return ec.fieldContext_Artifact_algorithm(ctx, field)
 			case "digest":
 				return ec.fieldContext_Artifact_digest(ctx, field)
 			}
@@ -753,13 +799,21 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"digest"}
+	fieldsInOrder := [...]string{"algorithm", "digest"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "algorithm":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
+			it.Algorithm, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "digest":
 			var err error
 
@@ -792,6 +846,13 @@ func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Artifact")
+		case "algorithm":
+
+			out.Values[i] = ec._Artifact_algorithm(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "digest":
 
 			out.Values[i] = ec._Artifact_digest(ctx, field, obj)

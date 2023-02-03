@@ -37,17 +37,21 @@ type demoClient struct {
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		packages: []*model.Package{},
-		sources:  []*model.Source{},
-		cve:      []*model.Cve{},
-		ghsa:     []*model.Ghsa{},
-		osv:      []*model.Osv{},
+		packages:  []*model.Package{},
+		sources:   []*model.Source{},
+		cve:       []*model.Cve{},
+		ghsa:      []*model.Ghsa{},
+		osv:       []*model.Osv{},
+		artifacts: []*model.Artifact{},
+		builders:  []*model.Builder{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
 	registerAllCVE(client)
 	registerAllGHSA(client)
 	registerAllOSV(client)
+	registerAllArtifacts(client)
+	registerAllBuilders(client)
 	return client, nil
 }
 
@@ -125,31 +129,29 @@ func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.
 }
 
 func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	var osv []*model.Osv
-	for _, o := range c.osv {
-		newOSV, err := filterOSVID(o, osvSpec)
-		if err != nil {
-			return nil, err
-		}
-		if newOSV != nil {
-			osv = append(osv, newOSV)
+	var artifacts []*model.Artifact
+	for _, a := range c.artifacts {
+		if artifactSpec.Digest == nil && artifactSpec.Algorithm == nil {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == *artifactSpec.Digest {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == *artifactSpec.Algorithm {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == *artifactSpec.Algorithm && a.Digest == *artifactSpec.Digest {
+			artifacts = append(artifacts, a)
 		}
 	}
-	return osv, nil
+	return artifacts, nil
 }
 
 func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
-	var osv []*model.Osv
-	for _, o := range c.osv {
-		newOSV, err := filterOSVID(o, osvSpec)
-		if err != nil {
-			return nil, err
-		}
-		if newOSV != nil {
-			osv = append(osv, newOSV)
+	var builders []*model.Builder
+	for _, b := range c.builders {
+		if builderSpec.URI == nil || b.URI == *builderSpec.URI {
+			builders = append(builders, b)
 		}
 	}
-	return osv, nil
+	return builders, nil
 }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {

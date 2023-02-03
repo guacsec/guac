@@ -38,7 +38,8 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Artifact struct {
-		Digest func(childComplexity int) int
+		Algorithm func(childComplexity int) int
+		Digest    func(childComplexity int) int
 	}
 
 	Builder struct {
@@ -137,6 +138,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Artifact.algorithm":
+		if e.complexity.Artifact.Algorithm == nil {
+			break
+		}
+
+		return e.complexity.Artifact.Algorithm(childComplexity), true
 
 	case "Artifact.digest":
 		if e.complexity.Artifact.Digest == nil {
@@ -490,17 +498,16 @@ var sources = []*ast.Source{
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the artifact. It only contains the digest
+# Defines a GraphQL schema for the artifact. It contains the algorithm and digest fields
 """
 Artifact represents the artifact and contains a digest field
 
-digest is mandatory.
-
-This node is a singleton: backends guarantee that there is exactly one node with
-the same ` + "`" + `digest` + "`" + ` value.
+algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
+digest is mandatory in the form checksum.Value.
 
 """
 type Artifact {
+  algorithm: String!
   digest: String!
 }
 
@@ -508,6 +515,7 @@ type Artifact {
 ArtifactSpec allows filtering the list of artifacts to return.
 """
 input ArtifactSpec {
+  algorithm: String
   digest: String
 }
 
