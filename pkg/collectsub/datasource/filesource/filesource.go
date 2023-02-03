@@ -16,6 +16,7 @@
 package filesource
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -58,7 +59,7 @@ func NewFileDataSources(path string) (datasource.CollectSource, error) {
 
 // GetDataSources returns a data source containing targets for the
 // collector to collect
-func (d *fileDataSources) GetDataSources() (*datasource.DataSources, error) {
+func (d *fileDataSources) GetDataSources(_ context.Context) (*datasource.DataSources, error) {
 	f, err := os.Open(d.filePath)
 	if err != nil {
 		return nil, err
@@ -80,7 +81,7 @@ func (d *fileDataSources) GetDataSources() (*datasource.DataSources, error) {
 // if the CollectSource has new data. Upon update, nil is inserted
 // into the channel and non-nil if the channel no longer is able to
 // serve updates.
-func (d *fileDataSources) DataSourcesUpdate() (<-chan error, error) {
+func (d *fileDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, error) {
 	updateChan := make(chan error)
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -114,6 +115,12 @@ func (d *fileDataSources) DataSourcesUpdate() (<-chan error, error) {
 				}
 				updateChan <- err
 				fmt.Printf("got err while watching: %+v\n", err)
+				return
+
+			case <-ctx.Done():
+				err := fmt.Errorf("file watcher ending from context closure")
+				updateChan <- err
+				fmt.Printf("ctx is closed: %+v\n", err)
 				return
 			}
 		}
