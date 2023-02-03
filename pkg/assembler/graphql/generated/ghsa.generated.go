@@ -28,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _GHSA_ghsa_id(ctx context.Context, field graphql.CollectedField, obj *model.Ghsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_GHSA_ghsa_id(ctx, field)
+func (ec *executionContext) _GHSA_ghsaId(ctx context.Context, field graphql.CollectedField, obj *model.Ghsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GHSA_ghsaId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -54,12 +54,12 @@ func (ec *executionContext) _GHSA_ghsa_id(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.GhsaID)
+	res := resTmp.([]*model.GHSAId)
 	fc.Result = res
-	return ec.marshalNGHSA_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsaIDᚄ(ctx, field.Selections, res)
+	return ec.marshalNGHSAId2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAIdᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_GHSA_ghsa_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_GHSA_ghsaId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "GHSA",
 		Field:      field,
@@ -68,16 +68,16 @@ func (ec *executionContext) fieldContext_GHSA_ghsa_id(ctx context.Context, field
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_GHSA_ID_id(ctx, field)
+				return ec.fieldContext_GHSAId_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type GHSA_ID", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type GHSAId", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _GHSA_ID_id(ctx context.Context, field graphql.CollectedField, obj *model.GhsaID) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_GHSA_ID_id(ctx, field)
+func (ec *executionContext) _GHSAId_id(ctx context.Context, field graphql.CollectedField, obj *model.GHSAId) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GHSAId_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -107,9 +107,9 @@ func (ec *executionContext) _GHSA_ID_id(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_GHSA_ID_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_GHSAId_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "GHSA_ID",
+		Object:     "GHSAId",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -131,17 +131,17 @@ func (ec *executionContext) unmarshalInputGHSASpec(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"ghsa_id"}
+	fieldsInOrder := [...]string{"ghsaId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "ghsa_id":
+		case "ghsaId":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa_id"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsaId"))
 			it.GhsaID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
@@ -170,9 +170,9 @@ func (ec *executionContext) _GHSA(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("GHSA")
-		case "ghsa_id":
+		case "ghsaId":
 
-			out.Values[i] = ec._GHSA_ghsa_id(ctx, field, obj)
+			out.Values[i] = ec._GHSA_ghsaId(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -188,19 +188,19 @@ func (ec *executionContext) _GHSA(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var gHSA_IDImplementors = []string{"GHSA_ID"}
+var gHSAIdImplementors = []string{"GHSAId"}
 
-func (ec *executionContext) _GHSA_ID(ctx context.Context, sel ast.SelectionSet, obj *model.GhsaID) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, gHSA_IDImplementors)
+func (ec *executionContext) _GHSAId(ctx context.Context, sel ast.SelectionSet, obj *model.GHSAId) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, gHSAIdImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("GHSA_ID")
+			out.Values[i] = graphql.MarshalString("GHSAId")
 		case "id":
 
-			out.Values[i] = ec._GHSA_ID_id(ctx, field, obj)
+			out.Values[i] = ec._GHSAId_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -274,7 +274,7 @@ func (ec *executionContext) marshalNGHSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg�
 	return ec._GHSA(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGHSA_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsaIDᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.GhsaID) graphql.Marshaler {
+func (ec *executionContext) marshalNGHSAId2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAIdᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.GHSAId) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -298,7 +298,7 @@ func (ec *executionContext) marshalNGHSA_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGHSA_ID2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsaID(ctx, sel, v[i])
+			ret[i] = ec.marshalNGHSAId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAId(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -318,14 +318,14 @@ func (ec *executionContext) marshalNGHSA_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 	return ret
 }
 
-func (ec *executionContext) marshalNGHSA_ID2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsaID(ctx context.Context, sel ast.SelectionSet, v *model.GhsaID) graphql.Marshaler {
+func (ec *executionContext) marshalNGHSAId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAId(ctx context.Context, sel ast.SelectionSet, v *model.GHSAId) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._GHSA_ID(ctx, sel, v)
+	return ec._GHSAId(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx context.Context, v interface{}) (*model.GHSASpec, error) {

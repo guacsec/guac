@@ -11,60 +11,60 @@ package model
 // the same `year` value.
 type Cve struct {
 	Year  string   `json:"year"`
-	CveID []*CveID `json:"cve_id"`
+	CveID []*CVEId `json:"cveId"`
+}
+
+// CVEId is the actual ID that is given to a specific vulnerability
+//
+// id filed is mandatory.
+//
+// This node can be referred to by other parts of GUAC.
+type CVEId struct {
+	ID string `json:"id"`
 }
 
 // CVESpec allows filtering the list of cves to return.
 type CVESpec struct {
 	Year  *string `json:"year"`
-	CveID *string `json:"cve_id"`
-}
-
-// CVE_ID is the actual ID that is given to a specific vulnerability
-//
-// id filed is mandatory.
-//
-// This node can be referred to by other parts of GUAC.
-type CveID struct {
-	ID string `json:"id"`
+	CveID *string `json:"cveId"`
 }
 
 // GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
 type Ghsa struct {
-	GhsaID []*GhsaID `json:"ghsa_id"`
+	GhsaID []*GHSAId `json:"ghsaId"`
 }
 
-// GHSASpec allows filtering the list of ghsa to return.
-type GHSASpec struct {
-	GhsaID *string `json:"ghsa_id"`
-}
-
-// GHSA_ID is the actual ID that is given to a specific vulnerability on github
+// GHSAId is the actual ID that is given to a specific vulnerability on github
 //
 // id filed is mandatory.
 //
 // This node can be referred to by other parts of GUAC.
-type GhsaID struct {
+type GHSAId struct {
 	ID string `json:"id"`
+}
+
+// GHSASpec allows filtering the list of ghsa to return.
+type GHSASpec struct {
+	GhsaID *string `json:"ghsaId"`
 }
 
 // OSV represents Open Source Vulnerability . It contains a OSV ID.
 type Osv struct {
-	OsvID []*OsvID `json:"osv_id"`
+	OsvID []*OSVId `json:"osvId"`
 }
 
-// OSVSpec allows filtering the list of osv to return.
-type OSVSpec struct {
-	OsvID *string `json:"osv_id"`
-}
-
-// OSV_ID is the actual ID that is given to a specific vulnerability
+// OSVId is the actual ID that is given to a specific vulnerability
 //
 // id filed is mandatory. This maps to a GHSA or CVE ID
 //
 // This node can be referred to by other parts of GUAC.
-type OsvID struct {
+type OSVId struct {
 	ID string `json:"id"`
+}
+
+// OSVSpec allows filtering the list of osv to return.
+type OSVSpec struct {
+	OsvID *string `json:"osvId"`
 }
 
 // Package represents a package.

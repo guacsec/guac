@@ -22,17 +22,17 @@ OSV represents Open Source Vulnerability . It contains a OSV ID.
 
 """
 type OSV {
-  osv_id: [OSV_ID!]!
+  osvId: [OSVId!]!
 }
 
 """
-OSV_ID is the actual ID that is given to a specific vulnerability
+OSVId is the actual ID that is given to a specific vulnerability
 
 id filed is mandatory. This maps to a GHSA or CVE ID
 
 This node can be referred to by other parts of GUAC.
 """
-type OSV_ID {
+type OSVId {
   id: String!
 }
 
@@ -40,11 +40,11 @@ type OSV_ID {
 OSVSpec allows filtering the list of osv to return.
 """
 input OSVSpec {
-  osv_id: String
+  osvId: String
 }
 
 
 extend type Query {
-  "Returns all packages"
+  "Returns all osv"
   osv(osvSpec: OSVSpec): [OSV!]!
 }

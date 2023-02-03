@@ -22,17 +22,17 @@ GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g
 
 """
 type GHSA {
-  ghsa_id: [GHSA_ID!]!
+  ghsaId: [GHSAId!]!
 }
 
 """
-GHSA_ID is the actual ID that is given to a specific vulnerability on github
+GHSAId is the actual ID that is given to a specific vulnerability on github
 
 id filed is mandatory.
 
 This node can be referred to by other parts of GUAC.
 """
-type GHSA_ID {
+type GHSAId {
   id: String!
 }
 
@@ -40,11 +40,11 @@ type GHSA_ID {
 GHSASpec allows filtering the list of ghsa to return.
 """
 input GHSASpec {
-  ghsa_id: String
+  ghsaId: String
 }
 
 
 extend type Query {
-  "Returns all packages"
+  "Returns all ghsa"
   ghsa(ghsaSpec: GHSASpec): [GHSA!]!
 }

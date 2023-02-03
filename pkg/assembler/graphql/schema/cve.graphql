@@ -29,17 +29,17 @@ the same `year` value.
 """
 type CVE {
   year: String!
-  cve_id: [CVE_ID!]!
+  cveId: [CVEId!]!
 }
 
 """
-CVE_ID is the actual ID that is given to a specific vulnerability
+CVEId is the actual ID that is given to a specific vulnerability
 
 id filed is mandatory.
 
 This node can be referred to by other parts of GUAC.
 """
-type CVE_ID {
+type CVEId {
   id: String!
 }
 
@@ -48,11 +48,11 @@ CVESpec allows filtering the list of cves to return.
 """
 input CVESpec {
   year: String
-  cve_id: String
+  cveId: String
 }
 
 
 extend type Query {
-  "Returns all packages"
+  "Returns all cve"
   cve(cveSpec: CVESpec): [CVE!]!
 }

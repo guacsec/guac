@@ -42,7 +42,7 @@ type ComplexityRoot struct {
 		Year  func(childComplexity int) int
 	}
 
-	CVE_ID struct {
+	CVEId struct {
 		ID func(childComplexity int) int
 	}
 
@@ -50,7 +50,7 @@ type ComplexityRoot struct {
 		GhsaID func(childComplexity int) int
 	}
 
-	GHSA_ID struct {
+	GHSAId struct {
 		ID func(childComplexity int) int
 	}
 
@@ -58,7 +58,7 @@ type ComplexityRoot struct {
 		OsvID func(childComplexity int) int
 	}
 
-	OSV_ID struct {
+	OSVId struct {
 		ID func(childComplexity int) int
 	}
 
@@ -128,7 +128,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "CVE.cve_id":
+	case "CVE.cveId":
 		if e.complexity.CVE.CveID == nil {
 			break
 		}
@@ -142,40 +142,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CVE.Year(childComplexity), true
 
-	case "CVE_ID.id":
-		if e.complexity.CVE_ID.ID == nil {
+	case "CVEId.id":
+		if e.complexity.CVEId.ID == nil {
 			break
 		}
 
-		return e.complexity.CVE_ID.ID(childComplexity), true
+		return e.complexity.CVEId.ID(childComplexity), true
 
-	case "GHSA.ghsa_id":
+	case "GHSA.ghsaId":
 		if e.complexity.GHSA.GhsaID == nil {
 			break
 		}
 
 		return e.complexity.GHSA.GhsaID(childComplexity), true
 
-	case "GHSA_ID.id":
-		if e.complexity.GHSA_ID.ID == nil {
+	case "GHSAId.id":
+		if e.complexity.GHSAId.ID == nil {
 			break
 		}
 
-		return e.complexity.GHSA_ID.ID(childComplexity), true
+		return e.complexity.GHSAId.ID(childComplexity), true
 
-	case "OSV.osv_id":
+	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
 			break
 		}
 
 		return e.complexity.OSV.OsvID(childComplexity), true
 
-	case "OSV_ID.id":
-		if e.complexity.OSV_ID.ID == nil {
+	case "OSVId.id":
+		if e.complexity.OSVId.ID == nil {
 			break
 		}
 
-		return e.complexity.OSV_ID.ID(childComplexity), true
+		return e.complexity.OSVId.ID(childComplexity), true
 
 	case "Package.namespaces":
 		if e.complexity.Package.Namespaces == nil {
@@ -454,17 +454,17 @@ the same ` + "`" + `year` + "`" + ` value.
 """
 type CVE {
   year: String!
-  cve_id: [CVE_ID!]!
+  cveId: [CVEId!]!
 }
 
 """
-CVE_ID is the actual ID that is given to a specific vulnerability
+CVEId is the actual ID that is given to a specific vulnerability
 
 id filed is mandatory.
 
 This node can be referred to by other parts of GUAC.
 """
-type CVE_ID {
+type CVEId {
   id: String!
 }
 
@@ -473,12 +473,12 @@ CVESpec allows filtering the list of cves to return.
 """
 input CVESpec {
   year: String
-  cve_id: String
+  cveId: String
 }
 
 
 extend type Query {
-  "Returns all packages"
+  "Returns all cve"
   cve(cveSpec: CVESpec): [CVE!]!
 }
 `, BuiltIn: false},
@@ -506,17 +506,17 @@ GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g
 
 """
 type GHSA {
-  ghsa_id: [GHSA_ID!]!
+  ghsaId: [GHSAId!]!
 }
 
 """
-GHSA_ID is the actual ID that is given to a specific vulnerability on github
+GHSAId is the actual ID that is given to a specific vulnerability on github
 
 id filed is mandatory.
 
 This node can be referred to by other parts of GUAC.
 """
-type GHSA_ID {
+type GHSAId {
   id: String!
 }
 
@@ -524,12 +524,12 @@ type GHSA_ID {
 GHSASpec allows filtering the list of ghsa to return.
 """
 input GHSASpec {
-  ghsa_id: String
+  ghsaId: String
 }
 
 
 extend type Query {
-  "Returns all packages"
+  "Returns all ghsa"
   ghsa(ghsaSpec: GHSASpec): [GHSA!]!
 }
 `, BuiltIn: false},
@@ -557,17 +557,17 @@ OSV represents Open Source Vulnerability . It contains a OSV ID.
 
 """
 type OSV {
-  osv_id: [OSV_ID!]!
+  osvId: [OSVId!]!
 }
 
 """
-OSV_ID is the actual ID that is given to a specific vulnerability
+OSVId is the actual ID that is given to a specific vulnerability
 
 id filed is mandatory. This maps to a GHSA or CVE ID
 
 This node can be referred to by other parts of GUAC.
 """
-type OSV_ID {
+type OSVId {
   id: String!
 }
 
@@ -575,12 +575,12 @@ type OSV_ID {
 OSVSpec allows filtering the list of osv to return.
 """
 input OSVSpec {
-  osv_id: String
+  osvId: String
 }
 
 
 extend type Query {
-  "Returns all packages"
+  "Returns all osv"
   osv(osvSpec: OSVSpec): [OSV!]!
 }
 `, BuiltIn: false},

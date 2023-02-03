@@ -45,6 +45,6 @@ func registerGhsaID(g *model.Ghsa, id string) *model.Ghsa {
 		}
 	}
 
-	g.GhsaID = append(g.GhsaID, &model.GhsaID{ID: id})
+	g.GhsaID = append(g.GhsaID, &model.GHSAId{ID: id})
 	return g
 }

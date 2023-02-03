@@ -28,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _OSV_osv_id(ctx context.Context, field graphql.CollectedField, obj *model.Osv) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_OSV_osv_id(ctx, field)
+func (ec *executionContext) _OSV_osvId(ctx context.Context, field graphql.CollectedField, obj *model.Osv) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OSV_osvId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -54,12 +54,12 @@ func (ec *executionContext) _OSV_osv_id(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.OsvID)
+	res := resTmp.([]*model.OSVId)
 	fc.Result = res
-	return ec.marshalNOSV_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvIDᚄ(ctx, field.Selections, res)
+	return ec.marshalNOSVId2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVIdᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_OSV_osv_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OSV_osvId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "OSV",
 		Field:      field,
@@ -68,16 +68,16 @@ func (ec *executionContext) fieldContext_OSV_osv_id(ctx context.Context, field g
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_OSV_ID_id(ctx, field)
+				return ec.fieldContext_OSVId_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type OSV_ID", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type OSVId", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _OSV_ID_id(ctx context.Context, field graphql.CollectedField, obj *model.OsvID) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_OSV_ID_id(ctx, field)
+func (ec *executionContext) _OSVId_id(ctx context.Context, field graphql.CollectedField, obj *model.OSVId) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_OSVId_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -107,9 +107,9 @@ func (ec *executionContext) _OSV_ID_id(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_OSV_ID_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_OSVId_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "OSV_ID",
+		Object:     "OSVId",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -131,17 +131,17 @@ func (ec *executionContext) unmarshalInputOSVSpec(ctx context.Context, obj inter
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"osv_id"}
+	fieldsInOrder := [...]string{"osvId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "osv_id":
+		case "osvId":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv_id"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osvId"))
 			it.OsvID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
@@ -170,9 +170,9 @@ func (ec *executionContext) _OSV(ctx context.Context, sel ast.SelectionSet, obj 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("OSV")
-		case "osv_id":
+		case "osvId":
 
-			out.Values[i] = ec._OSV_osv_id(ctx, field, obj)
+			out.Values[i] = ec._OSV_osvId(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -188,19 +188,19 @@ func (ec *executionContext) _OSV(ctx context.Context, sel ast.SelectionSet, obj 
 	return out
 }
 
-var oSV_IDImplementors = []string{"OSV_ID"}
+var oSVIdImplementors = []string{"OSVId"}
 
-func (ec *executionContext) _OSV_ID(ctx context.Context, sel ast.SelectionSet, obj *model.OsvID) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, oSV_IDImplementors)
+func (ec *executionContext) _OSVId(ctx context.Context, sel ast.SelectionSet, obj *model.OSVId) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oSVIdImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("OSV_ID")
+			out.Values[i] = graphql.MarshalString("OSVId")
 		case "id":
 
-			out.Values[i] = ec._OSV_ID_id(ctx, field, obj)
+			out.Values[i] = ec._OSVId_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -274,7 +274,7 @@ func (ec *executionContext) marshalNOSV2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg�
 	return ec._OSV(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNOSV_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvIDᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.OsvID) graphql.Marshaler {
+func (ec *executionContext) marshalNOSVId2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVIdᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.OSVId) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -298,7 +298,7 @@ func (ec *executionContext) marshalNOSV_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOSV_ID2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvID(ctx, sel, v[i])
+			ret[i] = ec.marshalNOSVId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVId(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -318,14 +318,14 @@ func (ec *executionContext) marshalNOSV_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 	return ret
 }
 
-func (ec *executionContext) marshalNOSV_ID2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvID(ctx context.Context, sel ast.SelectionSet, v *model.OsvID) graphql.Marshaler {
+func (ec *executionContext) marshalNOSVId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVId(ctx context.Context, sel ast.SelectionSet, v *model.OSVId) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._OSV_ID(ctx, sel, v)
+	return ec._OSVId(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx context.Context, v interface{}) (*model.OSVSpec, error) {

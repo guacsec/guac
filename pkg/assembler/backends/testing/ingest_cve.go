@@ -47,6 +47,6 @@ func registerCveID(c *model.Cve, id string) *model.Cve {
 		}
 	}
 
-	c.CveID = append(c.CveID, &model.CveID{ID: id})
+	c.CveID = append(c.CveID, &model.CVEId{ID: id})
 	return c
 }

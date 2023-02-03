@@ -171,8 +171,8 @@ func (ec *executionContext) fieldContext_CVE_year(ctx context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _CVE_cve_id(ctx context.Context, field graphql.CollectedField, obj *model.Cve) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CVE_cve_id(ctx, field)
+func (ec *executionContext) _CVE_cveId(ctx context.Context, field graphql.CollectedField, obj *model.Cve) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CVE_cveId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -197,12 +197,12 @@ func (ec *executionContext) _CVE_cve_id(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.CveID)
+	res := resTmp.([]*model.CVEId)
 	fc.Result = res
-	return ec.marshalNCVE_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveIDᚄ(ctx, field.Selections, res)
+	return ec.marshalNCVEId2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEIdᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CVE_cve_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CVE_cveId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CVE",
 		Field:      field,
@@ -211,16 +211,16 @@ func (ec *executionContext) fieldContext_CVE_cve_id(ctx context.Context, field g
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_CVE_ID_id(ctx, field)
+				return ec.fieldContext_CVEId_id(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type CVE_ID", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CVEId", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _CVE_ID_id(ctx context.Context, field graphql.CollectedField, obj *model.CveID) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CVE_ID_id(ctx, field)
+func (ec *executionContext) _CVEId_id(ctx context.Context, field graphql.CollectedField, obj *model.CVEId) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CVEId_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -250,9 +250,9 @@ func (ec *executionContext) _CVE_ID_id(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CVE_ID_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CVEId_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CVE_ID",
+		Object:     "CVEId",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -303,8 +303,8 @@ func (ec *executionContext) fieldContext_Query_cve(ctx context.Context, field gr
 			switch field.Name {
 			case "year":
 				return ec.fieldContext_CVE_year(ctx, field)
-			case "cve_id":
-				return ec.fieldContext_CVE_cve_id(ctx, field)
+			case "cveId":
+				return ec.fieldContext_CVE_cveId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CVE", field.Name)
 		},
@@ -361,8 +361,8 @@ func (ec *executionContext) fieldContext_Query_ghsa(ctx context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "ghsa_id":
-				return ec.fieldContext_GHSA_ghsa_id(ctx, field)
+			case "ghsaId":
+				return ec.fieldContext_GHSA_ghsaId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GHSA", field.Name)
 		},
@@ -419,8 +419,8 @@ func (ec *executionContext) fieldContext_Query_osv(ctx context.Context, field gr
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "osv_id":
-				return ec.fieldContext_OSV_osv_id(ctx, field)
+			case "osvId":
+				return ec.fieldContext_OSV_osvId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type OSV", field.Name)
 		},
@@ -697,7 +697,7 @@ func (ec *executionContext) unmarshalInputCVESpec(ctx context.Context, obj inter
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"year", "cve_id"}
+	fieldsInOrder := [...]string{"year", "cveId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -712,10 +712,10 @@ func (ec *executionContext) unmarshalInputCVESpec(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
-		case "cve_id":
+		case "cveId":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve_id"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cveId"))
 			it.CveID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
@@ -751,9 +751,9 @@ func (ec *executionContext) _CVE(ctx context.Context, sel ast.SelectionSet, obj 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "cve_id":
+		case "cveId":
 
-			out.Values[i] = ec._CVE_cve_id(ctx, field, obj)
+			out.Values[i] = ec._CVE_cveId(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -769,19 +769,19 @@ func (ec *executionContext) _CVE(ctx context.Context, sel ast.SelectionSet, obj 
 	return out
 }
 
-var cVE_IDImplementors = []string{"CVE_ID"}
+var cVEIdImplementors = []string{"CVEId"}
 
-func (ec *executionContext) _CVE_ID(ctx context.Context, sel ast.SelectionSet, obj *model.CveID) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, cVE_IDImplementors)
+func (ec *executionContext) _CVEId(ctx context.Context, sel ast.SelectionSet, obj *model.CVEId) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cVEIdImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("CVE_ID")
+			out.Values[i] = graphql.MarshalString("CVEId")
 		case "id":
 
-			out.Values[i] = ec._CVE_ID_id(ctx, field, obj)
+			out.Values[i] = ec._CVEId_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -993,7 +993,7 @@ func (ec *executionContext) marshalNCVE2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg�
 	return ec._CVE(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNCVE_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveIDᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CveID) graphql.Marshaler {
+func (ec *executionContext) marshalNCVEId2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEIdᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CVEId) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -1017,7 +1017,7 @@ func (ec *executionContext) marshalNCVE_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNCVE_ID2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveID(ctx, sel, v[i])
+			ret[i] = ec.marshalNCVEId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEId(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -1037,14 +1037,14 @@ func (ec *executionContext) marshalNCVE_ID2ᚕᚖgithubᚗcomᚋguacsecᚋguac�
 	return ret
 }
 
-func (ec *executionContext) marshalNCVE_ID2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveID(ctx context.Context, sel ast.SelectionSet, v *model.CveID) graphql.Marshaler {
+func (ec *executionContext) marshalNCVEId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEId(ctx context.Context, sel ast.SelectionSet, v *model.CVEId) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._CVE_ID(ctx, sel, v)
+	return ec._CVEId(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx context.Context, v interface{}) (*model.CVESpec, error) {

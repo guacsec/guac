@@ -64,9 +64,9 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 }
 
 func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
-	panic(fmt.Errorf("not implemented: Cve - cve in Neo4j backend"))
+	panic(fmt.Errorf("not implemented: Ghsa - ghsa in Neo4j backend"))
 }
 
 func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
-	panic(fmt.Errorf("not implemented: Cve - cve in Neo4j backend"))
+	panic(fmt.Errorf("not implemented: Osv - osv in Neo4j backend"))
 }

@@ -45,6 +45,6 @@ func registerOsvID(o *model.Osv, id string) *model.Osv {
 		}
 	}
 
-	o.OsvID = append(o.OsvID, &model.OsvID{ID: id})
+	o.OsvID = append(o.OsvID, &model.OSVId{ID: id})
 	return o
 }
