@@ -65,6 +65,23 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Packages func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Sources  func(childComplexity int, sourceSpec *model.SourceSpec) int
+	}
+
+	Source struct {
+		Namespaces func(childComplexity int) int
+		Type       func(childComplexity int) int
+	}
+
+	SourceName struct {
+		Commit func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Tag    func(childComplexity int) int
+	}
+
+	SourceNamespace struct {
+		Names     func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 }
 
@@ -172,6 +189,67 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(*model.PkgSpec)), true
 
+	case "Query.sources":
+		if e.complexity.Query.Sources == nil {
+			break
+		}
+
+		args, err := ec.field_Query_sources_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(*model.SourceSpec)), true
+
+	case "Source.namespaces":
+		if e.complexity.Source.Namespaces == nil {
+			break
+		}
+
+		return e.complexity.Source.Namespaces(childComplexity), true
+
+	case "Source.type":
+		if e.complexity.Source.Type == nil {
+			break
+		}
+
+		return e.complexity.Source.Type(childComplexity), true
+
+	case "SourceName.commit":
+		if e.complexity.SourceName.Commit == nil {
+			break
+		}
+
+		return e.complexity.SourceName.Commit(childComplexity), true
+
+	case "SourceName.name":
+		if e.complexity.SourceName.Name == nil {
+			break
+		}
+
+		return e.complexity.SourceName.Name(childComplexity), true
+
+	case "SourceName.tag":
+		if e.complexity.SourceName.Tag == nil {
+			break
+		}
+
+		return e.complexity.SourceName.Tag(childComplexity), true
+
+	case "SourceNamespace.names":
+		if e.complexity.SourceNamespace.Names == nil {
+			break
+		}
+
+		return e.complexity.SourceNamespace.Names(childComplexity), true
+
+	case "SourceNamespace.namespace":
+		if e.complexity.SourceNamespace.Namespace == nil {
+			break
+		}
+
+		return e.complexity.SourceNamespace.Namespace(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -182,6 +260,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputPackageQualifierInput,
 		ec.unmarshalInputPkgSpec,
+		ec.unmarshalInputSourceQualifierInput,
+		ec.unmarshalInputSourceSpec,
 	)
 	first := true
 
@@ -385,6 +465,100 @@ input PackageQualifierInput {
 extend type Query {
   "Returns all packages"
   packages(pkgSpec: PkgSpec): [Package!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/source.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the source trie/tree. This tree is a derivative of
+# the pURL specification where it has a type, namespace, name and finally a qualifier that
+# contain the tag or commit. 
+
+"""
+Source represents a source.
+
+This can be the version control system that is being used.
+
+This node is a singleton: backends guarantee that there is exactly one node with
+the same ` + "`" + `type` + "`" + ` value.
+
+Also note that this is named ` + "`" + `Source` + "`" + `, not ` + "`" + `SourceType` + "`" + `. This is only to make
+queries more readable.
+"""
+type Source {
+  type: String!
+  namespaces: [SourceNamespace!]!
+}
+
+"""
+SourceNamespace is a namespace for sources.
+
+This can be represented as the location of the repo (such as github/gitlab/bitbucket)
+
+Namespaces are optional and type specific. Because they are optional, we use
+empty string to denote missing namespaces.
+"""
+type SourceNamespace {
+  namespace: String!
+  names: [SourceName!]!
+}
+
+"""
+SourceName is a url of the repository and its tag or commit.
+
+SourceName is mandatory. Either a tag or commit needs to be specified.
+
+This is the first node in the trie that can be referred to by other parts of
+GUAC.
+"""
+type SourceName {
+  name: String!
+  tag: String
+  commit: String
+}
+
+"""
+PkgSpec allows filtering the list of packages to return.
+
+Each field matches a qualifier from pURL. Use ` + "`" + `null` + "`" + ` to match on all values at
+that level. For example, to get all packages in GUAC backend, use a PkgSpec
+where every field is ` + "`" + `null` + "`" + `.
+
+Empty string at a field means matching with the empty string.
+"""
+input SourceSpec {
+  type: String
+  namespace: String
+  name: String
+  qualifier: SourceQualifierInput
+}
+
+"""
+SourceQualifierInput is the same as SourceQualifier, but usable as query
+input.
+"""
+input SourceQualifierInput {
+  tag: String
+  commit: String
+}
+
+extend type Query {
+  "Returns all sources"
+  sources(sourceSpec: SourceSpec): [Source!]!
 }
 `, BuiltIn: false},
 }

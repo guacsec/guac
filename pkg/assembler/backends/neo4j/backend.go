@@ -54,3 +54,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	panic(fmt.Errorf("not implemented: Packages - packages in Neo4j backend"))
 }
+
+func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
+	panic(fmt.Errorf("not implemented: Sources - sources in Neo4j backend"))
+}
