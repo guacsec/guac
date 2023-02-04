@@ -63,7 +63,7 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 		if !ok {
 			return errors.New("failed to cast purl property to string type")
 		}
-		deps, err := getCompHelper(ctx, q.client, rootPackage.Purl)
+		deps, err := getCompHelper(ctx, q.client, rootPackage.Purl, map[int64]bool{})
 		if err != nil {
 			return err
 		}
@@ -76,7 +76,7 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 	return nil
 }
 
-func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string) ([]*PackageComponent, error) {
+func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string, visited map[int64]bool) ([]*PackageComponent, error) {
 	dependencies, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
 		map[string]any{"rootPurl": parentPurl})
 	if err != nil {
@@ -88,12 +88,17 @@ func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string
 		if !ok {
 			return nil, errors.New("failed to cast to node type")
 		}
+		if visited[foundDep.Id] {
+			continue
+		}
+		visited[foundDep.Id] = true
+
 		foundDepPack := assembler.PackageNode{}
 		foundDepPack.Purl, ok = foundDep.Props["purl"].(string)
 		if !ok {
 			return nil, errors.New("failed to cast purl property to string type")
 		}
-		deps, err := getCompHelper(ctx, client, foundDepPack.Purl)
+		deps, err := getCompHelper(ctx, client, foundDepPack.Purl, visited)
 		if err != nil {
 			return nil, err
 		}
