@@ -13,39 +13,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package filesource
+package csubsource
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/collectsub/client"
+	"github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 )
 
-var simpleConfig = []byte(`oci:
-- oci://abc
-- oci://def
-git:
-- git+https://github.com/guacsec/guac`)
+func createSimpleCsubClient(ctx context.Context) (client.Client, error) {
+	c, err := client.NewMockClient()
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.AddCollectEntries(ctx, []*collectsub.CollectEntry{
+		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "oci://abc"},
+		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "oci://def"},
+		{Type: collectsub.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
 
 func Test_FileSourceGetDataSources(t *testing.T) {
 	ctx := context.TODO()
-	tmpDir, err := os.MkdirTemp("", "test-file-source")
-	if err != nil {
-		t.Fatal("unable to create temp dir")
-	}
-	defer os.RemoveAll(tmpDir)
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
 
-	path, err := createTestFile(tmpDir, "test1.yaml", simpleConfig)
+	c, err := createSimpleCsubClient(ctx)
 	if err != nil {
-		t.Fatal("unable to create test file")
+		t.Errorf("unable to initiliaze simple source client: %v", err)
+		return
 	}
+	defer c.Close()
 
-	cds, err := NewFileDataSources(path)
+	cds, err := NewCsubDatasource(c, time.Second)
 	if err != nil {
 		t.Errorf("unable to create FileDataSources: %v", err)
 		return
@@ -74,22 +84,20 @@ func Test_FileSourceGetDataSources(t *testing.T) {
 
 func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 	ctx := context.TODO()
-	tmpDir, err := os.MkdirTemp("", "test-file-source")
-	if err != nil {
-		t.Fatal("unable to create temp dir")
-	}
-	defer os.RemoveAll(tmpDir)
 
-	path, err := createTestFile(tmpDir, "test1.yaml", simpleConfig)
+	c, err := createSimpleCsubClient(ctx)
 	if err != nil {
-		t.Fatal("unable to create test file")
+		t.Errorf("unable to initiliaze simple source client: %v", err)
+		return
 	}
+	defer c.Close()
 
-	cds, err := NewFileDataSources(path)
+	cds, err := NewCsubDatasource(c, time.Second)
 	if err != nil {
 		t.Errorf("unable to create FileDataSources: %v", err)
 		return
 	}
+
 	upChan, err := cds.DataSourcesUpdate(ctx)
 	if err != nil {
 		t.Errorf("unable to get DataSourcesUpdate: %v", err)
@@ -117,20 +125,16 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 	}
 
 	// Check for update
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	go func() {
-		f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		err := c.AddCollectEntries(ctx, []*collectsub.CollectEntry{
+			{Type: collectsub.CollectDataType_DATATYPE_GIT, Value: "git+newentry"},
+		})
 		if err != nil {
-			t.Errorf("unable to open file to append: %v", err)
-			return
+			t.Errorf("got error from trying to add new entries: %v", err)
 		}
-		_, err = f.Write([]byte("\n- git+newentry"))
-		if err != nil {
-			t.Errorf("unable to append to file: %v", err)
-		}
-		f.Close()
 	}()
 	select {
 	case err = <-upChan:
@@ -165,9 +169,4 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 		t.Errorf("unexpected datasource output: expect %v, got %v", expected, ds)
 	}
 
-}
-
-func createTestFile(dir string, name string, content []byte) (string, error) {
-	path := filepath.Join(dir, name)
-	return path, os.WriteFile(path, content, 0644)
 }

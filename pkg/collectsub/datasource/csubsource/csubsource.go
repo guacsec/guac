@@ -27,7 +27,7 @@ import (
 )
 
 type csubDataSources struct {
-	c            *client.Client
+	c            client.Client
 	lastEntries  *datasource.DataSources
 	pollDuration time.Duration
 }
@@ -36,7 +36,7 @@ type csubDataSources struct {
 // from a configuration file. This configuration file is in YAML and
 // follows the structure outlined in the FileFormat struct. An example
 // is as follows:
-func NewCsubDatasource(c *client.Client, pollDuration time.Duration) (datasource.CollectSource, error) {
+func NewCsubDatasource(c client.Client, pollDuration time.Duration) (datasource.CollectSource, error) {
 	return &csubDataSources{
 		c:            c,
 		pollDuration: pollDuration,
@@ -46,7 +46,10 @@ func NewCsubDatasource(c *client.Client, pollDuration time.Duration) (datasource
 // GetDataSources returns a data source containing targets for the
 // collector to collect
 func (d *csubDataSources) GetDataSources(ctx context.Context) (*datasource.DataSources, error) {
-	entries, err := d.c.GetCollectEntries(ctx, []*pb.CollectEntryFilter{})
+	entries, err := d.c.GetCollectEntries(ctx, []*pb.CollectEntryFilter{
+		{Type: pb.CollectDataType_DATATYPE_OCI, Glob: "*"},
+		{Type: pb.CollectDataType_DATATYPE_GIT, Glob: "*"},
+	})
 	if err != nil {
 		return nil, err
 	}
