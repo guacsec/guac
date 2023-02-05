@@ -21,14 +21,24 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-func registerAllArtifacts(client *neo4jClient) {
+func registerAllArtifacts(client *neo4jClient) error {
 	// strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-	client.registerArtifact("sha256", "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf")
-	client.registerArtifact("sha1", "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9")
-	client.registerArtifact("sha512", "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7")
+	err := client.registerArtifact("sha256", "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf")
+	if err != nil {
+		return err
+	}
+	err = client.registerArtifact("sha1", "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9")
+	if err != nil {
+		return err
+	}
+	err = client.registerArtifact("sha512", "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *neo4jClient) registerArtifact(algorithm, digest string) {
+func (c *neo4jClient) registerArtifact(algorithm, digest string) error {
 	// enforce lowercase for both the algorithm and digest when ingesting
 	collectedArtifact := artifactNode{
 		algorithm: strings.ToLower(algorithm),
@@ -37,7 +47,11 @@ func (c *neo4jClient) registerArtifact(algorithm, digest string) {
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: []assembler.GuacNode{collectedArtifact},
 	}
-	assembler.StoreGraph(assemblerinput, c.driver)
+	err := assembler.StoreGraph(assemblerinput, c.driver)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ArtifactNode is a node that represents an artifact

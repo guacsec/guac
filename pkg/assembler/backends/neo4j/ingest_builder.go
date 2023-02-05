@@ -19,20 +19,30 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-func registerAllBuilders(client *neo4jClient) {
-	client.registerBuilder("https://github.com/Attestations/GitHubHostedActions@v1")
-	client.registerBuilder("https://tekton.dev/chains/v2")
+func registerAllBuilders(client *neo4jClient) error {
+	err := client.registerBuilder("https://github.com/Attestations/GitHubHostedActions@v1")
+	if err != nil {
+		return err
+	}
+	err = client.registerBuilder("https://tekton.dev/chains/v2")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *neo4jClient) registerBuilder(uri string) {
-
+func (c *neo4jClient) registerBuilder(uri string) error {
 	collectedBuilder := builderNode{
 		uri: uri,
 	}
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: []assembler.GuacNode{collectedBuilder},
 	}
-	assembler.StoreGraph(assemblerinput, c.driver)
+	err := assembler.StoreGraph(assemblerinput, c.driver)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // builderNode represents the builder
