@@ -19,34 +19,44 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-func registerAllGHSA(client *neo4jClient) {
-	topLevelGhsa := createTopLevelGhsa(client)
-
-	client.registerGhsa(topLevelGhsa, "GHSA-h45f-rjvw-2rv2")
-	client.registerGhsa(topLevelGhsa, "GHSA-xrw3-wqph-3fxg")
-	client.registerGhsa(topLevelGhsa, "GHSA-8v4j-7jgf-5rg9")
-	client.registerGhsa(topLevelGhsa, "GHSA-h45f-rjvw-2rv2")
-	client.registerGhsa(topLevelGhsa, "GHSA-h45f-rjvw-2rv2")
-}
-
-func createTopLevelGhsa(client *neo4jClient) ghsaNode {
-	collectedGhsa := ghsaNode{}
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedGhsa},
+func registerAllGHSA(client *neo4jClient) error {
+	err := client.registerGhsa("GHSA-h45f-rjvw-2rv2")
+	if err != nil {
+		return err
 	}
-	assembler.StoreGraph(assemblerinput, client.driver)
-	return collectedGhsa
+	err = client.registerGhsa("GHSA-xrw3-wqph-3fxg")
+	if err != nil {
+		return err
+	}
+	err = client.registerGhsa("GHSA-8v4j-7jgf-5rg9")
+	if err != nil {
+		return err
+	}
+	err = client.registerGhsa("GHSA-h45f-rjvw-2rv2")
+	if err != nil {
+		return err
+	}
+	err = client.registerGhsa("GHSA-h45f-rjvw-2rv2")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *neo4jClient) registerGhsa(topLevelGhsa ghsaNode, id string) {
+func (c *neo4jClient) registerGhsa(id string) error {
+	collectedGhsa := ghsaNode{}
 	collecteGhsaId := ghsaID{id: id}
 
-	ghsaToIDEdge := ghsaToID{topLevelGhsa, collecteGhsaId}
+	ghsaToIDEdge := ghsaToID{collectedGhsa, collecteGhsaId}
 	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collecteGhsaId},
+		Nodes: []assembler.GuacNode{collectedGhsa, collecteGhsaId},
 		Edges: []assembler.GuacEdge{ghsaToIDEdge},
 	}
-	assembler.StoreGraph(assemblerinput, c.driver)
+	err := assembler.StoreGraph(assemblerinput, c.driver)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ghsaNode represents the top level GHSA->GHSAID

@@ -19,35 +19,46 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-func registerAllCVE(client *neo4jClient) {
-	topLevelCve := createTopLevelCve(client)
-	client.registerCVE(topLevelCve, "1970", "CVE-2019-13110")
-	client.registerCVE(topLevelCve, "2001", "CVE-2014-8139")
-	client.registerCVE(topLevelCve, "1970", "CVE-2014-8140")
-	client.registerCVE(topLevelCve, "2023", "CVE-2022-26499")
-	client.registerCVE(topLevelCve, "1970", "CVE-2014-8140")
-}
-
-func createTopLevelCve(client *neo4jClient) cveNode {
-	collectedCve := cveNode{}
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedCve},
+func registerAllCVE(client *neo4jClient) error {
+	err := client.registerCVE("1970", "CVE-2019-13110")
+	if err != nil {
+		return err
 	}
-	assembler.StoreGraph(assemblerinput, client.driver)
-	return collectedCve
+	err = client.registerCVE("2001", "CVE-2014-8139")
+	if err != nil {
+		return err
+	}
+	err = client.registerCVE("1970", "CVE-2014-8140")
+	if err != nil {
+		return err
+	}
+	err = client.registerCVE("2023", "CVE-2022-26499")
+	if err != nil {
+		return err
+	}
+	err = client.registerCVE("1970", "CVE-2014-8140")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *neo4jClient) registerCVE(topLevelCve cveNode, year, id string) {
+func (c *neo4jClient) registerCVE(year, id string) error {
+	collectedCve := cveNode{}
 	collectedYear := cveYear{year: year}
 	collecteCveId := cveID{id: id}
 
-	cveToYearEdge := cveToYear{topLevelCve, collectedYear}
+	cveToYearEdge := cveToYear{collectedCve, collectedYear}
 	cveYearToIDEdge := cveYearToCveID{collectedYear, collecteCveId}
 	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedYear, collecteCveId},
+		Nodes: []assembler.GuacNode{collectedCve, collectedYear, collecteCveId},
 		Edges: []assembler.GuacEdge{cveToYearEdge, cveYearToIDEdge},
 	}
-	assembler.StoreGraph(assemblerinput, c.driver)
+	err := assembler.StoreGraph(assemblerinput, c.driver)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // cveNode represents the top level CVE->Year->CVEID

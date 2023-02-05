@@ -21,68 +21,129 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-func registerAllPackages(client *neo4jClient) {
+func registerAllPackages(client *neo4jClient) error {
 	// TODO: add util to convert from pURL to package fields
-	topLevelPkg := createTopLevelPkg(client)
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-	client.registerPackage(topLevelPkg, "apk", "alpine", "apk", "2.12.9-r3", "", "arch=x86")
-	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
-	client.registerPackage(topLevelPkg, "apk", "alpine", "curl", "7.83.0-r0", "", "arch=x86")
-	// pkg:conan/openssl.org/openssl@3.0.3?arch=x86_64&build_type=Debug&compiler=Visual%20Studio&compiler.runtime=MDd&compiler.version=16&os=Windows&shared=True&rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e&prev=b429db8a0e324114c25ec387bfd8281f330d7c5c
-	client.registerPackage(topLevelPkg, "conan", "openssl.org", "openssl", "3.0.3", "", "arch=x86_64", "build_type=Debug", "compiler=Visual%20Studio", "compiler.runtime=MDd", "compiler.version=16", "os=Windows", "shared=True", "rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e", "prev=b429db8a0e324114c25ec387bfd8281f330d7c5c")
-	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	client.registerPackage(topLevelPkg, "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable")
-	// pkg:conan/openssl@3.0.3
-	client.registerPackage(topLevelPkg, "conan", "", "openssl", "3.0.3", "")
-	// pkg:deb/debian/attr@1:2.4.47-2?arch=amd64
-	client.registerPackage(topLevelPkg, "deb", "debian", "attr", "1:2.4.47-2", "", "arch=amd64")
-	// pkg:deb/debian/attr@1:2.4.47-2?arch=source
-	client.registerPackage(topLevelPkg, "deb", "debian", "attr", "1:2.4.47-2", "", "arch=source")
-	// pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie
-	client.registerPackage(topLevelPkg, "deb", "debian", "curl", "7.50.3-1", "", "arch=i386", "distro=jessie")
-	// pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch
-	client.registerPackage(topLevelPkg, "deb", "debian", "dpkg", "1.19.0.4", "", "arch=amd64", "distro=stretch")
-	// pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64
-	client.registerPackage(topLevelPkg, "deb", "ubuntu", "dpkg", "1.19.0.4", "", "arch=amd64")
-	// pkg:docker/cassandra@latest
-	client.registerPackage(topLevelPkg, "docker", "", "cassandra", "latest", "")
-	// pkg:docker/cassandra@sha256:244fd47e07d1004f0aed9c
-	client.registerPackage(topLevelPkg, "docker", "", "cassandra", "sha256:244fd47e07d1004f0aed9c", "")
-	// pkg:docker/customer/dockerimage@sha256:244fd47e07d1004f0aed9c?repository_url=gcr.io
-	client.registerPackage(topLevelPkg, "docker", "customer", "dockerimage", "sha256:244fd47e07d1004f0aed9c", "", "repository_url=gcr.io")
-	// pkg:docker/smartentry/debian@dc437cc87d10
-	client.registerPackage(topLevelPkg, "docker", "smartentry", "debian", "dc437cc87d10", "")
-	// pkg:generic/bitwarderl?vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32
-	client.registerPackage(topLevelPkg, "generic", "", "bitwarderl", "", "", "vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32")
-	// pkg:generic/openssl@1.1.10g
-	client.registerPackage(topLevelPkg, "generic", "", "openssl", "1.1.10g", "")
-	// pkg:generic/openssl@1.1.10g?download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da
-	client.registerPackage(topLevelPkg, "generic", "", "openssl", "1.1.10g", "", "download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum=sha256:de4d501267da")
-	// pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
-	client.registerPackage(topLevelPkg, "oci", "", "debian", "sha256:244fd47e07d10", "", "repository_url=ghcr.io/debian", "tag=bullseye")
-	// pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1
-	client.registerPackage(topLevelPkg, "oci", "", "hello-wasm", "sha256:244fd47e07d10", "", "tag=v1")
-	// pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io/distroless/static&tag=latest
-	client.registerPackage(topLevelPkg, "oci", "", "static", "sha256:244fd47e07d10", "", "repository_url=gcr.io/distroless/static", "tag=latest")
-	// pkg:pypi/django-allauth@12.23
-	client.registerPackage(topLevelPkg, "pypi", "", "django-allauth", "12.23", "")
-	// pkg:pypi/django@1.11.1
-	client.registerPackage(topLevelPkg, "pypi", "", "django", "1.11.1", "")
-	// pkg:pypi/django@1.11.1#subpath
-	client.registerPackage(topLevelPkg, "pypi", "", "django", "1.11.1", "subpath")
-}
-
-func createTopLevelPkg(client *neo4jClient) pkgNode {
-	collectedPkg := pkgNode{}
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedPkg},
+	err := client.registerPackage("apk", "alpine", "apk", "2.12.9-r3", "", "arch=x86")
+	if err != nil {
+		return err
 	}
-	assembler.StoreGraph(assemblerinput, client.driver)
-	return collectedPkg
+	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
+	err = client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch=x86")
+	if err != nil {
+		return err
+	}
+	// pkg:conan/openssl.org/openssl@3.0.3?arch=x86_64&build_type=Debug&compiler=Visual%20Studio&compiler.runtime=MDd&compiler.version=16&os=Windows&shared=True&rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e&prev=b429db8a0e324114c25ec387bfd8281f330d7c5c
+	// NOTE: neo4j does not like "." for its property. "compiler.runtime" has to be changed to "compiler_runtime"
+	err = client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "arch=x86_64", "build_type=Debug", "compiler=Visual%20Studio", "compiler_runtime=MDd", "compiler_version=16", "os=Windows", "shared=True", "rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e", "prev=b429db8a0e324114c25ec387bfd8281f330d7c5c")
+	if err != nil {
+		return err
+	}
+	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
+	err = client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable")
+	if err != nil {
+		return err
+	}
+	// pkg:conan/openssl@3.0.3
+	err = client.registerPackage("conan", "", "openssl", "3.0.3", "")
+	if err != nil {
+		return err
+	}
+	// pkg:deb/debian/attr@1:2.4.47-2?arch=amd64
+	err = client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch=amd64")
+	if err != nil {
+		return err
+	}
+	// pkg:deb/debian/attr@1:2.4.47-2?arch=source
+	err = client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch=source")
+	if err != nil {
+		return err
+	}
+	// pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie
+	err = client.registerPackage("deb", "debian", "curl", "7.50.3-1", "", "arch=i386", "distro=jessie")
+	if err != nil {
+		return err
+	}
+	// pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch
+	err = client.registerPackage("deb", "debian", "dpkg", "1.19.0.4", "", "arch=amd64", "distro=stretch")
+	if err != nil {
+		return err
+	}
+	// pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64
+	err = client.registerPackage("deb", "ubuntu", "dpkg", "1.19.0.4", "", "arch=amd64")
+	if err != nil {
+		return err
+	}
+	// pkg:docker/cassandra@latest
+	err = client.registerPackage("docker", "", "cassandra", "latest", "")
+	if err != nil {
+		return err
+	}
+	// pkg:docker/cassandra@sha256:244fd47e07d1004f0aed9c
+	err = client.registerPackage("docker", "", "cassandra", "sha256:244fd47e07d1004f0aed9c", "")
+	if err != nil {
+		return err
+	}
+	// pkg:docker/customer/dockerimage@sha256:244fd47e07d1004f0aed9c?repository_url=gcr.io
+	err = client.registerPackage("docker", "customer", "dockerimage", "sha256:244fd47e07d1004f0aed9c", "", "repository_url=gcr.io")
+	if err != nil {
+		return err
+	}
+	// pkg:docker/smartentry/debian@dc437cc87d10
+	err = client.registerPackage("docker", "smartentry", "debian", "dc437cc87d10", "")
+	if err != nil {
+		return err
+	}
+	// pkg:generic/bitwarderl?vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32
+	err = client.registerPackage("generic", "", "bitwarderl", "", "", "vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32")
+	if err != nil {
+		return err
+	}
+	// pkg:generic/openssl@1.1.10g
+	err = client.registerPackage("generic", "", "openssl", "1.1.10g", "")
+	if err != nil {
+		return err
+	}
+	// pkg:generic/openssl@1.1.10g?download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da
+	err = client.registerPackage("generic", "", "openssl", "1.1.10g", "", "download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum=sha256:de4d501267da")
+	if err != nil {
+		return err
+	}
+	// pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
+	err = client.registerPackage("oci", "", "debian", "sha256:244fd47e07d10", "", "repository_url=ghcr.io/debian", "tag=bullseye")
+	if err != nil {
+		return err
+	}
+	// pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1
+	err = client.registerPackage("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", "tag=v1")
+	if err != nil {
+		return err
+	}
+	// pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io/distroless/static&tag=latest
+	err = client.registerPackage("oci", "", "static", "sha256:244fd47e07d10", "", "repository_url=gcr.io/distroless/static", "tag=latest")
+	if err != nil {
+		return err
+	}
+	// pkg:pypi/django-allauth@12.23
+	err = client.registerPackage("pypi", "", "django-allauth", "12.23", "")
+	if err != nil {
+		return err
+	}
+	// pkg:pypi/django@1.11.1
+	err = client.registerPackage("pypi", "", "django", "1.11.1", "")
+	if err != nil {
+		return err
+	}
+	// pkg:pypi/django@1.11.1#subpath
+	err = client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *neo4jClient) registerPackage(topLevelPkg pkgNode, packageType, namespace, name, version, subpath string, qualifiers ...string) {
-
+func (c *neo4jClient) registerPackage(packageType, namespace, name, version, subpath string, qualifiers ...string) error {
+	collectedPkg := pkgNode{}
 	collectedType := pkgType{pkgType: packageType}
 	collectedNamespace := pkgNamespace{namespace: namespace}
 	collectedName := pkgName{name: name}
@@ -91,15 +152,19 @@ func (c *neo4jClient) registerPackage(topLevelPkg pkgNode, packageType, namespac
 		pair := strings.Split(kv, "=")
 		collectedVersion.qualifier[pair[0]] = pair[1]
 	}
-	pkgToTypeEdge := pkgToType{topLevelPkg, collectedType}
+	pkgToTypeEdge := pkgToType{collectedPkg, collectedType}
 	typetoNamespaceEdge := typeToNamespace{collectedType, collectedNamespace}
 	namespaceToNameEdge := namespaceToName{collectedNamespace, collectedName}
 	nameToVersionEdge := nameToVersion{collectedName, collectedVersion}
 	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedType, collectedNamespace, collectedName, collectedVersion},
+		Nodes: []assembler.GuacNode{collectedPkg, collectedType, collectedNamespace, collectedName, collectedVersion},
 		Edges: []assembler.GuacEdge{pkgToTypeEdge, typetoNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
 	}
-	assembler.StoreGraph(assemblerinput, c.driver)
+	err := assembler.StoreGraph(assemblerinput, c.driver)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // pkgNode represents the top level pkg->Type->Namespace->Name->Version
@@ -135,17 +200,17 @@ func (pt pkgType) Type() string {
 
 func (pt pkgType) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
-	properties["pkgType"] = pt.pkgType
+	properties["type"] = pt.pkgType
 	return properties
 }
 
 func (pt pkgType) PropertyNames() []string {
-	fields := []string{"pkgType"}
+	fields := []string{"type"}
 	return fields
 }
 
 func (pt pkgType) IdentifiablePropertyNames() []string {
-	return []string{"pkgType"}
+	return []string{"type"}
 }
 
 type pkgNamespace struct {
