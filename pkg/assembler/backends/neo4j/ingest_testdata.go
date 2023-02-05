@@ -305,7 +305,7 @@ func (c *neo4jClient) registerBuilder(uri string) error {
 func (c *neo4jClient) registerCVE(year, id string) error {
 	collectedCve := &cveNode{}
 	collectedYear := &cveYear{year: year}
-	collecteCveId := &cveID{id: id}
+	collecteCveId := &cveID{id: strings.ToLower(id)}
 
 	cveToYearEdge := &cveToYear{collectedCve, collectedYear}
 	cveYearToIDEdge := &cveYearToCveID{collectedYear, collecteCveId}
@@ -322,7 +322,7 @@ func (c *neo4jClient) registerCVE(year, id string) error {
 
 func (c *neo4jClient) registerGhsa(id string) error {
 	collectedGhsa := &ghsaNode{}
-	collecteGhsaId := &ghsaID{id: id}
+	collecteGhsaId := &ghsaID{id: strings.ToLower(id)}
 
 	ghsaToIDEdge := &ghsaToID{collectedGhsa, collecteGhsaId}
 	assemblerinput := assembler.AssemblerInput{
@@ -338,7 +338,7 @@ func (c *neo4jClient) registerGhsa(id string) error {
 
 func (c *neo4jClient) registerOSV(id string) error {
 	collectedOsv := &osvNode{}
-	collecteOsvId := &osvID{id: id}
+	collecteOsvId := &osvID{id: strings.ToLower(id)}
 
 	osvToIDEdge := &osvToID{collectedOsv, collecteOsvId}
 	assemblerinput := assembler.AssemblerInput{
