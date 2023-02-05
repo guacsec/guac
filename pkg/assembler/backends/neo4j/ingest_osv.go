@@ -19,34 +19,44 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-func registerAllOSV(client *neo4jClient) {
-	topLevelOsv := createTopLevelOsv(client)
-
-	client.registerOSV(topLevelOsv, "CVE-2019-3456")
-	client.registerOSV(topLevelOsv, "CVE-2014-53356")
-	client.registerOSV(topLevelOsv, "CVE-2014-4432")
-	client.registerOSV(topLevelOsv, "CVE-2022-9876")
-	client.registerOSV(topLevelOsv, "CVE-2014-4432")
-}
-
-func createTopLevelOsv(client *neo4jClient) osvNode {
-	collectedOsv := osvNode{}
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedOsv},
+func registerAllOSV(client *neo4jClient) error {
+	err := client.registerOSV("CVE-2019-3456")
+	if err != nil {
+		return err
 	}
-	assembler.StoreGraph(assemblerinput, client.driver)
-	return collectedOsv
+	err = client.registerOSV("CVE-2014-53356")
+	if err != nil {
+		return err
+	}
+	err = client.registerOSV("CVE-2014-4432")
+	if err != nil {
+		return err
+	}
+	err = client.registerOSV("CVE-2022-9876")
+	if err != nil {
+		return err
+	}
+	err = client.registerOSV("CVE-2014-4432")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *neo4jClient) registerOSV(topLevelOsv osvNode, id string) {
+func (c *neo4jClient) registerOSV(id string) error {
+	collectedOsv := osvNode{}
 	collecteOsvId := osvID{id: id}
 
-	osvToIDEdge := osvToID{topLevelOsv, collecteOsvId}
+	osvToIDEdge := osvToID{collectedOsv, collecteOsvId}
 	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collecteOsvId},
+		Nodes: []assembler.GuacNode{collectedOsv, collecteOsvId},
 		Edges: []assembler.GuacEdge{osvToIDEdge},
 	}
-	assembler.StoreGraph(assemblerinput, c.driver)
+	err := assembler.StoreGraph(assemblerinput, c.driver)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // osvNode presentes the top level OSV->OSVID

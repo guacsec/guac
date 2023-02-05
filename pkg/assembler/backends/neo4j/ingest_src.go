@@ -21,31 +21,37 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 )
 
-func registerAllSources(client *neo4jClient) {
-	topLevelSrc := createTopLevelSrc(client)
+func registerAllSources(client *neo4jClient) error {
 	// with tag
-	client.registerSource(topLevelSrc, "git", "github", "github.com/guacsec/guac", "tag=v0.0.1")
-	// with commit
-	client.registerSource(topLevelSrc, "git", "github", "github.com/guacsec/guac", "commit=fcba958b73e27cad8b5c8655d46439984d27853b")
-	// with no tag or commit
-	client.registerSource(topLevelSrc, "git", "github", "github.com/guacsec/guac", "")
-	// gitlab namespace
-	client.registerSource(topLevelSrc, "git", "gitlab", "github.com/guacsec/guacdata", "tag=v0.0.1")
-	// differnt type
-	client.registerSource(topLevelSrc, "svn", "gitlab", "github.com/guacsec/guac", "")
-}
-
-func createTopLevelSrc(client *neo4jClient) srcNode {
-	collectedSrc := srcNode{}
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedSrc},
+	err := client.registerSource("git", "github", "github.com/guacsec/guac", "tag=v0.0.1")
+	if err != nil {
+		return err
 	}
-	assembler.StoreGraph(assemblerinput, client.driver)
-	return collectedSrc
+	// with commit
+	err = client.registerSource("git", "github", "github.com/guacsec/guac", "commit=fcba958b73e27cad8b5c8655d46439984d27853b")
+	if err != nil {
+		return err
+	}
+	// with no tag or commit
+	err = client.registerSource("git", "github", "github.com/guacsec/guac", "")
+	if err != nil {
+		return err
+	}
+	// gitlab namespace
+	err = client.registerSource("git", "gitlab", "github.com/guacsec/guacdata", "tag=v0.0.1")
+	if err != nil {
+		return err
+	}
+	// differnt type
+	err = client.registerSource("svn", "gitlab", "github.com/guacsec/guac", "")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *neo4jClient) registerSource(topLevelSrc srcNode, sourceType, namespace, name, qualifier string) {
-
+func (c *neo4jClient) registerSource(sourceType, namespace, name, qualifier string) error {
+	collectedSrc := srcNode{}
 	collectedType := srcType{srcType: sourceType}
 	collectedNamespace := srcNamespace{namespace: namespace}
 	collectedName := srcName{name: name}
@@ -58,14 +64,18 @@ func (c *neo4jClient) registerSource(topLevelSrc srcNode, sourceType, namespace,
 		}
 	}
 
-	srcToTypeEdge := srcToType{topLevelSrc, collectedType}
+	srcToTypeEdge := srcToType{collectedSrc, collectedType}
 	typetoNamespaceEdge := srcTypeToNamespace{collectedType, collectedNamespace}
 	namespaceToNameEdge := srcNamespaceToName{collectedNamespace, collectedName}
 	assemblerinput := assembler.AssemblerInput{
-		Nodes: []assembler.GuacNode{collectedType, collectedNamespace, collectedName},
+		Nodes: []assembler.GuacNode{collectedSrc, collectedType, collectedNamespace, collectedName},
 		Edges: []assembler.GuacEdge{srcToTypeEdge, typetoNamespaceEdge, namespaceToNameEdge},
 	}
-	assembler.StoreGraph(assemblerinput, c.driver)
+	err := assembler.StoreGraph(assemblerinput, c.driver)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // scrNode represents the top level src->Type->Namespace->Name
@@ -88,7 +98,7 @@ func (sn srcNode) PropertyNames() []string {
 }
 
 func (sn srcNode) IdentifiablePropertyNames() []string {
-	return []string{""}
+	return []string{"src"}
 }
 
 type srcType struct {
