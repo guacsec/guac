@@ -90,7 +90,6 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 	if docChannel == nil {
 		return errors.New("invalid document channel")
 	}
-	excludedSuffixes := []string{"sbom", "att", "sig"}
 
 	rcOpts := []regclient.Opt{
 		regclient.WithDockerCreds(),
@@ -117,14 +116,8 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 
 		// Filter out tags that are not images
 		for _, tag := range allTags.Tags {
-			shouldInclude := true
-			for _, suffix := range excludedSuffixes {
-				if strings.HasSuffix(tag, suffix) {
-					shouldInclude = false
-					break
-				}
-			}
-			if shouldInclude {
+			// filter out tags that looking for sha256- followed by a 64 character hex string
+			if !(strings.HasPrefix(tag, "sha256-") && len(tag) == 71) {
 				fetchTags = append(fetchTags, tag)
 			}
 		}
