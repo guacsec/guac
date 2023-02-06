@@ -43,7 +43,7 @@ type ociCollector struct {
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
 // Note: OCI collector can be called upon by a upstream registry collector in the future to collect from all
 // repos in a given registry. For further details see issue #298
-func NewOCICollector(ctx context.Context, repoTags map[string][]string, poll bool, interval time.Duration) *ociCollector {
+func NewOCICollector(_ context.Context, repoTags map[string][]string, poll bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
 		repoTags:      repoTags,
 		checkedDigest: map[string][]string{},
