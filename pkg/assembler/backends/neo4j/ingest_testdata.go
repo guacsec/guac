@@ -357,7 +357,7 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 	collectedType := &pkgType{pkgType: packageType}
 	collectedNamespace := &pkgNamespace{namespace: namespace}
 	collectedName := &pkgName{name: name}
-	collectedVersion := &pkgVersion{version: version, subpath: subpath, qualifier: map[string]interface{}{}}
+	collectedVersion := &pkgVersion{version: version, subpath: subpath, qualifier: map[string]string{}}
 	for _, kv := range qualifiers {
 		pair := strings.Split(kv, "=")
 		collectedVersion.qualifier[pair[0]] = pair[1]
