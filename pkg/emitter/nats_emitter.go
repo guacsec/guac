@@ -29,16 +29,15 @@ import (
 
 // NATS stream
 const (
-	NatsName                string        = "GUAC"
-	StreamName              string        = "DOCUMENTS"
-	StreamSubjects          string        = "DOCUMENTS.*"
-	SubjectNameDocCollected string        = "DOCUMENTS.collected"
-	SubjectNameDocProcessed string        = "DOCUMENTS.processed"
-	SubjectNameDocParsed    string        = "DOCUMENTS.parsed"
-	DurableProcessor        string        = "processor"
-	DurableIngestor         string        = "ingestor"
-	BufferChannelSize       int           = 1000
-	BackOffTimer            time.Duration = 1 * time.Second
+	NatsName                string = "GUAC"
+	StreamName              string = "DOCUMENTS"
+	StreamSubjects          string = "DOCUMENTS.*"
+	SubjectNameDocCollected string = "DOCUMENTS.collected"
+	SubjectNameDocProcessed string = "DOCUMENTS.processed"
+	DurableProcessor        string = "processor"
+	DurableIngestor         string = "ingestor"
+	BufferChannelSize       int    = 1000
+	BackOffTimer                   = 1 * time.Second
 )
 
 type jetStream struct {
@@ -178,7 +177,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 	js := FromContext(ctx)
 	sub, err := js.PullSubscribe(subj, durable)
 	if err != nil {
-		logger.Errorf("%s subscribe failed: %w", durable, err)
+		logger.Errorf("%s subscribe failed: %v", durable, err)
 		return nil, nil, err
 	}
 	go func() {
@@ -190,7 +189,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 			msgs, err := sub.Fetch(1)
 			if err != nil {
 				if errors.Is(err, nats.ErrTimeout) {
-					logger.Infof("[%s: %s] nothing to consume, backing off for %s: %w", durable, id, backOffTimer.String(), err)
+					logger.Infof("[%s: %s] nothing to consume, backing off for %s: %v", durable, id, backOffTimer.String(), err)
 					time.Sleep(backOffTimer)
 					continue
 				} else {
