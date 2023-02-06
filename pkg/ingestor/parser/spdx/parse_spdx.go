@@ -26,8 +26,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
-	spdx_json "github.com/spdx/tools-golang/json"
-	spdx_common "github.com/spdx/tools-golang/spdx/common"
+	spdxjson "github.com/spdx/tools-golang/json"
+	spdxcommon "github.com/spdx/tools-golang/spdx/common"
 	"github.com/spdx/tools-golang/spdx/v2_2"
 )
 
@@ -38,14 +38,14 @@ type spdxParser struct {
 	spdxDoc  *v2_2.Document
 }
 
-func NewSpdxParser() common.DocumentParser {
+func NewSPDXParser() common.DocumentParser {
 	return &spdxParser{
 		packages: map[string][]assembler.PackageNode{},
 		files:    map[string][]assembler.ArtifactNode{},
 	}
 }
 
-func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
+func (s *spdxParser) Parse(_ context.Context, doc *processor.Document) error {
 	s.doc = doc
 	spdxDoc, err := parseSpdxBlob(doc.Blob)
 	if err != nil {
@@ -88,7 +88,7 @@ func (s *spdxParser) getPackages() {
 		for _, ext := range pac.PackageExternalReferences {
 			if strings.HasPrefix(ext.RefType, "cpe") {
 				currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
-			} else if ext.RefType == spdx_common.TypePackageManagerPURL {
+			} else if ext.RefType == spdxcommon.TypePackageManagerPURL {
 				currentPackage.Purl = ext.Locator
 			}
 		}
@@ -126,14 +126,14 @@ func getTags(f *v2_2.File) []string {
 
 func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	reader := bytes.NewReader(p)
-	spdx, err := spdx_json.Load2_2(reader)
+	spdx, err := spdxjson.Load2_2(reader)
 	if err != nil {
 		return nil, fmt.Errorf("error in parsing spdx Blob %w", err)
 	}
 	return spdx, nil
 }
 
-func (s *spdxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
+func (s *spdxParser) CreateNodes(_ context.Context) []assembler.GuacNode {
 	nodes := []assembler.GuacNode{}
 	for _, packNodes := range s.packages {
 		for _, packNode := range packNodes {
@@ -241,9 +241,9 @@ func getEdge(foundNode assembler.GuacNode, relationship string, relatedPackNodes
 
 func getEdgeByType(relationship string, foundNode assembler.GuacNode, relatedNode assembler.GuacNode) (assembler.GuacEdge, error) {
 	switch relationship {
-	case spdx_common.TypeRelationshipContains:
+	case spdxcommon.TypeRelationshipContains:
 		return getContainsEdge(foundNode, relatedNode)
-	case spdx_common.TypeRelationshipDependsOn:
+	case spdxcommon.TypeRelationshipDependsOn:
 		return getDependsOnEdge(foundNode, relatedNode), nil
 	}
 	return nil, nil
@@ -280,6 +280,6 @@ func getDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNo
 	return e
 }
 
-func (s *spdxParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
+func (s *spdxParser) GetIdentities(_ context.Context) []assembler.IdentityNode {
 	return nil
 }

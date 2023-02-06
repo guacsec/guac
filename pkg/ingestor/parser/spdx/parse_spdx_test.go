@@ -50,7 +50,7 @@ func Test_spdxParser(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewSpdxParser()
+			s := NewSPDXParser()
 			err := s.Parse(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("spdxParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
