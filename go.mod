@@ -92,7 +92,7 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.15.12 // indirect
+	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/letsencrypt/boulder v0.0.0-20221109233200-85aa52084eaf // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -137,7 +137,7 @@ require (
 	gocloud.dev v0.26.0 // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/term v0.4.0 // indirect
-	golang.org/x/time v0.2.0 // indirect
+	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.2.1-0.20221108172846-9474ca31d0df // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
@@ -157,7 +157,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/google/osv-scanner v1.1.1-0.20230130043441-25bdc68617ff
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nats-io/nats-server/v2 v2.9.11
+	github.com/nats-io/nats-server/v2 v2.9.14
 	github.com/nats-io/nats.go v1.23.0
 	github.com/ossf/scorecard/v4 v4.8.0
 	github.com/pkg/errors v0.9.1
