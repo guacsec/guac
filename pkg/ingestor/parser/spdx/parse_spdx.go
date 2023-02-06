@@ -128,7 +128,7 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	reader := bytes.NewReader(p)
 	spdx, err := spdx_json.Load2_2(reader)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error in parsing spdx Blob %w", err)
 	}
 	return spdx, nil
 }
@@ -149,20 +149,20 @@ func (s *spdxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
 }
 
 func (s *spdxParser) getPackageElement(elementID string) []assembler.PackageNode {
-	if packNode, ok := s.packages[string(elementID)]; ok {
+	if packNode, ok := s.packages[elementID]; ok {
 		return packNode
 	}
 	return nil
 }
 
 func (s *spdxParser) getFileElement(elementID string) []assembler.ArtifactNode {
-	if fileNode, ok := s.files[string(elementID)]; ok {
+	if fileNode, ok := s.files[elementID]; ok {
 		return fileNode
 	}
 	return nil
 }
 
-func (s *spdxParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
+func (s *spdxParser) CreateEdges(ctx context.Context, _ []assembler.IdentityNode) []assembler.GuacEdge {
 	logger := logging.FromContext(ctx)
 	edges := []assembler.GuacEdge{}
 	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
