@@ -199,7 +199,6 @@ func TestPurlConvert(t *testing.T) {
 				t.Errorf("unable to parse purl %v: %v", tt.purlUri, err)
 				return
 			}
-			//if !reflect.DeepEqual(got, tt.expected) {
 			if diff := cmp.Diff(tt.expected, got, cmpOpts...); diff != "" {
 				t.Errorf("model Package mismatch (-want +got):\n%s", diff)
 				return
