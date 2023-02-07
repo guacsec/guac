@@ -92,7 +92,7 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 		return nil
 	}
 
-	err = psub.GetDataFromNats(ctx, processFunc)
+	err = psub.GetDataFromNats(processFunc)
 	if err != nil {
 		return err
 	}

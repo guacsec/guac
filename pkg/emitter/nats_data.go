@@ -17,6 +17,8 @@ package emitter
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"time"
 )
 
@@ -33,7 +35,7 @@ type pubSub struct {
 func NewPubSub(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (*pubSub, error) {
 	dataChan, errchan, err := createSubscriber(ctx, id, subj, durable, backOffTimer)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while creating subscriber: %w", err)
 	}
 	return &pubSub{
 		dataChan: dataChan,
@@ -41,22 +43,27 @@ func NewPubSub(ctx context.Context, id string, subj string, durable string, back
 	}, nil
 }
 
-// GetDataFromNats retrieves the data from the channels and transforms it via the DataFunc defined per module
-func (psub *pubSub) GetDataFromNats(ctx context.Context, dataFunc DataFunc) error {
+// GetDataFromNats is a blocking function that will wait for data or error on the channels.
+// If data is received, it will be	transformed by the dataFunc and returned.
+func (psub *pubSub) GetDataFromNats(dataFunc DataFunc) error {
+	const timeout = time.Second * 30
 	for {
 		select {
 		case d := <-psub.dataChan:
 			if err := dataFunc(d); err != nil {
-				return err
+				return fmt.Errorf("error while processing data: %w", err)
 			}
 		case err := <-psub.errChan:
-			for len(psub.dataChan) > 0 {
+			for range psub.dataChan {
 				d := <-psub.dataChan
 				if err := dataFunc(d); err != nil {
-					return err
+					return fmt.Errorf("error while processing data: %w", err)
 				}
 			}
-			return err
+			return fmt.Errorf("error while processing data: %w", err)
+		case <-time.After(timeout):
+			log.Println("timed out while waiting for data or error on channels")
+			return nil
 		}
 	}
 }

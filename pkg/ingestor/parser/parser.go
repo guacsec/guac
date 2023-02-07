@@ -105,7 +105,7 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error)
 		return nil
 	}
 
-	err = psub.GetDataFromNats(ctx, parserFunc)
+	err = psub.GetDataFromNats(parserFunc)
 	if err != nil {
 		return err
 	}
