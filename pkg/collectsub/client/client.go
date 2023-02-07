@@ -25,12 +25,18 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type Client struct {
+type Client interface {
+	AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error
+	GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error)
+	Close()
+}
+
+type client struct {
 	client pb.ColectSubscriberServiceClient
 	conn   *grpc.ClientConn
 }
 
-func NewClient(addr string) (*Client, error) {
+func NewClient(addr string) (Client, error) {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -38,17 +44,17 @@ func NewClient(addr string) (*Client, error) {
 	}
 	c := pb.NewColectSubscriberServiceClient(conn)
 
-	return &Client{
+	return &client{
 		client: c,
 		conn:   conn,
 	}, nil
 }
 
-func (c *Client) Close() {
+func (c *client) Close() {
 	c.conn.Close()
 }
 
-func (c *Client) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
+func (c *client) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
 	res, err := c.client.AddCollectEntries(ctx, &pb.AddCollectEntriesRequest{
 		Entries: entries,
 	})
@@ -61,7 +67,7 @@ func (c *Client) AddCollectEntries(ctx context.Context, entries []*pb.CollectEnt
 	return nil
 }
 
-func (c *Client) GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error) {
+func (c *client) GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error) {
 	res, err := c.client.GetCollectEntries(ctx, &pb.GetCollectEntriesRequest{
 		Filters: filters,
 	})
