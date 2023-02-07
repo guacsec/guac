@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -105,7 +106,7 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error)
 		return nil
 	}
 
-	err = psub.GetDataFromNats(parserFunc)
+	err = psub.GetDataFromNats(parserFunc, time.Minute*5)
 	if err != nil {
 		return err
 	}

@@ -45,22 +45,21 @@ func NewPubSub(ctx context.Context, id string, subj string, durable string, back
 
 // GetDataFromNats is a blocking function that will wait for data or error on the channels.
 // If data is received, it will be	transformed by the dataFunc and returned.
-func (psub *pubSub) GetDataFromNats(dataFunc DataFunc) error {
-	const timeout = time.Second * 300
+func (psub *pubSub) GetDataFromNats(dataFunc DataFunc, timeout time.Duration) error {
 	for {
 		select {
 		case d := <-psub.dataChan:
 			if err := dataFunc(d); err != nil {
-				return fmt.Errorf("error while processing data: %w", err)
+				return fmt.Errorf("error while transforming data: %w", err)
 			}
 		case err := <-psub.errChan:
 			for range psub.dataChan {
 				d := <-psub.dataChan
 				if err := dataFunc(d); err != nil {
-					return fmt.Errorf("error while processing data: %w", err)
+					return fmt.Errorf("error while transforming data: %w", err)
 				}
 			}
-			return fmt.Errorf("error while processing data: %w", err)
+			return fmt.Errorf("error while receiving data: %w", err)
 		case <-time.After(timeout):
 			log.Println("timed out while waiting for data or error on channels")
 			return nil

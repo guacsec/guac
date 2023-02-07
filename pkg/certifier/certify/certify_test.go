@@ -245,7 +245,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return nil
 	}
 
-	err = psub.GetDataFromNats(processFunc)
+	err = psub.GetDataFromNats(processFunc, time.Minute*5)
 	if err != nil {
 		return err
 	}

@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -92,7 +93,7 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 		return nil
 	}
 
-	err = psub.GetDataFromNats(processFunc)
+	err = psub.GetDataFromNats(processFunc, time.Minute*5)
 	if err != nil {
 		return err
 	}
