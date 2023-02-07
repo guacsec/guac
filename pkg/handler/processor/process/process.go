@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -33,9 +32,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var (
-	documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
-)
+var documentProcessors = map[processor.DocumentType]processor.DocumentProcessor{}
 
 func init() {
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Generic)
@@ -93,7 +90,7 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 		return nil
 	}
 
-	err = psub.GetDataFromNats(processFunc, time.Minute*5)
+	err = psub.GetDataFromNats(processFunc)
 	if err != nil {
 		return err
 	}

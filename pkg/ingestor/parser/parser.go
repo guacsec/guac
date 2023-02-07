@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -44,9 +43,7 @@ func init() {
 	_ = RegisterDocumentParser(scorecard.NewScorecardParser, processor.DocumentScorecard)
 }
 
-var (
-	documentParser = map[processor.DocumentType]func() common.DocumentParser{}
-)
+var documentParser = map[processor.DocumentType]func() common.DocumentParser{}
 
 type docTreeBuilder struct {
 	identities    []assembler.IdentityNode
@@ -106,7 +103,7 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error)
 		return nil
 	}
 
-	err = psub.GetDataFromNats(parserFunc, time.Minute*5)
+	err = psub.GetDataFromNats(parserFunc)
 	if err != nil {
 		return err
 	}
