@@ -46,7 +46,7 @@ func purlConvert(p purl.PackageURL) (*model.Package, error) {
 	// so that they can be referenced with higher specificity in GUAC
 	//
 	// PURL types not defined in purl library handled generically
-	case "alpm", "apk", "huggingface", "mlflow", "qpkg", "pub", "swid":
+	case "alpm", "apk", "huggingface", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac:
 		fallthrough
 	// PURL types defined in purl library handled generically
 	case purl.TypeBitbucket, purl.TypeCocoapods, purl.TypeCargo,
