@@ -46,7 +46,7 @@ func NewPubSub(ctx context.Context, id string, subj string, durable string, back
 // GetDataFromNats is a blocking function that will wait for data or error on the channels.
 // If data is received, it will be	transformed by the dataFunc and returned.
 func (psub *pubSub) GetDataFromNats(dataFunc DataFunc) error {
-	const timeout = time.Second * 30
+	const timeout = time.Second * 300
 	for {
 		select {
 		case d := <-psub.dataChan:
