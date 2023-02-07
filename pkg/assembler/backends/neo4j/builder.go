@@ -13,23 +13,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package neo4jBackend
 
-import (
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-)
-
-func registerAllBuilders(client *demoClient) {
-	client.registerBuilder("https://github.com/Attestations/GitHubHostedActions@v1")
-	client.registerBuilder("https://tekton.dev/chains/v2")
+// builderNode represents the builder
+type builderNode struct {
+	uri string
 }
 
-func (c *demoClient) registerBuilder(uri string) {
-	for _, b := range c.builders {
-		if b.URI == uri {
-			return
-		}
-	}
-	newBuilder := &model.Builder{URI: uri}
-	c.builders = append(c.builders, newBuilder)
+func (bn builderNode) Type() string {
+	return "Builder"
+}
+
+func (bn builderNode) Properties() map[string]interface{} {
+	properties := make(map[string]interface{})
+	properties["uri"] = bn.uri
+	return properties
+}
+
+func (bn builderNode) PropertyNames() []string {
+	fields := []string{"uri"}
+	return fields
+}
+
+func (bn builderNode) IdentifiablePropertyNames() []string {
+	return []string{"uri"}
 }

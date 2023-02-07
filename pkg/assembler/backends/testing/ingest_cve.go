@@ -13,18 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package testing
 
 import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func registerAllCVE(client *demoClient) {
-	client.registerCVE("1970", "CVE-2019-13110")
-	client.registerCVE("2001", "CVE-2014-8139")
-	client.registerCVE("1970", "CVE-2014-8140")
-	client.registerCVE("2023", "CVE-2022-26499")
-	client.registerCVE("1970", "CVE-2014-8140")
+	client.registerCVE("2019", "CVE-2019-13110")
+	client.registerCVE("2014", "CVE-2014-8139")
+	client.registerCVE("2014", "CVE-2014-8140")
+	client.registerCVE("2022", "CVE-2022-26499")
+	client.registerCVE("2014", "CVE-2014-8140")
 }
 
 func (c *demoClient) registerCVE(year, id string) {

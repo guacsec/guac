@@ -45,13 +45,20 @@ func main() {
 		backend = "neo4j"
 	}
 
+	neo4jTest := os.Getenv("TEST")
+	testData := false
+	if neo4jTest == "true" {
+		testData = true
+	}
+
 	var topResolver resolvers.Resolver
 	if backend == "neo4j" {
-		args := neo4j.Neo4jCredentials{
-			User:   "neo4j",
-			Pass:   "s3cr3t",
-			Realm:  "neo4j",
-			DBAddr: "neo4j://localhost:7687",
+		args := neo4j.Neo4jConfig{
+			User:     "neo4j",
+			Pass:     "s3cr3t",
+			Realm:    "neo4j",
+			DBAddr:   "neo4j://localhost:7687",
+			TestData: testData,
 		}
 		backend, err := neo4j.GetBackend(&args)
 		if err != nil {

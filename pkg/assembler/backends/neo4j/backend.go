@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package neo4jBackend
 
 import (
 	"context"
@@ -24,11 +24,12 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
-type Neo4jCredentials struct {
-	User   string
-	Pass   string
-	Realm  string
-	DBAddr string
+type Neo4jConfig struct {
+	User     string
+	Pass     string
+	Realm    string
+	DBAddr   string
+	TestData bool
 }
 
 type neo4jClient struct {
@@ -36,9 +37,9 @@ type neo4jClient struct {
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
-	creds := args.(*Neo4jCredentials)
-	token := neo4j.BasicAuth(creds.User, creds.Pass, creds.Realm)
-	driver, err := neo4j.NewDriver(creds.DBAddr, token)
+	config := args.(*Neo4jConfig)
+	token := neo4j.BasicAuth(config.User, config.Pass, config.Realm)
+	driver, err := neo4j.NewDriver(config.DBAddr, token)
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +48,38 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		driver.Close()
 		return nil, err
 	}
-
-	return &neo4jClient{driver}, nil
+	client := &neo4jClient{driver}
+	if config.TestData {
+		err = registerAllPackages(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllArtifacts(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllBuilders(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllSources(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllCVE(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllGHSA(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllOSV(client)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
 func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
