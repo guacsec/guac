@@ -15,6 +15,8 @@
 
 package datasource
 
+import "context"
+
 // CollectSource provides a way for collector to get collect targets from
 // a data source (e.g. a file, a database, a pubsub queue, etc.)
 //
@@ -24,11 +26,12 @@ package datasource
 type CollectSource interface {
 	// GetDataSources returns a data source containing targets for the
 	// collector to collect
-	GetDataSources() (*DataSources, error)
+	GetDataSources(ctx context.Context) (*DataSources, error)
 
 	// DataSourcesUpdate will return a channel which will get an element
-	// if the CollectSource has new data
-	DataSourcesUpdate() (<-chan error, error)
+	// if the CollectSource has new data. This is heuristical and the
+	// channel may get an eleemnt even if there is no new data.
+	DataSourcesUpdate(ctx context.Context) (<-chan error, error)
 }
 
 type DataSources struct {
