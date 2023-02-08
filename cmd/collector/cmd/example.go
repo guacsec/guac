@@ -64,3 +64,7 @@ var exampleCmd = &cobra.Command{
 		}
 	},
 }
+
+func init() {
+	rootCmd.AddCommand(exampleCmd)
+}

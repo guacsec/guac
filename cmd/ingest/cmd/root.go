@@ -30,6 +30,16 @@ import (
 
 var cfgFile string
 
+var flags = struct {
+	dbAddr  string
+	gdbuser string
+	gdbpass string
+	realm   string
+
+	// nats
+	natsAddr string
+}{}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 	persistentFlags := rootCmd.PersistentFlags()
@@ -37,7 +47,8 @@ func init() {
 	persistentFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
 	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm"}
+	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
+	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {

@@ -31,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,6 +48,7 @@ var certifierCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
+			viper.GetString("natsaddr"),
 		)
 
 		if err != nil {
@@ -70,7 +70,7 @@ var certifierCmd = &cobra.Command{
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		jetStream := emitter.NewJetStream(nats.DefaultURL, "", "")
+		jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
 		ctx, err = jetStream.JetStreamInit(ctx)
 		if err != nil {
 			logger.Errorf("jetStream initialization failed with error: %v", err)
@@ -181,12 +181,13 @@ var certifierCmd = &cobra.Command{
 	},
 }
 
-func validateCertifierFlags(user string, pass string, dbAddr string, realm string) (options, error) {
+func validateCertifierFlags(user string, pass string, dbAddr string, realm string, natsAddr string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.natsAddr = natsAddr
 
 	return opts, nil
 }
