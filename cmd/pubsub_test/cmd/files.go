@@ -18,10 +18,8 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -34,31 +32,19 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
-	keyPath string
-	keyID   string
-}{}
 
 type options struct {
 	dbAddr string
 	user   string
 	pass   string
 	realm  string
-	// path to the pem file
-	keyPath string
-	// ID related to the key being stored
-	keyID string
 	// path to folder with documents to collect
 	path string
+	// nats
+	natsAddr string
 }
 
 var filesCmd = &cobra.Command{
@@ -71,8 +57,7 @@ var filesCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-			viper.GetString("verifier-keyPath"),
-			viper.GetString("verifier-keyID"),
+			viper.GetString("natsaddr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -92,7 +77,7 @@ var filesCmd = &cobra.Command{
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		jetStream := emitter.NewJetStream(nats.DefaultURL, "", "")
+		jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
 		ctx, err = jetStream.JetStreamInit(ctx)
 		if err != nil {
 			logger.Errorf("jetStream initialization failed with error: %v", err)
@@ -198,23 +183,13 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, keyPath string, keyID string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
-
-	if keyPath != "" {
-		if strings.HasSuffix(keyPath, "pem") {
-			opts.keyPath = keyPath
-		} else {
-			return opts, errors.New("key must be passed in as a pem file")
-		}
-	}
-	if keyPath != "" {
-		opts.keyID = keyID
-	}
+	opts.natsAddr = natsAddr
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")

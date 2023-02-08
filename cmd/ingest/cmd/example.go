@@ -43,6 +43,7 @@ var exampleCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
+			viper.GetString("natsaddr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)

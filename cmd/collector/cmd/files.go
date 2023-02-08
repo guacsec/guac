@@ -17,10 +17,8 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/guacsec/guac/pkg/emitter"
@@ -28,7 +26,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -38,14 +35,11 @@ type options struct {
 	user   string
 	pass   string
 	realm  string
-	// path to the pem file
-	keyPath string
-	// ID related to the key being stored
-	keyID string
 	// path to folder with documents to collect
 	path string
 	// map of image repo and tags
 	repoTags map[string][]string
+	natsAddr string
 }
 
 var filesCmd = &cobra.Command{
@@ -58,8 +52,7 @@ var filesCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-			viper.GetString("verifier-keyPath"),
-			viper.GetString("verifier-keyID"),
+			viper.GetString("natsaddr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -76,27 +69,17 @@ var filesCmd = &cobra.Command{
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
 		}
-		initializeNATsandCollector(ctx)
+		initializeNATsandCollector(ctx, opts.natsAddr)
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, keyPath string, keyID string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
-
-	if keyPath != "" {
-		if strings.HasSuffix(keyPath, "pem") {
-			opts.keyPath = keyPath
-		} else {
-			return opts, errors.New("key must be passed in as a pem file")
-		}
-	}
-	if keyPath != "" {
-		opts.keyID = keyID
-	}
+	opts.natsAddr = natsAddr
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")
@@ -113,11 +96,11 @@ func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, 
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context) {
+func initializeNATsandCollector(ctx context.Context, natsAddr string) {
 	logger := logging.FromContext(ctx)
 	// initialize jetstream
 	// TODO: pass in credentials file for NATS secure login
-	jetStream := emitter.NewJetStream(nats.DefaultURL, "", "")
+	jetStream := emitter.NewJetStream(natsAddr, "", "")
 	ctx, err := jetStream.JetStreamInit(ctx)
 	if err != nil {
 		logger.Errorf("jetStream initialization failed with error: %v", err)

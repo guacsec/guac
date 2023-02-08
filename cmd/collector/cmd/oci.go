@@ -42,6 +42,7 @@ var ociCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
+			viper.GetString("natsaddr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -56,16 +57,17 @@ var ociCmd = &cobra.Command{
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx)
+		initializeNATsandCollector(ctx, opts.natsAddr)
 	},
 }
 
-func validateOCIFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
+func validateOCIFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.natsAddr = natsAddr
 	opts.repoTags = map[string][]string{}
 
 	if len(args) < 1 {

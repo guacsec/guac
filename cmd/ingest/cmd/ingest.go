@@ -29,16 +29,16 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 type options struct {
-	dbAddr string
-	user   string
-	pass   string
-	realm  string
+	dbAddr   string
+	user     string
+	pass     string
+	realm    string
+	natsAddr string
 }
 
 var ingestCmd = &cobra.Command{
@@ -51,6 +51,7 @@ var ingestCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
+			viper.GetString("natsaddr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -63,7 +64,7 @@ var ingestCmd = &cobra.Command{
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
-		jetStream := emitter.NewJetStream(nats.DefaultURL, "", "")
+		jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
 		ctx, err = jetStream.JetStreamInit(ctx)
 		if err != nil {
 			logger.Errorf("jetStream initialization failed with error: %w", err)
@@ -133,12 +134,13 @@ var ingestCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.natsAddr = natsAddr
 
 	return opts, nil
 }
