@@ -159,18 +159,12 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 
 			if cveSpec.Year != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "cveYear", "year", "$cveYear")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "cveYear", "year", "$cveYear")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "cveYear", "year", "$cveYear")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
+				firstMatch = false
+
 				queryValues["cveYear"] = cveSpec.Year
 			}
 
@@ -233,24 +227,17 @@ func (c *neo4jClient) CveOnlyYear(ctx context.Context, cveSpec *model.CVESpec) (
 		func(tx neo4j.Transaction) (interface{}, error) {
 
 			var sb strings.Builder
-			var firstMatch bool = true
 			queryValues := map[string]any{}
 
 			sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)")
 
 			if cveSpec.Year != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "cveYear", "year", "$cveYear")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				} else {
-					err := matchAnd(&sb, "cveYear", "year", "$cveYear")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "cveYear", "year", "$cveYear")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
+
 				queryValues["cveYear"] = cveSpec.Year
 			}
 

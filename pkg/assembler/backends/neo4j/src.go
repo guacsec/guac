@@ -217,18 +217,12 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 
 			if sourceSpec.Type != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "type", "type", "$srcType")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "type", "type", "$srcType")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "type", "type", "$srcType")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
+				firstMatch = false
+
 				queryValues["srcType"] = sourceSpec.Type
 			}
 			if sourceSpec.Namespace != nil {

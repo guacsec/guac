@@ -104,24 +104,17 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 		func(tx neo4j.Transaction) (interface{}, error) {
 
 			var sb strings.Builder
-			var firstMatch bool = true
 			queryValues := map[string]any{}
 
 			sb.WriteString("MATCH (n:Osv)-[:OsvHasID]->(osvID:OsvID)")
 
 			if osvSpec.OsvID != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "osvID", "id", "$osvID")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				} else {
-					err := matchAnd(&sb, "osvID", "id", "$osvID")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "osvID", "id", "$osvID")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
+
 				queryValues["osvID"] = osvSpec.OsvID
 			}
 

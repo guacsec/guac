@@ -56,23 +56,14 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 		func(tx neo4j.Transaction) (interface{}, error) {
 
 			var sb strings.Builder
-			var firstMatch bool = true
 			queryValues := map[string]any{}
 
 			sb.WriteString("MATCH (n:Builder)")
 
 			if builderSpec.URI != nil {
-
-				if firstMatch {
-					err := matchWhere(&sb, "n", "uri", "$builderUri")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				} else {
-					err := matchAnd(&sb, "n", "uri", "$builderUri")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "n", "uri", "$builderUri")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
 				queryValues["builderUri"] = builderSpec.URI
 			}

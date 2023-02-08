@@ -268,18 +268,11 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 			if pkgSpec.Type != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "type", "type", "$pkgType")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "type", "type", "$pkgType")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "type", "type", "$pkgType")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
+				firstMatch = false
 				queryValues["pkgType"] = pkgSpec.Type
 			}
 			if pkgSpec.Namespace != nil {

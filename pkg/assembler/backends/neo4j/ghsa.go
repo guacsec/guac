@@ -104,24 +104,17 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 		func(tx neo4j.Transaction) (interface{}, error) {
 
 			var sb strings.Builder
-			var firstMatch bool = true
 			queryValues := map[string]any{}
 
 			sb.WriteString("MATCH (n:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
 
 			if ghsaSpec.GhsaID != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "ghsaID", "id", "$ghsaID")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				} else {
-					err := matchAnd(&sb, "ghsaID", "id", "$ghsaID")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "ghsaID", "id", "$ghsaID")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
+
 				queryValues["ghsaID"] = ghsaSpec.GhsaID
 			}
 

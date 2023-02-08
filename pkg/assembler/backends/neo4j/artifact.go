@@ -65,18 +65,12 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 			sb.WriteString("MATCH (n:Artifact)")
 			if artifactSpec.Algorithm != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "n", "algorithm", "$artifactAlgo")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "n", "algorithm", "$artifactAlgo")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
+				err := matchWhere(&sb, "n", "algorithm", "$artifactAlgo")
+				if err != nil {
+					return nil, fmt.Errorf("string builder failed with err: %w", err)
 				}
+				firstMatch = false
+
 				queryValues["artifactAlgo"] = artifactSpec.Algorithm
 			}
 			if artifactSpec.Digest != nil {
