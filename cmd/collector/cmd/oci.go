@@ -38,10 +38,6 @@ var ociCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateOCIFlags(
-			viper.GetString("gdbuser"),
-			viper.GetString("gdbpass"),
-			viper.GetString("gdbaddr"),
-			viper.GetString("realm"),
 			viper.GetString("natsaddr"),
 			args)
 		if err != nil {
@@ -61,12 +57,9 @@ var ociCmd = &cobra.Command{
 	},
 }
 
-func validateOCIFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
+func validateOCIFlags(natsAddr string, args []string) (options, error) {
 	var opts options
-	opts.user = user
-	opts.pass = pass
-	opts.dbAddr = dbAddr
-	opts.realm = realm
+
 	opts.natsAddr = natsAddr
 	opts.repoTags = map[string][]string{}
 

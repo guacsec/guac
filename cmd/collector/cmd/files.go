@@ -31,10 +31,6 @@ import (
 )
 
 type options struct {
-	dbAddr string
-	user   string
-	pass   string
-	realm  string
 	// path to folder with documents to collect
 	path string
 	// map of image repo and tags
@@ -48,10 +44,6 @@ var filesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		opts, err := validateFlags(
-			viper.GetString("gdbuser"),
-			viper.GetString("gdbpass"),
-			viper.GetString("gdbaddr"),
-			viper.GetString("realm"),
 			viper.GetString("natsaddr"),
 			args)
 		if err != nil {
@@ -73,12 +65,9 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
+func validateFlags(natsAddr string, args []string) (options, error) {
 	var opts options
-	opts.user = user
-	opts.pass = pass
-	opts.dbAddr = dbAddr
-	opts.realm = realm
+
 	opts.natsAddr = natsAddr
 
 	if len(args) != 1 {

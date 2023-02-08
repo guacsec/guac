@@ -29,11 +29,6 @@ import (
 )
 
 var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
-
 	// collect-sub flags
 	collectSubAddr       string
 	collectSubListenPort int
@@ -47,16 +42,11 @@ var cfgFile string
 func init() {
 	cobra.OnInitialize(initConfig)
 	persistentFlags := rootCmd.PersistentFlags()
-	persistentFlags.StringVar(&flags.dbAddr, "gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
-	persistentFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
-	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
-	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
 
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr",
-		"csub-addr", "csub-listen-port"}
+	flagNames := []string{"natsaddr", "csub-addr", "csub-listen-port"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
