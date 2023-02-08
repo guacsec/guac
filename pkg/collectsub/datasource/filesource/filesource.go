@@ -104,7 +104,6 @@ func (d *fileDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, 
 					return
 
 				}
-				fmt.Printf("GOT EVENT: %+v\n", ev)
 				if ev.Has(fsnotify.Write) {
 					updateChan <- nil
 				}
@@ -114,13 +113,11 @@ func (d *fileDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, 
 					return
 				}
 				updateChan <- err
-				fmt.Printf("got err while watching: %+v\n", err)
 				return
 
 			case <-ctx.Done():
 				err := fmt.Errorf("file watcher ending from context closure")
 				updateChan <- err
-				fmt.Printf("ctx is closed: %+v\n", err)
 				return
 			}
 		}

@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type csubDataSources struct {
@@ -53,7 +54,7 @@ func (d *csubDataSources) GetDataSources(ctx context.Context) (*datasource.DataS
 	if err != nil {
 		return nil, err
 	}
-	ds := entriesToSources(entries)
+	ds := entriesToSources(ctx, entries)
 	d.lastEntries = ds
 
 	return ds, nil
@@ -66,15 +67,17 @@ func (d *csubDataSources) GetDataSources(ctx context.Context) (*datasource.DataS
 func (d *csubDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, error) {
 	updateChan := make(chan error)
 	go func() {
+		timer := time.NewTicker(d.pollDuration)
 		for {
+			timer.Reset(d.pollDuration)
 			select {
-			case <-time.After(d.pollDuration):
+			case <-timer.C:
 				entries, err := d.c.GetCollectEntries(ctx, []*pb.CollectEntryFilter{})
 				if err != nil {
 					updateChan <- err
 					return
 				}
-				ds := entriesToSources(entries)
+				ds := entriesToSources(ctx, entries)
 				if reflect.DeepEqual(ds, d.lastEntries) {
 					continue
 				}
@@ -84,7 +87,6 @@ func (d *csubDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, 
 			case <-ctx.Done():
 				err := fmt.Errorf("file watcher ending from context closure")
 				updateChan <- err
-				fmt.Printf("ctx is closed: %+v\n", err)
 				return
 			}
 		}
@@ -92,7 +94,7 @@ func (d *csubDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, 
 	return updateChan, nil
 }
 
-func entriesToSources(entries []*pb.CollectEntry) *datasource.DataSources {
+func entriesToSources(ctx context.Context, entries []*pb.CollectEntry) *datasource.DataSources {
 	d := &datasource.DataSources{}
 	for _, e := range entries {
 		switch e.Type {
@@ -107,6 +109,8 @@ func entriesToSources(entries []*pb.CollectEntry) *datasource.DataSources {
 
 		default:
 			// unhandled datatype, skip
+			logger := logging.FromContext(ctx)
+			logger.Infof("got datatype %v unhandled in csubdatasource", e.Type)
 		}
 	}
 	return d
