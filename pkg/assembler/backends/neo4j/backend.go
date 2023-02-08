@@ -16,7 +16,6 @@
 package neo4jBackend
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -94,14 +93,18 @@ func matchProperties(sb *strings.Builder, firstMatch bool, label, property strin
 	sb.WriteString(resolver)
 }
 
-func matchLengthProperties(sb *strings.Builder, firstMatch bool, label string, value int) {
+func matchNotEdge(sb *strings.Builder, firstMatch bool, firstNodeLabel string, edgeLabel string, secondNodeLabel string) {
+	// -[:PkgHasQualifier]->(qualifier:PkgQualifier)
 	if firstMatch {
 		sb.WriteString(" WHERE ")
 	} else {
 		sb.WriteString(" AND ")
 	}
-	sb.WriteString("len(properties(")
-	sb.WriteString(label)
-	sb.WriteString(") <=")
-	sb.WriteString(strconv.Itoa(value))
+	sb.WriteString("NOT (")
+	sb.WriteString(firstNodeLabel)
+	sb.WriteString(")-[:")
+	sb.WriteString(edgeLabel)
+	sb.WriteString("]->(:")
+	sb.WriteString(secondNodeLabel)
+	sb.WriteString(")")
 }
