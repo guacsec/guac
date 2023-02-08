@@ -377,6 +377,16 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 		assemblerinput.Nodes = append(assemblerinput.Nodes, collectedQualifier)
 		assemblerinput.Edges = append(assemblerinput.Edges, versionToQualifierEdge)
 	}
+	if len(qualifiers) > 0 {
+		collectedQualifier := &pkgQualifier{qualifier: map[string]string{}}
+		for _, kv := range qualifiers {
+			pair := strings.Split(kv, "=")
+			collectedQualifier.qualifier[pair[0]] = pair[1]
+		}
+		versionToQualiferEdge := &versionToQualifier{collectedVersion, collectedQualifier}
+		assemblerinput.Nodes = append(assemblerinput.Nodes, collectedQualifier)
+		assemblerinput.Edges = append(assemblerinput.Edges, versionToQualiferEdge)
+	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
 	if err != nil {
 		return err
