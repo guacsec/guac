@@ -30,6 +30,13 @@ import (
 
 var cfgFile string
 
+var flags = struct {
+	dbAddr  string
+	gdbuser string
+	gdbpass string
+	realm   string
+}{}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 	persistentFlags := rootCmd.PersistentFlags()

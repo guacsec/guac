@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -27,20 +28,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
-}{}
-
-type options struct {
-	dbAddr string
-	user   string
-	pass   string
-	realm  string
-}
 
 var docs []processor.DocumentTree
 
@@ -56,9 +43,10 @@ var exampleCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-		)
+			args)
 		if err != nil {
-			logger.Errorf("unable to validate flags: %v", err)
+			fmt.Printf("unable to validate flags: %v\n", err)
+			_ = cmd.Help()
 			os.Exit(1)
 		}
 
@@ -92,16 +80,6 @@ var exampleCmd = &cobra.Command{
 			os.Exit(1)
 		}
 	},
-}
-
-func validateFlags(user string, pass string, dbAddr string, realm string) (options, error) {
-	var opts options
-
-	opts.user = user
-	opts.pass = pass
-	opts.dbAddr = dbAddr
-
-	return opts, nil
 }
 
 func init() {
