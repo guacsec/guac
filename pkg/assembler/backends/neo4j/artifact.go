@@ -16,7 +16,12 @@
 package neo4jBackend
 
 import (
+	"context"
+	"fmt"
 	"strings"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // ArtifactNode is a node that represents an artifact
@@ -44,4 +49,75 @@ func (an *artifactNode) PropertyNames() []string {
 func (an *artifactNode) IdentifiablePropertyNames() []string {
 	// An artifact can be uniquely identified by algorithm and digest
 	return []string{"algorithm", "digest"}
+}
+
+func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Artifact)")
+			if artifactSpec.Algorithm != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "n", "algorithm", "$artifactAlgo")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+					firstMatch = false
+				} else {
+					err := matchAnd(&sb, "n", "algorithm", "$artifactAlgo")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["artifactAlgo"] = artifactSpec.Algorithm
+			}
+			if artifactSpec.Digest != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "n", "digest", "$artifactDigest")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				} else {
+					err := matchAnd(&sb, "n", "digest", "$artifactDigest")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["artifactDigest"] = artifactSpec.Digest
+			}
+
+			sb.WriteString(" RETURN n.algorithm, n.digest")
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			artifacts := []*model.Artifact{}
+			for result.Next() {
+				artifact := &model.Artifact{
+					Algorithm: result.Record().Values[0].(string),
+					Digest:    result.Record().Values[1].(string),
+				}
+				artifacts = append(artifacts, artifact)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			return artifacts, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Artifact), nil
 }

@@ -16,7 +16,13 @@
 package neo4jBackend
 
 import (
+	"context"
+	"fmt"
+	"strings"
+
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // osvNode presentes the top level OSV->OSVID
@@ -88,4 +94,63 @@ func (e *osvToID) PropertyNames() []string {
 
 func (e *osvToID) IdentifiablePropertyNames() []string {
 	return []string{}
+}
+
+func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Osv)-[:OsvHasID]->(osvID:OsvID)")
+
+			if osvSpec.OsvID != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "osvID", "id", "$osvID")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				} else {
+					err := matchAnd(&sb, "osvID", "id", "$osvID")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["osvID"] = osvSpec.OsvID
+			}
+
+			sb.WriteString(" RETURN osvID.id")
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			osvIds := []*model.OSVId{}
+			for result.Next() {
+				osvId := &model.OSVId{
+					ID: result.Record().Values[0].(string),
+				}
+				osvIds = append(osvIds, osvId)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			osv := &model.Osv{
+				OsvID: osvIds,
+			}
+
+			return []*model.Osv{osv}, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Osv), nil
 }

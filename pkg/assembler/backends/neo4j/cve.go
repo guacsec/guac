@@ -16,7 +16,13 @@
 package neo4jBackend
 
 import (
+	"context"
+	"fmt"
+	"strings"
+
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // cveNode represents the top level CVE->Year->CVEID
@@ -136,4 +142,141 @@ func (e *cveYearToCveID) PropertyNames() []string {
 
 func (e *cveYearToCveID) IdentifiablePropertyNames() []string {
 	return []string{}
+}
+
+func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
+
+			if cveSpec.Year != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "cveYear", "year", "$cveYear")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+					firstMatch = false
+				} else {
+					err := matchAnd(&sb, "cveYear", "year", "$cveYear")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["cveYear"] = cveSpec.Year
+			}
+
+			if cveSpec.CveID != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "cveID", "id", "$cveID")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				} else {
+					err := matchAnd(&sb, "cveYear", "id", "$cveID")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["cveID"] = cveSpec.CveID
+			}
+
+			sb.WriteString(" RETURN cveYear.year, cveID.id")
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			cvesPerYear := map[string][]*model.CVEId{}
+			for result.Next() {
+				cveID := &model.CVEId{
+					ID: result.Record().Values[1].(string),
+				}
+				cvesPerYear[result.Record().Values[0].(string)] = append(cvesPerYear[result.Record().Values[0].(string)], cveID)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			cves := []*model.Cve{}
+			for year := range cvesPerYear {
+				cve := &model.Cve{
+					Year:  year,
+					CveID: cvesPerYear[year],
+				}
+				cves = append(cves, cve)
+			}
+
+			return cves, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Cve), nil
+}
+
+func (c *neo4jClient) CveOnlyYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)")
+
+			if cveSpec.Year != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "cveYear", "year", "$cveYear")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				} else {
+					err := matchAnd(&sb, "cveYear", "year", "$cveYear")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["cveYear"] = cveSpec.Year
+			}
+
+			sb.WriteString(" RETURN cveYear.year")
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			cves := []*model.Cve{}
+			for result.Next() {
+				cve := &model.Cve{
+					Year:  result.Record().Values[0].(string),
+					CveID: []*model.CVEId{},
+				}
+				cves = append(cves, cve)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			return cves, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Cve), nil
 }

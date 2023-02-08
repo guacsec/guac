@@ -16,7 +16,13 @@
 package neo4jBackend
 
 import (
+	"context"
+	"fmt"
+	"strings"
+
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 // ghsaNode represents the top level GHSA->GHSAID
@@ -88,4 +94,63 @@ func (e *ghsaToID) PropertyNames() []string {
 
 func (e *ghsaToID) IdentifiablePropertyNames() []string {
 	return []string{}
+}
+
+func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
+
+			if ghsaSpec.GhsaID != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "ghsaID", "id", "$ghsaID")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				} else {
+					err := matchAnd(&sb, "ghsaID", "id", "$ghsaID")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["ghsaID"] = ghsaSpec.GhsaID
+			}
+
+			sb.WriteString(" RETURN ghsaID.id")
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			ghsaIds := []*model.GHSAId{}
+			for result.Next() {
+				ghsaId := &model.GHSAId{
+					ID: result.Record().Values[0].(string),
+				}
+				ghsaIds = append(ghsaIds, ghsaId)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			ghsa := &model.Ghsa{
+				GhsaID: ghsaIds,
+			}
+
+			return []*model.Ghsa{ghsa}, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Ghsa), nil
 }

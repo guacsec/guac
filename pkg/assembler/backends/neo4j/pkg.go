@@ -16,7 +16,14 @@
 package neo4jBackend
 
 import (
+	"context"
+	"fmt"
+	"strings"
+
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
 // pkgNode represents the top level pkg->Type->Namespace->Name->Version
@@ -245,4 +252,211 @@ func (e *nameToVersion) PropertyNames() []string {
 
 func (e *nameToVersion) IdentifiablePropertyNames() []string {
 	return []string{}
+}
+
+func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
+
+			if pkgSpec.Type != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "type", "type", "$pkgType")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+					firstMatch = false
+				} else {
+					err := matchAnd(&sb, "type", "type", "$pkgType")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["pkgType"] = pkgSpec.Type
+			}
+			if pkgSpec.Namespace != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "namespace", "namespace", "$pkgNamespace")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+					firstMatch = false
+				} else {
+					err := matchAnd(&sb, "namespace", "namespace", "$pkgNamespace")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["pkgNamespace"] = pkgSpec.Namespace
+			}
+			if pkgSpec.Name != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "name", "name", "$pkgName")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+					firstMatch = false
+				} else {
+					err := matchAnd(&sb, "name", "name", "$pkgName")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["pkgName"] = pkgSpec.Name
+			}
+			if pkgSpec.Version != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "version", "version", "$pkgVerion")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+					firstMatch = false
+				} else {
+					err := matchAnd(&sb, "version", "version", "$pkgVerion")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["pkgVerion"] = pkgSpec.Version
+			}
+
+			if pkgSpec.Subpath != nil {
+
+				if firstMatch {
+					err := matchWhere(&sb, "version", "subpath", "$pkgSubpath")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+					firstMatch = false
+				} else {
+					err := matchAnd(&sb, "version", "subpath", "$pkgSubpath")
+					if err != nil {
+						return nil, fmt.Errorf("string builder failed with err: %w", err)
+					}
+				}
+				queryValues["pkgSubpath"] = pkgSpec.Subpath
+			}
+
+			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
+
+				if len(pkgSpec.Qualifiers) > 0 {
+
+					for _, qualifier := range pkgSpec.Qualifiers {
+						// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
+						// be replaced by an "-"
+						qualifierKey := strings.ReplaceAll(qualifier.Key, ".", "_")
+						if firstMatch {
+							err := matchWhere(&sb, "version", qualifierKey, "$"+qualifierKey)
+							if err != nil {
+								return nil, fmt.Errorf("string builder failed with err: %w", err)
+							}
+							firstMatch = false
+						} else {
+							err := matchAnd(&sb, "version", qualifierKey, "$"+qualifierKey)
+							if err != nil {
+								return nil, fmt.Errorf("string builder failed with err: %w", err)
+							}
+						}
+						queryValues[qualifierKey] = qualifier.Value
+					}
+				}
+			}
+
+			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version")
+
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
+			pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
+			pkgNames := map[string][]*model.PackageVersion{}
+			for result.Next() {
+
+				versionNode := result.Record().Values[3].(dbtype.Node)
+
+				pkgQualifiers := []*model.PackageQualifier{}
+				if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
+					if len(pkgSpec.Qualifiers) > 0 {
+						for _, qualifier := range pkgSpec.Qualifiers {
+							// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
+							// be replaced by an "-"
+							qualifierKey := strings.ReplaceAll(qualifier.Key, ".", "_")
+							pkgQualifier := &model.PackageQualifier{
+								Key:   qualifierKey,
+								Value: versionNode.Props[qualifierKey].(string),
+							}
+							pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+						}
+					} else {
+						for key, value := range versionNode.Props {
+							if key != "subpath" && key != "version" {
+								pkgQualifier := &model.PackageQualifier{
+									Key:   key,
+									Value: value.(string),
+								}
+								pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+							}
+						}
+					}
+				}
+
+				pkgVersion := &model.PackageVersion{
+					Version:    versionNode.Props["version"].(string),
+					Subpath:    versionNode.Props["subpath"].(string),
+					Qualifiers: pkgQualifiers,
+				}
+
+				pkgNames[result.Record().Values[2].(string)] = append(pkgNames[result.Record().Values[2].(string)], pkgVersion)
+				pkgNamespaces[result.Record().Values[1].(string)] = pkgNames
+				pkgTypes[result.Record().Values[0].(string)] = pkgNamespaces
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			packages := []*model.Package{}
+			for pkgType, pkgNamespaces := range pkgTypes {
+				collectedPkgNamespaces := []*model.PackageNamespace{}
+				for namespace, pkgNames := range pkgNamespaces {
+					collectedPkgNames := []*model.PackageName{}
+					for name, versions := range pkgNames {
+						pkgName := &model.PackageName{
+							Name:     name,
+							Versions: versions,
+						}
+						collectedPkgNames = append(collectedPkgNames, pkgName)
+					}
+					pkgNamespace := &model.PackageNamespace{
+						Namespace: namespace,
+						Names:     collectedPkgNames,
+					}
+					collectedPkgNamespaces = append(collectedPkgNamespaces, pkgNamespace)
+				}
+				collectedPackage := &model.Package{
+					Type:       pkgType,
+					Namespaces: collectedPkgNamespaces,
+				}
+				packages = append(packages, collectedPackage)
+			}
+
+			return packages, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Package), nil
 }
