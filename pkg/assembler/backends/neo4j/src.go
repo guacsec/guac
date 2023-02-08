@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -217,76 +216,32 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 
 			if sourceSpec.Type != nil {
 
-				err := matchWhere(&sb, "type", "type", "$srcType")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
+				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
 				firstMatch = false
-
 				queryValues["srcType"] = sourceSpec.Type
 			}
 			if sourceSpec.Namespace != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "namespace", "namespace", "$srcNamespace")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "namespace", "namespace", "$srcNamespace")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
+				firstMatch = false
 				queryValues["srcNamespace"] = sourceSpec.Namespace
 			}
 			if sourceSpec.Name != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "name", "name", "$srcName")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "name", "name", "$srcName")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "name", "name", "$srcName")
+				firstMatch = false
 				queryValues["srcName"] = sourceSpec.Name
 			}
 			if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Tag != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "name", "tag", "$srcTag")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "name", "tag", "$srcTag")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "name", "tag", "$srcTag")
+				firstMatch = false
 				queryValues["srcTag"] = sourceSpec.Qualifier.Tag
 			}
 
 			if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Commit != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "name", "commit", "$srcCommit")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				} else {
-					err := matchAnd(&sb, "name", "commit", "$srcCommit")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "name", "commit", "$srcCommit")
 				queryValues["srcCommit"] = sourceSpec.Qualifier.Commit
 			}
 

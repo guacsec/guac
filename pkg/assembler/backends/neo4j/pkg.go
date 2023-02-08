@@ -268,76 +268,33 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 			if pkgSpec.Type != nil {
 
-				err := matchWhere(&sb, "type", "type", "$pkgType")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
+				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
 				firstMatch = false
 				queryValues["pkgType"] = pkgSpec.Type
 			}
 			if pkgSpec.Namespace != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "namespace", "namespace", "$pkgNamespace")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "namespace", "namespace", "$pkgNamespace")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
+				firstMatch = false
 				queryValues["pkgNamespace"] = pkgSpec.Namespace
 			}
 			if pkgSpec.Name != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "name", "name", "$pkgName")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "name", "name", "$pkgName")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "name", "name", "$pkgName")
+				firstMatch = false
 				queryValues["pkgName"] = pkgSpec.Name
 			}
 			if pkgSpec.Version != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "version", "version", "$pkgVerion")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "version", "version", "$pkgVerion")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "version", "version", "$pkgVerion")
+				firstMatch = false
 				queryValues["pkgVerion"] = pkgSpec.Version
 			}
 
 			if pkgSpec.Subpath != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "version", "subpath", "$pkgSubpath")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-					firstMatch = false
-				} else {
-					err := matchAnd(&sb, "version", "subpath", "$pkgSubpath")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "version", "subpath", "$pkgSubpath")
+				firstMatch = false
 				queryValues["pkgSubpath"] = pkgSpec.Subpath
 			}
 
@@ -346,28 +303,18 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 				if len(pkgSpec.Qualifiers) > 0 {
 
 					for _, qualifier := range pkgSpec.Qualifiers {
-						// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
-						// be replaced by an "-"
-						qualifierKey := strings.ReplaceAll(qualifier.Key, ".", "_")
-						if firstMatch {
-							err := matchWhere(&sb, "version", qualifierKey, "$"+qualifierKey)
-							if err != nil {
-								return nil, fmt.Errorf("string builder failed with err: %w", err)
-							}
-							firstMatch = false
-						} else {
-							err := matchAnd(&sb, "version", qualifierKey, "$"+qualifierKey)
-							if err != nil {
-								return nil, fmt.Errorf("string builder failed with err: %w", err)
-							}
-						}
+						qualifierKey := removeInvalidCharFromProperty(qualifier.Key)
+						matchProperties(&sb, firstMatch, "version", qualifierKey, "$"+qualifierKey)
+						firstMatch = false
 						queryValues[qualifierKey] = qualifier.Value
 					}
 				}
+			} else {
+				matchLengthProperties(&sb, firstMatch, "version", 2)
 			}
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version")
-
+			fmt.Println(sb.String())
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -384,9 +331,8 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 				if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
 					if len(pkgSpec.Qualifiers) > 0 {
 						for _, qualifier := range pkgSpec.Qualifiers {
-							// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
-							// be replaced by an "-"
-							qualifierKey := strings.ReplaceAll(qualifier.Key, ".", "_")
+
+							qualifierKey := removeInvalidCharFromProperty(qualifier.Key)
 							pkgQualifier := &model.PackageQualifier{
 								Key:   qualifierKey,
 								Value: versionNode.Props[qualifierKey].(string),
@@ -452,4 +398,10 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 	}
 
 	return result.([]*model.Package), nil
+}
+
+func removeInvalidCharFromProperty(key string) string {
+	// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
+	// be replaced by an "-"
+	return strings.ReplaceAll(key, ".", "_")
 }

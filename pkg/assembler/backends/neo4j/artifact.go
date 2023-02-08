@@ -17,11 +17,11 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // ArtifactNode is a node that represents an artifact
@@ -55,6 +55,10 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	if artifactSpec.Algorithm == nil && artifactSpec.Digest == nil {
+		return nil, gqlerror.Errorf("must specify both algorithm and digest for artifact")
+	}
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
 
@@ -63,29 +67,14 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 			queryValues := map[string]any{}
 
 			sb.WriteString("MATCH (n:Artifact)")
+
 			if artifactSpec.Algorithm != nil {
-
-				err := matchWhere(&sb, "n", "algorithm", "$artifactAlgo")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
+				matchProperties(&sb, firstMatch, "n", "algorithm", "$artifactAlgo")
 				firstMatch = false
-
 				queryValues["artifactAlgo"] = artifactSpec.Algorithm
 			}
 			if artifactSpec.Digest != nil {
-
-				if firstMatch {
-					err := matchWhere(&sb, "n", "digest", "$artifactDigest")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				} else {
-					err := matchAnd(&sb, "n", "digest", "$artifactDigest")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "n", "digest", "$artifactDigest")
 				queryValues["artifactDigest"] = artifactSpec.Digest
 			}
 

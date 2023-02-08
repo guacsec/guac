@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -110,11 +109,7 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 
 			if ghsaSpec.GhsaID != nil {
 
-				err := matchWhere(&sb, "ghsaID", "id", "$ghsaID")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
-
+				matchProperties(&sb, true, "ghsaID", "id", "$ghsaID")
 				queryValues["ghsaID"] = ghsaSpec.GhsaID
 			}
 

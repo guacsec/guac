@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -159,10 +158,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 
 			if cveSpec.Year != nil {
 
-				err := matchWhere(&sb, "cveYear", "year", "$cveYear")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
+				matchProperties(&sb, firstMatch, "cveYear", "year", "$cveYear")
 				firstMatch = false
 
 				queryValues["cveYear"] = cveSpec.Year
@@ -170,17 +166,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 
 			if cveSpec.CveID != nil {
 
-				if firstMatch {
-					err := matchWhere(&sb, "cveID", "id", "$cveID")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				} else {
-					err := matchAnd(&sb, "cveYear", "id", "$cveID")
-					if err != nil {
-						return nil, fmt.Errorf("string builder failed with err: %w", err)
-					}
-				}
+				matchProperties(&sb, firstMatch, "cveID", "id", "$cveID")
 				queryValues["cveID"] = cveSpec.CveID
 			}
 
@@ -233,11 +219,7 @@ func (c *neo4jClient) CveOnlyYear(ctx context.Context, cveSpec *model.CVESpec) (
 
 			if cveSpec.Year != nil {
 
-				err := matchWhere(&sb, "cveYear", "year", "$cveYear")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
-
+				matchProperties(&sb, true, "cveYear", "year", "$cveYear")
 				queryValues["cveYear"] = cveSpec.Year
 			}
 

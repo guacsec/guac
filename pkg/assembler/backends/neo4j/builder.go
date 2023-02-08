@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -61,10 +60,7 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 			sb.WriteString("MATCH (n:Builder)")
 
 			if builderSpec.URI != nil {
-				err := matchWhere(&sb, "n", "uri", "$builderUri")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
+				matchProperties(&sb, true, "n", "uri", "$builderUri")
 				queryValues["builderUri"] = builderSpec.URI
 			}
 

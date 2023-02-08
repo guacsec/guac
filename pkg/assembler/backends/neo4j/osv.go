@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -109,12 +108,7 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 			sb.WriteString("MATCH (n:Osv)-[:OsvHasID]->(osvID:OsvID)")
 
 			if osvSpec.OsvID != nil {
-
-				err := matchWhere(&sb, "osvID", "id", "$osvID")
-				if err != nil {
-					return nil, fmt.Errorf("string builder failed with err: %w", err)
-				}
-
+				matchProperties(&sb, true, "osvID", "id", "$osvID")
 				queryValues["osvID"] = osvSpec.OsvID
 			}
 

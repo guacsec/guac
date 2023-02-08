@@ -16,6 +16,7 @@
 package neo4jBackend
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -80,60 +81,27 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	return client, nil
 }
 
-func matchWhere(sb *strings.Builder, label, property string, resolver string) error {
-	_, err := sb.WriteString(" WHERE ")
-	if err != nil {
-		return err
+func matchProperties(sb *strings.Builder, firstMatch bool, label, property string, resolver string) {
+	if firstMatch {
+		sb.WriteString(" WHERE ")
+	} else {
+		sb.WriteString(" AND ")
 	}
-	_, err = sb.WriteString(label)
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(".")
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(property)
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(" = ")
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(resolver)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	sb.WriteString(label)
+	sb.WriteString(".")
+	sb.WriteString(property)
+	sb.WriteString(" = ")
+	sb.WriteString(resolver)
 }
 
-func matchAnd(sb *strings.Builder, label, property string, resolver string) error {
-	_, err := sb.WriteString(" AND ")
-	if err != nil {
-		return err
+func matchLengthProperties(sb *strings.Builder, firstMatch bool, label string, value int) {
+	if firstMatch {
+		sb.WriteString(" WHERE ")
+	} else {
+		sb.WriteString(" AND ")
 	}
-	_, err = sb.WriteString(label)
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(".")
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(property)
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(" = ")
-	if err != nil {
-		return err
-	}
-	_, err = sb.WriteString(resolver)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	sb.WriteString("len(properties(")
+	sb.WriteString(label)
+	sb.WriteString(") <=")
+	sb.WriteString(strconv.Itoa(value))
 }
