@@ -146,7 +146,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		name: "tag empty string",
 		fields: fields{
 			ociValues: []string{
-				"ghcr.io/guacsec/guac-test-image",
+				"ghcr.io/guacsec/guac-test-image:",
 			},
 			poll:     false,
 			interval: 0,

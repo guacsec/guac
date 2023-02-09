@@ -68,14 +68,21 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 			imageRef, err := ref.New(d.Value)
 			if err != nil {
 				logger.Errorf("unable to parse OCI path: %v", d.Value)
+				continue
 			}
 			imagePath := fmt.Sprintf("%s/%s", imageRef.Registry, imageRef.Repository)
-			if imageRef.Tag != "latest" {
-				repoTags[imagePath] = append(repoTags[imagePath], imageRef.Tag)
+
+			// If a image reference has no tag, then it is considered as getting all tags
+			if hasNoTag(imageRef) {
+				repoTags[imagePath] = []string{}
 			} else {
-				repoTags[imagePath] = append(repoTags[imagePath], "")
+				// if the list is equal to the empty list, it is already looking for
+				// all tags
+				if repoTags[imagePath] == nil || len(repoTags[imagePath]) > 0 {
+					repoTags[imagePath] = append(repoTags[imagePath], imageRef.Tag)
+				}
+
 			}
-			fmt.Println(repoTags)
 		}
 		return nil
 	}
@@ -273,4 +280,12 @@ func contains(elems []string, v string) bool {
 // Type is the collector type of the collector
 func (o *ociCollector) Type() string {
 	return OCICollector
+}
+
+// hasNoTag determines if an OCI string passed in had no tag
+func hasNoTag(r ref.Ref) bool {
+	// the reference parsing automatically sets the tag to latest if there is no tag
+	// specified, thus we need to check the reference to see if the latest tag was actually
+	// included.
+	return r.Tag == "latest" && r.Digest == "" && !strings.HasSuffix(r.Reference, "latest")
 }
