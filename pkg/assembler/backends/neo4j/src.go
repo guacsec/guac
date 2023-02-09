@@ -246,6 +246,7 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 			}
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
+
 			result, err = tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
