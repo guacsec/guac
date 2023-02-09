@@ -374,10 +374,8 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			}
 
 			pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
-			pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
-			pkgNames := map[string][]*model.PackageVersion{}
-			for result.Next() {
 
+			for result.Next() {
 				pkgQualifiers := []*model.PackageQualifier{}
 				if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
 					qualifierNode := result.Record().Values[5].(dbtype.Node)
@@ -401,15 +399,35 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 					}
 				}
 
+				subPathString := result.Record().Values[4].(string)
+				versionString := result.Record().Values[3].(string)
+				nameString := result.Record().Values[2].(string)
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
+
 				pkgVersion := &model.PackageVersion{
-					Version:    result.Record().Values[3].(string),
-					Subpath:    result.Record().Values[4].(string),
+					Version:    versionString,
+					Subpath:    subPathString,
 					Qualifiers: pkgQualifiers,
 				}
 
-				pkgNames[result.Record().Values[2].(string)] = append(pkgNames[result.Record().Values[2].(string)], pkgVersion)
-				pkgNamespaces[result.Record().Values[1].(string)] = pkgNames
-				pkgTypes[result.Record().Values[0].(string)] = pkgNamespaces
+				if _, ok := pkgTypes[typeString]; ok {
+					if _, ok := pkgTypes[typeString][namespaceString]; ok {
+						pkgTypes[typeString][namespaceString][nameString] = append(pkgTypes[typeString][namespaceString][nameString], pkgVersion)
+					} else {
+						pkgNames := map[string][]*model.PackageVersion{}
+						pkgNames[nameString] = append(pkgNames[nameString], pkgVersion)
+						pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
+						pkgNamespaces[namespaceString] = pkgNames
+						pkgTypes[typeString] = pkgNamespaces
+					}
+				} else {
+					pkgNames := map[string][]*model.PackageVersion{}
+					pkgNames[nameString] = append(pkgNames[nameString], pkgVersion)
+					pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
+					pkgNamespaces[namespaceString] = pkgNames
+					pkgTypes[typeString] = pkgNamespaces
+				}
 			}
 			if err = result.Err(); err != nil {
 				return nil, err

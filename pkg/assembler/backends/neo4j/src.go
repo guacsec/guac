@@ -246,23 +246,33 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 			}
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
+
 			result, err = tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
 
 			srcTypes := map[string]map[string][]*model.SourceName{}
-			srcNamespace := map[string][]*model.SourceName{}
 			for result.Next() {
-				tagString := result.Record().Values[3].(string)
+
 				commitString := result.Record().Values[4].(string)
+				tagString := result.Record().Values[3].(string)
+				nameString := result.Record().Values[2].(string)
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
+
 				srcName := &model.SourceName{
-					Name:   result.Record().Values[2].(string),
+					Name:   nameString,
 					Tag:    &tagString,
 					Commit: &commitString,
 				}
-				srcNamespace[result.Record().Values[1].(string)] = append(srcNamespace[result.Record().Values[1].(string)], srcName)
-				srcTypes[result.Record().Values[0].(string)] = srcNamespace
+				if _, ok := srcTypes[typeString]; ok {
+					srcTypes[typeString][namespaceString] = append(srcTypes[typeString][namespaceString], srcName)
+				} else {
+					srcNamespace := map[string][]*model.SourceName{}
+					srcNamespace[namespaceString] = append(srcNamespace[namespaceString], srcName)
+					srcTypes[typeString] = srcNamespace
+				}
 			}
 			if err = result.Err(); err != nil {
 				return nil, err
