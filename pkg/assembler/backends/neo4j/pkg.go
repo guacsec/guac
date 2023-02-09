@@ -301,6 +301,33 @@ func (e *versionToQualifier) IdentifiablePropertyNames() []string {
 }
 
 func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
+	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
+	// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
+	fields := getPreloads(ctx)
+	nameRequired := false
+	namespaceRequired := false
+	versionRequired := false
+	for _, f := range fields {
+		if f == "namespaces" {
+			namespaceRequired = true
+		}
+		if f == "namespaces.names" {
+			nameRequired = true
+		}
+		if f == "namespaces.names.versions" {
+			versionRequired = true
+		}
+	}
+
+	if !namespaceRequired && !nameRequired && !versionRequired {
+		return c.packagesType(ctx, pkgSpec)
+	} else if nameRequired {
+		return c.packagesName(ctx, pkgSpec)
+	} else if namespaceRequired {
+		return c.packagesNamespace(ctx, pkgSpec)
+	}
+
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -467,7 +494,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 	return result.([]*model.Package), nil
 }
 
-func (c *neo4jClient) PackagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -513,7 +540,7 @@ func (c *neo4jClient) PackagesType(ctx context.Context, pkgSpec *model.PkgSpec) 
 	return result.([]*model.Package), nil
 }
 
-func (c *neo4jClient) PackagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -579,7 +606,7 @@ func (c *neo4jClient) PackagesNamespace(ctx context.Context, pkgSpec *model.PkgS
 	return result.([]*model.Package), nil
 }
 
-func (c *neo4jClient) PackagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+func (c *neo4jClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 

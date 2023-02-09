@@ -26,14 +26,8 @@ import (
 // GraphQL interface and this is enforced by this interface.
 type Backend interface {
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
-	PackagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
-	PackagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
-	PackagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
-	SourcesType(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
-	SourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
 	Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error)
-	CveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error)
 	Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error)
 	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
 	Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error)

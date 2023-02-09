@@ -12,19 +12,5 @@ import (
 
 // Cve is the resolver for the cve field.
 func (r *queryResolver) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-	// fields: [year cveId cveId.id]
-	fields := getPreloads(ctx)
-	cveIDImplRequired := false
-	for _, f := range fields {
-		if f == "cveId" {
-			cveIDImplRequired = true
-			break
-		}
-	}
-
-	if cveIDImplRequired {
-		return r.Backend.Cve(ctx, cveSpec)
-	} else {
-		return r.Backend.CveYear(ctx, cveSpec)
-	}
+	return r.Backend.Cve(ctx, cveSpec)
 }

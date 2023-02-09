@@ -69,73 +69,11 @@ func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	return packages, nil
 }
 
-func (c *demoClient) PackagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	var packages []*model.Package
-	for _, p := range c.packages {
-		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
-			packages = append(packages, p)
-		}
-	}
-	return packages, nil
-}
-
-func (c *demoClient) PackagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	var packages []*model.Package
-	for _, p := range c.packages {
-		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
-			newPkg := filterPackageOnlyNamespace(p, pkgSpec)
-			if newPkg != nil {
-				packages = append(packages, newPkg)
-			}
-		}
-	}
-	return packages, nil
-}
-
-func (c *demoClient) PackagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	var packages []*model.Package
-	for _, p := range c.packages {
-		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
-			newPkg := filterPackageNamespaceToNameOnly(p, pkgSpec)
-			if newPkg != nil {
-				packages = append(packages, newPkg)
-			}
-		}
-	}
-	return packages, nil
-}
-
 func (c *demoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	var sources []*model.Source
 	for _, s := range c.sources {
 		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
 			newSource, err := filterSourceNamespace(s, sourceSpec)
-			if err != nil {
-				return nil, err
-			}
-			if newSource != nil {
-				sources = append(sources, newSource)
-			}
-		}
-	}
-	return sources, nil
-}
-
-func (c *demoClient) SourcesType(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	var sources []*model.Source
-	for _, s := range c.sources {
-		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
-			sources = append(sources, s)
-		}
-	}
-	return sources, nil
-}
-
-func (c *demoClient) SourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	var sources []*model.Source
-	for _, s := range c.sources {
-		if sourceSpec.Type == nil || s.Type == *sourceSpec.Type {
-			newSource, err := filterSourceOnlyNamespace(s, sourceSpec)
 			if err != nil {
 				return nil, err
 			}
@@ -158,16 +96,6 @@ func (c *demoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.
 			if newCve != nil {
 				cve = append(cve, newCve)
 			}
-		}
-	}
-	return cve, nil
-}
-
-func (c *demoClient) CveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-	var cve []*model.Cve
-	for _, s := range c.cve {
-		if cveSpec.Year == nil || s.Year == *cveSpec.Year {
-			cve = append(cve, s)
 		}
 	}
 	return cve, nil
@@ -248,41 +176,6 @@ func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.P
 	}
 }
 
-func filterPackageNamespaceToNameOnly(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
-	var namespaces []*model.PackageNamespace
-	for _, ns := range pkg.Namespaces {
-		if pkgSpec.Namespace == nil || ns.Namespace == *pkgSpec.Namespace {
-			newNs := filterPackageOnlyName(ns, pkgSpec)
-			if newNs != nil {
-				namespaces = append(namespaces, newNs)
-			}
-		}
-	}
-	if len(namespaces) == 0 {
-		return nil
-	}
-	return &model.Package{
-		Type:       pkg.Type,
-		Namespaces: namespaces,
-	}
-}
-
-func filterPackageOnlyNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
-	var namespaces []*model.PackageNamespace
-	for _, ns := range pkg.Namespaces {
-		if pkgSpec.Namespace == nil || ns.Namespace == *pkgSpec.Namespace {
-			namespaces = append(namespaces, ns)
-		}
-	}
-	if len(namespaces) == 0 {
-		return nil
-	}
-	return &model.Package{
-		Type:       pkg.Type,
-		Namespaces: namespaces,
-	}
-}
-
 func filterPackageName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.PackageNamespace {
 	var names []*model.PackageName
 	for _, n := range ns.Names {
@@ -291,22 +184,6 @@ func filterPackageName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *mode
 			if newN != nil {
 				names = append(names, newN)
 			}
-		}
-	}
-	if len(names) == 0 {
-		return nil
-	}
-	return &model.PackageNamespace{
-		Namespace: ns.Namespace,
-		Names:     names,
-	}
-}
-
-func filterPackageOnlyName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.PackageNamespace {
-	var names []*model.PackageName
-	for _, n := range ns.Names {
-		if pkgSpec.Name == nil || n.Name == *pkgSpec.Name {
-			names = append(names, n)
 		}
 	}
 	if len(names) == 0 {
@@ -368,22 +245,6 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 		}
 	}
 	return v
-}
-
-func filterSourceOnlyNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*model.Source, error) {
-	var namespaces []*model.SourceNamespace
-	for _, ns := range src.Namespaces {
-		if sourceSpec.Namespace == nil || ns.Namespace == *sourceSpec.Namespace {
-			namespaces = append(namespaces, ns)
-		}
-	}
-	if len(namespaces) == 0 {
-		return nil, nil
-	}
-	return &model.Source{
-		Type:       src.Type,
-		Namespaces: namespaces,
-	}, nil
 }
 
 func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*model.Source, error) {

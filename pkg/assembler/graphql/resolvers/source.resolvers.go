@@ -12,24 +12,5 @@ import (
 
 // Sources is the resolver for the sources field.
 func (r *queryResolver) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
-	fields := getPreloads(ctx)
-	nameRequired := false
-	namespaceRequired := false
-	for _, f := range fields {
-		if f == "namespaces" {
-			namespaceRequired = true
-		}
-		if f == "namespaces.names" {
-			nameRequired = true
-		}
-	}
-
-	if namespaceRequired && nameRequired {
-		return r.Backend.Sources(ctx, sourceSpec)
-	} else if namespaceRequired {
-		return r.Backend.SourcesNamespace(ctx, sourceSpec)
-	} else {
-		return r.Backend.SourcesType(ctx, sourceSpec)
-	}
+	return r.Backend.Sources(ctx, sourceSpec)
 }

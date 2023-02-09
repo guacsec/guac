@@ -16,8 +16,10 @@
 package neo4jBackend
 
 import (
+	"context"
 	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -107,4 +109,29 @@ func matchNotEdge(sb *strings.Builder, firstMatch bool, firstNodeLabel string, e
 	sb.WriteString("]->(:")
 	sb.WriteString(secondNodeLabel)
 	sb.WriteString(")")
+}
+
+func getPreloads(ctx context.Context) []string {
+	return getNestedPreloads(
+		graphql.GetOperationContext(ctx),
+		graphql.CollectFieldsCtx(ctx, nil),
+		"",
+	)
+}
+
+func getNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string) []string {
+	preloads := []string{}
+	for _, column := range fields {
+		prefixColumn := getPreloadString(prefix, column.Name)
+		preloads = append(preloads, prefixColumn)
+		preloads = append(preloads, getNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn)...)
+	}
+	return preloads
+}
+
+func getPreloadString(prefix, name string) string {
+	if len(prefix) > 0 {
+		return prefix + "." + name
+	}
+	return name
 }
