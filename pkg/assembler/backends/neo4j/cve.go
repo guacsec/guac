@@ -205,7 +205,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 	return result.([]*model.Cve), nil
 }
 
-func (c *neo4jClient) CveOnlyYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+func (c *neo4jClient) CveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 

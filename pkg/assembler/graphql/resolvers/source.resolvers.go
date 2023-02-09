@@ -6,28 +6,30 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Sources is the resolver for the sources field.
 func (r *queryResolver) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	fields := graphql.CollectAllFields(ctx)
-	//versionsImplRequired := false
-	fmt.Println(fields)
-	/* for _, f := range fields {
-		if f == "versions" {
-			versionsImplRequired = true
-			break
+	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
+	fields := getPreloads(ctx)
+	nameRequired := false
+	namespaceRequired := false
+	for _, f := range fields {
+		if f == "namespaces" {
+			namespaceRequired = true
+		}
+		if f == "namespaces.names" {
+			nameRequired = true
 		}
 	}
 
-	if versionsImplRequired {
-		return PackagesWithVersion(ctx, r.DB)
+	if namespaceRequired && nameRequired {
+		return r.Backend.Sources(ctx, sourceSpec)
+	} else if namespaceRequired {
+		return r.Backend.SourcesNamespace(ctx, sourceSpec)
 	} else {
-		return r.Backend.Packages(ctx, pkgSpec)
-	} */
-	return r.Backend.Sources(ctx, sourceSpec)
+		return r.Backend.SourcesType(ctx, sourceSpec)
+	}
 }
