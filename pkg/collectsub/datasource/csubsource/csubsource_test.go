@@ -33,8 +33,8 @@ func createSimpleCsubClient(ctx context.Context) (client.Client, error) {
 	}
 
 	err = c.AddCollectEntries(ctx, []*collectsub.CollectEntry{
-		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "oci://abc"},
-		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "oci://def"},
+		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "abc"},
+		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "def"},
 		{Type: collectsub.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
 	})
 	if err != nil {
@@ -69,8 +69,8 @@ func Test_FileSourceGetDataSources(t *testing.T) {
 
 	expected := &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},
@@ -111,8 +111,8 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 
 	expected := &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},
@@ -156,8 +156,8 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 
 	expected = &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},

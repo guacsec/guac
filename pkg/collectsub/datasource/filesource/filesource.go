@@ -43,8 +43,8 @@ type FileFormat struct {
 // sources.yaml
 // ----
 // oci:
-// - oci://abc
-// - oci://def
+// - abc
+// - def
 // git:
 // - git+https://github.com/...
 func NewFileDataSources(path string) (datasource.CollectSource, error) {

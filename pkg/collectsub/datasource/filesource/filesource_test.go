@@ -27,8 +27,8 @@ import (
 )
 
 var simpleConfig = []byte(`oci:
-- oci://abc
-- oci://def
+- abc
+- def
 git:
 - git+https://github.com/guacsec/guac`)
 
@@ -59,8 +59,8 @@ func Test_FileSourceGetDataSources(t *testing.T) {
 
 	expected := &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},
@@ -103,8 +103,8 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 
 	expected := &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},
@@ -152,8 +152,8 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 
 	expected = &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},
