@@ -26,9 +26,8 @@ import (
 )
 
 const (
-	PurlTypeGuac  = "guac"
-	repoSeparator = "/"
-	repositoryurl = "repository_url"
+	PurlTypeGuac              = "guac"
+	repositoryUrlQualifierKey = "repository_url"
 )
 
 // PurlToPkg converts a purl URI string into a graphql package node
@@ -100,13 +99,13 @@ func ociHandler(p purl.PackageURL) (*model.Package, error) {
 	qs := p.Qualifiers.Map()
 	var ns string
 	for k, v := range qs {
-		if k == repositoryurl {
+		if k == repositoryUrlQualifierKey {
 			ns = v
 		}
 	}
 
-	delete(qs, repositoryurl)
-	ns = strings.TrimRight(ns, repoSeparator+p.Name)
+	delete(qs, repositoryUrlQualifierKey)
+	ns = strings.TrimRight(ns, "/"+p.Name)
 	r := pkg(p.Type, ns, p.Name, p.Version, p.Subpath, qs)
 	return r, nil
 }
@@ -127,14 +126,14 @@ func dockerHandler(p purl.PackageURL) (*model.Package, error) {
 	qs := p.Qualifiers.Map()
 	var repUrl string
 	for k, v := range qs {
-		if k == repositoryurl {
+		if k == repositoryUrlQualifierKey {
 			repUrl = v
 		}
 	}
-	delete(qs, repositoryurl)
+	delete(qs, repositoryUrlQualifierKey)
 
 	ns := filepath.Join(repUrl, p.Namespace)
-	ns = strings.Trim(ns, repoSeparator)
+	ns = strings.Trim(ns, "/")
 
 	r := pkg(p.Type, ns, p.Name, p.Version, p.Subpath, qs)
 	return r, nil
