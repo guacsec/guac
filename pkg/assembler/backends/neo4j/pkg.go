@@ -411,9 +411,9 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 					Qualifiers: pkgQualifiers,
 				}
 
-				if _, ok := pkgTypes[typeString]; ok {
-					if _, ok := pkgTypes[typeString][namespaceString]; ok {
-						pkgTypes[typeString][namespaceString][nameString] = append(pkgTypes[typeString][namespaceString][nameString], pkgVersion)
+				if pkgNamespaces, ok := pkgTypes[typeString]; ok {
+					if pkgNames, ok := pkgNamespaces[namespaceString]; ok {
+						pkgNames[nameString] = append(pkgNames[nameString], pkgVersion)
 					} else {
 						pkgNames := map[string][]*model.PackageVersion{}
 						pkgNames[nameString] = append(pkgNames[nameString], pkgVersion)

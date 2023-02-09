@@ -266,12 +266,12 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 					Tag:    &tagString,
 					Commit: &commitString,
 				}
-				if _, ok := srcTypes[typeString]; ok {
-					srcTypes[typeString][namespaceString] = append(srcTypes[typeString][namespaceString], srcName)
+				if srcNamespaces, ok := srcTypes[typeString]; ok {
+					srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
 				} else {
-					srcNamespace := map[string][]*model.SourceName{}
-					srcNamespace[namespaceString] = append(srcNamespace[namespaceString], srcName)
-					srcTypes[typeString] = srcNamespace
+					srcNamespaces := map[string][]*model.SourceName{}
+					srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
+					srcTypes[typeString] = srcNamespaces
 				}
 			}
 			if err = result.Err(); err != nil {

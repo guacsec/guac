@@ -360,12 +360,12 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 	collectedVersion := &pkgVersion{version: version, subpath: subpath}
 
 	pkgToTypeEdge := &pkgToType{collectedPkg, collectedType}
-	typetoNamespaceEdge := &typeToNamespace{collectedType, collectedNamespace}
+	typeToNamespaceEdge := &typeToNamespace{collectedType, collectedNamespace}
 	namespaceToNameEdge := &namespaceToName{collectedNamespace, collectedName}
 	nameToVersionEdge := &nameToVersion{collectedName, collectedVersion}
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: []assembler.GuacNode{collectedPkg, collectedType, collectedNamespace, collectedName, collectedVersion},
-		Edges: []assembler.GuacEdge{pkgToTypeEdge, typetoNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
+		Edges: []assembler.GuacEdge{pkgToTypeEdge, typeToNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
 	}
 	if len(qualifiers) > 0 {
 		collectedQualifier := &pkgQualifier{qualifier: map[string]string{}}
@@ -373,9 +373,9 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 			pair := strings.Split(kv, "=")
 			collectedQualifier.qualifier[pair[0]] = pair[1]
 		}
-		versionToQualiferEdge := &versionToQualifier{collectedVersion, collectedQualifier}
+		versionToQualifierEdge := &versionToQualifier{collectedVersion, collectedQualifier}
 		assemblerinput.Nodes = append(assemblerinput.Nodes, collectedQualifier)
-		assemblerinput.Edges = append(assemblerinput.Edges, versionToQualiferEdge)
+		assemblerinput.Edges = append(assemblerinput.Edges, versionToQualifierEdge)
 	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
 	if err != nil {
