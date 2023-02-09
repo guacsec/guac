@@ -101,6 +101,10 @@ func (c *demoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.
 	return cve, nil
 }
 
+func (c *demoClient) CveOnlyYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+	return c.Cve(ctx, cveSpec)
+}
+
 func (c *demoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
 	var ghsa []*model.Ghsa
 	for _, g := range c.ghsa {

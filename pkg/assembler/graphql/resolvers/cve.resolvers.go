@@ -7,10 +7,27 @@ package resolvers
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Cve is the resolver for the cve field.
 func (r *queryResolver) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+	// We have different implementations, based on whether versions are
+	// required or not (path match or just node match)
+	fields := graphql.CollectAllFields(ctx)
+	cveIDImplRequired := true
+	for _, f := range fields {
+		if f != "cveId" {
+			cveIDImplRequired = false
+			break
+		}
+	}
+
+	if cveIDImplRequired {
+		return r.Backend.Cve(ctx, cveSpec)
+	} else {
+		return r.Backend.CveOnlyYear(ctx, cveSpec)
+	}
 	return r.Backend.Cve(ctx, cveSpec)
 }

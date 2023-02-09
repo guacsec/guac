@@ -6,11 +6,31 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Packages is the resolver for the packages field.
 func (r *queryResolver) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	// We have different implementations, based on whether versions are
+	// required or not (path match or just node match)
+	fields := graphql.CollectAllFields(ctx)
+	fmt.Println(fields)
+
+	/*   	versionsImplRequired := false
+	for _, f := range fields {
+		if f == "versions" {
+			versionsImplRequired = true
+			break
+		}
+	}
+
+	if versionsImplRequired {
+		return PackagesWithVersion(ctx, r.DB)
+	} else {
+		return r.Backend.Packages(ctx, pkgSpec)
+	} */
 	return r.Backend.Packages(ctx, pkgSpec)
 }
