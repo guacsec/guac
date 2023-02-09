@@ -21,6 +21,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -33,8 +34,9 @@ import (
 type options struct {
 	// path to folder with documents to collect
 	path string
-	// map of image repo and tags
-	repoTags map[string][]string
+	// datasource for the collector
+	dataSource datasource.CollectSource
+	// address for NATS connection
 	natsAddr string
 }
 
