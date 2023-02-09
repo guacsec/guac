@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	PurlTypeGuac              = "guac"
+	PurlTypeGUAC              = "guac"
 	repositoryUrlQualifierKey = "repository_url"
 )
 
@@ -42,6 +42,12 @@ func PurlToPkg(purlUri string) (*model.Package, error) {
 
 // purlConvert converts a purl URI into a graphql package node.
 func purlConvert(p purl.PackageURL) (*model.Package, error) {
+	// Enumeration of https://github.com/package-url/purl-spec#known-purl-types
+	// TODO(lumjjb): each PURL definition usually comes with a default repository
+	// we should consider addition of default repository to the prefix of the namespace
+	// so that they can be referenced with higher specificity in GUAC
+	//
+	// PURL types not defined in purl library handled generically
 	purlTypeMap := map[string]func(purl.PackageURL) (*model.Package, error){
 		"alpm":             genericHandler,
 		"apk":              genericHandler,
@@ -50,7 +56,7 @@ func purlConvert(p purl.PackageURL) (*model.Package, error) {
 		"qpkg":             genericHandler,
 		"pub":              genericHandler,
 		"swid":             genericHandler,
-		PurlTypeGuac:       genericHandler,
+		PurlTypeGUAC:       genericHandler,
 		purl.TypeBitbucket: genericHandler,
 		purl.TypeCocoapods: genericHandler,
 		purl.TypeCargo:     genericHandler,
@@ -90,10 +96,10 @@ func genericHandler(p purl.PackageURL) (*model.Package, error) {
 
 // ociHandler is a handler for OCI purl types
 func ociHandler(p purl.PackageURL) (*model.Package, error) {
-	// For OCI, the namespace is not used and respository_url may contain a namespace
+	// For OCI, the namespace is not used and repository_url may contain a namespace
 	// as part of the physical location of the package. Therefore, in order to use it
 	// in the graphQL model consistently with other types, we special case OCI to take
-	// the respository_url and encode it as the Package namespace.
+	// the repository_url and encode it as the Package namespace.
 	//
 	// Ref: https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst#oci
 	qs := p.Qualifiers.Map()
@@ -120,7 +126,7 @@ func dockerHandler(p purl.PackageURL) (*model.Package, error) {
 	// - The namespace is the registry/user/organization if present.
 	// - The version should be the image id sha256 or a tag. Since tags can
 	// be moved, a sha256 image id is preferred.  as part of the physical
-	// location of the package.. However, this is not enforced, and examples use tags
+	// location of the package. However, this is not enforced, and examples use tags
 	//
 	// Ref: https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst#docker
 	qs := p.Qualifiers.Map()
