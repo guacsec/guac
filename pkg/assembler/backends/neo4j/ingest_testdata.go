@@ -305,7 +305,7 @@ func (c *neo4jClient) registerBuilder(uri string) error {
 func (c *neo4jClient) registerCVE(year, id string) error {
 	collectedCve := &cveNode{}
 	collectedYear := &cveYear{year: year}
-	collecteCveId := &cveID{id: id}
+	collecteCveId := &cveID{id: strings.ToLower(id)}
 
 	cveToYearEdge := &cveToYear{collectedCve, collectedYear}
 	cveYearToIDEdge := &cveYearToCveID{collectedYear, collecteCveId}
@@ -322,7 +322,7 @@ func (c *neo4jClient) registerCVE(year, id string) error {
 
 func (c *neo4jClient) registerGhsa(id string) error {
 	collectedGhsa := &ghsaNode{}
-	collecteGhsaId := &ghsaID{id: id}
+	collecteGhsaId := &ghsaID{id: strings.ToLower(id)}
 
 	ghsaToIDEdge := &ghsaToID{collectedGhsa, collecteGhsaId}
 	assemblerinput := assembler.AssemblerInput{
@@ -338,7 +338,7 @@ func (c *neo4jClient) registerGhsa(id string) error {
 
 func (c *neo4jClient) registerOSV(id string) error {
 	collectedOsv := &osvNode{}
-	collecteOsvId := &osvID{id: id}
+	collecteOsvId := &osvID{id: strings.ToLower(id)}
 
 	osvToIDEdge := &osvToID{collectedOsv, collecteOsvId}
 	assemblerinput := assembler.AssemblerInput{
@@ -357,18 +357,25 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 	collectedType := &pkgType{pkgType: packageType}
 	collectedNamespace := &pkgNamespace{namespace: namespace}
 	collectedName := &pkgName{name: name}
-	collectedVersion := &pkgVersion{version: version, subpath: subpath, qualifier: map[string]string{}}
-	for _, kv := range qualifiers {
-		pair := strings.Split(kv, "=")
-		collectedVersion.qualifier[pair[0]] = pair[1]
-	}
+	collectedVersion := &pkgVersion{version: version, subpath: subpath}
+
 	pkgToTypeEdge := &pkgToType{collectedPkg, collectedType}
-	typetoNamespaceEdge := &typeToNamespace{collectedType, collectedNamespace}
+	typeToNamespaceEdge := &typeToNamespace{collectedType, collectedNamespace}
 	namespaceToNameEdge := &namespaceToName{collectedNamespace, collectedName}
 	nameToVersionEdge := &nameToVersion{collectedName, collectedVersion}
 	assemblerinput := assembler.AssemblerInput{
 		Nodes: []assembler.GuacNode{collectedPkg, collectedType, collectedNamespace, collectedName, collectedVersion},
-		Edges: []assembler.GuacEdge{pkgToTypeEdge, typetoNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
+		Edges: []assembler.GuacEdge{pkgToTypeEdge, typeToNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
+	}
+	if len(qualifiers) > 0 {
+		collectedQualifier := &pkgQualifier{qualifier: map[string]string{}}
+		for _, kv := range qualifiers {
+			pair := strings.Split(kv, "=")
+			collectedQualifier.qualifier[pair[0]] = pair[1]
+		}
+		versionToQualifierEdge := &versionToQualifier{collectedVersion, collectedQualifier}
+		assemblerinput.Nodes = append(assemblerinput.Nodes, collectedQualifier)
+		assemblerinput.Edges = append(assemblerinput.Edges, versionToQualifierEdge)
 	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
 	if err != nil {

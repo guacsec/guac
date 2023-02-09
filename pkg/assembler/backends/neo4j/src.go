@@ -16,7 +16,13 @@
 package neo4jBackend
 
 import (
+	"context"
+	"strings"
+
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // scrNode represents the top level src->Type->Namespace->Name
@@ -188,4 +194,113 @@ func (e *srcNamespaceToName) PropertyNames() []string {
 
 func (e *srcNamespaceToName) IdentifiablePropertyNames() []string {
 	return []string{}
+}
+
+func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Commit != nil && sourceSpec.Qualifier.Tag != nil {
+		return nil, gqlerror.Errorf("can only pass in commit or tag")
+	}
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var result neo4j.Result
+			var err error
+
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+			sb.WriteString("MATCH (n:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
+
+			if sourceSpec.Type != nil {
+
+				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
+				firstMatch = false
+				queryValues["srcType"] = sourceSpec.Type
+			}
+			if sourceSpec.Namespace != nil {
+
+				matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
+				firstMatch = false
+				queryValues["srcNamespace"] = sourceSpec.Namespace
+			}
+			if sourceSpec.Name != nil {
+
+				matchProperties(&sb, firstMatch, "name", "name", "$srcName")
+				firstMatch = false
+				queryValues["srcName"] = sourceSpec.Name
+			}
+			if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Tag != nil {
+
+				matchProperties(&sb, firstMatch, "name", "tag", "$srcTag")
+				firstMatch = false
+				queryValues["srcTag"] = sourceSpec.Qualifier.Tag
+			}
+
+			if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Commit != nil {
+
+				matchProperties(&sb, firstMatch, "name", "commit", "$srcCommit")
+				queryValues["srcCommit"] = sourceSpec.Qualifier.Commit
+			}
+
+			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
+
+			result, err = tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			srcTypes := map[string]map[string][]*model.SourceName{}
+			for result.Next() {
+
+				commitString := result.Record().Values[4].(string)
+				tagString := result.Record().Values[3].(string)
+				nameString := result.Record().Values[2].(string)
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
+
+				srcName := &model.SourceName{
+					Name:   nameString,
+					Tag:    &tagString,
+					Commit: &commitString,
+				}
+				if srcNamespaces, ok := srcTypes[typeString]; ok {
+					srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
+				} else {
+					srcNamespaces := map[string][]*model.SourceName{}
+					srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
+					srcTypes[typeString] = srcNamespaces
+				}
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			sources := []*model.Source{}
+			for srcType, namespaces := range srcTypes {
+				sourceNamespaces := []*model.SourceNamespace{}
+				for namespace, sourceNames := range namespaces {
+					srcNamespace := &model.SourceNamespace{
+						Namespace: namespace,
+						Names:     sourceNames,
+					}
+					sourceNamespaces = append(sourceNamespaces, srcNamespace)
+				}
+
+				source := &model.Source{
+					Type:       srcType,
+					Namespaces: sourceNamespaces,
+				}
+				sources = append(sources, source)
+			}
+
+			return sources, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Source), nil
 }

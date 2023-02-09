@@ -259,11 +259,7 @@ type SourceQualifierInput struct {
 	Commit *string `json:"commit"`
 }
 
-// PkgSpec allows filtering the list of packages to return.
-//
-// Each field matches a qualifier from pURL. Use `null` to match on all values at
-// that level. For example, to get all packages in GUAC backend, use a PkgSpec
-// where every field is `null`.
+// SourceSpec allows filtering the list of sources to return.
 //
 // Empty string at a field means matching with the empty string.
 type SourceSpec struct {

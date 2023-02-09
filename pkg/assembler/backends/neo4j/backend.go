@@ -16,11 +16,9 @@
 package neo4jBackend
 
 import (
-	"context"
-	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -82,30 +80,31 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	return client, nil
 }
 
-func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	panic(fmt.Errorf("not implemented: Packages - packages in Neo4j backend"))
+func matchProperties(sb *strings.Builder, firstMatch bool, label, property string, resolver string) {
+	if firstMatch {
+		sb.WriteString(" WHERE ")
+	} else {
+		sb.WriteString(" AND ")
+	}
+	sb.WriteString(label)
+	sb.WriteString(".")
+	sb.WriteString(property)
+	sb.WriteString(" = ")
+	sb.WriteString(resolver)
 }
 
-func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	panic(fmt.Errorf("not implemented: Sources - sources in Neo4j backend"))
-}
-
-func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-	panic(fmt.Errorf("not implemented: Cve - cve in Neo4j backend"))
-}
-
-func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
-	panic(fmt.Errorf("not implemented: Ghsa - ghsa in Neo4j backend"))
-}
-
-func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
-	panic(fmt.Errorf("not implemented: Osv - osv in Neo4j backend"))
-}
-
-func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: Artifacts - artifacts in Neo4j backend"))
-}
-
-func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
-	panic(fmt.Errorf("not implemented: Builders - builders in Neo4j backend"))
+func matchNotEdge(sb *strings.Builder, firstMatch bool, firstNodeLabel string, edgeLabel string, secondNodeLabel string) {
+	// -[:PkgHasQualifier]->(qualifier:PkgQualifier)
+	if firstMatch {
+		sb.WriteString(" WHERE ")
+	} else {
+		sb.WriteString(" AND ")
+	}
+	sb.WriteString("NOT (")
+	sb.WriteString(firstNodeLabel)
+	sb.WriteString(")-[:")
+	sb.WriteString(edgeLabel)
+	sb.WriteString("]->(:")
+	sb.WriteString(secondNodeLabel)
+	sb.WriteString(")")
 }
