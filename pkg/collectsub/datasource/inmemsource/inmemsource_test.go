@@ -31,8 +31,8 @@ func Test_InmemSourceGetDataSources(t *testing.T) {
 
 	expected := &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},
@@ -59,8 +59,8 @@ func Test_InmemSourceDataSourcesUpdate(t *testing.T) {
 
 	expected := &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},
@@ -94,8 +94,8 @@ func Test_InmemSourceDataSourcesUpdate(t *testing.T) {
 
 	expectedNew := &datasource.DataSources{
 		OciDataSources: []datasource.Source{
-			{Value: "oci://abc"},
-			{Value: "oci://def"},
+			{Value: "abc"},
+			{Value: "def"},
 		},
 		GitDataSources: []datasource.Source{
 			{Value: "git+https://github.com/guacsec/guac"},

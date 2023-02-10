@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/pkg/errors"
@@ -34,35 +35,72 @@ const (
 )
 
 type ociCollector struct {
-	repoTags      map[string][]string
-	checkedDigest map[string][]string
-	poll          bool
-	interval      time.Duration
+	collectDataSource datasource.CollectSource
+	checkedDigest     map[string][]string
+	poll              bool
+	interval          time.Duration
 }
 
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
 // Note: OCI collector can be called upon by a upstream registry collector in the future to collect from all
 // repos in a given registry. For further details see issue #298
-func NewOCICollector(ctx context.Context, repoTags map[string][]string, poll bool, interval time.Duration) *ociCollector {
+func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
-		repoTags:      repoTags,
-		checkedDigest: map[string][]string{},
-		poll:          poll,
-		interval:      interval,
+		collectDataSource: collectDataSource,
+		checkedDigest:     map[string][]string{},
+		poll:              poll,
+		interval:          interval,
 	}
 }
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
+	repoTags := map[string][]string{}
+	logger := logging.FromContext(ctx)
+
+	populateRepoTags := func() error {
+		ds, err := o.collectDataSource.GetDataSources(ctx)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve datasource: %w", err)
+		}
+
+		for _, d := range ds.OciDataSources {
+			imageRef, err := ref.New(d.Value)
+			if err != nil {
+				logger.Errorf("unable to parse OCI path: %v", d.Value)
+				continue
+			}
+			imagePath := fmt.Sprintf("%s/%s", imageRef.Registry, imageRef.Repository)
+
+			// If a image reference has no tag, then it is considered as getting all tags
+			if hasNoTag(imageRef) {
+				repoTags[imagePath] = []string{}
+			} else {
+				// if the list is equal to the empty list, it is already looking for
+				// all tags
+				if repoTags[imagePath] == nil || len(repoTags[imagePath]) > 0 {
+					repoTags[imagePath] = append(repoTags[imagePath], imageRef.Tag)
+				}
+
+			}
+		}
+		return nil
+	}
+
 	if o.poll {
 		for {
-			for repo, tags := range o.repoTags {
+			err := populateRepoTags()
+			if err != nil {
+				return fmt.Errorf("unable to populate repotags: %w", err)
+			}
+
+			for repo, tags := range repoTags {
 				// when polling if tags are specified, it will never get any new tags
 				// that might be added after the fact. Defeating the point of the polling
 				if len(tags) > 0 {
 					return errors.New("image tag should not specified when using polling")
 				}
-				err := o.getTagsAndFetch(ctx, repo, tags, docChannel)
+				err = o.getTagsAndFetch(ctx, repo, tags, docChannel)
 				if err != nil {
 					return err
 				}
@@ -71,7 +109,12 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 			}
 		}
 	} else {
-		for repo, tags := range o.repoTags {
+		err := populateRepoTags()
+		if err != nil {
+			return fmt.Errorf("unable to populate repotags: %w", err)
+		}
+
+		for repo, tags := range repoTags {
 			err := o.getTagsAndFetch(ctx, repo, tags, docChannel)
 			if err != nil {
 				return err
@@ -237,4 +280,12 @@ func contains(elems []string, v string) bool {
 // Type is the collector type of the collector
 func (o *ociCollector) Type() string {
 	return OCICollector
+}
+
+// hasNoTag determines if an OCI string passed in had no tag
+func hasNoTag(r ref.Ref) bool {
+	// the reference parsing automatically sets the tag to latest if there is no tag
+	// specified, thus we need to check the reference to see if the latest tag was actually
+	// included.
+	return r.Tag == "latest" && r.Digest == "" && !strings.HasSuffix(r.Reference, "latest")
 }

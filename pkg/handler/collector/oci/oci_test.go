@@ -23,6 +23,8 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/pkg/errors"
 )
@@ -30,9 +32,9 @@ import (
 func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	ctx := context.Background()
 	type fields struct {
-		repoTags map[string][]string
-		poll     bool
-		interval time.Duration
+		ociValues []string
+		poll      bool
+		interval  time.Duration
 	}
 
 	tests := []struct {
@@ -44,8 +46,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}{{
 		name: "multi-platform sbom",
 		fields: fields{
-			repoTags: map[string][]string{
-				"ghcr.io/guacsec/go-multi-test": {"7ddfb3e035b42cd70649cc33393fe32c"},
+			ociValues: []string{
+				"ghcr.io/guacsec/go-multi-test:7ddfb3e035b42cd70649cc33393fe32c",
 			},
 			poll:     false,
 			interval: 0,
@@ -83,8 +85,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "get attestation and sbom",
 		fields: fields{
-			repoTags: map[string][]string{
-				"ghcr.io/guacsec/guac-test-image": {"e26f2e514682726fa808a849c863e5feca71e0c3"},
+			ociValues: []string{
+				"ghcr.io/guacsec/guac-test-image:e26f2e514682726fa808a849c863e5feca71e0c3",
 			},
 			poll:     false,
 			interval: 0,
@@ -113,8 +115,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "tag not specified not polling",
 		fields: fields{
-			repoTags: map[string][]string{
-				"ghcr.io/guacsec/guac-test-image": {},
+			ociValues: []string{
+				"ghcr.io/guacsec/guac-test-image",
 			},
 			poll:     false,
 			interval: 0,
@@ -143,8 +145,8 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}, {
 		name: "tag empty string",
 		fields: fields{
-			repoTags: map[string][]string{
-				"ghcr.io/guacsec/guac-test-image": {""},
+			ociValues: []string{
+				"ghcr.io/guacsec/guac-test-image:",
 			},
 			poll:     false,
 			interval: 0,
@@ -154,7 +156,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewOCICollector(ctx, tt.fields.repoTags, tt.fields.poll, tt.fields.interval)
+			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.interval)
 
 			var cancel context.CancelFunc
 			if tt.fields.poll {
@@ -213,4 +215,19 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 
 		})
 	}
+}
+
+func toDataSource(ociValues []string) datasource.CollectSource {
+	values := []datasource.Source{}
+	for _, v := range ociValues {
+		values = append(values, datasource.Source{Value: v})
+	}
+
+	ds, err := inmemsource.NewInmemDataSources(&datasource.DataSources{
+		OciDataSources: values,
+	})
+	if err != nil {
+		panic(err)
+	}
+	return ds
 }

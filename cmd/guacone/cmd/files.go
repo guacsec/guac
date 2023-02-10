@@ -25,6 +25,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -50,8 +51,8 @@ type options struct {
 	keyID string
 	// path to folder with documents to collect
 	path string
-	// map of image repo and tags
-	repoTags map[string][]string
+	// datasource for collectors
+	dataSource datasource.CollectSource
 }
 
 var exampleCmd = &cobra.Command{
