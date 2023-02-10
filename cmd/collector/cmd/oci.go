@@ -21,7 +21,9 @@ import (
 	"os"
 	"time"
 
+	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/oci"
@@ -31,16 +33,27 @@ import (
 	"github.com/spf13/viper"
 )
 
+type ociOptions struct {
+	// datasource for the collector
+	dataSource datasource.CollectSource
+	// address for NATS connection
+	natsAddr string
+	// run as poll collector
+	poll bool
+}
+
 var ociCmd = &cobra.Command{
 	Use:   "image [flags] image_path1 image_path2...",
 	Short: "takes images to download sbom and attestation stored in OCI to add to GUAC graph",
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateOCIFlags(
 			viper.GetString("natsaddr"),
+			viper.GetString("csub-addr"),
+			viper.GetBool("use-csub"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -49,7 +62,7 @@ var ociCmd = &cobra.Command{
 		}
 
 		// Register collector
-		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute)
+		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 10*time.Minute)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -59,10 +72,22 @@ var ociCmd = &cobra.Command{
 	},
 }
 
-func validateOCIFlags(natsAddr string, args []string) (options, error) {
-	var opts options
+func validateOCIFlags(natsAddr string, csubAddr string, useCsub bool, args []string) (ociOptions, error) {
+	var opts ociOptions
 	opts.natsAddr = natsAddr
 
+	if useCsub {
+		opts.poll = true
+		c, err := csubclient.NewClient(csubAddr)
+		if err != nil {
+			return opts, err
+		}
+		opts.dataSource, err = csubsource.NewCsubDatasource(c, 10*time.Second)
+		return opts, err
+	}
+
+	// else direct CLI call, no polling
+	opts.poll = false
 	if len(args) < 1 {
 		return opts, fmt.Errorf("expected positional argument for image_path")
 	}

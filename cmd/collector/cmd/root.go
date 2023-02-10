@@ -21,6 +21,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/logging"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -28,10 +29,21 @@ import (
 	"github.com/spf13/viper"
 )
 
+type options struct {
+	// path to folder with documents to collect
+	path string
+	// datasource for the collector
+	dataSource datasource.CollectSource
+	// address for NATS connection
+	natsAddr string
+}
+
 var flags = struct {
 	// collect-sub flags
-	collectSubAddr       string
-	collectSubListenPort int
+	// collectsub address if used
+	collectSubAddr string
+	// flag to use collectsub service for datasources
+	useCollectSub bool
 
 	// nats
 	natsAddr string
@@ -44,9 +56,9 @@ func init() {
 	persistentFlags := rootCmd.PersistentFlags()
 	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
+	persistentFlags.BoolVar(&flags.useCollectSub, "use-csub", false, "use collectsub server for datasource (no positional arguments required)")
 
-	flagNames := []string{"natsaddr", "csub-addr", "csub-listen-port"}
+	flagNames := []string{"natsaddr", "csub-addr", "use-csub"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {

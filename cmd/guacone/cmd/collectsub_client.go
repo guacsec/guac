@@ -70,7 +70,7 @@ func validateCsubClientFlags(addr string) (csubClientOptions, error) {
 Examples:
 
 # add two entries
-echo '[{"type":"DATATYPE_GIT", "value":"git+somerepo"},{"type":"DATATYPE_OCI", "value":"oci://abc"}]' | bin/guacone csub-client  add-collect-entries
+echo '[{"type":"DATATYPE_GIT", "value":"git+https://github.com/guacsec/guac"},{"type":"DATATYPE_OCI", "value":"ghcr.io/guacsec/go-multi-test"}]' | bin/guacone csub-client  add-collect-entries
 */
 var csubAddCollectEntriesCmd = &cobra.Command{
 	Use:   "add-collect-entries",
