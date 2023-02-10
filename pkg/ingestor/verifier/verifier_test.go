@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -103,7 +104,7 @@ func newMockSigstoreVerifier() *mockSigstoreVerifier {
 func (m *mockSigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]Identity, error) {
 	keyHash, err := dsse.SHA256KeyID(ecdsaPubKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get key hash: %w", err)
 	}
 	return []Identity{
 		{

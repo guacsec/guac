@@ -48,7 +48,7 @@ func (e *ITE6Processor) Unpack(i *processor.Document) ([]*processor.Document, er
 func parseStatement(p []byte) (*in_toto.Statement, error) {
 	ps := in_toto.Statement{}
 	if err := json.Unmarshal(p, &ps); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal statement: %w", err)
 	}
 	return &ps, nil
 }

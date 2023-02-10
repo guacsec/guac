@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -214,7 +215,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 			return cves, nil
 		})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get transaction: %w", err)
 	}
 
 	return result.([]*model.Cve), nil
@@ -259,7 +260,7 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 			return cves, nil
 		})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading transaction: %w", err)
 	}
 
 	return result.([]*model.Cve), nil

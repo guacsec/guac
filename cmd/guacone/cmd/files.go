@@ -207,14 +207,14 @@ func validateFlags(user string, pass string, dbAddr string, realm string, keyPat
 
 func getProcessor(ctx context.Context) (func(*processor.Document) (processor.DocumentTree, error), error) {
 	return func(d *processor.Document) (processor.DocumentTree, error) {
-		return process.Process(ctx, d)
+		return process.Process(ctx, d) // nolint:wrapcheck
 	}, nil
 }
 func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
 	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
 		inputs, err := parser.ParseDocumentTree(ctx, doc)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("unable to parse document tree: %v", err)
 		}
 		return inputs, nil
 	}, nil
@@ -229,7 +229,7 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 
 	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to create graph client: %v", err)
 	}
 
 	err = createIndices(client)
@@ -246,7 +246,7 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 			combined.AppendGraph(g)
 		}
 		if err := assembler.StoreGraph(combined, client); err != nil {
-			return err
+			return fmt.Errorf("unable to store graph: %v", err)
 		}
 
 		return nil
@@ -266,7 +266,7 @@ func createIndices(client graphdb.Client) error {
 		for _, attribute := range attributes {
 			err := assembler.CreateIndexOn(client, label, attribute)
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to create index on %v: %v", attribute, err)
 			}
 		}
 	}

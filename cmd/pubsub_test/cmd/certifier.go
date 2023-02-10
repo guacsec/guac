@@ -103,7 +103,7 @@ var certifierCmd = &cobra.Command{
 			}
 			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to publish document: %w", err)
 			}
 			return nil
 		}
@@ -194,7 +194,7 @@ func validateCertifierFlags(user string, pass string, dbAddr string, realm strin
 
 func getCertifierPublish(ctx context.Context) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return certify.Publish(ctx, d)
+		return certify.Publish(ctx, d) // nolint:wrapcheck
 	}, nil
 }
 

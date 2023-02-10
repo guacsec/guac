@@ -131,7 +131,7 @@ func DocEqualWithTimestamp(gotDoc, wantDoc *processor.Document) (bool, error) {
 func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStatement, error) {
 	predicate := attestation_vuln.VulnerabilityStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal json: %s", err)
 	}
 	return &predicate, nil
 }

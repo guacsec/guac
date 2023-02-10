@@ -83,7 +83,7 @@ func validateFlags(natsAddr string, args []string) (options, error) {
 
 func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d)
+		return collector.Publish(ctx, d) // nolint:wrapcheck
 	}, nil
 }
 

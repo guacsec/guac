@@ -49,7 +49,7 @@ type FileFormat struct {
 // - git+https://github.com/...
 func NewFileDataSources(path string) (datasource.CollectSource, error) {
 	if _, err := os.Stat(path); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to stat file: %w", err)
 	}
 
 	return &fileDataSources{
@@ -62,17 +62,17 @@ func NewFileDataSources(path string) (datasource.CollectSource, error) {
 func (d *fileDataSources) GetDataSources(_ context.Context) (*datasource.DataSources, error) {
 	f, err := os.Open(d.filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to open file: %w", err)
 	}
 
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to read file: %w", err)
 	}
 
 	var df FileFormat
 	if err := yaml.Unmarshal(b, &df); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to unmarshal file: %w", err)
 	}
 	return toDataSources(&df), nil
 }
@@ -85,12 +85,12 @@ func (d *fileDataSources) DataSourcesUpdate(ctx context.Context) (<-chan error, 
 	updateChan := make(chan error)
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to create watcher: %w", err)
 	}
 	err = watcher.Add(d.filePath)
 	if err != nil {
 		watcher.Close()
-		return nil, err
+		return nil, fmt.Errorf("unable to watch file: %w", err)
 	}
 
 	go func() {

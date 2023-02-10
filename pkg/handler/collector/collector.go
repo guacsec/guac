@@ -112,7 +112,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 	}
 	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to publish document: %w", err)
 	}
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil

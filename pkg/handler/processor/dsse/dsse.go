@@ -62,7 +62,7 @@ func (d *DSSEProcessor) Unpack(i *processor.Document) ([]*processor.Document, er
 	var doc *processor.Document
 	decodedPayload, err := base64.StdEncoding.DecodeString(envelope.Payload)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode payload: %w", err)
 	}
 	switch pt := envelope.PayloadType; pt {
 	case string(dsseITE6):
@@ -87,7 +87,7 @@ func (d *DSSEProcessor) Unpack(i *processor.Document) ([]*processor.Document, er
 func parseDSSE(b []byte) (*dsse.Envelope, error) {
 	envelope := dsse.Envelope{}
 	if err := json.Unmarshal(b, &envelope); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal envelope: %w", err)
 	}
 
 	return &envelope, nil

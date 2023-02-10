@@ -38,7 +38,7 @@ type server struct {
 func NewServer(port int) (*server, error) {
 	db, err := simpledb.NewSimpleDb()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create new simple db: %w", err)
 	}
 
 	return &server{
@@ -72,13 +72,13 @@ func (s *server) Serve(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to listen: %w", err)
 	}
 	gs := grpc.NewServer()
 	pb.RegisterColectSubscriberServiceServer(gs, s)
 	logger.Infof("server listening at %v", lis.Addr())
 	if err := gs.Serve(lis); err != nil {
-		return err
+		return fmt.Errorf("failed to serve: %w", err)
 	}
 
 	return nil

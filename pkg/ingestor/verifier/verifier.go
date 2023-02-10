@@ -72,7 +72,7 @@ func VerifyIdentity(ctx context.Context, doc *processor.Document) ([]Identity, e
 	switch doc.Type {
 	case processor.DocumentDSSE:
 		if verifier, ok := verifierProviders["sigstore"]; ok {
-			return verifier.Verify(ctx, doc.Blob)
+			return verifier.Verify(ctx, doc.Blob) // nolint:wrapcheck
 		}
 	}
 	return nil, fmt.Errorf("failed verification for document type: %s", doc.Type)

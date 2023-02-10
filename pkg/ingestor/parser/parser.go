@@ -76,7 +76,7 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error)
 	id := uuid.NewV4().String()
 	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
 	if err != nil {
-		return err
+		return fmt.Errorf("[ingestor: %s] failed to create new pubsub: %w", id, err)
 	}
 
 	parserFunc := func(d []byte) error {
@@ -107,7 +107,7 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error)
 
 	err = psub.GetDataFromNats(ctx, parserFunc)
 	if err != nil {
-		return err
+		return fmt.Errorf("[ingestor: %s] failed to get data from nats: %w", id, err)
 	}
 	return nil
 }
@@ -158,7 +158,7 @@ func parseHelper(ctx context.Context, doc *processor.Document) (*common.GraphBui
 	p := pFunc()
 	err := p.Parse(ctx, doc)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse document: %w", err)
 	}
 
 	graphBuilder := common.NewGenericGraphBuilder(p, p.GetIdentities(ctx))

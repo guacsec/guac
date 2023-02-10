@@ -79,5 +79,5 @@ func getFreePort() (int, error) {
 			return l.Addr().(*net.TCPAddr).Port, nil
 		}
 	}
-	return 0, err
+	return 0, fmt.Errorf("unable to get free port: %w", err)
 }

@@ -17,6 +17,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/server/db/simpledb"
@@ -31,7 +32,7 @@ type MockClient struct {
 func NewMockClient() (Client, error) {
 	sdb, err := simpledb.NewSimpleDb()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to create simple db: %v", err)
 	}
 	return &MockClient{
 		db: sdb,
@@ -41,9 +42,9 @@ func NewMockClient() (Client, error) {
 func (c *MockClient) Close() {}
 
 func (c *MockClient) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
-	return c.db.AddCollectEntries(ctx, entries)
+	return c.db.AddCollectEntries(ctx, entries) // nolint:wrapcheck
 }
 
 func (c *MockClient) GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error) {
-	return c.db.GetCollectEntries(ctx, filters)
+	return c.db.GetCollectEntries(ctx, filters) // nolint:wrapcheck
 }

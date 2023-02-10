@@ -59,7 +59,7 @@ func (c *client) AddCollectEntries(ctx context.Context, entries []*pb.CollectEnt
 		Entries: entries,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to add collect entries: %v", err)
 	}
 	if !res.Success {
 		return fmt.Errorf("add collect entry unsuccessful")
@@ -72,7 +72,7 @@ func (c *client) GetCollectEntries(ctx context.Context, filters []*pb.CollectEnt
 		Filters: filters,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to get collect entries: %v", err)
 	}
 
 	return res.Entries, nil

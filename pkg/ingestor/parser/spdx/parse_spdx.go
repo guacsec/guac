@@ -128,7 +128,7 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	reader := bytes.NewReader(p)
 	spdx, err := spdx_json.Load2_2(reader)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse SPDX document: %w", err)
 	}
 	return spdx, nil
 }

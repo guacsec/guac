@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -208,11 +209,11 @@ func Test_ParserSubscribe(t *testing.T) {
 func testPublish(ctx context.Context, documentTree processor.DocumentTree) error {
 	docTreeJSON, err := json.Marshal(documentTree)
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshaling document tree: %w", err)
 	}
 	err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeJSON)
 	if err != nil {
-		return err
+		return fmt.Errorf("error publishing: %w", err)
 	}
 	return nil
 }

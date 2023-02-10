@@ -141,7 +141,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 
 	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
-		return err
+		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", id, err)
 	}
 
 	processFunc := func(d []byte) error {
@@ -171,7 +171,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 
 	err = psub.GetDataFromNats(ctx, processFunc)
 	if err != nil {
-		return err
+		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", id, err)
 	}
 	return nil
 }

@@ -124,11 +124,11 @@ func Retrieve(ctx context.Context, id string, providerType KeyProviderType) (*Ke
 func Store(ctx context.Context, id string, pemBytes []byte, providerType KeyProviderType) error {
 	key, err := cryptoutils.UnmarshalPEMToPublicKey(pemBytes)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal PEM to public key: %w", err)
 	}
 	keyHash, err := dsse.SHA256KeyID(key)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get key hash: %w", err)
 	}
 	keyType, KeyScheme, err := getKeyInfo(key)
 	if err != nil {

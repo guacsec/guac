@@ -16,6 +16,7 @@
 package neo4jBackend
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -283,7 +284,7 @@ func (c *neo4jClient) registerArtifact(algorithm, digest string) error {
 	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
 	if err != nil {
-		return err
+		return fmt.Errorf("error storing graph: %w", err)
 	}
 	return nil
 }
@@ -297,7 +298,7 @@ func (c *neo4jClient) registerBuilder(uri string) error {
 	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
 	if err != nil {
-		return err
+		return fmt.Errorf("error storing graph: %w", err)
 	}
 	return nil
 }
@@ -315,7 +316,7 @@ func (c *neo4jClient) registerCVE(year, id string) error {
 	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
 	if err != nil {
-		return err
+		return fmt.Errorf("error storing graph: %w", err)
 	}
 	return nil
 }

@@ -19,6 +19,8 @@
 package graphdb
 
 import (
+	"fmt"
+
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -37,12 +39,12 @@ func WriteQueryForTesting(client Client, query string, args map[string]interface
 		func(tx Transaction) (interface{}, error) {
 			result, err := tx.Run(query, args)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error running query: %v", err)
 			}
 			_, err = result.Consume()
-			return nil, err
+			return nil, fmt.Errorf("error consuming result: %v", err)
 		})
-	return err
+	return fmt.Errorf("error writing transactions: %v", err)
 }
 
 // ReadQueryForTesting runs a simple read query against the graph database.
@@ -58,7 +60,7 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 		func(tx Transaction) (interface{}, error) {
 			records, err := tx.Run(query, args)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error running query: %v", err)
 			}
 			values := make([][]interface{}, 0)
 			// Since `records` is valid only while `tx` is in
@@ -68,13 +70,13 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 				values = append(values, record.Values)
 			}
 			if err = records.Err(); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error reading records: %v", err)
 			}
-			return values, err
+			return values, fmt.Errorf("error reading records: %v", err)
 		})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading transactions: %v", err)
 	}
 	return result.([][]interface{}), nil
 }
@@ -88,7 +90,7 @@ func ReadQuery(client Client, query string, args map[string]interface{}) ([]inte
 		func(tx Transaction) (interface{}, error) {
 			records, err := tx.Run(query, args)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error running query: %v", err)
 			}
 			values := make([]interface{}, 0)
 			// Since `records` is valid only while `tx` is in
@@ -98,13 +100,13 @@ func ReadQuery(client Client, query string, args map[string]interface{}) ([]inte
 				values = append(values, record)
 			}
 			if err = records.Err(); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error reading records: %v", err)
 			}
 			return values, err
 		})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading transactions: %v", err)
 	}
 	return result.([]interface{}), nil
 }
@@ -123,9 +125,9 @@ func ClearDBForTesting(client Client) error {
 				return nil, err
 			}
 			_, err = results.Consume()
-			return nil, err
+			return nil, fmt.Errorf("error consuming results: %v", err)
 		})
-	return err
+	return fmt.Errorf("error writing transactions: %v", err)
 }
 
 // EmptyClientForTesting returns a client to an empty database.

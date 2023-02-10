@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -53,7 +54,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 
 	if err = driver.VerifyConnectivity(); err != nil {
 		driver.Close()
-		return nil, err
+		return nil, fmt.Errorf("unable verify connectivity: %w", err)
 	}
 	client := &neo4jClient{driver}
 	if config.TestData {

@@ -138,7 +138,7 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 			imageTag := fmt.Sprintf("%v:%v", repo, tag)
 			r, err := ref.New(imageTag)
 			if err != nil {
-				return err
+				return fmt.Errorf("reading tags for %s: %w", repo, err)
 			}
 
 			rc := regclient.New(rcOpts...)
@@ -152,7 +152,7 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 	} else {
 		r, err := ref.New(repo)
 		if err != nil {
-			return err
+			return fmt.Errorf("reading tags for %s: %w", repo, err)
 		}
 
 		rc := regclient.New(rcOpts...)
@@ -168,7 +168,7 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 				imageTag := fmt.Sprintf("%v:%v", repo, tag)
 				r, err := ref.New(imageTag)
 				if err != nil {
-					return err
+					return fmt.Errorf("reading tags for %s: %w", repo, err)
 				}
 				err = o.fetchOCIArtifacts(ctx, repo, rc, r, docChannel)
 				if err != nil {
@@ -188,13 +188,13 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	// attempt to request only the headers, avoids Docker Hub rate limits
 	m, err := rc.ManifestHead(ctx, image)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get manifest head: %w", err)
 	}
 
 	if m.IsList() {
 		m, err := rc.ManifestGet(ctx, image)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get manifest: %w", err)
 		}
 		pl, _ := manifest.GetPlatformList(m)
 		for _, p := range pl {
@@ -220,7 +220,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
 			r, err := ref.New(imageTag)
 			if err != nil {
-				return err
+				return fmt.Errorf("reading tags for %s: %w", repo, err)
 			}
 
 			// if `.att` or `.sbom`` do not exist for specified digest
@@ -238,7 +238,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 			}
 			layers, err := mi.GetLayers()
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to get layers: %w", err)
 			}
 			for i := len(layers) - 1; i >= 0; i-- {
 				blob, err := rc.BlobGet(ctx, r, layers[i])
@@ -247,7 +247,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 				}
 				btr1, err := blob.RawBody()
 				if err != nil {
-					return err
+					return fmt.Errorf("failed reading layer %d: %w", i, err)
 				}
 
 				doc := &processor.Document{

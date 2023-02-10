@@ -78,7 +78,7 @@ func (dp *SimpleDocProc) ValidateSchema(d *processor.Document) error {
 
 	var p SimpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal simple doc: %w", err)
 	}
 
 	return validateSimpleDoc(p)
@@ -99,14 +99,14 @@ func validateSimpleDoc(pd SimpleDoc) error {
 func (dp *SimpleDocProc) Unpack(d *processor.Document) ([]*processor.Document, error) {
 	var p SimpleDoc
 	if err := json.Unmarshal(d.Blob, &p); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal simple doc: %w", err)
 	}
 
 	retDocs := make([]*processor.Document, len(p.Nested))
 	for i, nd := range p.Nested {
 		b, err := json.Marshal(nd)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to marshal nested doc: %w", err)
 		}
 		retDocs[i] = &processor.Document{
 			Blob:   b,

@@ -111,7 +111,7 @@ var filesCmd = &cobra.Command{
 			}
 			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to publish document: %w", err)
 			}
 			return nil
 		}
@@ -202,7 +202,7 @@ func validateFlags(user string, pass string, dbAddr string, realm string, natsAd
 
 func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d)
+		return collector.Publish(ctx, d) // nolint:wrapcheck
 	}, nil
 }
 
@@ -216,7 +216,7 @@ func getIngestor(ctx context.Context, transportFunc func([]assembler.Graph) erro
 	return func() error {
 		err := parser.Subscribe(ctx, transportFunc)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to subscribe to parser: %w", err)
 		}
 		return nil
 	}, nil
@@ -231,7 +231,7 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 
 	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create graph client: %w", err)
 	}
 
 	err = createIndices(client)
@@ -248,7 +248,7 @@ func getAssembler(opts options) (func([]assembler.Graph) error, error) {
 			combined.AppendGraph(g)
 		}
 		if err := assembler.StoreGraph(combined, client); err != nil {
-			return err
+			return fmt.Errorf("failed to store graph: %w", err)
 		}
 
 		return nil
@@ -268,7 +268,7 @@ func createIndices(client graphdb.Client) error {
 		for _, attribute := range attributes {
 			err := assembler.CreateIndexOn(client, label, attribute)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create index on %s.%s: %w", label, attribute, err)
 			}
 		}
 	}

@@ -69,7 +69,7 @@ func NewGCSClient(ctx context.Context, poll bool, interval time.Duration) (*gcs,
 	}
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv(gcsCredsEnv)))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create client: %w", err)
 	}
 	if getBucketPath() == "" {
 		return nil, errors.New("gcs bucket not specified")
@@ -106,13 +106,13 @@ func (r *reader) getIterator(ctx context.Context) (*storage.ObjectIterator, erro
 	// set query to return only the Name and Updated attributes
 	err := q.SetAttrSelection([]string{"Name", "Updated"})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to set attribute selection for bucket: %s, error: %w", r.bucket, err)
 	}
 	return r.client.Bucket(r.bucket).Objects(ctx, q), nil
 }
 
 func (r *reader) getReader(ctx context.Context, object string) (io.ReadCloser, error) {
-	return r.client.Bucket(r.bucket).Object(object).NewReader(ctx)
+	return r.client.Bucket(r.bucket).Object(object).NewReader(ctx) // nolint:wrapcheck
 }
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
@@ -187,7 +187,7 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 func (g *gcs) getObject(ctx context.Context, object string) ([]byte, error) {
 	reader, err := g.reader.getReader(ctx, object)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get reader for object: %s from bucket: %s, error: %w", object, g.bucket, err)
 	}
 	defer reader.Close()
 
@@ -197,7 +197,7 @@ func (g *gcs) getObject(ctx context.Context, object string) ([]byte, error) {
 	for {
 		n, err := reader.Read(buffer)
 		if err != nil && err != io.EOF {
-			return nil, err
+			return nil, fmt.Errorf("failed to read object: %s from bucket: %s, error: %w", object, g.bucket, err)
 		}
 		if n == 0 {
 			break

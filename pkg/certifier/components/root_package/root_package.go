@@ -18,6 +18,7 @@ package root_package
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
@@ -51,7 +52,7 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 
 	roots, err := graphdb.ReadQuery(q.client, "MATCH (p:Package) WHERE NOT (p)<-[:DependsOn]-() return p", nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to query for root packages: %w", err)
 	}
 	for _, result := range roots {
 		foundNode, ok := result.(dbtype.Node)
@@ -80,7 +81,7 @@ func getCompHelper(ctx context.Context, client graphdb.Client, parentPurl string
 	dependencies, err := graphdb.ReadQuery(client, "MATCH (p:Package) WHERE p.purl = $rootPurl WITH p MATCH (p)-[:DependsOn]->(p2:Package) return p2",
 		map[string]any{"rootPurl": parentPurl})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read the query for dependencies of %s: %w", parentPurl, err)
 	}
 	depPackages := []*PackageComponent{}
 	for _, dep := range dependencies {

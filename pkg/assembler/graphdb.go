@@ -78,17 +78,17 @@ func StoreGraph(g Graph, client graphdb.Client) error {
 			for i, query := range queries {
 				result, err := tx.Run(query, params[i])
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("failed to run query: %w", err)
 				}
 				_, err = result.Consume()
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("failed to consume result: %w", err)
 				}
 			}
 			return nil, nil
 		})
 
-	return err
+	return fmt.Errorf("failed to write transaction: %w", err)
 }
 
 // CreateIndexOn creates database indixes in the graph database given by Client
@@ -105,10 +105,10 @@ func CreateIndexOn(client graphdb.Client, nodeLabel string, nodeAttribute string
 
 	_, err := session.WriteTransaction(
 		func(tx graphdb.Transaction) (interface{}, error) {
-			return tx.Run(sb.String(), nil)
+			return tx.Run(sb.String(), nil) // nolint:wrapcheck
 		})
 
-	return err
+	return fmt.Errorf("failed to write transaction: %w", err)
 }
 
 // Creates the "MERGE (n:${NODE_TYPE} {${ATTR}:${VALUE}, ...})" part of the query

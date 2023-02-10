@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -67,7 +68,7 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 			sb.WriteString(" RETURN n.uri")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to read transactions: %w", err)
 			}
 
 			builders := []*model.Builder{}
@@ -78,13 +79,13 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 				builders = append(builders, builder)
 			}
 			if err = result.Err(); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to read transactions: %w", err)
 			}
 
 			return builders, nil
 		})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read transactions: %w", err)
 	}
 
 	return result.([]*model.Builder), nil

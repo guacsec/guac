@@ -52,7 +52,7 @@ func (d *csubDataSources) GetDataSources(ctx context.Context) (*datasource.DataS
 		{Type: pb.CollectDataType_DATATYPE_GIT, Glob: "*"},
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get collect entries: %w", err)
 	}
 	ds := entriesToSources(ctx, entries)
 	d.lastEntries = ds

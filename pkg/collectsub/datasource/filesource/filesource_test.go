@@ -169,5 +169,5 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 
 func createTestFile(dir string, name string, content []byte) (string, error) {
 	path := filepath.Join(dir, name)
-	return path, os.WriteFile(path, content, 0644)
+	return path, os.WriteFile(path, content, 0644) // nolint:wrapcheck
 }

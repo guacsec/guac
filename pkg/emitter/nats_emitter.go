@@ -114,7 +114,7 @@ func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 	_, err := js.StreamInfo(StreamName)
 
 	if err != nil && !errors.Is(err, nats.ErrStreamNotFound) {
-		return err
+		return fmt.Errorf("failed to get stream info: %w", err)
 	}
 	// stream not found, create it
 	if errors.Is(err, nats.ErrStreamNotFound) {
@@ -128,7 +128,7 @@ func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 			Duplicates: 5 * time.Minute,
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create stream: %w", err)
 		}
 	}
 	return nil
@@ -179,7 +179,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 	sub, err := js.PullSubscribe(subj, durable)
 	if err != nil {
 		logger.Errorf("%s subscribe failed: %w", durable, err)
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to subscribe to %s: %w", subj, err)
 	}
 	go func() {
 		for {

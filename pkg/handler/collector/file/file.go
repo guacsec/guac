@@ -61,7 +61,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		// When it gets thrown a second time will cancel the walk.
 		// See filepath.WalkDir for more info.
 		if ctx.Err() != nil {
-			return ctx.Err()
+			return ctx.Err() // nolint:wrapcheck
 		}
 		// NOTE: Explicitly rethrowing new errors if a particular directory has an error.
 		// If we rethrow the error it kills the whole walk. Still useful to make it explicit that we ran into an error.
@@ -72,12 +72,12 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			return nil
 		}
 		if info, err := dirEntry.Info(); !info.ModTime().After(f.lastChecked) || err != nil {
-			return err
+			return fmt.Errorf("path: %s has not been modified since last checked", path)
 		}
 
 		blob, err := os.ReadFile(path)
 		if err != nil {
-			return err
+			return fmt.Errorf("error reading file: %s, err: %w", path, err)
 		}
 
 		doc := &processor.Document{
@@ -100,11 +100,11 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			select {
 			// If the context has been canceled it contains an err which we can throw.
 			case <-ctx.Done():
-				return ctx.Err()
+				return ctx.Err() // nolint:wrapcheck
 			default:
 				err := filepath.WalkDir(f.path, readFunc)
 				if err != nil {
-					return err
+					return fmt.Errorf("error walking path: %s, err: %w", f.path, err)
 				}
 				f.lastChecked = time.Now()
 				time.Sleep(f.interval)
@@ -113,7 +113,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 	} else {
 		err := filepath.WalkDir(f.path, readFunc)
 		if err != nil {
-			return err
+			return fmt.Errorf("error walking path: %s, err: %w", f.path, err)
 		}
 		f.lastChecked = time.Now()
 	}

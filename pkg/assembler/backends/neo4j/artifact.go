@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -99,7 +100,7 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 			return artifacts, nil
 		})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read transaction: %w", err)
 	}
 
 	return result.([]*model.Artifact), nil
