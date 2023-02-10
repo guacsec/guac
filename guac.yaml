@@ -2,3 +2,4 @@ gdbuser: neo4j
 gdbpass: s3cr3t
 gdbaddr: neo4j://localhost:7687
 realm: neo4j
+natsaddr: nats://localhost:4222

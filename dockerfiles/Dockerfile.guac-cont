@@ -1,0 +1,8 @@
+FROM golang:1.19 as builder
+ADD . /go/src/github.com/guacsec/guac/
+WORKDIR /go/src/github.com/guacsec/guac/
+RUN rm -rf bin/ && make build
+
+FROM ubuntu:22.04
+WORKDIR /root
+COPY --from=builder /go/src/github.com/guacsec/guac/bin/ /opt/guac/
