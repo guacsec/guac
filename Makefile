@@ -95,4 +95,6 @@ container:
 service:
 	# requires force recreate since docker compose reuses containers and neo4j does
 	# not handle that well.
+	#
+	# if container images are missing, run `make container` first
 	docker compose up --force-recreate	
