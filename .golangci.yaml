@@ -4,3 +4,10 @@ run:
     - ".*\\.pb\\.go$"
     - "pkg/assembler/generated/.*"
     - "resolvers/schema\\.resolvers\\.go"
+linters:
+  enable:
+    - wrapcheck
+issues:
+  # Exclude previously existing issues from the report
+  new: true
+  new-from-rev: HEAD
