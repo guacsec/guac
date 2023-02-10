@@ -301,6 +301,34 @@ func (e *versionToQualifier) IdentifiablePropertyNames() []string {
 }
 
 func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
+	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
+	// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
+	fields := getPreloads(ctx)
+
+	nameRequired := false
+	namespaceRequired := false
+	versionRequired := false
+	for _, f := range fields {
+		if f == namespaces {
+			namespaceRequired = true
+		}
+		if f == names {
+			nameRequired = true
+		}
+		if f == versions {
+			versionRequired = true
+		}
+	}
+
+	if !namespaceRequired && !nameRequired && !versionRequired {
+		return c.packagesType(ctx, pkgSpec)
+	} else if namespaceRequired && !nameRequired && !versionRequired {
+		return c.packagesNamespace(ctx, pkgSpec)
+	} else if nameRequired && !versionRequired {
+		return c.packagesName(ctx, pkgSpec)
+	}
+
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -448,6 +476,205 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 					pkgNamespace := &model.PackageNamespace{
 						Namespace: namespace,
 						Names:     collectedPkgNames,
+					}
+					collectedPkgNamespaces = append(collectedPkgNamespaces, pkgNamespace)
+				}
+				collectedPackage := &model.Package{
+					Type:       pkgType,
+					Namespaces: collectedPkgNamespaces,
+				}
+				packages = append(packages, collectedPackage)
+			}
+
+			return packages, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Package), nil
+}
+
+func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)")
+
+			if pkgSpec.Type != nil {
+
+				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
+				queryValues["pkgType"] = pkgSpec.Type
+			}
+
+			sb.WriteString(" RETURN type.type")
+
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			packages := []*model.Package{}
+			for result.Next() {
+				collectedPackage := &model.Package{
+					Type:       result.Record().Values[0].(string),
+					Namespaces: []*model.PackageNamespace{},
+				}
+				packages = append(packages, collectedPackage)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			return packages, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Package), nil
+}
+
+func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)")
+
+			if pkgSpec.Type != nil {
+
+				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
+				firstMatch = false
+				queryValues["pkgType"] = pkgSpec.Type
+			}
+			if pkgSpec.Namespace != nil {
+
+				matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
+				queryValues["pkgNamespace"] = pkgSpec.Namespace
+			}
+
+			sb.WriteString(" RETURN type.type, namespace.namespace")
+
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			pkgTypes := map[string][]*model.PackageNamespace{}
+
+			for result.Next() {
+
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
+
+				pkgNamespace := &model.PackageNamespace{
+					Namespace: namespaceString,
+					Names:     []*model.PackageName{},
+				}
+				pkgTypes[typeString] = append(pkgTypes[typeString], pkgNamespace)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			packages := []*model.Package{}
+			for pkgType, namespaces := range pkgTypes {
+				collectedPackage := &model.Package{
+					Type:       pkgType,
+					Namespaces: namespaces,
+				}
+				packages = append(packages, collectedPackage)
+			}
+
+			return packages, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Package), nil
+}
+
+func (c *neo4jClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)")
+			if pkgSpec.Type != nil {
+
+				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
+				firstMatch = false
+				queryValues["pkgType"] = pkgSpec.Type
+			}
+			if pkgSpec.Namespace != nil {
+
+				matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
+				firstMatch = false
+				queryValues["pkgNamespace"] = pkgSpec.Namespace
+			}
+			if pkgSpec.Name != nil {
+
+				matchProperties(&sb, firstMatch, "name", "name", "$pkgName")
+				queryValues["pkgName"] = pkgSpec.Name
+			}
+
+			sb.WriteString(" RETURN type.type, namespace.namespace, name.name")
+
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			pkgTypes := map[string]map[string][]*model.PackageName{}
+
+			for result.Next() {
+
+				nameString := result.Record().Values[2].(string)
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
+
+				pkgName := &model.PackageName{
+					Name:     nameString,
+					Versions: []*model.PackageVersion{},
+				}
+
+				if pkgNamespace, ok := pkgTypes[typeString]; ok {
+					pkgNamespace[namespaceString] = append(pkgNamespace[namespaceString], pkgName)
+				} else {
+					pkgNamespaces := map[string][]*model.PackageName{}
+					pkgNamespaces[namespaceString] = append(pkgNamespaces[namespaceString], pkgName)
+					pkgTypes[typeString] = pkgNamespaces
+				}
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			packages := []*model.Package{}
+			for pkgType, pkgNamespaces := range pkgTypes {
+				collectedPkgNamespaces := []*model.PackageNamespace{}
+				for namespace, pkgNames := range pkgNamespaces {
+					pkgNamespace := &model.PackageNamespace{
+						Namespace: namespace,
+						Names:     pkgNames,
 					}
 					collectedPkgNamespaces = append(collectedPkgNamespaces, pkgNamespace)
 				}

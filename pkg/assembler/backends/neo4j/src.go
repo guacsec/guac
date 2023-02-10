@@ -197,6 +197,27 @@ func (e *srcNamespaceToName) IdentifiablePropertyNames() []string {
 }
 
 func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
+
+	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
+	fields := getPreloads(ctx)
+
+	nameRequired := false
+	namespaceRequired := false
+	for _, f := range fields {
+		if f == namespaces {
+			namespaceRequired = true
+		}
+		if f == names {
+			nameRequired = true
+		}
+	}
+
+	if !namespaceRequired && !nameRequired {
+		return c.sourcesType(ctx, sourceSpec)
+	} else if namespaceRequired && !nameRequired {
+		return c.sourcesNamespace(ctx, sourceSpec)
+	}
+
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -292,6 +313,123 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 				source := &model.Source{
 					Type:       srcType,
 					Namespaces: sourceNamespaces,
+				}
+				sources = append(sources, source)
+			}
+
+			return sources, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Source), nil
+}
+
+func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var result neo4j.Result
+			var err error
+
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+			sb.WriteString("MATCH (n:Src)-[:SrcHasType]->(type:SrcType)")
+
+			if sourceSpec.Type != nil {
+
+				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
+				queryValues["srcType"] = sourceSpec.Type
+			}
+
+			sb.WriteString(" RETURN type.type")
+
+			result, err = tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			sources := []*model.Source{}
+			for result.Next() {
+
+				source := &model.Source{
+					Type:       result.Record().Values[0].(string),
+					Namespaces: []*model.SourceNamespace{},
+				}
+
+				sources = append(sources, source)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			return sources, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Source), nil
+}
+
+func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var result neo4j.Result
+			var err error
+
+			var firstMatch bool = true
+			queryValues := map[string]any{}
+			sb.WriteString("MATCH (n:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)")
+
+			if sourceSpec.Type != nil {
+
+				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
+				firstMatch = false
+				queryValues["srcType"] = sourceSpec.Type
+			}
+			if sourceSpec.Namespace != nil {
+
+				matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
+				queryValues["srcNamespace"] = sourceSpec.Namespace
+			}
+			sb.WriteString(" RETURN type.type, namespace.namespace")
+
+			result, err = tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			srcTypes := map[string][]*model.SourceNamespace{}
+			for result.Next() {
+
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
+
+				srcNamespace := &model.SourceNamespace{
+					Namespace: namespaceString,
+					Names:     []*model.SourceName{},
+				}
+				srcTypes[typeString] = append(srcTypes[typeString], srcNamespace)
+
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			sources := []*model.Source{}
+			for srcType, namespaces := range srcTypes {
+				source := &model.Source{
+					Type:       srcType,
+					Namespaces: namespaces,
 				}
 				sources = append(sources, source)
 			}

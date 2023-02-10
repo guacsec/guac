@@ -144,6 +144,21 @@ func (e *cveYearToCveID) IdentifiablePropertyNames() []string {
 }
 
 func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+
+	// fields: [year cveId cveId.id]
+	fields := getPreloads(ctx)
+	cveIDImplRequired := false
+	for _, f := range fields {
+		if f == cvdID {
+			cveIDImplRequired = true
+			break
+		}
+	}
+
+	if !cveIDImplRequired {
+		return c.cveYear(ctx, cveSpec)
+	}
+
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -205,7 +220,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 	return result.([]*model.Cve), nil
 }
 
-func (c *neo4jClient) CveOnlyYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
+func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
