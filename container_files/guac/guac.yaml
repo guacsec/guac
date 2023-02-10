@@ -1,0 +1,5 @@
+gdbuser: neo4j
+gdbpass: s3cr3t
+gdbaddr: neo4j://neo4j:7687
+realm: neo4j
+natsaddr: nats://nats:4222
