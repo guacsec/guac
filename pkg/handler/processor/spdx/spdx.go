@@ -37,6 +37,9 @@ func (p *SPDXProcessor) ValidateSchema(d *processor.Document) error {
 	case processor.FormatJSON:
 		reader := bytes.NewReader(d.Blob)
 		_, err := spdx_json.Load2_2(reader)
+		if err == nil {
+			return nil
+		}
 		return fmt.Errorf("unable to parse SPDX document: %w", err)
 	}
 
