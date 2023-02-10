@@ -200,20 +200,21 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
 	fields := getPreloads(ctx)
+
 	nameRequired := false
 	namespaceRequired := false
 	for _, f := range fields {
-		if f == "namespaces" {
+		if f == namespaces {
 			namespaceRequired = true
 		}
-		if f == "namespaces.names" {
+		if f == names {
 			nameRequired = true
 		}
 	}
 
 	if !namespaceRequired && !nameRequired {
 		return c.sourcesType(ctx, sourceSpec)
-	} else if namespaceRequired {
+	} else if namespaceRequired && !nameRequired {
 		return c.sourcesNamespace(ctx, sourceSpec)
 	}
 

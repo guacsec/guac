@@ -305,27 +305,28 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
 	// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
 	fields := getPreloads(ctx)
+
 	nameRequired := false
 	namespaceRequired := false
 	versionRequired := false
 	for _, f := range fields {
-		if f == "namespaces" {
+		if f == namespaces {
 			namespaceRequired = true
 		}
-		if f == "namespaces.names" {
+		if f == names {
 			nameRequired = true
 		}
-		if f == "namespaces.names.versions" {
+		if f == versions {
 			versionRequired = true
 		}
 	}
 
 	if !namespaceRequired && !nameRequired && !versionRequired {
 		return c.packagesType(ctx, pkgSpec)
-	} else if nameRequired {
-		return c.packagesName(ctx, pkgSpec)
-	} else if namespaceRequired {
+	} else if namespaceRequired && !nameRequired && !versionRequired {
 		return c.packagesNamespace(ctx, pkgSpec)
+	} else if nameRequired && !versionRequired {
+		return c.packagesName(ctx, pkgSpec)
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})

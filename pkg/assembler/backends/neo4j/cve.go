@@ -149,7 +149,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 	fields := getPreloads(ctx)
 	cveIDImplRequired := false
 	for _, f := range fields {
-		if f == "cveId" {
+		if f == cvdID {
 			cveIDImplRequired = true
 			break
 		}
