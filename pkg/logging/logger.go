@@ -26,7 +26,7 @@ var logger *zap.SugaredLogger
 type loggerKey struct{}
 
 func init() {
-	zapLogger, _ := zap.NewProduction()
+	zapLogger, _ := zap.NewDevelopment(zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
 
 	// flushes buffer, if any
 	defer func() {
