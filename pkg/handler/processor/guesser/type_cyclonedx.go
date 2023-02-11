@@ -44,7 +44,7 @@ func (_ *cycloneDXTypeGuesser) GuessDocumentType(blob []byte, format processor.F
 		bom := new(cdx.BOM)
 		decoder := cdx.NewBOMDecoder(reader, cdx.BOMFileFormatXML)
 		err := decoder.Decode(bom)
-		if err == nil && strings.Contains(strings.ToLower(bom.XMLName.Space), "cyclonedx") {
+		if err == nil && strings.HasPrefix(bom.XMLNS, "http://cyclonedx.org/schema/bom/") {
 			return processor.DocumentCycloneDX
 		}
 	}
