@@ -62,7 +62,7 @@ var ociCmd = &cobra.Command{
 		}
 
 		// Register collector
-		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 10*time.Minute)
+		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
