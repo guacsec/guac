@@ -17,6 +17,7 @@ package logging
 
 import (
 	"context"
+	"os"
 
 	"go.uber.org/zap"
 )
@@ -26,7 +27,14 @@ var logger *zap.SugaredLogger
 type loggerKey struct{}
 
 func init() {
-	zapLogger, _ := zap.NewDevelopment(zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+	var zapLogger *zap.Logger
+	env := os.Getenv("ENVIRONMENT")
+
+	if env == "production" {
+		zapLogger, _ = zap.NewProduction(zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+	} else {
+		zapLogger, _ = zap.NewDevelopment(zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+	}
 
 	// flushes buffer, if any
 	defer func() {
