@@ -190,7 +190,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 			msgs, err := sub.Fetch(1)
 			if err != nil {
 				if errors.Is(err, nats.ErrTimeout) {
-					logger.Infof("[%s: %s] nothing to consume, backing off for %s: %w", durable, id, backOffTimer.String(), err)
+					// if we get a timeout, we want to try again
 					time.Sleep(backOffTimer)
 					continue
 				} else {
