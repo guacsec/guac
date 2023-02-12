@@ -13,22 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package neo4jBackend
 
 import (
 	"context"
-	"fmt"
+	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/backends"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
-type Neo4jCredentials struct {
-	User   string
-	Pass   string
-	Realm  string
-	DBAddr string
+const (
+	namespaces string = "namespaces"
+	names      string = namespaces + ".names"
+	versions   string = names + ".versions"
+	cvdID      string = "cveId"
+)
+
+type Neo4jConfig struct {
+	User     string
+	Pass     string
+	Realm    string
+	DBAddr   string
+	TestData bool
 }
 
 type neo4jClient struct {
@@ -36,9 +44,9 @@ type neo4jClient struct {
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
-	creds := args.(*Neo4jCredentials)
-	token := neo4j.BasicAuth(creds.User, creds.Pass, creds.Realm)
-	driver, err := neo4j.NewDriver(creds.DBAddr, token)
+	config := args.(*Neo4jConfig)
+	token := neo4j.BasicAuth(config.User, config.Pass, config.Realm)
+	driver, err := neo4j.NewDriver(config.DBAddr, token)
 	if err != nil {
 		return nil, err
 	}
@@ -47,34 +55,111 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		driver.Close()
 		return nil, err
 	}
-
-	return &neo4jClient{driver}, nil
+	client := &neo4jClient{driver}
+	if config.TestData {
+		err = registerAllPackages(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllArtifacts(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllBuilders(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllSources(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllCVE(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllGHSA(client)
+		if err != nil {
+			return nil, err
+		}
+		err = registerAllOSV(client)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
-func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	panic(fmt.Errorf("not implemented: Packages - packages in Neo4j backend"))
+func matchProperties(sb *strings.Builder, firstMatch bool, label, property string, resolver string) {
+	if firstMatch {
+		sb.WriteString(" WHERE ")
+	} else {
+		sb.WriteString(" AND ")
+	}
+	sb.WriteString(label)
+	sb.WriteString(".")
+	sb.WriteString(property)
+	sb.WriteString(" = ")
+	sb.WriteString(resolver)
 }
 
-func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	panic(fmt.Errorf("not implemented: Sources - sources in Neo4j backend"))
+func matchNotEdge(sb *strings.Builder, firstMatch bool, firstNodeLabel string, edgeLabel string, secondNodeLabel string) {
+	// -[:PkgHasQualifier]->(qualifier:PkgQualifier)
+	if firstMatch {
+		sb.WriteString(" WHERE ")
+	} else {
+		sb.WriteString(" AND ")
+	}
+	sb.WriteString("NOT (")
+	sb.WriteString(firstNodeLabel)
+	sb.WriteString(")-[:")
+	sb.WriteString(edgeLabel)
+	sb.WriteString("]->(:")
+	sb.WriteString(secondNodeLabel)
+	sb.WriteString(")")
 }
 
-func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-	panic(fmt.Errorf("not implemented: Cve - cve in Neo4j backend"))
+// getPreloads get the specific graphQL query fields that are requested.
+// graphql.CollectAllFields only provides the top level fields and none of the nested fields below it.
+// getPreloads recursively goes through the fields and retrieves each nested field below it.
+// for example:
+/*
+  type
+  namespaces {
+    namespace
+    names {
+      name
+      tag
+      commit
+    }
+  }
+  will return:
+  fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
+*/
+func getPreloads(ctx context.Context) []string {
+	visited := make(map[string]bool)
+	return getNestedPreloads(
+		graphql.GetOperationContext(ctx),
+		graphql.CollectFieldsCtx(ctx, nil),
+		"", visited)
 }
 
-func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
-	panic(fmt.Errorf("not implemented: Ghsa - ghsa in Neo4j backend"))
+func getNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string, visited map[string]bool) []string {
+	preloads := []string{}
+	for _, column := range fields {
+		prefixColumn := getPreloadString(prefix, column.Name)
+		if visited[prefixColumn] {
+			continue
+		}
+		visited[prefixColumn] = true
+		preloads = append(preloads, prefixColumn)
+		preloads = append(preloads, getNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn, visited)...)
+	}
+	return preloads
 }
 
-func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
-	panic(fmt.Errorf("not implemented: Osv - osv in Neo4j backend"))
-}
-
-func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: Artifacts - artifacts in Neo4j backend"))
-}
-
-func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
-	panic(fmt.Errorf("not implemented: Builders - builders in Neo4j backend"))
+func getPreloadString(prefix, name string) string {
+	if len(prefix) > 0 {
+		return prefix + "." + name
+	}
+	return name
 }

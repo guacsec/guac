@@ -17,6 +17,7 @@ package simpledb
 
 import (
 	"context"
+	"sync"
 
 	"github.com/gobwas/glob"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
@@ -24,11 +25,14 @@ import (
 )
 
 func NewSimpleDb() (db.CollectSubscriberDb, error) {
-	return &simpleDb{}, nil
+	return &simpleDb{
+		lock: &sync.RWMutex{},
+	}, nil
 }
 
 type simpleDb struct {
 	collectEntries []*pb.CollectEntry
+	lock           *sync.RWMutex
 }
 
 func entryKeyEq(e1, e2 *pb.CollectEntry) bool {
@@ -46,6 +50,8 @@ func (s *simpleDb) containsEntry(e *pb.CollectEntry) bool {
 }
 
 func (s *simpleDb) AddCollectEntries(ctx context.Context, entries []*pb.CollectEntry) error {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	for _, e := range entries {
 		if e != nil && !s.containsEntry(e) {
 			s.collectEntries = append(s.collectEntries, e)
@@ -55,6 +61,8 @@ func (s *simpleDb) AddCollectEntries(ctx context.Context, entries []*pb.CollectE
 }
 
 func (s *simpleDb) GetCollectEntries(ctx context.Context, filters []*pb.CollectEntryFilter) ([]*pb.CollectEntry, error) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	var filterMatchers []glob.Glob
 	for _, f := range filters {
 		filterMatchers = append(filterMatchers, glob.MustCompile(f.Glob))

@@ -19,13 +19,15 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/oci"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -51,7 +53,7 @@ var ociCmd = &cobra.Command{
 		}
 
 		// Register collector
-		ociCollector := oci.NewOCICollector(ctx, opts.repoTags, false, 10*time.Minute)
+		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
@@ -131,18 +133,26 @@ func validateOCIFlags(user string, pass string, dbAddr string, realm string, arg
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
-	opts.repoTags = map[string][]string{}
 
 	if len(args) < 1 {
 		return opts, fmt.Errorf("expected positional argument for image_path")
 	}
+	sources := []datasource.Source{}
 	for _, arg := range args {
-		stringSplit := strings.Split(arg, ":")
-		if len(stringSplit) == 2 {
-			opts.repoTags[stringSplit[0]] = append(opts.repoTags[stringSplit[0]], stringSplit[1])
-		} else {
+		if _, err := ref.New(arg); err != nil {
 			return opts, fmt.Errorf("image_path parsing error. require format repo:tag")
 		}
+		sources = append(sources, datasource.Source{
+			Value: arg,
+		})
+	}
+
+	var err error
+	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
+		OciDataSources: sources,
+	})
+	if err != nil {
+		return opts, err
 	}
 
 	return opts, nil
