@@ -117,7 +117,7 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 		// Filter out tags that are not images
 		for _, tag := range allTags.Tags {
 			// filter out tags that looking for sha256- followed by a 64 character hex string
-			if !(strings.HasPrefix(tag, "sha256-") && len(tag) == 71) {
+			if !(strings.HasPrefix(tag, "sha256-") && len(tag) >= 71) {
 				fetchTags = append(fetchTags, tag)
 			}
 		}
