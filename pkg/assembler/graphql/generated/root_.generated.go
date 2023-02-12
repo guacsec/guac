@@ -63,6 +63,14 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	HashEqual struct {
+		Artifact      func(childComplexity int) int
+		Collector     func(childComplexity int) int
+		EqualArtifact func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Source        func(childComplexity int) int
+	}
+
 	OSV struct {
 		OsvID func(childComplexity int) int
 	}
@@ -98,13 +106,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Artifacts func(childComplexity int, artifactSpec *model.ArtifactSpec) int
-		Builders  func(childComplexity int, builderSpec *model.BuilderSpec) int
-		Cve       func(childComplexity int, cveSpec *model.CVESpec) int
-		Ghsa      func(childComplexity int, ghsaSpec *model.GHSASpec) int
-		Osv       func(childComplexity int, osvSpec *model.OSVSpec) int
-		Packages  func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Sources   func(childComplexity int, sourceSpec *model.SourceSpec) int
+		Artifacts      func(childComplexity int, artifactSpec *model.ArtifactSpec) int
+		Builders       func(childComplexity int, builderSpec *model.BuilderSpec) int
+		Cve            func(childComplexity int, cveSpec *model.CVESpec) int
+		EqualArtifacts func(childComplexity int, artifactSpec *model.ArtifactSpec) int
+		Ghsa           func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		HashEqual      func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
+		Osv            func(childComplexity int, osvSpec *model.OSVSpec) int
+		Packages       func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Sources        func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
 
 	Source struct {
@@ -194,6 +204,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GHSAId.ID(childComplexity), true
+
+	case "HashEqual.artifact":
+		if e.complexity.HashEqual.Artifact == nil {
+			break
+		}
+
+		return e.complexity.HashEqual.Artifact(childComplexity), true
+
+	case "HashEqual.collector":
+		if e.complexity.HashEqual.Collector == nil {
+			break
+		}
+
+		return e.complexity.HashEqual.Collector(childComplexity), true
+
+	case "HashEqual.equalArtifact":
+		if e.complexity.HashEqual.EqualArtifact == nil {
+			break
+		}
+
+		return e.complexity.HashEqual.EqualArtifact(childComplexity), true
+
+	case "HashEqual.justification":
+		if e.complexity.HashEqual.Justification == nil {
+			break
+		}
+
+		return e.complexity.HashEqual.Justification(childComplexity), true
+
+	case "HashEqual.source":
+		if e.complexity.HashEqual.Source == nil {
+			break
+		}
+
+		return e.complexity.HashEqual.Source(childComplexity), true
 
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
@@ -322,6 +367,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Cve(childComplexity, args["cveSpec"].(*model.CVESpec)), true
 
+	case "Query.EqualArtifacts":
+		if e.complexity.Query.EqualArtifacts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_EqualArtifacts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.EqualArtifacts(childComplexity, args["ArtifactSpec"].(*model.ArtifactSpec)), true
+
 	case "Query.ghsa":
 		if e.complexity.Query.Ghsa == nil {
 			break
@@ -333,6 +390,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(*model.GHSASpec)), true
+
+	case "Query.HashEqual":
+		if e.complexity.Query.HashEqual == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HashEqual_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HashEqual(childComplexity, args["hashEqualSpec"].(*model.HashEqualSpec)), true
 
 	case "Query.osv":
 		if e.complexity.Query.Osv == nil {
@@ -431,6 +500,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputGHSASpec,
+		ec.unmarshalInputHashEqualSpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageQualifierInput,
 		ec.unmarshalInputPkgSpec,
@@ -677,6 +747,58 @@ input GHSASpec {
 extend type Query {
   "Returns all ghsa"
   ghsa(ghsaSpec: GHSASpec): [GHSA!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/hashEqual.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the artifact. It contains the algorithm and digest fields
+"""
+Artifact represents the artifact and contains a digest field
+
+algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
+digest is mandatory in the form checksum.Value.
+
+"""
+type HashEqual {
+  justification: String!
+  source: String!
+  collector: String!
+  artifact: Artifact!
+  equalArtifact: Artifact!
+}
+
+"""
+ArtifactSpec allows filtering the list of artifacts to return.
+"""
+input HashEqualSpec {
+  justification: String
+  source: String
+  collector: String
+  artifact: ArtifactSpec!
+  equalArtifact: ArtifactSpec!
+}
+
+
+extend type Query {
+  "Returns all HashEqual"
+  HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+  "Return all equal artifacts based on artifact spec"
+  EqualArtifacts(ArtifactSpec: ArtifactSpec): [HashEqual!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#

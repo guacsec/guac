@@ -78,6 +78,27 @@ type GHSASpec struct {
 	GhsaID *string `json:"ghsaId"`
 }
 
+// Artifact represents the artifact and contains a digest field
+//
+// algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
+// digest is mandatory in the form checksum.Value.
+type HashEqual struct {
+	Justification string    `json:"justification"`
+	Source        string    `json:"source"`
+	Collector     string    `json:"collector"`
+	Artifact      *Artifact `json:"artifact"`
+	EqualArtifact *Artifact `json:"equalArtifact"`
+}
+
+// ArtifactSpec allows filtering the list of artifacts to return.
+type HashEqualSpec struct {
+	Justification *string       `json:"justification"`
+	Source        *string       `json:"source"`
+	Collector     *string       `json:"collector"`
+	Artifact      *ArtifactSpec `json:"artifact"`
+	EqualArtifact *ArtifactSpec `json:"equalArtifact"`
+}
+
 // OSV represents Open Source Vulnerability . It contains a OSV ID.
 type Osv struct {
 	OsvID []*OSVId `json:"osvId"`
