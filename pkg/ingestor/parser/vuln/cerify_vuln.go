@@ -161,3 +161,7 @@ func (c *vulnCertificationParser) CreateEdges(ctx context.Context, foundIdentiti
 func (c *vulnCertificationParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
 }
+
+func (c *vulnCertificationParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}

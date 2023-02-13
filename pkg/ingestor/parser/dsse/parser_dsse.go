@@ -90,3 +90,7 @@ func (d *dsseParser) CreateNodes(_ context.Context) []assembler.GuacNode {
 func (d *dsseParser) CreateEdges(_ context.Context, _ []assembler.IdentityNode) []assembler.GuacEdge {
 	return []assembler.GuacEdge{}
 }
+
+func (d *dsseParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}

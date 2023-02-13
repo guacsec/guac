@@ -211,3 +211,7 @@ func parseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
 	}
 	return &bom, nil
 }
+
+func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}
