@@ -62,6 +62,9 @@ var ociCmd = &cobra.Command{
 		}
 
 		// Register collector
+		// TODO(lumjjb): Return this to a longer duration (~10 minutes) so as to not keep hitting
+		// the OCI server. This will require adding triggers to get new repos as they come up from
+		// the CollectSources so that there isn't a long delay from adding new data sources.
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
