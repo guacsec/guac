@@ -21,7 +21,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -30,15 +29,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-type options struct {
-	// path to folder with documents to collect
-	path string
-	// datasource for the collector
-	dataSource datasource.CollectSource
-	// address for NATS connection
-	natsAddr string
-}
 
 var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",

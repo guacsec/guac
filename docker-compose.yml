@@ -57,3 +57,27 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./container_files/guac:/guac
+
+  guac-collectsub:
+    image: "local-organic-guac"
+    command: "/opt/guac/guacone csub-server"
+    working_dir: /guac
+    restart: on-failure
+    ports:
+      - "2782:2782"
+    depends_on:
+      service-health:
+        condition: service_completed_successfully
+    volumes:
+      - ./container_files/guac:/guac
+
+  oci-collector:
+    image: "local-organic-guac"
+    command: "/opt/guac/collector image --use-csub"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      service-health:
+        condition: service_completed_successfully
+    volumes:
+      - ./container_files/guac:/guac
