@@ -39,12 +39,12 @@ func WriteQueryForTesting(client Client, query string, args map[string]interface
 		func(tx Transaction) (interface{}, error) {
 			result, err := tx.Run(query, args)
 			if err != nil {
-				return nil, fmt.Errorf("error running query: %v", err)
+				return nil, fmt.Errorf("error running query: %w", err)
 			}
 			_, err = result.Consume()
-			return nil, fmt.Errorf("error consuming result: %v", err)
+			return nil, fmt.Errorf("error consuming result: %w", err)
 		})
-	return fmt.Errorf("error writing transactions: %v", err)
+	return fmt.Errorf("error writing transactions: %w", err)
 }
 
 // ReadQueryForTesting runs a simple read query against the graph database.
@@ -60,7 +60,7 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 		func(tx Transaction) (interface{}, error) {
 			records, err := tx.Run(query, args)
 			if err != nil {
-				return nil, fmt.Errorf("error running query: %v", err)
+				return nil, fmt.Errorf("error running query: %w", err)
 			}
 			values := make([][]interface{}, 0)
 			// Since `records` is valid only while `tx` is in
@@ -70,13 +70,13 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 				values = append(values, record.Values)
 			}
 			if err = records.Err(); err != nil {
-				return nil, fmt.Errorf("error reading records: %v", err)
+				return nil, fmt.Errorf("error reading records: %w", err)
 			}
-			return values, fmt.Errorf("error reading records: %v", err)
+			return values, fmt.Errorf("error reading records: %w", err)
 		})
 
 	if err != nil {
-		return nil, fmt.Errorf("error reading transactions: %v", err)
+		return nil, fmt.Errorf("error reading transactions: %w", err)
 	}
 	return result.([][]interface{}), nil
 }
@@ -90,7 +90,7 @@ func ReadQuery(client Client, query string, args map[string]interface{}) ([]inte
 		func(tx Transaction) (interface{}, error) {
 			records, err := tx.Run(query, args)
 			if err != nil {
-				return nil, fmt.Errorf("error running query: %v", err)
+				return nil, fmt.Errorf("error running query: %w", err)
 			}
 			values := make([]interface{}, 0)
 			// Since `records` is valid only while `tx` is in
@@ -100,13 +100,13 @@ func ReadQuery(client Client, query string, args map[string]interface{}) ([]inte
 				values = append(values, record)
 			}
 			if err = records.Err(); err != nil {
-				return nil, fmt.Errorf("error reading records: %v", err)
+				return nil, fmt.Errorf("error reading records: %w", err)
 			}
 			return values, err
 		})
 
 	if err != nil {
-		return nil, fmt.Errorf("error reading transactions: %v", err)
+		return nil, fmt.Errorf("error reading transactions: %w", err)
 	}
 	return result.([]interface{}), nil
 }
@@ -125,9 +125,9 @@ func ClearDBForTesting(client Client) error {
 				return nil, err
 			}
 			_, err = results.Consume()
-			return nil, fmt.Errorf("error consuming results: %v", err)
+			return nil, fmt.Errorf("error consuming results: %w", err)
 		})
-	return fmt.Errorf("error writing transactions: %v", err)
+	return fmt.Errorf("error writing transactions: %w", err)
 }
 
 // EmptyClientForTesting returns a client to an empty database.

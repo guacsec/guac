@@ -30,7 +30,7 @@ import (
 func createSimpleCsubClient(ctx context.Context) (client.Client, error) {
 	c, err := client.NewMockClient()
 	if err != nil {
-		return nil, fmt.Errorf("unable to create mock client: %v", err)
+		return nil, fmt.Errorf("unable to create mock client: %w", err)
 	}
 
 	err = c.AddCollectEntries(ctx, []*collectsub.CollectEntry{
@@ -39,7 +39,7 @@ func createSimpleCsubClient(ctx context.Context) (client.Client, error) {
 		{Type: collectsub.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to add collect entries: %v", err)
+		return nil, fmt.Errorf("unable to add collect entries: %w", err)
 	}
 	return c, nil
 }

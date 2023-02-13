@@ -162,7 +162,7 @@ func getVulnerabilities(query osv_scanner.BatchedQuery, packDigest map[string][]
 func generateDocument(purl string, digest []string, vulns []osv_scanner.MinimalVulnerability) (*processor.Document, error) {
 	payload, err := json.Marshal(createAttestation(purl, digest, vulns))
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal attestation: %v", err)
+		return nil, fmt.Errorf("failed to marshal attestation: %w", err)
 	}
 	doc := &processor.Document{
 		Blob:   payload,

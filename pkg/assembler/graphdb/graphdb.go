@@ -46,12 +46,12 @@ func NewGraphClient(uri string, authToken AuthToken) (Client, error) {
 	// attributes of the connection (e.g., max connection pool size, etc.)
 	driver, err := neo4j.NewDriver(uri, authToken)
 	if err != nil {
-		return nil, fmt.Errorf("error creating driver: %v", err)
+		return nil, fmt.Errorf("error creating driver: %w", err)
 	}
 
 	if err = driver.VerifyConnectivity(); err != nil {
 		driver.Close()
-		return nil, fmt.Errorf("error verifying connectivity: %v", err)
+		return nil, fmt.Errorf("error verifying connectivity: %w", err)
 	}
 	return driver, nil
 }

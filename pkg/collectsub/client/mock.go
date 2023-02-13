@@ -32,7 +32,7 @@ type MockClient struct {
 func NewMockClient() (Client, error) {
 	sdb, err := simpledb.NewSimpleDb()
 	if err != nil {
-		return nil, fmt.Errorf("unable to create simple db: %v", err)
+		return nil, fmt.Errorf("unable to create simple db: %w", err)
 	}
 	return &MockClient{
 		db: sdb,
