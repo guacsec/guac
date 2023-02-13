@@ -138,3 +138,7 @@ func hashToDigest(h string) string {
 	}
 	return h
 }
+
+func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}
