@@ -162,19 +162,29 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	var hashEquals []*model.HashEqual
 
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
 	for _, h := range c.hashEquals {
 		if hashEqualSpec.Justification == nil || h.Justification == *hashEqualSpec.Justification {
-			if hashEqualSpec.Collector == nil || h.Collector == *hashEqualSpec.Collector {
-				if hashEqualSpec.Origin == nil || h.Origin == *hashEqualSpec.Origin {
-					if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
-						hashEquals = append(hashEquals, h)
-					} else if len(hashEqualSpec.Artifacts) == 0 {
-						hashEquals = append(hashEquals, h)
-					}
-				}
+			justificationMatchOrSkip = true
+		}
+		if hashEqualSpec.Collector == nil || h.Collector == *hashEqualSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if hashEqualSpec.Origin == nil || h.Origin == *hashEqualSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
+				hashEquals = append(hashEquals, h)
+			} else if len(hashEqualSpec.Artifacts) == 0 {
+				hashEquals = append(hashEquals, h)
 			}
 		}
 	}
+
 	return hashEquals, nil
 }
 
