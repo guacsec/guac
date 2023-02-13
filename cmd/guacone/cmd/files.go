@@ -212,10 +212,14 @@ func getProcessor(ctx context.Context) (func(*processor.Document) (processor.Doc
 }
 func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
 	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
-		inputs, err := parser.ParseDocumentTree(ctx, doc)
+		inputs, idStrings, err := parser.ParseDocumentTree(ctx, doc)
 		if err != nil {
 			return nil, err
 		}
+
+		// for guacone collectors, we do not integrate with the collectsub service
+		_ = idStrings
+
 		return inputs, nil
 	}, nil
 }

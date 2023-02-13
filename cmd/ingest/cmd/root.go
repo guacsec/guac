@@ -38,6 +38,9 @@ var flags = struct {
 
 	// nats
 	natsAddr string
+
+	// collectsub service
+	collectSubAddr string
 }{}
 
 func init() {
@@ -48,6 +51,7 @@ func init() {
 	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
+	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {

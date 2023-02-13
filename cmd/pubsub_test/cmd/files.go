@@ -31,6 +31,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -116,7 +118,8 @@ var filesCmd = &cobra.Command{
 			return nil
 		}
 
-		ingestorTransportFunc := func(d []assembler.Graph) error {
+		// for pubsub_test we ignore identifier strings as we don't connect to a collectsub service
+		ingestorTransportFunc := func(d []assembler.Graph, i []*common.IdentifierStrings) error {
 			err := assemblerFunc(d)
 			if err != nil {
 				return err
@@ -212,7 +215,7 @@ func getProcessor(ctx context.Context, transportFunc func(processor.DocumentTree
 	}, nil
 }
 
-func getIngestor(ctx context.Context, transportFunc func([]assembler.Graph) error) (func() error, error) {
+func getIngestor(ctx context.Context, transportFunc func([]assembler.Graph, []*parser_common.IdentifierStrings) error) (func() error, error) {
 	return func() error {
 		err := parser.Subscribe(ctx, transportFunc)
 		if err != nil {

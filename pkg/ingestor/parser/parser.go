@@ -70,7 +70,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 
 // Subscribe is used by NATS JetStream to stream the documents received from the processor
 // and parse them them via ParseDocumentTree
-func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error) error {
+func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph, []*common.IdentifierStrings) error) error {
 	logger := logging.FromContext(ctx)
 
 	id := uuid.NewV4().String()
@@ -87,14 +87,14 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error)
 			logger.Error(fmtErr)
 			return err
 		}
-		assemblerInputs, err := ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
+		assemblerInputs, idStrings, err := ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
 		if err != nil {
 			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %w", id, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
 
-		err = transportFunc(assemblerInputs)
+		err = transportFunc(assemblerInputs, idStrings)
 		if err != nil {
 			fmtErr := fmt.Errorf("[ingestor: %s] failed transportFunc: %w", id, err)
 			logger.Error(fmtErr)
@@ -113,18 +113,30 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph) error)
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.Graph{}
+	identifierStrings := []*common.IdentifierStrings{}
+	logger := logging.FromContext(ctx)
 	docTreeBuilder := newDocTreeBuilder()
+
+	logger.Infof("parsing document tree with root type: %v", docTree.Document.Type)
 	err := docTreeBuilder.parse(ctx, docTree)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+
 	for _, builder := range docTreeBuilder.graphBuilders {
 		assemblerInput := builder.CreateAssemblerInput(ctx, docTreeBuilder.identities)
 		assemblerInputs = append(assemblerInputs, assemblerInput)
+		if idStrings, err := builder.GetIdentifiers(ctx); err == nil {
+			identifierStrings = append(identifierStrings, idStrings)
+			logger.Debugf("found ID strings: %+v", idStrings)
+		} else {
+			logger.Debugf("parser did not find ID strings with err: %v", err)
+		}
 	}
-	return assemblerInputs, nil
+
+	return assemblerInputs, identifierStrings, nil
 }
 
 func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree) error {
