@@ -27,13 +27,14 @@ import (
 type DemoCredentials struct{}
 
 type demoClient struct {
-	packages  []*model.Package
-	sources   []*model.Source
-	cve       []*model.Cve
-	ghsa      []*model.Ghsa
-	osv       []*model.Osv
-	artifacts []*model.Artifact
-	builders  []*model.Builder
+	packages   []*model.Package
+	sources    []*model.Source
+	cve        []*model.Cve
+	ghsa       []*model.Ghsa
+	osv        []*model.Osv
+	artifacts  []*model.Artifact
+	builders   []*model.Builder
+	hashEquals []*model.HashEqual
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -53,6 +54,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllOSV(client)
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
+	registerAllHashEqual(client)
 	return client, nil
 }
 
@@ -155,6 +157,54 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 		}
 	}
 	return builders, nil
+}
+
+func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+	var hashEquals []*model.HashEqual
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	for _, h := range c.hashEquals {
+		if hashEqualSpec.Justification == nil || h.Justification == *hashEqualSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if hashEqualSpec.Collector == nil || h.Collector == *hashEqualSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if hashEqualSpec.Origin == nil || h.Origin == *hashEqualSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
+				hashEquals = append(hashEquals, h)
+			} else if len(hashEqualSpec.Artifacts) == 0 {
+				hashEquals = append(hashEquals, h)
+			}
+		}
+	}
+
+	return hashEquals, nil
+}
+
+func filterEqualArtifact(storedArtifacts []*model.Artifact, queryArtifacts []*model.ArtifactSpec) bool {
+	exists := make(map[model.Artifact]bool)
+	for _, value := range storedArtifacts {
+		exists[*value] = true
+	}
+
+	// enforce lowercase for both the algorithm and digest when querying
+	for _, value := range queryArtifacts {
+		queryArt := model.Artifact{
+			Algorithm: strings.ToLower(*value.Algorithm),
+			Digest:    strings.ToLower(*value.Digest),
+		}
+		if _, ok := exists[queryArt]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {

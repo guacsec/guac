@@ -1,0 +1,51 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, source and collector. 
+"""
+HashEqual is an attestation represents when two artifact hash are similar based on a justification.
+
+Justification - string value representing why the artifacts are the equal
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+Artifacts - the artifacts (represented by algorithm and digest) that are equal
+
+"""
+type HashEqual {
+  justification: String!
+  artifacts: [Artifact!]!
+  origin: String!
+  collector: String!
+}
+
+"""
+HashEqualSpec allows filtering the list of HashEqual to return.
+
+Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
+"""
+input HashEqualSpec {
+  justification: String
+  artifacts: [ArtifactSpec]
+  origin: String
+  collector: String
+}
+
+
+extend type Query {
+  "Returns all HashEqual"
+  HashEquals(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+}

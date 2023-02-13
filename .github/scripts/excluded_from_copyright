@@ -17,3 +17,5 @@
 ./pkg/assembler/graphql/resolvers/artifact.resolvers.go
 ./pkg/assembler/graphql/generated/builder.generated.go
 ./pkg/assembler/graphql/resolvers/builder.resolvers.go
+./pkg/assembler/graphql/generated/hashEqual.generated.go
+./pkg/assembler/graphql/resolvers/hashEqual.resolvers.go
