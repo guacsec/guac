@@ -48,6 +48,9 @@ func NewServer(port int) (*server, error) {
 }
 
 func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntriesRequest) (*pb.AddCollectEntriesResponse, error) {
+	logger := logging.FromContext(ctx)
+	logger.Infof("AddCollectEntries called with entries: %v", in.Entries)
+
 	err := s.Db.AddCollectEntries(ctx, in.Entries)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add entry to db: %w", err)
@@ -59,10 +62,15 @@ func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntries
 }
 
 func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntriesRequest) (*pb.GetCollectEntriesResponse, error) {
+	logger := logging.FromContext(ctx)
+	logger.Infof("GetCollectEntries called with filters: %v", in.Filters)
+
 	ret, err := s.Db.GetCollectEntries(ctx, in.Filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get collect entries from db: %w", err)
 	}
+	logger.Infof("GetCollectEntries returning %d entries", len(ret))
+
 	return &pb.GetCollectEntriesResponse{
 		Entries: ret,
 	}, nil
