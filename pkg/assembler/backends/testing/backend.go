@@ -27,14 +27,15 @@ import (
 type DemoCredentials struct{}
 
 type demoClient struct {
-	packages   []*model.Package
-	sources    []*model.Source
-	cve        []*model.Cve
-	ghsa       []*model.Ghsa
-	osv        []*model.Osv
-	artifacts  []*model.Artifact
-	builders   []*model.Builder
+	packages     []*model.Package
+	sources      []*model.Source
+	cve          []*model.Cve
+	ghsa         []*model.Ghsa
+	osv          []*model.Osv
+	artifacts    []*model.Artifact
+	builders     []*model.Builder
 	hashEquals []*model.HashEqual
+	isOccurrence []*model.IsOccurrence
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -55,6 +56,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
 	registerAllHashEqual(client)
+	err := registerAllIsOccurrence(client)
+	if err != nil {
+		return nil, err
+	}
 	return client, nil
 }
 
@@ -186,6 +191,24 @@ func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEq
 	}
 
 	return hashEquals, nil
+
+func (c *demoClient) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {{
+	var isOccurrences []*model.IsOccurrence
+
+	for _, h := range c.isOccurrence {
+		if hashEqualSpec.Justification == nil || h.Justification == *hashEqualSpec.Justification {
+			if hashEqualSpec.Collector == nil || h.Collector == *hashEqualSpec.Collector {
+				if hashEqualSpec.Origin == nil || h.Origin == *hashEqualSpec.Origin {
+					if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
+						hashEquals = append(hashEquals, h)
+					} else if len(hashEqualSpec.Artifacts) == 0 {
+						hashEquals = append(hashEquals, h)
+					}
+				}
+			}
+		}
+	}
+	return isOccurrences, nil
 }
 
 func filterEqualArtifact(storedArtifacts []*model.Artifact, queryArtifacts []*model.ArtifactSpec) bool {
