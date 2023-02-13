@@ -24,6 +24,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/ingestor/key"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 	"github.com/sigstore/sigstore/pkg/signature"
 	sig_dsse "github.com/sigstore/sigstore/pkg/signature/dsse"
@@ -61,6 +62,12 @@ func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]v
 			Key: *key,
 		}
 		err = verifySignature(key.Val, payloadBytes)
+		if err != nil {
+			// logging here as we don't want to fail but record that the signature check failed
+			logger := logging.FromContext(ctx)
+			logger.Errorf("failed to verify signature with provided key: %w", key.Hash)
+		}
+		// if err (meaning that the keyID or the signature verification failed), verified is set to false
 		foundIdentity.Verified = (err == nil)
 		identities = append(identities, foundIdentity)
 	}

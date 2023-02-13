@@ -1,0 +1,12 @@
+# neo4j
+gdbuser: neo4j
+gdbpass: s3cr3t
+gdbaddr: neo4j://neo4j:7687
+realm: neo4j
+
+# nats
+natsaddr: nats://nats:4222
+
+# collect-sub
+csub-addr: guac-collectsub:2782
+csub-listen-port: 2782

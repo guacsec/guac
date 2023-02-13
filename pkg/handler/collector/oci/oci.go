@@ -44,6 +44,8 @@ type ociCollector struct {
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
 // Note: OCI collector can be called upon by a upstream registry collector in the future to collect from all
 // repos in a given registry. For further details see issue #298
+//
+// Interval should be set to about 5 mins or more for production so that it doesn't clobber registries.
 func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
 		collectDataSource: collectDataSource,
@@ -104,9 +106,8 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 				if err != nil {
 					return err
 				}
-				// set interval to about 5 mins or more
-				time.Sleep(o.interval)
 			}
+			time.Sleep(o.interval)
 		}
 	} else {
 		err := populateRepoTags()

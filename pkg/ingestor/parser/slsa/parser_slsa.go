@@ -150,3 +150,7 @@ func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assemble
 func (s *slsaParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
 }
+
+func (s *slsaParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}

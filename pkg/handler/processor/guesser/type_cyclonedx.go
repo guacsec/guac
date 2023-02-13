@@ -17,6 +17,7 @@ package guesser
 
 import (
 	"bytes"
+	"strings"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -36,10 +37,15 @@ func (_ *cycloneDXTypeGuesser) GuessDocumentType(blob []byte, format processor.F
 		bom := new(cdx.BOM)
 		decoder := cdx.NewBOMDecoder(reader, cdx.BOMFileFormatJSON)
 		err := decoder.Decode(bom)
-		if err == nil {
-			if bom.BOMFormat == cycloneDXFormat {
-				return processor.DocumentCycloneDX
-			}
+		if err == nil && bom.BOMFormat == cycloneDXFormat {
+			return processor.DocumentCycloneDX
+		}
+	case processor.FormatXML:
+		bom := new(cdx.BOM)
+		decoder := cdx.NewBOMDecoder(reader, cdx.BOMFileFormatXML)
+		err := decoder.Decode(bom)
+		if err == nil && strings.HasPrefix(bom.XMLNS, "http://cyclonedx.org/schema/bom/") {
+			return processor.DocumentCycloneDX
 		}
 	}
 	return processor.DocumentUnknown

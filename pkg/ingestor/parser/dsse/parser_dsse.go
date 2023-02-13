@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
@@ -55,13 +56,18 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 		return fmt.Errorf("failed to verify identity: %w", err)
 	}
 	for _, i := range identities {
-		pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(i.Key.Val)
-		if err != nil {
-			return fmt.Errorf("MarshalPublicKeyToPEM returned error: %w", err)
+		if i.Verified {
+			pemBytes, err := cryptoutils.MarshalPublicKeyToPEM(i.Key.Val)
+			if err != nil {
+				return fmt.Errorf("MarshalPublicKeyToPEM returned error: %w", err)
+			}
+			d.identities = append(d.identities, assembler.IdentityNode{
+				ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
+				KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), NodeData: *assembler.NewObjectMetadata(d.doc.SourceInformation)})
+		} else {
+			logger := logging.FromContext(ctx)
+			logger.Errorf("failed to verify DSSE with provided key: %w", i.ID)
 		}
-		d.identities = append(d.identities, assembler.IdentityNode{
-			ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
-			KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), NodeData: *assembler.NewObjectMetadata(d.doc.SourceInformation)})
 	}
 	return nil
 }
@@ -83,4 +89,8 @@ func (d *dsseParser) CreateNodes(_ context.Context) []assembler.GuacNode {
 // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
 func (d *dsseParser) CreateEdges(_ context.Context, _ []assembler.IdentityNode) []assembler.GuacEdge {
 	return []assembler.GuacEdge{}
+}
+
+func (d *dsseParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
 }

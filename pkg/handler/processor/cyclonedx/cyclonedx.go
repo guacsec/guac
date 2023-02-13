@@ -43,6 +43,11 @@ func (p *CycloneDXProcessor) ValidateSchema(d *processor.Document) error {
 			return fmt.Errorf("unable to decode CycloneDX document: %w", err)
 		}
 		return nil
+	case processor.FormatXML:
+		reader := bytes.NewReader(d.Blob)
+		bom := new(cdx.BOM)
+		decoder := cdx.NewBOMDecoder(reader, cdx.BOMFileFormatXML)
+		return decoder.Decode(bom)
 	}
 
 	return fmt.Errorf("unable to support parsing of CycloneDX document format: %v", d.Format)

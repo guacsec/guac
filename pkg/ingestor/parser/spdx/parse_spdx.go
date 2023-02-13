@@ -283,3 +283,7 @@ func getDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNo
 func (s *spdxParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
 	return nil
 }
+
+func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}

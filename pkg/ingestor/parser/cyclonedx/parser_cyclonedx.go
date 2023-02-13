@@ -18,6 +18,7 @@ package cyclonedx
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"strings"
 
@@ -78,7 +79,7 @@ func addEdges(curPkg component, edges *[]assembler.GuacEdge, visited map[string]
 // Parse breaks out the document into the graph components
 func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) error {
 	c.doc = doc
-	cdxBom, err := parseCycloneDXBOM(doc.Blob)
+	cdxBom, err := parseCycloneDXBOM(doc)
 	if err != nil {
 		return fmt.Errorf("failed to parse cyclonedx BOM: %w", err)
 	}
@@ -194,10 +195,23 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 	}
 }
 
-func parseCycloneDXBOM(d []byte) (*cdx.BOM, error) {
+func parseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
 	bom := cdx.BOM{}
-	if err := json.Unmarshal(d, &bom); err != nil {
-		return nil, err
+	switch doc.Format {
+	case processor.FormatJSON:
+		if err := json.Unmarshal(doc.Blob, &bom); err != nil {
+			return nil, err
+		}
+	case processor.FormatXML:
+		if err := xml.Unmarshal(doc.Blob, &bom); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("unrecognized CycloneDX format %s", doc.Format)
 	}
 	return &bom, nil
+}
+
+func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+	return nil, fmt.Errorf("not yet implemented")
 }

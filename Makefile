@@ -82,3 +82,24 @@ fmt-md:
 .PHONY: generate
 generate:
 	go generate ./...
+
+.PHONY: container
+container:
+	docker build -f dockerfiles/Dockerfile.guac-cont -t local-organic-guac .
+	docker build -f dockerfiles/Dockerfile.healthcheck -t local-healthcheck .
+
+
+# To run the service, run `make container` and then `make service`
+# making the container is a longer process and thus not a dependency of service.
+.PHONY: start-service
+start-service:
+	# requires force recreate since docker compose reuses containers and neo4j does
+	# not handle that well.
+	#
+	# if container images are missing, run `make container` first
+	docker compose up --force-recreate	
+
+# to flush state, service-stop must be used else state is taken from old containers
+.PHONY: stop-service
+stop-service:
+	docker compose down
