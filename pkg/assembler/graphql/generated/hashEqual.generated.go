@@ -72,8 +72,8 @@ func (ec *executionContext) fieldContext_HashEqual_justification(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _HashEqual_source(ctx context.Context, field graphql.CollectedField, obj *model.HashEqual) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HashEqual_source(ctx, field)
+func (ec *executionContext) _HashEqual_artifacts(ctx context.Context, field graphql.CollectedField, obj *model.HashEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HashEqual_artifacts(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -86,7 +86,57 @@ func (ec *executionContext) _HashEqual_source(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Source, nil
+		return obj.Artifacts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Artifact)
+	fc.Result = res
+	return ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_HashEqual_artifacts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "HashEqual",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "algorithm":
+				return ec.fieldContext_Artifact_algorithm(ctx, field)
+			case "digest":
+				return ec.fieldContext_Artifact_digest(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _HashEqual_origin(ctx context.Context, field graphql.CollectedField, obj *model.HashEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HashEqual_origin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Origin, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -103,7 +153,7 @@ func (ec *executionContext) _HashEqual_source(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HashEqual_source(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HashEqual_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HashEqual",
 		Field:      field,
@@ -160,106 +210,6 @@ func (ec *executionContext) fieldContext_HashEqual_collector(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _HashEqual_artifact(ctx context.Context, field graphql.CollectedField, obj *model.HashEqual) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HashEqual_artifact(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Artifact, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Artifact)
-	fc.Result = res
-	return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_HashEqual_artifact(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "HashEqual",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "algorithm":
-				return ec.fieldContext_Artifact_algorithm(ctx, field)
-			case "digest":
-				return ec.fieldContext_Artifact_digest(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _HashEqual_equalArtifact(ctx context.Context, field graphql.CollectedField, obj *model.HashEqual) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HashEqual_equalArtifact(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.EqualArtifact, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Artifact)
-	fc.Result = res
-	return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_HashEqual_equalArtifact(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "HashEqual",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "algorithm":
-				return ec.fieldContext_Artifact_algorithm(ctx, field)
-			case "digest":
-				return ec.fieldContext_Artifact_digest(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -271,7 +221,7 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "source", "collector", "artifact", "equalArtifact"}
+	fieldsInOrder := [...]string{"justification", "artifacts", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -286,11 +236,19 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 			if err != nil {
 				return it, err
 			}
-		case "source":
+		case "artifacts":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-			it.Source, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
+			it.Artifacts, err = ec.unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -299,22 +257,6 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			it.Collector, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "artifact":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-			it.Artifact, err = ec.unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "equalArtifact":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("equalArtifact"))
-			it.EqualArtifact, err = ec.unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -349,9 +291,16 @@ func (ec *executionContext) _HashEqual(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "source":
+		case "artifacts":
 
-			out.Values[i] = ec._HashEqual_source(ctx, field, obj)
+			out.Values[i] = ec._HashEqual_artifacts(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "origin":
+
+			out.Values[i] = ec._HashEqual_origin(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -359,20 +308,6 @@ func (ec *executionContext) _HashEqual(ctx context.Context, sel ast.SelectionSet
 		case "collector":
 
 			out.Values[i] = ec._HashEqual_collector(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "artifact":
-
-			out.Values[i] = ec._HashEqual_artifact(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "equalArtifact":
-
-			out.Values[i] = ec._HashEqual_equalArtifact(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

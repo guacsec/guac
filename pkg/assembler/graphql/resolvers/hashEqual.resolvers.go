@@ -6,17 +6,11 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// HashEqual is the resolver for the HashEqual field.
-func (r *queryResolver) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
-	panic(fmt.Errorf("not implemented: HashEqual - HashEqual"))
-}
-
-// EqualArtifacts is the resolver for the EqualArtifacts field.
-func (r *queryResolver) EqualArtifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.HashEqual, error) {
-	panic(fmt.Errorf("not implemented: EqualArtifacts - EqualArtifacts"))
+// HashEquals is the resolver for the HashEquals field.
+func (r *queryResolver) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+	return r.Backend.HashEquals(ctx, hashEqualSpec)
 }

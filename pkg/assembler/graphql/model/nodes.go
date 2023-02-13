@@ -78,25 +78,27 @@ type GHSASpec struct {
 	GhsaID *string `json:"ghsaId"`
 }
 
-// Artifact represents the artifact and contains a digest field
+// HashEqual is an attestation represents when two artifact hash are similar based on a justification.
 //
-// algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
-// digest is mandatory in the form checksum.Value.
+// Justification - string value representing why the artifacts are the equal
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+// Artifacts - the artifacts (represented by algorithm and digest) that are equal
 type HashEqual struct {
-	Justification string    `json:"justification"`
-	Source        string    `json:"source"`
-	Collector     string    `json:"collector"`
-	Artifact      *Artifact `json:"artifact"`
-	EqualArtifact *Artifact `json:"equalArtifact"`
+	Justification string      `json:"justification"`
+	Artifacts     []*Artifact `json:"artifacts"`
+	Origin        string      `json:"origin"`
+	Collector     string      `json:"collector"`
 }
 
-// ArtifactSpec allows filtering the list of artifacts to return.
+// HashEqualSpec allows filtering the list of HashEqual to return.
+//
+// Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 type HashEqualSpec struct {
-	Justification *string       `json:"justification"`
-	Source        *string       `json:"source"`
-	Collector     *string       `json:"collector"`
-	Artifact      *ArtifactSpec `json:"artifact"`
-	EqualArtifact *ArtifactSpec `json:"equalArtifact"`
+	Justification *string         `json:"justification"`
+	Artifacts     []*ArtifactSpec `json:"artifacts"`
+	Origin        *string         `json:"origin"`
+	Collector     *string         `json:"collector"`
 }
 
 // OSV represents Open Source Vulnerability . It contains a OSV ID.

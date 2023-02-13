@@ -159,18 +159,17 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 	return builders, nil
 }
 
-func (c *demoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	var hashEquals []*model.HashEqual
 
-	// enforce lowercase for both the algorithm and digest when querying
 	for _, h := range c.hashEquals {
 		if hashEqualSpec.Justification == nil || h.Justification == *hashEqualSpec.Justification {
 			if hashEqualSpec.Collector == nil || h.Collector == *hashEqualSpec.Collector {
-				if hashEqualSpec.Source == nil || h.Source == *hashEqualSpec.Source {
-					if hashEqualSpec.Artifact == nil || h.Artifact.Algorithm == strings.ToLower(*hashEqualSpec.Artifact.Algorithm) && h.Artifact.Digest == strings.ToLower(*hashEqualSpec.Artifact.Digest) {
-						if hashEqualSpec.EqualArtifact == nil || h.EqualArtifact.Algorithm == strings.ToLower(*hashEqualSpec.EqualArtifact.Algorithm) && h.EqualArtifact.Digest == strings.ToLower(*hashEqualSpec.EqualArtifact.Digest) {
-							hashEquals = append(hashEquals, h)
-						}
+				if hashEqualSpec.Origin == nil || h.Origin == *hashEqualSpec.Origin {
+					if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
+						hashEquals = append(hashEquals, h)
+					} else if len(hashEqualSpec.Artifacts) == 0 {
+						hashEquals = append(hashEquals, h)
 					}
 				}
 			}
@@ -179,18 +178,23 @@ func (c *demoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqu
 	return hashEquals, nil
 }
 
-func (c *demoClient) EqualArtifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.HashEqual, error) {
-	var hashEquals []*model.HashEqual
-	// enforce lowercase for both the algorithm and digest when querying
-	for _, h := range c.hashEquals {
-		if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && h.Artifact.Algorithm == strings.ToLower(*artifactSpec.Algorithm) && h.Artifact.Digest == strings.ToLower(*artifactSpec.Digest) {
-			hashEquals = append(hashEquals, h)
-		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && h.EqualArtifact.Algorithm == strings.ToLower(*artifactSpec.Algorithm) && h.EqualArtifact.Digest == strings.ToLower(*artifactSpec.Digest) {
-			hashEquals = append(hashEquals, h)
-		}
+func filterEqualArtifact(storedArtifacts []*model.Artifact, queryArtifacts []*model.ArtifactSpec) bool {
+	exists := make(map[model.Artifact]bool)
+	for _, value := range storedArtifacts {
+		exists[*value] = true
 	}
 
-	return hashEquals, nil
+	// enforce lowercase for both the algorithm and digest when querying
+	for _, value := range queryArtifacts {
+		queryArt := model.Artifact{
+			Algorithm: strings.ToLower(*value.Algorithm),
+			Digest:    strings.ToLower(*value.Digest),
+		}
+		if _, ok := exists[queryArt]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
