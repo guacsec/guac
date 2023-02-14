@@ -63,7 +63,7 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 	id := uuid.NewV4().String()
 	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
-		return err
+		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", id, err)
 	}
 
 	processFunc := func(d []byte) error {
@@ -94,7 +94,7 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 
 	err = psub.GetDataFromNats(ctx, processFunc)
 	if err != nil {
-		return err
+		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", id, err)
 	}
 	return nil
 }
@@ -155,7 +155,7 @@ func processDocument(ctx context.Context, i *processor.Document) ([]*processor.D
 func preProcessDocument(ctx context.Context, i *processor.Document) error {
 	docType, format, err := guesser.GuessDocument(ctx, i)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to guess document type: %w", err)
 	}
 
 	i.Type = docType
@@ -184,7 +184,7 @@ func validateDocument(i *processor.Document) error {
 		return fmt.Errorf("no document processor registered for type: %s", i.Type)
 	}
 
-	return p.ValidateSchema(i)
+	return p.ValidateSchema(i) // nolint:wrapcheck
 }
 
 func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
@@ -192,5 +192,5 @@ func unpackDocument(i *processor.Document) ([]*processor.Document, error) {
 	if !ok {
 		return nil, fmt.Errorf("no document processor registered for type: %s", i.Type)
 	}
-	return p.Unpack(i)
+	return p.Unpack(i) // nolint:wrapcheck
 }
