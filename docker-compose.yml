@@ -33,30 +33,19 @@ services:
   # TODO(lumjjb): no good way right now to do a healtcheck for nats-server since
   # it doesn't have utilities within it to perform the check from the container
   # itself. 
-  service-health:
+  service-health-1:
     image: "local-healthcheck"
     stdin_open: true
     tty: true
-    command: 
+    command:
       - /bin/bash
       - -c
       - |
         echo "checking-for-services";
         until curl -I http://nats:8222 > /dev/null 2>&1; do sleep 5; done; 
         echo "nats-up";
-        until curl -I http://neo4j:7474> /dev/null 2>&1; do sleep 5; done; 
+        until curl -I http://neo4j:7474> /dev/null 2>&1; do sleep 5; done;
         echo "neo4j-up";
-
-  guac-ingestor:
-    image: "local-organic-guac"
-    command: "/opt/guac/ingest ingest"
-    working_dir: /guac
-    restart: on-failure
-    depends_on:
-      service-health:
-        condition: service_completed_successfully
-    volumes:
-      - ./container_files/guac:/guac
 
   guac-collectsub:
     image: "local-organic-guac"
@@ -66,10 +55,39 @@ services:
     ports:
       - "2782:2782"
     depends_on:
-      service-health:
+      service-health-1:
         condition: service_completed_successfully
     volumes:
       - ./container_files/guac:/guac
+
+  # GUAC ingestor and oci collector are dependent on the collectsub service to be up
+  service-health-2:
+    image: "local-healthcheck"
+    stdin_open: true
+    tty: true
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "checking-for-services";
+        until nc -z guac-collectsub 2782 > /dev/null 2>&1; do sleep 5; done;
+        echo "guac collectsub up";
+    depends_on:
+      service-health-1:
+        condition: service_completed_successfully
+
+
+  guac-ingestor:
+    image: "local-organic-guac"
+    command: "/opt/guac/ingest ingest"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      service-health-2:
+        condition: service_completed_successfully
+    volumes:
+      - ./container_files/guac:/guac
+
 
   oci-collector:
     image: "local-organic-guac"
@@ -77,7 +95,7 @@ services:
     working_dir: /guac
     restart: on-failure
     depends_on:
-      service-health:
+      service-health-2:
         condition: service_completed_successfully
     volumes:
       - ./container_files/guac:/guac
