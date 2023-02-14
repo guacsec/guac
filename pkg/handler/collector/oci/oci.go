@@ -21,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/handler/collector"
+
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -42,11 +44,11 @@ type ociCollector struct {
 }
 
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
-// Note: OCI collector can be called upon by a upstream registry collector in the future to collect from all
+// Note: OCI collector can be called upon by an upstream registry collector in the future to collect from all
 // repos in a given registry. For further details see issue #298
 //
-// Interval should be set to about 5 mins or more for production so that it doesn't clobber registries.
-func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) *ociCollector {
+// Interval should be set to about 5 minutes or more for production so that it doesn't clobber registries.
+func NewOCICollector(_ context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) collector.Collector {
 	return &ociCollector{
 		collectDataSource: collectDataSource,
 		checkedDigest:     map[string][]string{},
@@ -57,69 +59,43 @@ func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSo
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	repoTags := map[string][]string{}
+	if docChannel == nil {
+		return fmt.Errorf("docChannel is nil")
+	}
 	logger := logging.FromContext(ctx)
-
-	populateRepoTags := func() error {
-		ds, err := o.collectDataSource.GetDataSources(ctx)
-		if err != nil {
-			return fmt.Errorf("unable to retrieve datasource: %w", err)
-		}
-
-		for _, d := range ds.OciDataSources {
-			imageRef, err := ref.New(d.Value)
-			if err != nil {
-				logger.Errorf("unable to parse OCI path: %v", d.Value)
-				continue
-			}
-			imagePath := fmt.Sprintf("%s/%s", imageRef.Registry, imageRef.Repository)
-
-			// If a image reference has no tag, then it is considered as getting all tags
-			if hasNoTag(imageRef) {
-				repoTags[imagePath] = []string{}
-			} else {
-				// if the list is equal to the empty list, it is already looking for
-				// all tags
-				if repoTags[imagePath] == nil || len(repoTags[imagePath]) > 0 {
-					repoTags[imagePath] = append(repoTags[imagePath], imageRef.Tag)
-				}
-
-			}
-		}
-		return nil
+	// Get the data sources only once, since they do not change during the collection process
+	ds, err := o.collectDataSource.GetDataSources(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve datasource: %w", err)
 	}
 
-	if o.poll {
-		for {
-			err := populateRepoTags()
-			if err != nil {
-				return fmt.Errorf("unable to populate repotags: %w", err)
-			}
-
-			for repo, tags := range repoTags {
-				// when polling if tags are specified, it will never get any new tags
-				// that might be added after the fact. Defeating the point of the polling
-				if len(tags) > 0 {
-					return errors.New("image tag should not specified when using polling")
-				}
-				err = o.getTagsAndFetch(ctx, repo, tags, docChannel)
-				if err != nil {
-					return err
-				}
-			}
-			time.Sleep(o.interval)
-		}
-	} else {
-		err := populateRepoTags()
+	// Loop through each data source, get the image reference and tags, and call getTagsAndFetch
+	for _, d := range ds.OciDataSources {
+		imageRef, err := ref.New(d.Value)
 		if err != nil {
-			return fmt.Errorf("unable to populate repotags: %w", err)
+			logger.Errorf("unable to parse OCI path: %v", d.Value)
+			continue
+		}
+		imagePath := fmt.Sprintf("%s/%s", imageRef.Registry, imageRef.Repository)
+
+		// If an image reference has no tag, then it is considered as getting all tags
+		tags := []string{}
+		if !hasNoTag(imageRef) {
+			tags = []string{imageRef.Tag}
 		}
 
-		for repo, tags := range repoTags {
-			err := o.getTagsAndFetch(ctx, repo, tags, docChannel)
-			if err != nil {
-				return err
-			}
+		// Check for invalid input, where polling and image tag are both specified
+		if o.poll && len(tags) > 0 {
+			return errors.New("image tag should not be specified when using polling")
+		}
+
+		// Call getTagsAndFetch with the image path and tags, and send the resulting documents to the docChannel
+		if err := o.getTagsAndFetch(ctx, imagePath, tags, docChannel); err != nil {
+			return fmt.Errorf("unable to fetch OCI artifacts: %w", err)
+		}
+		// Sleep if in polling mode
+		if o.poll {
+			time.Sleep(o.interval)
 		}
 	}
 
@@ -256,7 +232,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 					Type:   processor.DocumentUnknown,
 					Format: processor.FormatUnknown,
 					SourceInformation: processor.SourceInformation{
-						Collector: string(OCICollector),
+						Collector: OCICollector,
 						Source:    imageTag,
 					},
 				}
@@ -269,7 +245,7 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 	return nil
 }
 
-func contains(elems []string, v string) bool {
+func contains[T comparable](elems []T, v T) bool {
 	for _, s := range elems {
 		if v == s {
 			return true
