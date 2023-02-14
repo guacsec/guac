@@ -33,6 +33,7 @@ type Backend interface {
 	Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error)
 	Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error)
 	HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error)
+	IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

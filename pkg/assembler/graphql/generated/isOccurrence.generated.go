@@ -315,7 +315,7 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "package", "src", "artifacts", "origin", "collector"}
+	fieldsInOrder := [...]string{"justification", "package", "source", "artifacts", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -338,11 +338,11 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "src":
+		case "source":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("src"))
-			it.Src, err = ec.unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+			it.Source, err = ec.unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}

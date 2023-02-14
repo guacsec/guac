@@ -870,11 +870,13 @@ Justification - string value representing why the package or source is represent
 Package - the package object type that represents the package
 Source - the source object type that represents the source
 occurrenceArtifacts - list of artifacts that represent the the package or source
-source - 
-Collector - the GUAC collector that collected the document that generated this attestation
 Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
 
-Note: Package or Source must be specified but not both at the same time
+Note: Package or Source must be specified but not both at the same time.
+Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+
+IsOccurrence does not connect a package with a source. 
 HasSourceAt attestation will be used to connect a package with a source
 
 """
@@ -896,7 +898,7 @@ Fro Source - a SourceName must be specified (name, tag or commit)
 input IsOccurrenceSpec {
   justification: String
   package: PkgSpec
-  src: SourceSpec
+  source: SourceSpec
   artifacts: [ArtifactSpec]
   origin: String
   collector: String

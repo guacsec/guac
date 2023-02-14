@@ -6,12 +6,11 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IsOccurrences is the resolver for the IsOccurrences field.
 func (r *queryResolver) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	panic(fmt.Errorf("not implemented: IsOccurrences - IsOccurrences"))
+	return r.Backend.IsOccurrences(ctx, isOccurrenceSpec)
 }
