@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -98,7 +99,8 @@ func TestParseDocumentTree(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseDocumentTree(ctx, tt.tree)
+			// TODO: add tests for checking identifier strings
+			got, _, err := ParseDocumentTree(ctx, tt.tree)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -182,7 +184,7 @@ func Test_ParserSubscribe(t *testing.T) {
 			ctx, cancel = context.WithTimeout(ctx, time.Second)
 			defer cancel()
 
-			transportFunc := func(d []assembler.Graph) error {
+			transportFunc := func(d []assembler.Graph, _ []*parser_common.IdentifierStrings) error {
 				if len(d) != len(tt.want) {
 					t.Errorf("ParseDocumentTree() = %v, want %v", d, tt.want)
 				}
