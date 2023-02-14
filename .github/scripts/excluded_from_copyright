@@ -19,3 +19,5 @@
 ./pkg/assembler/graphql/resolvers/builder.resolvers.go
 ./pkg/assembler/graphql/generated/hashEqual.generated.go
 ./pkg/assembler/graphql/resolvers/hashEqual.resolvers.go
+./pkg/assembler/graphql/generated/isOccurrence.generated.go
+./pkg/assembler/graphql/resolvers/isOccurrence.resolvers.go
