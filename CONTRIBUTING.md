@@ -31,6 +31,23 @@ information on using pull requests.
 This project follows
 [Google's Open Source Community Guidelines](https://opensource.google/conduct/).
 
+### Community Etiquette
+
+The project maintainers team actively try to make the project successful, but
+unfortunately have a limited set of time to address issues. 
+
+To help make the project easier to manage, contributors can help:
+- Create issues for proposed changes focused around addressing classes
+of problems/enhancements instead of specific instances of them. 
+- Do not create many different minor PRs for movement of files, this makes
+figuring out the pedigree of the code more difficult (e.g. using git blome).
+- Be understanding that maintainers may have a different point of view and
+that they are the ones maintaining the code, and that maintainers may consider
+your viewpoint but may not always agree. 
+- Be understanding that there may be some lead time in getting responses to
+certain issues, especially if they are not blocking or in the critical path
+of project milestones.
+
 ## Getting Started
 
 The project is managed via Github. For contributors that would like to find a
