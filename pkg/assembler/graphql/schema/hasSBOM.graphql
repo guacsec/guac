@@ -15,37 +15,43 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector. 
+# Defines a GraphQL schema for the HasSBOM. It contains the package object, source object, uri, origin and collector. 
 """
-HashEqual is an attestation represents when two artifact hash are similar based on a justification.
+HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 
-Justification - string value representing why the artifacts are the equal
+Package - the package object type that represents the package
+Source - the source object type that represents the source
+uri - identifier string for the SBOM
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
-Artifacts - the artifacts (represented by algorithm and digest) that are equal
+
+Note: Only package object or source object can be defined. Not both.
 
 """
-type HashEqual {
-  justification: String!
-  artifacts: [Artifact!]!
+type HasSBOM {
+  package: Package
+  source: Source
+  uri: String!
   origin: String!
   collector: String!
 }
 
 """
-HashEqualSpec allows filtering the list of HashEqual to return.
+HashEqualSpec allows filtering the list of HasSBOM to return.
 
-Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
+Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
+relationship. 
 """
-input HashEqualSpec {
-  justification: String
-  artifacts: [ArtifactSpec]
+input HasSBOMSpec {
+  package: PkgSpec
+  source: SourceSpec
+  uri: String
   origin: String
   collector: String
 }
 
 
 extend type Query {
-  "Returns all HashEqual"
-  HashEquals(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+  "Returns all HasSBOM"
+  HasSBOMs(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
 }

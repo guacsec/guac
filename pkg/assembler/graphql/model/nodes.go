@@ -78,6 +78,35 @@ type GHSASpec struct {
 	GhsaID *string `json:"ghsaId"`
 }
 
+// HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+//
+// Package - the package object type that represents the package
+// Source - the source object type that represents the source
+// uri - identifier string for the SBOM
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Only package object or source object can be defined. Not both.
+type HasSbom struct {
+	Package   *Package `json:"package"`
+	Source    *Source  `json:"source"`
+	URI       string   `json:"uri"`
+	Origin    string   `json:"origin"`
+	Collector string   `json:"collector"`
+}
+
+// HashEqualSpec allows filtering the list of HasSBOM to return.
+//
+// Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
+// relationship.
+type HasSBOMSpec struct {
+	Package   *PkgSpec    `json:"package"`
+	Source    *SourceSpec `json:"source"`
+	URI       *string     `json:"uri"`
+	Origin    *string     `json:"origin"`
+	Collector *string     `json:"collector"`
+}
+
 // HashEqual is an attestation represents when two artifact hash are similar based on a justification.
 //
 // Justification - string value representing why the artifacts are the equal
@@ -125,8 +154,8 @@ type IsOccurrence struct {
 
 // IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 // Note: Package or Source must be specified but not both at the same time
-// For Package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-// Fro Source - a SourceName must be specified (name, tag or commit)
+// For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+// For source - a SourceName must be specified (name, tag or commit)
 type IsOccurrenceSpec struct {
 	Justification *string         `json:"justification"`
 	Package       *PkgSpec        `json:"package"`

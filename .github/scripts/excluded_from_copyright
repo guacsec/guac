@@ -21,3 +21,5 @@
 ./pkg/assembler/graphql/resolvers/hashEqual.resolvers.go
 ./pkg/assembler/graphql/generated/isOccurrence.generated.go
 ./pkg/assembler/graphql/resolvers/isOccurrence.resolvers.go
+./pkg/assembler/graphql/generated/hasSBOM.generated.go
+./pkg/assembler/graphql/resolvers/hasSBOM.resolvers.go
