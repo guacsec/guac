@@ -271,7 +271,7 @@ type PackageQualifier struct {
 	Value string `json:"value"`
 }
 
-// PackageQualifierInput is the same as PackageQualifier, but usable as query
+// PackageQualifierSpec is the same as PackageQualifier, but usable as query
 // input.
 //
 // GraphQL does not allow input types to contain composite types and does not allow
@@ -282,7 +282,7 @@ type PackageQualifier struct {
 // values for a specific key.
 //
 // TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
-type PackageQualifierInput struct {
+type PackageQualifierSpec struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 }
@@ -332,13 +332,13 @@ type PkgNameSpec struct {
 // on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
 // true. If this field is true, then the qualifiers argument is ignored.
 type PkgSpec struct {
-	Type                     *string                  `json:"type"`
-	Namespace                *string                  `json:"namespace"`
-	Name                     *string                  `json:"name"`
-	Version                  *string                  `json:"version"`
-	Qualifiers               []*PackageQualifierInput `json:"qualifiers"`
-	MatchOnlyEmptyQualifiers *bool                    `json:"matchOnlyEmptyQualifiers"`
-	Subpath                  *string                  `json:"subpath"`
+	Type                     *string                 `json:"type"`
+	Namespace                *string                 `json:"namespace"`
+	Name                     *string                 `json:"name"`
+	Version                  *string                 `json:"version"`
+	Qualifiers               []*PackageQualifierSpec `json:"qualifiers"`
+	MatchOnlyEmptyQualifiers *bool                   `json:"matchOnlyEmptyQualifiers"`
+	Subpath                  *string                 `json:"subpath"`
 }
 
 // Source represents a source.

@@ -130,13 +130,13 @@ input PkgSpec {
   namespace: String
   name: String
   version: String
-  qualifiers: [PackageQualifierInput!] = []
+  qualifiers: [PackageQualifierSpec!] = []
   matchOnlyEmptyQualifiers: Boolean = false
   subpath: String
 }
 
 """
-PackageQualifierInput is the same as PackageQualifier, but usable as query
+PackageQualifierSpec is the same as PackageQualifier, but usable as query
 input.
 
 GraphQL does not allow input types to contain composite types and does not allow
@@ -148,7 +148,7 @@ values for a specific key.
 
 TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
 """
-input PackageQualifierInput {
+input PackageQualifierSpec {
   key: String!
   value: String
 }
