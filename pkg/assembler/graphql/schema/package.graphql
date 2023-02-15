@@ -153,7 +153,39 @@ input PackageQualifierSpec {
   value: String
 }
 
+"""
+PkgInputSpec specifies a package for a mutation.
+
+This is different than PkgSpec because we want to encode mandatatory fields:
+`type` and `name`. All optional fields are given empty default values.
+"""
+input PkgInputSpec {
+  type: String!
+  namespace: String = ""
+  name: String!
+  version: String = ""
+  qualifiers: [PackageQualifierInputSpec!] = []
+  subpath: String = ""
+}
+
+"""
+PackageQualifierInputSpec is the same as PackageQualifier, but usable as
+mutation input.
+
+GraphQL does not allow input types to contain composite types and does not allow
+composite types to contain input types. So, although in this case these two
+types are semantically the same, we have to duplicate the definition.
+
+Both fields are mandatory.
+"""
+input PackageQualifierInputSpec {
+  key: String!
+  value: String!
+}
+
 extend type Query {
   "Returns all packages"
   packages(pkgSpec: PkgSpec): [Package!]!
+  "Ingest a new package. Returns the ingested package trie"
+  ingestPackage(pkg: PkgInputSpec): Package!
 }

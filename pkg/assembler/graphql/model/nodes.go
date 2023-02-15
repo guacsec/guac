@@ -271,6 +271,19 @@ type PackageQualifier struct {
 	Value string `json:"value"`
 }
 
+// PackageQualifierInputSpec is the same as PackageQualifier, but usable as
+// mutation input.
+//
+// GraphQL does not allow input types to contain composite types and does not allow
+// composite types to contain input types. So, although in this case these two
+// types are semantically the same, we have to duplicate the definition.
+//
+// Both fields are mandatory.
+type PackageQualifierInputSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 // PackageQualifierSpec is the same as PackageQualifier, but usable as query
 // input.
 //
@@ -317,6 +330,19 @@ type PkgNameSpec struct {
 	Type      *string `json:"type"`
 	Namespace *string `json:"namespace"`
 	Name      *string `json:"name"`
+}
+
+// PkgInputSpec specifies a package for a mutation.
+//
+// This is different than PkgSpec because we want to encode mandatatory fields:
+// `type` and `name`. All optional fields are given empty default values.
+type PkgInputSpec struct {
+	Type       string                       `json:"type"`
+	Namespace  *string                      `json:"namespace"`
+	Name       string                       `json:"name"`
+	Version    *string                      `json:"version"`
+	Qualifiers []*PackageQualifierInputSpec `json:"qualifiers"`
+	Subpath    *string                      `json:"subpath"`
 }
 
 // PkgSpec allows filtering the list of packages to return.
