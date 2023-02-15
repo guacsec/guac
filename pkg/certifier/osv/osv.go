@@ -99,11 +99,14 @@ func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *root_package
 		}
 	}
 
+	packNodes = append(packNodes, topLevel.Package)
+	topLevelPurl := topLevel.Package.Purl
+
 	packDigest := map[string][]string{}
 	i := 0
 	for i < len(packNodes) {
 		query, lastIndex := getQuery(i, packNodes, packDigest)
-		vulns, err := getVulnerabilities(query, packDigest, docChannel)
+		vulns, err := getVulnerabilities(query, packDigest, topLevelPurl, docChannel)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +143,7 @@ func getQuery(lastIndex int, packNodes []assembler.PackageNode, packDigest map[s
 	return query, stoppedIndex
 }
 
-func getVulnerabilities(query osv_scanner.BatchedQuery, packDigest map[string][]string, docChannel chan<- *processor.Document) ([]osv_scanner.MinimalVulnerability, error) {
+func getVulnerabilities(query osv_scanner.BatchedQuery, packDigest map[string][]string, topLevelPurl string, docChannel chan<- *processor.Document) ([]osv_scanner.MinimalVulnerability, error) {
 
 	resp, err := osv_scanner.MakeRequest(query)
 	if err != nil {
@@ -150,11 +153,15 @@ func getVulnerabilities(query osv_scanner.BatchedQuery, packDigest map[string][]
 	for i, query := range query.Queries {
 		response := resp.Results[i]
 		totalDepVul = append(totalDepVul, response.Vulns...)
-		doc, err := generateDocument(query.Package.PURL, packDigest[query.Package.PURL], response.Vulns)
+		purl := query.Package.PURL
+		doc, err := generateDocument(purl, packDigest[purl], response.Vulns)
 		if err != nil {
 			return nil, err
 		}
-		docChannel <- doc
+		// Do not emit a doc for the top level package as a combined doc will be emitted to include information from all transitive dependencies
+		if topLevelPurl != purl {
+			docChannel <- doc
+		}
 	}
 	return totalDepVul, nil
 }
