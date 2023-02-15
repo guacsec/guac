@@ -300,18 +300,18 @@ func TestCertifyHelperStackOverflow(t *testing.T) {
 	// Create a cyclical dependency between two components
 	A = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
-			Name: "example.com/A",
+			Purl: "pkg:example.com/A",
 		},
 	}
 
 	B = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
-			Purl: "example.com/B",
+			Purl: "pkg:example.com/B",
 		},
 	}
 	C = &root_package.PackageComponent{
 		Package: assembler.PackageNode{
-			Purl: "example.com/C",
+			Purl: "pkg:example.com/C",
 		},
 	}
 	A.DepPackages = []*root_package.PackageComponent{B, C}
