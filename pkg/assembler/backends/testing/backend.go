@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -579,4 +580,8 @@ func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 	return &model.Osv{
 		OsvID: osvID,
 	}, nil
+}
+
+func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+	panic(fmt.Errorf("not implemented: IngestPackage - ingestPackage - test backend"))
 }

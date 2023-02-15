@@ -18,6 +18,7 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -698,4 +699,8 @@ func removeInvalidCharFromProperty(key string) string {
 	// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
 	// be replaced by an "-"
 	return strings.ReplaceAll(key, ".", "_")
+}
+
+func (c *neo4jClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+	panic(fmt.Errorf("not implemented: IngestPackage - ingestPackage - neo4j backend"))
 }
