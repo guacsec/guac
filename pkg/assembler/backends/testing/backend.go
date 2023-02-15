@@ -18,7 +18,6 @@ package testing
 import (
 	"context"
 	"strings"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -583,5 +582,30 @@ func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 }
 
 func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
-	panic(fmt.Errorf("not implemented: IngestPackage - ingestPackage - test backend"))
+	pkgType := pkg.Type
+	name := pkg.Name
+
+	var namespace = ""
+	if pkg.Namespace != nil {
+		namespace = *pkg.Namespace
+	}
+
+	var version = ""
+	if pkg.Version != nil {
+		version = *pkg.Version
+	}
+
+	var subpath = ""
+	if pkg.Subpath != nil {
+		subpath = *pkg.Subpath
+	}
+
+	var qualifiers []string
+	for _, qualifier := range pkg.Qualifiers {
+		qualifiers = append(qualifiers, qualifier.Key, qualifier.Value)
+	}
+
+	newPkg := c.registerPackage(pkgType, namespace, name, version, subpath, qualifiers...)
+
+	return newPkg, nil
 }
