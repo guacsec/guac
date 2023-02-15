@@ -107,7 +107,7 @@ type HasSBOMSpec struct {
 	Collector *string     `json:"collector"`
 }
 
-// HashEqual is an attestation represents when two artifact hash are similar based on a justification.
+// HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
 //
 // Justification - string value representing why the artifacts are the equal
 // Origin - where this attestation was generated from (based on which document)
@@ -128,6 +128,36 @@ type HashEqualSpec struct {
 	Artifacts     []*ArtifactSpec `json:"artifacts"`
 	Origin        *string         `json:"origin"`
 	Collector     *string         `json:"collector"`
+}
+
+// IsDependency is an attestation that represents when a package is dependent on another package
+//
+// Package - the package object type that represents the package
+// dependentPackage - the package object type that represents the packageName (cannot be to the packageVersion)
+// VersionRange - string value for version range that applies to the dependent package
+// Justification - string value representing why the artifacts are the equal
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type IsDependency struct {
+	Package          *Package `json:"package"`
+	DependentPackage *Package `json:"dependentPackage"`
+	VersionRange     string   `json:"versionRange"`
+	Justification    string   `json:"justification"`
+	Origin           string   `json:"origin"`
+	Collector        string   `json:"collector"`
+}
+
+// IsDependencySpec allows filtering the list of IsDependency to return.
+//
+// Note: the package object must be defined to return its dependent packages.
+// Dependent Packages must represent the packageName (cannot be the packageVersion)
+type IsDependencySpec struct {
+	Package          *PkgSpec     `json:"package"`
+	DependentPackage *PkgNameSpec `json:"dependentPackage"`
+	VersionRange     *string      `json:"versionRange"`
+	Justification    *string      `json:"justification"`
+	Origin           *string      `json:"origin"`
+	Collector        *string      `json:"collector"`
 }
 
 // IsOccurrence is an attestation represents when either a package or source is represented by an artifact
@@ -278,6 +308,15 @@ type PackageVersion struct {
 	Version    string              `json:"version"`
 	Qualifiers []*PackageQualifier `json:"qualifiers"`
 	Subpath    string              `json:"subpath"`
+}
+
+// PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
+// as the IsDependency attestation should only be allowed to be made to the packageName node and not the
+// packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
+type PkgNameSpec struct {
+	Type      *string `json:"type"`
+	Namespace *string `json:"namespace"`
+	Name      *string `json:"name"`
 }
 
 // PkgSpec allows filtering the list of packages to return.

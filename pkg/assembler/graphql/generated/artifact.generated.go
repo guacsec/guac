@@ -24,6 +24,7 @@ type QueryResolver interface {
 	Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error)
 	HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error)
 	HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error)
+	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
 	IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
 	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
@@ -61,6 +62,21 @@ func (ec *executionContext) field_Query_HashEquals_args(ctx context.Context, raw
 		}
 	}
 	args["hashEqualSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.IsDependencySpec
+	if tmp, ok := rawArgs["isDependencySpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isDependencySpec"))
+		arg0, err = ec.unmarshalOIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["isDependencySpec"] = arg0
 	return args, nil
 }
 
@@ -661,6 +677,74 @@ func (ec *executionContext) fieldContext_Query_HashEquals(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_IsDependency(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_IsDependency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().IsDependency(rctx, fc.Args["isDependencySpec"].(*model.IsDependencySpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.IsDependency)
+	fc.Result = res
+	return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "package":
+				return ec.fieldContext_IsDependency_package(ctx, field)
+			case "dependentPackage":
+				return ec.fieldContext_IsDependency_dependentPackage(ctx, field)
+			case "versionRange":
+				return ec.fieldContext_IsDependency_versionRange(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsDependency_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsDependency_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsDependency_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_IsDependency_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_IsOccurrences(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_IsOccurrences(ctx, field)
 	if err != nil {
@@ -1245,6 +1329,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_HashEquals(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "IsDependency":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_IsDependency(ctx, field)
 				return res
 			}
 
