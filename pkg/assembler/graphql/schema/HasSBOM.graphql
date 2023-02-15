@@ -27,7 +27,6 @@ Collector - the GUAC collector that collected the document that generated this a
 type HasSBOM {
   package: Package
   source: Source
-  artifact: Artifact
   uri: String!
   origin: String!
   collector: String!
