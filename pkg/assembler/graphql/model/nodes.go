@@ -102,7 +102,7 @@ type HasSbom struct {
 type HasSBOMSpec struct {
 	Package   *PkgSpec    `json:"package"`
 	Source    *SourceSpec `json:"source"`
-	URI       string      `json:"uri"`
+	URI       *string     `json:"uri"`
 	Origin    *string     `json:"origin"`
 	Collector *string     `json:"collector"`
 }

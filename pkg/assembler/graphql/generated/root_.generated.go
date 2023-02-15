@@ -897,7 +897,7 @@ relationship.
 input HasSBOMSpec {
   package: PkgSpec
   source: SourceSpec
-  uri: String!
+  uri: String
   origin: String
   collector: String
 }

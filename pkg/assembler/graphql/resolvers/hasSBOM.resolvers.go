@@ -6,12 +6,11 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // HasSBOMs is the resolver for the HasSBOMs field.
 func (r *queryResolver) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
-	panic(fmt.Errorf("not implemented: HasSBOMs - HasSBOMs"))
+	return r.Backend.HasSBOMs(ctx, hasSBOMSpec)
 }
