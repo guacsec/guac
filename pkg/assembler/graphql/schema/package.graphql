@@ -186,6 +186,9 @@ input PackageQualifierInputSpec {
 extend type Query {
   "Returns all packages"
   packages(pkgSpec: PkgSpec): [Package!]!
+}
+
+extend type Mutation {
   "Ingest a new package. Returns the ingested package trie"
   ingestPackage(pkg: PkgInputSpec): Package!
 }
