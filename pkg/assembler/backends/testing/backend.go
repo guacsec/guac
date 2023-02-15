@@ -27,14 +27,15 @@ import (
 type DemoCredentials struct{}
 
 type demoClient struct {
-	packages   []*model.Package
-	sources    []*model.Source
-	cve        []*model.Cve
-	ghsa       []*model.Ghsa
-	osv        []*model.Osv
-	artifacts  []*model.Artifact
-	builders   []*model.Builder
-	hashEquals []*model.HashEqual
+	packages     []*model.Package
+	sources      []*model.Source
+	cve          []*model.Cve
+	ghsa         []*model.Ghsa
+	osv          []*model.Osv
+	artifacts    []*model.Artifact
+	builders     []*model.Builder
+	hashEquals   []*model.HashEqual
+	isOccurrence []*model.IsOccurrence
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -55,6 +56,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
 	registerAllHashEqual(client)
+	err := registerAllIsOccurrence(client)
+	if err != nil {
+		return nil, err
+	}
 	return client, nil
 }
 
@@ -205,6 +210,55 @@ func filterEqualArtifact(storedArtifacts []*model.Artifact, queryArtifacts []*mo
 		}
 	}
 	return false
+}
+
+func (c *demoClient) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+
+	if isOccurrenceSpec.Package != nil && isOccurrenceSpec.Source != nil {
+		return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
+	}
+
+	var isOccurrences []*model.IsOccurrence
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	for _, h := range c.isOccurrence {
+		if isOccurrenceSpec.Justification == nil || h.Justification == *isOccurrenceSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if isOccurrenceSpec.Collector == nil || h.Collector == *isOccurrenceSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if isOccurrenceSpec.Origin == nil || h.Origin == *isOccurrenceSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if isOccurrenceSpec.Package == nil && isOccurrenceSpec.Source == nil {
+				isOccurrences = append(isOccurrences, h)
+			} else if isOccurrenceSpec.Package != nil && h.Package != nil {
+				if isOccurrenceSpec.Package.Type == nil || h.Package.Type == *isOccurrenceSpec.Package.Type {
+					newPkg := filterPackageNamespace(h.Package, isOccurrenceSpec.Package)
+					if newPkg != nil {
+						isOccurrences = append(isOccurrences, h)
+					}
+				}
+			} else if isOccurrenceSpec.Source != nil && h.Source != nil {
+				if isOccurrenceSpec.Source.Type == nil || h.Source.Type == *isOccurrenceSpec.Source.Type {
+					newSource, err := filterSourceNamespace(h.Source, isOccurrenceSpec.Source)
+					if err != nil {
+						return nil, err
+					}
+					if newSource != nil {
+						isOccurrences = append(isOccurrences, h)
+					}
+				}
+			}
+		}
+	}
+
+	return isOccurrences, nil
 }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {

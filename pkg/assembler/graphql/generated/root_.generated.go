@@ -70,6 +70,15 @@ type ComplexityRoot struct {
 		Origin        func(childComplexity int) int
 	}
 
+	IsOccurrence struct {
+		Collector           func(childComplexity int) int
+		Justification       func(childComplexity int) int
+		OccurrenceArtifacts func(childComplexity int) int
+		Origin              func(childComplexity int) int
+		Package             func(childComplexity int) int
+		Source              func(childComplexity int) int
+	}
+
 	OSV struct {
 		OsvID func(childComplexity int) int
 	}
@@ -105,14 +114,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Artifacts  func(childComplexity int, artifactSpec *model.ArtifactSpec) int
-		Builders   func(childComplexity int, builderSpec *model.BuilderSpec) int
-		Cve        func(childComplexity int, cveSpec *model.CVESpec) int
-		Ghsa       func(childComplexity int, ghsaSpec *model.GHSASpec) int
-		HashEquals func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
-		Osv        func(childComplexity int, osvSpec *model.OSVSpec) int
-		Packages   func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Sources    func(childComplexity int, sourceSpec *model.SourceSpec) int
+		Artifacts     func(childComplexity int, artifactSpec *model.ArtifactSpec) int
+		Builders      func(childComplexity int, builderSpec *model.BuilderSpec) int
+		Cve           func(childComplexity int, cveSpec *model.CVESpec) int
+		Ghsa          func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		HashEquals    func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
+		IsOccurrences func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
+		Osv           func(childComplexity int, osvSpec *model.OSVSpec) int
+		Packages      func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Sources       func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
 
 	Source struct {
@@ -230,6 +240,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HashEqual.Origin(childComplexity), true
+
+	case "IsOccurrence.collector":
+		if e.complexity.IsOccurrence.Collector == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.Collector(childComplexity), true
+
+	case "IsOccurrence.justification":
+		if e.complexity.IsOccurrence.Justification == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.Justification(childComplexity), true
+
+	case "IsOccurrence.occurrenceArtifacts":
+		if e.complexity.IsOccurrence.OccurrenceArtifacts == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.OccurrenceArtifacts(childComplexity), true
+
+	case "IsOccurrence.origin":
+		if e.complexity.IsOccurrence.Origin == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.Origin(childComplexity), true
+
+	case "IsOccurrence.package":
+		if e.complexity.IsOccurrence.Package == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.Package(childComplexity), true
+
+	case "IsOccurrence.source":
+		if e.complexity.IsOccurrence.Source == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.Source(childComplexity), true
 
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
@@ -382,6 +434,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.HashEquals(childComplexity, args["hashEqualSpec"].(*model.HashEqualSpec)), true
 
+	case "Query.IsOccurrences":
+		if e.complexity.Query.IsOccurrences == nil {
+			break
+		}
+
+		args, err := ec.field_Query_IsOccurrences_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IsOccurrences(childComplexity, args["isOccurrenceSpec"].(*model.IsOccurrenceSpec)), true
+
 	case "Query.osv":
 		if e.complexity.Query.Osv == nil {
 			break
@@ -480,6 +544,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHashEqualSpec,
+		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageQualifierInput,
 		ec.unmarshalInputPkgSpec,
@@ -780,6 +845,70 @@ extend type Query {
   HashEquals(hashEqualSpec: HashEqualSpec): [HashEqual!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/isOccurrence.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the IsOccurrence. It contains the justification, package, source object,
+#  occurrenceArtifacts, source of the attestation, and collector
+"""
+IsOccurrence is an attestation represents when either a package or source is represented by an artifact
+Justification - string value representing why the package or source is represented by the specified artifact
+Package - the package object type that represents the package
+Source - the source object type that represents the source
+occurrenceArtifacts - list of artifacts that represent the the package or source
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+
+Note: Package or Source must be specified but not both at the same time.
+Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+
+IsOccurrence does not connect a package with a source. 
+HasSourceAt attestation will be used to connect a package with a source
+
+"""
+type IsOccurrence {
+  justification: String!
+  package: Package
+  source: Source
+  occurrenceArtifacts: [Artifact!]!
+  origin: String!
+  collector: String!
+}
+
+"""
+IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
+Note: Package or Source must be specified but not both at the same time
+For Package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+Fro Source - a SourceName must be specified (name, tag or commit)
+"""
+input IsOccurrenceSpec {
+  justification: String
+  package: PkgSpec
+  source: SourceSpec
+  artifacts: [ArtifactSpec]
+  origin: String
+  collector: String
+}
+
+
+extend type Query {
+  "Returns all IsOccurrence"
+  IsOccurrences(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
+}`, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #

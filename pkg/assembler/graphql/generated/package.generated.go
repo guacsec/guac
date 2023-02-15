@@ -1130,6 +1130,13 @@ func (ec *executionContext) marshalNPackageVersion2ᚖgithubᚗcomᚋguacsecᚋg
 	return ec._PackageVersion(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx context.Context, sel ast.SelectionSet, v *model.Package) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Package(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOPackageQualifierInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputᚄ(ctx context.Context, v interface{}) ([]*model.PackageQualifierInput, error) {
 	if v == nil {
 		return nil, nil

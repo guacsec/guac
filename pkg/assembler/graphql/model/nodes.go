@@ -101,6 +101,41 @@ type HashEqualSpec struct {
 	Collector     *string         `json:"collector"`
 }
 
+// IsOccurrence is an attestation represents when either a package or source is represented by an artifact
+// Justification - string value representing why the package or source is represented by the specified artifact
+// Package - the package object type that represents the package
+// Source - the source object type that represents the source
+// occurrenceArtifacts - list of artifacts that represent the the package or source
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Package or Source must be specified but not both at the same time.
+// Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+//
+// IsOccurrence does not connect a package with a source.
+// HasSourceAt attestation will be used to connect a package with a source
+type IsOccurrence struct {
+	Justification       string      `json:"justification"`
+	Package             *Package    `json:"package"`
+	Source              *Source     `json:"source"`
+	OccurrenceArtifacts []*Artifact `json:"occurrenceArtifacts"`
+	Origin              string      `json:"origin"`
+	Collector           string      `json:"collector"`
+}
+
+// IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
+// Note: Package or Source must be specified but not both at the same time
+// For Package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+// Fro Source - a SourceName must be specified (name, tag or commit)
+type IsOccurrenceSpec struct {
+	Justification *string         `json:"justification"`
+	Package       *PkgSpec        `json:"package"`
+	Source        *SourceSpec     `json:"source"`
+	Artifacts     []*ArtifactSpec `json:"artifacts"`
+	Origin        *string         `json:"origin"`
+	Collector     *string         `json:"collector"`
+}
+
 // OSV represents Open Source Vulnerability . It contains a OSV ID.
 type Osv struct {
 	OsvID []*OSVId `json:"osvId"`
