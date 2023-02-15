@@ -63,6 +63,14 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	HasSBOM struct {
+		Collector func(childComplexity int) int
+		Origin    func(childComplexity int) int
+		Package   func(childComplexity int) int
+		Source    func(childComplexity int) int
+		URI       func(childComplexity int) int
+	}
+
 	HashEqual struct {
 		Artifacts     func(childComplexity int) int
 		Collector     func(childComplexity int) int
@@ -118,6 +126,7 @@ type ComplexityRoot struct {
 		Builders      func(childComplexity int, builderSpec *model.BuilderSpec) int
 		Cve           func(childComplexity int, cveSpec *model.CVESpec) int
 		Ghsa          func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		HasSBOMs      func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
 		HashEquals    func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
 		IsOccurrences func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		Osv           func(childComplexity int, osvSpec *model.OSVSpec) int
@@ -212,6 +221,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GHSAId.ID(childComplexity), true
+
+	case "HasSBOM.collector":
+		if e.complexity.HasSBOM.Collector == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.Collector(childComplexity), true
+
+	case "HasSBOM.origin":
+		if e.complexity.HasSBOM.Origin == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.Origin(childComplexity), true
+
+	case "HasSBOM.package":
+		if e.complexity.HasSBOM.Package == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.Package(childComplexity), true
+
+	case "HasSBOM.source":
+		if e.complexity.HasSBOM.Source == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.Source(childComplexity), true
+
+	case "HasSBOM.uri":
+		if e.complexity.HasSBOM.URI == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.URI(childComplexity), true
 
 	case "HashEqual.artifacts":
 		if e.complexity.HashEqual.Artifacts == nil {
@@ -422,6 +466,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(*model.GHSASpec)), true
 
+	case "Query.HasSBOMs":
+		if e.complexity.Query.HasSBOMs == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasSBOMs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasSBOMs(childComplexity, args["hasSBOMSpec"].(*model.HasSBOMSpec)), true
+
 	case "Query.HashEquals":
 		if e.complexity.Query.HashEquals == nil {
 			break
@@ -543,6 +599,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputGHSASpec,
+		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHashEqualSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputOSVSpec,
@@ -793,6 +850,64 @@ extend type Query {
   ghsa(ghsaSpec: GHSASpec): [GHSA!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/hasSBOM.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the HasSBOM. It contains the package object, source object, uri, origin and collector. 
+"""
+HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+
+Package - the package object type that represents the package
+Source - the source object type that represents the source
+uri - identifier string for the SBOM
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+
+Note: Only package object or source object can be defined. Not both.
+
+"""
+type HasSBOM {
+  package: Package
+  source: Source
+  uri: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+HashEqualSpec allows filtering the list of HasSBOM to return.
+
+Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
+relationship. 
+"""
+input HasSBOMSpec {
+  package: PkgSpec
+  source: SourceSpec
+  uri: String!
+  origin: String
+  collector: String
+}
+
+
+extend type Query {
+  "Returns all HasSBOM"
+  HasSBOMs(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+}
+`, BuiltIn: false},
 	{Name: "../schema/hashEqual.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -810,7 +925,7 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, source and collector. 
+# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector. 
 """
 HashEqual is an attestation represents when two artifact hash are similar based on a justification.
 
@@ -892,8 +1007,8 @@ type IsOccurrence {
 """
 IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 Note: Package or Source must be specified but not both at the same time
-For Package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-Fro Source - a SourceName must be specified (name, tag or commit)
+For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+For source - a SourceName must be specified (name, tag or commit)
 """
 input IsOccurrenceSpec {
   justification: String
@@ -908,7 +1023,8 @@ input IsOccurrenceSpec {
 extend type Query {
   "Returns all IsOccurrence"
   IsOccurrences(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
