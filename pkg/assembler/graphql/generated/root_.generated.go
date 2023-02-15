@@ -78,6 +78,15 @@ type ComplexityRoot struct {
 		Origin        func(childComplexity int) int
 	}
 
+	IsDependency struct {
+		Collector        func(childComplexity int) int
+		DependentPackage func(childComplexity int) int
+		Justification    func(childComplexity int) int
+		Origin           func(childComplexity int) int
+		Package          func(childComplexity int) int
+		VersionRange     func(childComplexity int) int
+	}
+
 	IsOccurrence struct {
 		Collector           func(childComplexity int) int
 		Justification       func(childComplexity int) int
@@ -128,6 +137,7 @@ type ComplexityRoot struct {
 		Ghsa          func(childComplexity int, ghsaSpec *model.GHSASpec) int
 		HasSBOMs      func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
 		HashEquals    func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
+		IsDependency  func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
 		IsOccurrences func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		Osv           func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages      func(childComplexity int, pkgSpec *model.PkgSpec) int
@@ -284,6 +294,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HashEqual.Origin(childComplexity), true
+
+	case "IsDependency.collector":
+		if e.complexity.IsDependency.Collector == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.Collector(childComplexity), true
+
+	case "IsDependency.dependentPackage":
+		if e.complexity.IsDependency.DependentPackage == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.DependentPackage(childComplexity), true
+
+	case "IsDependency.justification":
+		if e.complexity.IsDependency.Justification == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.Justification(childComplexity), true
+
+	case "IsDependency.origin":
+		if e.complexity.IsDependency.Origin == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.Origin(childComplexity), true
+
+	case "IsDependency.package":
+		if e.complexity.IsDependency.Package == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.Package(childComplexity), true
+
+	case "IsDependency.versionRange":
+		if e.complexity.IsDependency.VersionRange == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.VersionRange(childComplexity), true
 
 	case "IsOccurrence.collector":
 		if e.complexity.IsOccurrence.Collector == nil {
@@ -490,6 +542,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.HashEquals(childComplexity, args["hashEqualSpec"].(*model.HashEqualSpec)), true
 
+	case "Query.IsDependency":
+		if e.complexity.Query.IsDependency == nil {
+			break
+		}
+
+		args, err := ec.field_Query_IsDependency_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IsDependency(childComplexity, args["isDependencySpec"].(*model.IsDependencySpec)), true
+
 	case "Query.IsOccurrences":
 		if e.complexity.Query.IsOccurrences == nil {
 			break
@@ -601,9 +665,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHashEqualSpec,
+		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageQualifierInput,
+		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
 		ec.unmarshalInputSourceQualifierInput,
 		ec.unmarshalInputSourceSpec,
@@ -927,7 +993,7 @@ extend type Query {
 
 # Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector. 
 """
-HashEqual is an attestation represents when two artifact hash are similar based on a justification.
+HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
 
 Justification - string value representing why the artifacts are the equal
 Origin - where this attestation was generated from (based on which document)
@@ -958,6 +1024,77 @@ input HashEqualSpec {
 extend type Query {
   "Returns all HashEqual"
   HashEquals(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/isDependency.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the IsDependency. It contains the package object, dependent package object
+# version range of the dependent package that it applies to, justification, origin and collector.
+"""
+IsDependency is an attestation that represents when a package is dependent on another package
+
+Package - the package object type that represents the package
+dependentPackage - the package object type that represents the packageName (cannot be to the packageVersion)
+VersionRange - string value for version range that applies to the dependent package
+Justification - string value representing why the artifacts are the equal
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+
+"""
+type IsDependency {
+  package: Package!
+  dependentPackage: Package!
+  versionRange: String!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+IsDependencySpec allows filtering the list of IsDependency to return.
+
+Note: the package object must be defined to return its dependent packages.
+Dependent Packages must represent the packageName (cannot be the packageVersion)
+"""
+input IsDependencySpec {
+  package: PkgSpec
+  dependentPackage: PkgNameSpec
+  versionRange: String
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
+as the IsDependency attestation should only be allowed to be made to the packageName node and not the
+packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
+"""
+input PkgNameSpec {
+  type: String
+  namespace: String
+  name: String
+}
+
+
+extend type Query {
+  "Returns all IsDependency"
+  IsDependency(isDependencySpec: IsDependencySpec): [IsDependency!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
