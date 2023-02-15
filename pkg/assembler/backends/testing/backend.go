@@ -585,17 +585,17 @@ func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec)
 	pkgType := pkg.Type
 	name := pkg.Name
 
-	var namespace = ""
+	namespace := ""
 	if pkg.Namespace != nil {
 		namespace = *pkg.Namespace
 	}
 
-	var version = ""
+	version := ""
 	if pkg.Version != nil {
 		version = *pkg.Version
 	}
 
-	var subpath = ""
+	subpath := ""
 	if pkg.Subpath != nil {
 		subpath = *pkg.Subpath
 	}
