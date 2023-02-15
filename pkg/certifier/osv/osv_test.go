@@ -92,6 +92,57 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		rootComponent: assembler.AttestationNode{},
 		wantErr:       true,
 		errMessage:    ErrOSVComponenetTypeMismatch,
+	}, {
+		name:          "ensure intermediate vulnerabilities are reported",
+		rootComponent: testdata.VertxWeb,
+		want: []*processor.Document{
+			{
+				Blob:   []byte(testdata.VertxWebCommonAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: INVOC_URI,
+					Source:    INVOC_URI,
+				},
+			},
+			{
+				Blob:   []byte(testdata.VertxAuthCommonAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: INVOC_URI,
+					Source:    INVOC_URI,
+				},
+			},
+			{
+				Blob:   []byte(testdata.VertxBridgeCommonAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: INVOC_URI,
+					Source:    INVOC_URI,
+				},
+			},
+			{
+				Blob:   []byte(testdata.VertxCoreCommonAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: INVOC_URI,
+					Source:    INVOC_URI,
+				},
+			},
+			{
+				Blob:   []byte(testdata.VertxWebAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: INVOC_URI,
+					Source:    INVOC_URI,
+				},
+			},
+		},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

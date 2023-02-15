@@ -802,6 +802,185 @@ var (
 		Package:     rootPackage,
 		DepPackages: []*root_package.PackageComponent{secondLevel, log4j},
 	}
+
+	VertxWebCommonAttestation = `{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"subject": [
+			{
+				"name": "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar",
+				"digest": null
+			}
+		],
+		"predicate": {
+			"invocation": {
+				"uri": "guac",
+				"producer_id": "guacsec/guac"
+			},
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14",
+				"db": {}
+			},
+			"metadata": {
+				"scannedOn": "2023-02-15T11:10:08.986308-08:00"
+			}
+		}
+	}`
+
+	VertxAuthCommonAttestation = `{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"subject": [
+			{
+				"name": "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar",
+				"digest": null
+			}
+		],
+		"predicate": {
+			"invocation": {
+				"uri": "guac",
+				"producer_id": "guacsec/guac"
+			},
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14",
+				"db": {}
+			},
+			"metadata": {
+				"scannedOn": "2023-02-15T11:10:08.986401-08:00"
+			}
+		}
+	}`
+
+	VertxBridgeCommonAttestation = `{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"subject": [
+			{
+				"name": "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar",
+				"digest": null
+			}
+		],
+		"predicate": {
+			"invocation": {
+				"uri": "guac",
+				"producer_id": "guacsec/guac"
+			},
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14",
+				"db": {}
+			},
+			"metadata": {
+				"scannedOn": "2023-02-15T11:10:08.98646-08:00"
+			}
+		}
+	}`
+
+	VertxCoreCommonAttestation = `{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"subject": [
+			{
+				"name": "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar",
+				"digest": null
+			}
+		],
+		"predicate": {
+			"invocation": {
+				"uri": "guac",
+				"producer_id": "guacsec/guac"
+			},
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14",
+				"db": {}
+			},
+			"metadata": {
+				"scannedOn": "2023-02-15T11:10:08.986506-08:00"
+			}
+		}
+	}`
+
+	VertxWebAttestation = `{
+		"_type": "https://in-toto.io/Statement/v0.1",
+		"predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+		"subject": [
+			{
+				"name": "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar",
+				"digest": null
+			}
+		],
+		"predicate": {
+			"invocation": {
+				"uri": "guac",
+				"producer_id": "guacsec/guac"
+			},
+			"scanner": {
+				"uri": "osv.dev",
+				"version": "0.0.14",
+				"db": {},
+				"result": [
+					{
+						"vulnerability_id": "GHSA-53jx-vvf9-4x38"
+					}
+				]
+			},
+			"metadata": {
+				"scannedOn": "2023-02-15T11:10:08.986592-08:00"
+			}
+		}
+	}`
+
+	vertxWebCommonPackage = assembler.PackageNode{
+		Purl: "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar",
+	}
+
+	vertxAuthCommonPackage = assembler.PackageNode{
+		Purl: "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar",
+	}
+
+	vertxBridgeCommonPackage = assembler.PackageNode{
+		Purl: "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar",
+	}
+
+	vertxCoreCommonPackage = assembler.PackageNode{
+		Purl: "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar",
+	}
+
+	vertxWebPackage = assembler.PackageNode{
+		Purl: "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar",
+	}
+
+	// ignore dependencies for the test
+	vertxWebCommon = &root_package.PackageComponent{
+		Package:     vertxWebCommonPackage,
+		DepPackages: []*root_package.PackageComponent{},
+	}
+
+	// ignore dependencies for the test
+	vertxAuthCommon = &root_package.PackageComponent{
+		Package:     vertxAuthCommonPackage,
+		DepPackages: []*root_package.PackageComponent{},
+	}
+
+	// ignore dependencies for the test
+	vertxBridgeCommon = &root_package.PackageComponent{
+		Package:     vertxBridgeCommonPackage,
+		DepPackages: []*root_package.PackageComponent{},
+	}
+
+	// ignore dependencies for the test
+	vertxCore = &root_package.PackageComponent{
+		Package:     vertxCoreCommonPackage,
+		DepPackages: []*root_package.PackageComponent{},
+	}
+
+	VertxWeb = &root_package.PackageComponent{
+		Package:     vertxWebPackage,
+		DepPackages: []*root_package.PackageComponent{vertxWebCommon, vertxAuthCommon, vertxBridgeCommon, vertxCore},
+	}
 )
 
 func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
