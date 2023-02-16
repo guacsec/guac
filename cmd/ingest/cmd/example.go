@@ -44,6 +44,7 @@ var exampleCmd = &cobra.Command{
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
 			viper.GetString("natsaddr"),
+			viper.GetString("csub-addr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -66,7 +67,8 @@ var exampleCmd = &cobra.Command{
 			Edges: []assembler.GuacEdge{},
 		}
 		for _, doc := range docs {
-			inputs, err := parser.ParseDocumentTree(ctx, doc)
+			// This is a test example, so we will ignore calling out to a collectsub service
+			inputs, _, err := parser.ParseDocumentTree(ctx, doc)
 			if err != nil {
 				logger.Errorf("unable to parse document: %v", err)
 				os.Exit(1)

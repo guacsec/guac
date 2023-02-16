@@ -48,3 +48,7 @@ func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities
 func (b *GraphBuilder) GetIdentities() []assembler.IdentityNode {
 	return b.foundIdentities
 }
+
+func (b *GraphBuilder) GetIdentifiers(ctx context.Context) (*IdentifierStrings, error) {
+	return b.docParser.GetIdentifiers(ctx)
+}

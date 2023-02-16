@@ -24,10 +24,13 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
+	"github.com/guacsec/guac/pkg/collectsub/collectsub/input"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/process"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
+	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,6 +42,7 @@ type options struct {
 	pass     string
 	realm    string
 	natsAddr string
+	csubAddr string
 }
 
 var ingestCmd = &cobra.Command{
@@ -52,6 +56,7 @@ var ingestCmd = &cobra.Command{
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
 			viper.GetString("natsaddr"),
+			viper.GetString("csub-addr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -72,6 +77,14 @@ var ingestCmd = &cobra.Command{
 		}
 		defer jetStream.Close()
 
+		// initialize collectsub client
+		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		if err != nil {
+			logger.Errorf("collectsub client initialization failed with error: %w", err)
+			os.Exit(1)
+		}
+		defer csubClient.Close()
+
 		assemblerFunc, err := getAssembler(opts)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -90,10 +103,18 @@ var ingestCmd = &cobra.Command{
 			return nil
 		}
 
-		ingestorTransportFunc := func(d []assembler.Graph) error {
+		ingestorTransportFunc := func(d []assembler.Graph, i []*parser_common.IdentifierStrings) error {
 			err := assemblerFunc(d)
 			if err != nil {
 				return err
+			}
+
+			entries := input.IdentifierStringsSliceToCollectEntries(i)
+			if len(entries) > 0 {
+				logger.Infof("got entries to add: %v", entries)
+				if err := csubClient.AddCollectEntries(ctx, entries); err != nil {
+					logger.Errorf("unable to add collect entries: %v", err)
+				}
 			}
 			return nil
 		}
@@ -134,13 +155,14 @@ var ingestCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, csubAddr string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
 	opts.natsAddr = natsAddr
+	opts.csubAddr = csubAddr
 
 	return opts, nil
 }
@@ -151,7 +173,7 @@ func getProcessor(ctx context.Context, transportFunc func(processor.DocumentTree
 	}, nil
 }
 
-func getIngestor(ctx context.Context, transportFunc func([]assembler.Graph) error) (func() error, error) {
+func getIngestor(ctx context.Context, transportFunc func([]assembler.Graph, []*parser_common.IdentifierStrings) error) (func() error, error) {
 	return func() error {
 		err := parser.Subscribe(ctx, transportFunc)
 		if err != nil {

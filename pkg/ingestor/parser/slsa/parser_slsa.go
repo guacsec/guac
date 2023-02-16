@@ -34,20 +34,22 @@ const (
 )
 
 type slsaParser struct {
-	doc          *processor.Document
-	subjects     []assembler.ArtifactNode
-	dependencies []assembler.ArtifactNode
-	attestations []assembler.AttestationNode
-	builders     []assembler.BuilderNode
+	doc               *processor.Document
+	subjects          []assembler.ArtifactNode
+	dependencies      []assembler.ArtifactNode
+	attestations      []assembler.AttestationNode
+	builders          []assembler.BuilderNode
+	identifierStrings *common.IdentifierStrings
 }
 
 // NewSLSAParser initializes the slsaParser
 func NewSLSAParser() common.DocumentParser {
 	return &slsaParser{
-		subjects:     []assembler.ArtifactNode{},
-		dependencies: []assembler.ArtifactNode{},
-		attestations: []assembler.AttestationNode{},
-		builders:     []assembler.BuilderNode{},
+		subjects:          []assembler.ArtifactNode{},
+		dependencies:      []assembler.ArtifactNode{},
+		attestations:      []assembler.AttestationNode{},
+		builders:          []assembler.BuilderNode{},
+		identifierStrings: &common.IdentifierStrings{},
 	}
 }
 
@@ -71,6 +73,7 @@ func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 		for alg, ds := range sub.Digest {
 			s.subjects = append(s.subjects, assembler.ArtifactNode{
 				Name: sub.Name, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
+			s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, sub.Name)
 		}
 	}
 }
@@ -79,9 +82,9 @@ func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
 	// append dependency nodes for the materials
 	for _, mat := range statement.Predicate.Materials {
 		for alg, ds := range mat.Digest {
-
 			s.dependencies = append(s.dependencies, assembler.ArtifactNode{
 				Name: mat.URI, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
+			s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, mat.URI)
 		}
 	}
 }
@@ -152,5 +155,5 @@ func (s *slsaParser) GetIdentities(ctx context.Context) []assembler.IdentityNode
 }
 
 func (s *slsaParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return s.identifierStrings, nil
 }

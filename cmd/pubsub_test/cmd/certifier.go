@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/cobra"
@@ -108,7 +109,8 @@ var certifierCmd = &cobra.Command{
 			return nil
 		}
 
-		ingestorTransportFunc := func(d []assembler.Graph) error {
+		// for pubsub_test we ignore identifier strings as we don't connect to a collectsub service
+		ingestorTransportFunc := func(d []assembler.Graph, i []*parser_common.IdentifierStrings) error {
 			err := assemblerFunc(d)
 			if err != nil {
 				return err
