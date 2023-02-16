@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"reflect"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -38,6 +39,7 @@ type demoClient struct {
 	isOccurrence []*model.IsOccurrence
 	hasSBOM      []*model.HasSbom
 	isDependency []*model.IsDependency
+	certifyPkg   []*model.CertifyPkg
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -67,6 +69,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	err = registerAllIsDependency(client)
+	if err != nil {
+		return nil, err
+	}
+	err = registerAllCertifyPkg(client)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +200,7 @@ func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEq
 		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
 			if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
 				hashEquals = append(hashEquals, h)
-			} else if len(hashEqualSpec.Artifacts) == 0 {
+			} else {
 				hashEquals = append(hashEquals, h)
 			}
 		}
@@ -375,6 +381,68 @@ func (c *demoClient) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 	}
 
 	return collectedHasSBOM, nil
+}
+
+func (c *demoClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
+	var certifyPkgs []*model.CertifyPkg
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+
+	queryPkgs, err := getPackagesFromInput(c, ctx, certifyPkgSpec.Packages)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, h := range c.certifyPkg {
+		if certifyPkgSpec.Justification == nil || h.Justification == *certifyPkgSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if certifyPkgSpec.Collector == nil || h.Collector == *certifyPkgSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if certifyPkgSpec.Origin == nil || h.Origin == *certifyPkgSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if len(queryPkgs) > 0 {
+				for _, pkg := range queryPkgs {
+					if packagesContain(h.Packages, pkg) {
+						certifyPkgs = append(certifyPkgs, h)
+					}
+				}
+			} else {
+				certifyPkgs = append(certifyPkgs, h)
+			}
+		}
+	}
+
+	return certifyPkgs, nil
+}
+
+func packagesContain(selectedPackages []*model.Package, queryPackage *model.Package) bool {
+	for _, pkg := range selectedPackages {
+		if reflect.DeepEqual(pkg, queryPackage) {
+			return true
+		}
+	}
+	return false
+}
+
+func getPackagesFromInput(client *demoClient, ctx context.Context, queryPackages []*model.PkgSpec) ([]*model.Package, error) {
+	collectedPkg := []*model.Package{}
+	for _, value := range queryPackages {
+		selectedPackage, err := client.Packages(context.TODO(), value)
+		if err != nil {
+			return nil, err
+		}
+		if selectedPackage != nil {
+			collectedPkg = append(collectedPkg, selectedPackage...)
+		}
+	}
+	return collectedPkg, nil
 }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
