@@ -751,8 +751,8 @@ func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, 
 				return ec.fieldContext_HasSourceAt_package(ctx, field)
 			case "source":
 				return ec.fieldContext_HasSourceAt_source(ctx, field)
-			case "since":
-				return ec.fieldContext_HasSourceAt_since(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_HasSourceAt_knownSince(ctx, field)
 			case "justification":
 				return ec.fieldContext_HasSourceAt_justification(ctx, field)
 			case "origin":

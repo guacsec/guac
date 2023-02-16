@@ -493,6 +493,7 @@ func getPackagesFromInput(client *demoClient, ctx context.Context, queryPackages
 	}
 	return collectedPkg, nil
 }
+
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
 	var namespaces []*model.PackageNamespace
 	for _, ns := range pkg.Namespaces {

@@ -19,7 +19,6 @@
 # id associated with vulnerability (ghsa id)
 """
 GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
-
 """
 type GHSA {
   ghsaId: [GHSAId!]!

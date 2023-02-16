@@ -23,7 +23,6 @@ uri is mandatory and represents the specific builder.
 
 This node is a singleton: backends guarantee that there is exactly one node with
 the same `uri` value.
-
 """
 type Builder {
   uri: String!

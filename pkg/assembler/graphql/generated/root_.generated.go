@@ -82,9 +82,9 @@ type ComplexityRoot struct {
 	HasSourceAt struct {
 		Collector     func(childComplexity int) int
 		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Package       func(childComplexity int) int
-		Since         func(childComplexity int) int
 		Source        func(childComplexity int) int
 	}
 
@@ -332,6 +332,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasSourceAt.Justification(childComplexity), true
 
+	case "HasSourceAt.knownSince":
+		if e.complexity.HasSourceAt.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.KnownSince(childComplexity), true
+
 	case "HasSourceAt.origin":
 		if e.complexity.HasSourceAt.Origin == nil {
 			break
@@ -345,13 +352,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSourceAt.Package(childComplexity), true
-
-	case "HasSourceAt.since":
-		if e.complexity.HasSourceAt.Since == nil {
-			break
-		}
-
-		return e.complexity.HasSourceAt.Since(childComplexity), true
 
 	case "HasSourceAt.source":
 		if e.complexity.HasSourceAt.Source == nil {
@@ -889,7 +889,6 @@ Artifact represents the artifact and contains a digest field
 
 algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
 digest is mandatory in the form checksum.Value.
-
 """
 type Artifact {
   algorithm: String!
@@ -935,7 +934,6 @@ uri is mandatory and represents the specific builder.
 
 This node is a singleton: backends guarantee that there is exactly one node with
 the same ` + "`" + `uri` + "`" + ` value.
-
 """
 type Builder {
   uri: String!
@@ -1033,7 +1031,6 @@ year is mandatory.
 
 This node is a singleton: backends guarantee that there is exactly one node with
 the same ` + "`" + `year` + "`" + ` value.
-
 """
 type CVE {
   year: String!
@@ -1086,7 +1083,6 @@ extend type Query {
 # id associated with vulnerability (ghsa id)
 """
 GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
-
 """
 type GHSA {
   ghsaId: [GHSAId!]!
@@ -1144,7 +1140,6 @@ Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
 
 Note: Only package object or source object can be defined. Not both.
-
 """
 type HasSBOM {
   package: Package
@@ -1197,18 +1192,15 @@ HasSourceAt is an attestation represents that a package object has a source obje
 
 Package - the package object type that represents the package
 Source - the source object type that represents the source
-Since - timestamp when this was last checked
+KnownSince - timestamp when this was last checked (exact time)
 Justification - string value representing why the package has a source specified
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
-
 """
-scalar Time
-
 type HasSourceAt {
   package: Package!
   source: Source!
-  since: Time!
+  knownSince: String!
   justification: String!
   origin: String!
   collector: String!
@@ -1216,12 +1208,11 @@ type HasSourceAt {
 
 """
 HasSourceAtSpec allows filtering the list of HasSourceAt to return.
-
 """
 input HasSourceAtSpec {
   package: PkgSpec
   source: SourceSpec
-  since: Time
+  knownSince: String
   justification: String
   origin: String
   collector: String
@@ -1258,7 +1249,6 @@ Justification - string value representing why the artifacts are the equal
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
 Artifacts - the artifacts (represented by algorithm and digest) that are equal
-
 """
 type HashEqual {
   justification: String!
@@ -1313,7 +1303,6 @@ VersionRange - string value for version range that applies to the dependent pack
 Justification - string value representing why the artifacts are the equal
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
-
 """
 type IsDependency {
   package: Package!
@@ -1389,7 +1378,6 @@ Attestation must occur at the PackageName or the PackageVersion or at the Source
 
 IsOccurrence does not connect a package with a source. 
 HasSourceAt attestation will be used to connect a package with a source
-
 """
 type IsOccurrence {
   justification: String!
@@ -1442,7 +1430,6 @@ extend type Query {
 # id associated with vulnerability (osv id)
 """
 OSV represents Open Source Vulnerability . It contains a OSV ID.
-
 """
 type OSV {
   osvId: [OSVId!]!

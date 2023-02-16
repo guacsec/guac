@@ -26,7 +26,6 @@ Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
 
 Note: Only package object or source object can be defined. Not both.
-
 """
 type HasSBOM {
   package: Package

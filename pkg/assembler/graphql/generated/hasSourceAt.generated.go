@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -129,8 +128,8 @@ func (ec *executionContext) fieldContext_HasSourceAt_source(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSourceAt_since(ctx context.Context, field graphql.CollectedField, obj *model.HasSourceAt) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSourceAt_since(ctx, field)
+func (ec *executionContext) _HasSourceAt_knownSince(ctx context.Context, field graphql.CollectedField, obj *model.HasSourceAt) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasSourceAt_knownSince(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -143,7 +142,7 @@ func (ec *executionContext) _HasSourceAt_since(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Since, nil
+		return obj.KnownSince, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -155,19 +154,19 @@ func (ec *executionContext) _HasSourceAt_since(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(time.Time)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSourceAt_since(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSourceAt_knownSince(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSourceAt",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -316,7 +315,7 @@ func (ec *executionContext) unmarshalInputHasSourceAtSpec(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"package", "source", "since", "justification", "origin", "collector"}
+	fieldsInOrder := [...]string{"package", "source", "knownSince", "justification", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -339,11 +338,11 @@ func (ec *executionContext) unmarshalInputHasSourceAtSpec(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
-		case "since":
+		case "knownSince":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("since"))
-			it.Since, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
+			it.KnownSince, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -409,9 +408,9 @@ func (ec *executionContext) _HasSourceAt(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "since":
+		case "knownSince":
 
-			out.Values[i] = ec._HasSourceAt_since(ctx, field, obj)
+			out.Values[i] = ec._HasSourceAt_knownSince(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -506,43 +505,12 @@ func (ec *executionContext) marshalNHasSourceAt2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._HasSourceAt(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
-	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	res := graphql.MarshalTime(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalOHasSourceAtSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx context.Context, v interface{}) (*model.HasSourceAtSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputHasSourceAtSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalTime(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalTime(*v)
-	return res
 }
 
 // endregion ***************************** type.gotpl *****************************

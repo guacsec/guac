@@ -31,7 +31,6 @@ Attestation must occur at the PackageName or the PackageVersion or at the Source
 
 IsOccurrence does not connect a package with a source. 
 HasSourceAt attestation will be used to connect a package with a source
-
 """
 type IsOccurrence {
   justification: String!

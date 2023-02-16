@@ -19,7 +19,6 @@
 # id associated with vulnerability (osv id)
 """
 OSV represents Open Source Vulnerability . It contains a OSV ID.
-
 """
 type OSV {
   osvId: [OSVId!]!

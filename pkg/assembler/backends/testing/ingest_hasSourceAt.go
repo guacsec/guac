@@ -100,7 +100,7 @@ func (c *demoClient) registerHasSourceAt(selectedPackage *model.Package, selecte
 	newHasSourceAt := &model.HasSourceAt{
 		Package:       selectedPackage,
 		Source:        selectedSource,
-		Since:         since,
+		KnownSince:    since.String(),
 		Justification: justification,
 		Origin:        "testing backend",
 		Collector:     "testing backend",
