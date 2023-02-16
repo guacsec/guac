@@ -40,6 +40,7 @@ type demoClient struct {
 	hasSBOM      []*model.HasSbom
 	isDependency []*model.IsDependency
 	certifyPkg   []*model.CertifyPkg
+	hasSourceAt  []*model.HasSourceAt
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -73,6 +74,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	err = registerAllCertifyPkg(client)
+	if err != nil {
+		return nil, err
+	}
+	err = registerAllHasSourceAt(client)
 	if err != nil {
 		return nil, err
 	}
@@ -383,6 +388,50 @@ func (c *demoClient) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 	return collectedHasSBOM, nil
 }
 
+func (c *demoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
+
+	var collectedHasSourceAt []*model.HasSourceAt
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	for _, h := range c.hasSourceAt {
+		if hasSourceAtSpec.Justification == nil || h.Justification == *hasSourceAtSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if hasSourceAtSpec.Collector == nil || h.Collector == *hasSourceAtSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if hasSourceAtSpec.Origin == nil || h.Origin == *hasSourceAtSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if hasSourceAtSpec.Package == nil && hasSourceAtSpec.Source == nil {
+				collectedHasSourceAt = append(collectedHasSourceAt, h)
+			} else if hasSourceAtSpec.Package != nil && h.Package != nil {
+				if hasSourceAtSpec.Package.Type == nil || h.Package.Type == *hasSourceAtSpec.Package.Type {
+					newPkg := filterPackageNamespace(h.Package, hasSourceAtSpec.Package)
+					if newPkg != nil {
+						collectedHasSourceAt = append(collectedHasSourceAt, h)
+					}
+				}
+			} else if hasSourceAtSpec.Source != nil && h.Source != nil {
+				if hasSourceAtSpec.Source.Type == nil || h.Source.Type == *hasSourceAtSpec.Source.Type {
+					newSource, err := filterSourceNamespace(h.Source, hasSourceAtSpec.Source)
+					if err != nil {
+						return nil, err
+					}
+					if newSource != nil {
+						collectedHasSourceAt = append(collectedHasSourceAt, h)
+					}
+				}
+			}
+		}
+	}
+	return collectedHasSourceAt, nil
+}
+
 func (c *demoClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
 	var certifyPkgs []*model.CertifyPkg
 
@@ -444,7 +493,6 @@ func getPackagesFromInput(client *demoClient, ctx context.Context, queryPackages
 	}
 	return collectedPkg, nil
 }
-
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
 	var namespaces []*model.PackageNamespace
 	for _, ns := range pkg.Namespaces {

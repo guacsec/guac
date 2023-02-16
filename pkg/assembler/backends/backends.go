@@ -40,6 +40,7 @@ type Backend interface {
 	// Mutations (read-write queries)
 	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 	CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error)
+	HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

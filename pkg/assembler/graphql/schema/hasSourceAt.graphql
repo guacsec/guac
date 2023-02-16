@@ -1,0 +1,58 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector. 
+"""
+HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+
+Package - the package object type that represents the package
+Source - the source object type that represents the source
+Since - timestamp when this was last checked
+Justification - string value representing why the package has a source specified
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+
+"""
+scalar Time
+
+type HasSourceAt {
+  package: Package!
+  source: Source!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+HasSourceAtSpec allows filtering the list of HasSourceAt to return.
+
+"""
+input HasSourceAtSpec {
+  package: PkgSpec
+  source: SourceSpec
+  since: Time
+  justification: String
+  origin: String
+  collector: String
+}
+
+
+extend type Query {
+  "Returns all HasSourceAt"
+  HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
+}

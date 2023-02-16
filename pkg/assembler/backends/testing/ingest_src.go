@@ -32,6 +32,10 @@ func registerAllSources(client *demoClient) {
 	client.registerSource("git", "gitlab", "github.com/guacsec/guacdata", "tag=v0.0.1")
 	// differnt type
 	client.registerSource("svn", "gitlab", "github.com/guacsec/guac", "")
+	// "git", "github", "https://github.com/django/django", "tag=1.11.1"
+	client.registerSource("git", "github", "https://github.com/django/django", "tag=1.11.1")
+	// "git", "github", "https://github.com/vapor-ware/kubetest", "tag=0.9.5"
+	client.registerSource("git", "github", "https://github.com/vapor-ware/kubetest", "tag=0.9.5")
 }
 
 func (c *demoClient) registerSource(srcType, namespace, name, qualifier string) {

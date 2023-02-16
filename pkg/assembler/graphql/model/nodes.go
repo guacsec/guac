@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"time"
+)
+
 // Artifact represents the artifact and contains a digest field
 //
 // algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
@@ -128,6 +132,25 @@ type HasSBOMSpec struct {
 	URI       *string     `json:"uri"`
 	Origin    *string     `json:"origin"`
 	Collector *string     `json:"collector"`
+}
+
+type HasSourceAt struct {
+	Package       *Package  `json:"package"`
+	Source        *Source   `json:"source"`
+	Since         time.Time `json:"since"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// HasSourceAtSpec allows filtering the list of HasSourceAt to return.
+type HasSourceAtSpec struct {
+	Package       *PkgSpec    `json:"package"`
+	Source        *SourceSpec `json:"source"`
+	Since         *time.Time  `json:"since"`
+	Justification *string     `json:"justification"`
+	Origin        *string     `json:"origin"`
+	Collector     *string     `json:"collector"`
 }
 
 // HashEqual is an attestation that represents when two artifact hash are similar based on a justification.

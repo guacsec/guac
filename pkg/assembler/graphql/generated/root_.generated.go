@@ -79,6 +79,15 @@ type ComplexityRoot struct {
 		URI       func(childComplexity int) int
 	}
 
+	HasSourceAt struct {
+		Collector     func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Package       func(childComplexity int) int
+		Since         func(childComplexity int) int
+		Source        func(childComplexity int) int
+	}
+
 	HashEqual struct {
 		Artifacts     func(childComplexity int) int
 		Collector     func(childComplexity int) int
@@ -149,6 +158,7 @@ type ComplexityRoot struct {
 		Cve           func(childComplexity int, cveSpec *model.CVESpec) int
 		Ghsa          func(childComplexity int, ghsaSpec *model.GHSASpec) int
 		HasSBOMs      func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
+		HasSourceAt   func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
 		HashEquals    func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
 		IsDependency  func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
 		IsOccurrences func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
@@ -307,6 +317,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.URI(childComplexity), true
+
+	case "HasSourceAt.collector":
+		if e.complexity.HasSourceAt.Collector == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.Collector(childComplexity), true
+
+	case "HasSourceAt.justification":
+		if e.complexity.HasSourceAt.Justification == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.Justification(childComplexity), true
+
+	case "HasSourceAt.origin":
+		if e.complexity.HasSourceAt.Origin == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.Origin(childComplexity), true
+
+	case "HasSourceAt.package":
+		if e.complexity.HasSourceAt.Package == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.Package(childComplexity), true
+
+	case "HasSourceAt.since":
+		if e.complexity.HasSourceAt.Since == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.Since(childComplexity), true
+
+	case "HasSourceAt.source":
+		if e.complexity.HasSourceAt.Source == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.Source(childComplexity), true
 
 	case "HashEqual.artifacts":
 		if e.complexity.HashEqual.Artifacts == nil {
@@ -595,6 +647,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.HasSBOMs(childComplexity, args["hasSBOMSpec"].(*model.HasSBOMSpec)), true
 
+	case "Query.HasSourceAt":
+		if e.complexity.Query.HasSourceAt == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasSourceAt_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasSourceAt(childComplexity, args["hasSourceAtSpec"].(*model.HasSourceAtSpec)), true
+
 	case "Query.HashEquals":
 		if e.complexity.Query.HashEquals == nil {
 			break
@@ -730,6 +794,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
+		ec.unmarshalInputHasSourceAtSpec,
 		ec.unmarshalInputHashEqualSpec,
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceSpec,
@@ -1107,6 +1172,65 @@ input HasSBOMSpec {
 extend type Query {
   "Returns all HasSBOM"
   HasSBOMs(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/hasSourceAt.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector. 
+"""
+HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+
+Package - the package object type that represents the package
+Source - the source object type that represents the source
+Since - timestamp when this was last checked
+Justification - string value representing why the package has a source specified
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+
+"""
+scalar Time
+
+type HasSourceAt {
+  package: Package!
+  source: Source!
+  since: Time!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+HasSourceAtSpec allows filtering the list of HasSourceAt to return.
+
+"""
+input HasSourceAtSpec {
+  package: PkgSpec
+  source: SourceSpec
+  since: Time
+  justification: String
+  origin: String
+  collector: String
+}
+
+
+extend type Query {
+  "Returns all HasSourceAt"
+  HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hashEqual.graphql", Input: `#
