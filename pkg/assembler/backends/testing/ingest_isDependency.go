@@ -33,7 +33,7 @@ func registerAllIsDependency(client *demoClient) error {
 	selectedName := "dpkg"
 	selectedVersion := "1.19.0.4"
 	qualifierA := "amd64"
-	selectedQualifiers := []*model.PackageQualifierInput{{Key: "arch", Value: &qualifierA}}
+	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "arch", Value: &qualifierA}}
 	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
 	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
 	if err != nil {
