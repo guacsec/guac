@@ -130,13 +130,13 @@ input PkgSpec {
   namespace: String
   name: String
   version: String
-  qualifiers: [PackageQualifierInput!] = []
+  qualifiers: [PackageQualifierSpec!] = []
   matchOnlyEmptyQualifiers: Boolean = false
   subpath: String
 }
 
 """
-PackageQualifierInput is the same as PackageQualifier, but usable as query
+PackageQualifierSpec is the same as PackageQualifier, but usable as query
 input.
 
 GraphQL does not allow input types to contain composite types and does not allow
@@ -148,12 +148,47 @@ values for a specific key.
 
 TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
 """
-input PackageQualifierInput {
+input PackageQualifierSpec {
   key: String!
   value: String
+}
+
+"""
+PkgInputSpec specifies a package for a mutation.
+
+This is different than PkgSpec because we want to encode mandatatory fields:
+`type` and `name`. All optional fields are given empty default values.
+"""
+input PkgInputSpec {
+  type: String!
+  namespace: String = ""
+  name: String!
+  version: String = ""
+  qualifiers: [PackageQualifierInputSpec!] = []
+  subpath: String = ""
+}
+
+"""
+PackageQualifierInputSpec is the same as PackageQualifier, but usable as
+mutation input.
+
+GraphQL does not allow input types to contain composite types and does not allow
+composite types to contain input types. So, although in this case these two
+types are semantically the same, we have to duplicate the definition.
+
+Both fields are mandatory.
+"""
+input PackageQualifierInputSpec {
+  key: String!
+  value: String!
 }
 
 extend type Query {
   "Returns all packages"
   packages(pkgSpec: PkgSpec): [Package!]!
+}
+
+extend type Mutation {
+  "Ingest a new package. Returns the ingested package trie"
+  ingestPackage(pkg: PkgInputSpec): Package!
 }

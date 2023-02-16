@@ -271,7 +271,20 @@ type PackageQualifier struct {
 	Value string `json:"value"`
 }
 
-// PackageQualifierInput is the same as PackageQualifier, but usable as query
+// PackageQualifierInputSpec is the same as PackageQualifier, but usable as
+// mutation input.
+//
+// GraphQL does not allow input types to contain composite types and does not allow
+// composite types to contain input types. So, although in this case these two
+// types are semantically the same, we have to duplicate the definition.
+//
+// Both fields are mandatory.
+type PackageQualifierInputSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// PackageQualifierSpec is the same as PackageQualifier, but usable as query
 // input.
 //
 // GraphQL does not allow input types to contain composite types and does not allow
@@ -282,7 +295,7 @@ type PackageQualifier struct {
 // values for a specific key.
 //
 // TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
-type PackageQualifierInput struct {
+type PackageQualifierSpec struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
 }
@@ -310,6 +323,19 @@ type PackageVersion struct {
 	Subpath    string              `json:"subpath"`
 }
 
+// PkgInputSpec specifies a package for a mutation.
+//
+// This is different than PkgSpec because we want to encode mandatatory fields:
+// `type` and `name`. All optional fields are given empty default values.
+type PkgInputSpec struct {
+	Type       string                       `json:"type"`
+	Namespace  *string                      `json:"namespace"`
+	Name       string                       `json:"name"`
+	Version    *string                      `json:"version"`
+	Qualifiers []*PackageQualifierInputSpec `json:"qualifiers"`
+	Subpath    *string                      `json:"subpath"`
+}
+
 // PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
 // as the IsDependency attestation should only be allowed to be made to the packageName node and not the
 // packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
@@ -332,13 +358,13 @@ type PkgNameSpec struct {
 // on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
 // true. If this field is true, then the qualifiers argument is ignored.
 type PkgSpec struct {
-	Type                     *string                  `json:"type"`
-	Namespace                *string                  `json:"namespace"`
-	Name                     *string                  `json:"name"`
-	Version                  *string                  `json:"version"`
-	Qualifiers               []*PackageQualifierInput `json:"qualifiers"`
-	MatchOnlyEmptyQualifiers *bool                    `json:"matchOnlyEmptyQualifiers"`
-	Subpath                  *string                  `json:"subpath"`
+	Type                     *string                 `json:"type"`
+	Namespace                *string                 `json:"namespace"`
+	Name                     *string                 `json:"name"`
+	Version                  *string                 `json:"version"`
+	Qualifiers               []*PackageQualifierSpec `json:"qualifiers"`
+	MatchOnlyEmptyQualifiers *bool                   `json:"matchOnlyEmptyQualifiers"`
+	Subpath                  *string                 `json:"subpath"`
 }
 
 // Source represents a source.

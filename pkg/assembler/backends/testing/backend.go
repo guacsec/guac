@@ -580,3 +580,32 @@ func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 		OsvID: osvID,
 	}, nil
 }
+
+func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+	pkgType := pkg.Type
+	name := pkg.Name
+
+	namespace := ""
+	if pkg.Namespace != nil {
+		namespace = *pkg.Namespace
+	}
+
+	version := ""
+	if pkg.Version != nil {
+		version = *pkg.Version
+	}
+
+	subpath := ""
+	if pkg.Subpath != nil {
+		subpath = *pkg.Subpath
+	}
+
+	var qualifiers []string
+	for _, qualifier := range pkg.Qualifiers {
+		qualifiers = append(qualifiers, qualifier.Key, qualifier.Value)
+	}
+
+	newPkg := c.registerPackage(pkgType, namespace, name, version, subpath, qualifiers...)
+
+	return newPkg, nil
+}

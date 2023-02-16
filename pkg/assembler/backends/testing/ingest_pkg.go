@@ -71,17 +71,19 @@ func registerAllPackages(client *demoClient) {
 	client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
 }
 
-func (c *demoClient) registerPackage(pkgType, namespace, name, version, subpath string, qualifiers ...string) {
+func (c *demoClient) registerPackage(pkgType, namespace, name, version, subpath string, qualifiers ...string) *model.Package {
 	for i, p := range c.packages {
 		if p.Type == pkgType {
 			c.packages[i] = registerNamespace(p, namespace, name, version, subpath, qualifiers...)
-			return
+			return c.packages[i]
 		}
 	}
 
 	newPkg := &model.Package{Type: pkgType}
 	newPkg = registerNamespace(newPkg, namespace, name, version, subpath, qualifiers...)
 	c.packages = append(c.packages, newPkg)
+
+	return newPkg
 }
 
 func registerNamespace(p *model.Package, namespace, name, version, subpath string, qualifiers ...string) *model.Package {

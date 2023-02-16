@@ -699,3 +699,92 @@ func removeInvalidCharFromProperty(key string) string {
 	// be replaced by an "-"
 	return strings.ReplaceAll(key, ".", "_")
 }
+
+func (c *neo4jClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["pkgType"] = pkg.Type
+	values["name"] = pkg.Name
+	if pkg.Namespace != nil {
+		values["namespace"] = *pkg.Namespace
+	} else {
+		values["namespace"] = ""
+	}
+	if pkg.Version != nil {
+		values["version"] = *pkg.Version
+	} else {
+		values["version"] = ""
+	}
+	if pkg.Subpath != nil {
+		values["subpath"] = *pkg.Subpath
+	} else {
+		values["subpath"] = ""
+	}
+	// TODO(mihaimaruseac): Handle qualifiers
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Pkg)
+MERGE (root) -[:PkgHasType]-> (type:PkgType{type:$pkgType})
+MERGE (type) -[:PkgHasNamespace]-> (ns:PkgNamespace{namespace:$namespace})
+MERGE (ns) -[:PkgHasName]-> (name:PkgName{name:$name})
+MERGE (name) -[:PkgHasVersion]-> (version:PkgVersion{version:$version,subpath:$subpath})
+MERGE (version) -[:PkgHasQualifier]-> (qualifier:PkgQualifier)
+RETURN type.type, ns.namespace, name.name, version.version, version.subpath, qualifier`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
+			subPathStr := ""
+			if record.Values[4] != nil {
+				subPathStr = record.Values[4].(string)
+			}
+			versionStr := ""
+			if record.Values[3] != nil {
+				versionStr = record.Values[3].(string)
+			}
+			version := &model.PackageVersion{
+				Version: versionStr,
+				Subpath: subPathStr,
+				// TODO(mihaimaruseac): qualifiers
+			}
+
+			nameStr := record.Values[2].(string)
+			name := &model.PackageName{
+				Name:     nameStr,
+				Versions: []*model.PackageVersion{version},
+			}
+
+			namespaceStr := ""
+			if record.Values[1] != nil {
+				namespaceStr = record.Values[1].(string)
+			}
+			namespace := &model.PackageNamespace{
+				Namespace: namespaceStr,
+				Names:     []*model.PackageName{name},
+			}
+
+			pkgType := record.Values[0].(string)
+			pkg := model.Package{
+				Type:       pkgType,
+				Namespaces: []*model.PackageNamespace{namespace},
+			}
+
+			return &pkg, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Package), nil
+}

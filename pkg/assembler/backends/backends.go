@@ -25,6 +25,7 @@ import (
 // GraphQL interface. All backends must implement all queries specified by the
 // GraphQL interface and this is enforced by this interface.
 type Backend interface {
+	// Retrieval read-only queries
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
 	Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error)
@@ -36,6 +37,8 @@ type Backend interface {
 	IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
 	HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error)
 	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
+	// Mutations (read-write queries)
+	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

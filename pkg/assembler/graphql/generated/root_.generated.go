@@ -30,6 +30,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -94,6 +95,10 @@ type ComplexityRoot struct {
 		Origin              func(childComplexity int) int
 		Package             func(childComplexity int) int
 		Source              func(childComplexity int) int
+	}
+
+	Mutation struct {
+		IngestPackage func(childComplexity int, pkg *model.PkgInputSpec) int
 	}
 
 	OSV struct {
@@ -378,6 +383,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsOccurrence.Source(childComplexity), true
+
+	case "Mutation.ingestPackage":
+		if e.complexity.Mutation.IngestPackage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPackage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(*model.PkgInputSpec)), true
 
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
@@ -668,7 +685,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputOSVSpec,
-		ec.unmarshalInputPackageQualifierInput,
+		ec.unmarshalInputPackageQualifierInputSpec,
+		ec.unmarshalInputPackageQualifierSpec,
+		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
 		ec.unmarshalInputSourceQualifierInput,
@@ -685,6 +704,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -1345,13 +1379,13 @@ input PkgSpec {
   namespace: String
   name: String
   version: String
-  qualifiers: [PackageQualifierInput!] = []
+  qualifiers: [PackageQualifierSpec!] = []
   matchOnlyEmptyQualifiers: Boolean = false
   subpath: String
 }
 
 """
-PackageQualifierInput is the same as PackageQualifier, but usable as query
+PackageQualifierSpec is the same as PackageQualifier, but usable as query
 input.
 
 GraphQL does not allow input types to contain composite types and does not allow
@@ -1363,14 +1397,49 @@ values for a specific key.
 
 TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
 """
-input PackageQualifierInput {
+input PackageQualifierSpec {
   key: String!
   value: String
+}
+
+"""
+PkgInputSpec specifies a package for a mutation.
+
+This is different than PkgSpec because we want to encode mandatatory fields:
+` + "`" + `type` + "`" + ` and ` + "`" + `name` + "`" + `. All optional fields are given empty default values.
+"""
+input PkgInputSpec {
+  type: String!
+  namespace: String = ""
+  name: String!
+  version: String = ""
+  qualifiers: [PackageQualifierInputSpec!] = []
+  subpath: String = ""
+}
+
+"""
+PackageQualifierInputSpec is the same as PackageQualifier, but usable as
+mutation input.
+
+GraphQL does not allow input types to contain composite types and does not allow
+composite types to contain input types. So, although in this case these two
+types are semantically the same, we have to duplicate the definition.
+
+Both fields are mandatory.
+"""
+input PackageQualifierInputSpec {
+  key: String!
+  value: String!
 }
 
 extend type Query {
   "Returns all packages"
   packages(pkgSpec: PkgSpec): [Package!]!
+}
+
+extend type Mutation {
+  "Ingest a new package. Returns the ingested package trie"
+  ingestPackage(pkg: PkgInputSpec): Package!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
