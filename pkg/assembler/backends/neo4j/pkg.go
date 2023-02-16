@@ -761,7 +761,7 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, qua
 
 			nameStr := record.Values[2].(string)
 			name := &model.PackageName{
-				Name: nameStr,
+				Name:     nameStr,
 				Versions: []*model.PackageVersion{version},
 			}
 
@@ -769,14 +769,14 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, qua
 			if record.Values[1] != nil {
 				namespaceStr = record.Values[1].(string)
 			}
-			namespace := &model.PackageNamespace {
+			namespace := &model.PackageNamespace{
 				Namespace: namespaceStr,
-				Names: []*model.PackageName{name},
+				Names:     []*model.PackageName{name},
 			}
 
 			pkgType := record.Values[0].(string)
 			pkg := model.Package{
-				Type: pkgType,
+				Type:       pkgType,
 				Namespaces: []*model.PackageNamespace{namespace},
 			}
 
