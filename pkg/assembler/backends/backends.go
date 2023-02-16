@@ -39,6 +39,7 @@ type Backend interface {
 	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
 	// Mutations (read-write queries)
 	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
+	CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

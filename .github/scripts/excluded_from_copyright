@@ -25,3 +25,5 @@
 ./pkg/assembler/graphql/resolvers/hasSBOM.resolvers.go
 ./pkg/assembler/graphql/generated/isDependency.generated.go
 ./pkg/assembler/graphql/resolvers/isDependency.resolvers.go
+./pkg/assembler/graphql/generated/certifypkg.generated.go
+./pkg/assembler/graphql/resolvers/certifypkg.resolvers.go
