@@ -34,7 +34,7 @@ func registerAllCertifyPkg(client *demoClient) error {
 	selectedSubPath := ""
 	qualifierA := "bincrafters"
 	qualifierB := "stable"
-	selectedQualifiers := []*model.PackageQualifierInput{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
+	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
 	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Subpath: &selectedSubPath, Qualifiers: selectedQualifiers}
 	selectedPackage1, err := client.Packages(context.TODO(), selectedPkgSpec)
 	if err != nil {
