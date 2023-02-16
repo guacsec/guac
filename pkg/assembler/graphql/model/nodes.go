@@ -323,15 +323,6 @@ type PackageVersion struct {
 	Subpath    string              `json:"subpath"`
 }
 
-// PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
-// as the IsDependency attestation should only be allowed to be made to the packageName node and not the
-// packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
-type PkgNameSpec struct {
-	Type      *string `json:"type"`
-	Namespace *string `json:"namespace"`
-	Name      *string `json:"name"`
-}
-
 // PkgInputSpec specifies a package for a mutation.
 //
 // This is different than PkgSpec because we want to encode mandatatory fields:
@@ -343,6 +334,15 @@ type PkgInputSpec struct {
 	Version    *string                      `json:"version"`
 	Qualifiers []*PackageQualifierInputSpec `json:"qualifiers"`
 	Subpath    *string                      `json:"subpath"`
+}
+
+// PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
+// as the IsDependency attestation should only be allowed to be made to the packageName node and not the
+// packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
+type PkgNameSpec struct {
+	Type      *string `json:"type"`
+	Namespace *string `json:"namespace"`
+	Name      *string `json:"name"`
 }
 
 // PkgSpec allows filtering the list of packages to return.
