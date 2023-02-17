@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"sort"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -722,7 +723,20 @@ func (c *neo4jClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec
 	} else {
 		values["subpath"] = ""
 	}
-	// TODO(mihaimaruseac): Handle qualifiers
+
+	// To ensure consistency, always sort the qualifiers by key
+	qualifiersMap := map[string]string{}
+	keys := []string{}
+	for _, kv := range pkg.Qualifiers {
+		qualifiersMap[kv.Key] = kv.Value
+		keys = append(keys, kv.Key)
+	}
+	sort.Strings(keys)
+	qualifiers := []string{}
+	for _, k := range keys {
+		qualifiers = append(qualifiers, k, qualifiersMap[k])
+	}
+	values["qualifier"] = qualifiers
 
 	result, err := session.WriteTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
@@ -730,9 +744,8 @@ func (c *neo4jClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec
 MERGE (root) -[:PkgHasType]-> (type:PkgType{type:$pkgType})
 MERGE (type) -[:PkgHasNamespace]-> (ns:PkgNamespace{namespace:$namespace})
 MERGE (ns) -[:PkgHasName]-> (name:PkgName{name:$name})
-MERGE (name) -[:PkgHasVersion]-> (version:PkgVersion{version:$version,subpath:$subpath})
-MERGE (version) -[:PkgHasQualifier]-> (qualifier:PkgQualifier)
-RETURN type.type, ns.namespace, name.name, version.version, version.subpath, qualifier`
+MERGE (name) -[:PkgHasVersion]-> (version:PkgVersion{version:$version,subpath:$subpath,qualifier_list:$qualifier})
+RETURN type.type, ns.namespace, name.name, version.version, version.subpath, version.qualifier_list`
 			result, err := tx.Run(query, values)
 			if err != nil {
 				return nil, err
@@ -745,6 +758,19 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, qua
 			}
 
 			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
+			qualifiers := []*model.PackageQualifier{}
+			if record.Values[5] != nil {
+				qualifierList := record.Values[5].([]interface{})
+				for i := range qualifierList {
+					if i%2 == 0 {
+						qualifier := &model.PackageQualifier{
+							Key:   qualifierList[i].(string),
+							Value: qualifierList[i+1].(string),
+						}
+						qualifiers = append(qualifiers, qualifier)
+					}
+				}
+			}
 			subPathStr := ""
 			if record.Values[4] != nil {
 				subPathStr = record.Values[4].(string)
@@ -754,9 +780,9 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, qua
 				versionStr = record.Values[3].(string)
 			}
 			version := &model.PackageVersion{
-				Version: versionStr,
-				Subpath: subPathStr,
-				// TODO(mihaimaruseac): qualifiers
+				Version:    versionStr,
+				Subpath:    subPathStr,
+				Qualifiers: qualifiers,
 			}
 
 			nameStr := record.Values[2].(string)
