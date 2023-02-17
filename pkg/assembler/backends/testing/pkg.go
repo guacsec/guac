@@ -16,6 +16,7 @@
 package testing
 
 import (
+	"context"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -71,6 +72,37 @@ func registerAllPackages(client *demoClient) {
 	client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
 	// pkg:pypi/kubetest@0.9.5
 	client.registerPackage("pypi", "", "kubetest", "0.9.5", "")
+}
+
+// Ingest Package
+
+func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+	pkgType := pkg.Type
+	name := pkg.Name
+
+	namespace := ""
+	if pkg.Namespace != nil {
+		namespace = *pkg.Namespace
+	}
+
+	version := ""
+	if pkg.Version != nil {
+		version = *pkg.Version
+	}
+
+	subpath := ""
+	if pkg.Subpath != nil {
+		subpath = *pkg.Subpath
+	}
+
+	var qualifiers []string
+	for _, qualifier := range pkg.Qualifiers {
+		qualifiers = append(qualifiers, qualifier.Key, qualifier.Value)
+	}
+
+	newPkg := c.registerPackage(pkgType, namespace, name, version, subpath, qualifiers...)
+
+	return newPkg, nil
 }
 
 func (c *demoClient) registerPackage(pkgType, namespace, name, version, subpath string, qualifiers ...string) *model.Package {
@@ -141,4 +173,109 @@ func buildQualifierSet(qualifiers ...string) []*model.PackageQualifier {
 		})
 	}
 	return qs
+}
+
+// Query Package
+
+func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	var packages []*model.Package
+	for _, p := range c.packages {
+		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
+			newPkg := filterPackageNamespace(p, pkgSpec)
+			if newPkg != nil {
+				packages = append(packages, newPkg)
+			}
+		}
+	}
+	return packages, nil
+}
+
+func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
+	var namespaces []*model.PackageNamespace
+	for _, ns := range pkg.Namespaces {
+		if pkgSpec.Namespace == nil || ns.Namespace == *pkgSpec.Namespace {
+			newNs := filterPackageName(ns, pkgSpec)
+			if newNs != nil {
+				namespaces = append(namespaces, newNs)
+			}
+		}
+	}
+	if len(namespaces) == 0 {
+		return nil
+	}
+	return &model.Package{
+		Type:       pkg.Type,
+		Namespaces: namespaces,
+	}
+}
+
+func filterPackageName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.PackageNamespace {
+	var names []*model.PackageName
+	for _, n := range ns.Names {
+		if pkgSpec.Name == nil || n.Name == *pkgSpec.Name {
+			newN := filterPackageVersion(n, pkgSpec)
+			if newN != nil {
+				names = append(names, newN)
+			}
+		}
+	}
+	if len(names) == 0 {
+		return nil
+	}
+	return &model.PackageNamespace{
+		Namespace: ns.Namespace,
+		Names:     names,
+	}
+}
+
+func filterPackageVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageName {
+	var versions []*model.PackageVersion
+	for _, v := range n.Versions {
+		if pkgSpec.Version == nil || v.Version == *pkgSpec.Version {
+			newV := filterQualifiersAndSubpath(v, pkgSpec)
+			if newV != nil {
+				versions = append(versions, newV)
+			}
+		}
+	}
+	if len(versions) == 0 {
+		return nil
+	}
+	return &model.PackageName{
+		Name:     n.Name,
+		Versions: versions,
+	}
+}
+
+func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec) *model.PackageVersion {
+	// First check for subpath matching
+	if pkgSpec.Subpath != nil && *pkgSpec.Subpath != v.Subpath {
+		return nil
+	}
+
+	// Allow matching on nodes with no qualifiers
+	if pkgSpec.MatchOnlyEmptyQualifiers != nil {
+		if *pkgSpec.MatchOnlyEmptyQualifiers && len(v.Qualifiers) != 0 {
+			return nil
+		}
+	}
+
+	// Because we operate on GraphQL-generated structs directly we cannot
+	// use a key-value map, so this is O(n^2). Production resolvers will
+	// run queries that match the qualifiers faster.
+	for _, specQualifier := range pkgSpec.Qualifiers {
+		found := false
+		for _, versionQualifier := range v.Qualifiers {
+			if specQualifier.Key == versionQualifier.Key {
+				if specQualifier.Value == nil || *specQualifier.Value == versionQualifier.Value {
+					found = true
+					break
+				}
+			}
+		}
+		if !found {
+			return nil
+		}
+	}
+	return v
 }

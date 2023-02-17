@@ -16,6 +16,8 @@
 package testing
 
 import (
+	"context"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -26,6 +28,8 @@ func registerAllGHSA(client *demoClient) {
 	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
 	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
 }
+
+// Ingest GHSA
 
 func (c *demoClient) registerGhsa(id string) {
 	for i, g := range c.ghsa {
@@ -47,4 +51,35 @@ func registerGhsaID(g *model.Ghsa, id string) *model.Ghsa {
 
 	g.GhsaID = append(g.GhsaID, &model.GHSAId{ID: id})
 	return g
+}
+
+// Query GHSA
+
+func (c *demoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
+	var ghsa []*model.Ghsa
+	for _, g := range c.ghsa {
+		newGHSA, err := filterGHSAID(g, ghsaSpec)
+		if err != nil {
+			return nil, err
+		}
+		if newGHSA != nil {
+			ghsa = append(ghsa, newGHSA)
+		}
+	}
+	return ghsa, nil
+}
+
+func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, error) {
+	var ghsaID []*model.GHSAId
+	for _, id := range ghsa.GhsaID {
+		if ghsaSpec.GhsaID == nil || id.ID == *ghsaSpec.GhsaID {
+			ghsaID = append(ghsaID, id)
+		}
+	}
+	if len(ghsaID) == 0 {
+		return nil, nil
+	}
+	return &model.Ghsa{
+		GhsaID: ghsaID,
+	}, nil
 }

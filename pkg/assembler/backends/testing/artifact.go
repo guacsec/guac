@@ -16,6 +16,7 @@
 package testing
 
 import (
+	"context"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -27,6 +28,8 @@ func registerAllArtifacts(client *demoClient) {
 	client.registerArtifact("sha1", "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9")
 	client.registerArtifact("sha512", "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7")
 }
+
+// Ingest Artifacts
 
 func (c *demoClient) registerArtifact(algorithm, digest string) {
 	// enforce lowercase for both the algorithm and digest when ingesting
@@ -40,4 +43,24 @@ func (c *demoClient) registerArtifact(algorithm, digest string) {
 	}
 	newArtifact := &model.Artifact{Digest: lowerCaseDigest, Algorithm: lowerCaseAlgorithm}
 	c.artifacts = append(c.artifacts, newArtifact)
+}
+
+// Query Artifacts
+
+func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	var artifacts []*model.Artifact
+
+	// enforce lowercase for both the algorithm and digest when querying
+	for _, a := range c.artifacts {
+		if artifactSpec.Digest == nil && artifactSpec.Algorithm == nil {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == strings.ToLower(*artifactSpec.Digest) {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) {
+			artifacts = append(artifacts, a)
+		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) && a.Digest == strings.ToLower(*artifactSpec.Digest) {
+			artifacts = append(artifacts, a)
+		}
+	}
+	return artifacts, nil
 }

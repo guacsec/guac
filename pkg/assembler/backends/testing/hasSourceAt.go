@@ -86,6 +86,8 @@ func registerAllHasSourceAt(client *demoClient) error {
 	return nil
 }
 
+// Ingest HasSourceAt
+
 func (c *demoClient) registerHasSourceAt(selectedPackage *model.Package, selectedSource *model.Source, since time.Time, justification string) error {
 
 	if selectedPackage == nil || selectedSource == nil {
@@ -107,4 +109,50 @@ func (c *demoClient) registerHasSourceAt(selectedPackage *model.Package, selecte
 	}
 	c.hasSourceAt = append(c.hasSourceAt, newHasSourceAt)
 	return nil
+}
+
+// Query HasSourceAt
+
+func (c *demoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
+
+	var collectedHasSourceAt []*model.HasSourceAt
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	for _, h := range c.hasSourceAt {
+		if hasSourceAtSpec.Justification == nil || h.Justification == *hasSourceAtSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if hasSourceAtSpec.Collector == nil || h.Collector == *hasSourceAtSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if hasSourceAtSpec.Origin == nil || h.Origin == *hasSourceAtSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if hasSourceAtSpec.Package == nil && hasSourceAtSpec.Source == nil {
+				collectedHasSourceAt = append(collectedHasSourceAt, h)
+			} else if hasSourceAtSpec.Package != nil && h.Package != nil {
+				if hasSourceAtSpec.Package.Type == nil || h.Package.Type == *hasSourceAtSpec.Package.Type {
+					newPkg := filterPackageNamespace(h.Package, hasSourceAtSpec.Package)
+					if newPkg != nil {
+						collectedHasSourceAt = append(collectedHasSourceAt, h)
+					}
+				}
+			} else if hasSourceAtSpec.Source != nil && h.Source != nil {
+				if hasSourceAtSpec.Source.Type == nil || h.Source.Type == *hasSourceAtSpec.Source.Type {
+					newSource, err := filterSourceNamespace(h.Source, hasSourceAtSpec.Source)
+					if err != nil {
+						return nil, err
+					}
+					if newSource != nil {
+						collectedHasSourceAt = append(collectedHasSourceAt, h)
+					}
+				}
+			}
+		}
+	}
+	return collectedHasSourceAt, nil
 }

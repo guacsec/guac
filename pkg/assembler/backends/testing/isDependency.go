@@ -114,6 +114,8 @@ func registerAllIsDependency(client *demoClient) error {
 	return nil
 }
 
+// Ingest IsDependency
+
 func (c *demoClient) registerIsDependency(selectedPackage *model.Package, dependentPackage *model.Package, versionRange string, justification string) {
 
 	for _, dependency := range c.isDependency {
@@ -132,4 +134,63 @@ func (c *demoClient) registerIsDependency(selectedPackage *model.Package, depend
 		Collector:        "testing backend",
 	}
 	c.isDependency = append(c.isDependency, newIsOccurrence)
+}
+
+// Query IsDependency
+
+func (c *demoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
+	var isDependencies []*model.IsDependency
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	versionRangeMatchOrSkip := false
+	for _, h := range c.isDependency {
+		if isDependencySpec.Justification == nil || h.Justification == *isDependencySpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if isDependencySpec.Collector == nil || h.Collector == *isDependencySpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if isDependencySpec.Origin == nil || h.Origin == *isDependencySpec.Origin {
+			originMatchOrSkip = true
+		}
+		if isDependencySpec.VersionRange == nil || h.VersionRange == *isDependencySpec.VersionRange {
+			versionRangeMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && versionRangeMatchOrSkip {
+			if isDependencySpec.Package == nil && isDependencySpec.DependentPackage == nil {
+				isDependencies = append(isDependencies, h)
+			} else if isDependencySpec.Package != nil && h.Package != nil && isDependencySpec.DependentPackage == nil {
+				if isDependencySpec.Package.Type == nil || h.Package.Type == *isDependencySpec.Package.Type {
+					newPkg := filterPackageNamespace(h.Package, isDependencySpec.Package)
+					if newPkg != nil {
+						isDependencies = append(isDependencies, h)
+					}
+				}
+			} else if isDependencySpec.Package == nil && isDependencySpec.DependentPackage != nil && h.DependentPackage != nil {
+				if isDependencySpec.DependentPackage.Type == nil || h.DependentPackage.Type == *isDependencySpec.DependentPackage.Type {
+					depPkgSpec := &model.PkgSpec{Type: isDependencySpec.DependentPackage.Type, Namespace: isDependencySpec.DependentPackage.Namespace,
+						Name: isDependencySpec.DependentPackage.Name}
+					newPkg := filterPackageNamespace(h.DependentPackage, depPkgSpec)
+					if newPkg != nil {
+						isDependencies = append(isDependencies, h)
+					}
+				}
+			} else if isDependencySpec.Package != nil && h.Package != nil && isDependencySpec.DependentPackage != nil && h.DependentPackage != nil {
+				if isDependencySpec.Package.Type == nil || h.Package.Type == *isDependencySpec.Package.Type {
+					newPkg := filterPackageNamespace(h.Package, isDependencySpec.Package)
+					depPkgSpec := &model.PkgSpec{Type: isDependencySpec.DependentPackage.Type, Namespace: isDependencySpec.DependentPackage.Namespace,
+						Name: isDependencySpec.DependentPackage.Name}
+					depPkg := filterPackageNamespace(h.DependentPackage, depPkgSpec)
+					if newPkg != nil && depPkg != nil {
+						isDependencies = append(isDependencies, h)
+					}
+				}
+			}
+		}
+	}
+
+	return isDependencies, nil
 }

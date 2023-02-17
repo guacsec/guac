@@ -16,37 +16,36 @@
 package testing
 
 import (
+	"context"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func registerAllCVE(client *demoClient) {
-	client.registerCVE("2019", "CVE-2019-13110")
-	client.registerCVE("2014", "CVE-2014-8139")
-	client.registerCVE("2014", "CVE-2014-8140")
-	client.registerCVE("2022", "CVE-2022-26499")
-	client.registerCVE("2014", "CVE-2014-8140")
+func registerAllBuilders(client *demoClient) {
+	client.registerBuilder("https://github.com/Attestations/GitHubHostedActions@v1")
+	client.registerBuilder("https://tekton.dev/chains/v2")
 }
 
-func (c *demoClient) registerCVE(year, id string) {
-	for i, s := range c.cve {
-		if s.Year == year {
-			c.cve[i] = registerCveID(s, id)
+// Ingest Builder
+
+func (c *demoClient) registerBuilder(uri string) {
+	for _, b := range c.builders {
+		if b.URI == uri {
 			return
 		}
 	}
-
-	newCve := &model.Cve{Year: year}
-	newCve = registerCveID(newCve, id)
-	c.cve = append(c.cve, newCve)
+	newBuilder := &model.Builder{URI: uri}
+	c.builders = append(c.builders, newBuilder)
 }
 
-func registerCveID(c *model.Cve, id string) *model.Cve {
-	for _, cveID := range c.CveID {
-		if cveID.ID == id {
-			return c
+// Query Builder
+
+func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
+	var builders []*model.Builder
+	for _, b := range c.builders {
+		if builderSpec.URI == nil || b.URI == *builderSpec.URI {
+			builders = append(builders, b)
 		}
 	}
-
-	c.CveID = append(c.CveID, &model.CVEId{ID: id})
-	return c
+	return builders, nil
 }
