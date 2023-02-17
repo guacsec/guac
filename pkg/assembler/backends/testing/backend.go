@@ -23,20 +23,21 @@ import (
 type DemoCredentials struct{}
 
 type demoClient struct {
-	packages     []*model.Package
-	sources      []*model.Source
-	cve          []*model.Cve
-	ghsa         []*model.Ghsa
-	osv          []*model.Osv
-	artifacts    []*model.Artifact
-	builders     []*model.Builder
-	hashEquals   []*model.HashEqual
-	isOccurrence []*model.IsOccurrence
-	hasSBOM      []*model.HasSbom
-	isDependency []*model.IsDependency
-	certifyPkg   []*model.CertifyPkg
-	hasSourceAt  []*model.HasSourceAt
-	certifyBad   []*model.CertifyBad
+	packages         []*model.Package
+	sources          []*model.Source
+	cve              []*model.Cve
+	ghsa             []*model.Ghsa
+	osv              []*model.Osv
+	artifacts        []*model.Artifact
+	builders         []*model.Builder
+	hashEquals       []*model.HashEqual
+	isOccurrence     []*model.IsOccurrence
+	hasSBOM          []*model.HasSbom
+	isDependency     []*model.IsDependency
+	certifyPkg       []*model.CertifyPkg
+	hasSourceAt      []*model.HasSourceAt
+	certifyBad       []*model.CertifyBad
+	certifyScorecard []*model.CertifyScorecard
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -78,6 +79,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	err = registerAllCertifyBad(client)
+	if err != nil {
+		return nil, err
+	}
+	err = registerAllCertifyScorecard(client)
 	if err != nil {
 		return nil, err
 	}

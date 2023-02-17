@@ -70,6 +70,17 @@ type ComplexityRoot struct {
 		Packages      func(childComplexity int) int
 	}
 
+	CertifyScorecard struct {
+		AggregateScore   func(childComplexity int) int
+		Checks           func(childComplexity int) int
+		Collector        func(childComplexity int) int
+		Origin           func(childComplexity int) int
+		ScorecardCommit  func(childComplexity int) int
+		ScorecardVersion func(childComplexity int) int
+		Source           func(childComplexity int) int
+		TimeScanned      func(childComplexity int) int
+	}
+
 	GHSA struct {
 		GhsaID func(childComplexity int) int
 	}
@@ -157,20 +168,26 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Artifacts     func(childComplexity int, artifactSpec *model.ArtifactSpec) int
-		Builders      func(childComplexity int, builderSpec *model.BuilderSpec) int
-		CertifyBad    func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
-		CertifyPkg    func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
-		Cve           func(childComplexity int, cveSpec *model.CVESpec) int
-		Ghsa          func(childComplexity int, ghsaSpec *model.GHSASpec) int
-		HasSBOMs      func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
-		HasSourceAt   func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
-		HashEquals    func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
-		IsDependency  func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
-		IsOccurrences func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
-		Osv           func(childComplexity int, osvSpec *model.OSVSpec) int
-		Packages      func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Sources       func(childComplexity int, sourceSpec *model.SourceSpec) int
+		Artifacts        func(childComplexity int, artifactSpec *model.ArtifactSpec) int
+		Builders         func(childComplexity int, builderSpec *model.BuilderSpec) int
+		CertifyBad       func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
+		CertifyPkg       func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
+		CertifyScorecard func(childComplexity int, certifyScorecardSpec *model.CertifyScorecardSpec) int
+		Cve              func(childComplexity int, cveSpec *model.CVESpec) int
+		Ghsa             func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		HasSBOMs         func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
+		HasSourceAt      func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
+		HashEquals       func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
+		IsDependency     func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
+		IsOccurrences    func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
+		Osv              func(childComplexity int, osvSpec *model.OSVSpec) int
+		Packages         func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Sources          func(childComplexity int, sourceSpec *model.SourceSpec) int
+	}
+
+	ScorecardCheck struct {
+		Check func(childComplexity int) int
+		Score func(childComplexity int) int
 	}
 
 	Source struct {
@@ -302,6 +319,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyPkg.Packages(childComplexity), true
+
+	case "CertifyScorecard.aggregateScore":
+		if e.complexity.CertifyScorecard.AggregateScore == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.AggregateScore(childComplexity), true
+
+	case "CertifyScorecard.checks":
+		if e.complexity.CertifyScorecard.Checks == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.Checks(childComplexity), true
+
+	case "CertifyScorecard.collector":
+		if e.complexity.CertifyScorecard.Collector == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.Collector(childComplexity), true
+
+	case "CertifyScorecard.origin":
+		if e.complexity.CertifyScorecard.Origin == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.Origin(childComplexity), true
+
+	case "CertifyScorecard.scorecardCommit":
+		if e.complexity.CertifyScorecard.ScorecardCommit == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.ScorecardCommit(childComplexity), true
+
+	case "CertifyScorecard.scorecardVersion":
+		if e.complexity.CertifyScorecard.ScorecardVersion == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.ScorecardVersion(childComplexity), true
+
+	case "CertifyScorecard.source":
+		if e.complexity.CertifyScorecard.Source == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.Source(childComplexity), true
+
+	case "CertifyScorecard.timeScanned":
+		if e.complexity.CertifyScorecard.TimeScanned == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.TimeScanned(childComplexity), true
 
 	case "GHSA.ghsaId":
 		if e.complexity.GHSA.GhsaID == nil {
@@ -643,6 +716,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyPkg(childComplexity, args["certifyPkgSpec"].(*model.CertifyPkgSpec)), true
 
+	case "Query.CertifyScorecard":
+		if e.complexity.Query.CertifyScorecard == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyScorecard_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyScorecard(childComplexity, args["certifyScorecardSpec"].(*model.CertifyScorecardSpec)), true
+
 	case "Query.cve":
 		if e.complexity.Query.Cve == nil {
 			break
@@ -763,6 +848,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(*model.SourceSpec)), true
 
+	case "ScorecardCheck.check":
+		if e.complexity.ScorecardCheck.Check == nil {
+			break
+		}
+
+		return e.complexity.ScorecardCheck.Check(childComplexity), true
+
+	case "ScorecardCheck.score":
+		if e.complexity.ScorecardCheck.Score == nil {
+			break
+		}
+
+		return e.complexity.ScorecardCheck.Score(childComplexity), true
+
 	case "Source.namespaces":
 		if e.complexity.Source.Namespaces == nil {
 			break
@@ -825,6 +924,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyPkgSpec,
+		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSourceAtSpec,
@@ -837,6 +937,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
+		ec.unmarshalInputScorecardCheckSpec,
 		ec.unmarshalInputSourceQualifierInput,
 		ec.unmarshalInputSourceSpec,
 	)
@@ -1096,6 +1197,94 @@ input CertifyPkgSpec {
 extend type Query {
   "Returns all CertifyPkg"
   CertifyPkg(certifyPkgSpec: CertifyPkgSpec): [CertifyPkg!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/certifyScorecard.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the CertifyScorecard. It contains the source object, time the source was scanned,
+# aggregate score, individual check scores, scorecard version and commit, origin and collector.
+"""
+CertifyScorecard is an attestation represents the scorecard of a particular source
+
+Source - the source object type that represents the source
+timeScanned - timestamp when this was last scanned (exact time)
+aggregateScore - overall scorecard score for the source
+checks - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+scorecardVersion - version of the scorecard when the source was scanned
+scorecardCommit - commit of scorecard when the source was scanned
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+"""
+type CertifyScorecard {
+  source: Source!
+  timeScanned: String!
+  aggregateScore: Float!
+  checks: [ScorecardCheck!]!
+  scorecardVersion: String!
+  scorecardCommit: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+ScorecardCheck are the individual checks from scorecard and their values, a key-value pair.
+For example:  Branch-Protection, Code-Review...etc
+Based off scorecard's:
+type jsonCheckResultV2 struct {
+	Details []string                 ` + "`" + `json:"details"` + "`" + `
+	Score   int                      ` + "`" + `json:"score"` + "`" + `
+	Reason  string                   ` + "`" + `json:"reason"` + "`" + `
+	Name    string                   ` + "`" + `json:"name"` + "`" + `
+	Doc     jsonCheckDocumentationV2 ` + "`" + `json:"documentation"` + "`" + `
+}
+This node cannot be directly referred by other parts of GUAC.
+"""
+type ScorecardCheck {
+  check: String!
+  score: Int!
+}
+
+"""
+CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
+"""
+input CertifyScorecardSpec {
+  source: SourceSpec
+  timeScanned: String
+  aggregateScore: Float
+  checks: [ScorecardCheckSpec!] = []
+  scorecardVersion: String
+  scorecardCommit: String
+  origin: String
+  collector: String
+}
+
+"""
+ScorecardCheckSpec is the same as ScorecardCheck, but usable as query
+input.
+"""
+input ScorecardCheckSpec {
+  check: String!
+  score: Int!
+}
+
+extend type Query {
+  "Returns all CertifyScorecard"
+  CertifyScorecard(certifyScorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
