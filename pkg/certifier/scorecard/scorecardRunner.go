@@ -25,6 +25,11 @@ import (
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
+// scorecardRunner is a struct that implements the Scorecard interface.
+type scorecardRunner struct {
+	ctx context.Context
+}
+
 func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResult, error) {
 	defaultLogger := log.NewLogger(log.DefaultLevel)
 

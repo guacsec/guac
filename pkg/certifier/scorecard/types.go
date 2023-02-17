@@ -16,23 +16,8 @@
 package scorecard
 
 import (
-	"context"
-
-	"github.com/guacsec/guac/pkg/assembler"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
-
-// scorecard is a struct that implements the Certifier interface.
-type scorecard struct {
-	scorecard Scorecard
-	ghToken   string
-	artifact  *assembler.ArtifactNode
-}
-
-// scorecardRunner is a struct that implements the Scorecard interface.
-type scorecardRunner struct {
-	ctx context.Context
-}
 
 // Scorecard is an interface for the scorecard library. This can also be mocked for testing.
 type Scorecard interface {

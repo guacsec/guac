@@ -25,6 +25,13 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
+// scorecard is a struct that implements the Certifier interface.
+type scorecard struct {
+	scorecard Scorecard
+	ghToken   string
+	artifact  *assembler.ArtifactNode
+}
+
 var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *assembler.ArtifactNode")
 
 // CertifyComponent is a certifier that generates scorecard attestations
