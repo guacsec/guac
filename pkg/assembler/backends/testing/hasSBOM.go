@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllhasSBOM(client *demoClient) error {
@@ -59,6 +60,8 @@ func registerAllhasSBOM(client *demoClient) error {
 	return nil
 }
 
+// Ingest HasSBOM
+
 func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSource *model.Source, uri string) error {
 
 	if selectedPackage != nil && selectedSource != nil {
@@ -78,4 +81,55 @@ func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSou
 	}
 	c.hasSBOM = append(c.hasSBOM, newHasSBOM)
 	return nil
+}
+
+// Query HasSBOM
+
+func (c *demoClient) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
+
+	if hasSBOMSpec.Package != nil && hasSBOMSpec.Source != nil {
+		return nil, gqlerror.Errorf("cannot specify both package and source for HasSBOM")
+	}
+
+	var collectedHasSBOM []*model.HasSbom
+
+	uriMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	for _, h := range c.hasSBOM {
+		if hasSBOMSpec.URI == nil || h.URI == *hasSBOMSpec.URI {
+			uriMatchOrSkip = true
+		}
+		if hasSBOMSpec.Collector == nil || h.Collector == *hasSBOMSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if hasSBOMSpec.Origin == nil || h.Origin == *hasSBOMSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if uriMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if hasSBOMSpec.Package == nil && hasSBOMSpec.Source == nil {
+				collectedHasSBOM = append(collectedHasSBOM, h)
+			} else if hasSBOMSpec.Package != nil && h.Package != nil {
+				if hasSBOMSpec.Package.Type == nil || h.Package.Type == *hasSBOMSpec.Package.Type {
+					newPkg := filterPackageNamespace(h.Package, hasSBOMSpec.Package)
+					if newPkg != nil {
+						collectedHasSBOM = append(collectedHasSBOM, h)
+					}
+				}
+			} else if hasSBOMSpec.Source != nil && h.Source != nil {
+				if hasSBOMSpec.Source.Type == nil || h.Source.Type == *hasSBOMSpec.Source.Type {
+					newSource, err := filterSourceNamespace(h.Source, hasSBOMSpec.Source)
+					if err != nil {
+						return nil, err
+					}
+					if newSource != nil {
+						collectedHasSBOM = append(collectedHasSBOM, h)
+					}
+				}
+			}
+		}
+	}
+
+	return collectedHasSBOM, nil
 }

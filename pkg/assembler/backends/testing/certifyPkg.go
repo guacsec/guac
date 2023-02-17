@@ -87,6 +87,8 @@ func registerAllCertifyPkg(client *demoClient) error {
 	return nil
 }
 
+// Ingest CertifyPkg
+
 func (c *demoClient) registerCertifyPkg(selectedPackages []*model.Package, justification string) {
 
 	for _, a := range c.certifyPkg {
@@ -102,4 +104,68 @@ func (c *demoClient) registerCertifyPkg(selectedPackages []*model.Package, justi
 		Collector:     "testing backend",
 	}
 	c.certifyPkg = append(c.certifyPkg, newCertifyPkg)
+}
+
+// Query CertifyPkg
+
+func (c *demoClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
+	var certifyPkgs []*model.CertifyPkg
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+
+	queryPkgs, err := getPackagesFromInput(c, ctx, certifyPkgSpec.Packages)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, h := range c.certifyPkg {
+		if certifyPkgSpec.Justification == nil || h.Justification == *certifyPkgSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if certifyPkgSpec.Collector == nil || h.Collector == *certifyPkgSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if certifyPkgSpec.Origin == nil || h.Origin == *certifyPkgSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if len(queryPkgs) > 0 {
+				for _, pkg := range queryPkgs {
+					if packagesContain(h.Packages, pkg) {
+						certifyPkgs = append(certifyPkgs, h)
+					}
+				}
+			} else {
+				certifyPkgs = append(certifyPkgs, h)
+			}
+		}
+	}
+
+	return certifyPkgs, nil
+}
+
+func packagesContain(selectedPackages []*model.Package, queryPackage *model.Package) bool {
+	for _, pkg := range selectedPackages {
+		if reflect.DeepEqual(pkg, queryPackage) {
+			return true
+		}
+	}
+	return false
+}
+
+func getPackagesFromInput(client *demoClient, ctx context.Context, queryPackages []*model.PkgSpec) ([]*model.Package, error) {
+	collectedPkg := []*model.Package{}
+	for _, value := range queryPackages {
+		selectedPackage, err := client.Packages(context.TODO(), value)
+		if err != nil {
+			return nil, err
+		}
+		if selectedPackage != nil {
+			collectedPkg = append(collectedPkg, selectedPackage...)
+		}
+	}
+	return collectedPkg, nil
 }

@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllIsOccurrence(client *demoClient) error {
@@ -61,6 +62,8 @@ func registerAllIsOccurrence(client *demoClient) error {
 	return nil
 }
 
+// Ingest IsOccurrence
+
 func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, selectedSource *model.Source, artifacts []*model.Artifact, justification string) error {
 
 	if selectedPackage != nil && selectedSource != nil {
@@ -84,4 +87,55 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	}
 	c.isOccurrence = append(c.isOccurrence, newIsOccurrence)
 	return nil
+}
+
+// Query IsOccurrence
+
+func (c *demoClient) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+
+	if isOccurrenceSpec.Package != nil && isOccurrenceSpec.Source != nil {
+		return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
+	}
+
+	var isOccurrences []*model.IsOccurrence
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	for _, h := range c.isOccurrence {
+		if isOccurrenceSpec.Justification == nil || h.Justification == *isOccurrenceSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if isOccurrenceSpec.Collector == nil || h.Collector == *isOccurrenceSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if isOccurrenceSpec.Origin == nil || h.Origin == *isOccurrenceSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if isOccurrenceSpec.Package == nil && isOccurrenceSpec.Source == nil {
+				isOccurrences = append(isOccurrences, h)
+			} else if isOccurrenceSpec.Package != nil && h.Package != nil {
+				if isOccurrenceSpec.Package.Type == nil || h.Package.Type == *isOccurrenceSpec.Package.Type {
+					newPkg := filterPackageNamespace(h.Package, isOccurrenceSpec.Package)
+					if newPkg != nil {
+						isOccurrences = append(isOccurrences, h)
+					}
+				}
+			} else if isOccurrenceSpec.Source != nil && h.Source != nil {
+				if isOccurrenceSpec.Source.Type == nil || h.Source.Type == *isOccurrenceSpec.Source.Type {
+					newSource, err := filterSourceNamespace(h.Source, isOccurrenceSpec.Source)
+					if err != nil {
+						return nil, err
+					}
+					if newSource != nil {
+						isOccurrences = append(isOccurrences, h)
+					}
+				}
+			}
+		}
+	}
+
+	return isOccurrences, nil
 }

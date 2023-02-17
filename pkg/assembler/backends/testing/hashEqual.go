@@ -16,7 +16,9 @@
 package testing
 
 import (
+	"context"
 	"reflect"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -28,6 +30,8 @@ func registerAllHashEqual(client *demoClient) {
 	client.registerHashEqual([]*model.Artifact{{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"},
 		{Digest: "89bb0da1891646e58eb3e6ed24f3a6fc3c8eb5a0d44824cba581dfa34a0450cf", Algorithm: "sha256"}}, "these two are the same")
 }
+
+// Ingest HashEqual
 
 func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justification string) {
 
@@ -44,4 +48,54 @@ func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justificatio
 		Collector:     "testing backend",
 	}
 	c.hashEquals = append(c.hashEquals, newHashEqual)
+}
+
+// Query HashEqual
+
+func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+	var hashEquals []*model.HashEqual
+
+	justificationMatchOrSkip := false
+	collectorMatchOrSkip := false
+	originMatchOrSkip := false
+	for _, h := range c.hashEquals {
+		if hashEqualSpec.Justification == nil || h.Justification == *hashEqualSpec.Justification {
+			justificationMatchOrSkip = true
+		}
+		if hashEqualSpec.Collector == nil || h.Collector == *hashEqualSpec.Collector {
+			collectorMatchOrSkip = true
+		}
+		if hashEqualSpec.Origin == nil || h.Origin == *hashEqualSpec.Origin {
+			originMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
+			if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
+				hashEquals = append(hashEquals, h)
+			} else {
+				hashEquals = append(hashEquals, h)
+			}
+		}
+	}
+
+	return hashEquals, nil
+}
+
+func filterEqualArtifact(storedArtifacts []*model.Artifact, queryArtifacts []*model.ArtifactSpec) bool {
+	exists := make(map[model.Artifact]bool)
+	for _, value := range storedArtifacts {
+		exists[*value] = true
+	}
+
+	// enforce lowercase for both the algorithm and digest when querying
+	for _, value := range queryArtifacts {
+		queryArt := model.Artifact{
+			Algorithm: strings.ToLower(*value.Algorithm),
+			Digest:    strings.ToLower(*value.Digest),
+		}
+		if _, ok := exists[queryArt]; ok {
+			return true
+		}
+	}
+	return false
 }
