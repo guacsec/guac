@@ -130,6 +130,33 @@ type HasSBOMSpec struct {
 	Collector *string     `json:"collector"`
 }
 
+// HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+//
+// Package - the package object type that represents the package
+// Source - the source object type that represents the source
+// KnownSince - timestamp when this was last checked (exact time)
+// Justification - string value representing why the package has a source specified
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type HasSourceAt struct {
+	Package       *Package `json:"package"`
+	Source        *Source  `json:"source"`
+	KnownSince    string   `json:"knownSince"`
+	Justification string   `json:"justification"`
+	Origin        string   `json:"origin"`
+	Collector     string   `json:"collector"`
+}
+
+// HasSourceAtSpec allows filtering the list of HasSourceAt to return.
+type HasSourceAtSpec struct {
+	Package       *PkgSpec    `json:"package"`
+	Source        *SourceSpec `json:"source"`
+	KnownSince    *string     `json:"knownSince"`
+	Justification *string     `json:"justification"`
+	Origin        *string     `json:"origin"`
+	Collector     *string     `json:"collector"`
+}
+
 // HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
 //
 // Justification - string value representing why the artifacts are the equal

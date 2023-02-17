@@ -25,7 +25,6 @@ year is mandatory.
 
 This node is a singleton: backends guarantee that there is exactly one node with
 the same `year` value.
-
 """
 type CVE {
   year: String!

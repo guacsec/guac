@@ -26,7 +26,6 @@ VersionRange - string value for version range that applies to the dependent pack
 Justification - string value representing why the artifacts are the equal
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
-
 """
 type IsDependency {
   package: Package!

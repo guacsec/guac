@@ -15,42 +15,40 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSBOM. It contains the package object, source object, uri, origin and collector. 
+# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector. 
 """
-HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+HasSourceAt is an attestation represents that a package object has a source object since a timestamp
 
 Package - the package object type that represents the package
 Source - the source object type that represents the source
-uri - identifier string for the SBOM
+KnownSince - timestamp when this was last checked (exact time)
+Justification - string value representing why the package has a source specified
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
-
-Note: Only package object or source object can be defined. Not both.
 """
-type HasSBOM {
-  package: Package
-  source: Source
-  uri: String!
+type HasSourceAt {
+  package: Package!
+  source: Source!
+  knownSince: String!
+  justification: String!
   origin: String!
   collector: String!
 }
 
 """
-HashEqualSpec allows filtering the list of HasSBOM to return.
-
-Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
-relationship. 
+HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 """
-input HasSBOMSpec {
+input HasSourceAtSpec {
   package: PkgSpec
   source: SourceSpec
-  uri: String
+  knownSince: String
+  justification: String
   origin: String
   collector: String
 }
 
 
 extend type Query {
-  "Returns all HasSBOM"
-  HasSBOMs(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+  "Returns all HasSourceAt"
+  HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
 }

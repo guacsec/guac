@@ -69,6 +69,8 @@ func registerAllPackages(client *demoClient) {
 	client.registerPackage("pypi", "", "django", "1.11.1", "")
 	// pkg:pypi/django@1.11.1#subpath
 	client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
+	// pkg:pypi/kubetest@0.9.5
+	client.registerPackage("pypi", "", "kubetest", "0.9.5", "")
 }
 
 func (c *demoClient) registerPackage(pkgType, namespace, name, version, subpath string, qualifiers ...string) *model.Package {

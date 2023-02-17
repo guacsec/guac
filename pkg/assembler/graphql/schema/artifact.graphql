@@ -21,7 +21,6 @@ Artifact represents the artifact and contains a digest field
 
 algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
 digest is mandatory in the form checksum.Value.
-
 """
 type Artifact {
   algorithm: String!
