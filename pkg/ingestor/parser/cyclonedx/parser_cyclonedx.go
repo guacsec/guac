@@ -153,27 +153,29 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 }
 
 func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
-	for _, comp := range *cdxBom.Components {
-		// skipping over the "operating-system" type as it does not contain
-		// the required purl for package node. Currently there is no use-case
-		// to capture OS for GUAC.
-		if comp.Type != cdx.ComponentTypeOS {
-			curPkg := assembler.PackageNode{
-				Name: comp.Name,
-				// Digest: []string{comp.Version},
-				Purl:     comp.PackageURL,
-				Version:  comp.Version,
-				NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
+	if cdxBom.Components != nil {
+		for _, comp := range *cdxBom.Components {
+			// skipping over the "operating-system" type as it does not contain
+			// the required purl for package node. Currently there is no use-case
+			// to capture OS for GUAC.
+			if comp.Type != cdx.ComponentTypeOS {
+				curPkg := assembler.PackageNode{
+					Name: comp.Name,
+					// Digest: []string{comp.Version},
+					Purl:     comp.PackageURL,
+					Version:  comp.Version,
+					NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
+				}
+				if comp.CPE != "" {
+					curPkg.CPEs = []string{comp.CPE}
+				}
+				parentPkg := component{
+					curPackage:  curPkg,
+					depPackages: []*component{},
+				}
+				c.rootComponent.depPackages = append(c.rootComponent.depPackages, &parentPkg)
+				c.pkgMap[comp.BOMRef] = &parentPkg
 			}
-			if comp.CPE != "" {
-				curPkg.CPEs = []string{comp.CPE}
-			}
-			parentPkg := component{
-				curPackage:  curPkg,
-				depPackages: []*component{},
-			}
-			c.rootComponent.depPackages = append(c.rootComponent.depPackages, &parentPkg)
-			c.pkgMap[comp.BOMRef] = &parentPkg
 		}
 	}
 
