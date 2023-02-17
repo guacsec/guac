@@ -81,6 +81,18 @@ type ComplexityRoot struct {
 		TimeScanned      func(childComplexity int) int
 	}
 
+	CertifyVuln struct {
+		Collector      func(childComplexity int) int
+		DbURI          func(childComplexity int) int
+		DbVersion      func(childComplexity int) int
+		Origin         func(childComplexity int) int
+		Package        func(childComplexity int) int
+		ScannerURI     func(childComplexity int) int
+		ScannerVersion func(childComplexity int) int
+		TimeScanned    func(childComplexity int) int
+		Vulnerability  func(childComplexity int) int
+	}
+
 	GHSA struct {
 		GhsaID func(childComplexity int) int
 	}
@@ -173,6 +185,7 @@ type ComplexityRoot struct {
 		CertifyBad       func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
 		CertifyPkg       func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
 		CertifyScorecard func(childComplexity int, certifyScorecardSpec *model.CertifyScorecardSpec) int
+		CertifyVuln      func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
 		Cve              func(childComplexity int, cveSpec *model.CVESpec) int
 		Ghsa             func(childComplexity int, ghsaSpec *model.GHSASpec) int
 		HasSBOMs         func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
@@ -375,6 +388,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyScorecard.TimeScanned(childComplexity), true
+
+	case "CertifyVuln.collector":
+		if e.complexity.CertifyVuln.Collector == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.Collector(childComplexity), true
+
+	case "CertifyVuln.dbUri":
+		if e.complexity.CertifyVuln.DbURI == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.DbURI(childComplexity), true
+
+	case "CertifyVuln.dbVersion":
+		if e.complexity.CertifyVuln.DbVersion == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.DbVersion(childComplexity), true
+
+	case "CertifyVuln.origin":
+		if e.complexity.CertifyVuln.Origin == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.Origin(childComplexity), true
+
+	case "CertifyVuln.package":
+		if e.complexity.CertifyVuln.Package == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.Package(childComplexity), true
+
+	case "CertifyVuln.scannerUri":
+		if e.complexity.CertifyVuln.ScannerURI == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.ScannerURI(childComplexity), true
+
+	case "CertifyVuln.scannerVersion":
+		if e.complexity.CertifyVuln.ScannerVersion == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.ScannerVersion(childComplexity), true
+
+	case "CertifyVuln.timeScanned":
+		if e.complexity.CertifyVuln.TimeScanned == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.TimeScanned(childComplexity), true
+
+	case "CertifyVuln.vulnerability":
+		if e.complexity.CertifyVuln.Vulnerability == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.Vulnerability(childComplexity), true
 
 	case "GHSA.ghsaId":
 		if e.complexity.GHSA.GhsaID == nil {
@@ -728,6 +804,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyScorecard(childComplexity, args["certifyScorecardSpec"].(*model.CertifyScorecardSpec)), true
 
+	case "Query.CertifyVuln":
+		if e.complexity.Query.CertifyVuln == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyVuln_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(*model.CertifyVulnSpec)), true
+
 	case "Query.cve":
 		if e.complexity.Query.Cve == nil {
 			break
@@ -925,6 +1013,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
+		ec.unmarshalInputCertifyVulnSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSourceAtSpec,
@@ -1173,7 +1262,6 @@ Packages - list of package objects
 Justification - string value representing why the packages are similar
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
-
 """
 type CertifyPkg {
   packages: [Package!]!
@@ -1285,6 +1373,80 @@ input ScorecardCheckSpec {
 extend type Query {
   "Returns all CertifyScorecard"
   CertifyScorecard(certifyScorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/certifyVuln.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the CertifyVuln. It contains a package, vulnerability that can be of type
+# cve, ghsa or osv, time scanned, db uri, db version, scanner uri, scanner version, origin and collector
+"""
+CertifyVuln is an attestation that represents when a package has a vulnerability
+
+Package - the package object type that represents the package
+vulnerability - union type that consists of osv, cve or ghsa
+timeScanned - timestamp of when the package was last scanned
+dbUri - scanner vulnerability database uri
+dbVersion - scanner vulnerability database version
+scannerUri - vulnerability scanner's uri 
+scannerVersion - vulnerability scanner version
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+"""
+type CertifyVuln {
+  package: Package!
+  vulnerability: OsvCveGhsaObject!
+  timeScanned: String!
+  dbUri: String!
+  dbVersion: String!
+  scannerUri: String!
+  scannerVersion: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+CertifyVulnSpec allows filtering the list of CertifyVuln to return.
+
+Specifying just the package allows to query for all vulnerabilities associated with the package.
+Only OSV, CVE or GHSA can be specified at once
+"""
+input CertifyVulnSpec {
+  package: PkgSpec
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+  timeScanned: String
+  dbUri: String
+  dbVersion: String
+  scannerUri: String
+  scannerVersion: String
+  origin: String
+  collector: String
+}
+
+"""
+OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+"""
+union OsvCveGhsaObject = OSV | CVE | GHSA
+
+extend type Query {
+  "Returns all CertifyVuln"
+  CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#

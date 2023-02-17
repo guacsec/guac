@@ -111,16 +111,16 @@ func (c *demoClient) registerCertifyPkg(selectedPackages []*model.Package, justi
 func (c *demoClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
 	var certifyPkgs []*model.CertifyPkg
 
-	justificationMatchOrSkip := false
-	collectorMatchOrSkip := false
-	originMatchOrSkip := false
-
 	queryPkgs, err := getPackagesFromInput(c, ctx, certifyPkgSpec.Packages)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, h := range c.certifyPkg {
+		justificationMatchOrSkip := false
+		collectorMatchOrSkip := false
+		originMatchOrSkip := false
+
 		if certifyPkgSpec.Justification == nil || h.Justification == *certifyPkgSpec.Justification {
 			justificationMatchOrSkip = true
 		}

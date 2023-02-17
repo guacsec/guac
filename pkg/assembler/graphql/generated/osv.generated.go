@@ -160,7 +160,7 @@ func (ec *executionContext) unmarshalInputOSVSpec(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
-var oSVImplementors = []string{"OSV"}
+var oSVImplementors = []string{"OSV", "OsvCveGhsaObject"}
 
 func (ec *executionContext) _OSV(ctx context.Context, sel ast.SelectionSet, obj *model.Osv) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, oSVImplementors)

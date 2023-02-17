@@ -2,6 +2,11 @@
 
 package model
 
+// OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+type OsvCveGhsaObject interface {
+	IsOsvCveGhsaObject()
+}
+
 // PkgSrcArtObject is a union of Package, Source and Artifact. Any of these objects can be specified
 type PkgSrcArtObject interface {
 	IsPkgSrcArtObject()
@@ -55,6 +60,8 @@ type Cve struct {
 	Year  string   `json:"year"`
 	CveID []*CVEId `json:"cveId"`
 }
+
+func (Cve) IsOsvCveGhsaObject() {}
 
 // CVEId is the actual ID that is given to a specific vulnerability
 //
@@ -155,10 +162,53 @@ type CertifyScorecardSpec struct {
 	Collector        *string               `json:"collector"`
 }
 
+// CertifyVuln is an attestation that represents when a package has a vulnerability
+//
+// Package - the package object type that represents the package
+// vulnerability - union type that consists of osv, cve or ghsa
+// timeScanned - timestamp of when the package was last scanned
+// dbUri - scanner vulnerability database uri
+// dbVersion - scanner vulnerability database version
+// scannerUri - vulnerability scanner's uri
+// scannerVersion - vulnerability scanner version
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type CertifyVuln struct {
+	Package        *Package         `json:"package"`
+	Vulnerability  OsvCveGhsaObject `json:"vulnerability"`
+	TimeScanned    string           `json:"timeScanned"`
+	DbURI          string           `json:"dbUri"`
+	DbVersion      string           `json:"dbVersion"`
+	ScannerURI     string           `json:"scannerUri"`
+	ScannerVersion string           `json:"scannerVersion"`
+	Origin         string           `json:"origin"`
+	Collector      string           `json:"collector"`
+}
+
+// CertifyVulnSpec allows filtering the list of CertifyVuln to return.
+//
+// Specifying just the package allows to query for all vulnerabilities associated with the package.
+// Only OSV, CVE or GHSA can be specified at once
+type CertifyVulnSpec struct {
+	Package        *PkgSpec  `json:"package"`
+	Osv            *OSVSpec  `json:"osv"`
+	Cve            *CVESpec  `json:"cve"`
+	Ghsa           *GHSASpec `json:"ghsa"`
+	TimeScanned    *string   `json:"timeScanned"`
+	DbURI          *string   `json:"dbUri"`
+	DbVersion      *string   `json:"dbVersion"`
+	ScannerURI     *string   `json:"scannerUri"`
+	ScannerVersion *string   `json:"scannerVersion"`
+	Origin         *string   `json:"origin"`
+	Collector      *string   `json:"collector"`
+}
+
 // GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
 type Ghsa struct {
 	GhsaID []*GHSAId `json:"ghsaId"`
 }
+
+func (Ghsa) IsOsvCveGhsaObject() {}
 
 // GHSAId is the actual ID that is given to a specific vulnerability on github
 //
@@ -321,6 +371,8 @@ type IsOccurrenceSpec struct {
 type Osv struct {
 	OsvID []*OSVId `json:"osvId"`
 }
+
+func (Osv) IsOsvCveGhsaObject() {}
 
 // OSVId is the actual ID that is given to a specific vulnerability
 //
