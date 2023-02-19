@@ -18,7 +18,6 @@ package scorecard
 import (
 	"context"
 	"fmt"
-
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/checks"
 	"github.com/ossf/scorecard/v4/log"
@@ -32,13 +31,11 @@ type scorecardRunner struct {
 
 func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResult, error) {
 	defaultLogger := log.NewLogger(log.DefaultLevel)
-
 	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
 
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to get clients: %w", err)
 	}
-
 	enabledChecks := map[string]checker.Check{
 		checks.CheckBinaryArtifacts:      {Fn: checks.BinaryArtifacts},
 		checks.CheckVulnerabilities:      {Fn: checks.Vulnerabilities},
@@ -62,11 +59,13 @@ func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResu
 	}
 
 	res, err := sc.RunScorecards(s.ctx, repo, commitSHA, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)
-
+	if res.Repo.Name == "" {
+		// The commit SHA can be invalid or the repo can be private.
+		return nil, fmt.Errorf("error, failed to get scorecard data for repo %v, commit SHA %v", res.Repo.Name, commitSHA)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
 	}
-
 	return &res, nil
 }
 

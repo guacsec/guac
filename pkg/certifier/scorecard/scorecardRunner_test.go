@@ -54,6 +54,7 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 				t.Errorf("GetScore() error = %v, wantErr %v", err, test.wantErr)
 				return
 			}
+			t.Logf("scorecard result: %v", got.Repo.Name)
 			for _, check := range got.Checks {
 				if check.Name == checks.CheckMaintained && check.Score < 5 {
 					t.Errorf("Maintained score is less than 5")

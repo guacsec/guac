@@ -39,6 +39,7 @@ func (p *ScorecardProcessor) ValidateSchema(d *processor.Document) error {
 		if err := json.Unmarshal(d.Blob, &scorecard); err != nil {
 			return err
 		}
+		fmt.Println(scorecard.Repo.Name, scorecard.Repo.Commit)
 		if scorecard.Repo.Name == "" ||
 			scorecard.Repo.Commit == "" ||
 			len(scorecard.Checks) == 0 {
