@@ -18,10 +18,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/guacsec/guac/pkg/certifier/scorecard"
 	"os"
 	"time"
+
+	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/scorecard"
 
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier/certify"

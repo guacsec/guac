@@ -18,6 +18,7 @@ package scorecard
 import (
 	"context"
 	"fmt"
+
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/checks"
 	"github.com/ossf/scorecard/v4/log"
@@ -30,6 +31,7 @@ type scorecardRunner struct {
 }
 
 func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResult, error) {
+	// Can't use guacs standard logger because scorecard uses a different logger.
 	defaultLogger := log.NewLogger(log.DefaultLevel)
 	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
 

@@ -18,12 +18,13 @@ package scorecard
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
-	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/ossf/scorecard/v4/checker"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/ossf/scorecard/v4/checker"
 
 	"github.com/golang/mock/gomock"
 	"github.com/guacsec/guac/pkg/assembler"
