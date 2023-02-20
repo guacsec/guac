@@ -2,6 +2,16 @@
 
 package model
 
+// PkgSrcArtObject is a union of Package, Source and Artifact. Any of these objects can be specified
+type PkgSrcArtObject interface {
+	IsPkgSrcArtObject()
+}
+
+// PkgSrcObject is a union of Package and Source. Any of these objects can be specified
+type PkgSrcObject interface {
+	IsPkgSrcObject()
+}
+
 // Artifact represents the artifact and contains a digest field
 //
 // algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
@@ -10,6 +20,8 @@ type Artifact struct {
 	Algorithm string `json:"algorithm"`
 	Digest    string `json:"digest"`
 }
+
+func (Artifact) IsPkgSrcArtObject() {}
 
 // ArtifactSpec allows filtering the list of artifacts to return.
 type ArtifactSpec struct {
@@ -59,6 +71,34 @@ type CVESpec struct {
 	CveID *string `json:"cveId"`
 }
 
+// CertifyBad is an attestation represents when a package, source or artifact is considered bad
+//
+// Subject - union type that can be either a package, source or artifact object type
+// Justification - string value representing why the subject is considered bad
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+type CertifyBad struct {
+	Subject       PkgSrcArtObject `json:"subject"`
+	Justification string          `json:"justification"`
+	Origin        string          `json:"origin"`
+	Collector     string          `json:"collector"`
+}
+
+// CertifyBadSpec allows filtering the list of CertifyBad to return.
+// Note: Package, Source or artifact must be specified but not at the same time
+// For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+// For source - a SourceName must be specified (name, tag or commit)
+type CertifyBadSpec struct {
+	Package       *PkgSpec      `json:"package"`
+	Source        *SourceSpec   `json:"source"`
+	Artifact      *ArtifactSpec `json:"artifact"`
+	Justification *string       `json:"justification"`
+	Origin        *string       `json:"origin"`
+	Collector     *string       `json:"collector"`
+}
+
 // CertifyPkg is an attestation that represents when a package objects are similar
 //
 // Packages - list of package objects
@@ -103,6 +143,7 @@ type GHSASpec struct {
 
 // HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 //
+// Subject - union type that can be either a package or source object type
 // Package - the package object type that represents the package
 // Source - the source object type that represents the source
 // uri - identifier string for the SBOM
@@ -111,11 +152,10 @@ type GHSASpec struct {
 //
 // Note: Only package object or source object can be defined. Not both.
 type HasSbom struct {
-	Package   *Package `json:"package"`
-	Source    *Source  `json:"source"`
-	URI       string   `json:"uri"`
-	Origin    string   `json:"origin"`
-	Collector string   `json:"collector"`
+	Subject   PkgSrcObject `json:"subject"`
+	URI       string       `json:"uri"`
+	Origin    string       `json:"origin"`
+	Collector string       `json:"collector"`
 }
 
 // HashEqualSpec allows filtering the list of HasSBOM to return.
@@ -211,10 +251,10 @@ type IsDependencySpec struct {
 }
 
 // IsOccurrence is an attestation represents when either a package or source is represented by an artifact
-// Justification - string value representing why the package or source is represented by the specified artifact
-// Package - the package object type that represents the package
-// Source - the source object type that represents the source
+//
+// Subject - union type that can be either a package or source object type
 // occurrenceArtifacts - list of artifacts that represent the the package or source
+// Justification - string value representing why the package or source is represented by the specified artifact
 // Origin - where this attestation was generated from (based on which document)
 // Collector - the GUAC collector that collected the document that generated this attestation
 //
@@ -224,12 +264,11 @@ type IsDependencySpec struct {
 // IsOccurrence does not connect a package with a source.
 // HasSourceAt attestation will be used to connect a package with a source
 type IsOccurrence struct {
-	Justification       string      `json:"justification"`
-	Package             *Package    `json:"package"`
-	Source              *Source     `json:"source"`
-	OccurrenceArtifacts []*Artifact `json:"occurrenceArtifacts"`
-	Origin              string      `json:"origin"`
-	Collector           string      `json:"collector"`
+	Subject             PkgSrcObject `json:"subject"`
+	OccurrenceArtifacts []*Artifact  `json:"occurrenceArtifacts"`
+	Justification       string       `json:"justification"`
+	Origin              string       `json:"origin"`
+	Collector           string       `json:"collector"`
 }
 
 // IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
@@ -280,6 +319,10 @@ type Package struct {
 	Type       string              `json:"type"`
 	Namespaces []*PackageNamespace `json:"namespaces"`
 }
+
+func (Package) IsPkgSrcArtObject() {}
+
+func (Package) IsPkgSrcObject() {}
 
 // PackageName is a name for packages.
 //
@@ -430,6 +473,10 @@ type Source struct {
 	Type       string             `json:"type"`
 	Namespaces []*SourceNamespace `json:"namespaces"`
 }
+
+func (Source) IsPkgSrcArtObject() {}
+
+func (Source) IsPkgSrcObject() {}
 
 // SourceName is a url of the repository and its tag or commit.
 //

@@ -28,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _IsOccurrence_subject(ctx context.Context, field graphql.CollectedField, obj *model.IsOccurrence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_IsOccurrence_subject(ctx, field)
+func (ec *executionContext) _CertifyBad_subject(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyBad_subject(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -54,76 +54,26 @@ func (ec *executionContext) _IsOccurrence_subject(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.PkgSrcObject)
+	res := resTmp.(model.PkgSrcArtObject)
 	fc.Result = res
-	return ec.marshalNPkgSrcObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcObject(ctx, field.Selections, res)
+	return ec.marshalNPkgSrcArtObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcArtObject(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CertifyBad_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "IsOccurrence",
+		Object:     "CertifyBad",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type PkgSrcObject does not have child fields")
+			return nil, errors.New("field of type PkgSrcArtObject does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _IsOccurrence_occurrenceArtifacts(ctx context.Context, field graphql.CollectedField, obj *model.IsOccurrence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_IsOccurrence_occurrenceArtifacts(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.OccurrenceArtifacts, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Artifact)
-	fc.Result = res
-	return ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_IsOccurrence_occurrenceArtifacts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "IsOccurrence",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "algorithm":
-				return ec.fieldContext_Artifact_algorithm(ctx, field)
-			case "digest":
-				return ec.fieldContext_Artifact_digest(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _IsOccurrence_justification(ctx context.Context, field graphql.CollectedField, obj *model.IsOccurrence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_IsOccurrence_justification(ctx, field)
+func (ec *executionContext) _CertifyBad_justification(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyBad_justification(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -153,9 +103,9 @@ func (ec *executionContext) _IsOccurrence_justification(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_justification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CertifyBad_justification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "IsOccurrence",
+		Object:     "CertifyBad",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -166,8 +116,8 @@ func (ec *executionContext) fieldContext_IsOccurrence_justification(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _IsOccurrence_origin(ctx context.Context, field graphql.CollectedField, obj *model.IsOccurrence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_IsOccurrence_origin(ctx, field)
+func (ec *executionContext) _CertifyBad_origin(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyBad_origin(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -197,9 +147,9 @@ func (ec *executionContext) _IsOccurrence_origin(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CertifyBad_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "IsOccurrence",
+		Object:     "CertifyBad",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -210,8 +160,8 @@ func (ec *executionContext) fieldContext_IsOccurrence_origin(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _IsOccurrence_collector(ctx context.Context, field graphql.CollectedField, obj *model.IsOccurrence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_IsOccurrence_collector(ctx, field)
+func (ec *executionContext) _CertifyBad_collector(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyBad_collector(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -241,9 +191,9 @@ func (ec *executionContext) _IsOccurrence_collector(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CertifyBad_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "IsOccurrence",
+		Object:     "CertifyBad",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -258,28 +208,20 @@ func (ec *executionContext) fieldContext_IsOccurrence_collector(ctx context.Cont
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, obj interface{}) (model.IsOccurrenceSpec, error) {
-	var it model.IsOccurrenceSpec
+func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, obj interface{}) (model.CertifyBadSpec, error) {
+	var it model.CertifyBadSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "package", "source", "artifacts", "origin", "collector"}
+	fieldsInOrder := [...]string{"package", "source", "artifact", "justification", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "justification":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "package":
 			var err error
 
@@ -296,11 +238,19 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "artifacts":
+		case "artifact":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-			it.Artifacts, err = ec.unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+			it.Artifact, err = ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -330,51 +280,74 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _PkgSrcArtObject(ctx context.Context, sel ast.SelectionSet, obj model.PkgSrcArtObject) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Package:
+		return ec._Package(ctx, sel, &obj)
+	case *model.Package:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Package(ctx, sel, obj)
+	case model.Source:
+		return ec._Source(ctx, sel, &obj)
+	case *model.Source:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Source(ctx, sel, obj)
+	case model.Artifact:
+		return ec._Artifact(ctx, sel, &obj)
+	case *model.Artifact:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Artifact(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var isOccurrenceImplementors = []string{"IsOccurrence"}
+var certifyBadImplementors = []string{"CertifyBad"}
 
-func (ec *executionContext) _IsOccurrence(ctx context.Context, sel ast.SelectionSet, obj *model.IsOccurrence) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, isOccurrenceImplementors)
+func (ec *executionContext) _CertifyBad(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyBad) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, certifyBadImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("IsOccurrence")
+			out.Values[i] = graphql.MarshalString("CertifyBad")
 		case "subject":
 
-			out.Values[i] = ec._IsOccurrence_subject(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "occurrenceArtifacts":
-
-			out.Values[i] = ec._IsOccurrence_occurrenceArtifacts(ctx, field, obj)
+			out.Values[i] = ec._CertifyBad_subject(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "justification":
 
-			out.Values[i] = ec._IsOccurrence_justification(ctx, field, obj)
+			out.Values[i] = ec._CertifyBad_justification(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "origin":
 
-			out.Values[i] = ec._IsOccurrence_origin(ctx, field, obj)
+			out.Values[i] = ec._CertifyBad_origin(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "collector":
 
-			out.Values[i] = ec._IsOccurrence_collector(ctx, field, obj)
+			out.Values[i] = ec._CertifyBad_collector(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -394,7 +367,7 @@ func (ec *executionContext) _IsOccurrence(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.IsOccurrence) graphql.Marshaler {
+func (ec *executionContext) marshalNCertifyBad2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyBad) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -418,7 +391,7 @@ func (ec *executionContext) marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNIsOccurrence2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrence(ctx, sel, v[i])
+			ret[i] = ec.marshalNCertifyBad2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBad(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -438,21 +411,31 @@ func (ec *executionContext) marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNIsOccurrence2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrence(ctx context.Context, sel ast.SelectionSet, v *model.IsOccurrence) graphql.Marshaler {
+func (ec *executionContext) marshalNCertifyBad2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBad(ctx context.Context, sel ast.SelectionSet, v *model.CertifyBad) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._IsOccurrence(ctx, sel, v)
+	return ec._CertifyBad(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOIsOccurrenceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx context.Context, v interface{}) (*model.IsOccurrenceSpec, error) {
+func (ec *executionContext) marshalNPkgSrcArtObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcArtObject(ctx context.Context, sel ast.SelectionSet, v model.PkgSrcArtObject) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PkgSrcArtObject(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOCertifyBadSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx context.Context, v interface{}) (*model.CertifyBadSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputIsOccurrenceSpec(ctx, v)
+	res, err := ec.unmarshalInputCertifyBadSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

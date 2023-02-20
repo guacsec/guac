@@ -36,6 +36,7 @@ type demoClient struct {
 	isDependency []*model.IsDependency
 	certifyPkg   []*model.CertifyPkg
 	hasSourceAt  []*model.HasSourceAt
+	certifyBad   []*model.CertifyBad
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -73,6 +74,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	err = registerAllHasSourceAt(client)
+	if err != nil {
+		return nil, err
+	}
+	err = registerAllCertifyBad(client)
 	if err != nil {
 		return nil, err
 	}

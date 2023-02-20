@@ -897,7 +897,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var packageImplementors = []string{"Package"}
+var packageImplementors = []string{"Package", "PkgSrcArtObject", "PkgSrcObject"}
 
 func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, obj *model.Package) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, packageImplementors)
@@ -1365,13 +1365,6 @@ func (ec *executionContext) marshalNPackageVersion2ᚖgithubᚗcomᚋguacsecᚋg
 		return graphql.Null
 	}
 	return ec._PackageVersion(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx context.Context, sel ast.SelectionSet, v *model.Package) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Package(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageQualifierInputSpec, error) {

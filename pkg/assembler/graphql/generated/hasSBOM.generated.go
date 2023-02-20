@@ -28,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _HasSBOM_package(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_package(ctx, field)
+func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasSBOM_subject(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -42,81 +42,31 @@ func (ec *executionContext) _HasSBOM_package(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Package, nil
+		return obj.Subject, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Package)
-	fc.Result = res
-	return ec.marshalOPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_HasSBOM_package(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "HasSBOM",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "type":
-				return ec.fieldContext_Package_type(ctx, field)
-			case "namespaces":
-				return ec.fieldContext_Package_namespaces(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Package", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _HasSBOM_source(ctx context.Context, field graphql.CollectedField, obj *model.HasSbom) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSBOM_source(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
 		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Source, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
 		return graphql.Null
 	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Source)
+	res := resTmp.(model.PkgSrcObject)
 	fc.Result = res
-	return ec.marshalOSource2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSource(ctx, field.Selections, res)
+	return ec.marshalNPkgSrcObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcObject(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSBOM_source(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HasSBOM_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HasSBOM",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "type":
-				return ec.fieldContext_Source_type(ctx, field)
-			case "namespaces":
-				return ec.fieldContext_Source_namespaces(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Source", field.Name)
+			return nil, errors.New("field of type PkgSrcObject does not have child fields")
 		},
 	}
 	return fc, nil
@@ -322,6 +272,29 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _PkgSrcObject(ctx context.Context, sel ast.SelectionSet, obj model.PkgSrcObject) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Package:
+		return ec._Package(ctx, sel, &obj)
+	case *model.Package:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Package(ctx, sel, obj)
+	case model.Source:
+		return ec._Source(ctx, sel, &obj)
+	case *model.Source:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Source(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -336,14 +309,13 @@ func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("HasSBOM")
-		case "package":
+		case "subject":
 
-			out.Values[i] = ec._HasSBOM_package(ctx, field, obj)
+			out.Values[i] = ec._HasSBOM_subject(ctx, field, obj)
 
-		case "source":
-
-			out.Values[i] = ec._HasSBOM_source(ctx, field, obj)
-
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "uri":
 
 			out.Values[i] = ec._HasSBOM_uri(ctx, field, obj)
@@ -432,6 +404,16 @@ func (ec *executionContext) marshalNHasSBOM2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 		return graphql.Null
 	}
 	return ec._HasSBOM(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPkgSrcObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcObject(ctx context.Context, sel ast.SelectionSet, v model.PkgSrcObject) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PkgSrcObject(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOHasSBOMSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v interface{}) (*model.HasSBOMSpec, error) {
