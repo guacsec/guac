@@ -39,3 +39,5 @@
 ./pkg/assembler/graphql/resolvers/isVulnerability.resolvers.go
 ./pkg/assembler/graphql/generated/hasSLSA.generated.go
 ./pkg/assembler/graphql/resolvers/hasSLSA.resolvers.go
+./pkg/assembler/graphql/generated/isVulnerability.generated.go
+./pkg/assembler/graphql/resolvers/isVulnerability.resolvers.go
