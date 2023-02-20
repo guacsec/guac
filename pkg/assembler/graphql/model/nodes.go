@@ -262,6 +262,49 @@ type HasSBOMSpec struct {
 	Collector *string     `json:"collector"`
 }
 
+// HasSLSA is an attestation represents that the subject has a SLSA attestation associated with it.
+//
+// Subject - an union type that consists of package, source or artifact
+// BuiltFrom - list of union types that consists of the package, source or artifact that the subject was build from
+// BuiltBy - represents the builder that was used to build the subject
+// BuildType - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+// slsaPredicate - a list of key value pair that consist of the keys and values of the SLSA predicate
+// SlsaVersion - version of the SLSA predicate
+// StartedOn - timestamp when the SLSA predicate was recorded during the build time of the subject
+// FinishedOn - timestamp when the SLSA predicate was completed during the build time of the subject
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type HasSlsa struct {
+	Subject       PkgSrcArtObject   `json:"subject"`
+	BuiltFrom     []PkgSrcArtObject `json:"builtFrom"`
+	BuiltBy       *Builder          `json:"builtBy"`
+	BuildType     string            `json:"buildType"`
+	SlsaPredicate []*SLSAPredicate  `json:"slsaPredicate"`
+	SlsaVersion   string            `json:"slsaVersion"`
+	StartedOn     string            `json:"startedOn"`
+	FinishedOn    string            `json:"finishedOn"`
+	Origin        string            `json:"origin"`
+	Collector     string            `json:"collector"`
+}
+
+// HasSLSASpec allows filtering the list of HasSLSA to return.
+type HasSLSASpec struct {
+	Package           *PkgSpec             `json:"package"`
+	Source            *SourceSpec          `json:"source"`
+	Artifact          *ArtifactSpec        `json:"artifact"`
+	BuiltFromPackages []*PkgSpec           `json:"builtFromPackages"`
+	BuiltFromSource   []*SourceSpec        `json:"builtFromSource"`
+	BuiltFromArtifact []*ArtifactSpec      `json:"builtFromArtifact"`
+	BuiltBy           *BuilderSpec         `json:"builtBy"`
+	BuildType         *string              `json:"buildType"`
+	Predicate         []*SLSAPredicateSpec `json:"predicate"`
+	SlsaVersion       *string              `json:"slsaVersion"`
+	StartedOn         *string              `json:"startedOn"`
+	FinishedOn        *string              `json:"finishedOn"`
+	Origin            *string              `json:"origin"`
+	Collector         *string              `json:"collector"`
+}
+
 // HasSourceAt is an attestation represents that a package object has a source object since a timestamp
 //
 // Package - the package object type that represents the package
@@ -578,6 +621,53 @@ type PkgSpec struct {
 	Qualifiers               []*PackageQualifierSpec `json:"qualifiers"`
 	MatchOnlyEmptyQualifiers *bool                   `json:"matchOnlyEmptyQualifiers"`
 	Subpath                  *string                 `json:"subpath"`
+}
+
+// SLSAPredicate are the values from the SLSA predicate in key-value pair form.
+// // Predicate:
+// "predicateType": "https://slsa.dev/provenance/v1",
+//
+//	"predicate": {
+//	    "buildDefinition": {
+//	        "buildType": string,
+//	        "externalParameters": object,
+//	        "systemParameters": object,
+//	        "resolvedDependencies": [ ...#ArtifactReference ],
+//	    },
+//	    "runDetails": {
+//	        "builder": {
+//	            "id": string,
+//	            "version": string,
+//	            "builderDependencies": [ ...#ArtifactReference ],
+//	        },
+//	        "metadata": {
+//	            "invocationId": string,
+//	            "startedOn": #Timestamp,
+//	            "finishedOn": #Timestamp,
+//	        },
+//	        "byproducts": [ ...#ArtifactReference ],
+//	    }
+//	}
+//
+// where
+//
+//	"externalParameters": {
+//	    "repository": "https://github.com/octocat/hello-world",
+//	    "ref": "refs/heads/main"
+//	},
+//
+// For example: key = "buildDefinition.externalParameters.repository" value = "https://github.com/octocat/hello-world"
+// This node cannot be directly referred by other parts of GUAC.
+type SLSAPredicate struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query
+// input.
+type SLSAPredicateSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // ScorecardCheck are the individual checks from scorecard and their values, a key-value pair.

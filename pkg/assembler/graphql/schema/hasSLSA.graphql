@@ -15,72 +15,105 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyScorecard. It contains the source object, time the source was scanned,
-# aggregate score, individual check scores, scorecard version and commit, origin and collector.
+# Defines a GraphQL schema for the HasSLSA. It contains the Subject which can be of type package, source or artifact,
+# buliltFrom which can also be of type package, source or artifact, builtby (builder object), build type,  predicate (key value pair of
+# the predicate values), slsa version, started on, finished on, origin and collector.
 """
-CertifyScorecard is an attestation represents the scorecard of a particular source
-Source - the source object type that represents the source
-timeScanned - timestamp when this was last scanned (exact time)
-aggregateScore - overall scorecard score for the source
-checks - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-scorecardVersion - version of the scorecard when the source was scanned
-scorecardCommit - commit of scorecard when the source was scanned
+HasSLSA is an attestation represents that the subject has a SLSA attestation associated with it.
+
+Subject - an union type that consists of package, source or artifact
+BuiltFrom - list of union types that consists of the package, source or artifact that the subject was build from
+BuiltBy - represents the builder that was used to build the subject
+BuildType - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+slsaPredicate - a list of key value pair that consist of the keys and values of the SLSA predicate
+SlsaVersion - version of the SLSA predicate
+StartedOn - timestamp when the SLSA predicate was recorded during the build time of the subject
+FinishedOn - timestamp when the SLSA predicate was completed during the build time of the subject
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
 """
-type CertifyScorecard {
-  source: Source!
-  timeScanned: String!
-  aggregateScore: Float!
-  checks: [ScorecardCheck!]!
-  scorecardVersion: String!
-  scorecardCommit: String!
+type HasSLSA {
+  subject: PkgSrcArtObject!
+  builtFrom: [PkgSrcArtObject!]!
+  builtBy: Builder!
+  buildType: String!
+  slsaPredicate: [SLSAPredicate!]!
+  slsaVersion: String!
+  startedOn: String!
+  finishedOn: String!
   origin: String!
   collector: String!
 }
 
 """
-ScorecardCheck are the individual checks from scorecard and their values, a key-value pair.
-For example:  Branch-Protection, Code-Review...etc
-Based off scorecard's:
-type jsonCheckResultV2 struct {
-	Details []string                 `json:"details"`
-	Score   int                      `json:"score"`
-	Reason  string                   `json:"reason"`
-	Name    string                   `json:"name"`
-	Doc     jsonCheckDocumentationV2 `json:"documentation"`
+SLSAPredicate are the values from the SLSA predicate in key-value pair form.
+// Predicate:
+"predicateType": "https://slsa.dev/provenance/v1",
+"predicate": {
+    "buildDefinition": {
+        "buildType": string,
+        "externalParameters": object,
+        "systemParameters": object,
+        "resolvedDependencies": [ ...#ArtifactReference ],
+    },
+    "runDetails": {
+        "builder": {
+            "id": string,
+            "version": string,
+            "builderDependencies": [ ...#ArtifactReference ],
+        },
+        "metadata": {
+            "invocationId": string,
+            "startedOn": #Timestamp,
+            "finishedOn": #Timestamp,
+        },
+        "byproducts": [ ...#ArtifactReference ],
+    }
 }
+where
+"externalParameters": {
+    "repository": "https://github.com/octocat/hello-world",
+    "ref": "refs/heads/main"
+},
+
+For example: key = "buildDefinition.externalParameters.repository" value = "https://github.com/octocat/hello-world"
 This node cannot be directly referred by other parts of GUAC.
 """
-type ScorecardCheck {
-  check: String!
-  score: Int!
+type SLSAPredicate {
+  key: String!
+  value: String!
 }
 
 """
-CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
+HasSLSASpec allows filtering the list of HasSLSA to return.
 """
-input CertifyScorecardSpec {
+input HasSLSASpec {
+  package: PkgSpec
   source: SourceSpec
-  timeScanned: String
-  aggregateScore: Float
-  checks: [ScorecardCheckSpec!] = []
-  scorecardVersion: String
-  scorecardCommit: String
+  artifact: ArtifactSpec
+  builtFromPackages: [PkgSpec]
+  builtFromSource: [SourceSpec]
+  builtFromArtifact: [ArtifactSpec]
+  builtBy: BuilderSpec
+  buildType: String
+  predicate: [SLSAPredicateSpec!] = []
+  slsaVersion: String
+  startedOn: String
+  finishedOn: String
   origin: String
   collector: String
 }
 
 """
-ScorecardCheckSpec is the same as ScorecardCheck, but usable as query
+SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query
 input.
 """
-input ScorecardCheckSpec {
-  check: String!
-  score: Int!
+input SLSAPredicateSpec {
+  key: String!
+  value: String!
 }
 
 extend type Query {
-  "Returns all CertifyScorecard"
-  CertifyScorecard(certifyScorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
+  "Returns all HasSLSA"
+  HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
 }
