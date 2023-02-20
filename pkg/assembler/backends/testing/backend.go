@@ -23,46 +23,48 @@ import (
 type DemoCredentials struct{}
 
 type demoClient struct {
-	packages         []*model.Package
-	sources          []*model.Source
-	cve              []*model.Cve
-	ghsa             []*model.Ghsa
-	osv              []*model.Osv
-	artifacts        []*model.Artifact
-	builders         []*model.Builder
-	hashEquals       []*model.HashEqual
-	isOccurrence     []*model.IsOccurrence
-	hasSBOM          []*model.HasSbom
-	isDependency     []*model.IsDependency
-	certifyPkg       []*model.CertifyPkg
-	certifyVuln      []*model.CertifyVuln
-	hasSourceAt      []*model.HasSourceAt
-	certifyScorecard []*model.CertifyScorecard
-	certifyBad       []*model.CertifyBad
-	isVulnerability  []*model.IsVulnerability
-	hasSLSA          []*model.HasSlsa
+	packages            []*model.Package
+	sources             []*model.Source
+	cve                 []*model.Cve
+	ghsa                []*model.Ghsa
+	osv                 []*model.Osv
+	artifacts           []*model.Artifact
+	builders            []*model.Builder
+	hashEquals          []*model.HashEqual
+	isOccurrence        []*model.IsOccurrence
+	hasSBOM             []*model.HasSbom
+	isDependency        []*model.IsDependency
+	certifyPkg          []*model.CertifyPkg
+	certifyVuln         []*model.CertifyVuln
+	hasSourceAt         []*model.HasSourceAt
+	certifyScorecard    []*model.CertifyScorecard
+	certifyBad          []*model.CertifyBad
+	isVulnerability     []*model.IsVulnerability
+	certifyVEXStatement []*model.CertifyVEXStatement
+	hasSLSA             []*model.HasSlsa
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		packages:         []*model.Package{},
-		sources:          []*model.Source{},
-		cve:              []*model.Cve{},
-		ghsa:             []*model.Ghsa{},
-		osv:              []*model.Osv{},
-		artifacts:        []*model.Artifact{},
-		builders:         []*model.Builder{},
-		hashEquals:       []*model.HashEqual{},
-		isOccurrence:     []*model.IsOccurrence{},
-		hasSBOM:          []*model.HasSbom{},
-		isDependency:     []*model.IsDependency{},
-		certifyPkg:       []*model.CertifyPkg{},
-		certifyVuln:      []*model.CertifyVuln{},
-		hasSourceAt:      []*model.HasSourceAt{},
-		certifyScorecard: []*model.CertifyScorecard{},
-		certifyBad:       []*model.CertifyBad{},
-		isVulnerability:  []*model.IsVulnerability{},
-		hasSLSA:          []*model.HasSlsa{},
+		packages:            []*model.Package{},
+		sources:             []*model.Source{},
+		cve:                 []*model.Cve{},
+		ghsa:                []*model.Ghsa{},
+		osv:                 []*model.Osv{},
+		artifacts:           []*model.Artifact{},
+		builders:            []*model.Builder{},
+		hashEquals:          []*model.HashEqual{},
+		isOccurrence:        []*model.IsOccurrence{},
+		hasSBOM:             []*model.HasSbom{},
+		isDependency:        []*model.IsDependency{},
+		certifyPkg:          []*model.CertifyPkg{},
+		certifyVuln:         []*model.CertifyVuln{},
+		hasSourceAt:         []*model.HasSourceAt{},
+		certifyScorecard:    []*model.CertifyScorecard{},
+		certifyBad:          []*model.CertifyBad{},
+		isVulnerability:     []*model.IsVulnerability{},
+		certifyVEXStatement: []*model.CertifyVEXStatement{},
+		hasSLSA:             []*model.HasSlsa{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -105,6 +107,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	err = registerAllIsVulnerability(client)
+	if err != nil {
+		return nil, err
+	}
+	err = registerAllCertifyVEXStatement(client)
 	if err != nil {
 		return nil, err
 	}

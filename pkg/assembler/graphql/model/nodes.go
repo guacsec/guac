@@ -12,6 +12,11 @@ type OsvCveGhsaObject interface {
 	IsOsvCveGhsaObject()
 }
 
+// PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
+type PkgArtObject interface {
+	IsPkgArtObject()
+}
+
 // PkgSrcArtObject is a union of Package, Source and Artifact. Any of these objects can be specified
 type PkgSrcArtObject interface {
 	IsPkgSrcArtObject()
@@ -32,6 +37,8 @@ type Artifact struct {
 }
 
 func (Artifact) IsPkgSrcArtObject() {}
+
+func (Artifact) IsPkgArtObject() {}
 
 // ArtifactSpec allows filtering the list of artifacts to return.
 type ArtifactSpec struct {
@@ -167,6 +174,36 @@ type CertifyScorecardSpec struct {
 	ScorecardCommit  *string               `json:"scorecardCommit"`
 	Origin           *string               `json:"origin"`
 	Collector        *string               `json:"collector"`
+}
+
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// Subject - union type that represents a package or artifact
+// Vulnerability - union type that consists of cve or ghsa
+// Justification - justification for VEX
+// knownSince - timestamp of the VEX (exact time)
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type CertifyVEXStatement struct {
+	Subject       PkgArtObject  `json:"subject"`
+	Vulnerability CveGhsaObject `json:"vulnerability"`
+	Justification string        `json:"justification"`
+	KnownSince    string        `json:"knownSince"`
+	Origin        string        `json:"origin"`
+	Collector     string        `json:"collector"`
+}
+
+// CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
+// Only package or artifact and CVE or GHSA can be specified at once.
+type CertifyVEXStatementSpec struct {
+	Package       *PkgSpec      `json:"package"`
+	Artifact      *ArtifactSpec `json:"artifact"`
+	Cve           *CVESpec      `json:"cve"`
+	Ghsa          *GHSASpec     `json:"ghsa"`
+	Justification *string       `json:"justification"`
+	KnownSince    *string       `json:"knownSince"`
+	Origin        *string       `json:"origin"`
+	Collector     *string       `json:"collector"`
 }
 
 // CertifyVuln is an attestation that represents when a package has a vulnerability
@@ -484,6 +521,8 @@ type Package struct {
 }
 
 func (Package) IsPkgSrcArtObject() {}
+
+func (Package) IsPkgArtObject() {}
 
 func (Package) IsPkgSrcObject() {}
 

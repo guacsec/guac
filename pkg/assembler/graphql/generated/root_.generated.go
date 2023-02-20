@@ -81,6 +81,15 @@ type ComplexityRoot struct {
 		TimeScanned      func(childComplexity int) int
 	}
 
+	CertifyVEXStatement struct {
+		Collector     func(childComplexity int) int
+		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Subject       func(childComplexity int) int
+		Vulnerability func(childComplexity int) int
+	}
+
 	CertifyVuln struct {
 		Collector      func(childComplexity int) int
 		DbURI          func(childComplexity int) int
@@ -201,24 +210,25 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Artifacts        func(childComplexity int, artifactSpec *model.ArtifactSpec) int
-		Builders         func(childComplexity int, builderSpec *model.BuilderSpec) int
-		CertifyBad       func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
-		CertifyPkg       func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
-		CertifyScorecard func(childComplexity int, certifyScorecardSpec *model.CertifyScorecardSpec) int
-		CertifyVuln      func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
-		Cve              func(childComplexity int, cveSpec *model.CVESpec) int
-		Ghsa             func(childComplexity int, ghsaSpec *model.GHSASpec) int
-		HasSBOMs         func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
-		HasSlsa          func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
-		HasSourceAt      func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
-		HashEquals       func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
-		IsDependency     func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
-		IsOccurrences    func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
-		IsVulnerability  func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
-		Osv              func(childComplexity int, osvSpec *model.OSVSpec) int
-		Packages         func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Sources          func(childComplexity int, sourceSpec *model.SourceSpec) int
+		Artifacts           func(childComplexity int, artifactSpec *model.ArtifactSpec) int
+		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
+		CertifyBad          func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
+		CertifyPkg          func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
+		CertifyScorecard    func(childComplexity int, certifyScorecardSpec *model.CertifyScorecardSpec) int
+		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
+		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
+		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
+		Ghsa                func(childComplexity int, ghsaSpec *model.GHSASpec) int
+		HasSBOMs            func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
+		HasSlsa             func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
+		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
+		HashEquals          func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
+		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
+		IsOccurrences       func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
+		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
+		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
+		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
 
 	SLSAPredicate struct {
@@ -416,6 +426,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyScorecard.TimeScanned(childComplexity), true
+
+	case "CertifyVEXStatement.collector":
+		if e.complexity.CertifyVEXStatement.Collector == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Collector(childComplexity), true
+
+	case "CertifyVEXStatement.justification":
+		if e.complexity.CertifyVEXStatement.Justification == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Justification(childComplexity), true
+
+	case "CertifyVEXStatement.knownSince":
+		if e.complexity.CertifyVEXStatement.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.KnownSince(childComplexity), true
+
+	case "CertifyVEXStatement.origin":
+		if e.complexity.CertifyVEXStatement.Origin == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Origin(childComplexity), true
+
+	case "CertifyVEXStatement.subject":
+		if e.complexity.CertifyVEXStatement.Subject == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Subject(childComplexity), true
+
+	case "CertifyVEXStatement.vulnerability":
+		if e.complexity.CertifyVEXStatement.Vulnerability == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Vulnerability(childComplexity), true
 
 	case "CertifyVuln.collector":
 		if e.complexity.CertifyVuln.Collector == nil {
@@ -937,6 +989,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyScorecard(childComplexity, args["certifyScorecardSpec"].(*model.CertifyScorecardSpec)), true
 
+	case "Query.CertifyVEXStatement":
+		if e.complexity.Query.CertifyVEXStatement == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyVEXStatement_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyVEXStatement(childComplexity, args["certifyVEXStatementSpec"].(*model.CertifyVEXStatementSpec)), true
+
 	case "Query.CertifyVuln":
 		if e.complexity.Query.CertifyVuln == nil {
 			break
@@ -1184,6 +1248,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
+		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
@@ -1549,6 +1614,68 @@ extend type Query {
   CertifyScorecard(certifyScorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/certifyVEXStatement.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the CertifyVEXStatement. It contains a subject which can be a package or artifact object, vulnerability that can be of type
+# cve or ghsa, justification, origin and collector
+"""
+CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+
+Subject - union type that represents a package or artifact
+Vulnerability - union type that consists of cve or ghsa
+Justification - justification for VEX
+knownSince - timestamp of the VEX (exact time)
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+"""
+type CertifyVEXStatement {
+  subject: PkgArtObject!
+  vulnerability: CveGhsaObject!
+  justification: String!
+  knownSince: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
+Only package or artifact and CVE or GHSA can be specified at once.
+"""
+input CertifyVEXStatementSpec {
+  package: PkgSpec
+  artifact: ArtifactSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+  justification: String
+  knownSince: String
+  origin: String
+  collector: String
+}
+
+"""
+PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
+"""
+union PkgArtObject = Package | Artifact
+
+extend type Query {
+  "Returns all CertifyVEXStatement"
+  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
+}`, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #

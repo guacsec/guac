@@ -1,0 +1,62 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the CertifyVEXStatement. It contains a subject which can be a package or artifact object, vulnerability that can be of type
+# cve or ghsa, justification, origin and collector
+"""
+CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+
+Subject - union type that represents a package or artifact
+Vulnerability - union type that consists of cve or ghsa
+Justification - justification for VEX
+knownSince - timestamp of the VEX (exact time)
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+"""
+type CertifyVEXStatement {
+  subject: PkgArtObject!
+  vulnerability: CveGhsaObject!
+  justification: String!
+  knownSince: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
+Only package or artifact and CVE or GHSA can be specified at once.
+"""
+input CertifyVEXStatementSpec {
+  package: PkgSpec
+  artifact: ArtifactSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+  justification: String
+  knownSince: String
+  origin: String
+  collector: String
+}
+
+"""
+PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
+"""
+union PkgArtObject = Package | Artifact
+
+extend type Query {
+  "Returns all CertifyVEXStatement"
+  CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
+}
