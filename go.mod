@@ -7,7 +7,7 @@ require (
 	github.com/fsouza/fake-gcs-server v1.44.0
 	github.com/in-toto/in-toto-golang v0.3.4-0.20220709202702-fa494aaa0add
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.5
-	github.com/secure-systems-lab/go-securesystemslib v0.4.0
+	github.com/secure-systems-lab/go-securesystemslib v0.5.0
 	github.com/spf13/cobra v1.6.1
 	go.uber.org/zap v1.24.0
 	google.golang.org/api v0.110.0
