@@ -31,6 +31,7 @@ type QueryResolver interface {
 	HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error)
 	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
 	IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
+	IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
 	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
@@ -172,6 +173,21 @@ func (ec *executionContext) field_Query_IsOccurrences_args(ctx context.Context, 
 		}
 	}
 	args["isOccurrenceSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_IsVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.IsVulnerabilitySpec
+	if tmp, ok := rawArgs["isVulnerabilitySpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isVulnerabilitySpec"))
+		arg0, err = ec.unmarshalOIsVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerabilitySpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["isVulnerabilitySpec"] = arg0
 	return args, nil
 }
 
@@ -1231,6 +1247,72 @@ func (ec *executionContext) fieldContext_Query_IsOccurrences(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_IsVulnerability(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_IsVulnerability(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().IsVulnerability(rctx, fc.Args["isVulnerabilitySpec"].(*model.IsVulnerabilitySpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.IsVulnerability)
+	fc.Result = res
+	return ec.marshalNIsVulnerability2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsVulnerabilityᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_IsVulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "osv":
+				return ec.fieldContext_IsVulnerability_osv(ctx, field)
+			case "vulnerability":
+				return ec.fieldContext_IsVulnerability_vulnerability(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsVulnerability_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsVulnerability_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsVulnerability_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsVulnerability", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_IsVulnerability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_osv(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_osv(ctx, field)
 	if err != nil {
@@ -1887,6 +1969,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_IsOccurrences(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "IsVulnerability":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_IsVulnerability(ctx, field)
 				return res
 			}
 

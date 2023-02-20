@@ -141,6 +141,14 @@ type ComplexityRoot struct {
 		Subject             func(childComplexity int) int
 	}
 
+	IsVulnerability struct {
+		Collector     func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Osv           func(childComplexity int) int
+		Vulnerability func(childComplexity int) int
+	}
+
 	Mutation struct {
 		IngestPackage func(childComplexity int, pkg *model.PkgInputSpec) int
 	}
@@ -193,6 +201,7 @@ type ComplexityRoot struct {
 		HashEquals       func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
 		IsDependency     func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
 		IsOccurrences    func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
+		IsVulnerability  func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
 		Osv              func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages         func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Sources          func(childComplexity int, sourceSpec *model.SourceSpec) int
@@ -641,6 +650,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsOccurrence.Subject(childComplexity), true
 
+	case "IsVulnerability.collector":
+		if e.complexity.IsVulnerability.Collector == nil {
+			break
+		}
+
+		return e.complexity.IsVulnerability.Collector(childComplexity), true
+
+	case "IsVulnerability.justification":
+		if e.complexity.IsVulnerability.Justification == nil {
+			break
+		}
+
+		return e.complexity.IsVulnerability.Justification(childComplexity), true
+
+	case "IsVulnerability.origin":
+		if e.complexity.IsVulnerability.Origin == nil {
+			break
+		}
+
+		return e.complexity.IsVulnerability.Origin(childComplexity), true
+
+	case "IsVulnerability.osv":
+		if e.complexity.IsVulnerability.Osv == nil {
+			break
+		}
+
+		return e.complexity.IsVulnerability.Osv(childComplexity), true
+
+	case "IsVulnerability.vulnerability":
+		if e.complexity.IsVulnerability.Vulnerability == nil {
+			break
+		}
+
+		return e.complexity.IsVulnerability.Vulnerability(childComplexity), true
+
 	case "Mutation.ingestPackage":
 		if e.complexity.Mutation.IngestPackage == nil {
 			break
@@ -900,6 +944,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.IsOccurrences(childComplexity, args["isOccurrenceSpec"].(*model.IsOccurrenceSpec)), true
 
+	case "Query.IsVulnerability":
+		if e.complexity.Query.IsVulnerability == nil {
+			break
+		}
+
+		args, err := ec.field_Query_IsVulnerability_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IsVulnerability(childComplexity, args["isVulnerabilitySpec"].(*model.IsVulnerabilitySpec)), true
+
 	case "Query.osv":
 		if e.complexity.Query.Osv == nil {
 			break
@@ -1020,6 +1076,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputHashEqualSpec,
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceSpec,
+		ec.unmarshalInputIsVulnerabilitySpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
@@ -1857,6 +1914,64 @@ extend type Query {
   IsOccurrences(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/isVulnerability.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the IsVulnerability. It contains a OSV, vulnerability that can be of type
+# cve or ghsa, justification, origin and collector
+"""
+IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
+
+OSV - the osv object type that represents OSV and its ID
+Vulnerability - union type that consists of cve or ghsa
+Justification - the reason why the osv ID represents the cve or ghsa
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+"""
+type IsVulnerability {
+  osv: OSV!
+  vulnerability: CveGhsaObject!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
+Only CVE or GHSA can be specified at once.
+"""
+input IsVulnerabilitySpec {
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+CveGhsaObject is a union of CVE and GHSA.
+"""
+union CveGhsaObject = CVE | GHSA
+
+extend type Query {
+  "Returns all IsVulnerability"
+  IsVulnerability(isVulnerabilitySpec: IsVulnerabilitySpec): [IsVulnerability!]!
+}`, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #

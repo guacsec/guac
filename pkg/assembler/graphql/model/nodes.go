@@ -2,6 +2,11 @@
 
 package model
 
+// CveGhsaObject is a union of CVE and GHSA.
+type CveGhsaObject interface {
+	IsCveGhsaObject()
+}
+
 // OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
 type OsvCveGhsaObject interface {
 	IsOsvCveGhsaObject()
@@ -62,6 +67,8 @@ type Cve struct {
 }
 
 func (Cve) IsOsvCveGhsaObject() {}
+
+func (Cve) IsCveGhsaObject() {}
 
 // CVEId is the actual ID that is given to a specific vulnerability
 //
@@ -209,6 +216,8 @@ type Ghsa struct {
 }
 
 func (Ghsa) IsOsvCveGhsaObject() {}
+
+func (Ghsa) IsCveGhsaObject() {}
 
 // GHSAId is the actual ID that is given to a specific vulnerability on github
 //
@@ -365,6 +374,32 @@ type IsOccurrenceSpec struct {
 	Artifacts     []*ArtifactSpec `json:"artifacts"`
 	Origin        *string         `json:"origin"`
 	Collector     *string         `json:"collector"`
+}
+
+// IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
+//
+// OSV - the osv object type that represents OSV and its ID
+// Vulnerability - union type that consists of cve or ghsa
+// Justification - the reason why the osv ID represents the cve or ghsa
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type IsVulnerability struct {
+	Osv           *Osv          `json:"osv"`
+	Vulnerability CveGhsaObject `json:"vulnerability"`
+	Justification string        `json:"justification"`
+	Origin        string        `json:"origin"`
+	Collector     string        `json:"collector"`
+}
+
+// IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
+// Only CVE or GHSA can be specified at once.
+type IsVulnerabilitySpec struct {
+	Osv           *OSVSpec  `json:"osv"`
+	Cve           *CVESpec  `json:"cve"`
+	Ghsa          *GHSASpec `json:"ghsa"`
+	Justification *string   `json:"justification"`
+	Origin        *string   `json:"origin"`
+	Collector     *string   `json:"collector"`
 }
 
 // OSV represents Open Source Vulnerability . It contains a OSV ID.
