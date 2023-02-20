@@ -444,7 +444,7 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 
 // region    **************************** object.gotpl ****************************
 
-var sourceImplementors = []string{"Source"}
+var sourceImplementors = []string{"Source", "PkgSrcArtObject", "PkgSrcObject"}
 
 func (ec *executionContext) _Source(ctx context.Context, sel ast.SelectionSet, obj *model.Source) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, sourceImplementors)
@@ -714,13 +714,6 @@ func (ec *executionContext) marshalNSourceNamespace2ᚖgithubᚗcomᚋguacsecᚋ
 		return graphql.Null
 	}
 	return ec._SourceNamespace(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSource2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSource(ctx context.Context, sel ast.SelectionSet, v *model.Source) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Source(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOSourceQualifierInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceQualifierInput(ctx context.Context, v interface{}) (*model.SourceQualifierInput, error) {

@@ -71,20 +71,31 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	}
 
 	for _, occurrence := range c.isOccurrence {
-		if reflect.DeepEqual(occurrence.OccurrenceArtifacts, artifacts) && occurrence.Justification == justification &&
-			occurrence.Package == selectedPackage || occurrence.Source == selectedSource {
-			return nil
+		if reflect.DeepEqual(occurrence.OccurrenceArtifacts, artifacts) && occurrence.Justification == justification {
+			if val, ok := occurrence.Subject.(model.Package); ok {
+				if &val == selectedPackage {
+					return nil
+				}
+			} else if val, ok := occurrence.Subject.(model.Source); ok {
+				if &val == selectedSource {
+					return nil
+				}
+			}
 		}
 	}
 
 	newIsOccurrence := &model.IsOccurrence{
 		Justification:       justification,
-		Package:             selectedPackage,
-		Source:              selectedSource,
 		OccurrenceArtifacts: artifacts,
 		Origin:              "testing backend",
 		Collector:           "testing backend",
 	}
+	if selectedPackage != nil {
+		newIsOccurrence.Subject = selectedPackage
+	} else {
+		newIsOccurrence.Subject = selectedSource
+	}
+
 	c.isOccurrence = append(c.isOccurrence, newIsOccurrence)
 	return nil
 }
@@ -99,10 +110,13 @@ func (c *demoClient) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.
 
 	var isOccurrences []*model.IsOccurrence
 
-	justificationMatchOrSkip := false
-	collectorMatchOrSkip := false
-	originMatchOrSkip := false
 	for _, h := range c.isOccurrence {
+		justificationMatchOrSkip := false
+		collectorMatchOrSkip := false
+		originMatchOrSkip := false
+		packageMatchOrSkip := false
+		sourceMatchOrSkip := false
+
 		if isOccurrenceSpec.Justification == nil || h.Justification == *isOccurrenceSpec.Justification {
 			justificationMatchOrSkip = true
 		}
@@ -113,27 +127,37 @@ func (c *demoClient) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.
 			originMatchOrSkip = true
 		}
 
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
-			if isOccurrenceSpec.Package == nil && isOccurrenceSpec.Source == nil {
-				isOccurrences = append(isOccurrences, h)
-			} else if isOccurrenceSpec.Package != nil && h.Package != nil {
-				if isOccurrenceSpec.Package.Type == nil || h.Package.Type == *isOccurrenceSpec.Package.Type {
-					newPkg := filterPackageNamespace(h.Package, isOccurrenceSpec.Package)
+		if isOccurrenceSpec.Package == nil {
+			packageMatchOrSkip = true
+		} else if isOccurrenceSpec.Package != nil && h.Subject != nil {
+			if val, ok := h.Subject.(*model.Package); ok {
+				if isOccurrenceSpec.Package.Type == nil || val.Type == *isOccurrenceSpec.Package.Type {
+					newPkg := filterPackageNamespace(val, isOccurrenceSpec.Package)
 					if newPkg != nil {
-						isOccurrences = append(isOccurrences, h)
+						packageMatchOrSkip = true
 					}
 				}
-			} else if isOccurrenceSpec.Source != nil && h.Source != nil {
-				if isOccurrenceSpec.Source.Type == nil || h.Source.Type == *isOccurrenceSpec.Source.Type {
-					newSource, err := filterSourceNamespace(h.Source, isOccurrenceSpec.Source)
+			}
+		}
+
+		if isOccurrenceSpec.Source == nil {
+			sourceMatchOrSkip = true
+		} else if isOccurrenceSpec.Source != nil && h.Subject != nil {
+			if val, ok := h.Subject.(*model.Source); ok {
+				if isOccurrenceSpec.Source.Type == nil || val.Type == *isOccurrenceSpec.Source.Type {
+					newSource, err := filterSourceNamespace(val, isOccurrenceSpec.Source)
 					if err != nil {
 						return nil, err
 					}
 					if newSource != nil {
-						isOccurrences = append(isOccurrences, h)
+						sourceMatchOrSkip = true
 					}
 				}
 			}
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && sourceMatchOrSkip {
+			isOccurrences = append(isOccurrences, h)
 		}
 	}
 

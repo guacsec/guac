@@ -15,10 +15,11 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSBOM. It contains the package object, source object, uri, origin and collector. 
+# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector. 
 """
 HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 
+Subject - union type that can be either a package or source object type
 Package - the package object type that represents the package
 Source - the source object type that represents the source
 uri - identifier string for the SBOM
@@ -28,8 +29,7 @@ Collector - the GUAC collector that collected the document that generated this a
 Note: Only package object or source object can be defined. Not both.
 """
 type HasSBOM {
-  package: Package
-  source: Source
+  subject: PkgSrcObject!
   uri: String!
   origin: String!
   collector: String!
@@ -49,6 +49,10 @@ input HasSBOMSpec {
   collector: String
 }
 
+"""
+PkgSrcObject is a union of Package and Source. Any of these objects can be specified
+"""
+union PkgSrcObject = Package | Source
 
 extend type Query {
   "Returns all HasSBOM"

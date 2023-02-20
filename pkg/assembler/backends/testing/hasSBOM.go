@@ -68,17 +68,30 @@ func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSou
 		return fmt.Errorf("cannot specify both package and source for HasSBOM")
 	}
 	for _, h := range c.hasSBOM {
-		if h.URI == uri && h.Package == selectedPackage || h.Source == selectedSource {
-			return nil
+		if h.URI == uri {
+			if val, ok := h.Subject.(model.Package); ok {
+				if &val == selectedPackage {
+					return nil
+				}
+			} else if val, ok := h.Subject.(model.Source); ok {
+				if &val == selectedSource {
+					return nil
+				}
+			}
 		}
 	}
+
 	newHasSBOM := &model.HasSbom{
-		Package:   selectedPackage,
-		Source:    selectedSource,
 		URI:       uri,
 		Origin:    "testing backend",
 		Collector: "testing backend",
 	}
+	if selectedPackage != nil {
+		newHasSBOM.Subject = selectedPackage
+	} else {
+		newHasSBOM.Subject = selectedSource
+	}
+
 	c.hasSBOM = append(c.hasSBOM, newHasSBOM)
 	return nil
 }
@@ -93,10 +106,13 @@ func (c *demoClient) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 
 	var collectedHasSBOM []*model.HasSbom
 
-	uriMatchOrSkip := false
-	collectorMatchOrSkip := false
-	originMatchOrSkip := false
 	for _, h := range c.hasSBOM {
+		uriMatchOrSkip := false
+		collectorMatchOrSkip := false
+		originMatchOrSkip := false
+		packageMatchOrSkip := false
+		sourceMatchOrSkip := false
+
 		if hasSBOMSpec.URI == nil || h.URI == *hasSBOMSpec.URI {
 			uriMatchOrSkip = true
 		}
@@ -107,27 +123,37 @@ func (c *demoClient) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 			originMatchOrSkip = true
 		}
 
-		if uriMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
-			if hasSBOMSpec.Package == nil && hasSBOMSpec.Source == nil {
-				collectedHasSBOM = append(collectedHasSBOM, h)
-			} else if hasSBOMSpec.Package != nil && h.Package != nil {
-				if hasSBOMSpec.Package.Type == nil || h.Package.Type == *hasSBOMSpec.Package.Type {
-					newPkg := filterPackageNamespace(h.Package, hasSBOMSpec.Package)
+		if hasSBOMSpec.Package == nil {
+			packageMatchOrSkip = true
+		} else if hasSBOMSpec.Package != nil && h.Subject != nil {
+			if val, ok := h.Subject.(*model.Package); ok {
+				if hasSBOMSpec.Package.Type == nil || val.Type == *hasSBOMSpec.Package.Type {
+					newPkg := filterPackageNamespace(val, hasSBOMSpec.Package)
 					if newPkg != nil {
-						collectedHasSBOM = append(collectedHasSBOM, h)
+						packageMatchOrSkip = true
 					}
 				}
-			} else if hasSBOMSpec.Source != nil && h.Source != nil {
-				if hasSBOMSpec.Source.Type == nil || h.Source.Type == *hasSBOMSpec.Source.Type {
-					newSource, err := filterSourceNamespace(h.Source, hasSBOMSpec.Source)
+			}
+		}
+
+		if hasSBOMSpec.Source == nil {
+			sourceMatchOrSkip = true
+		} else if hasSBOMSpec.Source != nil && h.Subject != nil {
+			if val, ok := h.Subject.(*model.Source); ok {
+				if hasSBOMSpec.Source.Type == nil || val.Type == *hasSBOMSpec.Source.Type {
+					newSource, err := filterSourceNamespace(val, hasSBOMSpec.Source)
 					if err != nil {
 						return nil, err
 					}
 					if newSource != nil {
-						collectedHasSBOM = append(collectedHasSBOM, h)
+						sourceMatchOrSkip = true
 					}
 				}
 			}
+		}
+
+		if uriMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && sourceMatchOrSkip {
+			collectedHasSBOM = append(collectedHasSBOM, h)
 		}
 	}
 

@@ -55,10 +55,12 @@ func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justificatio
 func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	var hashEquals []*model.HashEqual
 
-	justificationMatchOrSkip := false
-	collectorMatchOrSkip := false
-	originMatchOrSkip := false
 	for _, h := range c.hashEquals {
+		justificationMatchOrSkip := false
+		collectorMatchOrSkip := false
+		originMatchOrSkip := false
+		artifactMatchOrSkip := false
+
 		if hashEqualSpec.Justification == nil || h.Justification == *hashEqualSpec.Justification {
 			justificationMatchOrSkip = true
 		}
@@ -69,12 +71,14 @@ func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEq
 			originMatchOrSkip = true
 		}
 
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
-			if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
-				hashEquals = append(hashEquals, h)
-			} else {
-				hashEquals = append(hashEquals, h)
-			}
+		if len(hashEqualSpec.Artifacts) == 0 {
+			artifactMatchOrSkip = true
+		} else if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
+			artifactMatchOrSkip = true
+		}
+
+		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && artifactMatchOrSkip {
+			hashEquals = append(hashEquals, h)
 		}
 	}
 

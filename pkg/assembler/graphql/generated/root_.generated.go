@@ -56,6 +56,13 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	CertifyBad struct {
+		Collector     func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Subject       func(childComplexity int) int
+	}
+
 	CertifyPkg struct {
 		Collector     func(childComplexity int) int
 		Justification func(childComplexity int) int
@@ -74,8 +81,7 @@ type ComplexityRoot struct {
 	HasSBOM struct {
 		Collector func(childComplexity int) int
 		Origin    func(childComplexity int) int
-		Package   func(childComplexity int) int
-		Source    func(childComplexity int) int
+		Subject   func(childComplexity int) int
 		URI       func(childComplexity int) int
 	}
 
@@ -109,8 +115,7 @@ type ComplexityRoot struct {
 		Justification       func(childComplexity int) int
 		OccurrenceArtifacts func(childComplexity int) int
 		Origin              func(childComplexity int) int
-		Package             func(childComplexity int) int
-		Source              func(childComplexity int) int
+		Subject             func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -154,6 +159,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Artifacts     func(childComplexity int, artifactSpec *model.ArtifactSpec) int
 		Builders      func(childComplexity int, builderSpec *model.BuilderSpec) int
+		CertifyBad    func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
 		CertifyPkg    func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
 		Cve           func(childComplexity int, cveSpec *model.CVESpec) int
 		Ghsa          func(childComplexity int, ghsaSpec *model.GHSASpec) int
@@ -241,6 +247,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CVEId.ID(childComplexity), true
 
+	case "CertifyBad.collector":
+		if e.complexity.CertifyBad.Collector == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.Collector(childComplexity), true
+
+	case "CertifyBad.justification":
+		if e.complexity.CertifyBad.Justification == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.Justification(childComplexity), true
+
+	case "CertifyBad.origin":
+		if e.complexity.CertifyBad.Origin == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.Origin(childComplexity), true
+
+	case "CertifyBad.subject":
+		if e.complexity.CertifyBad.Subject == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.Subject(childComplexity), true
+
 	case "CertifyPkg.collector":
 		if e.complexity.CertifyPkg.Collector == nil {
 			break
@@ -297,19 +331,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasSBOM.Origin(childComplexity), true
 
-	case "HasSBOM.package":
-		if e.complexity.HasSBOM.Package == nil {
+	case "HasSBOM.subject":
+		if e.complexity.HasSBOM.Subject == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.Package(childComplexity), true
-
-	case "HasSBOM.source":
-		if e.complexity.HasSBOM.Source == nil {
-			break
-		}
-
-		return e.complexity.HasSBOM.Source(childComplexity), true
+		return e.complexity.HasSBOM.Subject(childComplexity), true
 
 	case "HasSBOM.uri":
 		if e.complexity.HasSBOM.URI == nil {
@@ -458,19 +485,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsOccurrence.Origin(childComplexity), true
 
-	case "IsOccurrence.package":
-		if e.complexity.IsOccurrence.Package == nil {
+	case "IsOccurrence.subject":
+		if e.complexity.IsOccurrence.Subject == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.Package(childComplexity), true
-
-	case "IsOccurrence.source":
-		if e.complexity.IsOccurrence.Source == nil {
-			break
-		}
-
-		return e.complexity.IsOccurrence.Source(childComplexity), true
+		return e.complexity.IsOccurrence.Subject(childComplexity), true
 
 	case "Mutation.ingestPackage":
 		if e.complexity.Mutation.IngestPackage == nil {
@@ -598,6 +618,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Builders(childComplexity, args["builderSpec"].(*model.BuilderSpec)), true
+
+	case "Query.CertifyBad":
+		if e.complexity.Query.CertifyBad == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyBad_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(*model.CertifyBadSpec)), true
 
 	case "Query.CertifyPkg":
 		if e.complexity.Query.CertifyPkg == nil {
@@ -791,6 +823,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVESpec,
+		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
@@ -952,7 +985,68 @@ extend type Query {
   builders(builderSpec: BuilderSpec): [Builder!]!
 }
 `, BuiltIn: false},
-	{Name: "../schema/certifypkg.graphql", Input: `#
+	{Name: "../schema/certifyBad.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the CertifyBad. It contains the subject (which can be either a package, source or artifact),
+#  justification, origin of the attestation, and collector
+"""
+CertifyBad is an attestation represents when a package, source or artifact is considered bad
+
+Subject - union type that can be either a package, source or artifact object type
+Justification - string value representing why the subject is considered bad
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+
+Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+"""
+type CertifyBad {
+  subject: PkgSrcArtObject!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+CertifyBadSpec allows filtering the list of CertifyBad to return.
+Note: Package, Source or artifact must be specified but not at the same time
+For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+For source - a SourceName must be specified (name, tag or commit)
+"""
+input CertifyBadSpec {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+PkgSrcArtObject is a union of Package, Source and Artifact. Any of these objects can be specified
+"""
+union PkgSrcArtObject = Package | Source | Artifact
+
+extend type Query {
+  "Returns all CertifyBad"
+  CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/certifyPkg.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -1129,10 +1223,11 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSBOM. It contains the package object, source object, uri, origin and collector. 
+# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector. 
 """
 HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 
+Subject - union type that can be either a package or source object type
 Package - the package object type that represents the package
 Source - the source object type that represents the source
 uri - identifier string for the SBOM
@@ -1142,8 +1237,7 @@ Collector - the GUAC collector that collected the document that generated this a
 Note: Only package object or source object can be defined. Not both.
 """
 type HasSBOM {
-  package: Package
-  source: Source
+  subject: PkgSrcObject!
   uri: String!
   origin: String!
   collector: String!
@@ -1163,6 +1257,10 @@ input HasSBOMSpec {
   collector: String
 }
 
+"""
+PkgSrcObject is a union of Package and Source. Any of these objects can be specified
+"""
+union PkgSrcObject = Package | Source
 
 extend type Query {
   "Returns all HasSBOM"
@@ -1362,14 +1460,14 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the IsOccurrence. It contains the justification, package, source object,
-#  occurrenceArtifacts, source of the attestation, and collector
+# Defines a GraphQL schema for the IsOccurrence. It contains the subject (which can be either a package or source),
+#  occurrenceArtifacts, justification,  origin of the attestation, and collector
 """
 IsOccurrence is an attestation represents when either a package or source is represented by an artifact
-Justification - string value representing why the package or source is represented by the specified artifact
-Package - the package object type that represents the package
-Source - the source object type that represents the source
+
+Subject - union type that can be either a package or source object type
 occurrenceArtifacts - list of artifacts that represent the the package or source
+Justification - string value representing why the package or source is represented by the specified artifact
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
 
@@ -1380,10 +1478,9 @@ IsOccurrence does not connect a package with a source.
 HasSourceAt attestation will be used to connect a package with a source
 """
 type IsOccurrence {
-  justification: String!
-  package: Package
-  source: Source
+  subject: PkgSrcObject!
   occurrenceArtifacts: [Artifact!]!
+  justification: String!
   origin: String!
   collector: String!
 }

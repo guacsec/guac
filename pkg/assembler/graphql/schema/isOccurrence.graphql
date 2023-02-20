@@ -15,14 +15,14 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the IsOccurrence. It contains the justification, package, source object,
-#  occurrenceArtifacts, source of the attestation, and collector
+# Defines a GraphQL schema for the IsOccurrence. It contains the subject (which can be either a package or source),
+#  occurrenceArtifacts, justification,  origin of the attestation, and collector
 """
 IsOccurrence is an attestation represents when either a package or source is represented by an artifact
-Justification - string value representing why the package or source is represented by the specified artifact
-Package - the package object type that represents the package
-Source - the source object type that represents the source
+
+Subject - union type that can be either a package or source object type
 occurrenceArtifacts - list of artifacts that represent the the package or source
+Justification - string value representing why the package or source is represented by the specified artifact
 Origin - where this attestation was generated from (based on which document)
 Collector - the GUAC collector that collected the document that generated this attestation
 
@@ -33,10 +33,9 @@ IsOccurrence does not connect a package with a source.
 HasSourceAt attestation will be used to connect a package with a source
 """
 type IsOccurrence {
-  justification: String!
-  package: Package
-  source: Source
+  subject: PkgSrcObject!
   occurrenceArtifacts: [Artifact!]!
+  justification: String!
   origin: String!
   collector: String!
 }
