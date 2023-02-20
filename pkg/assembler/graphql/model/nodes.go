@@ -99,6 +99,29 @@ type CertifyBadSpec struct {
 	Collector     *string       `json:"collector"`
 }
 
+// CertifyPkg is an attestation that represents when a package objects are similar
+//
+// Packages - list of package objects
+// Justification - string value representing why the packages are similar
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type CertifyPkg struct {
+	Packages      []*Package `json:"packages"`
+	Justification string     `json:"justification"`
+	Origin        string     `json:"origin"`
+	Collector     string     `json:"collector"`
+}
+
+// CertifyPkgSpec allows filtering the list of CertifyPkg to return.
+//
+// Specifying just the package allows to query for all similar packages (if they exist)
+type CertifyPkgSpec struct {
+	Packages      []*PkgSpec `json:"packages"`
+	Justification *string    `json:"justification"`
+	Origin        *string    `json:"origin"`
+	Collector     *string    `json:"collector"`
+}
+
 // GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
 type Ghsa struct {
 	GhsaID []*GHSAId `json:"ghsaId"`
