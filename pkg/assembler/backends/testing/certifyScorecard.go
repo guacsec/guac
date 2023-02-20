@@ -107,11 +107,13 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, certifyScorecardSpec 
 
 	var collectedHasSourceAt []*model.CertifyScorecard
 
-	scorecardVersionMatchOrSkip := false
-	scorecardCommitMatchOrSkip := false
-	collectorMatchOrSkip := false
-	originMatchOrSkip := false
 	for _, h := range c.certifyScorecard {
+		scorecardVersionMatchOrSkip := false
+		scorecardCommitMatchOrSkip := false
+		collectorMatchOrSkip := false
+		originMatchOrSkip := false
+		sourceMatchOrSkip := false
+
 		if certifyScorecardSpec.ScorecardVersion == nil || h.ScorecardVersion == *certifyScorecardSpec.ScorecardVersion {
 			scorecardVersionMatchOrSkip = true
 		}
@@ -125,20 +127,22 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, certifyScorecardSpec 
 			originMatchOrSkip = true
 		}
 
-		if scorecardVersionMatchOrSkip && scorecardCommitMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
-			if certifyScorecardSpec.Source == nil {
-				collectedHasSourceAt = append(collectedHasSourceAt, h)
-			} else if certifyScorecardSpec.Source != nil && h.Source != nil {
-				if certifyScorecardSpec.Source.Type == nil || h.Source.Type == *certifyScorecardSpec.Source.Type {
-					newSource, err := filterSourceNamespace(h.Source, certifyScorecardSpec.Source)
-					if err != nil {
-						return nil, err
-					}
-					if newSource != nil {
-						collectedHasSourceAt = append(collectedHasSourceAt, h)
-					}
+		if certifyScorecardSpec.Source == nil {
+			sourceMatchOrSkip = true
+		} else if certifyScorecardSpec.Source != nil && h.Source != nil {
+			if certifyScorecardSpec.Source.Type == nil || h.Source.Type == *certifyScorecardSpec.Source.Type {
+				newSource, err := filterSourceNamespace(h.Source, certifyScorecardSpec.Source)
+				if err != nil {
+					return nil, err
+				}
+				if newSource != nil {
+					sourceMatchOrSkip = true
 				}
 			}
+		}
+
+		if scorecardVersionMatchOrSkip && scorecardCommitMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && sourceMatchOrSkip {
+			collectedHasSourceAt = append(collectedHasSourceAt, h)
 		}
 	}
 	return collectedHasSourceAt, nil
