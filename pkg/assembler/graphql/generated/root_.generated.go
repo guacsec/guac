@@ -63,13 +63,6 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
-	CertifyPkg struct {
-		Collector     func(childComplexity int) int
-		Justification func(childComplexity int) int
-		Origin        func(childComplexity int) int
-		Packages      func(childComplexity int) int
-	}
-
 	GHSA struct {
 		GhsaID func(childComplexity int) int
 	}
@@ -160,7 +153,6 @@ type ComplexityRoot struct {
 		Artifacts     func(childComplexity int, artifactSpec *model.ArtifactSpec) int
 		Builders      func(childComplexity int, builderSpec *model.BuilderSpec) int
 		CertifyBad    func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
-		CertifyPkg    func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
 		Cve           func(childComplexity int, cveSpec *model.CVESpec) int
 		Ghsa          func(childComplexity int, ghsaSpec *model.GHSASpec) int
 		HasSBOMs      func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
@@ -274,34 +266,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyBad.Subject(childComplexity), true
-
-	case "CertifyPkg.collector":
-		if e.complexity.CertifyPkg.Collector == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Collector(childComplexity), true
-
-	case "CertifyPkg.justification":
-		if e.complexity.CertifyPkg.Justification == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Justification(childComplexity), true
-
-	case "CertifyPkg.origin":
-		if e.complexity.CertifyPkg.Origin == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Origin(childComplexity), true
-
-	case "CertifyPkg.packages":
-		if e.complexity.CertifyPkg.Packages == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Packages(childComplexity), true
 
 	case "GHSA.ghsaId":
 		if e.complexity.GHSA.GhsaID == nil {
@@ -631,18 +595,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(*model.CertifyBadSpec)), true
 
-	case "Query.CertifyPkg":
-		if e.complexity.Query.CertifyPkg == nil {
-			break
-		}
-
-		args, err := ec.field_Query_CertifyPkg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.CertifyPkg(childComplexity, args["certifyPkgSpec"].(*model.CertifyPkgSpec)), true
-
 	case "Query.cve":
 		if e.complexity.Query.Cve == nil {
 			break
@@ -824,7 +776,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadSpec,
-		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSourceAtSpec,
@@ -1044,58 +995,6 @@ union PkgSrcArtObject = Package | Source | Artifact
 extend type Query {
   "Returns all CertifyBad"
   CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
-}
-`, BuiltIn: false},
-	{Name: "../schema/certifyPkg.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema for the CertifyPkg. It contains a list of packages that are similar
-# along with the justification, origin and collector.
-"""
-CertifyPkg is an attestation that represents when a package objects are similar
-
-Packages - list of package objects
-Justification - string value representing why the packages are similar
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
-
-"""
-type CertifyPkg {
-  packages: [Package!]!
-  justification: String!
-  origin: String!
-  collector: String!
-}
-
-"""
-CertifyPkgSpec allows filtering the list of CertifyPkg to return.
-
-Specifying just the package allows to query for all similar packages (if they exist)
-"""
-input CertifyPkgSpec {
-  packages: [PkgSpec]
-  justification: String
-  origin: String
-  collector: String
-}
-
-extend type Query {
-  "Returns all CertifyPkg"
-  CertifyPkg(certifyPkgSpec: CertifyPkgSpec): [CertifyPkg!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
