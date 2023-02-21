@@ -122,6 +122,39 @@ type CertifyPkgSpec struct {
 	Collector     *string    `json:"collector"`
 }
 
+// CertifyScorecard is an attestation represents the scorecard of a particular source
+//
+// Source - the source object type that represents the source
+// timeScanned - timestamp when this was last scanned (exact time)
+// aggregateScore - overall scorecard score for the source
+// checks - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+// scorecardVersion - version of the scorecard when the source was scanned
+// scorecardCommit - commit of scorecard when the source was scanned
+// Origin - where this attestation was generated from (based on which document)
+// Collector - the GUAC collector that collected the document that generated this attestation
+type CertifyScorecard struct {
+	Source           *Source           `json:"source"`
+	TimeScanned      string            `json:"timeScanned"`
+	AggregateScore   float64           `json:"aggregateScore"`
+	Checks           []*ScorecardCheck `json:"checks"`
+	ScorecardVersion string            `json:"scorecardVersion"`
+	ScorecardCommit  string            `json:"scorecardCommit"`
+	Origin           string            `json:"origin"`
+	Collector        string            `json:"collector"`
+}
+
+// CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
+type CertifyScorecardSpec struct {
+	Source           *SourceSpec           `json:"source"`
+	TimeScanned      *string               `json:"timeScanned"`
+	AggregateScore   *float64              `json:"aggregateScore"`
+	Checks           []*ScorecardCheckSpec `json:"checks"`
+	ScorecardVersion *string               `json:"scorecardVersion"`
+	ScorecardCommit  *string               `json:"scorecardCommit"`
+	Origin           *string               `json:"origin"`
+	Collector        *string               `json:"collector"`
+}
+
 // GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
 type Ghsa struct {
 	GhsaID []*GHSAId `json:"ghsaId"`
@@ -458,6 +491,31 @@ type PkgSpec struct {
 	Qualifiers               []*PackageQualifierSpec `json:"qualifiers"`
 	MatchOnlyEmptyQualifiers *bool                   `json:"matchOnlyEmptyQualifiers"`
 	Subpath                  *string                 `json:"subpath"`
+}
+
+// ScorecardCheck are the individual checks from scorecard and their values, a key-value pair.
+// For example:  Branch-Protection, Code-Review...etc
+// Based off scorecard's:
+//
+//	type jsonCheckResultV2 struct {
+//		Details []string                 `json:"details"`
+//		Score   int                      `json:"score"`
+//		Reason  string                   `json:"reason"`
+//		Name    string                   `json:"name"`
+//		Doc     jsonCheckDocumentationV2 `json:"documentation"`
+//	}
+//
+// This node cannot be directly referred by other parts of GUAC.
+type ScorecardCheck struct {
+	Check string `json:"check"`
+	Score int    `json:"score"`
+}
+
+// ScorecardCheckSpec is the same as ScorecardCheck, but usable as query
+// input.
+type ScorecardCheckSpec struct {
+	Check string `json:"check"`
+	Score int    `json:"score"`
 }
 
 // Source represents a source.
