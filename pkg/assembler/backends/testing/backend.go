@@ -35,9 +35,10 @@ type demoClient struct {
 	hasSBOM          []*model.HasSbom
 	isDependency     []*model.IsDependency
 	certifyPkg       []*model.CertifyPkg
+	certifyVuln      []*model.CertifyVuln
 	hasSourceAt      []*model.HasSourceAt
-	certifyBad       []*model.CertifyBad
 	certifyScorecard []*model.CertifyScorecard
+	certifyBad       []*model.CertifyBad
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -83,6 +84,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	err = registerAllCertifyScorecard(client)
+	if err != nil {
+		return nil, err
+	}
+	err = registerAllCertifyVuln(client)
 	if err != nil {
 		return nil, err
 	}

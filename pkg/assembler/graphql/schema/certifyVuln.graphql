@@ -1,0 +1,73 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the CertifyVuln. It contains a package, vulnerability that can be of type
+# cve, ghsa or osv, time scanned, db uri, db version, scanner uri, scanner version, origin and collector
+"""
+CertifyVuln is an attestation that represents when a package has a vulnerability
+
+Package - the package object type that represents the package
+vulnerability - union type that consists of osv, cve or ghsa
+timeScanned - timestamp of when the package was last scanned
+dbUri - scanner vulnerability database uri
+dbVersion - scanner vulnerability database version
+scannerUri - vulnerability scanner's uri 
+scannerVersion - vulnerability scanner version
+Origin - where this attestation was generated from (based on which document)
+Collector - the GUAC collector that collected the document that generated this attestation
+"""
+type CertifyVuln {
+  package: Package!
+  vulnerability: OsvCveGhsaObject!
+  timeScanned: String!
+  dbUri: String!
+  dbVersion: String!
+  scannerUri: String!
+  scannerVersion: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+CertifyVulnSpec allows filtering the list of CertifyVuln to return.
+
+Specifying just the package allows to query for all vulnerabilities associated with the package.
+Only OSV, CVE or GHSA can be specified at once
+"""
+input CertifyVulnSpec {
+  package: PkgSpec
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+  timeScanned: String
+  dbUri: String
+  dbVersion: String
+  scannerUri: String
+  scannerVersion: String
+  origin: String
+  collector: String
+}
+
+"""
+OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+"""
+union OsvCveGhsaObject = OSV | CVE | GHSA
+
+extend type Query {
+  "Returns all CertifyVuln"
+  CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
+}
