@@ -63,19 +63,6 @@ func registerAllHasSLSA(client *demoClient) error {
 func (c *demoClient) registerHasSLSA(selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact, builtFromPackages []*model.Package,
 	builtFromSouces []*model.Source, builtFromArtifacts []*model.Artifact, builtBy *model.Builder, buildType string, predicate []*model.SLSAPredicate, slsaVersion string, startOn string, finishOn string) error {
 
-	/*
-	  subject: PkgSrcArtObject!
-	  builtFrom: [PkgSrcArtObject!]!
-	  builtBy: Builder!
-	  buildType: String!
-	  predicate: [Predicate!]!
-	  slsaVersion: String!
-	  startedOn: String!
-	  finishedOn: String!
-	  origin: String!
-	  collector: String!
-	*/
-
 	for _, h := range c.hasSLSA {
 		if h.BuildType == buildType && h.SlsaVersion == slsaVersion {
 			if val, ok := h.Subject.(model.Package); ok {
@@ -144,19 +131,6 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 	}
 
 	var collectedHasSLSA []*model.HasSlsa
-
-	/*
-	  subject: PkgSrcArtObject!
-	  builtFrom: [PkgSrcArtObject!]!
-	  builtBy: Builder!
-	  buildType: String!
-	  predicate: [Predicate!]!
-	  slsaVersion: String!
-	  startedOn: String!
-	  finishedOn: String!
-	  origin: String!
-	  collector: String!
-	*/
 
 	for _, h := range c.hasSLSA {
 		buildTypeMatchOrSkip := false
