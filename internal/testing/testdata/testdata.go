@@ -81,6 +81,9 @@ var (
 	//go:embed exampledata/invalid-cyclonedx.xml
 	CycloneDXInvalidExampleXML []byte
 
+	//go:embed exampledata/no-dependent-components-cyclonedx.json
+	CycloneDXExampleNoDependentComponents []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
@@ -605,6 +608,26 @@ var (
 			PackageNode:       cdxWebAppPackage,
 		},
 	}
+
+	cdxQuarkusParentPackage = assembler.PackageNode{
+		Name:    "quarkus-parent",
+		Digest:  nil,
+		Version: "999-SNAPSHOT",
+		Purl:    "pkg:maven/io.quarkus/quarkus-parent@999-SNAPSHOT?type=pom",
+		Tags:    []string{"library"},
+		CPEs:    nil,
+		NodeData: *assembler.NewObjectMetadata(
+			processor.SourceInformation{
+				Collector: "TestCollector",
+				Source:    "TestSource",
+			},
+		),
+	}
+
+	CycloneDXNoDependentComponentsNodes = []assembler.GuacNode{
+		cdxQuarkusParentPackage,
+	}
+	CyloneDXNoDependentComponentsEdges = []assembler.GuacEdge{}
 
 	// ceritifer testdata
 
