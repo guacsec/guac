@@ -35,3 +35,5 @@
 ./pkg/assembler/graphql/resolvers/certifyScorecard.resolvers.go
 ./pkg/assembler/graphql/generated/certifyVuln.generated.go
 ./pkg/assembler/graphql/resolvers/certifyVuln.resolvers.go
+./pkg/assembler/graphql/generated/isVulnerability.generated.go
+./pkg/assembler/graphql/resolvers/isVulnerability.resolvers.go

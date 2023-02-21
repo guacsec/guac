@@ -212,7 +212,7 @@ func (ec *executionContext) unmarshalInputCVESpec(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
-var cVEImplementors = []string{"CVE", "OsvCveGhsaObject"}
+var cVEImplementors = []string{"CVE", "OsvCveGhsaObject", "CveGhsaObject"}
 
 func (ec *executionContext) _CVE(ctx context.Context, sel ast.SelectionSet, obj *model.Cve) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, cVEImplementors)

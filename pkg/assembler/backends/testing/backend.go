@@ -39,6 +39,7 @@ type demoClient struct {
 	hasSourceAt      []*model.HasSourceAt
 	certifyScorecard []*model.CertifyScorecard
 	certifyBad       []*model.CertifyBad
+	isVulnerability  []*model.IsVulnerability
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -88,6 +89,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	err = registerAllCertifyVuln(client)
+	if err != nil {
+		return nil, err
+	}
+	err = registerAllIsVulnerability(client)
 	if err != nil {
 		return nil, err
 	}
