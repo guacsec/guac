@@ -17,11 +17,55 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
 func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	panic(fmt.Errorf("not implemented: IsDependency - IsDependency"))
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+
+			var sb strings.Builder
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Osv)-[:OsvHasID]->(osvID:OsvID)")
+
+			if osvSpec.OsvID != nil {
+				matchProperties(&sb, true, "osvID", "id", "$osvID")
+				queryValues["osvID"] = osvSpec.OsvID
+			}
+
+			sb.WriteString(" RETURN osvID.id")
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			osvIds := []*model.OSVId{}
+			for result.Next() {
+				osvId := &model.OSVId{
+					ID: result.Record().Values[0].(string),
+				}
+				osvIds = append(osvIds, osvId)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			osv := &model.Osv{
+				OsvID: osvIds,
+			}
+
+			return []*model.Osv{osv}, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.Osv), nil
 }
