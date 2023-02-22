@@ -56,28 +56,23 @@ func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEq
 	var hashEquals []*model.HashEqual
 
 	for _, h := range c.hashEquals {
-		justificationMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
-		artifactMatchOrSkip := false
+		matchOrSkip := true
 
-		if hashEqualSpec.Justification == nil || h.Justification == *hashEqualSpec.Justification {
-			justificationMatchOrSkip = true
+		if hashEqualSpec.Justification != nil && h.Justification != *hashEqualSpec.Justification {
+			matchOrSkip = false
 		}
-		if hashEqualSpec.Collector == nil || h.Collector == *hashEqualSpec.Collector {
-			collectorMatchOrSkip = true
+		if hashEqualSpec.Collector != nil && h.Collector != *hashEqualSpec.Collector {
+			matchOrSkip = false
 		}
-		if hashEqualSpec.Origin == nil || h.Origin == *hashEqualSpec.Origin {
-			originMatchOrSkip = true
+		if hashEqualSpec.Origin != nil && h.Origin != *hashEqualSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if len(hashEqualSpec.Artifacts) == 0 {
-			artifactMatchOrSkip = true
-		} else if len(hashEqualSpec.Artifacts) > 0 && filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
-			artifactMatchOrSkip = true
+		if len(hashEqualSpec.Artifacts) > 0 && !filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
+			matchOrSkip = false
 		}
 
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && artifactMatchOrSkip {
+		if matchOrSkip {
 			hashEquals = append(hashEquals, h)
 		}
 	}

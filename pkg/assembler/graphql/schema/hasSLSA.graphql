@@ -21,16 +21,16 @@
 """
 HasSLSA is an attestation represents that the subject has a SLSA attestation associated with it.
 
-Subject - an union type that consists of package, source or artifact
-BuiltFrom - list of union types that consists of the package, source or artifact that the subject was build from
-BuiltBy - represents the builder that was used to build the subject
-BuildType - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-slsaPredicate - a list of key value pair that consist of the keys and values of the SLSA predicate
-SlsaVersion - version of the SLSA predicate
-StartedOn - timestamp when the SLSA predicate was recorded during the build time of the subject
-FinishedOn - timestamp when the SLSA predicate was completed during the build time of the subject
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - an union type that consists of package, source or artifact
+builtFrom (object) - list of union types that consists of the package, source or artifact that the subject was build from
+builtBy (object) - represents the builder that was used to build the subject
+buildType (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+slsaPredicate (property) - a list of key value pair that consist of the keys and values of the SLSA predicate
+slsaVersion (property) - version of the SLSA predicate
+startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject
+finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HasSLSA {
   subject: PkgSrcArtObject!

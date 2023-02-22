@@ -1263,10 +1263,10 @@ func (ec *executionContext) fieldContext_Query_HashEquals(ctx context.Context, f
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "justification":
-				return ec.fieldContext_HashEqual_justification(ctx, field)
 			case "artifacts":
 				return ec.fieldContext_HashEqual_artifacts(ctx, field)
+			case "justification":
+				return ec.fieldContext_HashEqual_justification(ctx, field)
 			case "origin":
 				return ec.fieldContext_HashEqual_origin(ctx, field)
 			case "collector":

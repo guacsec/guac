@@ -20,10 +20,10 @@
 """
 CertifyPkg is an attestation that represents when a package objects are similar
 
-Packages - list of package objects
-Justification - string value representing why the packages are similar
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+packages (subject) - list of package objects
+justification (property) - string value representing why the packages are similar
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyPkg {
   packages: [Package!]!

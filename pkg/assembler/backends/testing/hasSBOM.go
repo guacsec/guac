@@ -107,52 +107,48 @@ func (c *demoClient) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 	var collectedHasSBOM []*model.HasSbom
 
 	for _, h := range c.hasSBOM {
-		uriMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
-		packageMatchOrSkip := false
-		sourceMatchOrSkip := false
+		matchOrSkip := true
 
-		if hasSBOMSpec.URI == nil || h.URI == *hasSBOMSpec.URI {
-			uriMatchOrSkip = true
+		if hasSBOMSpec.URI != nil && h.URI != *hasSBOMSpec.URI {
+			matchOrSkip = false
 		}
-		if hasSBOMSpec.Collector == nil || h.Collector == *hasSBOMSpec.Collector {
-			collectorMatchOrSkip = true
+		if hasSBOMSpec.Collector != nil && h.Collector != *hasSBOMSpec.Collector {
+			matchOrSkip = false
 		}
-		if hasSBOMSpec.Origin == nil || h.Origin == *hasSBOMSpec.Origin {
-			originMatchOrSkip = true
+		if hasSBOMSpec.Origin != nil && h.Origin != *hasSBOMSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if hasSBOMSpec.Package == nil {
-			packageMatchOrSkip = true
-		} else if hasSBOMSpec.Package != nil && h.Subject != nil {
+		if hasSBOMSpec.Package != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Package); ok {
 				if hasSBOMSpec.Package.Type == nil || val.Type == *hasSBOMSpec.Package.Type {
 					newPkg := filterPackageNamespace(val, hasSBOMSpec.Package)
-					if newPkg != nil {
-						packageMatchOrSkip = true
+					if newPkg == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if hasSBOMSpec.Source == nil {
-			sourceMatchOrSkip = true
-		} else if hasSBOMSpec.Source != nil && h.Subject != nil {
+		if hasSBOMSpec.Source != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Source); ok {
 				if hasSBOMSpec.Source.Type == nil || val.Type == *hasSBOMSpec.Source.Type {
 					newSource, err := filterSourceNamespace(val, hasSBOMSpec.Source)
 					if err != nil {
 						return nil, err
 					}
-					if newSource != nil {
-						sourceMatchOrSkip = true
+					if newSource == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if uriMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && sourceMatchOrSkip {
+		if matchOrSkip {
 			collectedHasSBOM = append(collectedHasSBOM, h)
 		}
 	}

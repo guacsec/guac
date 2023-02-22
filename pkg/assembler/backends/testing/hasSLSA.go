@@ -133,81 +133,71 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 	var collectedHasSLSA []*model.HasSlsa
 
 	for _, h := range c.hasSLSA {
-		buildTypeMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
-		packageMatchOrSkip := false
-		sourceMatchOrSkip := false
-		artifactMatchOrSkip := false
-		builtByMatchOrSkip := false
-		slsaVersionMatchOrSkip := false
+		matchOrSkip := true
 
-		if hasSLSASpec.BuildType == nil || h.BuildType == *hasSLSASpec.BuildType {
-			buildTypeMatchOrSkip = true
+		if hasSLSASpec.BuildType != nil && h.BuildType != *hasSLSASpec.BuildType {
+			matchOrSkip = false
 		}
-		if hasSLSASpec.SlsaVersion == nil || h.SlsaVersion == *hasSLSASpec.SlsaVersion {
-			slsaVersionMatchOrSkip = true
+		if hasSLSASpec.SlsaVersion != nil && h.SlsaVersion != *hasSLSASpec.SlsaVersion {
+			matchOrSkip = false
 		}
-		if hasSLSASpec.Collector == nil || h.Collector == *hasSLSASpec.Collector {
-			collectorMatchOrSkip = true
+		if hasSLSASpec.Collector != nil && h.Collector != *hasSLSASpec.Collector {
+			matchOrSkip = false
 		}
-		if hasSLSASpec.Origin == nil || h.Origin == *hasSLSASpec.Origin {
-			originMatchOrSkip = true
+		if hasSLSASpec.Origin != nil && h.Origin != *hasSLSASpec.Origin {
+			matchOrSkip = false
 		}
 
-		if hasSLSASpec.BuiltBy == nil {
-			builtByMatchOrSkip = true
-		} else if hasSLSASpec.BuiltBy != nil && h.BuiltBy != nil {
-			if hasSLSASpec.BuiltBy.URI == nil || h.BuiltBy.URI == *hasSLSASpec.BuiltBy.URI {
-				builtByMatchOrSkip = true
+		if hasSLSASpec.BuiltBy != nil && h.BuiltBy != nil {
+			if hasSLSASpec.BuiltBy.URI != nil && h.BuiltBy.URI != *hasSLSASpec.BuiltBy.URI {
+				matchOrSkip = false
 			}
 		}
 
-		if hasSLSASpec.Package == nil {
-			packageMatchOrSkip = true
-		} else if hasSLSASpec.Package != nil && h.Subject != nil {
+		if hasSLSASpec.Package != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Package); ok {
 				if hasSLSASpec.Package.Type == nil || val.Type == *hasSLSASpec.Package.Type {
 					newPkg := filterPackageNamespace(val, hasSLSASpec.Package)
-					if newPkg != nil {
-						packageMatchOrSkip = true
+					if newPkg == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if hasSLSASpec.Source == nil {
-			sourceMatchOrSkip = true
-		} else if hasSLSASpec.Source != nil && h.Subject != nil {
+		if hasSLSASpec.Source != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Source); ok {
 				if hasSLSASpec.Source.Type == nil || val.Type == *hasSLSASpec.Source.Type {
 					newSource, err := filterSourceNamespace(val, hasSLSASpec.Source)
 					if err != nil {
 						return nil, err
 					}
-					if newSource != nil {
-						sourceMatchOrSkip = true
+					if newSource == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if hasSLSASpec.Artifact == nil {
-			artifactMatchOrSkip = true
-		} else if hasSLSASpec.Artifact != nil && h.Subject != nil {
+		if hasSLSASpec.Artifact != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Artifact); ok {
 				queryArt := &model.Artifact{
 					Algorithm: strings.ToLower(*hasSLSASpec.Artifact.Algorithm),
 					Digest:    strings.ToLower(*hasSLSASpec.Artifact.Digest),
 				}
-				if *queryArt == *val {
-					artifactMatchOrSkip = true
+				if *queryArt != *val {
+					matchOrSkip = false
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if buildTypeMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && sourceMatchOrSkip && artifactMatchOrSkip &&
-			builtByMatchOrSkip && slsaVersionMatchOrSkip {
+		if matchOrSkip {
 			collectedHasSLSA = append(collectedHasSLSA, h)
 		}
 	}

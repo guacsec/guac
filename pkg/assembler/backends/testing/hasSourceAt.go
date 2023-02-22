@@ -118,48 +118,40 @@ func (c *demoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Has
 	var collectedHasSourceAt []*model.HasSourceAt
 
 	for _, h := range c.hasSourceAt {
-		justificationMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
-		packageMatchOrSkip := false
-		sourceMatchOrSkip := false
+		matchOrSkip := true
 
-		if hasSourceAtSpec.Justification == nil || h.Justification == *hasSourceAtSpec.Justification {
-			justificationMatchOrSkip = true
+		if hasSourceAtSpec.Justification != nil && h.Justification != *hasSourceAtSpec.Justification {
+			matchOrSkip = false
 		}
-		if hasSourceAtSpec.Collector == nil || h.Collector == *hasSourceAtSpec.Collector {
-			collectorMatchOrSkip = true
+		if hasSourceAtSpec.Collector != nil && h.Collector != *hasSourceAtSpec.Collector {
+			matchOrSkip = false
 		}
-		if hasSourceAtSpec.Origin == nil || h.Origin == *hasSourceAtSpec.Origin {
-			originMatchOrSkip = true
+		if hasSourceAtSpec.Origin != nil && h.Origin != *hasSourceAtSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if hasSourceAtSpec.Package == nil {
-			packageMatchOrSkip = true
-		} else if hasSourceAtSpec.Package != nil && h.Package != nil {
+		if hasSourceAtSpec.Package != nil && h.Package != nil {
 			if hasSourceAtSpec.Package.Type == nil || h.Package.Type == *hasSourceAtSpec.Package.Type {
 				newPkg := filterPackageNamespace(h.Package, hasSourceAtSpec.Package)
-				if newPkg != nil {
-					packageMatchOrSkip = true
+				if newPkg == nil {
+					matchOrSkip = false
 				}
 			}
 		}
 
-		if hasSourceAtSpec.Source == nil {
-			sourceMatchOrSkip = true
-		} else if hasSourceAtSpec.Source != nil && h.Source != nil {
+		if hasSourceAtSpec.Source != nil && h.Source != nil {
 			if hasSourceAtSpec.Source.Type == nil || h.Source.Type == *hasSourceAtSpec.Source.Type {
 				newSource, err := filterSourceNamespace(h.Source, hasSourceAtSpec.Source)
 				if err != nil {
 					return nil, err
 				}
-				if newSource != nil {
-					sourceMatchOrSkip = true
+				if newSource == nil {
+					matchOrSkip = false
 				}
 			}
 		}
 
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && sourceMatchOrSkip {
+		if matchOrSkip {
 			collectedHasSourceAt = append(collectedHasSourceAt, h)
 		}
 	}

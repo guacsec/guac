@@ -117,31 +117,29 @@ func (c *demoClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Certi
 	}
 
 	for _, h := range c.certifyPkg {
-		justificationMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
+		matchOrSkip := true
 
-		if certifyPkgSpec.Justification == nil || h.Justification == *certifyPkgSpec.Justification {
-			justificationMatchOrSkip = true
+		if certifyPkgSpec.Justification != nil && h.Justification != *certifyPkgSpec.Justification {
+			matchOrSkip = false
 		}
-		if certifyPkgSpec.Collector == nil || h.Collector == *certifyPkgSpec.Collector {
-			collectorMatchOrSkip = true
+		if certifyPkgSpec.Collector != nil && h.Collector != *certifyPkgSpec.Collector {
+			matchOrSkip = false
 		}
-		if certifyPkgSpec.Origin == nil || h.Origin == *certifyPkgSpec.Origin {
-			originMatchOrSkip = true
+		if certifyPkgSpec.Origin != nil && h.Origin != *certifyPkgSpec.Origin {
+			matchOrSkip = false
 		}
-
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip {
-			if len(queryPkgs) > 0 {
-				for _, pkg := range queryPkgs {
-					if packagesContain(h.Packages, pkg) {
-						certifyPkgs = append(certifyPkgs, h)
-					}
+		if len(queryPkgs) > 0 {
+			for _, pkg := range queryPkgs {
+				if !packagesContain(h.Packages, pkg) {
+					matchOrSkip = false
 				}
-			} else {
-				certifyPkgs = append(certifyPkgs, h)
 			}
 		}
+
+		if matchOrSkip {
+			certifyPkgs = append(certifyPkgs, h)
+		}
+
 	}
 
 	return certifyPkgs, nil

@@ -130,83 +130,76 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatemen
 	var foundCertifyVEXStatement []*model.CertifyVEXStatement
 
 	for _, h := range c.certifyVEXStatement {
-		packageMatchOrSkip := false
-		artifactMatchOrSkip := false
-		cveMatchOrSkip := false
-		ghsaMatchOrSkip := false
-		justificationMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
+		matchOrSkip := true
 
-		if certifyVEXStatementSpec.Justification == nil || h.Justification == *certifyVEXStatementSpec.Justification {
-			justificationMatchOrSkip = true
+		if certifyVEXStatementSpec.Justification != nil && h.Justification != *certifyVEXStatementSpec.Justification {
+			matchOrSkip = false
+		}
+		if certifyVEXStatementSpec.Collector != nil && h.Collector != *certifyVEXStatementSpec.Collector {
+			matchOrSkip = false
+		}
+		if certifyVEXStatementSpec.Origin != nil && h.Origin != *certifyVEXStatementSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if certifyVEXStatementSpec.Collector == nil || h.Collector == *certifyVEXStatementSpec.Collector {
-			collectorMatchOrSkip = true
-		}
-		if certifyVEXStatementSpec.Origin == nil || h.Origin == *certifyVEXStatementSpec.Origin {
-			originMatchOrSkip = true
-		}
-
-		if certifyVEXStatementSpec.Package == nil {
-			packageMatchOrSkip = true
-		} else if certifyVEXStatementSpec.Package != nil && h.Subject != nil {
+		if certifyVEXStatementSpec.Package != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Package); ok {
 				if certifyVEXStatementSpec.Package.Type == nil || val.Type == *certifyVEXStatementSpec.Package.Type {
 					newPkg := filterPackageNamespace(val, certifyVEXStatementSpec.Package)
-					if newPkg != nil {
-						packageMatchOrSkip = true
+					if newPkg == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if certifyVEXStatementSpec.Artifact == nil {
-			artifactMatchOrSkip = true
-		} else if certifyVEXStatementSpec.Artifact != nil && h.Subject != nil {
+		if certifyVEXStatementSpec.Artifact != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Artifact); ok {
 				queryArt := &model.Artifact{
 					Algorithm: strings.ToLower(*certifyVEXStatementSpec.Artifact.Algorithm),
 					Digest:    strings.ToLower(*certifyVEXStatementSpec.Artifact.Digest),
 				}
-				if reflect.DeepEqual(val, queryArt) {
-					artifactMatchOrSkip = true
+				if !reflect.DeepEqual(val, queryArt) {
+					matchOrSkip = false
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if certifyVEXStatementSpec.Cve == nil {
-			cveMatchOrSkip = true
-		} else if certifyVEXStatementSpec.Cve != nil {
+		if certifyVEXStatementSpec.Cve != nil {
 			if val, ok := h.Vulnerability.(*model.Cve); ok {
 				if certifyVEXStatementSpec.Cve.Year == nil || val.Year == *certifyVEXStatementSpec.Cve.Year {
 					newCve, err := filterCVEID(val, certifyVEXStatementSpec.Cve)
 					if err != nil {
 						return nil, err
 					}
-					if newCve != nil {
-						cveMatchOrSkip = true
+					if newCve == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if certifyVEXStatementSpec.Ghsa == nil {
-			ghsaMatchOrSkip = true
-		} else if certifyVEXStatementSpec.Ghsa != nil {
+		if certifyVEXStatementSpec.Ghsa != nil {
 			if val, ok := h.Vulnerability.(*model.Ghsa); ok {
 				newGhsa, err := filterGHSAID(val, certifyVEXStatementSpec.Ghsa)
 				if err != nil {
 					return nil, err
 				}
-				if newGhsa != nil {
-					ghsaMatchOrSkip = true
+				if newGhsa == nil {
+					matchOrSkip = false
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && artifactMatchOrSkip && cveMatchOrSkip && ghsaMatchOrSkip {
+		if matchOrSkip {
 			foundCertifyVEXStatement = append(foundCertifyVEXStatement, h)
 		}
 	}

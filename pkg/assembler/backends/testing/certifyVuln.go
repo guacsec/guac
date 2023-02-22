@@ -147,93 +147,82 @@ func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Cer
 	var foundCertifyBad []*model.CertifyVuln
 
 	for _, h := range c.certifyVuln {
-		cveMatchOrSkip := false
-		osvMatchOrSkip := false
-		ghsaMatchOrSkip := false
-		packageMatchOrSkip := false
-		dbUriMatchOrSkip := false
-		dbVersionMatchOrSkip := false
-		scannerUriMatchOrSkip := false
-		scannerVersionMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
+		matchOrSkip := true
 
-		if certifyVulnSpec.DbURI == nil || h.DbURI == *certifyVulnSpec.DbURI {
-			dbUriMatchOrSkip = true
+		if certifyVulnSpec.DbURI != nil && h.DbURI != *certifyVulnSpec.DbURI {
+			matchOrSkip = false
 		}
-		if certifyVulnSpec.DbVersion == nil || h.DbVersion == *certifyVulnSpec.DbVersion {
-			dbVersionMatchOrSkip = true
+		if certifyVulnSpec.DbVersion != nil && h.DbVersion != *certifyVulnSpec.DbVersion {
+			matchOrSkip = false
 		}
-		if certifyVulnSpec.ScannerURI == nil || h.ScannerURI == *certifyVulnSpec.ScannerURI {
-			scannerUriMatchOrSkip = true
+		if certifyVulnSpec.ScannerURI != nil && h.ScannerURI != *certifyVulnSpec.ScannerURI {
+			matchOrSkip = false
 		}
-		if certifyVulnSpec.ScannerVersion == nil || h.ScannerVersion == *certifyVulnSpec.ScannerVersion {
-			scannerVersionMatchOrSkip = true
+		if certifyVulnSpec.ScannerVersion != nil && h.ScannerVersion != *certifyVulnSpec.ScannerVersion {
+			matchOrSkip = false
 		}
-		if certifyVulnSpec.Collector == nil || h.Collector == *certifyVulnSpec.Collector {
-			collectorMatchOrSkip = true
+		if certifyVulnSpec.Collector != nil && h.Collector != *certifyVulnSpec.Collector {
+			matchOrSkip = false
 		}
-		if certifyVulnSpec.Origin == nil || h.Origin == *certifyVulnSpec.Origin {
-			originMatchOrSkip = true
+		if certifyVulnSpec.Origin != nil && h.Origin != *certifyVulnSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if certifyVulnSpec.Package == nil {
-			packageMatchOrSkip = true
-		} else if certifyVulnSpec.Package != nil && h.Package != nil {
+		if certifyVulnSpec.Package != nil && h.Package != nil {
 			if certifyVulnSpec.Package.Type == nil || h.Package.Type == *certifyVulnSpec.Package.Type {
 				newPkg := filterPackageNamespace(h.Package, certifyVulnSpec.Package)
-				if newPkg != nil {
-					packageMatchOrSkip = true
+				if newPkg == nil {
+					matchOrSkip = false
 				}
 			}
 		}
 
-		if certifyVulnSpec.Cve == nil {
-			cveMatchOrSkip = true
-		} else if certifyVulnSpec.Cve != nil {
+		if certifyVulnSpec.Cve != nil {
 			if val, ok := h.Vulnerability.(*model.Cve); ok {
 				if certifyVulnSpec.Cve.Year == nil || val.Year == *certifyVulnSpec.Cve.Year {
 					newCve, err := filterCVEID(val, certifyVulnSpec.Cve)
 					if err != nil {
 						return nil, err
 					}
-					if newCve != nil {
-						cveMatchOrSkip = true
+					if newCve == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
+
 			}
 		}
 
-		if certifyVulnSpec.Osv == nil {
-			osvMatchOrSkip = true
-		} else if certifyVulnSpec.Osv != nil {
+		if certifyVulnSpec.Osv != nil {
 			if val, ok := h.Vulnerability.(*model.Osv); ok {
 				newOSV, err := filterOSVID(val, certifyVulnSpec.Osv)
 				if err != nil {
 					return nil, err
 				}
-				if newOSV != nil {
-					osvMatchOrSkip = true
+				if newOSV == nil {
+					matchOrSkip = false
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if certifyVulnSpec.Ghsa == nil {
-			ghsaMatchOrSkip = true
-		} else if certifyVulnSpec.Ghsa != nil {
+		if certifyVulnSpec.Ghsa != nil {
 			if val, ok := h.Vulnerability.(*model.Ghsa); ok {
 				newGhsa, err := filterGHSAID(val, certifyVulnSpec.Ghsa)
 				if err != nil {
 					return nil, err
 				}
-				if newGhsa != nil {
-					ghsaMatchOrSkip = true
+				if newGhsa == nil {
+					matchOrSkip = false
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if dbUriMatchOrSkip && dbVersionMatchOrSkip && scannerUriMatchOrSkip && scannerVersionMatchOrSkip &&
-			collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && cveMatchOrSkip && osvMatchOrSkip && ghsaMatchOrSkip {
+		if matchOrSkip {
 			foundCertifyBad = append(foundCertifyBad, h)
 		}
 	}

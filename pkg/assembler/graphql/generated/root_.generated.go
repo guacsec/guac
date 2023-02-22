@@ -1436,10 +1436,10 @@ extend type Query {
 """
 CertifyBad is an attestation represents when a package, source or artifact is considered bad
 
-Subject - union type that can be either a package, source or artifact object type
-Justification - string value representing why the subject is considered bad
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - union type that can be either a package, source or artifact object type
+justification (property) - string value representing why the subject is considered bad
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 
 Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 """
@@ -1497,10 +1497,10 @@ extend type Query {
 """
 CertifyPkg is an attestation that represents when a package objects are similar
 
-Packages - list of package objects
-Justification - string value representing why the packages are similar
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+packages (subject) - list of package objects
+justification (property) - string value representing why the packages are similar
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyPkg {
   packages: [Package!]!
@@ -1548,14 +1548,14 @@ extend type Query {
 """
 CertifyScorecard is an attestation represents the scorecard of a particular source
 
-Source - the source object type that represents the source
-timeScanned - timestamp when this was last scanned (exact time)
-aggregateScore - overall scorecard score for the source
-checks - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-scorecardVersion - version of the scorecard when the source was scanned
-scorecardCommit - commit of scorecard when the source was scanned
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+source (subject) - the source object type that represents the source
+timeScanned (property) - timestamp when this was last scanned (exact time)
+aggregateScore (property) - overall scorecard score for the source
+checks (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+scorecardVersion (property) - version of the scorecard when the source was scanned
+scorecardCommit (property) - commit of scorecard when the source was scanned
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyScorecard {
   source: Source!
@@ -1636,12 +1636,12 @@ extend type Query {
 """
 CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
 
-Subject - union type that represents a package or artifact
-Vulnerability - union type that consists of cve or ghsa
-Justification - justification for VEX
-knownSince - timestamp of the VEX (exact time)
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - union type that represents a package or artifact
+vulnerability (object) - union type that consists of cve or ghsa
+justification (property) - justification for VEX
+knownSince (property) - timestamp of the VEX (exact time)
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVEXStatement {
   subject: PkgArtObject!
@@ -1698,15 +1698,15 @@ extend type Query {
 """
 CertifyVuln is an attestation that represents when a package has a vulnerability
 
-Package - the package object type that represents the package
-vulnerability - union type that consists of osv, cve or ghsa
-timeScanned - timestamp of when the package was last scanned
-dbUri - scanner vulnerability database uri
-dbVersion - scanner vulnerability database version
-scannerUri - vulnerability scanner's uri 
-scannerVersion - vulnerability scanner version
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+package (subject) - the package object type that represents the package
+vulnerability (object) - union type that consists of osv, cve or ghsa
+timeScanned (property) - timestamp of when the package was last scanned
+dbUri (property) - scanner vulnerability database uri
+dbVersion (property) - scanner vulnerability database version
+scannerUri (property) - vulnerability scanner's uri 
+scannerVersion (property) - vulnerability scanner version
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVuln {
   package: Package!
@@ -1879,12 +1879,10 @@ extend type Query {
 """
 HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 
-Subject - union type that can be either a package or source object type
-Package - the package object type that represents the package
-Source - the source object type that represents the source
-uri - identifier string for the SBOM
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - union type that can be either a package or source object type
+uri (property) - identifier string for the SBOM
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 
 Note: Only package object or source object can be defined. Not both.
 """
@@ -1942,16 +1940,16 @@ extend type Query {
 """
 HasSLSA is an attestation represents that the subject has a SLSA attestation associated with it.
 
-Subject - an union type that consists of package, source or artifact
-BuiltFrom - list of union types that consists of the package, source or artifact that the subject was build from
-BuiltBy - represents the builder that was used to build the subject
-BuildType - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-slsaPredicate - a list of key value pair that consist of the keys and values of the SLSA predicate
-SlsaVersion - version of the SLSA predicate
-StartedOn - timestamp when the SLSA predicate was recorded during the build time of the subject
-FinishedOn - timestamp when the SLSA predicate was completed during the build time of the subject
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - an union type that consists of package, source or artifact
+builtFrom (object) - list of union types that consists of the package, source or artifact that the subject was build from
+builtBy (object) - represents the builder that was used to build the subject
+buildType (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+slsaPredicate (property) - a list of key value pair that consist of the keys and values of the SLSA predicate
+slsaVersion (property) - version of the SLSA predicate
+startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject
+finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HasSLSA {
   subject: PkgSrcArtObject!
@@ -2060,12 +2058,12 @@ extend type Query {
 """
 HasSourceAt is an attestation represents that a package object has a source object since a timestamp
 
-Package - the package object type that represents the package
-Source - the source object type that represents the source
-KnownSince - timestamp when this was last checked (exact time)
-Justification - string value representing why the package has a source specified
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+package (subject) - the package object type that represents the package
+source (object) - the source object type that represents the source
+knownSince (property) - timestamp when this was last checked (exact time)
+justification (property) - string value representing why the package has a source specified
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HasSourceAt {
   package: Package!
@@ -2115,14 +2113,14 @@ extend type Query {
 """
 HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
 
-Justification - string value representing why the artifacts are the equal
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
-Artifacts - the artifacts (represented by algorithm and digest) that are equal
+artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
+justification (property) - string value representing why the artifacts are the equal
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HashEqual {
-  justification: String!
   artifacts: [Artifact!]!
+  justification: String!
   origin: String!
   collector: String!
 }
@@ -2167,12 +2165,12 @@ extend type Query {
 """
 IsDependency is an attestation that represents when a package is dependent on another package
 
-Package - the package object type that represents the package
-dependentPackage - the package object type that represents the packageName (cannot be to the packageVersion)
-VersionRange - string value for version range that applies to the dependent package
-Justification - string value representing why the artifacts are the equal
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+package (subject) - the package object type that represents the package
+dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
+versionRange (property) - string value for version range that applies to the dependent package
+justification (property) - string value representing why the artifacts are the equal
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type IsDependency {
   package: Package!
@@ -2237,11 +2235,11 @@ extend type Query {
 """
 IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 
-Subject - union type that can be either a package or source object type
-occurrenceArtifacts - list of artifacts that represent the the package or source
-Justification - string value representing why the package or source is represented by the specified artifact
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - union type that can be either a package or source object type
+occurrenceArtifacts (object) - list of artifacts that represent the the package or source
+justification (property) - string value representing why the package or source is represented by the specified artifact
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 
 Note: Package or Source must be specified but not both at the same time.
 Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
@@ -2300,11 +2298,11 @@ extend type Query {
 """
 IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
 
-OSV - the osv object type that represents OSV and its ID
-Vulnerability - union type that consists of cve or ghsa
-Justification - the reason why the osv ID represents the cve or ghsa
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+osv (subject) - the osv object type that represents OSV and its ID
+vulnerability (object) - union type that consists of cve or ghsa
+justification (property) - the reason why the osv ID represents the cve or ghsa
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type IsVulnerability {
   osv: OSV!

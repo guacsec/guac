@@ -20,12 +20,12 @@
 """
 IsDependency is an attestation that represents when a package is dependent on another package
 
-Package - the package object type that represents the package
-dependentPackage - the package object type that represents the packageName (cannot be to the packageVersion)
-VersionRange - string value for version range that applies to the dependent package
-Justification - string value representing why the artifacts are the equal
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+package (subject) - the package object type that represents the package
+dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
+versionRange (property) - string value for version range that applies to the dependent package
+justification (property) - string value representing why the artifacts are the equal
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type IsDependency {
   package: Package!

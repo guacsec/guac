@@ -19,12 +19,10 @@
 """
 HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 
-Subject - union type that can be either a package or source object type
-Package - the package object type that represents the package
-Source - the source object type that represents the source
-uri - identifier string for the SBOM
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - union type that can be either a package or source object type
+uri (property) - identifier string for the SBOM
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 
 Note: Only package object or source object can be defined. Not both.
 """

@@ -20,14 +20,14 @@
 """
 CertifyScorecard is an attestation represents the scorecard of a particular source
 
-Source - the source object type that represents the source
-timeScanned - timestamp when this was last scanned (exact time)
-aggregateScore - overall scorecard score for the source
-checks - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-scorecardVersion - version of the scorecard when the source was scanned
-scorecardCommit - commit of scorecard when the source was scanned
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+source (subject) - the source object type that represents the source
+timeScanned (property) - timestamp when this was last scanned (exact time)
+aggregateScore (property) - overall scorecard score for the source
+checks (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
+scorecardVersion (property) - version of the scorecard when the source was scanned
+scorecardCommit (property) - commit of scorecard when the source was scanned
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyScorecard {
   source: Source!
