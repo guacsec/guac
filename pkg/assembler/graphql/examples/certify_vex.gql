@@ -1,0 +1,82 @@
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+  subject {
+    __typename
+    ... on Package {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          versions {
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    ... on Artifact {
+      algorithm
+      digest
+    }
+  }
+  vulnerability {
+    __typename
+    ... on CVE {
+      year
+      cveId {
+        id
+      }
+    }
+    ... on GHSA {
+      ghsaId {
+        id
+      }
+    }
+  }
+  justification
+  knownSince
+  origin
+  collector
+}
+
+query Q1 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {}) {
+    ...allCertifyVEXStatement
+  }
+}
+
+query Q2 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {origin: "testing backend"}) {
+    ...allCertifyVEXStatement
+  }
+}
+
+query Q3 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {package: {name: "openssl"}}) {
+    ...allCertifyVEXStatement
+  }
+}
+
+
+query Q4 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {artifact: {algorithm: "sha1", digest: "5a787865sd676dacb0142afa0b83029cd7befd9"}}) {
+    ...allCertifyVEXStatement
+  }
+}
+
+
+query Q5 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {cve: {cveId: "CVE-2019-13110"}}) {
+    ...allCertifyVEXStatement
+  }
+}
+
+query Q6 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {ghsa: {ghsaId: "GHSA-h45f-rjvw-2rv2"}}) {
+    ...allCertifyVEXStatement
+  }
+}

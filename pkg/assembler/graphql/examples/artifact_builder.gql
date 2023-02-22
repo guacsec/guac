@@ -1,0 +1,45 @@
+fragment allArtifactTree on Artifact {
+  	algorithm
+    digest
+}
+
+fragment allBuilderTree on Builder {
+  uri
+}
+
+
+query Q1 {
+  artifacts(artifactSpec: {algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}) {
+    ...allArtifactTree
+  }
+}
+
+query Q2 {
+  artifacts(artifactSpec: {}) {
+    ...allArtifactTree
+  }
+}
+
+query Q3 {
+  artifacts(artifactSpec: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}) {
+    ...allArtifactTree
+  }
+}
+
+query Q4 {
+  artifacts(artifactSpec: {algorithm: "sha512"}) {
+    ...allArtifactTree
+  }
+}
+
+query Q5 {
+  builders(builderSpec: {uri: "https://github.com/Attestations/GitHubHostedActions@v1"}) {
+    ...allBuilderTree
+  }
+}
+
+query Q6 {
+  builders(builderSpec: {}) {
+    ...allBuilderTree
+  }
+}

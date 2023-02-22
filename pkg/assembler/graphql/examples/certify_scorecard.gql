@@ -1,0 +1,52 @@
+fragment allCertifyScorecard on CertifyScorecard {
+  source {
+    type
+    namespaces {
+      namespace
+      names {
+        name
+        tag
+        commit
+      }
+    }
+  }
+  timeScanned
+  aggregateScore
+  checks {
+    check
+    score
+  }
+  scorecardVersion
+  scorecardCommit
+  origin
+  collector
+}
+
+query Q1 {
+  CertifyScorecard(certifyScorecardSpec: {}) {
+    ...allCertifyScorecard
+  }
+}
+
+query Q2 {
+  CertifyScorecard(certifyScorecardSpec: {origin: "testing backend"}) {
+    ...allCertifyScorecard
+  }
+}
+
+query Q3 {
+  CertifyScorecard(
+    certifyScorecardSpec: {source: {name: "https://github.com/django/django"}}
+  ) {
+    ...allCertifyScorecard
+  }
+}
+
+
+query Q4 {
+  CertifyScorecard(
+    certifyScorecardSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
+  ) {
+    ...allCertifyScorecard
+  }
+}

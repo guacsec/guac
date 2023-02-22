@@ -1,0 +1,73 @@
+fragment allCveTree on CVE {
+  year
+  cveId{
+    id
+  }
+}
+
+fragment allGHSATree on GHSA {
+  ghsaId{
+    id
+  }
+}
+
+fragment allOSVTree on OSV {
+  osvId{
+    id
+  }
+}
+
+
+query Q1 {
+  cve(cveSpec: {year: "1970"}) {
+    ...allCveTree
+  }
+}
+
+query Q2 {
+  cve(cveSpec: {cveId: "CVE-2014-8139"}) {
+    ...allCveTree
+  }
+}
+
+query Q3 {
+  cve(cveSpec: {year: "2023"}) {
+    ...allCveTree
+  }
+}
+
+query Q4 {
+  ghsa(ghsaSpec: {ghsaId: "GHSA-h45f-rjvw-2rv2"}) {
+    ...allGHSATree
+  }
+}
+
+query Q5 {
+  ghsa(ghsaSpec: {ghsaId: "GHSA-xrw3-wqph-3fxg"}) {
+    ...allGHSATree
+  }
+}
+
+query Q6 {
+  ghsa(ghsaSpec: {}) {
+    ...allGHSATree
+  }
+}
+
+query Q7 {
+  osv(osvSpec: {osvId: "CVE-2014-8139"}) {
+    ...allOSVTree
+  }
+}
+
+query Q8 {
+  osv(osvSpec: {osvId: "CVE-2022-26499"}) {
+    ...allOSVTree
+  }
+}
+
+query Q9 {
+  osv(osvSpec: {}) {
+    ...allOSVTree
+  }
+}

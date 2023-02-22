@@ -1,0 +1,82 @@
+fragment allIsDependencyTree on IsDependency {
+  justification
+  package {
+    type
+    namespaces {
+      namespace 
+      names {
+        name
+        versions {
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
+  }
+dependentPackage {
+      type
+    namespaces {
+      namespace 
+      names {
+        name
+        versions {
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
+  }
+versionRange
+origin
+collector
+}
+
+query Q1 {
+  IsDependency(isDependencySpec: {}) {
+    ...allIsDependencyTree
+  }
+}
+
+query Q2 {
+  IsDependency(isDependencySpec: {origin: "testing backend"}) {
+    ...allIsDependencyTree
+  }
+}
+
+query Q3 {
+  IsDependency(isDependencySpec: {package: {name: "debian"}}) {
+    ...allIsDependencyTree
+  }
+}
+
+query Q4 {
+  IsDependency(isDependencySpec: {package: {name: "dpkg"}}) {
+    ...allIsDependencyTree
+  }
+}
+
+query Q5 {
+  IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}}) {
+    ...allIsDependencyTree
+  }
+}
+
+query Q6 {
+  IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}, versionRange: "3.0.3"}) {
+    ...allIsDependencyTree
+  }
+}
+
+query Q7 {
+  IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}, versionRange: "3.0.5"}) {
+    ...allIsDependencyTree
+  }
+}

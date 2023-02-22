@@ -1,0 +1,74 @@
+fragment allHasSourceAt on HasSourceAt {
+  justification
+  knownSince
+  package {
+    type
+    namespaces {
+      namespace
+      names {
+        name
+        versions {
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
+  }
+  source {
+    type
+    namespaces {
+      namespace
+      names {
+        name
+        tag
+        commit
+      }
+    }
+  }
+  origin
+  collector
+}
+
+query Q1 {
+  HasSourceAt(hasSourceAtSpec: {}) {
+    ...allHasSourceAt
+  }
+}
+
+query Q2 {
+  HasSourceAt(hasSourceAtSpec: {origin: "testing backend"}) {
+    ...allHasSourceAt
+  }
+}
+
+query Q4 {
+  HasSourceAt(hasSourceAtSpec: {package: {name: "django"}}) {
+    ...allHasSourceAt
+  }
+}
+
+query Q5 {
+  HasSourceAt(
+    hasSourceAtSpec: {source: {name: "https://github.com/django/django"}}
+  ) {
+    ...allHasSourceAt
+  }
+}
+
+query Q6 {
+  HasSourceAt(hasSourceAtSpec: {package: {name: "kubetest"}}) {
+    ...allHasSourceAt
+  }
+}
+
+query Q7 {
+  HasSourceAt(
+    hasSourceAtSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
+  ) {
+    ...allHasSourceAt
+  }
+}
