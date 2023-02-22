@@ -897,7 +897,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var packageImplementors = []string{"Package", "PkgSrcArtObject", "PkgSrcObject"}
+var packageImplementors = []string{"Package", "PkgSrcArtObject", "PkgArtObject", "PkgSrcObject"}
 
 func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, obj *model.Package) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, packageImplementors)
