@@ -1,0 +1,69 @@
+fragment allCertifyVuln on CertifyVuln {
+  package {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          versions {
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+  vulnerability {
+    __typename
+    ... on CVE {
+      year
+     cveId{
+      id
+    }
+    }
+    ... on OSV {
+     osvId{
+      id
+    }
+    }
+    ... on GHSA {
+      ghsaId{
+        id
+      }
+    }
+  }
+  dbUri
+  dbVersion
+  scannerUri
+  scannerVersion
+  timeScanned
+  origin
+  collector
+}
+
+query Q1 {
+  CertifyVuln(certifyVulnSpec: {}) {
+    ...allCertifyVuln
+  }
+}
+
+query Q2 {
+  CertifyVuln(certifyVulnSpec: {origin: "testing backend"}) {
+    ...allCertifyVuln
+  }
+}
+
+query Q3 {
+  CertifyVuln(certifyVulnSpec: {package: {name: "openssl"}}) {
+    ...allCertifyVuln
+  }
+}
+
+query Q4 {
+  CertifyVuln(certifyVulnSpec: {package: {name: "django"}}) {
+    ...allCertifyVuln
+  }
+}

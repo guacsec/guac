@@ -1,0 +1,103 @@
+fragment allHasSLSA on HasSLSA {
+  subject {
+    __typename
+    ... on Package {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          versions {
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    ... on Source {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          tag
+          commit
+        }
+      }
+    }
+    ... on Artifact {
+      algorithm
+      digest
+    }
+  }
+  builtFrom {
+       __typename
+    ... on Package {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          versions {
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    ... on Source {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          tag
+          commit
+        }
+      }
+    }
+    ... on Artifact {
+      algorithm
+      digest
+    }
+  }
+  builtBy {
+    uri
+  }
+  buildType
+  slsaPredicate{
+    key
+    value
+  }
+  slsaVersion
+  startedOn
+  finishedOn
+  origin
+  collector
+}
+
+query Q1 {
+  HasSLSA(hasSLSASpec: {}) {
+    ...allHasSLSA
+  }
+}
+
+query Q2 {
+  HasSLSA(hasSLSASpec: {origin: "testing backend"}) {
+    ...allHasSLSA
+  }
+}
+
+query Q3 {
+  HasSLSA(hasSLSASpec: {package: {name: "django"}}) {
+    ...allHasSLSA
+  }
+}

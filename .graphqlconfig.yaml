@@ -1,0 +1,4 @@
+schemaPath: ./pkg/assembler/graphql/schema/*.graphql
+extensions:
+  endpoints:
+    dev:  http://localhost:8080/query

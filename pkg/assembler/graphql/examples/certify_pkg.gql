@@ -1,0 +1,46 @@
+fragment allCertifyPkg on CertifyPkg {
+  justification
+  packages {
+    type
+    namespaces {
+      namespace 
+      names {
+        name
+        versions {
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
+  }
+  origin
+  collector
+}
+
+query Q1 {
+  CertifyPkg(certifyPkgSpec: {}) {
+    ...allCertifyPkg
+  }
+}
+
+query Q2 {
+  CertifyPkg(certifyPkgSpec: {origin: "testing backend"}) {
+    ...allCertifyPkg
+  }
+}
+
+query Q3 {
+  CertifyPkg(certifyPkgSpec: {packages: {type: "conan", namespace: "", name: "openssl", version: "3.0.3", subpath: ""}}) {
+    ...allCertifyPkg
+  }
+}
+
+query Q4 {
+  CertifyPkg(certifyPkgSpec: {packages: {type: "pypi", namespace: "", name: "django", version: "1.11.1", subpath: ""}}) {
+    ...allCertifyPkg
+  }
+}

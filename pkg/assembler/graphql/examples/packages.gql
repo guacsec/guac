@@ -1,0 +1,76 @@
+query Q1 {
+  artifacts {
+    name
+    sourceInfo
+    collectorInfo
+  }
+}
+
+fragment allPkgTree on Package {
+  type
+  namespaces {
+    namespace
+    names {
+      name
+      versions {
+        version
+      }
+    }
+  }
+}
+
+# all packages
+query Q2 {
+  packages(pkgSpec: {}) {
+    ...allPkgTree
+  }
+}
+
+# only PyPI packages
+query Q3 {
+  packages(pkgSpec: {type: "pypi"}) {
+    ...allPkgTree
+  }
+}
+
+# PyPI packages in "debian" namespace (empty)
+query Q4 {
+  packages(pkgSpec: {type: "pypi", namespace: "debian"}) {
+    ...allPkgTree
+  }
+}
+
+# debian packages in "debian" namespace
+query Q5 {
+  packages(pkgSpec: {type: "deb", namespace: "debian"}) {
+    ...allPkgTree
+  }
+}
+
+# "dpkg" package from Ubuntu ("ubuntu" namespace on "deb" type)
+query Q6 {
+  packages(pkgSpec: {type: "deb", namespace: "ubuntu", name: "dpkg"}) {
+    ...allPkgTree
+  }
+}
+
+# All "deb" type packages named "dpkg"
+query Q7 {
+  packages(pkgSpec: {type: "deb", name:"dpkg"}) {
+    ...allPkgTree
+  }
+}
+
+# All occurrences of openssl-3.0.3
+query Q8 {
+  packages(pkgSpec: {name:"openssl", version:"3.0.3"}) {
+    ...allPkgTree
+  }
+}
+
+# All occurrences of openssl
+query Q9 {
+  packages(pkgSpec: {name:"openssl"}) {
+    ...allPkgTree
+  }
+}
