@@ -19,14 +19,14 @@
 """
 HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
 
-Justification - string value representing why the artifacts are the equal
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
-Artifacts - the artifacts (represented by algorithm and digest) that are equal
+artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
+justification (property) - string value representing why the artifacts are the equal
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HashEqual {
-  justification: String!
   artifacts: [Artifact!]!
+  justification: String!
   origin: String!
   collector: String!
 }

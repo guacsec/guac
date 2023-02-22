@@ -130,67 +130,62 @@ func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Certi
 	var foundCertifyBad []*model.CertifyBad
 
 	for _, h := range c.certifyBad {
-		justificationMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
-		packageMatchOrSkip := false
-		sourceMatchOrSkip := false
-		artifactMatchOrSkip := false
+		matchOrSkip := true
 
-		if certifyBadSpec.Justification == nil || h.Justification == *certifyBadSpec.Justification {
-			justificationMatchOrSkip = true
+		if certifyBadSpec.Justification != nil && h.Justification != *certifyBadSpec.Justification {
+			matchOrSkip = false
 		}
-		if certifyBadSpec.Collector == nil || h.Collector == *certifyBadSpec.Collector {
-			collectorMatchOrSkip = true
+		if certifyBadSpec.Collector != nil && h.Collector != *certifyBadSpec.Collector {
+			matchOrSkip = false
 		}
-		if certifyBadSpec.Origin == nil || h.Origin == *certifyBadSpec.Origin {
-			originMatchOrSkip = true
+		if certifyBadSpec.Origin != nil && h.Origin != *certifyBadSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if certifyBadSpec.Package == nil {
-			packageMatchOrSkip = true
-		} else if certifyBadSpec.Package != nil && h.Subject != nil {
+		if certifyBadSpec.Package != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Package); ok {
 				if certifyBadSpec.Package.Type == nil || val.Type == *certifyBadSpec.Package.Type {
 					newPkg := filterPackageNamespace(val, certifyBadSpec.Package)
-					if newPkg != nil {
-						packageMatchOrSkip = true
+					if newPkg == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if certifyBadSpec.Source == nil {
-			sourceMatchOrSkip = true
-		} else if certifyBadSpec.Source != nil && h.Subject != nil {
+		if certifyBadSpec.Source != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Source); ok {
 				if certifyBadSpec.Source.Type == nil || val.Type == *certifyBadSpec.Source.Type {
 					newSource, err := filterSourceNamespace(val, certifyBadSpec.Source)
 					if err != nil {
 						return nil, err
 					}
-					if newSource != nil {
-						sourceMatchOrSkip = true
+					if newSource == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if certifyBadSpec.Artifact == nil {
-			artifactMatchOrSkip = true
-		} else if certifyBadSpec.Artifact != nil && h.Subject != nil {
+		if certifyBadSpec.Artifact != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Artifact); ok {
 				queryArt := &model.Artifact{
 					Algorithm: strings.ToLower(*certifyBadSpec.Artifact.Algorithm),
 					Digest:    strings.ToLower(*certifyBadSpec.Artifact.Digest),
 				}
-				if *queryArt == *val {
-					artifactMatchOrSkip = true
+				if *queryArt != *val {
+					matchOrSkip = false
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && sourceMatchOrSkip && artifactMatchOrSkip {
+		if matchOrSkip {
 			foundCertifyBad = append(foundCertifyBad, h)
 		}
 	}

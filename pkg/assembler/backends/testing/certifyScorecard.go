@@ -108,40 +108,34 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, certifyScorecardSpec 
 	var collectedHasSourceAt []*model.CertifyScorecard
 
 	for _, h := range c.certifyScorecard {
-		scorecardVersionMatchOrSkip := false
-		scorecardCommitMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
-		sourceMatchOrSkip := false
+		matchOrSkip := true
 
-		if certifyScorecardSpec.ScorecardVersion == nil || h.ScorecardVersion == *certifyScorecardSpec.ScorecardVersion {
-			scorecardVersionMatchOrSkip = true
+		if certifyScorecardSpec.ScorecardVersion != nil && h.ScorecardVersion != *certifyScorecardSpec.ScorecardVersion {
+			matchOrSkip = false
 		}
-		if certifyScorecardSpec.ScorecardCommit == nil || h.ScorecardCommit == *certifyScorecardSpec.ScorecardCommit {
-			scorecardCommitMatchOrSkip = true
+		if certifyScorecardSpec.ScorecardCommit != nil && h.ScorecardCommit != *certifyScorecardSpec.ScorecardCommit {
+			matchOrSkip = false
 		}
-		if certifyScorecardSpec.Collector == nil || h.Collector == *certifyScorecardSpec.Collector {
-			collectorMatchOrSkip = true
+		if certifyScorecardSpec.Collector != nil && h.Collector != *certifyScorecardSpec.Collector {
+			matchOrSkip = false
 		}
-		if certifyScorecardSpec.Origin == nil || h.Origin == *certifyScorecardSpec.Origin {
-			originMatchOrSkip = true
+		if certifyScorecardSpec.Origin != nil && h.Origin != *certifyScorecardSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if certifyScorecardSpec.Source == nil {
-			sourceMatchOrSkip = true
-		} else if certifyScorecardSpec.Source != nil && h.Source != nil {
+		if certifyScorecardSpec.Source != nil && h.Source != nil {
 			if certifyScorecardSpec.Source.Type == nil || h.Source.Type == *certifyScorecardSpec.Source.Type {
 				newSource, err := filterSourceNamespace(h.Source, certifyScorecardSpec.Source)
 				if err != nil {
 					return nil, err
 				}
-				if newSource != nil {
-					sourceMatchOrSkip = true
+				if newSource == nil {
+					matchOrSkip = false
 				}
 			}
 		}
 
-		if scorecardVersionMatchOrSkip && scorecardCommitMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && sourceMatchOrSkip {
+		if matchOrSkip {
 			collectedHasSourceAt = append(collectedHasSourceAt, h)
 		}
 	}

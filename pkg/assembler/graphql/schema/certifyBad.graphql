@@ -20,10 +20,10 @@
 """
 CertifyBad is an attestation represents when a package, source or artifact is considered bad
 
-Subject - union type that can be either a package, source or artifact object type
-Justification - string value representing why the subject is considered bad
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+subject - union type that can be either a package, source or artifact object type
+justification (property) - string value representing why the subject is considered bad
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 
 Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 """

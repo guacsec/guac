@@ -111,52 +111,48 @@ func (c *demoClient) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.
 	var isOccurrences []*model.IsOccurrence
 
 	for _, h := range c.isOccurrence {
-		justificationMatchOrSkip := false
-		collectorMatchOrSkip := false
-		originMatchOrSkip := false
-		packageMatchOrSkip := false
-		sourceMatchOrSkip := false
+		matchOrSkip := true
 
-		if isOccurrenceSpec.Justification == nil || h.Justification == *isOccurrenceSpec.Justification {
-			justificationMatchOrSkip = true
+		if isOccurrenceSpec.Justification != nil && h.Justification != *isOccurrenceSpec.Justification {
+			matchOrSkip = false
 		}
-		if isOccurrenceSpec.Collector == nil || h.Collector == *isOccurrenceSpec.Collector {
-			collectorMatchOrSkip = true
+		if isOccurrenceSpec.Collector != nil && h.Collector != *isOccurrenceSpec.Collector {
+			matchOrSkip = false
 		}
-		if isOccurrenceSpec.Origin == nil || h.Origin == *isOccurrenceSpec.Origin {
-			originMatchOrSkip = true
+		if isOccurrenceSpec.Origin != nil && h.Origin != *isOccurrenceSpec.Origin {
+			matchOrSkip = false
 		}
 
-		if isOccurrenceSpec.Package == nil {
-			packageMatchOrSkip = true
-		} else if isOccurrenceSpec.Package != nil && h.Subject != nil {
+		if isOccurrenceSpec.Package != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Package); ok {
 				if isOccurrenceSpec.Package.Type == nil || val.Type == *isOccurrenceSpec.Package.Type {
 					newPkg := filterPackageNamespace(val, isOccurrenceSpec.Package)
-					if newPkg != nil {
-						packageMatchOrSkip = true
+					if newPkg == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if isOccurrenceSpec.Source == nil {
-			sourceMatchOrSkip = true
-		} else if isOccurrenceSpec.Source != nil && h.Subject != nil {
+		if isOccurrenceSpec.Source != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Source); ok {
 				if isOccurrenceSpec.Source.Type == nil || val.Type == *isOccurrenceSpec.Source.Type {
 					newSource, err := filterSourceNamespace(val, isOccurrenceSpec.Source)
 					if err != nil {
 						return nil, err
 					}
-					if newSource != nil {
-						sourceMatchOrSkip = true
+					if newSource == nil {
+						matchOrSkip = false
 					}
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
-		if justificationMatchOrSkip && collectorMatchOrSkip && originMatchOrSkip && packageMatchOrSkip && sourceMatchOrSkip {
+		if matchOrSkip {
 			isOccurrences = append(isOccurrences, h)
 		}
 	}

@@ -19,12 +19,12 @@
 """
 HasSourceAt is an attestation represents that a package object has a source object since a timestamp
 
-Package - the package object type that represents the package
-Source - the source object type that represents the source
-KnownSince - timestamp when this was last checked (exact time)
-Justification - string value representing why the package has a source specified
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+package (subject) - the package object type that represents the package
+source (object) - the source object type that represents the source
+knownSince (property) - timestamp when this was last checked (exact time)
+justification (property) - string value representing why the package has a source specified
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HasSourceAt {
   package: Package!

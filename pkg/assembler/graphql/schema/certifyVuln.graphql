@@ -20,15 +20,15 @@
 """
 CertifyVuln is an attestation that represents when a package has a vulnerability
 
-Package - the package object type that represents the package
-vulnerability - union type that consists of osv, cve or ghsa
-timeScanned - timestamp of when the package was last scanned
-dbUri - scanner vulnerability database uri
-dbVersion - scanner vulnerability database version
-scannerUri - vulnerability scanner's uri 
-scannerVersion - vulnerability scanner version
-Origin - where this attestation was generated from (based on which document)
-Collector - the GUAC collector that collected the document that generated this attestation
+package (subject) - the package object type that represents the package
+vulnerability (object) - union type that consists of osv, cve or ghsa
+timeScanned (property) - timestamp of when the package was last scanned
+dbUri (property) - scanner vulnerability database uri
+dbVersion (property) - scanner vulnerability database version
+scannerUri (property) - vulnerability scanner's uri 
+scannerVersion (property) - vulnerability scanner version
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVuln {
   package: Package!
