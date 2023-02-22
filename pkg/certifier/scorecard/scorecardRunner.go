@@ -61,12 +61,12 @@ func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResu
 	}
 
 	res, err := sc.RunScorecards(s.ctx, repo, commitSHA, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)
+	if err != nil {
+		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
+	}
 	if res.Repo.Name == "" {
 		// The commit SHA can be invalid or the repo can be private.
 		return nil, fmt.Errorf("error, failed to get scorecard data for repo %v, commit SHA %v", res.Repo.Name, commitSHA)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
 	}
 	return &res, nil
 }

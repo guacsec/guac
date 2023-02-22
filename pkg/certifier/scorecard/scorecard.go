@@ -85,10 +85,13 @@ func (s scorecard) CertifyComponent(ctx context.Context, rootComponent interface
 	}
 
 	res := processor.Document{
-		Blob:              scorecardResults.Bytes(),
-		Format:            processor.FormatUnknown,
-		Type:              processor.DocumentScorecard,
-		SourceInformation: processor.SourceInformation{},
+		Blob:   scorecardResults.Bytes(),
+		Format: processor.FormatJSON,
+		Type:   processor.DocumentScorecard,
+		SourceInformation: processor.SourceInformation{
+			Collector: "scorecard",
+			Source:    artifactNode.Name + "@" + artifactNode.Digest,
+		},
 	}
 
 	docChannel <- &res
@@ -125,10 +128,10 @@ func (s scorecard) GetComponents(ctx context.Context, compChan chan<- interface{
 	return nil
 }
 
-// NewScorecard initializes the scorecard certifier.
+// NewScorecardCertifier initializes the scorecard certifier.
 // It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not, it returns an error.w
 // The token is used to access the GitHub API, https://github.com/ossf/scorecard#authentication.
-func NewScorecard(sc Scorecard, client graphdb.Client) (CertQuerier, error) {
+func NewScorecardCertifier(sc Scorecard, client graphdb.Client) (CertQuerier, error) {
 	if sc == nil {
 		return nil, fmt.Errorf("scorecard cannot be nil")
 	}
@@ -140,5 +143,9 @@ func NewScorecard(sc Scorecard, client graphdb.Client) (CertQuerier, error) {
 		return nil, fmt.Errorf("GITHUB_AUTH_TOKEN is not set")
 	}
 
-	return &scorecard{scorecard: sc, ghToken: s, client: client}, nil
+	return &scorecard{
+		scorecard: sc,
+		ghToken:   s,
+		client:    client,
+	}, nil
 }

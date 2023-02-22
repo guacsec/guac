@@ -22,15 +22,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+	mocks "github.com/guacsec/guac/internal/testing/mock"
+	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/ossf/scorecard/v4/checker"
-
-	"github.com/golang/mock/gomock"
-	"github.com/guacsec/guac/pkg/assembler"
-	mocks "github.com/guacsec/guac/pkg/certifier/scorecard/mock"
 	"github.com/guacsec/guac/pkg/handler/processor"
-
+	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/pkg"
 )
 
@@ -75,25 +73,26 @@ func TestNewScorecard(t *testing.T) {
 				t.Setenv("GITHUB_AUTH_TOKEN", test.authToken)
 			}
 
-			got, err := NewScorecard(test.sc, test.client)
+			got, err := NewScorecardCertifier(test.sc, test.client)
 			if (err != nil) != test.wantErr {
-				t.Errorf("NewScorecard() error = %v, wantErr %v", err, test.wantErr)
+				t.Errorf("NewScorecardCertifier() error = %v, wantErr %v", err, test.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("NewScorecard() got = %v, want %v", got, test.want)
+				t.Errorf("NewScorecardCertifier() got = %v, want %v", got, test.want)
 			}
 		})
 	}
 }
 
-func Test_scorecard_CertifyComponent(t *testing.T) {
+func Test_CertifyComponent(t *testing.T) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second) // nolint:govet
+
 	type fields struct {
 		ghToken  string
 		artifact *assembler.ArtifactNode
 	}
 	type args struct {
-		ctx           context.Context
 		rootComponent interface{}
 		docChannel    chan<- *processor.Document
 	}
@@ -111,7 +110,6 @@ func Test_scorecard_CertifyComponent(t *testing.T) {
 				artifact: &assembler.ArtifactNode{},
 			},
 			args: args{
-				ctx:           context.Background(),
 				rootComponent: &assembler.ArtifactNode{},
 				docChannel:    nil,
 			},
@@ -124,7 +122,6 @@ func Test_scorecard_CertifyComponent(t *testing.T) {
 				artifact: &assembler.ArtifactNode{},
 			},
 			args: args{
-				ctx:           context.Background(),
 				docChannel:    make(chan *processor.Document),
 				rootComponent: nil,
 			},
@@ -137,9 +134,34 @@ func Test_scorecard_CertifyComponent(t *testing.T) {
 				artifact: &assembler.ArtifactNode{},
 			},
 			args: args{
-				ctx:           context.Background(),
 				docChannel:    make(chan *processor.Document),
 				rootComponent: "",
+			},
+			wantErr: true,
+		},
+		{
+			name: "artifactNode.Digest error",
+			fields: fields{
+				ghToken:  "",
+				artifact: &assembler.ArtifactNode{},
+			},
+			args: args{
+				docChannel:    make(chan *processor.Document),
+				rootComponent: &assembler.ArtifactNode{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "repo name is empty",
+			fields: fields{
+				ghToken:  "",
+				artifact: &assembler.ArtifactNode{},
+			},
+			args: args{
+				docChannel: make(chan *processor.Document),
+				rootComponent: &assembler.ArtifactNode{
+					Digest: "test",
+				},
 			},
 			wantErr: true,
 		},
@@ -150,9 +172,11 @@ func Test_scorecard_CertifyComponent(t *testing.T) {
 				artifact: &assembler.ArtifactNode{},
 			},
 			args: args{
-				ctx:           context.Background(),
-				docChannel:    make(chan *processor.Document),
-				rootComponent: &assembler.ArtifactNode{},
+				docChannel: make(chan *processor.Document),
+				rootComponent: &assembler.ArtifactNode{
+					Digest: "test",
+					Name:   "test",
+				},
 			},
 			getScoreShouldReturnErr: true,
 			wantErr:                 true,
@@ -174,15 +198,15 @@ func Test_scorecard_CertifyComponent(t *testing.T) {
 				scorecard: sc,
 				ghToken:   test.fields.ghToken,
 			}
-			if err := s.CertifyComponent(test.args.ctx, test.args.rootComponent, test.args.docChannel); (err != nil) != test.wantErr {
+			if err := s.CertifyComponent(ctx, test.args.rootComponent, test.args.docChannel); (err != nil) != test.wantErr {
 				t.Errorf("CertifyComponent() error = %v, wantErr %v", err, test.wantErr)
 			}
 		})
 	}
 }
 
-func TestCertifyComponent(t *testing.T) {
-	ctx := context.Background()
+func TestCertifyComponentDefaultCase(t *testing.T) {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second) // nolint:govet
 
 	ctrl := gomock.NewController(t)
 	scMock := mocks.NewMockScorecard(ctrl)
@@ -199,7 +223,7 @@ func TestCertifyComponent(t *testing.T) {
 					CommitSHA: "test",
 				},
 				Checks: []checker.CheckResult{
-					checker.CheckResult{
+					{
 						Name:    "Maintained",
 						Version: 10,
 						Error:   nil,
@@ -231,7 +255,7 @@ func TestCertifyComponent(t *testing.T) {
 		client:    nil,
 	}
 
-	// Test case 1: valid input
+	// valid input
 	docChannel := make(chan *processor.Document, 2)
 
 	err := sc.CertifyComponent(ctx, artifact, docChannel)
@@ -243,29 +267,11 @@ func TestCertifyComponent(t *testing.T) {
 	if res.Type != processor.DocumentScorecard {
 		t.Errorf("unexpected document type: %v", res.Type)
 	}
-	if res.Format != processor.FormatUnknown {
+	if res.Format != processor.FormatJSON {
 		t.Errorf("unexpected document format: %v", res.Format)
 	}
 	if len(res.Blob) < 100 {
 		// the test scorecard result is less than 100 bytes
 		t.Errorf("unexpected document blob size: %v", len(res.Blob))
-	}
-
-	// Test case 2: nil docChannel
-	err = sc.CertifyComponent(ctx, artifact, nil)
-	if err == nil {
-		t.Error("expected error for nil docChannel")
-	}
-
-	// Test case 3: nil rootComponent
-	err = sc.CertifyComponent(ctx, nil, docChannel)
-	if err == nil {
-		t.Error("expected error for nil rootComponent")
-	}
-
-	// Test case 4: invalid rootComponent type
-	err = sc.CertifyComponent(ctx, "not an ArtifactNode", docChannel)
-	if err != ErrArtifactNodeTypeMismatch {
-		t.Errorf("expected ErrArtifactNodeTypeMismatch, but got: %v", err)
 	}
 }

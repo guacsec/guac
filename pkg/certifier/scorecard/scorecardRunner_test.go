@@ -22,7 +22,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/ossf/scorecard/v4/checks"
 )
 
@@ -31,7 +30,6 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 	tests := []struct {
 		name    string
 		sc      Scorecard
-		want    certifier.Certifier
 		wantErr bool
 	}{
 		{

@@ -20,7 +20,7 @@ test: generate
 integration-test: generate
 	go test -tags=integration ./...
 
-check-env:
+.PHONY: check-env
 ifndef GITHUB_AUTH_TOKEN
 	$(error GITHUB_AUTH_TOKEN is not set)
 endif

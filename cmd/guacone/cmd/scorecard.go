@@ -66,7 +66,7 @@ var scorecardCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		scorecardCertifier, err := scorecard.NewScorecard(scorecardRunner, client)
+		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner, client)
 
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
