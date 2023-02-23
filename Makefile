@@ -104,20 +104,28 @@ start-service:
 stop-service:
 	docker compose down
 
-# Check that docker is installed.
 .PHONY: check-docker-tool-check
 check-docker-tool-check:
-	@docker --version > /dev/null
+	@if ! command -v docker &> /dev/null; then \
+		echo "Docker is not installed. Please install Docker and try again."; \
+		exit 1; \
+	fi
 
 # Check that protoc is installed.
-.PHONY: checkk-protoc-tool-check
+.PHONY: check-protoc-tool-check
 check-protoc-tool-check:
-	@protoc --version > /dev/null
+	@if ! command -v protoc &> /dev/null; then \
+		echo "Protoc is not installed. Please install Protoc and try again."; \
+		exit 1; \
+	fi
 
 # Check that golangci-lint is installed.
 .PHONY: check-golangci-lint-tool-check
 check-golangci-lint-tool-check:
-	@golangci-lint --version > /dev/null
+	@if ! command -v golangci-lint &> /dev/null; then \
+		echo "Golangci-lint is not installed. Please install Golangci-lint and try again."; \
+		exit 1; \
+	fi
 
 # Check that all the tools are installed.
 .PHONY: check-tools
