@@ -18,10 +18,211 @@ package neo4jBackend
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
-	panic(fmt.Errorf("not implemented: CertifyPkg - CertifyPkg"))
+
+	if certifyPkgSpec.Packages != nil && len(certifyPkgSpec.Packages) > 2 {
+		return nil, gqlerror.Errorf("cannot specify more than 2 packages in CertifyPkg")
+	}
+
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			var sb strings.Builder
+			var firstMatch bool = true
+
+			var selectedPkg *model.PkgSpec = nil
+			var dependentPkg *model.PkgSpec = nil
+			if certifyPkgSpec.Packages != nil {
+				if len(certifyPkgSpec.Packages) == 1 {
+					selectedPkg = certifyPkgSpec.Packages[0]
+				} else {
+					selectedPkg = certifyPkgSpec.Packages[0]
+					dependentPkg = certifyPkgSpec.Packages[1]
+				}
+			}
+
+			returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
+				"version.qualifier_list, certifyPkg, depType.type, depNamespace.namespace, depName.name, " +
+				"depVersion.version, depVersion.subpath, depVersion.qualifier_list"
+
+			queryValues := map[string]any{}
+			// query with pkgVersion
+			query := "MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
+				"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+				"\nWITH *, depName" +
+				"\nMATCH (depName)-[:PkgHasVersion]->(depVersion:PkgVersion)"
+			sb.WriteString(query)
+
+			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+
+			sb.WriteString(returnValue)
+
+			sb.WriteString("\nUNION")
+			// query without pkgVersion
+			query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				"-[:PkgHasName]->(name:PkgName)" +
+				"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+				"\nWITH *, name, depName" +
+				"\nMATCH (name)-[:PkgHasVersion]->(version:PkgVersion)" +
+				"\nWITH *" +
+				"\nMATCH (depName)-[:PkgHasVersion]->(depVersion:PkgVersion)"
+			sb.WriteString(query)
+
+			firstMatch = true
+			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+
+			sb.WriteString(returnValue)
+
+			sb.WriteString("\nUNION")
+
+			query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
+				"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
+				"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)"
+			sb.WriteString(query)
+
+			firstMatch = true
+			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+
+			sb.WriteString(returnValue)
+
+			sb.WriteString("\nUNION")
+			// query without pkgVersion
+			query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				"-[:PkgHasName]->(name:PkgName)" +
+				"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
+				"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+				"\nWITH *, name" +
+				"\nMATCH (name)-[:PkgHasVersion]->(version:PkgVersion)"
+			sb.WriteString(query)
+
+			firstMatch = true
+			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+
+			sb.WriteString(returnValue)
+			fmt.Println(sb.String())
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			collectedCertifyPkg := []*model.CertifyPkg{}
+
+			for result.Next() {
+				pkgQualifiers := []*model.PackageQualifier{}
+				if result.Record().Values[5] != nil {
+					qualifierList := result.Record().Values[5].([]interface{})
+					for i := range qualifierList {
+						if i%2 == 0 {
+							qualifier := &model.PackageQualifier{
+								Key:   qualifierList[i].(string),
+								Value: qualifierList[i+1].(string),
+							}
+							pkgQualifiers = append(pkgQualifiers, qualifier)
+						}
+					}
+				}
+
+				subPathString := result.Record().Values[4].(string)
+				versionString := result.Record().Values[3].(string)
+				nameString := result.Record().Values[2].(string)
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
+
+				version := &model.PackageVersion{
+					Version:    versionString,
+					Subpath:    subPathString,
+					Qualifiers: pkgQualifiers,
+				}
+
+				name := &model.PackageName{
+					Name:     nameString,
+					Versions: []*model.PackageVersion{version},
+				}
+
+				namespace := &model.PackageNamespace{
+					Namespace: namespaceString,
+					Names:     []*model.PackageName{name},
+				}
+				pkg := model.Package{
+					Type:       typeString,
+					Namespaces: []*model.PackageNamespace{namespace},
+				}
+
+				pkgQualifiers = []*model.PackageQualifier{}
+				if result.Record().Values[12] != nil {
+					qualifierList := result.Record().Values[12].([]interface{})
+					for i := range qualifierList {
+						if i%2 == 0 {
+							qualifier := &model.PackageQualifier{
+								Key:   qualifierList[i].(string),
+								Value: qualifierList[i+1].(string),
+							}
+							pkgQualifiers = append(pkgQualifiers, qualifier)
+						}
+					}
+				}
+
+				subPathString = result.Record().Values[11].(string)
+				versionString = result.Record().Values[10].(string)
+				nameString = result.Record().Values[9].(string)
+				namespaceString = result.Record().Values[8].(string)
+				typeString = result.Record().Values[7].(string)
+
+				version = &model.PackageVersion{
+					Version:    versionString,
+					Subpath:    subPathString,
+					Qualifiers: pkgQualifiers,
+				}
+
+				name = &model.PackageName{
+					Name:     nameString,
+					Versions: []*model.PackageVersion{version},
+				}
+
+				namespace = &model.PackageNamespace{
+					Namespace: namespaceString,
+					Names:     []*model.PackageName{name},
+				}
+				depPkg := model.Package{
+					Type:       typeString,
+					Namespaces: []*model.PackageNamespace{namespace},
+				}
+
+				certifyPkgEdge := result.Record().Values[6].(dbtype.Relationship)
+
+				certifyPkg := &model.CertifyPkg{
+					Packages:      []*model.Package{&pkg, &depPkg},
+					Justification: certifyPkgEdge.Props[justification].(string),
+					Origin:        certifyPkgEdge.Props[origin].(string),
+					Collector:     certifyPkgEdge.Props[collector].(string),
+				}
+				collectedCertifyPkg = append(collectedCertifyPkg, certifyPkg)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			return collectedCertifyPkg, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.CertifyPkg), nil
 }

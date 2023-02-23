@@ -336,9 +336,9 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			}
 
 			if pkgSpec.Version != nil {
-				matchProperties(&sb, firstMatch, "version", "version", "$pkgVerion")
+				matchProperties(&sb, firstMatch, "version", "version", "$pkgVersion")
 				firstMatch = false
-				queryValues["pkgVerion"] = pkgSpec.Version
+				queryValues["pkgVersion"] = pkgSpec.Version
 			}
 
 			if pkgSpec.Subpath != nil {
