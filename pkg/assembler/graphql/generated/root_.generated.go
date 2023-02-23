@@ -1266,7 +1266,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPkgSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
 		ec.unmarshalInputScorecardCheckSpec,
-		ec.unmarshalInputSourceQualifierInput,
 		ec.unmarshalInputSourceSpec,
 	)
 	first := true
@@ -2415,8 +2414,8 @@ The ` + "`" + `type` + "`" + ` field matches the pURL types but we might also us
 cases where the pURL representation is not complete or when we have custom
 rules.
 
-This node is a singleton: backends guarantee that there is exactly one node with
-the same ` + "`" + `type` + "`" + ` value.
+This node is a singleton: backends guarantee that there is exactly one node
+with the same ` + "`" + `type` + "`" + ` value.
 
 Also note that this is named ` + "`" + `Package` + "`" + `, not ` + "`" + `PackageType` + "`" + `. This is only to make
 queries more readable.
@@ -2596,17 +2595,17 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the source trie/tree. This tree is a derivative of
-# the pURL specification where it has a type, namespace, name and finally a qualifier that
-# contain the tag or commit. 
+# Defines a GraphQL schema for the source trie/tree. This tree is a derivative
+# of the pURL specification where it has a type, namespace, name and finally a
+# qualifier that contain the tag or commit.
 
 """
 Source represents a source.
 
 This can be the version control system that is being used.
 
-This node is a singleton: backends guarantee that there is exactly one node with
-the same ` + "`" + `type` + "`" + ` value.
+This node is a singleton: backends guarantee that there is exactly one node
+with the same ` + "`" + `type` + "`" + ` value.
 
 Also note that this is named ` + "`" + `Source` + "`" + `, not ` + "`" + `SourceType` + "`" + `. This is only to make
 queries more readable.
@@ -2619,10 +2618,9 @@ type Source {
 """
 SourceNamespace is a namespace for sources.
 
-This can be represented as the location of the repo (such as github/gitlab/bitbucket)
+This is the location of the repository (such as github/gitlab/bitbucket).
 
-Namespaces are optional and type specific. Because they are optional, we use
-empty string to denote missing namespaces.
+The ` + "`" + `namespace` + "`" + ` field is mandatory.
 """
 type SourceNamespace {
   namespace: String!
@@ -2632,9 +2630,10 @@ type SourceNamespace {
 """
 SourceName is a url of the repository and its tag or commit.
 
-SourceName is mandatory. Either a tag or commit needs to be specified.
+The ` + "`" + `name` + "`" + ` field is mandatory. The ` + "`" + `tag` + "`" + ` and ` + "`" + `commit` + "`" + ` fields are optional, but
+it is an error to specify both.
 
-This is the first node in the trie that can be referred to by other parts of
+This is the only source trie node that can be referenced by other parts of
 GUAC.
 """
 type SourceName {
@@ -2646,20 +2645,17 @@ type SourceName {
 """
 SourceSpec allows filtering the list of sources to return.
 
-Empty string at a field means matching with the empty string.
+Empty string at a field means matching with the empty string. Missing field
+means retrieving all possible matches.
+
+It is an error to specify both tag and commit fields, except it both are set as
+empty string (in which case the returned sources are only those for which there
+is no tag/commit information).
 """
 input SourceSpec {
   type: String
   namespace: String
   name: String
-  qualifier: SourceQualifierInput
-}
-
-"""
-SourceQualifierInput is the same as SourceQualifier, but usable as query
-input.
-"""
-input SourceQualifierInput {
   tag: String
   commit: String
 }
