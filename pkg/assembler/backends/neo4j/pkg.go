@@ -23,7 +23,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
 // pkgNode represents the top level pkg->Type->Namespace->Name->Version
@@ -119,8 +118,9 @@ func (pn *pkgName) IdentifiablePropertyNames() []string {
 }
 
 type pkgVersion struct {
-	version string
-	subpath string
+	version        string
+	subpath        string
+	qualifier_list []string
 }
 
 func (pv *pkgVersion) Type() string {
@@ -131,16 +131,17 @@ func (pv *pkgVersion) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["version"] = pv.version
 	properties["subpath"] = pv.subpath
+	properties["qualifier_list"] = pv.qualifier_list
 	return properties
 }
 
 func (pv *pkgVersion) PropertyNames() []string {
-	fields := []string{"version", "subpath"}
+	fields := []string{"version", "subpath", "qualifier_list"}
 	return fields
 }
 
 func (pv *pkgVersion) IdentifiablePropertyNames() []string {
-	fields := []string{"version", "subpath"}
+	fields := []string{"version", "subpath", "qualifier_list"}
 	return fields
 }
 
@@ -276,31 +277,6 @@ func (e *nameToVersion) IdentifiablePropertyNames() []string {
 	return []string{}
 }
 
-type versionToQualifier struct {
-	version   *pkgVersion
-	qualifier *pkgQualifier
-}
-
-func (e *versionToQualifier) Type() string {
-	return "PkgHasQualifier"
-}
-
-func (e *versionToQualifier) Nodes() (v, u assembler.GuacNode) {
-	return e.version, e.qualifier
-}
-
-func (e *versionToQualifier) Properties() map[string]interface{} {
-	return map[string]interface{}{}
-}
-
-func (e *versionToQualifier) PropertyNames() []string {
-	return []string{}
-}
-
-func (e *versionToQualifier) IdentifiablePropertyNames() []string {
-	return []string{}
-}
-
 func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
 	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
@@ -339,63 +315,63 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			var firstMatch bool = true
 			queryValues := map[string]any{}
 
-			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-				sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)-[:PkgHasQualifier]->(qualifier:PkgQualifier)")
-			} else {
-				sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
-			}
-			if pkgSpec.Type != nil {
+			sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
 
+			if pkgSpec.Type != nil {
 				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
 				firstMatch = false
 				queryValues["pkgType"] = pkgSpec.Type
 			}
-			if pkgSpec.Namespace != nil {
 
+			if pkgSpec.Namespace != nil {
 				matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
 				firstMatch = false
 				queryValues["pkgNamespace"] = pkgSpec.Namespace
 			}
-			if pkgSpec.Name != nil {
 
+			if pkgSpec.Name != nil {
 				matchProperties(&sb, firstMatch, "name", "name", "$pkgName")
 				firstMatch = false
 				queryValues["pkgName"] = pkgSpec.Name
 			}
-			if pkgSpec.Version != nil {
 
+			if pkgSpec.Version != nil {
 				matchProperties(&sb, firstMatch, "version", "version", "$pkgVerion")
 				firstMatch = false
 				queryValues["pkgVerion"] = pkgSpec.Version
 			}
 
 			if pkgSpec.Subpath != nil {
-
 				matchProperties(&sb, firstMatch, "version", "subpath", "$pkgSubpath")
 				firstMatch = false
 				queryValues["pkgSubpath"] = pkgSpec.Subpath
 			}
 
 			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-
 				if len(pkgSpec.Qualifiers) > 0 {
-					for _, qualifier := range pkgSpec.Qualifiers {
-						qualifierKey := removeInvalidCharFromProperty(qualifier.Key)
-						matchProperties(&sb, firstMatch, "qualifier", qualifierKey, "$"+qualifierKey)
-						firstMatch = false
-						queryValues[qualifierKey] = qualifier.Value
+					qualifiersMap := map[string]string{}
+					keys := []string{}
+					for _, kv := range pkgSpec.Qualifiers {
+						key := removeInvalidCharFromProperty(kv.Key)
+						qualifiersMap[key] = *kv.Value
+						keys = append(keys, key)
 					}
+					sort.Strings(keys)
+					qualifiers := []string{}
+					for _, k := range keys {
+						qualifiers = append(qualifiers, k, qualifiersMap[k])
+					}
+					matchProperties(&sb, firstMatch, "version", "qualifier_list", "$qualifier")
+					firstMatch = false
+					queryValues["qualifier"] = qualifiers
 				}
 			} else {
-				matchNotEdge(&sb, firstMatch, "version", "PkgHasQualifier", "PkgQualifier")
+				matchProperties(&sb, firstMatch, "version", "qualifier_list", "$qualifier")
+				firstMatch = false
+				queryValues["qualifier"] = []string{}
 			}
 
-			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-				sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, qualifier")
-
-			} else {
-				sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath")
-			}
+			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, version.qualifier_list")
 
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
@@ -406,24 +382,15 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 			for result.Next() {
 				pkgQualifiers := []*model.PackageQualifier{}
-				if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-					qualifierNode := result.Record().Values[5].(dbtype.Node)
-					if len(pkgSpec.Qualifiers) > 0 {
-						for _, qualifier := range pkgSpec.Qualifiers {
-							qualifierKey := removeInvalidCharFromProperty(qualifier.Key)
-							pkgQualifier := &model.PackageQualifier{
-								Key:   qualifierKey,
-								Value: qualifierNode.Props[qualifierKey].(string),
+				if result.Record().Values[5] != nil {
+					qualifierList := result.Record().Values[5].([]interface{})
+					for i := range qualifierList {
+						if i%2 == 0 {
+							qualifier := &model.PackageQualifier{
+								Key:   qualifierList[i].(string),
+								Value: qualifierList[i+1].(string),
 							}
-							pkgQualifiers = append(pkgQualifiers, pkgQualifier)
-						}
-					} else {
-						for key, value := range qualifierNode.Props {
-							pkgQualifier := &model.PackageQualifier{
-								Key:   key,
-								Value: value.(string),
-							}
-							pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+							pkgQualifiers = append(pkgQualifiers, qualifier)
 						}
 					}
 				}
