@@ -70,8 +70,7 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				"-[:PkgHasName]->(name:PkgName)" +
 				"-[isDependency:IsDependency]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
 				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, name" +
-				"\nMATCH (name)-[:PkgHasVersion]->(version:PkgVersion)"
+				"\nWITH *, null AS version"
 			sb.WriteString(query)
 
 			firstMatch = true

@@ -41,7 +41,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 			var selectedPkg *model.PkgSpec = nil
 			var dependentPkg *model.PkgSpec = nil
-			if certifyPkgSpec.Packages != nil {
+			if certifyPkgSpec.Packages != nil && len(certifyPkgSpec.Packages) != 0 {
 				if len(certifyPkgSpec.Packages) == 1 {
 					selectedPkg = certifyPkgSpec.Packages[0]
 				} else {
@@ -60,8 +60,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
 				"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
 				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, depName" +
-				"\nMATCH (depName)-[:PkgHasVersion]->(depVersion:PkgVersion)"
+				"\nWITH *, null AS depVersion"
 			sb.WriteString(query)
 
 			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
@@ -74,10 +73,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				"-[:PkgHasName]->(name:PkgName)" +
 				"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
 				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, name, depName" +
-				"\nMATCH (name)-[:PkgHasVersion]->(version:PkgVersion)" +
-				"\nWITH *" +
-				"\nMATCH (depName)-[:PkgHasVersion]->(depVersion:PkgVersion)"
+				"\nWITH *, null AS version, null AS depVersion"
 			sb.WriteString(query)
 
 			firstMatch = true
@@ -106,8 +102,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
 				"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
 				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, name" +
-				"\nMATCH (name)-[:PkgHasVersion]->(version:PkgVersion)"
+				"\nWITH *, null AS version"
 			sb.WriteString(query)
 
 			firstMatch = true

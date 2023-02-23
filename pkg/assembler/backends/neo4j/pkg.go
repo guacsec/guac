@@ -145,38 +145,6 @@ func (pv *pkgVersion) IdentifiablePropertyNames() []string {
 	return fields
 }
 
-type pkgQualifier struct {
-	qualifier map[string]string
-}
-
-func (pq *pkgQualifier) Type() string {
-	return "PkgQualifier"
-}
-
-func (pq *pkgQualifier) Properties() map[string]interface{} {
-	properties := make(map[string]interface{})
-	for k, v := range pq.qualifier {
-		properties[k] = v
-	}
-	return properties
-}
-
-func (pq *pkgQualifier) PropertyNames() []string {
-	fields := []string{}
-	for k := range pq.qualifier {
-		fields = append(fields, k)
-	}
-	return fields
-}
-
-func (pq *pkgQualifier) IdentifiablePropertyNames() []string {
-	fields := []string{}
-	for k := range pq.qualifier {
-		fields = append(fields, k)
-	}
-	return fields
-}
-
 type pkgToType struct {
 	pkg     *pkgNode
 	pkgType *pkgType
@@ -383,16 +351,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			for result.Next() {
 				pkgQualifiers := []*model.PackageQualifier{}
 				if result.Record().Values[5] != nil {
-					qualifierList := result.Record().Values[5].([]interface{})
-					for i := range qualifierList {
-						if i%2 == 0 {
-							qualifier := &model.PackageQualifier{
-								Key:   qualifierList[i].(string),
-								Value: qualifierList[i+1].(string),
-							}
-							pkgQualifiers = append(pkgQualifiers, qualifier)
-						}
-					}
+					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
 				}
 
 				subPathString := result.Record().Values[4].(string)
