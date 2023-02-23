@@ -118,8 +118,8 @@ func (pn *pkgName) IdentifiablePropertyNames() []string {
 }
 
 type pkgVersion struct {
-	version string
-	subpath string
+	version        string
+	subpath        string
 	qualifier_list []string
 }
 
