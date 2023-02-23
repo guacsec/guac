@@ -121,6 +121,7 @@ func (pn *pkgName) IdentifiablePropertyNames() []string {
 type pkgVersion struct {
 	version string
 	subpath string
+	qualifier_list []string
 }
 
 func (pv *pkgVersion) Type() string {
@@ -131,16 +132,17 @@ func (pv *pkgVersion) Properties() map[string]interface{} {
 	properties := make(map[string]interface{})
 	properties["version"] = pv.version
 	properties["subpath"] = pv.subpath
+	properties["qualifier_list"] = pv.qualifier_list
 	return properties
 }
 
 func (pv *pkgVersion) PropertyNames() []string {
-	fields := []string{"version", "subpath"}
+	fields := []string{"version", "subpath", "qualifier_list"}
 	return fields
 }
 
 func (pv *pkgVersion) IdentifiablePropertyNames() []string {
-	fields := []string{"version", "subpath"}
+	fields := []string{"version", "subpath", "qualifier_list"}
 	return fields
 }
 
@@ -273,31 +275,6 @@ func (e *nameToVersion) PropertyNames() []string {
 }
 
 func (e *nameToVersion) IdentifiablePropertyNames() []string {
-	return []string{}
-}
-
-type versionToQualifier struct {
-	version   *pkgVersion
-	qualifier *pkgQualifier
-}
-
-func (e *versionToQualifier) Type() string {
-	return "PkgHasQualifier"
-}
-
-func (e *versionToQualifier) Nodes() (v, u assembler.GuacNode) {
-	return e.version, e.qualifier
-}
-
-func (e *versionToQualifier) Properties() map[string]interface{} {
-	return map[string]interface{}{}
-}
-
-func (e *versionToQualifier) PropertyNames() []string {
-	return []string{}
-}
-
-func (e *versionToQualifier) IdentifiablePropertyNames() []string {
 	return []string{}
 }
 

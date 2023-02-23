@@ -16,6 +16,7 @@
 package neo4jBackend
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -358,6 +359,22 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 	collectedNamespace := &pkgNamespace{namespace: namespace}
 	collectedName := &pkgName{name: name}
 	collectedVersion := &pkgVersion{version: version, subpath: subpath}
+	if len(qualifiers) > 0 {
+		qualifiersMap := map[string]string{}
+		keys := []string{}
+		for _, kv := range qualifiers {
+			pair := strings.Split(kv, "=")
+			qualifiersMap[pair[0]] = pair[1]
+			keys = append(keys, pair[0])
+		}
+		sort.Strings(keys)
+		qualifiers := []string{}
+		for _, k := range keys {
+			qualifiers = append(qualifiers, k, qualifiersMap[k])
+		}
+
+		collectedVersion.qualifier_list = qualifiers
+	}
 
 	pkgToTypeEdge := &pkgToType{collectedPkg, collectedType}
 	typeToNamespaceEdge := &typeToNamespace{collectedType, collectedNamespace}
@@ -367,16 +384,7 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 		Nodes: []assembler.GuacNode{collectedPkg, collectedType, collectedNamespace, collectedName, collectedVersion},
 		Edges: []assembler.GuacEdge{pkgToTypeEdge, typeToNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
 	}
-	if len(qualifiers) > 0 {
-		collectedQualifier := &pkgQualifier{qualifier: map[string]string{}}
-		for _, kv := range qualifiers {
-			pair := strings.Split(kv, "=")
-			collectedQualifier.qualifier[pair[0]] = pair[1]
-		}
-		versionToQualifierEdge := &versionToQualifier{collectedVersion, collectedQualifier}
-		assemblerinput.Nodes = append(assemblerinput.Nodes, collectedQualifier)
-		assemblerinput.Edges = append(assemblerinput.Edges, versionToQualifierEdge)
-	}
+
 	err := assembler.StoreGraph(assemblerinput, c.driver)
 	if err != nil {
 		return err
