@@ -38,7 +38,7 @@ generated_up_to_date: generate
 
 # Run all the linters
 .PHONY: lint
-lint:
+lint: check-golangci-lint-tool-check
 	golangci-lint run ./...
 
 # Run all the tests and code checks
@@ -54,7 +54,7 @@ build: generate
 	go build -ldflags ${LDFLAGS} -o bin/pubsub_test cmd/pubsub_test/main.go
 
 .PHONY: proto
-proto: pkg/collectsub/collectsub/collectsub.proto
+proto: pkg/collectsub/collectsub/collectsub.proto check-protoc-tool-check
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		$^
@@ -84,7 +84,7 @@ generate:
 	go generate ./...
 
 .PHONY: container
-container:
+container: check-docker-tool-check
 	docker build -f dockerfiles/Dockerfile.guac-cont -t local-organic-guac .
 	docker build -f dockerfiles/Dockerfile.healthcheck -t local-healthcheck .
 
@@ -103,3 +103,22 @@ start-service:
 .PHONY: stop-service
 stop-service:
 	docker compose down
+
+# Check that docker is installed.
+.PHONY: check-docker-tool-check
+check-docker-tool-check:
+	@docker --version > /dev/null
+
+# Check that protoc is installed.
+.PHONY: checkk-protoc-tool-check
+check-protoc-tool-check:
+	@protoc --version > /dev/null
+
+# Check that golangci-lint is installed.
+.PHONY: check-golangci-lint-tool-check
+check-golangci-lint-tool-check:
+	@golangci-lint --version > /dev/null
+
+# Check that all the tools are installed.
+.PHONY: check-tools
+check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check
