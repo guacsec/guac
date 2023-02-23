@@ -29,8 +29,8 @@ The `type` field matches the pURL types but we might also use `"guac"` for the
 cases where the pURL representation is not complete or when we have custom
 rules.
 
-This node is a singleton: backends guarantee that there is exactly one node with
-the same `type` value.
+This node is a singleton: backends guarantee that there is exactly one node
+with the same `type` value.
 
 Also note that this is named `Package`, not `PackageType`. This is only to make
 queries more readable.
