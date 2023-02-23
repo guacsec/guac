@@ -17,10 +17,14 @@ fragment allPkgTree on Package {
 }
 
 query PkgQ1 {
-  artifacts {
-    name
-    sourceInfo
-    collectorInfo
+  packages(pkgSpec: {}) {
+    type
+    namespaces {
+      namespace
+      names {
+        name
+      }
+    }
   }
 }
 
