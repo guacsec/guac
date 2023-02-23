@@ -102,22 +102,6 @@ func matchProperties(sb *strings.Builder, firstMatch bool, label, property strin
 	sb.WriteString(resolver)
 }
 
-func matchNotEdge(sb *strings.Builder, firstMatch bool, firstNodeLabel string, edgeLabel string, secondNodeLabel string) {
-	// -[:PkgHasQualifier]->(qualifier:PkgQualifier)
-	if firstMatch {
-		sb.WriteString(" WHERE ")
-	} else {
-		sb.WriteString(" AND ")
-	}
-	sb.WriteString("NOT (")
-	sb.WriteString(firstNodeLabel)
-	sb.WriteString(")-[:")
-	sb.WriteString(edgeLabel)
-	sb.WriteString("]->(:")
-	sb.WriteString(secondNodeLabel)
-	sb.WriteString(")")
-}
-
 // getPreloads get the specific graphQL query fields that are requested.
 // graphql.CollectAllFields only provides the top level fields and none of the nested fields below it.
 // getPreloads recursively goes through the fields and retrieves each nested field below it.

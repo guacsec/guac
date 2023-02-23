@@ -23,7 +23,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
 // pkgNode represents the top level pkg->Type->Namespace->Name->Version
@@ -323,34 +322,32 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 				firstMatch = false
 				queryValues["pkgType"] = pkgSpec.Type
 			}
-			if pkgSpec.Namespace != nil {
 
+			if pkgSpec.Namespace != nil {
 				matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
 				firstMatch = false
 				queryValues["pkgNamespace"] = pkgSpec.Namespace
 			}
-			if pkgSpec.Name != nil {
 
+			if pkgSpec.Name != nil {
 				matchProperties(&sb, firstMatch, "name", "name", "$pkgName")
 				firstMatch = false
 				queryValues["pkgName"] = pkgSpec.Name
 			}
-			if pkgSpec.Version != nil {
 
+			if pkgSpec.Version != nil {
 				matchProperties(&sb, firstMatch, "version", "version", "$pkgVerion")
 				firstMatch = false
 				queryValues["pkgVerion"] = pkgSpec.Version
 			}
 
 			if pkgSpec.Subpath != nil {
-
 				matchProperties(&sb, firstMatch, "version", "subpath", "$pkgSubpath")
 				firstMatch = false
 				queryValues["pkgSubpath"] = pkgSpec.Subpath
 			}
 
 			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-
 				if len(pkgSpec.Qualifiers) > 0 {
 					for _, qualifier := range pkgSpec.Qualifiers {
 						qualifierKey := removeInvalidCharFromProperty(qualifier.Key)
