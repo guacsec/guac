@@ -349,12 +349,21 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
 				if len(pkgSpec.Qualifiers) > 0 {
-					for _, qualifier := range pkgSpec.Qualifiers {
-						qualifierKey := removeInvalidCharFromProperty(qualifier.Key)
-						matchProperties(&sb, firstMatch, "qualifier", qualifierKey, "$"+qualifierKey)
-						firstMatch = false
-						queryValues[qualifierKey] = qualifier.Value
+					qualifiersMap := map[string]string{}
+					keys := []string{}
+					for _, kv := range pkgSpec.Qualifiers {
+						key := removeInvalidCharFromProperty(kv.Key)
+						qualifiersMap[key] = *kv.Value
+						keys = append(keys, key)
 					}
+					sort.Strings(keys)
+					qualifiers := []string{}
+					for _, k := range keys {
+						qualifiers = append(qualifiers, k, qualifiersMap[k])
+					}
+					matchProperties(&sb, firstMatch, "version", "qualifier_list", "$qualifier")
+					firstMatch = false
+					queryValues["qualifier"] = qualifiers
 				}
 			} else {
 				matchProperties(&sb, firstMatch, "version", "qualifier_list", "[]")
