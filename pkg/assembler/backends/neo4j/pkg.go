@@ -316,13 +316,9 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			var firstMatch bool = true
 			queryValues := map[string]any{}
 
-			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-				sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)-[:PkgHasQualifier]->(qualifier:PkgQualifier)")
-			} else {
-				sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
-			}
-			if pkgSpec.Type != nil {
+			sb.WriteString("MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
 
+			if pkgSpec.Type != nil {
 				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
 				firstMatch = false
 				queryValues["pkgType"] = pkgSpec.Type
@@ -364,15 +360,10 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 					}
 				}
 			} else {
-				matchNotEdge(&sb, firstMatch, "version", "PkgHasQualifier", "PkgQualifier")
+				matchProperties(&sb, firstMatch, "version", "qualifier_list", "[]")
 			}
 
-			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-				sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, qualifier")
-
-			} else {
-				sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath")
-			}
+			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, version.qualifier_list")
 
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
@@ -383,24 +374,15 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 			for result.Next() {
 				pkgQualifiers := []*model.PackageQualifier{}
-				if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
-					qualifierNode := result.Record().Values[5].(dbtype.Node)
-					if len(pkgSpec.Qualifiers) > 0 {
-						for _, qualifier := range pkgSpec.Qualifiers {
-							qualifierKey := removeInvalidCharFromProperty(qualifier.Key)
-							pkgQualifier := &model.PackageQualifier{
-								Key:   qualifierKey,
-								Value: qualifierNode.Props[qualifierKey].(string),
+				if result.Record().Values[5] != nil {
+					qualifierList := result.Record().Values[5].([]interface{})
+					for i := range qualifierList {
+						if i%2 == 0 {
+							qualifier := &model.PackageQualifier{
+								Key:   qualifierList[i].(string),
+								Value: qualifierList[i+1].(string),
 							}
-							pkgQualifiers = append(pkgQualifiers, pkgQualifier)
-						}
-					} else {
-						for key, value := range qualifierNode.Props {
-							pkgQualifier := &model.PackageQualifier{
-								Key:   key,
-								Value: value.(string),
-							}
-							pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+							pkgQualifiers = append(pkgQualifiers, qualifier)
 						}
 					}
 				}
