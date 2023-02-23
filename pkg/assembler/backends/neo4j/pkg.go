@@ -368,7 +368,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			} else {
 				matchProperties(&sb, firstMatch, "version", "qualifier_list", "$qualifier")
 				firstMatch = false
-				queryValues["qualifier"] = []
+				queryValues["qualifier"] = []string{}
 			}
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, version.qualifier_list")
