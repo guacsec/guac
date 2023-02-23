@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -115,7 +114,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
-			fmt.Println(sb.String())
+
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -124,25 +123,32 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 			collectedCertifyPkg := []*model.CertifyPkg{}
 
 			for result.Next() {
+
 				pkgQualifiers := []*model.PackageQualifier{}
 				if result.Record().Values[5] != nil {
-					qualifierList := result.Record().Values[5].([]interface{})
-					for i := range qualifierList {
-						if i%2 == 0 {
-							qualifier := &model.PackageQualifier{
-								Key:   qualifierList[i].(string),
-								Value: qualifierList[i+1].(string),
-							}
-							pkgQualifiers = append(pkgQualifiers, qualifier)
-						}
-					}
+					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
 				}
 
-				subPathString := result.Record().Values[4].(string)
-				versionString := result.Record().Values[3].(string)
-				nameString := result.Record().Values[2].(string)
-				namespaceString := result.Record().Values[1].(string)
-				typeString := result.Record().Values[0].(string)
+				subPathString := ""
+				if result.Record().Values[4] != nil {
+					subPathString = result.Record().Values[4].(string)
+				}
+				versionString := ""
+				if result.Record().Values[3] != nil {
+					versionString = result.Record().Values[3].(string)
+				}
+				nameString := ""
+				if result.Record().Values[2] != nil {
+					nameString = result.Record().Values[2].(string)
+				}
+				namespaceString := ""
+				if result.Record().Values[1] != nil {
+					namespaceString = result.Record().Values[1].(string)
+				}
+				typeString := ""
+				if result.Record().Values[0] != nil {
+					typeString = result.Record().Values[0].(string)
+				}
 
 				version := &model.PackageVersion{
 					Version:    versionString,
@@ -166,23 +172,29 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 				pkgQualifiers = []*model.PackageQualifier{}
 				if result.Record().Values[12] != nil {
-					qualifierList := result.Record().Values[12].([]interface{})
-					for i := range qualifierList {
-						if i%2 == 0 {
-							qualifier := &model.PackageQualifier{
-								Key:   qualifierList[i].(string),
-								Value: qualifierList[i+1].(string),
-							}
-							pkgQualifiers = append(pkgQualifiers, qualifier)
-						}
-					}
+					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[12].([]interface{}))
 				}
 
-				subPathString = result.Record().Values[11].(string)
-				versionString = result.Record().Values[10].(string)
-				nameString = result.Record().Values[9].(string)
-				namespaceString = result.Record().Values[8].(string)
-				typeString = result.Record().Values[7].(string)
+				subPathString = ""
+				if result.Record().Values[11] != nil {
+					subPathString = result.Record().Values[11].(string)
+				}
+				versionString = ""
+				if result.Record().Values[10] != nil {
+					versionString = result.Record().Values[10].(string)
+				}
+				nameString = ""
+				if result.Record().Values[9] != nil {
+					nameString = result.Record().Values[9].(string)
+				}
+				namespaceString = ""
+				if result.Record().Values[8] != nil {
+					namespaceString = result.Record().Values[8].(string)
+				}
+				typeString = ""
+				if result.Record().Values[7] != nil {
+					typeString = result.Record().Values[7].(string)
+				}
 
 				version = &model.PackageVersion{
 					Version:    versionString,
@@ -204,7 +216,12 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 					Namespaces: []*model.PackageNamespace{namespace},
 				}
 
-				certifyPkgEdge := result.Record().Values[6].(dbtype.Relationship)
+				certifyPkgEdge := dbtype.Relationship{}
+				if result.Record().Values[6] != nil {
+					certifyPkgEdge = result.Record().Values[6].(dbtype.Relationship)
+				} else {
+					return nil, gqlerror.Errorf("certifyPkgEdge not found in neo4j")
+				}
 
 				certifyPkg := &model.CertifyPkg{
 					Packages:      []*model.Package{&pkg, &depPkg},

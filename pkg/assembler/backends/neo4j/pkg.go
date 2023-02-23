@@ -724,19 +724,9 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 				return nil, err
 			}
 
-			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
 			qualifiers := []*model.PackageQualifier{}
 			if record.Values[5] != nil {
-				qualifierList := record.Values[5].([]interface{})
-				for i := range qualifierList {
-					if i%2 == 0 {
-						qualifier := &model.PackageQualifier{
-							Key:   qualifierList[i].(string),
-							Value: qualifierList[i+1].(string),
-						}
-						qualifiers = append(qualifiers, qualifier)
-					}
-				}
+				qualifiers = getCollectedPackageQualifiers(record.Values[5].([]interface{}))
 			}
 			subPathStr := ""
 			if record.Values[4] != nil {
@@ -780,4 +770,18 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 	}
 
 	return result.(*model.Package), nil
+}
+
+func getCollectedPackageQualifiers(qualifierList []interface{}) []*model.PackageQualifier {
+	qualifiers := []*model.PackageQualifier{}
+	for i := range qualifierList {
+		if i%2 == 0 {
+			qualifier := &model.PackageQualifier{
+				Key:   qualifierList[i].(string),
+				Value: qualifierList[i+1].(string),
+			}
+			qualifiers = append(qualifiers, qualifier)
+		}
+	}
+	return qualifiers
 }

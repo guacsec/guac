@@ -17,13 +17,13 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const (
@@ -79,7 +79,6 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 			sb.WriteString(returnValue)
 
-			fmt.Println(sb.String())
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -88,25 +87,32 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 			collectedIsDependency := []*model.IsDependency{}
 
 			for result.Next() {
+
 				pkgQualifiers := []*model.PackageQualifier{}
 				if result.Record().Values[5] != nil {
-					qualifierList := result.Record().Values[5].([]interface{})
-					for i := range qualifierList {
-						if i%2 == 0 {
-							qualifier := &model.PackageQualifier{
-								Key:   qualifierList[i].(string),
-								Value: qualifierList[i+1].(string),
-							}
-							pkgQualifiers = append(pkgQualifiers, qualifier)
-						}
-					}
+					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
 				}
 
-				subPathString := result.Record().Values[4].(string)
-				versionString := result.Record().Values[3].(string)
-				nameString := result.Record().Values[2].(string)
-				namespaceString := result.Record().Values[1].(string)
-				typeString := result.Record().Values[0].(string)
+				subPathString := ""
+				if result.Record().Values[4] != nil {
+					subPathString = result.Record().Values[4].(string)
+				}
+				versionString := ""
+				if result.Record().Values[3] != nil {
+					versionString = result.Record().Values[3].(string)
+				}
+				nameString := ""
+				if result.Record().Values[2] != nil {
+					nameString = result.Record().Values[2].(string)
+				}
+				namespaceString := ""
+				if result.Record().Values[1] != nil {
+					namespaceString = result.Record().Values[1].(string)
+				}
+				typeString := ""
+				if result.Record().Values[0] != nil {
+					typeString = result.Record().Values[0].(string)
+				}
 
 				version := &model.PackageVersion{
 					Version:    versionString,
@@ -128,9 +134,18 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 					Namespaces: []*model.PackageNamespace{namespace},
 				}
 
-				nameString = result.Record().Values[9].(string)
-				namespaceString = result.Record().Values[8].(string)
-				typeString = result.Record().Values[7].(string)
+				nameString = ""
+				if result.Record().Values[9] != nil {
+					nameString = result.Record().Values[9].(string)
+				}
+				namespaceString = ""
+				if result.Record().Values[8] != nil {
+					namespaceString = result.Record().Values[8].(string)
+				}
+				typeString = ""
+				if result.Record().Values[7] != nil {
+					typeString = result.Record().Values[7].(string)
+				}
 
 				name = &model.PackageName{
 					Name:     nameString,
@@ -146,7 +161,12 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 					Namespaces: []*model.PackageNamespace{namespace},
 				}
 
-				isDependencyEdge := result.Record().Values[6].(dbtype.Relationship)
+				isDependencyEdge := dbtype.Relationship{}
+				if result.Record().Values[6] != nil {
+					isDependencyEdge = result.Record().Values[6].(dbtype.Relationship)
+				} else {
+					return nil, gqlerror.Errorf("isDependencyEdge not found in neo4j")
+				}
 
 				isDependency := &model.IsDependency{
 					Package:          &pkg,
