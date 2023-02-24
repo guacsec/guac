@@ -33,43 +33,44 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+
+	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
+		"version.qualifier_list, hasSourceAt, srcType.type, srcNamespace.namespace, srcName.name, srcName.tag, srcName.commit"
+
+	queryValues := map[string]any{}
+	// query with pkgVersion
+	query := "MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
+		"-[hasSourceAt:HasSourceAt]-(srcName:SrcName)<-[:SrcHasName]-(srcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
+		"-(srcType:SrcType)<-[:SrcHasType]-(src:Src)"
+	sb.WriteString(query)
+
+	setPkgSrcMatchValues(&sb, hasSourceAtSpec.Package, hasSourceAtSpec.Source, firstMatch, queryValues)
+	setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
+	sb.WriteString(returnValue)
+
+	if hasSourceAtSpec.Package == nil || hasSourceAtSpec.Package != nil && hasSourceAtSpec.Package.Version == nil && hasSourceAtSpec.Package.Subpath == nil &&
+		len(hasSourceAtSpec.Package.Qualifiers) == 0 && !*hasSourceAtSpec.Package.MatchOnlyEmptyQualifiers {
+
+		sb.WriteString("\nUNION")
+		// query without pkgVersion
+		query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)" +
+			"-[hasSourceAt:HasSourceAt]-(srcName:SrcName)<-[:SrcHasName]-(srcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
+			"-(srcType:SrcType)<-[:SrcHasType]-(src:Src)" +
+			"\nWITH *, null AS version"
+		sb.WriteString(query)
+
+		firstMatch = true
+		setPkgSrcMatchValues(&sb, hasSourceAtSpec.Package, hasSourceAtSpec.Source, firstMatch, queryValues)
+		setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
+		sb.WriteString(returnValue)
+	}
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var firstMatch bool = true
-
-			returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
-				"version.qualifier_list, hasSourceAt, srcType.type, srcNamespace.namespace, srcName.name, srcName.tag, srcName.commit"
-
-			queryValues := map[string]any{}
-			// query with pkgVersion
-			query := "MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-				"-[hasSourceAt:HasSourceAt]-(srcName:SrcName)<-[:SrcHasName]-(srcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
-				"-(srcType:SrcType)<-[:SrcHasType]-(src:Src)"
-			sb.WriteString(query)
-
-			setPkgSrcMatchValues(&sb, hasSourceAtSpec.Package, hasSourceAtSpec.Source, firstMatch, queryValues)
-			setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
-			sb.WriteString(returnValue)
-
-			if hasSourceAtSpec.Package == nil || hasSourceAtSpec.Package != nil && hasSourceAtSpec.Package.Version == nil && hasSourceAtSpec.Package.Subpath == nil &&
-				len(hasSourceAtSpec.Package.Qualifiers) == 0 && !*hasSourceAtSpec.Package.MatchOnlyEmptyQualifiers {
-
-				sb.WriteString("\nUNION")
-				// query without pkgVersion
-				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-					"-[:PkgHasName]->(name:PkgName)" +
-					"-[hasSourceAt:HasSourceAt]-(srcName:SrcName)<-[:SrcHasName]-(srcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
-					"-(srcType:SrcType)<-[:SrcHasType]-(src:Src)" +
-					"\nWITH *, null AS version"
-				sb.WriteString(query)
-
-				firstMatch = true
-				setPkgSrcMatchValues(&sb, hasSourceAtSpec.Package, hasSourceAtSpec.Source, firstMatch, queryValues)
-				setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
-				sb.WriteString(returnValue)
-			}
 
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
