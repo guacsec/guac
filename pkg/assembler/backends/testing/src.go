@@ -42,17 +42,19 @@ func registerAllSources(client *demoClient) {
 
 // Ingest Source
 
-func (c *demoClient) registerSource(srcType, namespace, name, qualifier string) {
+func (c *demoClient) registerSource(srcType, namespace, name, qualifier string) *model.Source {
 	for i, s := range c.sources {
 		if s.Type == srcType {
 			c.sources[i] = registerSourceNamespace(s, namespace, name, qualifier)
-			return
+			return c.sources[i]
 		}
 	}
 
 	newSrc := &model.Source{Type: srcType}
 	newSrc = registerSourceNamespace(newSrc, namespace, name, qualifier)
 	c.sources = append(c.sources, newSrc)
+
+	return newSrc
 }
 
 func registerSourceNamespace(s *model.Source, namespace, name, qualifier string) *model.Source {
@@ -193,4 +195,30 @@ func filterSourceTagCommit(n *model.SourceName, sourceSpec *model.SourceSpec) (*
 	}
 
 	return n, nil
+}
+
+func (c *demoClient) IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error) {
+	sourceType := source.Type
+	namespace := source.Namespace
+	name := source.Name
+
+	// TODO(mihaimaruseac): Separate in two fields, no need for `tag=`/`commit=`
+	tagOrCommit := ""
+	if source.Commit != nil && source.Tag != nil {
+		if *source.Commit != "" && *source.Tag != "" {
+			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
+		} else if *source.Commit != "" {
+			tagOrCommit = "commit=" + *source.Commit
+		} else if *source.Tag != "" {
+			tagOrCommit = "tag=" + *source.Tag
+		}
+	} else if source.Commit != nil {
+		tagOrCommit = "commit=" + *source.Commit
+	} else if source.Tag != nil {
+		tagOrCommit = "tag=" + *source.Tag
+	}
+
+	newSrc := c.registerSource(sourceType, namespace, name, tagOrCommit)
+
+	return newSrc, nil
 }

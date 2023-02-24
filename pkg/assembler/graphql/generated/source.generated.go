@@ -348,6 +348,73 @@ func (ec *executionContext) fieldContext_SourceNamespace_names(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, obj interface{}) (model.SourceInputSpec, error) {
+	var it model.SourceInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["tag"]; !present {
+		asMap["tag"] = ""
+	}
+	if _, present := asMap["commit"]; !present {
+		asMap["commit"] = ""
+	}
+
+	fieldsInOrder := [...]string{"type", "namespace", "name", "tag", "commit"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("namespace"))
+			it.Namespace, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tag":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
+			it.Tag, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "commit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commit"))
+			it.Commit, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj interface{}) (model.SourceSpec, error) {
 	var it model.SourceSpec
 	asMap := map[string]interface{}{}
@@ -526,6 +593,10 @@ func (ec *executionContext) _SourceNamespace(ctx context.Context, sel ast.Select
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNSource2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSource(ctx context.Context, sel ast.SelectionSet, v model.Source) graphql.Marshaler {
+	return ec._Source(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNSource2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Source) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -686,6 +757,14 @@ func (ec *executionContext) marshalNSourceNamespace2ᚖgithubᚗcomᚋguacsecᚋ
 		return graphql.Null
 	}
 	return ec._SourceNamespace(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx context.Context, v interface{}) (*model.SourceInputSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputSourceInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOSourceSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx context.Context, v interface{}) ([]*model.SourceSpec, error) {

@@ -173,6 +173,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		IngestPackage func(childComplexity int, pkg *model.PkgInputSpec) int
+		IngestSource  func(childComplexity int, source *model.SourceInputSpec) int
 	}
 
 	OSV struct {
@@ -838,6 +839,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(*model.PkgInputSpec)), true
 
+	case "Mutation.ingestSource":
+		if e.complexity.Mutation.IngestSource == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestSource_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(*model.SourceInputSpec)), true
+
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
 			break
@@ -1266,6 +1279,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPkgSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
 		ec.unmarshalInputScorecardCheckSpec,
+		ec.unmarshalInputSourceInputSpec,
 		ec.unmarshalInputSourceSpec,
 	)
 	first := true
@@ -2541,7 +2555,7 @@ input PackageQualifierSpec {
 """
 PkgInputSpec specifies a package for a mutation.
 
-This is different than PkgSpec because we want to encode mandatatory fields:
+This is different than PkgSpec because we want to encode mandatory fields:
 ` + "`" + `type` + "`" + ` and ` + "`" + `name` + "`" + `. All optional fields are given empty default values.
 """
 input PkgInputSpec {
@@ -2648,9 +2662,9 @@ SourceSpec allows filtering the list of sources to return.
 Empty string at a field means matching with the empty string. Missing field
 means retrieving all possible matches.
 
-It is an error to specify both tag and commit fields, except it both are set as
-empty string (in which case the returned sources are only those for which there
-is no tag/commit information).
+It is an error to specify both ` + "`" + `tag` + "`" + ` and ` + "`" + `commit` + "`" + ` fields, except it both are
+set as empty string (in which case the returned sources are only those for
+which there is no tag/commit information).
 """
 input SourceSpec {
   type: String
@@ -2660,9 +2674,32 @@ input SourceSpec {
   commit: String
 }
 
+"""
+SourceInputSpec specifies a source for a mutation.
+
+This is different than SourceSpec because we want to encode that all fields
+except tag and commit are mandatory fields. All optional fields are given
+empty default values.
+
+It is an error to set both ` + "`" + `tag` + "`" + ` and ` + "`" + `commit` + "`" + ` fields to values different than
+the default.
+"""
+input SourceInputSpec {
+  type: String!
+  namespace: String!
+  name: String!
+  tag: String = ""
+  commit: String = ""
+}
+
 extend type Query {
   "Returns all sources"
   sources(sourceSpec: SourceSpec): [Source!]!
+}
+
+extend type Mutation {
+  "Ingest a new source. Returns the ingested source trie"
+  ingestSource(source: SourceInputSpec): Source!
 }
 `, BuiltIn: false},
 }

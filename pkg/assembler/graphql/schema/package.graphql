@@ -156,7 +156,7 @@ input PackageQualifierSpec {
 """
 PkgInputSpec specifies a package for a mutation.
 
-This is different than PkgSpec because we want to encode mandatatory fields:
+This is different than PkgSpec because we want to encode mandatory fields:
 `type` and `name`. All optional fields are given empty default values.
 """
 input PkgInputSpec {

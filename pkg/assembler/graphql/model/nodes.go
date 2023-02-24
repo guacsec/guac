@@ -618,7 +618,7 @@ type PackageVersion struct {
 
 // PkgInputSpec specifies a package for a mutation.
 //
-// This is different than PkgSpec because we want to encode mandatatory fields:
+// This is different than PkgSpec because we want to encode mandatory fields:
 // `type` and `name`. All optional fields are given empty default values.
 type PkgInputSpec struct {
 	Type       string                       `json:"type"`
@@ -750,6 +750,22 @@ func (Source) IsPkgSrcArtObject() {}
 
 func (Source) IsPkgSrcObject() {}
 
+// SourceInputSpec specifies a source for a mutation.
+//
+// This is different than SourceSpec because we want to encode that all fields
+// except tag and commit are mandatory fields. All optional fields are given
+// empty default values.
+//
+// It is an error to set both `tag` and `commit` fields to values different than
+// the default.
+type SourceInputSpec struct {
+	Type      string  `json:"type"`
+	Namespace string  `json:"namespace"`
+	Name      string  `json:"name"`
+	Tag       *string `json:"tag"`
+	Commit    *string `json:"commit"`
+}
+
 // SourceName is a url of the repository and its tag or commit.
 //
 // The `name` field is mandatory. The `tag` and `commit` fields are optional, but
@@ -778,9 +794,9 @@ type SourceNamespace struct {
 // Empty string at a field means matching with the empty string. Missing field
 // means retrieving all possible matches.
 //
-// It is an error to specify both tag and commit fields, except it both are set as
-// empty string (in which case the returned sources are only those for which there
-// is no tag/commit information).
+// It is an error to specify both `tag` and `commit` fields, except it both are
+// set as empty string (in which case the returned sources are only those for
+// which there is no tag/commit information).
 type SourceSpec struct {
 	Type      *string `json:"type"`
 	Namespace *string `json:"namespace"`
