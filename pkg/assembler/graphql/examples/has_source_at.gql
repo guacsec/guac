@@ -46,7 +46,7 @@ query Q2 {
 }
 
 query Q4 {
-  HasSourceAt(hasSourceAtSpec: {package: {name: "django"}}) {
+  HasSourceAt(hasSourceAtSpec: {package: {name: "openssl", version: "3.0.3"}})  {
     ...allHasSourceAt
   }
 }
