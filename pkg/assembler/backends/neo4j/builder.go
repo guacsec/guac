@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -91,6 +90,35 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 	return result.([]*model.Builder), nil
 }
 
-func (r *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
-	panic(fmt.Errorf("not implemented: IngestBuilder - ingestBuilder"))
+func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["uri"] = builder.URI
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (b:Builder{uri:$uri}) RETURN b.uri`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			uri := record.Values[0].(string)
+			builder := model.Builder{URI: uri}
+
+			return &builder, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Builder), nil
 }
