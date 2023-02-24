@@ -127,8 +127,8 @@ RETURN a.algorithm, a.digest`
 			digest := record.Values[1].(string)
 			algorithm := record.Values[0].(string)
 			artifact := model.Artifact{
-				Algorithm:    algorithm,
-				Digest: digest,
+				Algorithm: algorithm,
+				Digest:    digest,
 			}
 
 			return &artifact, nil
