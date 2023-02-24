@@ -29,8 +29,11 @@ type PkgSrcObject interface {
 
 // Artifact represents the artifact and contains a digest field
 //
-// algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
-// digest is mandatory in the form checksum.Value.
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
 type Artifact struct {
 	Algorithm string `json:"algorithm"`
 	Digest    string `json:"digest"`
@@ -41,6 +44,8 @@ func (Artifact) IsPkgSrcArtObject() {}
 func (Artifact) IsPkgArtObject() {}
 
 // ArtifactSpec allows filtering the list of artifacts to return.
+//
+// Both arguments will be canonicalized to lowercase.
 type ArtifactSpec struct {
 	Algorithm *string `json:"algorithm"`
 	Digest    *string `json:"digest"`

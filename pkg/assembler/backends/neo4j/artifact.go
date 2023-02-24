@@ -21,7 +21,6 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // ArtifactNode is a node that represents an artifact
@@ -55,30 +54,26 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	if artifactSpec.Algorithm == nil && artifactSpec.Digest == nil {
-		return nil, gqlerror.Errorf("must specify both algorithm and digest for artifact")
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (n:Artifact)")
+
+	if artifactSpec.Algorithm != nil {
+		matchProperties(&sb, firstMatch, "n", "algorithm", "$artifactAlgo")
+		firstMatch = false
+		queryValues["artifactAlgo"] = strings.ToLower(*artifactSpec.Algorithm)
 	}
+	if artifactSpec.Digest != nil {
+		matchProperties(&sb, firstMatch, "n", "digest", "$artifactDigest")
+		queryValues["artifactDigest"] = strings.ToLower(*artifactSpec.Digest)
+	}
+
+	sb.WriteString(" RETURN n.algorithm, n.digest")
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-
-			var sb strings.Builder
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Artifact)")
-
-			if artifactSpec.Algorithm != nil {
-				matchProperties(&sb, firstMatch, "n", "algorithm", "$artifactAlgo")
-				firstMatch = false
-				queryValues["artifactAlgo"] = artifactSpec.Algorithm
-			}
-			if artifactSpec.Digest != nil {
-				matchProperties(&sb, firstMatch, "n", "digest", "$artifactDigest")
-				queryValues["artifactDigest"] = artifactSpec.Digest
-			}
-
-			sb.WriteString(" RETURN n.algorithm, n.digest")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
