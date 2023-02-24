@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -47,6 +46,8 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 					Type:      isDependencySpec.DependentPackage.Type,
 					Namespace: isDependencySpec.DependentPackage.Namespace,
 					Name:      isDependencySpec.DependentPackage.Name,
+					// remove version, subpath and set qualifiers to empty list
+					Qualifiers: []*model.PackageQualifierSpec{},
 					// setting to default value of false as package version is not checked for dependent packages
 					MatchOnlyEmptyQualifiers: &depMatchOnlyEmptyQualifiers,
 				}
@@ -86,7 +87,7 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 				sb.WriteString(returnValue)
 			}
-			fmt.Println(sb.String())
+
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
