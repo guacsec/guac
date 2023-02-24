@@ -192,6 +192,7 @@ func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDepend
 	}
 }
 
+// TODO: Refactor to remove reused code by multiple verbs
 func setMatchValues(sb *strings.Builder, pkg *model.PkgSpec, depPkg *model.PkgSpec, firstMatch bool, queryValues map[string]any) {
 	if pkg != nil {
 		if pkg.Type != nil {

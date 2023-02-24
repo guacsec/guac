@@ -192,6 +192,7 @@ func setHasSourceAtValues(sb *strings.Builder, hasSourceAtSpec *model.HasSourceA
 	}
 }
 
+// TODO (parth): Refactor to remove reused code by multiple verbs
 func setPkgSrcMatchValues(sb *strings.Builder, pkg *model.PkgSpec, src *model.SourceSpec, firstMatch bool, queryValues map[string]any) {
 	if pkg != nil {
 		if pkg.Type != nil {
