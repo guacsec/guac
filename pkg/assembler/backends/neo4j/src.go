@@ -458,11 +458,10 @@ func (c *neo4jClient) IngestSource(ctx context.Context, source *model.SourceInpu
 		}
 	}
 
-	//values["commit"] = ""
 	if source.Commit != nil {
 		values["commit"] = *source.Commit
 	}
-	//values["tag"] = ""
+
 	if source.Tag != nil {
 		values["tag"] = *source.Tag
 	}
