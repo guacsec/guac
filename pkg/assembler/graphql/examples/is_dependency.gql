@@ -58,25 +58,13 @@ query Q3 {
 }
 
 query Q4 {
-  IsDependency(isDependencySpec: {package: {name: "dpkg"}}) {
+  IsDependency(isDependencySpec: {package: {name: "openssl", version: "3.0.3"}}) {
     ...allIsDependencyTree
   }
 }
 
 query Q5 {
   IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}}) {
-    ...allIsDependencyTree
-  }
-}
-
-query Q6 {
-  IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}, versionRange: "3.0.3"}) {
-    ...allIsDependencyTree
-  }
-}
-
-query Q7 {
-  IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}, versionRange: "3.0.5"}) {
     ...allIsDependencyTree
   }
 }

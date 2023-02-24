@@ -40,11 +40,16 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 			selectedPkg := isDependencySpec.Package
 			var dependentPkg *model.PkgSpec = nil
+			depMatchOnlyEmptyQualifiers := false
 			if isDependencySpec.DependentPackage != nil {
 				dependentPkg = &model.PkgSpec{
 					Type:      isDependencySpec.DependentPackage.Type,
 					Namespace: isDependencySpec.DependentPackage.Namespace,
 					Name:      isDependencySpec.DependentPackage.Name,
+					// remove version, subpath and set qualifiers to empty list
+					Qualifiers: []*model.PackageQualifierSpec{},
+					// setting to default value of false as package version is not checked for dependent packages
+					MatchOnlyEmptyQualifiers: &depMatchOnlyEmptyQualifiers,
 				}
 			}
 
@@ -64,20 +69,24 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 			sb.WriteString(returnValue)
 
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[isDependency:IsDependency]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
+			if selectedPkg == nil || selectedPkg != nil && selectedPkg.Version == nil && selectedPkg.Subpath == nil &&
+				len(selectedPkg.Qualifiers) == 0 && !*selectedPkg.MatchOnlyEmptyQualifiers {
 
-			firstMatch = true
-			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
-			setIsDependencyValues(&sb, isDependencySpec, firstMatch, queryValues)
+				sb.WriteString("\nUNION")
+				// query without pkgVersion
+				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+					"-[:PkgHasName]->(name:PkgName)" +
+					"-[isDependency:IsDependency]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+					"\nWITH *, null AS version"
+				sb.WriteString(query)
 
-			sb.WriteString(returnValue)
+				firstMatch = true
+				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+				setIsDependencyValues(&sb, isDependencySpec, firstMatch, queryValues)
+
+				sb.WriteString(returnValue)
+			}
 
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
@@ -88,31 +97,12 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 			for result.Next() {
 
-				pkgQualifiers := []*model.PackageQualifier{}
-				if result.Record().Values[5] != nil {
-					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-				}
-
-				subPathString := ""
-				if result.Record().Values[4] != nil {
-					subPathString = result.Record().Values[4].(string)
-				}
-				versionString := ""
-				if result.Record().Values[3] != nil {
-					versionString = result.Record().Values[3].(string)
-				}
-				nameString := ""
-				if result.Record().Values[2] != nil {
-					nameString = result.Record().Values[2].(string)
-				}
-				namespaceString := ""
-				if result.Record().Values[1] != nil {
-					namespaceString = result.Record().Values[1].(string)
-				}
-				typeString := ""
-				if result.Record().Values[0] != nil {
-					typeString = result.Record().Values[0].(string)
-				}
+				pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
+				subPathString := result.Record().Values[4].(string)
+				versionString := result.Record().Values[3].(string)
+				nameString := result.Record().Values[2].(string)
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
 
 				version := &model.PackageVersion{
 					Version:    versionString,
@@ -134,18 +124,9 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 					Namespaces: []*model.PackageNamespace{namespace},
 				}
 
-				nameString = ""
-				if result.Record().Values[9] != nil {
-					nameString = result.Record().Values[9].(string)
-				}
-				namespaceString = ""
-				if result.Record().Values[8] != nil {
-					namespaceString = result.Record().Values[8].(string)
-				}
-				typeString = ""
-				if result.Record().Values[7] != nil {
-					typeString = result.Record().Values[7].(string)
-				}
+				nameString = result.Record().Values[9].(string)
+				namespaceString = result.Record().Values[8].(string)
+				typeString = result.Record().Values[7].(string)
 
 				name = &model.PackageName{
 					Name:     nameString,
@@ -245,7 +226,7 @@ func setMatchValues(sb *strings.Builder, pkg *model.PkgSpec, depPkg *model.PkgSp
 			queryValues["pkgSubpath"] = pkg.Subpath
 		}
 
-		if pkg.MatchOnlyEmptyQualifiers != nil && !*pkg.MatchOnlyEmptyQualifiers {
+		if !*pkg.MatchOnlyEmptyQualifiers {
 
 			if len(pkg.Qualifiers) > 0 {
 				qualifiers := getQualifiers(pkg.Qualifiers)
@@ -294,13 +275,13 @@ func setMatchValues(sb *strings.Builder, pkg *model.PkgSpec, depPkg *model.PkgSp
 			queryValues["depSubpath"] = depPkg.Subpath
 		}
 
-		if depPkg.MatchOnlyEmptyQualifiers != nil && !*depPkg.MatchOnlyEmptyQualifiers {
-
-			qualifiers := getQualifiers(depPkg.Qualifiers)
-			matchProperties(sb, firstMatch, "depVersion", "qualifier_list", "$depQualifierList")
-			firstMatch = false
-			queryValues["depQualifierList"] = qualifiers
-
+		if !*depPkg.MatchOnlyEmptyQualifiers {
+			if len(depPkg.Qualifiers) > 0 {
+				qualifiers := getQualifiers(depPkg.Qualifiers)
+				matchProperties(sb, firstMatch, "depVersion", "qualifier_list", "$depQualifierList")
+				firstMatch = false
+				queryValues["depQualifierList"] = qualifiers
+			}
 		} else {
 			matchProperties(sb, firstMatch, "depVersion", "qualifier_list", "$depQualifierList")
 			firstMatch = false
