@@ -28,7 +28,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/pkg"
 )
 
@@ -212,34 +211,7 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	scMock := mocks.NewMockScorecard(ctrl)
 	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(a, b string) (*pkg.ScorecardResult, error) {
-			return &pkg.ScorecardResult{
-				Repo: pkg.RepoInfo{
-					Name:      "test",
-					CommitSHA: "test",
-				},
-				Date: time.Now(),
-				Scorecard: pkg.ScorecardInfo{
-					Version:   "test",
-					CommitSHA: "test",
-				},
-				Checks: []checker.CheckResult{
-					{
-						Name:    "Maintained",
-						Version: 10,
-						Error:   nil,
-						Details: []checker.CheckDetail{
-							{
-								Msg:  checker.LogMessage{},
-								Type: 0,
-							},
-						},
-						Score:  10,
-						Reason: "test",
-					},
-				},
-				RawResults: checker.RawResults{},
-				Metadata:   []string{},
-			}, nil
+			return &pkg.ScorecardResult{}, nil
 		}).AnyTimes()
 
 	// Create a mock ArtifactNode to use as input
