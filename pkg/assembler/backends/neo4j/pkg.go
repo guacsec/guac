@@ -145,38 +145,6 @@ func (pv *pkgVersion) IdentifiablePropertyNames() []string {
 	return fields
 }
 
-type pkgQualifier struct {
-	qualifier map[string]string
-}
-
-func (pq *pkgQualifier) Type() string {
-	return "PkgQualifier"
-}
-
-func (pq *pkgQualifier) Properties() map[string]interface{} {
-	properties := make(map[string]interface{})
-	for k, v := range pq.qualifier {
-		properties[k] = v
-	}
-	return properties
-}
-
-func (pq *pkgQualifier) PropertyNames() []string {
-	fields := []string{}
-	for k := range pq.qualifier {
-		fields = append(fields, k)
-	}
-	return fields
-}
-
-func (pq *pkgQualifier) IdentifiablePropertyNames() []string {
-	fields := []string{}
-	for k := range pq.qualifier {
-		fields = append(fields, k)
-	}
-	return fields
-}
-
 type pkgToType struct {
 	pkg     *pkgNode
 	pkgType *pkgType
@@ -336,9 +304,9 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			}
 
 			if pkgSpec.Version != nil {
-				matchProperties(&sb, firstMatch, "version", "version", "$pkgVerion")
+				matchProperties(&sb, firstMatch, "version", "version", "$pkgVersion")
 				firstMatch = false
-				queryValues["pkgVerion"] = pkgSpec.Version
+				queryValues["pkgVersion"] = pkgSpec.Version
 			}
 
 			if pkgSpec.Subpath != nil {
@@ -349,18 +317,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
 				if len(pkgSpec.Qualifiers) > 0 {
-					qualifiersMap := map[string]string{}
-					keys := []string{}
-					for _, kv := range pkgSpec.Qualifiers {
-						key := removeInvalidCharFromProperty(kv.Key)
-						qualifiersMap[key] = *kv.Value
-						keys = append(keys, key)
-					}
-					sort.Strings(keys)
-					qualifiers := []string{}
-					for _, k := range keys {
-						qualifiers = append(qualifiers, k, qualifiersMap[k])
-					}
+					qualifiers := getQualifiers(pkgSpec.Qualifiers)
 					matchProperties(&sb, firstMatch, "version", "qualifier_list", "$qualifier")
 					firstMatch = false
 					queryValues["qualifier"] = qualifiers
@@ -383,16 +340,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 			for result.Next() {
 				pkgQualifiers := []*model.PackageQualifier{}
 				if result.Record().Values[5] != nil {
-					qualifierList := result.Record().Values[5].([]interface{})
-					for i := range qualifierList {
-						if i%2 == 0 {
-							qualifier := &model.PackageQualifier{
-								Key:   qualifierList[i].(string),
-								Value: qualifierList[i+1].(string),
-							}
-							pkgQualifiers = append(pkgQualifiers, qualifier)
-						}
-					}
+					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
 				}
 
 				subPathString := result.Record().Values[4].(string)
@@ -724,19 +672,9 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 				return nil, err
 			}
 
-			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
 			qualifiers := []*model.PackageQualifier{}
 			if record.Values[5] != nil {
-				qualifierList := record.Values[5].([]interface{})
-				for i := range qualifierList {
-					if i%2 == 0 {
-						qualifier := &model.PackageQualifier{
-							Key:   qualifierList[i].(string),
-							Value: qualifierList[i+1].(string),
-						}
-						qualifiers = append(qualifiers, qualifier)
-					}
-				}
+				qualifiers = getCollectedPackageQualifiers(record.Values[5].([]interface{}))
 			}
 			subPathStr := ""
 			if record.Values[4] != nil {
@@ -780,4 +718,34 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 	}
 
 	return result.(*model.Package), nil
+}
+
+func getCollectedPackageQualifiers(qualifierList []interface{}) []*model.PackageQualifier {
+	qualifiers := []*model.PackageQualifier{}
+	for i := range qualifierList {
+		if i%2 == 0 {
+			qualifier := &model.PackageQualifier{
+				Key:   qualifierList[i].(string),
+				Value: qualifierList[i+1].(string),
+			}
+			qualifiers = append(qualifiers, qualifier)
+		}
+	}
+	return qualifiers
+}
+
+func getQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string {
+	qualifiersMap := map[string]string{}
+	keys := []string{}
+	for _, kv := range qualifiersSpec {
+		key := removeInvalidCharFromProperty(kv.Key)
+		qualifiersMap[key] = *kv.Value
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	qualifiers := []string{}
+	for _, k := range keys {
+		qualifiers = append(qualifiers, k, qualifiersMap[k])
+	}
+	return qualifiers
 }

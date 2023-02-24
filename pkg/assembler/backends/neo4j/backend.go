@@ -25,10 +25,13 @@ import (
 )
 
 const (
-	namespaces string = "namespaces"
-	names      string = namespaces + ".names"
-	versions   string = names + ".versions"
-	cvdID      string = "cveId"
+	namespaces    string = "namespaces"
+	names         string = namespaces + ".names"
+	versions      string = names + ".versions"
+	cvdID         string = "cveId"
+	origin        string = "origin"
+	collector     string = "collector"
+	justification string = "justification"
 )
 
 type Neo4jConfig struct {
