@@ -1280,7 +1280,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSLSAPredicateSpec,
 		ec.unmarshalInputScorecardCheckSpec,
 		ec.unmarshalInputSourceInputSpec,
-		ec.unmarshalInputSourceQualifierInput,
 		ec.unmarshalInputSourceSpec,
 	)
 	first := true
