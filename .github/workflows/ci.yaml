@@ -89,3 +89,5 @@ jobs:
         run: make fmt
       - name: golangci-lint
         uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5 # tag=v3.2.0
+      - name: Check that all generated code is up to date
+        run: make generated_up_to_date
