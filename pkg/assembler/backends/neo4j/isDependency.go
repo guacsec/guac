@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"sort"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -226,17 +225,7 @@ func setMatchValues(sb *strings.Builder, pkg *model.PkgSpec, depPkg *model.PkgSp
 		if pkg.MatchOnlyEmptyQualifiers != nil && !*pkg.MatchOnlyEmptyQualifiers {
 
 			if len(pkg.Qualifiers) > 0 {
-				qualifiers := []string{}
-				qualifiersMap := map[string]string{}
-				keys := []string{}
-				for _, kv := range pkg.Qualifiers {
-					qualifiersMap[kv.Key] = *kv.Value
-					keys = append(keys, kv.Key)
-				}
-				sort.Strings(keys)
-				for _, k := range keys {
-					qualifiers = append(qualifiers, k, qualifiersMap[k])
-				}
+				qualifiers := getQualifiers(pkg.Qualifiers)
 				matchProperties(sb, firstMatch, "version", "qualifier_list", "$pkgQualifierList")
 				firstMatch = false
 				queryValues["pkgQualifierList"] = qualifiers
@@ -284,18 +273,7 @@ func setMatchValues(sb *strings.Builder, pkg *model.PkgSpec, depPkg *model.PkgSp
 
 		if depPkg.MatchOnlyEmptyQualifiers != nil && !*depPkg.MatchOnlyEmptyQualifiers {
 
-			qualifiersMap := map[string]string{}
-			keys := []string{}
-			for _, kv := range depPkg.Qualifiers {
-				qualifiersMap[kv.Key] = *kv.Value
-				keys = append(keys, kv.Key)
-			}
-			sort.Strings(keys)
-			qualifiers := []string{}
-			for _, k := range keys {
-				qualifiers = append(qualifiers, k, qualifiersMap[k])
-			}
-
+			qualifiers := getQualifiers(depPkg.Qualifiers)
 			matchProperties(sb, firstMatch, "depVersion", "qualifier_list", "$depQualifierList")
 			firstMatch = false
 			queryValues["depQualifierList"] = qualifiers
