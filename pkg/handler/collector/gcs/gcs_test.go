@@ -78,6 +78,16 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		wantErr:  false,
 		wantDone: true,
 	}, {
+		name: "last download time the same",
+		fields: fields{
+			bucket:       getBucketPath(),
+			reader:       &reader{client: client, bucket: getBucketPath()},
+			lastDownload: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+		},
+		want:     nil,
+		wantErr:  false,
+		wantDone: true,
+	}, {
 		name: "last download time set before",
 		fields: fields{
 			bucket:       getBucketPath(),

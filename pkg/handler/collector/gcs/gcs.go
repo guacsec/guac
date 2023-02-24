@@ -174,18 +174,18 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 			if len(payload) == 0 {
 				continue
 			}
-		}
 
-		doc := &processor.Document{
-			Blob:   payload,
-			Type:   processor.DocumentUnknown,
-			Format: processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{
-				Collector: string(CollectorGCS),
-				Source:    g.bucket + "/" + attrs.Name,
-			},
+			doc := &processor.Document{
+				Blob:   payload,
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(CollectorGCS),
+					Source:    g.bucket + "/" + attrs.Name,
+				},
+			}
+			docChannel <- doc
 		}
-		docChannel <- doc
 	}
 	return nil
 }
