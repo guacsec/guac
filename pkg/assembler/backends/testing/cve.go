@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -32,15 +33,16 @@ func registerAllCVE(client *demoClient) {
 // Ingest CVE
 
 func (c *demoClient) registerCVE(year, id string) {
+	idLower := strings.ToLower(id)
 	for i, s := range c.cve {
 		if s.Year == year {
-			c.cve[i] = registerCveID(s, id)
+			c.cve[i] = registerCveID(s, idLower)
 			return
 		}
 	}
 
 	newCve := &model.Cve{Year: year}
-	newCve = registerCveID(newCve, id)
+	newCve = registerCveID(newCve, idLower)
 	c.cve = append(c.cve, newCve)
 }
 
@@ -76,7 +78,7 @@ func (c *demoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.
 func filterCVEID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
 	var cveID []*model.CVEId
 	for _, id := range cve.CveID {
-		if cveSpec.CveID == nil || id.ID == *cveSpec.CveID {
+		if cveSpec.CveID == nil || id.ID == strings.ToLower(*cveSpec.CveID) {
 			cveID = append(cveID, id)
 		}
 	}

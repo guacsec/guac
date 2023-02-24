@@ -180,9 +180,8 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 			}
 
 			if cveSpec.CveID != nil {
-
 				matchProperties(&sb, firstMatch, "cveID", "id", "$cveID")
-				queryValues["cveID"] = cveSpec.CveID
+				queryValues["cveID"] = strings.ToLower(*cveSpec.CveID)
 			}
 
 			sb.WriteString(" RETURN cveYear.year, cveID.id")

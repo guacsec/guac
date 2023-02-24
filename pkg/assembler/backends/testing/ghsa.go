@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -32,13 +33,14 @@ func registerAllGHSA(client *demoClient) {
 // Ingest GHSA
 
 func (c *demoClient) registerGhsa(id string) {
+	idLower := strings.ToLower(id)
 	for i, g := range c.ghsa {
-		c.ghsa[i] = registerGhsaID(g, id)
+		c.ghsa[i] = registerGhsaID(g, idLower)
 		return
 	}
 
 	newGhsa := &model.Ghsa{}
-	newGhsa = registerGhsaID(newGhsa, id)
+	newGhsa = registerGhsaID(newGhsa, idLower)
 	c.ghsa = append(c.ghsa, newGhsa)
 }
 
@@ -72,7 +74,7 @@ func (c *demoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mod
 func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, error) {
 	var ghsaID []*model.GHSAId
 	for _, id := range ghsa.GhsaID {
-		if ghsaSpec.GhsaID == nil || id.ID == *ghsaSpec.GhsaID {
+		if ghsaSpec.GhsaID == nil || id.ID == strings.ToLower(*ghsaSpec.GhsaID) {
 			ghsaID = append(ghsaID, id)
 		}
 	}
