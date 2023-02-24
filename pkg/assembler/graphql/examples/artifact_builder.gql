@@ -1,35 +1,56 @@
 fragment allArtifactTree on Artifact {
-  	algorithm
-    digest
+  algorithm
+  digest
 }
 
-fragment allBuilderTree on Builder {
-  uri
-}
-
-
-query Q1 {
-  artifacts(artifactSpec: {algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}) {
-    ...allArtifactTree
-  }
-}
-
-query Q2 {
+query ArtQ1 {
   artifacts(artifactSpec: {}) {
     ...allArtifactTree
   }
 }
 
-query Q3 {
-  artifacts(artifactSpec: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}) {
+query ArtQ2 {
+  artifacts(
+    artifactSpec: {algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}
+  ) {
     ...allArtifactTree
   }
 }
 
-query Q4 {
+query ArtQ3 {
+  artifacts(
+    artifactSpec: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}
+  ) {
+    ...allArtifactTree
+  }
+}
+
+query ArtQ4 {
   artifacts(artifactSpec: {algorithm: "sha512"}) {
     ...allArtifactTree
   }
+}
+
+query ArtQ5 {
+  artifacts(artifactSpec: {digest: "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"}) {
+    ...allArtifactTree
+  }
+}
+
+mutation ArtM1 {
+  ingestArtifact(artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}) {
+    ...allArtifactTree
+  }
+}
+
+mutation ArtM2 {
+  ingestArtifact(artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}) {
+    ...allArtifactTree
+  }
+}
+
+fragment allBuilderTree on Builder {
+  uri
 }
 
 query Q5 {
