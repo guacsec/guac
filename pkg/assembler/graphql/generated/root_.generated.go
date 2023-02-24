@@ -173,6 +173,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		IngestArtifact func(childComplexity int, artifact *model.ArtifactInputSpec) int
+		IngestBuilder  func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestPackage  func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSource   func(childComplexity int, source *model.SourceInputSpec) int
 	}
@@ -840,6 +841,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestArtifact(childComplexity, args["artifact"].(*model.ArtifactInputSpec)), true
 
+	case "Mutation.ingestBuilder":
+		if e.complexity.Mutation.IngestBuilder == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestBuilder_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.BuilderInputSpec)), true
+
 	case "Mutation.ingestPackage":
 		if e.complexity.Mutation.IngestPackage == nil {
 			break
@@ -1270,6 +1283,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputArtifactInputSpec,
 		ec.unmarshalInputArtifactSpec,
+		ec.unmarshalInputBuilderInputSpec,
 		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadSpec,
@@ -1436,13 +1450,11 @@ extend type Mutation {
 # NOTE: This is experimental and might change in the future!
 
 # Defines a GraphQL schema for the builder. It only contains the uri
+
 """
-Builder represents the builder such as (FRSCA or github actions) and contains a uri field
+Builder represents the builder such as (FRSCA or github actions).
 
-uri is mandatory and represents the specific builder.
-
-This node is a singleton: backends guarantee that there is exactly one node with
-the same ` + "`" + `uri` + "`" + ` value.
+Currently builders are identified by the ` + "`" + `uri` + "`" + ` field, which is mandatory.
 """
 type Builder {
   uri: String!
@@ -1455,10 +1467,21 @@ input BuilderSpec {
   uri: String
 }
 
+"""
+BuilderInputSpec is the same as Builder, but used for mutation ingestion.
+"""
+input BuilderInputSpec {
+  uri: String!
+}
 
 extend type Query {
   "Returns all builders"
   builders(builderSpec: BuilderSpec): [Builder!]!
+}
+
+extend type Mutation {
+  "Ingest a new builder. Returns the ingested builder"
+  ingestBuilder(builder: BuilderInputSpec): Builder!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyBad.graphql", Input: `#

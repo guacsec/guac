@@ -6,9 +6,15 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+// IngestBuilder is the resolver for the ingestBuilder field.
+func (r *mutationResolver) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+	panic(fmt.Errorf("not implemented: IngestBuilder - ingestBuilder"))
+}
 
 // Builders is the resolver for the builders field.
 func (r *queryResolver) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
