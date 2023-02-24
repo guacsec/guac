@@ -49,6 +49,7 @@ type Backend interface {
 	// Mutations (read-write queries)
 	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
+	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

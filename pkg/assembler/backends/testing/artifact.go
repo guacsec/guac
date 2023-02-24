@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -74,4 +75,9 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 		}
 	}
 	return artifacts, nil
+}
+
+func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+	fmt.Printf("%v %v", artifact.Digest, artifact.Algorithm)
+	panic(fmt.Errorf("not implemented: IngestArtifact - ingestArtifact"))
 }
