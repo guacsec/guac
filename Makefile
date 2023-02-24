@@ -38,7 +38,7 @@ generated_up_to_date: generate
 
 # Run all the linters
 .PHONY: lint
-lint:
+lint: check-golangci-lint-tool-check
 	golangci-lint run ./...
 
 # Build a version
@@ -50,7 +50,7 @@ build: generate
 	go build -ldflags ${LDFLAGS} -o bin/pubsub_test cmd/pubsub_test/main.go
 
 .PHONY: proto
-proto: pkg/collectsub/collectsub/collectsub.proto
+proto: pkg/collectsub/collectsub/collectsub.proto check-protoc-tool-check
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		$^
@@ -80,7 +80,7 @@ generate:
 	go generate ./...
 
 .PHONY: container
-container:
+container: check-docker-tool-check
 	docker build -f dockerfiles/Dockerfile.guac-cont -t local-organic-guac .
 	docker build -f dockerfiles/Dockerfile.healthcheck -t local-healthcheck .
 
@@ -99,3 +99,30 @@ start-service:
 .PHONY: stop-service
 stop-service:
 	docker compose down
+
+.PHONY: check-docker-tool-check
+check-docker-tool-check:
+	@if ! command -v docker &> /dev/null; then \
+		echo "Docker is not installed. Please install Docker and try again."; \
+		exit 1; \
+	fi
+
+# Check that protoc is installed.
+.PHONY: check-protoc-tool-check
+check-protoc-tool-check:
+	@if ! command -v protoc &> /dev/null; then \
+		echo "Protoc is not installed. Please install Protoc and try again."; \
+		exit 1; \
+	fi
+
+# Check that golangci-lint is installed.
+.PHONY: check-golangci-lint-tool-check
+check-golangci-lint-tool-check:
+	@if ! command -v golangci-lint &> /dev/null; then \
+		echo "Golangci-lint is not installed. Please install Golangci-lint and try again."; \
+		exit 1; \
+	fi
+
+# Check that all the tools are installed.
+.PHONY: check-tools
+check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check
