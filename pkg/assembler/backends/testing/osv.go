@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -33,13 +34,14 @@ func registerAllOSV(client *demoClient) {
 // Ingest OSV
 
 func (c *demoClient) registerOSV(id string) {
+	idLower := strings.ToLower(id)
 	for i, o := range c.osv {
-		c.osv[i] = registerOsvID(o, id)
+		c.osv[i] = registerOsvID(o, idLower)
 		return
 	}
 
 	newOsv := &model.Osv{}
-	newOsv = registerOsvID(newOsv, id)
+	newOsv = registerOsvID(newOsv, idLower)
 	c.osv = append(c.osv, newOsv)
 }
 
@@ -73,7 +75,7 @@ func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.
 func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 	var osvID []*model.OSVId
 	for _, id := range ghsa.OsvID {
-		if osvSpec.OsvID == nil || id.ID == *osvSpec.OsvID {
+		if osvSpec.OsvID == nil || id.ID == strings.ToLower(*osvSpec.OsvID) {
 			osvID = append(osvID, id)
 		}
 	}

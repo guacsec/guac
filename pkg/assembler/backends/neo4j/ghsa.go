@@ -108,9 +108,8 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 			sb.WriteString("MATCH (n:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
 
 			if ghsaSpec.GhsaID != nil {
-
 				matchProperties(&sb, true, "ghsaID", "id", "$ghsaID")
-				queryValues["ghsaID"] = ghsaSpec.GhsaID
+				queryValues["ghsaID"] = strings.ToLower(*ghsaSpec.GhsaID)
 			}
 
 			sb.WriteString(" RETURN ghsaID.id")

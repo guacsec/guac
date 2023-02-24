@@ -1833,7 +1833,7 @@ type CVE {
 """
 CVEId is the actual ID that is given to a specific vulnerability
 
-id field is mandatory.
+id field is mandatory and canonicalized to be lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -1884,7 +1884,7 @@ type GHSA {
 """
 GHSAId is the actual ID that is given to a specific vulnerability on github
 
-id field is mandatory.
+id field is mandatory and canonicalized to be lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -2408,9 +2408,9 @@ type OSV {
 }
 
 """
-OSVId is the actual ID that is given to a specific vulnerability
+OSVId is the actual ID that is given to a specific vulnerability.
 
-id field is mandatory. This maps to a GHSA or CVE ID
+id field is mandatory and canonicalized to be lowercase. This maps to a GHSA or CVE ID
 
 This node can be referred to by other parts of GUAC.
 """

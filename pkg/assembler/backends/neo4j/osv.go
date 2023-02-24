@@ -109,7 +109,7 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 
 			if osvSpec.OsvID != nil {
 				matchProperties(&sb, true, "osvID", "id", "$osvID")
-				queryValues["osvID"] = osvSpec.OsvID
+				queryValues["osvID"] = strings.ToLower(*osvSpec.OsvID)
 			}
 
 			sb.WriteString(" RETURN osvID.id")
