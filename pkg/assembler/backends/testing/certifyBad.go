@@ -48,8 +48,7 @@ func registerAllCertifyBad(client *demoClient) error {
 	selectedSourceNameSpace := "github"
 	selectedSourceName := "github.com/guacsec/guac"
 	selectedTag := "v0.0.1"
-	selectedSourceQualifiers := &model.SourceQualifierInput{Tag: &selectedTag}
-	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Qualifier: selectedSourceQualifiers}
+	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
 	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
 	if err != nil {
 		return err

@@ -10,52 +10,64 @@ fragment allSrcTree on Source {
   }
 }
 
-query Q1 {
-  sources(sourceSpec: {name: "github.com/guacsec/guac"}) {
-    ...allSrcTree
+query SrcQ1 {
+  sources(sourceSpec: {}) {
+    namespaces {
+      names {
+        name
+      }
+    }
   }
 }
 
-query Q2 {
-  sources(sourceSpec: {qualifier: {tag: "v0.0.1"}}) {
-    ...allSrcTree
-  }
-}
-
-query Q3 {
-  sources(
-    sourceSpec: {qualifier: {commit: "fcba958b73e27cad8b5c8655d46439984d27853b"}}
-  ) {
-    ...allSrcTree
-  }
-}
-
-query Q4 {
-  sources(sourceSpec: {qualifier: {}}) {
-    ...allSrcTree
-  }
-}
-
-query Q5 {
-  sources(sourceSpec: {type: "svn"}) {
-    ...allSrcTree
-  }
-}
-
-query Q6 {
-  sources(sourceSpec: {namespace: "gitlab"}) {
-    ...allSrcTree
-  }
-}
-
-query Q7 {
+query SrcQ2 {
   sources(sourceSpec: {}) {
     ...allSrcTree
   }
 }
 
-query Q8 {
-  sources(sourceSpec: {qualifier: {tag: "asd", commit: "sad"}}) {
+# Return only sources with neither tag nor commit
+query SrcQ3 {
+  sources(sourceSpec: {tag:"", commit:""}) {
+    ...allSrcTree
+  }
+}
+
+
+query SrcQ4 {
+  sources(sourceSpec: {name: "github.com/guacsec/guac"}) {
+    ...allSrcTree
+  }
+}
+
+query SrcQ5 {
+  sources(sourceSpec: {tag: "v0.0.1"}) {
+    ...allSrcTree
+  }
+}
+
+query SrcQ6 {
+  sources(
+    sourceSpec: {commit: "fcba958b73e27cad8b5c8655d46439984d27853b"}
+  ) {
+    ...allSrcTree
+  }
+}
+query SrcQ7 {
+  sources(sourceSpec: {type: "svn"}) {
+    ...allSrcTree
+  }
+}
+
+query SrcQ8 {
+  sources(sourceSpec: {namespace: "gitlab"}) {
+    ...allSrcTree
+  }
+}
+
+# this should error as both `tag` and `commit` are specified and not empty
+query SrcQ9 {
+  sources(sourceSpec: {tag: "asd", commit: "sad"}) {
     ...allSrcTree
   }
 }

@@ -99,13 +99,9 @@ func checkQualifier(n *model.SourceName, qualifier string) bool {
 	if qualifier != "" {
 		pair := strings.Split(qualifier, "=")
 		if pair[0] == "tag" {
-			if n.Tag == &pair[1] {
-				return true
-			}
+			return n.Tag == &pair[1]
 		} else {
-			if n.Commit == &pair[1] {
-				return true
-			}
+			return n.Commit == &pair[1]
 		}
 	}
 	return false
@@ -152,11 +148,10 @@ func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*mo
 }
 
 func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (*model.SourceNamespace, error) {
-
 	var names []*model.SourceName
 	for _, n := range ns.Names {
 		if sourceSpec.Name == nil || n.Name == *sourceSpec.Name {
-			n, err := filterSourceQualifier(n, sourceSpec)
+			n, err := filterSourceTagCommit(n, sourceSpec)
 			if err != nil {
 				return nil, err
 			}
@@ -174,25 +169,28 @@ func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (
 	}, nil
 }
 
-func filterSourceQualifier(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
-	if sourceSpec.Qualifier != nil {
-		if sourceSpec.Qualifier.Commit != nil && sourceSpec.Qualifier.Tag != nil {
-			return nil, gqlerror.Errorf("can only pass in commit or tag")
+func filterSourceTagCommit(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
+	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
+		if *sourceSpec.Commit == "" && *sourceSpec.Tag == "" {
+			if n.Commit == nil && n.Tag == nil {
+				return n, nil
+			}
+		} else {
+			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
 		}
-		if sourceSpec.Qualifier.Commit == nil && sourceSpec.Qualifier.Tag == nil {
-			if n.Tag == nil && n.Commit == nil {
-				return n, nil
-			}
-		} else if sourceSpec.Qualifier.Commit != nil && n.Commit != nil {
-			if *n.Commit == *sourceSpec.Qualifier.Commit {
-				return n, nil
-			}
-		} else if sourceSpec.Qualifier.Tag != nil && n.Tag != nil {
-			if *n.Tag == *sourceSpec.Qualifier.Tag {
-				return n, nil
-			}
-		}
-		return nil, nil
 	}
+
+	if sourceSpec.Commit != nil {
+		if n.Commit == nil || *n.Commit != *sourceSpec.Commit {
+			return nil, nil
+		}
+	}
+
+	if sourceSpec.Tag != nil {
+		if n.Tag == nil || *n.Tag != *sourceSpec.Tag {
+			return nil, nil
+		}
+	}
+
 	return n, nil
 }

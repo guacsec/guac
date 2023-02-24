@@ -508,8 +508,8 @@ type OSVSpec struct {
 // cases where the pURL representation is not complete or when we have custom
 // rules.
 //
-// This node is a singleton: backends guarantee that there is exactly one node with
-// the same `type` value.
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
 //
 // Also note that this is named `Package`, not `PackageType`. This is only to make
 // queries more readable.
@@ -736,8 +736,8 @@ type ScorecardCheckSpec struct {
 //
 // This can be the version control system that is being used.
 //
-// This node is a singleton: backends guarantee that there is exactly one node with
-// the same `type` value.
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
 //
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
@@ -752,9 +752,10 @@ func (Source) IsPkgSrcObject() {}
 
 // SourceName is a url of the repository and its tag or commit.
 //
-// SourceName is mandatory. Either a tag or commit needs to be specified.
+// The `name` field is mandatory. The `tag` and `commit` fields are optional, but
+// it is an error to specify both.
 //
-// This is the first node in the trie that can be referred to by other parts of
+// This is the only source trie node that can be referenced by other parts of
 // GUAC.
 type SourceName struct {
 	Name   string  `json:"name"`
@@ -764,28 +765,26 @@ type SourceName struct {
 
 // SourceNamespace is a namespace for sources.
 //
-// This can be represented as the location of the repo (such as github/gitlab/bitbucket)
+// This is the location of the repository (such as github/gitlab/bitbucket).
 //
-// Namespaces are optional and type specific. Because they are optional, we use
-// empty string to denote missing namespaces.
+// The `namespace` field is mandatory.
 type SourceNamespace struct {
 	Namespace string        `json:"namespace"`
 	Names     []*SourceName `json:"names"`
 }
 
-// SourceQualifierInput is the same as SourceQualifier, but usable as query
-// input.
-type SourceQualifierInput struct {
-	Tag    *string `json:"tag"`
-	Commit *string `json:"commit"`
-}
-
 // SourceSpec allows filtering the list of sources to return.
 //
-// Empty string at a field means matching with the empty string.
+// Empty string at a field means matching with the empty string. Missing field
+// means retrieving all possible matches.
+//
+// It is an error to specify both tag and commit fields, except it both are set as
+// empty string (in which case the returned sources are only those for which there
+// is no tag/commit information).
 type SourceSpec struct {
-	Type      *string               `json:"type"`
-	Namespace *string               `json:"namespace"`
-	Name      *string               `json:"name"`
-	Qualifier *SourceQualifierInput `json:"qualifier"`
+	Type      *string `json:"type"`
+	Namespace *string `json:"namespace"`
+	Name      *string `json:"name"`
+	Tag       *string `json:"tag"`
+	Commit    *string `json:"commit"`
 }
