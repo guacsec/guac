@@ -672,18 +672,9 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 				return nil, err
 			}
 
-			qualifiers := []*model.PackageQualifier{}
-			if record.Values[5] != nil {
-				qualifiers = getCollectedPackageQualifiers(record.Values[5].([]interface{}))
-			}
-			subPathStr := ""
-			if record.Values[4] != nil {
-				subPathStr = record.Values[4].(string)
-			}
-			versionStr := ""
-			if record.Values[3] != nil {
-				versionStr = record.Values[3].(string)
-			}
+			qualifiers := getCollectedPackageQualifiers(record.Values[5].([]interface{}))
+			subPathStr := record.Values[4].(string)
+			versionStr := record.Values[3].(string)
 			version := &model.PackageVersion{
 				Version:    versionStr,
 				Subpath:    subPathStr,
@@ -696,10 +687,7 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 				Versions: []*model.PackageVersion{version},
 			}
 
-			namespaceStr := ""
-			if record.Values[1] != nil {
-				namespaceStr = record.Values[1].(string)
-			}
+			namespaceStr := record.Values[1].(string)
 			namespace := &model.PackageNamespace{
 				Namespace: namespaceStr,
 				Names:     []*model.PackageName{name},
