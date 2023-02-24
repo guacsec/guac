@@ -221,8 +221,10 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Commit != nil && sourceSpec.Qualifier.Tag != nil {
-		return nil, gqlerror.Errorf("can only pass in commit or tag")
+	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
+		if *sourceSpec.Commit != "" || *sourceSpec.Tag != "" {
+			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
+		}
 	}
 
 	result, err := session.ReadTransaction(
@@ -236,34 +238,32 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 			sb.WriteString("MATCH (n:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
 
 			if sourceSpec.Type != nil {
-
 				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
 				firstMatch = false
 				queryValues["srcType"] = sourceSpec.Type
 			}
-			if sourceSpec.Namespace != nil {
 
+			if sourceSpec.Namespace != nil {
 				matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
 				firstMatch = false
 				queryValues["srcNamespace"] = sourceSpec.Namespace
 			}
-			if sourceSpec.Name != nil {
 
+			if sourceSpec.Name != nil {
 				matchProperties(&sb, firstMatch, "name", "name", "$srcName")
 				firstMatch = false
 				queryValues["srcName"] = sourceSpec.Name
 			}
-			if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Tag != nil {
 
+			if sourceSpec.Tag != nil {
 				matchProperties(&sb, firstMatch, "name", "tag", "$srcTag")
 				firstMatch = false
-				queryValues["srcTag"] = sourceSpec.Qualifier.Tag
+				queryValues["srcTag"] = sourceSpec.Tag
 			}
 
-			if sourceSpec.Qualifier != nil && sourceSpec.Qualifier.Commit != nil {
-
+			if sourceSpec.Commit != nil {
 				matchProperties(&sb, firstMatch, "name", "commit", "$srcCommit")
-				queryValues["srcCommit"] = sourceSpec.Qualifier.Commit
+				queryValues["srcCommit"] = sourceSpec.Commit
 			}
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")

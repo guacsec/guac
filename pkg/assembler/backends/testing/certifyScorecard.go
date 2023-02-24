@@ -30,8 +30,7 @@ func registerAllCertifyScorecard(client *demoClient) error {
 	selectedSourceNameSpace := "github"
 	selectedSourceName := "https://github.com/django/django"
 	selectedTag := "1.11.1"
-	selectedSourceQualifiers := &model.SourceQualifierInput{Tag: &selectedTag}
-	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Qualifier: selectedSourceQualifiers}
+	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
 	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
 	if err != nil {
 		return err
@@ -50,8 +49,7 @@ func registerAllCertifyScorecard(client *demoClient) error {
 	selectedSourceNameSpace = "github"
 	selectedSourceName = "https://github.com/vapor-ware/kubetest"
 	selectedTag = "0.9.5"
-	selectedSourceQualifiers = &model.SourceQualifierInput{Tag: &selectedTag}
-	selectedSourceSpec = &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Qualifier: selectedSourceQualifiers}
+	selectedSourceSpec = &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
 	selectedSource, err = client.Sources(context.TODO(), selectedSourceSpec)
 	if err != nil {
 		return err
