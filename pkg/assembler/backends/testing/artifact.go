@@ -41,7 +41,10 @@ func (c *demoClient) registerArtifact(algorithm, digest string) {
 			return
 		}
 	}
-	newArtifact := &model.Artifact{Digest: lowerCaseDigest, Algorithm: lowerCaseAlgorithm}
+	newArtifact := &model.Artifact{
+		Digest: lowerCaseDigest,
+		Algorithm: lowerCaseAlgorithm,
+	}
 	c.artifacts = append(c.artifacts, newArtifact)
 }
 
@@ -52,13 +55,21 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 
 	// enforce lowercase for both the algorithm and digest when querying
 	for _, a := range c.artifacts {
-		if artifactSpec.Digest == nil && artifactSpec.Algorithm == nil {
-			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm == nil && a.Digest == strings.ToLower(*artifactSpec.Digest) {
-			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest == nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) {
-			artifacts = append(artifacts, a)
-		} else if artifactSpec.Digest != nil && artifactSpec.Algorithm != nil && a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) && a.Digest == strings.ToLower(*artifactSpec.Digest) {
+		matchDigest := false
+		if artifactSpec.Digest == nil {
+			matchDigest = true
+		} else if a.Digest == strings.ToLower(*artifactSpec.Digest) {
+			matchDigest = true
+		}
+
+		matchAlgorithm := false
+		if artifactSpec.Algorithm == nil {
+			matchAlgorithm = true
+		} else if a.Algorithm == strings.ToLower(*artifactSpec.Algorithm) {
+			matchAlgorithm = true
+		}
+
+		if matchDigest && matchAlgorithm {
 			artifacts = append(artifacts, a)
 		}
 	}

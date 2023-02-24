@@ -1359,11 +1359,15 @@ var sources = []*ast.Source{
 # NOTE: This is experimental and might change in the future!
 
 # Defines a GraphQL schema for the artifact. It contains the algorithm and digest fields
+
 """
 Artifact represents the artifact and contains a digest field
 
-algorithm is mandatory in the from strings.ToLower(string(checksum.Algorithm)) (sha256, sha1...etc)
-digest is mandatory in the form checksum.Value.
+Both field are mandatory and canonicalized to be lowercase.
+
+If having a ` + "`" + `checksum` + "`" + ` Go object, ` + "`" + `algorithm` + "`" + ` can be
+` + "`" + `strings.ToLower(string(checksum.Algorithm))` + "`" + ` and ` + "`" + `digest` + "`" + ` can be
+` + "`" + `checksum.Value` + "`" + `.
 """
 type Artifact {
   algorithm: String!
@@ -1372,12 +1376,13 @@ type Artifact {
 
 """
 ArtifactSpec allows filtering the list of artifacts to return.
+
+Both arguments will be canonicalized to lowercase.
 """
 input ArtifactSpec {
   algorithm: String
   digest: String
 }
-
 
 extend type Query {
   "Returns all artifacts"
