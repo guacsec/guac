@@ -99,3 +99,43 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 
 	return result.([]*model.Artifact), nil
 }
+
+func (c *neo4jClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["algorithm"] = strings.ToLower(artifact.Algorithm)
+	values["digest"] = strings.ToLower(artifact.Digest)
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `
+MERGE (a:Artifact{algorithm:$algorithm,digest:$digest})
+RETURN a.algorithm, a.digest`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			digest := record.Values[1].(string)
+			algorithm := record.Values[0].(string)
+			artifact := model.Artifact{
+				Algorithm: algorithm,
+				Digest:    digest,
+			}
+
+			return &artifact, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Artifact), nil
+}

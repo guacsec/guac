@@ -31,14 +31,14 @@ func registerAllArtifacts(client *demoClient) {
 
 // Ingest Artifacts
 
-func (c *demoClient) registerArtifact(algorithm, digest string) {
+func (c *demoClient) registerArtifact(algorithm, digest string) *model.Artifact {
 	// enforce lowercase for both the algorithm and digest when ingesting
 	lowerCaseDigest := strings.ToLower(digest)
 	lowerCaseAlgorithm := strings.ToLower(algorithm)
 
 	for _, a := range c.artifacts {
 		if a.Digest == lowerCaseDigest && a.Algorithm == lowerCaseAlgorithm {
-			return
+			return a
 		}
 	}
 	newArtifact := &model.Artifact{
@@ -46,6 +46,8 @@ func (c *demoClient) registerArtifact(algorithm, digest string) {
 		Algorithm: lowerCaseAlgorithm,
 	}
 	c.artifacts = append(c.artifacts, newArtifact)
+
+	return newArtifact
 }
 
 // Query Artifacts
@@ -74,4 +76,8 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 		}
 	}
 	return artifacts, nil
+}
+
+func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+	return c.registerArtifact(artifact.Algorithm, artifact.Digest), nil
 }

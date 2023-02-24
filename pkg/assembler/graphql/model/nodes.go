@@ -43,6 +43,14 @@ func (Artifact) IsPkgSrcArtObject() {}
 
 func (Artifact) IsPkgArtObject() {}
 
+// ArtifactInputSpec is the same as Artifact, but used as mutation input.
+//
+// Both arguments will be canonicalized to lowercase.
+type ArtifactInputSpec struct {
+	Algorithm string `json:"algorithm"`
+	Digest    string `json:"digest"`
+}
+
 // ArtifactSpec allows filtering the list of artifacts to return.
 //
 // Both arguments will be canonicalized to lowercase.

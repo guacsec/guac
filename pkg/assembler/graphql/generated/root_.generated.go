@@ -172,8 +172,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		IngestPackage func(childComplexity int, pkg *model.PkgInputSpec) int
-		IngestSource  func(childComplexity int, source *model.SourceInputSpec) int
+		IngestArtifact func(childComplexity int, artifact *model.ArtifactInputSpec) int
+		IngestPackage  func(childComplexity int, pkg *model.PkgInputSpec) int
+		IngestSource   func(childComplexity int, source *model.SourceInputSpec) int
 	}
 
 	OSV struct {
@@ -827,6 +828,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsVulnerability.Vulnerability(childComplexity), true
 
+	case "Mutation.ingestArtifact":
+		if e.complexity.Mutation.IngestArtifact == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestArtifact_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestArtifact(childComplexity, args["artifact"].(*model.ArtifactInputSpec)), true
+
 	case "Mutation.ingestPackage":
 		if e.complexity.Mutation.IngestPackage == nil {
 			break
@@ -1255,6 +1268,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputArtifactInputSpec,
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVESpec,
@@ -1384,9 +1398,24 @@ input ArtifactSpec {
   digest: String
 }
 
+"""
+ArtifactInputSpec is the same as Artifact, but used as mutation input.
+
+Both arguments will be canonicalized to lowercase.
+"""
+input ArtifactInputSpec {
+  algorithm: String!
+  digest: String!
+}
+
 extend type Query {
   "Returns all artifacts"
   artifacts(artifactSpec: ArtifactSpec): [Artifact!]!
+}
+
+extend type Mutation {
+  "Ingest a new artifact. Returns the ingested artifact"
+  ingestArtifact(artifact: ArtifactInputSpec): Artifact!
 }
 `, BuiltIn: false},
 	{Name: "../schema/builder.graphql", Input: `#
