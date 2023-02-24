@@ -8,7 +8,7 @@ LDFLAGS="-X $(PKG).version=$(VERSION) -X $(PKG).commit=$(COMMIT) -X $(PKG).date=
 .DEFAULT_GOAL := build
 
 .PHONY: all
-all: test cover fmt lint ci build generate
+all: test cover fmt lint build generate
 
 # Run the unit tests
 .PHONY: test
@@ -40,10 +40,6 @@ generated_up_to_date: generate
 .PHONY: lint
 lint:
 	golangci-lint run ./...
-
-# Run all the tests and code checks
-.PHONY: ci
-ci: fmt lint test generated_up_to_date
 
 # Build a version
 .PHONY: build
