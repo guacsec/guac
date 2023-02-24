@@ -42,7 +42,7 @@ func (c *demoClient) registerArtifact(algorithm, digest string) {
 		}
 	}
 	newArtifact := &model.Artifact{
-		Digest: lowerCaseDigest,
+		Digest:    lowerCaseDigest,
 		Algorithm: lowerCaseAlgorithm,
 	}
 	c.artifacts = append(c.artifacts, newArtifact)
