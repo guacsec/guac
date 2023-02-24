@@ -442,3 +442,86 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 
 	return result.([]*model.Source), nil
 }
+
+func (c *neo4jClient) IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["sourceType"] = source.Type
+	values["namespace"] = source.Namespace
+	values["name"] = source.Name
+
+	if source.Commit != nil && source.Tag != nil {
+		if *source.Commit != "" && *source.Tag != "" {
+			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
+		}
+	}
+
+	//values["commit"] = ""
+	if source.Commit != nil {
+		values["commit"] = *source.Commit
+	}
+	//values["tag"] = ""
+	if source.Tag != nil {
+		values["tag"] = *source.Tag
+	}
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Src)
+MERGE (root) -[:SrcHasType]-> (type:SrcType{type:$sourceType})
+MERGE (type) -[:SrcHasNamespace]-> (ns:SrcNamespace{namespace:$namespace})
+MERGE (ns) -[:SrcHasName]-> (name:SrcName{name:$name,commit:$commit,tag:$tag})
+RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
+			tag := (*string)(nil)
+			if record.Values[4] != nil {
+				// make sure to take a copy
+				tagStr := record.Values[4].(string)
+				tag = &tagStr
+			}
+			commit := (*string)(nil)
+			if record.Values[3] != nil {
+				// make sure to take a copy
+				commitStr := record.Values[3].(string)
+				commit = &commitStr
+			}
+			nameStr := record.Values[2].(string)
+			name := &model.SourceName{
+				Name:   nameStr,
+				Tag:    tag,
+				Commit: commit,
+			}
+
+			namespaceStr := record.Values[1].(string)
+			namespace := &model.SourceNamespace{
+				Namespace: namespaceStr,
+				Names:     []*model.SourceName{name},
+			}
+
+			srcType := record.Values[0].(string)
+			src := model.Source{
+				Type:       srcType,
+				Namespaces: []*model.SourceNamespace{namespace},
+			}
+
+			return &src, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Source), nil
+}

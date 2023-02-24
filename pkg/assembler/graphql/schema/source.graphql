@@ -68,9 +68,9 @@ SourceSpec allows filtering the list of sources to return.
 Empty string at a field means matching with the empty string. Missing field
 means retrieving all possible matches.
 
-It is an error to specify both tag and commit fields, except it both are set as
-empty string (in which case the returned sources are only those for which there
-is no tag/commit information).
+It is an error to specify both `tag` and `commit` fields, except it both are
+set as empty string (in which case the returned sources are only those for
+which there is no tag/commit information).
 """
 input SourceSpec {
   type: String
@@ -80,7 +80,30 @@ input SourceSpec {
   commit: String
 }
 
+"""
+SourceInputSpec specifies a source for a mutation.
+
+This is different than SourceSpec because we want to encode that all fields
+except tag and commit are mandatory fields. All optional fields are given
+empty default values.
+
+It is an error to set both `tag` and `commit` fields to values different than
+the default.
+"""
+input SourceInputSpec {
+  type: String!
+  namespace: String!
+  name: String!
+  tag: String = ""
+  commit: String = ""
+}
+
 extend type Query {
   "Returns all sources"
   sources(sourceSpec: SourceSpec): [Source!]!
+}
+
+extend type Mutation {
+  "Ingest a new source. Returns the ingested source trie"
+  ingestSource(source: SourceInputSpec): Source!
 }

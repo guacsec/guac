@@ -71,3 +71,57 @@ query SrcQ9 {
     ...allSrcTree
   }
 }
+
+mutation SrcM1 {
+  ingestSource(
+    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow"}
+  ) {
+    ...allSrcTree
+  }
+}
+
+mutation SrcM2 {
+  ingestSource(
+    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609"}
+  ) {
+    ...allSrcTree
+  }
+}
+
+mutation SrcM3 {
+  ingestSource(
+    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", tag: "v2.12.0"}
+  ) {
+    ...allSrcTree
+  }
+}
+
+# this should error as both `tag` and `commit` are specified and not empty
+mutation SrcM4 {
+  ingestSource(
+    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", commit: "4fd637ad9d674c88c50d56a5d47cd77f6032e609", tag: "2.12.0"}
+  ) {
+    ...allSrcTree
+  }
+}
+
+mutation SrcM5 {
+  ingestSource(
+    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", tag: "v2.12.0"}
+  ) {
+    namespaces {
+      names {
+        name
+      }
+    }
+  }
+}
+
+# this should be ok, since we're setting default value
+mutation SrcM6 {
+  ingestSource(
+    source: {type: "git", namespace: "github", name: "github.com/tensorflow/tensorflow", commit: "", tag: "v2.12.0"}
+  ) {
+    ...allSrcTree
+  }
+}

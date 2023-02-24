@@ -37,8 +37,6 @@ type Backend interface {
 	IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
 	HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error)
 	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
-	// Mutations (read-write queries)
-	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 	CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error)
 	HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
 	CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error)
@@ -47,6 +45,10 @@ type Backend interface {
 	IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error)
+
+	// Mutations (read-write queries)
+	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
+	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to
