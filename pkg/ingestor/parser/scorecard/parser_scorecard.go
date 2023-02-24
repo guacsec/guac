@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	sc "github.com/ossf/scorecard/v4/pkg"
@@ -32,6 +33,13 @@ type scorecardParser struct {
 	// artifactNode should have a 1:1 mapping to the index
 	// of scorecardNodes.
 	artifactNodes []assembler.ArtifactNode
+
+	// TODO: this will change to model.CertifyScorecardInputSpec when it is done
+	scorecardInput []*model.CertifyScorecardSpec
+
+	// Don't thinkwe need sourceInput since putting in the verb should imply
+	// importing of this software tree.
+	//sourceInput    []*model.SourceInputSpec
 }
 
 // NewSLSAParser initializes the slsaParser
@@ -55,8 +63,9 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 		if err := json.Unmarshal(doc.Blob, &scorecard); err != nil {
 			return err
 		}
-		p.scorecardNodes = append(p.scorecardNodes, getMetadataNode(&scorecard))
-		p.artifactNodes = append(p.artifactNodes, getArtifactNode(&scorecard))
+		p.scorecardNodes = append(p.scorecardNodes, getMetadataNodeOld(&scorecard))
+		p.artifactNodes = append(p.artifactNodes, getArtifactNodeOld(&scorecard))
+
 		return nil
 	}
 	return fmt.Errorf("unable to support parsing of Scorecard document format: %v", doc.Format)
@@ -97,7 +106,46 @@ func metadataId(s *sc.JSONScorecardResultV2) string {
 	return fmt.Sprintf("%v:%v", s.Repo.Name, s.Repo.Commit)
 }
 
-func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
+func getPredicates(s *sc.JSONScorecardResultV2) (*model.CertifyScorecardSpec, *model.SourceInputSpec) {
+	var ns, name string
+	idx := strings.LastIndex(s.Repo.Name, "/")
+	if idx < 0 {
+		name = s.Repo.Name
+	}
+
+	ns = s.Repo.Name[:idx]
+	name = s.Repo.Name[idx+1:]
+
+	srcInput := model.SourceInputSpec{
+		// assuming scorecards is only git
+		Type:      "git",
+		Namespace: ns,
+		Name:      name,
+		Commit:    &s.Repo.Commit,
+	}
+
+	var checks []*model.ScorecardCheckSpec
+	for _, c := range s.Checks {
+		checks = append(checks, &model.ScorecardCheckSpec{
+			Check: c.Name,
+			Score: c.Score,
+		})
+	}
+
+	// TODO: will become CertifyScorecardInputSpec
+	scInput := model.CertifyScorecardSpec{
+		// TODO: Put the above source input here
+		Source:           nil,
+		TimeScanned:      &s.Date,
+		AggregateScore:   (*float64)(&s.AggregateScore),
+		Checks:           checks,
+		ScorecardVersion: &s.Scorecard.Version,
+		ScorecardCommit:  &s.Scorecard.Commit,
+	}
+	return &scInput, &srcInput
+}
+
+func getMetadataNodeOld(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
 	mnNode := assembler.MetadataNode{
 		MetadataType: "scorecard",
 		ID:           metadataId(s),
@@ -116,7 +164,7 @@ func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
 	return mnNode
 }
 
-func getArtifactNode(s *sc.JSONScorecardResultV2) assembler.ArtifactNode {
+func getArtifactNodeOld(s *sc.JSONScorecardResultV2) assembler.ArtifactNode {
 	return assembler.ArtifactNode{
 		Name:   sourceUri(s.Repo.Name),
 		Digest: hashToDigest(s.Repo.Commit),

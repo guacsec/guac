@@ -113,6 +113,9 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph, []*com
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
+// TODO: Create an input type which is a sum type of all possible inputspec types instead of returning
+// []assembler.Graph return []model.InputSpec, then we would have a function that takes in the InputSpec
+// fill up the collector and origin information and call the GraphQL client.
 func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.Graph{}
 	identifierStrings := []*common.IdentifierStrings{}

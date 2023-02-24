@@ -28,6 +28,7 @@ type GraphBuilder struct {
 }
 
 // NewGenericGraphBuilder initializes the graphbulder
+// TODO: take in trust URI strings instead of identities
 func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assembler.IdentityNode) *GraphBuilder {
 	return &GraphBuilder{
 		docParser:       docParser,

@@ -25,12 +25,17 @@ import (
 type DocumentParser interface {
 	// Parse breaks out the document into the graph components
 	Parse(ctx context.Context, doc *processor.Document) error
+	// TODO(beta): change this to just return a string representing trust URI instead
 	// GetIdentities gets the identity node from the document if they exist
 	GetIdentities(ctx context.Context) []assembler.IdentityNode
+	// TODO(beta): to deprecate
 	// CreateNodes creates the GuacNode for the graph inputs
 	CreateNodes(ctx context.Context) []assembler.GuacNode
+	// TODO(beta): to deprecate
 	// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
 	CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
+	// TODO(beta): create GetPredicates which will return []model.InputSpec
+
 	// GetIdentifiers returns a set of identifiers that the parser has found to help provide context
 	// for collectors to gather more information around found software identifiers.
 	// This is an optional function to implement and it should return an error if not implemented.
