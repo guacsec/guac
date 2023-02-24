@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -48,4 +49,8 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 		}
 	}
 	return builders, nil
+}
+
+func (r *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+	panic(fmt.Errorf("not implemented: IngestBuilder - ingestBuilder"))
 }

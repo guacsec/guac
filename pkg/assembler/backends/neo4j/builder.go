@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -88,4 +89,8 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 	}
 
 	return result.([]*model.Builder), nil
+}
+
+func (r *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+	panic(fmt.Errorf("not implemented: IngestBuilder - ingestBuilder"))
 }
