@@ -41,7 +41,22 @@ input ArtifactSpec {
   digest: String
 }
 
+"""
+ArtifactInputSpec is the same as Artifact, but used as mutation input.
+
+Both arguments will be canonicalized to lowercase.
+"""
+input ArtifactInputSpec {
+  algorithm: String!
+  digest: String!
+}
+
 extend type Query {
   "Returns all artifacts"
   artifacts(artifactSpec: ArtifactSpec): [Artifact!]!
+}
+
+extend type Mutation {
+  "Ingest a new artifact. Returns the ingested artifact"
+  ingestArtifact(artifact: ArtifactInputSpec): Artifact!
 }
