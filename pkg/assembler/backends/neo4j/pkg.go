@@ -315,7 +315,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 				queryValues["pkgSubpath"] = pkgSpec.Subpath
 			}
 
-			if pkgSpec.MatchOnlyEmptyQualifiers != nil && !*pkgSpec.MatchOnlyEmptyQualifiers {
+			if !*pkgSpec.MatchOnlyEmptyQualifiers {
 				if len(pkgSpec.Qualifiers) > 0 {
 					qualifiers := getQualifiers(pkgSpec.Qualifiers)
 					matchProperties(&sb, firstMatch, "version", "qualifier_list", "$qualifier")

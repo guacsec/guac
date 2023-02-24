@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -55,37 +56,9 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				"depVersion.version, depVersion.subpath, depVersion.qualifier_list"
 
 			queryValues := map[string]any{}
+
 			// query with pkgVersion
 			query := "MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-				"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, null AS depVersion"
-			sb.WriteString(query)
-
-			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
-			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
-
-			sb.WriteString(returnValue)
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, null AS version, null AS depVersion"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
-			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
-
-			sb.WriteString(returnValue)
-
-			sb.WriteString("\nUNION")
-
-			query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
 				"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
 				"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
@@ -98,21 +71,66 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 			sb.WriteString(returnValue)
 
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
-				"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
+			if dependentPkg == nil || dependentPkg != nil && dependentPkg.Version == nil && dependentPkg.Subpath == nil &&
+				len(dependentPkg.Qualifiers) == 0 && !*dependentPkg.MatchOnlyEmptyQualifiers {
 
-			firstMatch = true
-			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
-			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+				sb.WriteString("\nUNION")
+				// query with pkgVersion
+				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+					"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
+					"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+					"\nWITH *, null AS depVersion"
+				sb.WriteString(query)
 
-			sb.WriteString(returnValue)
+				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+
+				sb.WriteString(returnValue)
+
+			}
+
+			if selectedPkg == nil || (selectedPkg != nil && selectedPkg.Version == nil && selectedPkg.Subpath == nil &&
+				len(selectedPkg.Qualifiers) == 0 && !*selectedPkg.MatchOnlyEmptyQualifiers &&
+				dependentPkg == nil || dependentPkg != nil && dependentPkg.Version == nil && dependentPkg.Subpath == nil &&
+				len(dependentPkg.Qualifiers) == 0 && !*dependentPkg.MatchOnlyEmptyQualifiers) {
+
+				sb.WriteString("\nUNION")
+				// query without pkgVersion
+				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+					"-[:PkgHasName]->(name:PkgName)" +
+					"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+					"\nWITH *, null AS version, null AS depVersion"
+				sb.WriteString(query)
+
+				firstMatch = true
+				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+
+				sb.WriteString(returnValue)
+			}
+
+			if selectedPkg == nil || selectedPkg != nil && selectedPkg.Version == nil && selectedPkg.Subpath == nil &&
+				len(selectedPkg.Qualifiers) == 0 && !*selectedPkg.MatchOnlyEmptyQualifiers {
+
+				sb.WriteString("\nUNION")
+				// query without pkgVersion
+				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+					"-[:PkgHasName]->(name:PkgName)" +
+					"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
+					"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+					"\nWITH *, null AS version"
+				sb.WriteString(query)
+
+				firstMatch = true
+				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+
+				sb.WriteString(returnValue)
+			}
+			fmt.Println(sb.String())
 
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
@@ -123,31 +141,12 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 			for result.Next() {
 
-				pkgQualifiers := []*model.PackageQualifier{}
-				if result.Record().Values[5] != nil {
-					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-				}
-
-				subPathString := ""
-				if result.Record().Values[4] != nil {
-					subPathString = result.Record().Values[4].(string)
-				}
-				versionString := ""
-				if result.Record().Values[3] != nil {
-					versionString = result.Record().Values[3].(string)
-				}
-				nameString := ""
-				if result.Record().Values[2] != nil {
-					nameString = result.Record().Values[2].(string)
-				}
-				namespaceString := ""
-				if result.Record().Values[1] != nil {
-					namespaceString = result.Record().Values[1].(string)
-				}
-				typeString := ""
-				if result.Record().Values[0] != nil {
-					typeString = result.Record().Values[0].(string)
-				}
+				pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
+				subPathString := result.Record().Values[4].(string)
+				versionString := result.Record().Values[3].(string)
+				nameString := result.Record().Values[2].(string)
+				namespaceString := result.Record().Values[1].(string)
+				typeString := result.Record().Values[0].(string)
 
 				version := &model.PackageVersion{
 					Version:    versionString,
@@ -169,31 +168,12 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 					Namespaces: []*model.PackageNamespace{namespace},
 				}
 
-				pkgQualifiers = []*model.PackageQualifier{}
-				if result.Record().Values[12] != nil {
-					pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[12].([]interface{}))
-				}
-
-				subPathString = ""
-				if result.Record().Values[11] != nil {
-					subPathString = result.Record().Values[11].(string)
-				}
-				versionString = ""
-				if result.Record().Values[10] != nil {
-					versionString = result.Record().Values[10].(string)
-				}
-				nameString = ""
-				if result.Record().Values[9] != nil {
-					nameString = result.Record().Values[9].(string)
-				}
-				namespaceString = ""
-				if result.Record().Values[8] != nil {
-					namespaceString = result.Record().Values[8].(string)
-				}
-				typeString = ""
-				if result.Record().Values[7] != nil {
-					typeString = result.Record().Values[7].(string)
-				}
+				pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[12].([]interface{}))
+				subPathString = result.Record().Values[11].(string)
+				versionString = result.Record().Values[10].(string)
+				nameString = result.Record().Values[9].(string)
+				namespaceString = result.Record().Values[8].(string)
+				typeString = result.Record().Values[7].(string)
 
 				version = &model.PackageVersion{
 					Version:    versionString,
