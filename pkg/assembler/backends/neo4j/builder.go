@@ -17,6 +17,8 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
