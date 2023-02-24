@@ -64,6 +64,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 			sb.WriteString(query)
 
 			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
 
@@ -78,6 +79,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 			firstMatch = true
 			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
 
@@ -92,6 +94,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 			firstMatch = true
 			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
 
@@ -107,6 +110,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 			firstMatch = true
 			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
 
@@ -237,4 +241,25 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 	}
 
 	return result.([]*model.CertifyPkg), nil
+}
+
+func setCertifyPkgValues(sb *strings.Builder, certifyPkgSpec *model.CertifyPkgSpec, firstMatch bool, queryValues map[string]any) {
+	if certifyPkgSpec.Justification != nil {
+
+		matchProperties(sb, firstMatch, "certifyPkg", "justification", "$justification")
+		firstMatch = false
+		queryValues["justification"] = certifyPkgSpec.Justification
+	}
+	if certifyPkgSpec.Origin != nil {
+
+		matchProperties(sb, firstMatch, "certifyPkg", "origin", "$origin")
+		firstMatch = false
+		queryValues["origin"] = certifyPkgSpec.Origin
+	}
+	if certifyPkgSpec.Collector != nil {
+
+		matchProperties(sb, firstMatch, "certifyPkg", "collector", "$collector")
+		firstMatch = false
+		queryValues["collector"] = certifyPkgSpec.Collector
+	}
 }
