@@ -28,14 +28,15 @@ func registerAllBuilders(client *demoClient) {
 
 // Ingest Builder
 
-func (c *demoClient) registerBuilder(uri string) {
+func (c *demoClient) registerBuilder(uri string) *model.Builder {
 	for _, b := range c.builders {
 		if b.URI == uri {
-			return
+			return b
 		}
 	}
 	newBuilder := &model.Builder{URI: uri}
 	c.builders = append(c.builders, newBuilder)
+	return newBuilder
 }
 
 // Query Builder
@@ -48,4 +49,8 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 		}
 	}
 	return builders, nil
+}
+
+func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+	return c.registerBuilder(builder.URI), nil
 }

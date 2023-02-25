@@ -49,18 +49,22 @@ mutation ArtM2 {
   }
 }
 
-fragment allBuilderTree on Builder {
-  uri
-}
-
-query Q5 {
-  builders(builderSpec: {uri: "https://github.com/Attestations/GitHubHostedActions@v1"}) {
-    ...allBuilderTree
+query BQ1 {
+  builders(builderSpec: {}) {
+    uri
   }
 }
 
-query Q6 {
-  builders(builderSpec: {}) {
-    ...allBuilderTree
+query BQ2 {
+  builders(
+    builderSpec: {uri: "https://github.com/Attestations/GitHubHostedActions@v1"}
+  ) {
+    uri
+  }
+}
+
+mutation BM1 {
+  ingestBuilder(builder: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"}) {
+    uri
   }
 }

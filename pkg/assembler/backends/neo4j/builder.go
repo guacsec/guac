@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -51,21 +50,18 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var query string
+	values := map[string]any{}
+	if builderSpec.URI != nil {
+		query = "MATCH (b:Builder) WHERE b.uri = $uri RETURN b.uri"
+		values["uri"] = *builderSpec.URI
+	} else {
+		query = "MATCH (b:Builder) RETURN b.uri"
+	}
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-
-			var sb strings.Builder
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Builder)")
-
-			if builderSpec.URI != nil {
-				matchProperties(&sb, true, "n", "uri", "$builderUri")
-				queryValues["builderUri"] = builderSpec.URI
-			}
-
-			sb.WriteString(" RETURN n.uri")
-			result, err := tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(query, values)
 			if err != nil {
 				return nil, err
 			}
@@ -88,4 +84,37 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 	}
 
 	return result.([]*model.Builder), nil
+}
+
+func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["uri"] = builder.URI
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := "MERGE (b:Builder{uri:$uri}) RETURN b.uri"
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			uri := record.Values[0].(string)
+			builder := model.Builder{URI: uri}
+
+			return &builder, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Builder), nil
 }

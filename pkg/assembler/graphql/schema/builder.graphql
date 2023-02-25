@@ -16,13 +16,11 @@
 # NOTE: This is experimental and might change in the future!
 
 # Defines a GraphQL schema for the builder. It only contains the uri
+
 """
-Builder represents the builder such as (FRSCA or github actions) and contains a uri field
+Builder represents the builder such as (FRSCA or github actions).
 
-uri is mandatory and represents the specific builder.
-
-This node is a singleton: backends guarantee that there is exactly one node with
-the same `uri` value.
+Currently builders are identified by the `uri` field, which is mandatory.
 """
 type Builder {
   uri: String!
@@ -35,8 +33,19 @@ input BuilderSpec {
   uri: String
 }
 
+"""
+BuilderInputSpec is the same as Builder, but used for mutation ingestion.
+"""
+input BuilderInputSpec {
+  uri: String!
+}
 
 extend type Query {
   "Returns all builders"
   builders(builderSpec: BuilderSpec): [Builder!]!
+}
+
+extend type Mutation {
+  "Ingest a new builder. Returns the ingested builder"
+  ingestBuilder(builder: BuilderInputSpec): Builder!
 }

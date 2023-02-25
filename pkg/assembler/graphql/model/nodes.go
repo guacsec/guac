@@ -59,13 +59,15 @@ type ArtifactSpec struct {
 	Digest    *string `json:"digest"`
 }
 
-// Builder represents the builder such as (FRSCA or github actions) and contains a uri field
+// Builder represents the builder such as (FRSCA or github actions).
 //
-// uri is mandatory and represents the specific builder.
-//
-// This node is a singleton: backends guarantee that there is exactly one node with
-// the same `uri` value.
+// Currently builders are identified by the `uri` field, which is mandatory.
 type Builder struct {
+	URI string `json:"uri"`
+}
+
+// BuilderInputSpec is the same as Builder, but used for mutation ingestion.
+type BuilderInputSpec struct {
 	URI string `json:"uri"`
 }
 
