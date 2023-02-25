@@ -51,21 +51,21 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 			}
 
 			returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
-				"version.qualifier_list, certifyPkg, depType.type, depNamespace.namespace, depName.name, " +
-				"depVersion.version, depVersion.subpath, depVersion.qualifier_list"
+				"version.qualifier_list, certifyPkg, objPkgType.type, objPkgNamespace.namespace, objPkgName.name, " +
+				"objPkgVersion.version, objPkgVersion.subpath, objPkgVersion.qualifier_list"
 
 			queryValues := map[string]any{}
 
 			// query with pkgVersion
-			query := "MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-				"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
-				"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)"
+				"-[certifyPkg:CertifyPkg]-(objPkgVersion:PkgVersion)<-[:PkgHasVersion]-(objPkgName:PkgName)<-[:PkgHasName]" +
+				"-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+				"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
 			sb.WriteString(query)
 
-			firstMatch = true
-			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+			setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
+			setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
 			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
@@ -75,14 +75,16 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 				sb.WriteString("\nUNION")
 				// query with pkgVersion
-				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 					"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-					"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-					"\nWITH *, null AS depVersion"
+					"-[certifyPkg:CertifyPkg]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
+					"\nWITH *, null AS objPkgVersion"
 				sb.WriteString(query)
 
-				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+				firstMatch = true
+				setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
 				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 				sb.WriteString(returnValue)
@@ -96,15 +98,16 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 				sb.WriteString("\nUNION")
 				// query without pkgVersion
-				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 					"-[:PkgHasName]->(name:PkgName)" +
-					"-[certifyPkg:CertifyPkg]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
-					"\nWITH *, null AS version, null AS depVersion"
+					"-[certifyPkg:CertifyPkg]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
+					"\nWITH *, null AS version, null AS objPkgVersion"
 				sb.WriteString(query)
 
 				firstMatch = true
-				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+				setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
 				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 				sb.WriteString(returnValue)
@@ -115,16 +118,17 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 				sb.WriteString("\nUNION")
 				// query without pkgVersion
-				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 					"-[:PkgHasName]->(name:PkgName)" +
-					"-[certifyPkg:CertifyPkg]-(depVersion:PkgVersion)<-[:PkgHasVersion]-(depName:PkgName)<-[:PkgHasName]" +
-					"-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+					"-[certifyPkg:CertifyPkg]-(objPkgVersion:PkgVersion)<-[:PkgHasVersion]-(objPkgName:PkgName)<-[:PkgHasName]" +
+					"-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
 					"\nWITH *, null AS version"
 				sb.WriteString(query)
 
 				firstMatch = true
-				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
+				setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
 				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
 
 				sb.WriteString(returnValue)

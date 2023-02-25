@@ -235,36 +235,10 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 
 			var firstMatch bool = true
 			queryValues := map[string]any{}
-			sb.WriteString("MATCH (n:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
 
-			if sourceSpec.Type != nil {
-				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
-				firstMatch = false
-				queryValues["srcType"] = sourceSpec.Type
-			}
+			sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
 
-			if sourceSpec.Namespace != nil {
-				matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
-				firstMatch = false
-				queryValues["srcNamespace"] = sourceSpec.Namespace
-			}
-
-			if sourceSpec.Name != nil {
-				matchProperties(&sb, firstMatch, "name", "name", "$srcName")
-				firstMatch = false
-				queryValues["srcName"] = sourceSpec.Name
-			}
-
-			if sourceSpec.Tag != nil {
-				matchProperties(&sb, firstMatch, "name", "tag", "$srcTag")
-				firstMatch = false
-				queryValues["srcTag"] = sourceSpec.Tag
-			}
-
-			if sourceSpec.Commit != nil {
-				matchProperties(&sb, firstMatch, "name", "commit", "$srcCommit")
-				queryValues["srcCommit"] = sourceSpec.Commit
-			}
+			setSrcMatchValues(&sb, sourceSpec, false, firstMatch, queryValues)
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
 
@@ -338,7 +312,7 @@ func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceS
 
 			var firstMatch bool = true
 			queryValues := map[string]any{}
-			sb.WriteString("MATCH (n:Src)-[:SrcHasType]->(type:SrcType)")
+			sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)")
 
 			if sourceSpec.Type != nil {
 
@@ -388,7 +362,7 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 
 			var firstMatch bool = true
 			queryValues := map[string]any{}
-			sb.WriteString("MATCH (n:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)")
+			sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)")
 
 			if sourceSpec.Type != nil {
 
@@ -523,4 +497,60 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
 	}
 
 	return result.(*model.Source), nil
+}
+
+func setSrcMatchValues(sb *strings.Builder, src *model.SourceSpec, objectSrc bool, firstMatch bool, queryValues map[string]any) {
+	if src != nil {
+		if src.Type != nil {
+			if !objectSrc {
+				matchProperties(sb, firstMatch, "type", "type", "$srcType")
+				queryValues["srcType"] = src.Type
+			} else {
+				matchProperties(sb, firstMatch, "objSrcType", "type", "$objSrcType")
+				queryValues["objSrcType"] = src.Type
+			}
+			firstMatch = false
+		}
+		if src.Namespace != nil {
+			if !objectSrc {
+				matchProperties(sb, firstMatch, "namespace", "namespace", "$srcNamespace")
+				queryValues["srcNamespace"] = src.Namespace
+			} else {
+				matchProperties(sb, firstMatch, "objSrcNamespace", "namespace", "$objSrcNamespace")
+				queryValues["objSrcNamespace"] = src.Namespace
+			}
+			firstMatch = false
+		}
+		if src.Name != nil {
+			if !objectSrc {
+				matchProperties(sb, firstMatch, "name", "name", "$srcName")
+				queryValues["srcName"] = src.Name
+			} else {
+				matchProperties(sb, firstMatch, "objSrcName", "name", "$objSrcName")
+				queryValues["objSrcName"] = src.Name
+			}
+			firstMatch = false
+		}
+
+		if src.Tag != nil {
+			if !objectSrc {
+				matchProperties(sb, firstMatch, "name", "tag", "$srcTag")
+				queryValues["srcTag"] = src.Tag
+			} else {
+				matchProperties(sb, firstMatch, "objSrcName", "tag", "$objSrcTag")
+				queryValues["objSrcTag"] = src.Tag
+			}
+			firstMatch = false
+		}
+
+		if src.Commit != nil {
+			if !objectSrc {
+				matchProperties(sb, firstMatch, "name", "commit", "$srcCommit")
+				queryValues["srcCommit"] = src.Commit
+			} else {
+				matchProperties(sb, firstMatch, "objSrcName", "commit", "$objSrcCommit")
+				queryValues["objSrcCommit"] = src.Commit
+			}
+		}
+	}
 }

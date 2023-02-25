@@ -37,17 +37,18 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 	var firstMatch bool = true
 
 	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
-		"version.qualifier_list, hasSourceAt, srcType.type, srcNamespace.namespace, srcName.name, srcName.tag, srcName.commit"
+		"version.qualifier_list, hasSourceAt, objSrcType.type, objSrcNamespace.namespace, objSrcName.name, objSrcName.tag, objSrcName.commit"
 
 	queryValues := map[string]any{}
 	// query with pkgVersion
-	query := "MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+	query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-		"-[hasSourceAt:HasSourceAt]-(srcName:SrcName)<-[:SrcHasName]-(srcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
-		"-(srcType:SrcType)<-[:SrcHasType]-(src:Src)"
+		"-[hasSourceAt:HasSourceAt]-(objSrcName:SrcName)<-[:SrcHasName]-(objSrcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
+		"-(objSrcType:SrcType)<-[:SrcHasType]-(objSrcRoot:Src)"
 	sb.WriteString(query)
 
-	setPkgSrcMatchValues(&sb, hasSourceAtSpec.Package, hasSourceAtSpec.Source, firstMatch, queryValues)
+	setPkgMatchValues(&sb, hasSourceAtSpec.Package, false, firstMatch, queryValues)
+	setSrcMatchValues(&sb, hasSourceAtSpec.Source, true, firstMatch, queryValues)
 	setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
 	sb.WriteString(returnValue)
 
@@ -56,15 +57,16 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 
 		sb.WriteString("\nUNION")
 		// query without pkgVersion
-		query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)" +
-			"-[hasSourceAt:HasSourceAt]-(srcName:SrcName)<-[:SrcHasName]-(srcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
-			"-(srcType:SrcType)<-[:SrcHasType]-(src:Src)" +
+			"-[hasSourceAt:HasSourceAt]-(objSrcName:SrcName)<-[:SrcHasName]-(objSrcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
+			"-(objSrcType:SrcType)<-[:SrcHasType]-(objSrcRoot:Src)" +
 			"\nWITH *, null AS version"
 		sb.WriteString(query)
 
 		firstMatch = true
-		setPkgSrcMatchValues(&sb, hasSourceAtSpec.Package, hasSourceAtSpec.Source, firstMatch, queryValues)
+		setPkgMatchValues(&sb, hasSourceAtSpec.Package, false, firstMatch, queryValues)
+		setSrcMatchValues(&sb, hasSourceAtSpec.Source, true, firstMatch, queryValues)
 		setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
 		sb.WriteString(returnValue)
 	}
@@ -189,88 +191,5 @@ func setHasSourceAtValues(sb *strings.Builder, hasSourceAtSpec *model.HasSourceA
 		matchProperties(sb, firstMatch, "hasSourceAt", "collector", "$collector")
 		firstMatch = false
 		queryValues["collector"] = hasSourceAtSpec.Collector
-	}
-}
-
-// TODO (parth): Refactor to remove reused code by multiple verbs
-func setPkgSrcMatchValues(sb *strings.Builder, pkg *model.PkgSpec, src *model.SourceSpec, firstMatch bool, queryValues map[string]any) {
-	if pkg != nil {
-		if pkg.Type != nil {
-
-			matchProperties(sb, firstMatch, "type", "type", "$pkgType")
-			firstMatch = false
-			queryValues["pkgType"] = pkg.Type
-		}
-		if pkg.Namespace != nil {
-
-			matchProperties(sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
-			firstMatch = false
-			queryValues["pkgNamespace"] = pkg.Namespace
-		}
-		if pkg.Name != nil {
-
-			matchProperties(sb, firstMatch, "name", "name", "$pkgName")
-			firstMatch = false
-			queryValues["pkgName"] = pkg.Name
-		}
-		if pkg.Version != nil {
-
-			matchProperties(sb, firstMatch, "version", "version", "$pkgVersion")
-			firstMatch = false
-			queryValues["pkgVersion"] = pkg.Version
-		}
-
-		if pkg.Subpath != nil {
-
-			matchProperties(sb, firstMatch, "version", "subpath", "$pkgSubpath")
-			firstMatch = false
-			queryValues["pkgSubpath"] = pkg.Subpath
-		}
-
-		if !*pkg.MatchOnlyEmptyQualifiers {
-
-			if len(pkg.Qualifiers) > 0 {
-				qualifiers := getQualifiers(pkg.Qualifiers)
-				matchProperties(sb, firstMatch, "version", "qualifier_list", "$pkgQualifierList")
-				firstMatch = false
-				queryValues["pkgQualifierList"] = qualifiers
-			}
-
-		} else {
-			matchProperties(sb, firstMatch, "version", "qualifier_list", "$pkgQualifierList")
-			firstMatch = false
-			queryValues["pkgQualifierList"] = []string{}
-		}
-	}
-	if src != nil {
-		if src.Type != nil {
-
-			matchProperties(sb, firstMatch, "srcType", "type", "$srcType")
-			firstMatch = false
-			queryValues["srcType"] = src.Type
-		}
-		if src.Namespace != nil {
-
-			matchProperties(sb, firstMatch, "srcNamespace", "namespace", "$srcNamespace")
-			firstMatch = false
-			queryValues["srcNamespace"] = src.Namespace
-		}
-		if src.Name != nil {
-
-			matchProperties(sb, firstMatch, "srcName", "name", "$srcName")
-			firstMatch = false
-			queryValues["srcName"] = src.Name
-		}
-
-		if src.Tag != nil {
-			matchProperties(sb, firstMatch, "srcName", "tag", "$srcTag")
-			firstMatch = false
-			queryValues["srcTag"] = src.Tag
-		}
-
-		if src.Commit != nil {
-			matchProperties(sb, firstMatch, "srcName", "commit", "$srcCommit")
-			queryValues["srcCommit"] = src.Commit
-		}
 	}
 }

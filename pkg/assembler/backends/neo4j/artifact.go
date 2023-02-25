@@ -58,19 +58,11 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 	var firstMatch bool = true
 	queryValues := map[string]any{}
 
-	sb.WriteString("MATCH (n:Artifact)")
+	sb.WriteString("MATCH (a:Artifact)")
 
-	if artifactSpec.Algorithm != nil {
-		matchProperties(&sb, firstMatch, "n", "algorithm", "$artifactAlgo")
-		firstMatch = false
-		queryValues["artifactAlgo"] = strings.ToLower(*artifactSpec.Algorithm)
-	}
-	if artifactSpec.Digest != nil {
-		matchProperties(&sb, firstMatch, "n", "digest", "$artifactDigest")
-		queryValues["artifactDigest"] = strings.ToLower(*artifactSpec.Digest)
-	}
+	setArtifactMatchValues(&sb, artifactSpec, false, firstMatch, queryValues)
 
-	sb.WriteString(" RETURN n.algorithm, n.digest")
+	sb.WriteString(" RETURN a.algorithm, a.digest")
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
@@ -138,4 +130,30 @@ RETURN a.algorithm, a.digest`
 	}
 
 	return result.(*model.Artifact), nil
+}
+
+func setArtifactMatchValues(sb *strings.Builder, art *model.ArtifactSpec, objectArt bool, firstMatch bool, queryValues map[string]any) {
+	if art != nil {
+		if art.Algorithm != nil {
+			if !objectArt {
+				matchProperties(sb, firstMatch, "a", "algorithm", "$algorithm")
+				queryValues["algorithm"] = strings.ToLower(*art.Algorithm)
+			} else {
+				matchProperties(sb, firstMatch, "objArt", "algorithm", "$objAlgorithm")
+				queryValues["objAlgorithm"] = strings.ToLower(*art.Algorithm)
+			}
+			firstMatch = false
+		}
+
+		if art.Digest != nil {
+			if !objectArt {
+				matchProperties(sb, firstMatch, "a", "digest", "$digest")
+				queryValues["digest"] = strings.ToLower(*art.Digest)
+			} else {
+				matchProperties(sb, firstMatch, "objArt", "digest", "$objDigest")
+				queryValues["objDigest"] = strings.ToLower(*art.Digest)
+			}
+			firstMatch = false
+		}
+	}
 }
