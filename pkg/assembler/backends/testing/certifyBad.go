@@ -112,17 +112,29 @@ func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selected
 // Query CertifyBad
 
 func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
+	certifyPkg := false
+	certifySrc := false
+	certifyArt := false
+	if certifyBadSpec.Package != nil {
+		certifyPkg = true
+	}
+	if certifyBadSpec.Source != nil {
+		certifySrc = true
+	}
+	if certifyBadSpec.Artifact != nil {
+		certifyArt = true
+	}
 
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
+	if certifyPkg && certifySrc && certifyArt {
 		return nil, gqlerror.Errorf("cannot specify package, source and artifact together for CertifyBad")
 	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil {
+	if certifyPkg && certifySrc {
 		return nil, gqlerror.Errorf("cannot specify package and source together for CertifyBad")
 	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Artifact != nil {
+	if certifyPkg && certifyArt {
 		return nil, gqlerror.Errorf("cannot specify package and artifact together for CertifyBad")
 	}
-	if certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
+	if certifySrc && certifyArt {
 		return nil, gqlerror.Errorf("cannot specify source and artifact together for CertifyBad")
 	}
 
