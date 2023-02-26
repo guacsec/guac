@@ -1,5 +1,4 @@
 fragment allIsOccurrencesTree on IsOccurrence {
-  justification
   subject {
     __typename 
     ... on Package {
@@ -31,40 +30,47 @@ fragment allIsOccurrencesTree on IsOccurrence {
       }
     }
   }
-  occurrenceArtifacts {
+  occurrenceArtifact {
     algorithm
     digest
   }
+  justification
   origin
   collector
 }
 
 query Q1 {
-  IsOccurrences(isOccurrenceSpec: {}) {
+  IsOccurrence(isOccurrenceSpec: {}) {
     ...allIsOccurrencesTree
   }
 }
 
 query Q2 {
-  IsOccurrences(isOccurrenceSpec: {origin: "testing backend"}) {
+  IsOccurrence(isOccurrenceSpec: {origin: "testing backend"}) {
     ...allIsOccurrencesTree
   }
 }
 
 query Q3 {
-  IsOccurrences(isOccurrenceSpec: {package: {name: "openssl"}}) {
+  IsOccurrence(isOccurrenceSpec: {package: {name: "openssl"}}) {
     ...allIsOccurrencesTree
   }
 }
 
 query Q4 {
-  IsOccurrences(isOccurrenceSpec: {source: {name: "github.com/guacsec/guac"}}) {
+  IsOccurrence(isOccurrenceSpec: {package: {name: "openssl", version: "3.0.3"}}) {
     ...allIsOccurrencesTree
   }
 }
 
 query Q5 {
-  IsOccurrences(
+  IsOccurrence(isOccurrenceSpec: {source: {name: "github.com/guacsec/guac"}}) {
+    ...allIsOccurrencesTree
+  }
+}
+
+query Q6 {
+  IsOccurrence(
     isOccurrenceSpec: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}
   ) {
     ...allIsOccurrencesTree

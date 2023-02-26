@@ -61,5 +61,5 @@ input IsOccurrenceSpec {
 
 extend type Query {
   "Returns all IsOccurrence"
-  IsOccurrences(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
+  IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
 }

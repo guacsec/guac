@@ -10,7 +10,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// IsOccurrences is the resolver for the IsOccurrences field.
-func (r *queryResolver) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	return r.Backend.IsOccurrences(ctx, isOccurrenceSpec)
+// IsOccurrence is the resolver for the IsOccurrence field.
+func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	return r.Backend.IsOccurrence(ctx, isOccurrenceSpec)
 }

@@ -230,7 +230,7 @@ type ComplexityRoot struct {
 		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
 		HashEqual           func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
 		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
-		IsOccurrences       func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
+		IsOccurrence        func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
@@ -1175,17 +1175,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.IsDependency(childComplexity, args["isDependencySpec"].(*model.IsDependencySpec)), true
 
-	case "Query.IsOccurrences":
-		if e.complexity.Query.IsOccurrences == nil {
+	case "Query.IsOccurrence":
+		if e.complexity.Query.IsOccurrence == nil {
 			break
 		}
 
-		args, err := ec.field_Query_IsOccurrences_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_IsOccurrence_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.IsOccurrences(childComplexity, args["isOccurrenceSpec"].(*model.IsOccurrenceSpec)), true
+		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(*model.IsOccurrenceSpec)), true
 
 	case "Query.IsVulnerability":
 		if e.complexity.Query.IsVulnerability == nil {
@@ -2419,7 +2419,7 @@ input IsOccurrenceSpec {
 
 extend type Query {
   "Returns all IsOccurrence"
-  IsOccurrences(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
+  IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#

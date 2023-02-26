@@ -99,7 +99,7 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 
 // Query IsOccurrence
 
-func (c *demoClient) IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+func (c *demoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
 	if isOccurrenceSpec.Package != nil && isOccurrenceSpec.Source != nil {
 		return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
