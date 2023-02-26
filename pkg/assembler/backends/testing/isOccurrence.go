@@ -18,7 +18,6 @@ package testing
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -39,8 +38,7 @@ func registerAllIsOccurrence(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerIsOccurrence(selectedPackage[0], nil, []*model.Artifact{{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"},
-		{Digest: "89bb0da1891646e58eb3e6ed24f3a6fc3c8eb5a0d44824cba581dfa34a0450cf", Algorithm: "sha256"}}, "this artifact is an occurrence of this package")
+	err = client.registerIsOccurrence(selectedPackage[0], nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is an occurrence of this package")
 	if err != nil {
 		return err
 	}
@@ -54,7 +52,7 @@ func registerAllIsOccurrence(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerIsOccurrence(nil, selectedSource[0], []*model.Artifact{client.artifacts[0]}, "this artifact is an occurrence of this source")
+	err = client.registerIsOccurrence(nil, selectedSource[0], client.artifacts[0], "this artifact is an occurrence of this source")
 	if err != nil {
 		return err
 	}
@@ -63,14 +61,14 @@ func registerAllIsOccurrence(client *demoClient) error {
 
 // Ingest IsOccurrence
 
-func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, selectedSource *model.Source, artifacts []*model.Artifact, justification string) error {
+func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, selectedSource *model.Source, artifact *model.Artifact, justification string) error {
 
 	if selectedPackage != nil && selectedSource != nil {
 		return fmt.Errorf("cannot specify both package and source for IsOccurrence")
 	}
 
 	for _, occurrence := range c.isOccurrence {
-		if reflect.DeepEqual(occurrence.OccurrenceArtifacts, artifacts) && occurrence.Justification == justification {
+		if occurrence.OccurrenceArtifact == artifact && occurrence.Justification == justification {
 			if val, ok := occurrence.Subject.(model.Package); ok {
 				if &val == selectedPackage {
 					return nil
@@ -84,10 +82,10 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	}
 
 	newIsOccurrence := &model.IsOccurrence{
-		Justification:       justification,
-		OccurrenceArtifacts: artifacts,
-		Origin:              "testing backend",
-		Collector:           "testing backend",
+		Justification:      justification,
+		OccurrenceArtifact: artifact,
+		Origin:             "testing backend",
+		Collector:          "testing backend",
 	}
 	if selectedPackage != nil {
 		newIsOccurrence.Subject = selectedPackage

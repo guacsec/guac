@@ -1925,8 +1925,8 @@ func (ec *executionContext) fieldContext_Query_IsOccurrences(ctx context.Context
 			switch field.Name {
 			case "subject":
 				return ec.fieldContext_IsOccurrence_subject(ctx, field)
-			case "occurrenceArtifacts":
-				return ec.fieldContext_IsOccurrence_occurrenceArtifacts(ctx, field)
+			case "occurrenceArtifact":
+				return ec.fieldContext_IsOccurrence_occurrenceArtifact(ctx, field)
 			case "justification":
 				return ec.fieldContext_IsOccurrence_justification(ctx, field)
 			case "origin":
