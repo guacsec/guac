@@ -291,7 +291,7 @@ RETURN cy.year, ci.id`
 
 			yearStr := record.Values[0].(string)
 			src := model.Cve{
-				Year:       yearStr,
+				Year:  yearStr,
 				CveID: []*model.CVEId{id},
 			}
 
