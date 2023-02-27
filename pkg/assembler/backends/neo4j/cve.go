@@ -165,7 +165,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 	var firstMatch bool = true
 	queryValues := map[string]any{}
 
-	sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
+	sb.WriteString("MATCH (root:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
 
 	if cveSpec.Year != nil {
 		matchProperties(&sb, firstMatch, "cveYear", "year", "$cveYear")

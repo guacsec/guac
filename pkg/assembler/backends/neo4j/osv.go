@@ -102,7 +102,7 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 	var sb strings.Builder
 	queryValues := map[string]any{}
 
-	sb.WriteString("MATCH (n:Osv)-[:OsvHasID]->(osvID:OsvID)")
+	sb.WriteString("MATCH (root:Osv)-[:OsvHasID]->(osvID:OsvID)")
 
 	if osvSpec.OsvID != nil {
 		matchProperties(&sb, true, "osvID", "id", "$osvID")
