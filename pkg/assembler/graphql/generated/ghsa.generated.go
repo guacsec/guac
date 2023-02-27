@@ -124,6 +124,34 @@ func (ec *executionContext) fieldContext_GHSAId_id(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputGHSAInputSpec(ctx context.Context, obj interface{}) (model.GHSAInputSpec, error) {
+	var it model.GHSAInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ghsaId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ghsaId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsaId"))
+			it.GhsaID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGHSASpec(ctx context.Context, obj interface{}) (model.GHSASpec, error) {
 	var it model.GHSASpec
 	asMap := map[string]interface{}{}
@@ -219,6 +247,10 @@ func (ec *executionContext) _GHSAId(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNGHSA2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsa(ctx context.Context, sel ast.SelectionSet, v model.Ghsa) graphql.Marshaler {
+	return ec._GHSA(ctx, sel, &v)
+}
 
 func (ec *executionContext) marshalNGHSA2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGhsaᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Ghsa) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
@@ -326,6 +358,14 @@ func (ec *executionContext) marshalNGHSAId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpk
 		return graphql.Null
 	}
 	return ec._GHSAId(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpec(ctx context.Context, v interface{}) (*model.GHSAInputSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGHSAInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx context.Context, v interface{}) (*model.GHSASpec, error) {

@@ -124,6 +124,34 @@ func (ec *executionContext) fieldContext_OSVId_id(ctx context.Context, field gra
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputOSVInputSpec(ctx context.Context, obj interface{}) (model.OSVInputSpec, error) {
+	var it model.OSVInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"osvId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "osvId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osvId"))
+			it.OsvID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputOSVSpec(ctx context.Context, obj interface{}) (model.OSVSpec, error) {
 	var it model.OSVSpec
 	asMap := map[string]interface{}{}
@@ -219,6 +247,10 @@ func (ec *executionContext) _OSVId(ctx context.Context, sel ast.SelectionSet, ob
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNOSV2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsv(ctx context.Context, sel ast.SelectionSet, v model.Osv) graphql.Marshaler {
+	return ec._OSV(ctx, sel, &v)
+}
 
 func (ec *executionContext) marshalNOSV2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Osv) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
@@ -326,6 +358,14 @@ func (ec *executionContext) marshalNOSVId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg
 		return graphql.Null
 	}
 	return ec._OSVId(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx context.Context, v interface{}) (*model.OSVInputSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputOSVInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx context.Context, v interface{}) (*model.OSVSpec, error) {

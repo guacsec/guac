@@ -174,6 +174,9 @@ type ComplexityRoot struct {
 	Mutation struct {
 		IngestArtifact func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestBuilder  func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestCve      func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestGhsa     func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestOsv      func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage  func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSource   func(childComplexity int, source *model.SourceInputSpec) int
 	}
@@ -853,6 +856,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.BuilderInputSpec)), true
 
+	case "Mutation.ingestCVE":
+		if e.complexity.Mutation.IngestCve == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCVE_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCve(childComplexity, args["cve"].(*model.CVEInputSpec)), true
+
+	case "Mutation.ingestGHSA":
+		if e.complexity.Mutation.IngestGhsa == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestGHSA_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
+
+	case "Mutation.ingestOSV":
+		if e.complexity.Mutation.IngestOsv == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestOSV_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestOsv(childComplexity, args["osv"].(*model.OSVInputSpec)), true
+
 	case "Mutation.ingestPackage":
 		if e.complexity.Mutation.IngestPackage == nil {
 			break
@@ -1285,12 +1324,14 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderInputSpec,
 		ec.unmarshalInputBuilderSpec,
+		ec.unmarshalInputCVEInputSpec,
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
+		ec.unmarshalInputGHSAInputSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSLSASpec,
@@ -1299,6 +1340,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputIsVulnerabilitySpec,
+		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
@@ -1386,7 +1428,8 @@ var sources = []*ast.Source{
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the artifact. It contains the algorithm and digest fields
+# Defines a GraphQL schema for the artifact. It contains the algorithm and
+# digest fields
 
 """
 Artifact represents the artifact and contains a digest field
@@ -1837,16 +1880,17 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the cve trie/tree. It contains the year
-# along with the id associated with vulnerability (cve id)
+# Defines a GraphQL schema for the CVE trie/tree. It contains the year
+# along with the ID associated with vulnerability (CVE ID).
+
 """
 CVE represents common vulnerabilities and exposures. It contains the year along
 with the CVE ID.
 
-year is mandatory.
+The year is mandatory.
 
-This node is a singleton: backends guarantee that there is exactly one node with
-the same ` + "`" + `year` + "`" + ` value.
+This node is a singleton: backends guarantee that there is exactly one node
+with the same ` + "`" + `year` + "`" + ` value.
 """
 type CVE {
   year: String!
@@ -1856,7 +1900,7 @@ type CVE {
 """
 CVEId is the actual ID that is given to a specific vulnerability
 
-id field is mandatory and canonicalized to be lowercase.
+The ` + "`" + `id` + "`" + ` field is mandatory and canonicalized to be lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -1872,10 +1916,22 @@ input CVESpec {
   cveId: String
 }
 
+"""
+CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
+"""
+input CVEInputSpec {
+  year: String!
+  cveId: String!
+}
 
 extend type Query {
-  "Returns all cve"
+  "Returns all CVEs"
   cve(cveSpec: CVESpec): [CVE!]!
+}
+
+extend type Mutation {
+  "Ingest a new CVE. Returns the ingested object"
+  ingestCVE(cve: CVEInputSpec): CVE!
 }
 `, BuiltIn: false},
 	{Name: "../schema/ghsa.graphql", Input: `#
@@ -1895,19 +1951,23 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the ghsa trie/tree. It contains 
-# id associated with vulnerability (ghsa id)
+# Defines a GraphQL schema for the GitHub Security Advisory (GSHA) trie/tree.
+# It contains the ID associated with a vulnerability in the GitHub numbering
+# schema (GHSA ID).
+
 """
-GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
+GHSA represents GitHub security advisories.
+
+We create a separate node to allow retrieving all GHSAs.
 """
 type GHSA {
   ghsaId: [GHSAId!]!
 }
 
 """
-GHSAId is the actual ID that is given to a specific vulnerability on github
+GHSAId is the actual ID that is given to a specific vulnerability on GitHub
 
-id field is mandatory and canonicalized to be lowercase.
+The ` + "`" + `id` + "`" + ` field is mandatory and canonicalized to be lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -1916,16 +1976,29 @@ type GHSAId {
 }
 
 """
-GHSASpec allows filtering the list of ghsa to return.
+GHSASpec allows filtering the list of GHSA to return.
+
+The argument will be canonicalized to lowercase.
 """
 input GHSASpec {
   ghsaId: String
 }
 
+"""
+GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
+"""
+input GHSAInputSpec {
+  ghsaId: String!
+}
 
 extend type Query {
-  "Returns all ghsa"
+  "Returns all GHSA nodes"
   ghsa(ghsaSpec: GHSASpec): [GHSA!]!
+}
+
+extend type Mutation {
+  "Ingest a new GHSA. Returns the ingested object"
+  ingestGHSA(ghsa: GHSAInputSpec): GHSA!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
@@ -2421,10 +2494,13 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the osv trie/tree. It contains 
-# id associated with vulnerability (osv id)
+# Defines a GraphQL schema for the OSV trie/tree. It contains the OSV ID
+# associated with the vulnerability.
+
 """
-OSV represents Open Source Vulnerability . It contains a OSV ID.
+OSV represents an Open Source Vulnerability.
+
+We create a separate node to allow retrieving all OSVs.
 """
 type OSV {
   osvId: [OSVId!]!
@@ -2433,7 +2509,10 @@ type OSV {
 """
 OSVId is the actual ID that is given to a specific vulnerability.
 
-id field is mandatory and canonicalized to be lowercase. This maps to a GHSA or CVE ID
+The ` + "`" + `id` + "`" + ` field is mandatory and canonicalized to be lowercase.
+
+This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
+CVE ID).
 
 This node can be referred to by other parts of GUAC.
 """
@@ -2442,16 +2521,27 @@ type OSVId {
 }
 
 """
-OSVSpec allows filtering the list of osv to return.
+OSVSpec allows filtering the list of OSV to return.
 """
 input OSVSpec {
   osvId: String
 }
 
+"""
+OSVInputSpec is the same as OSVSpec, but used for mutation ingestion.
+"""
+input OSVInputSpec {
+  osvId: String!
+}
 
 extend type Query {
-  "Returns all osv"
+  "Returns all OSV"
   osv(osvSpec: OSVSpec): [OSV!]!
+}
+
+extend type Mutation {
+  "Ingest a new OSV. Returns the ingested object"
+  ingestOSV(osv: OSVInputSpec): OSV!
 }
 `, BuiltIn: false},
 	{Name: "../schema/package.graphql", Input: `#

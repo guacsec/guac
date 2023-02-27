@@ -168,6 +168,42 @@ func (ec *executionContext) fieldContext_CVEId_id(ctx context.Context, field gra
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCVEInputSpec(ctx context.Context, obj interface{}) (model.CVEInputSpec, error) {
+	var it model.CVEInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"year", "cveId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "year":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
+			it.Year, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "cveId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cveId"))
+			it.CveID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCVESpec(ctx context.Context, obj interface{}) (model.CVESpec, error) {
 	var it model.CVESpec
 	asMap := map[string]interface{}{}
@@ -279,6 +315,10 @@ func (ec *executionContext) _CVEId(ctx context.Context, sel ast.SelectionSet, ob
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNCVE2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCve(ctx context.Context, sel ast.SelectionSet, v model.Cve) graphql.Marshaler {
+	return ec._CVE(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNCVE2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Cve) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -385,6 +425,14 @@ func (ec *executionContext) marshalNCVEId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg
 		return graphql.Null
 	}
 	return ec._CVEId(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpec(ctx context.Context, v interface{}) (*model.CVEInputSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCVEInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx context.Context, v interface{}) (*model.CVESpec, error) {

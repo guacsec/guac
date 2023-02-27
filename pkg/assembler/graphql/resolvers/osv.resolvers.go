@@ -6,9 +6,15 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+// IngestOsv is the resolver for the ingestOSV field.
+func (r *mutationResolver) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
+	panic(fmt.Errorf("not implemented: IngestOsv - ingestOSV"))
+}
 
 // Osv is the resolver for the osv field.
 func (r *queryResolver) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
