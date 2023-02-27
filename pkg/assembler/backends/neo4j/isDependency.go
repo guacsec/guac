@@ -60,7 +60,7 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 			// query with pkgVersion
 			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-				"-[isDependency:IsDependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+				"-[:subject]-(isDependency:IsDependency)-[:dependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
 				"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
 			sb.WriteString(query)
 
@@ -77,7 +77,7 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				// query without pkgVersion
 				query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 					"-[:PkgHasName]->(name:PkgName)" +
-					"-[isDependency:IsDependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-[:subject]-(isDependency:IsDependency)-[:dependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
 					"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
 					"\nWITH *, null AS version"
 				sb.WriteString(query)
@@ -144,9 +144,9 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 					Namespaces: []*model.PackageNamespace{namespace},
 				}
 
-				isDependencyEdge := dbtype.Relationship{}
+				isDependencyNode := dbtype.Node{}
 				if result.Record().Values[6] != nil {
-					isDependencyEdge = result.Record().Values[6].(dbtype.Relationship)
+					isDependencyNode = result.Record().Values[6].(dbtype.Node)
 				} else {
 					return nil, gqlerror.Errorf("isDependencyEdge not found in neo4j")
 				}
@@ -154,9 +154,9 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				isDependency := &model.IsDependency{
 					Package:          &pkg,
 					DependentPackage: &depPkg,
-					VersionRange:     isDependencyEdge.Props[versionRange].(string),
-					Origin:           isDependencyEdge.Props[origin].(string),
-					Collector:        isDependencyEdge.Props[collector].(string),
+					VersionRange:     isDependencyNode.Props[versionRange].(string),
+					Origin:           isDependencyNode.Props[origin].(string),
+					Collector:        isDependencyNode.Props[collector].(string),
 				}
 				collectedIsDependency = append(collectedIsDependency, isDependency)
 			}
