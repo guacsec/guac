@@ -39,7 +39,6 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 	defer session.Close()
 
 	aggregateIsOccurrence := []*model.IsOccurrence{}
-	var result interface{}
 
 	if matchPkgSrc || isOccurrenceSpec.Package != nil {
 		var sb strings.Builder
@@ -78,8 +77,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 			sb.WriteString(returnValue)
 		}
 
-		var err error
-		result, err = session.ReadTransaction(
+		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 
 				result, err := tx.Run(sb.String(), queryValues)
@@ -164,8 +162,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		setIsOccurrenceValues(&sb, isOccurrenceSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, isOccurrence, objArt.algorithm, objArt.digest")
 
-		var err error
-		result, err = session.ReadTransaction(
+		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 
 				result, err := tx.Run(sb.String(), queryValues)
