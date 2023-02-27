@@ -97,18 +97,18 @@ func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEq
 					Digest:    result.Record().Values[4].(string),
 				}
 
-				hashEqualEdge := dbtype.Node{}
+				hashEqualNode := dbtype.Node{}
 				if result.Record().Values[2] != nil {
-					hashEqualEdge = result.Record().Values[6].(dbtype.Node)
+					hashEqualNode = result.Record().Values[6].(dbtype.Node)
 				} else {
-					return nil, gqlerror.Errorf("hashEqualEdge not found in neo4j")
+					return nil, gqlerror.Errorf("hashEqual Node not found in neo4j")
 				}
 
 				hashEqual := &model.HashEqual{
 					Artifacts:     []*model.Artifact{&artifact, &depArtifact},
-					Justification: hashEqualEdge.Props[justification].(string),
-					Origin:        hashEqualEdge.Props[origin].(string),
-					Collector:     hashEqualEdge.Props[collector].(string),
+					Justification: hashEqualNode.Props[justification].(string),
+					Origin:        hashEqualNode.Props[origin].(string),
+					Collector:     hashEqualNode.Props[collector].(string),
 				}
 				collectedHashEqual = append(collectedHashEqual, hashEqual)
 			}
