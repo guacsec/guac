@@ -52,7 +52,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		// query with pkgVersion
 		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-			"-[isOccurrence:IsOccurrence]-(objArt:Artifact)"
+			"-[:subject]-(isOccurrence:IsOccurrence)-[:has_occurrence]-(objArt:Artifact)"
 		sb.WriteString(query)
 
 		setPkgMatchValues(&sb, isOccurrenceSpec.Package, false, &firstMatch, queryValues)
@@ -67,7 +67,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 			// query without pkgVersion
 			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 				"-[:PkgHasName]->(name:PkgName)" +
-				"-[isOccurrence:IsOccurrence]-(objArt:Artifact)" +
+				"-[:subject]-(isOccurrence:IsOccurrence)-[:has_occurrence]-(objArt:Artifact)" +
 				"\nWITH *, null AS version"
 			sb.WriteString(query)
 
@@ -122,19 +122,19 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 						Digest:    result.Record().Values[8].(string),
 					}
 
-					isOccurrenceEdge := dbtype.Relationship{}
+					isOccurrenceNode := dbtype.Node{}
 					if result.Record().Values[6] != nil {
-						isOccurrenceEdge = result.Record().Values[6].(dbtype.Relationship)
+						isOccurrenceNode = result.Record().Values[6].(dbtype.Node)
 					} else {
-						return nil, gqlerror.Errorf("isOccurrenceEdge not found in neo4j")
+						return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
 					}
 
 					isOccurrence := &model.IsOccurrence{
 						Subject:            &pkg,
 						OccurrenceArtifact: &artifact,
-						Justification:      isOccurrenceEdge.Props[justification].(string),
-						Origin:             isOccurrenceEdge.Props[origin].(string),
-						Collector:          isOccurrenceEdge.Props[collector].(string),
+						Justification:      isOccurrenceNode.Props[justification].(string),
+						Origin:             isOccurrenceNode.Props[origin].(string),
+						Collector:          isOccurrenceNode.Props[collector].(string),
 					}
 					collectedIsOccurrence = append(collectedIsOccurrence, isOccurrence)
 				}
@@ -156,7 +156,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		queryValues := map[string]any{}
 
 		query := "MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)" +
-			"-[:SrcHasName]->(name:SrcName)-[isOccurrence:IsOccurrence]->(objArt:Artifact)"
+			"-[:SrcHasName]->(name:SrcName)-[:subject]-(isOccurrence:IsOccurrence)-[:has_occurrence]-(objArt:Artifact)"
 		sb.WriteString(query)
 
 		setSrcMatchValues(&sb, isOccurrenceSpec.Source, false, &firstMatch, queryValues)
@@ -208,19 +208,19 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 						Digest:    result.Record().Values[7].(string),
 					}
 
-					isOccurrenceEdge := dbtype.Relationship{}
+					isOccurrenceNode := dbtype.Node{}
 					if result.Record().Values[5] != nil {
-						isOccurrenceEdge = result.Record().Values[5].(dbtype.Relationship)
+						isOccurrenceNode = result.Record().Values[5].(dbtype.Node)
 					} else {
-						return nil, gqlerror.Errorf("isOccurrenceEdge not found in neo4j")
+						return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
 					}
 
 					isOccurrence := &model.IsOccurrence{
 						Subject:            &src,
 						OccurrenceArtifact: &artifact,
-						Justification:      isOccurrenceEdge.Props[justification].(string),
-						Origin:             isOccurrenceEdge.Props[origin].(string),
-						Collector:          isOccurrenceEdge.Props[collector].(string),
+						Justification:      isOccurrenceNode.Props[justification].(string),
+						Origin:             isOccurrenceNode.Props[origin].(string),
+						Collector:          isOccurrenceNode.Props[collector].(string),
 					}
 					collectedIsOccurrence = append(collectedIsOccurrence, isOccurrence)
 				}
