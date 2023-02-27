@@ -156,11 +156,11 @@ type ComplexityRoot struct {
 	}
 
 	IsOccurrence struct {
-		Collector           func(childComplexity int) int
-		Justification       func(childComplexity int) int
-		OccurrenceArtifacts func(childComplexity int) int
-		Origin              func(childComplexity int) int
-		Subject             func(childComplexity int) int
+		Collector          func(childComplexity int) int
+		Justification      func(childComplexity int) int
+		OccurrenceArtifact func(childComplexity int) int
+		Origin             func(childComplexity int) int
+		Subject            func(childComplexity int) int
 	}
 
 	IsVulnerability struct {
@@ -230,7 +230,7 @@ type ComplexityRoot struct {
 		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
 		HashEqual           func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
 		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
-		IsOccurrences       func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
+		IsOccurrence        func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
@@ -776,12 +776,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsOccurrence.Justification(childComplexity), true
 
-	case "IsOccurrence.occurrenceArtifacts":
-		if e.complexity.IsOccurrence.OccurrenceArtifacts == nil {
+	case "IsOccurrence.occurrenceArtifact":
+		if e.complexity.IsOccurrence.OccurrenceArtifact == nil {
 			break
 		}
 
-		return e.complexity.IsOccurrence.OccurrenceArtifacts(childComplexity), true
+		return e.complexity.IsOccurrence.OccurrenceArtifact(childComplexity), true
 
 	case "IsOccurrence.origin":
 		if e.complexity.IsOccurrence.Origin == nil {
@@ -1175,17 +1175,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.IsDependency(childComplexity, args["isDependencySpec"].(*model.IsDependencySpec)), true
 
-	case "Query.IsOccurrences":
-		if e.complexity.Query.IsOccurrences == nil {
+	case "Query.IsOccurrence":
+		if e.complexity.Query.IsOccurrence == nil {
 			break
 		}
 
-		args, err := ec.field_Query_IsOccurrences_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_IsOccurrence_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.IsOccurrences(childComplexity, args["isOccurrenceSpec"].(*model.IsOccurrenceSpec)), true
+		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(*model.IsOccurrenceSpec)), true
 
 	case "Query.IsVulnerability":
 		if e.complexity.Query.IsVulnerability == nil {
@@ -2374,12 +2374,12 @@ extend type Query {
 # NOTE: This is experimental and might change in the future!
 
 # Defines a GraphQL schema for the IsOccurrence. It contains the subject (which can be either a package or source),
-#  occurrenceArtifacts, justification,  origin of the attestation, and collector
+#  occurrenceArtifact, justification,  origin of the attestation, and collector
 """
 IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 
 subject - union type that can be either a package or source object type
-occurrenceArtifacts (object) - list of artifacts that represent the the package or source
+occurrenceArtifact (object) - artifact that represent the the package or source
 justification (property) - string value representing why the package or source is represented by the specified artifact
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -2387,12 +2387,15 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Package or Source must be specified but not both at the same time.
 Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 
+HashEqual will be used to connect together two artifacts if a package or source 
+is represented by more than one artifact.
+
 IsOccurrence does not connect a package with a source. 
 HasSourceAt attestation will be used to connect a package with a source
 """
 type IsOccurrence {
   subject: PkgSrcObject!
-  occurrenceArtifacts: [Artifact!]!
+  occurrenceArtifact: Artifact!
   justification: String!
   origin: String!
   collector: String!
@@ -2405,10 +2408,10 @@ For package - a PackageName or PackageVersion must be specified (name or name, v
 For source - a SourceName must be specified (name, tag or commit)
 """
 input IsOccurrenceSpec {
-  justification: String
   package: PkgSpec
   source: SourceSpec
-  artifacts: [ArtifactSpec]
+  artifact: ArtifactSpec
+  justification: String
   origin: String
   collector: String
 }
@@ -2416,7 +2419,7 @@ input IsOccurrenceSpec {
 
 extend type Query {
   "Returns all IsOccurrence"
-  IsOccurrences(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
+  IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#

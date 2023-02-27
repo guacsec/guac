@@ -72,8 +72,8 @@ func (ec *executionContext) fieldContext_IsOccurrence_subject(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _IsOccurrence_occurrenceArtifacts(ctx context.Context, field graphql.CollectedField, obj *model.IsOccurrence) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_IsOccurrence_occurrenceArtifacts(ctx, field)
+func (ec *executionContext) _IsOccurrence_occurrenceArtifact(ctx context.Context, field graphql.CollectedField, obj *model.IsOccurrence) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_IsOccurrence_occurrenceArtifact(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -86,7 +86,7 @@ func (ec *executionContext) _IsOccurrence_occurrenceArtifacts(ctx context.Contex
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.OccurrenceArtifacts, nil
+		return obj.OccurrenceArtifact, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -98,12 +98,12 @@ func (ec *executionContext) _IsOccurrence_occurrenceArtifacts(ctx context.Contex
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Artifact)
+	res := resTmp.(*model.Artifact)
 	fc.Result = res
-	return ec.marshalNArtifact2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactᚄ(ctx, field.Selections, res)
+	return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_IsOccurrence_occurrenceArtifacts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_IsOccurrence_occurrenceArtifact(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "IsOccurrence",
 		Field:      field,
@@ -265,21 +265,13 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "package", "source", "artifacts", "origin", "collector"}
+	fieldsInOrder := [...]string{"package", "source", "artifact", "justification", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "justification":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "package":
 			var err error
 
@@ -296,11 +288,19 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-		case "artifacts":
+		case "artifact":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-			it.Artifacts, err = ec.unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+			it.Artifact, err = ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -351,9 +351,9 @@ func (ec *executionContext) _IsOccurrence(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "occurrenceArtifacts":
+		case "occurrenceArtifact":
 
-			out.Values[i] = ec._IsOccurrence_occurrenceArtifacts(ctx, field, obj)
+			out.Values[i] = ec._IsOccurrence_occurrenceArtifact(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

@@ -453,7 +453,7 @@ type IsDependencySpec struct {
 // IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 //
 // subject - union type that can be either a package or source object type
-// occurrenceArtifacts (object) - list of artifacts that represent the the package or source
+// occurrenceArtifact (object) - artifact that represent the the package or source
 // justification (property) - string value representing why the package or source is represented by the specified artifact
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -461,14 +461,17 @@ type IsDependencySpec struct {
 // Note: Package or Source must be specified but not both at the same time.
 // Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 //
+// HashEqual will be used to connect together two artifacts if a package or source
+// is represented by more than one artifact.
+//
 // IsOccurrence does not connect a package with a source.
 // HasSourceAt attestation will be used to connect a package with a source
 type IsOccurrence struct {
-	Subject             PkgSrcObject `json:"subject"`
-	OccurrenceArtifacts []*Artifact  `json:"occurrenceArtifacts"`
-	Justification       string       `json:"justification"`
-	Origin              string       `json:"origin"`
-	Collector           string       `json:"collector"`
+	Subject            PkgSrcObject `json:"subject"`
+	OccurrenceArtifact *Artifact    `json:"occurrenceArtifact"`
+	Justification      string       `json:"justification"`
+	Origin             string       `json:"origin"`
+	Collector          string       `json:"collector"`
 }
 
 // IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
@@ -476,12 +479,12 @@ type IsOccurrence struct {
 // For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
 // For source - a SourceName must be specified (name, tag or commit)
 type IsOccurrenceSpec struct {
-	Justification *string         `json:"justification"`
-	Package       *PkgSpec        `json:"package"`
-	Source        *SourceSpec     `json:"source"`
-	Artifacts     []*ArtifactSpec `json:"artifacts"`
-	Origin        *string         `json:"origin"`
-	Collector     *string         `json:"collector"`
+	Package       *PkgSpec      `json:"package"`
+	Source        *SourceSpec   `json:"source"`
+	Artifact      *ArtifactSpec `json:"artifact"`
+	Justification *string       `json:"justification"`
+	Origin        *string       `json:"origin"`
+	Collector     *string       `json:"collector"`
 }
 
 // IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
