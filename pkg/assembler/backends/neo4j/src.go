@@ -227,22 +227,20 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 		}
 	}
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
+
+	setSrcMatchValues(&sb, sourceSpec, false, &firstMatch, queryValues)
+
+	sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var result neo4j.Result
-			var err error
 
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
-
-			setSrcMatchValues(&sb, sourceSpec, false, &firstMatch, queryValues)
-
-			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
-
-			result, err = tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
@@ -304,25 +302,23 @@ func (c *neo4jClient) sourcesType(ctx context.Context, sourceSpec *model.SourceS
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)")
+
+	if sourceSpec.Type != nil {
+
+		matchProperties(&sb, firstMatch, "type", "type", "$srcType")
+		queryValues["srcType"] = sourceSpec.Type
+	}
+
+	sb.WriteString(" RETURN type.type")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var result neo4j.Result
-			var err error
 
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-			sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)")
-
-			if sourceSpec.Type != nil {
-
-				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
-				queryValues["srcType"] = sourceSpec.Type
-			}
-
-			sb.WriteString(" RETURN type.type")
-
-			result, err = tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}
@@ -354,30 +350,28 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+	sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)")
+
+	if sourceSpec.Type != nil {
+
+		matchProperties(&sb, firstMatch, "type", "type", "$srcType")
+		firstMatch = false
+		queryValues["srcType"] = sourceSpec.Type
+	}
+	if sourceSpec.Namespace != nil {
+
+		matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
+		queryValues["srcNamespace"] = sourceSpec.Namespace
+	}
+	sb.WriteString(" RETURN type.type, namespace.namespace")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var result neo4j.Result
-			var err error
 
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-			sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)")
-
-			if sourceSpec.Type != nil {
-
-				matchProperties(&sb, firstMatch, "type", "type", "$srcType")
-				firstMatch = false
-				queryValues["srcType"] = sourceSpec.Type
-			}
-			if sourceSpec.Namespace != nil {
-
-				matchProperties(&sb, firstMatch, "namespace", "namespace", "$srcNamespace")
-				queryValues["srcNamespace"] = sourceSpec.Namespace
-			}
-			sb.WriteString(" RETURN type.type, namespace.namespace")
-
-			result, err = tx.Run(sb.String(), queryValues)
+			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
 			}

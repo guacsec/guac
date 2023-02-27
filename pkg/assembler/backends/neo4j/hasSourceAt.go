@@ -43,7 +43,7 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 	// query with pkgVersion
 	query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-		"-[hasSourceAt:HasSourceAt]-(objSrcName:SrcName)<-[:SrcHasName]-(objSrcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
+		"-[:subject]-(hasSourceAt:HasSourceAt)-[:has_source]-(objSrcName:SrcName)<-[:SrcHasName]-(objSrcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
 		"-(objSrcType:SrcType)<-[:SrcHasType]-(objSrcRoot:Src)"
 	sb.WriteString(query)
 
@@ -59,7 +59,7 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 		// query without pkgVersion
 		query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)" +
-			"-[hasSourceAt:HasSourceAt]-(objSrcName:SrcName)<-[:SrcHasName]-(objSrcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
+			"-[:subject]-(hasSourceAt:HasSourceAt)-[:has_source]-(objSrcName:SrcName)<-[:SrcHasName]-(objSrcNamespace:SrcNamespace)<-[:SrcHasNamespace]" +
 			"-(objSrcType:SrcType)<-[:SrcHasType]-(objSrcRoot:Src)" +
 			"\nWITH *, null AS version"
 		sb.WriteString(query)
@@ -137,20 +137,20 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 					Namespaces: []*model.SourceNamespace{srcNamespace},
 				}
 
-				hasSourceAtEdge := dbtype.Relationship{}
+				hasSourceAtNode := dbtype.Node{}
 				if result.Record().Values[6] != nil {
-					hasSourceAtEdge = result.Record().Values[6].(dbtype.Relationship)
+					hasSourceAtNode = result.Record().Values[6].(dbtype.Node)
 				} else {
-					return nil, gqlerror.Errorf("hasSourceAtEdge not found in neo4j")
+					return nil, gqlerror.Errorf("hasSourceAt Node not found in neo4j")
 				}
 
 				hasSourceAt := &model.HasSourceAt{
 					Package:       &pkg,
 					Source:        &src,
-					KnownSince:    hasSourceAtEdge.Props[knownSince].(string),
-					Justification: hasSourceAtEdge.Props[justification].(string),
-					Origin:        hasSourceAtEdge.Props[origin].(string),
-					Collector:     hasSourceAtEdge.Props[collector].(string),
+					KnownSince:    hasSourceAtNode.Props[knownSince].(string),
+					Justification: hasSourceAtNode.Props[justification].(string),
+					Origin:        hasSourceAtNode.Props[origin].(string),
+					Collector:     hasSourceAtNode.Props[collector].(string),
 				}
 				collectedHasSourceAt = append(collectedHasSourceAt, hasSourceAt)
 			}
