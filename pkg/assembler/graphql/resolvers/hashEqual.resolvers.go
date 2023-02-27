@@ -10,7 +10,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// HashEquals is the resolver for the HashEquals field.
-func (r *queryResolver) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
-	return r.Backend.HashEquals(ctx, hashEqualSpec)
+// HashEqual is the resolver for the HashEqual field.
+func (r *queryResolver) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+	return r.Backend.HashEqual(ctx, hashEqualSpec)
 }

@@ -414,8 +414,8 @@ type HashEqual struct {
 //
 // Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 type HashEqualSpec struct {
-	Justification *string         `json:"justification"`
 	Artifacts     []*ArtifactSpec `json:"artifacts"`
+	Justification *string         `json:"justification"`
 	Origin        *string         `json:"origin"`
 	Collector     *string         `json:"collector"`
 }

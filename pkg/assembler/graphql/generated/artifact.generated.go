@@ -39,7 +39,7 @@ type QueryResolver interface {
 	HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error)
 	HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error)
 	HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
-	HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error)
+	HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error)
 	IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error)
 	IsOccurrences(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
 	IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
@@ -277,7 +277,7 @@ func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_HashEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.HashEqualSpec
@@ -1753,8 +1753,8 @@ func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_HashEquals(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_HashEquals(ctx, field)
+func (ec *executionContext) _Query_HashEqual(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HashEqual(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1767,7 +1767,7 @@ func (ec *executionContext) _Query_HashEquals(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HashEquals(rctx, fc.Args["hashEqualSpec"].(*model.HashEqualSpec))
+		return ec.resolvers.Query().HashEqual(rctx, fc.Args["hashEqualSpec"].(*model.HashEqualSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1783,7 +1783,7 @@ func (ec *executionContext) _Query_HashEquals(ctx context.Context, field graphql
 	return ec.marshalNHashEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_HashEquals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_HashEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1810,7 +1810,7 @@ func (ec *executionContext) fieldContext_Query_HashEquals(ctx context.Context, f
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_HashEquals_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_HashEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2767,7 +2767,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "HashEquals":
+		case "HashEqual":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2776,7 +2776,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_HashEquals(ctx, field)
+				res = ec._Query_HashEqual(ctx, field)
 				return res
 			}
 

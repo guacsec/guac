@@ -37,8 +37,8 @@ HashEqualSpec allows filtering the list of HashEqual to return.
 Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 """
 input HashEqualSpec {
-  justification: String
   artifacts: [ArtifactSpec]
+  justification: String
   origin: String
   collector: String
 }
@@ -46,5 +46,5 @@ input HashEqualSpec {
 
 extend type Query {
   "Returns all HashEqual"
-  HashEquals(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+  HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
 }
