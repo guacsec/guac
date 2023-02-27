@@ -18,7 +18,6 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -266,5 +265,45 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 }
 
 func (c *neo4jClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
-	panic(fmt.Errorf("not implemented: IngestCve - ingestCVE"))
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["year"] = cve.Year
+	values["id"] = strings.ToLower(cve.CveID)
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Cve)
+MERGE (root) -[:CveIsYear]-> (cy:CveYear{year:$year})
+MERGE (cy) -[:CveHasID]-> (ci:CveID{id:$id})
+RETURN cy.year, ci.id`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
+			idStr := record.Values[1].(string)
+			id := &model.CVEId{ID: idStr}
+
+			yearStr := record.Values[0].(string)
+			src := model.Cve{
+				Year:       yearStr,
+				CveID: []*model.CVEId{id},
+			}
+
+			return &src, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Cve), nil
 }

@@ -18,7 +18,6 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -144,5 +143,39 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 }
 
 func (c *neo4jClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
-	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["id"] = strings.ToLower(ghsa.GhsaID)
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Ghsa)
+MERGE (root) -[:GhsaHasID]-> (ghsa:GhsaID{id:$id})
+RETURN ghsa.id`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			id := record.Values[0].(string)
+			ghsaID := &model.GHSAId{ID: id}
+			ghsa := &model.Ghsa{
+				GhsaID: []*model.GHSAId{ghsaID},
+			}
+
+			return ghsa, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Ghsa), nil
 }

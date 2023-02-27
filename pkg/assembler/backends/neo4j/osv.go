@@ -18,7 +18,6 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -144,5 +143,39 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 }
 
 func (c *neo4jClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
-	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["id"] = strings.ToLower(osv.OsvID)
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Osv)
+MERGE (root) -[:OsvHasID]-> (osv:OsvID{id:$id})
+RETURN osv.id`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			id := record.Values[0].(string)
+			osvID := &model.OSVId{ID: id}
+			osv := &model.Osv{
+				OsvID: []*model.OSVId{osvID},
+			}
+
+			return osv, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Osv), nil
 }
