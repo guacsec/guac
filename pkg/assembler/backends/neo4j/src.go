@@ -238,7 +238,7 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 
 			sb.WriteString("MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)-[:SrcHasName]->(name:SrcName)")
 
-			setSrcMatchValues(&sb, sourceSpec, false, firstMatch, queryValues)
+			setSrcMatchValues(&sb, sourceSpec, false, &firstMatch, queryValues)
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit")
 
@@ -499,58 +499,59 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
 	return result.(*model.Source), nil
 }
 
-func setSrcMatchValues(sb *strings.Builder, src *model.SourceSpec, objectSrc bool, firstMatch bool, queryValues map[string]any) {
+func setSrcMatchValues(sb *strings.Builder, src *model.SourceSpec, objectSrc bool, firstMatch *bool, queryValues map[string]any) {
 	if src != nil {
 		if src.Type != nil {
 			if !objectSrc {
-				matchProperties(sb, firstMatch, "type", "type", "$srcType")
+				matchProperties(sb, *firstMatch, "type", "type", "$srcType")
 				queryValues["srcType"] = src.Type
 			} else {
-				matchProperties(sb, firstMatch, "objSrcType", "type", "$objSrcType")
+				matchProperties(sb, *firstMatch, "objSrcType", "type", "$objSrcType")
 				queryValues["objSrcType"] = src.Type
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 		if src.Namespace != nil {
 			if !objectSrc {
-				matchProperties(sb, firstMatch, "namespace", "namespace", "$srcNamespace")
+				matchProperties(sb, *firstMatch, "namespace", "namespace", "$srcNamespace")
 				queryValues["srcNamespace"] = src.Namespace
 			} else {
-				matchProperties(sb, firstMatch, "objSrcNamespace", "namespace", "$objSrcNamespace")
+				matchProperties(sb, *firstMatch, "objSrcNamespace", "namespace", "$objSrcNamespace")
 				queryValues["objSrcNamespace"] = src.Namespace
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 		if src.Name != nil {
 			if !objectSrc {
-				matchProperties(sb, firstMatch, "name", "name", "$srcName")
+				matchProperties(sb, *firstMatch, "name", "name", "$srcName")
 				queryValues["srcName"] = src.Name
 			} else {
-				matchProperties(sb, firstMatch, "objSrcName", "name", "$objSrcName")
+				matchProperties(sb, *firstMatch, "objSrcName", "name", "$objSrcName")
 				queryValues["objSrcName"] = src.Name
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 
 		if src.Tag != nil {
 			if !objectSrc {
-				matchProperties(sb, firstMatch, "name", "tag", "$srcTag")
+				matchProperties(sb, *firstMatch, "name", "tag", "$srcTag")
 				queryValues["srcTag"] = src.Tag
 			} else {
-				matchProperties(sb, firstMatch, "objSrcName", "tag", "$objSrcTag")
+				matchProperties(sb, *firstMatch, "objSrcName", "tag", "$objSrcTag")
 				queryValues["objSrcTag"] = src.Tag
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 
 		if src.Commit != nil {
 			if !objectSrc {
-				matchProperties(sb, firstMatch, "name", "commit", "$srcCommit")
+				matchProperties(sb, *firstMatch, "name", "commit", "$srcCommit")
 				queryValues["srcCommit"] = src.Commit
 			} else {
-				matchProperties(sb, firstMatch, "objSrcName", "commit", "$objSrcCommit")
+				matchProperties(sb, *firstMatch, "objSrcName", "commit", "$objSrcCommit")
 				queryValues["objSrcCommit"] = src.Commit
 			}
+			*firstMatch = false
 		}
 	}
 }

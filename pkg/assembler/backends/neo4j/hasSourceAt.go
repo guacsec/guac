@@ -47,9 +47,9 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 		"-(objSrcType:SrcType)<-[:SrcHasType]-(objSrcRoot:Src)"
 	sb.WriteString(query)
 
-	setPkgMatchValues(&sb, hasSourceAtSpec.Package, false, firstMatch, queryValues)
-	setSrcMatchValues(&sb, hasSourceAtSpec.Source, true, firstMatch, queryValues)
-	setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
+	setPkgMatchValues(&sb, hasSourceAtSpec.Package, false, &firstMatch, queryValues)
+	setSrcMatchValues(&sb, hasSourceAtSpec.Source, true, &firstMatch, queryValues)
+	setHasSourceAtValues(&sb, hasSourceAtSpec, &firstMatch, queryValues)
 	sb.WriteString(returnValue)
 
 	if hasSourceAtSpec.Package == nil || hasSourceAtSpec.Package != nil && hasSourceAtSpec.Package.Version == nil && hasSourceAtSpec.Package.Subpath == nil &&
@@ -65,9 +65,9 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 		sb.WriteString(query)
 
 		firstMatch = true
-		setPkgMatchValues(&sb, hasSourceAtSpec.Package, false, firstMatch, queryValues)
-		setSrcMatchValues(&sb, hasSourceAtSpec.Source, true, firstMatch, queryValues)
-		setHasSourceAtValues(&sb, hasSourceAtSpec, firstMatch, queryValues)
+		setPkgMatchValues(&sb, hasSourceAtSpec.Package, false, &firstMatch, queryValues)
+		setSrcMatchValues(&sb, hasSourceAtSpec.Source, true, &firstMatch, queryValues)
+		setHasSourceAtValues(&sb, hasSourceAtSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 	}
 
@@ -167,29 +167,29 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 	return result.([]*model.HasSourceAt), nil
 }
 
-func setHasSourceAtValues(sb *strings.Builder, hasSourceAtSpec *model.HasSourceAtSpec, firstMatch bool, queryValues map[string]any) {
+func setHasSourceAtValues(sb *strings.Builder, hasSourceAtSpec *model.HasSourceAtSpec, firstMatch *bool, queryValues map[string]any) {
 	if hasSourceAtSpec.KnownSince != nil {
 
-		matchProperties(sb, firstMatch, "hasSourceAt", "knownSince", "$knownSince")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "hasSourceAt", "knownSince", "$knownSince")
+		*firstMatch = false
 		queryValues["knownSince"] = hasSourceAtSpec.KnownSince
 	}
 	if hasSourceAtSpec.Justification != nil {
 
-		matchProperties(sb, firstMatch, "hasSourceAt", "justification", "$justification")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "hasSourceAt", "justification", "$justification")
+		*firstMatch = false
 		queryValues["justification"] = hasSourceAtSpec.Justification
 	}
 	if hasSourceAtSpec.Origin != nil {
 
-		matchProperties(sb, firstMatch, "hasSourceAt", "origin", "$origin")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "hasSourceAt", "origin", "$origin")
+		*firstMatch = false
 		queryValues["origin"] = hasSourceAtSpec.Origin
 	}
 	if hasSourceAtSpec.Collector != nil {
 
-		matchProperties(sb, firstMatch, "hasSourceAt", "collector", "$collector")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "hasSourceAt", "collector", "$collector")
+		*firstMatch = false
 		queryValues["collector"] = hasSourceAtSpec.Collector
 	}
 }

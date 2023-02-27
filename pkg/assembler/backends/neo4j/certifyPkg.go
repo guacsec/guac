@@ -64,9 +64,9 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
 			sb.WriteString(query)
 
-			setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
-			setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
-			setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+			setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+			setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+			setCertifyPkgValues(&sb, certifyPkgSpec, &firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
 
@@ -83,9 +83,9 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				sb.WriteString(query)
 
 				firstMatch = true
-				setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
-				setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
-				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+				setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+				setCertifyPkgValues(&sb, certifyPkgSpec, &firstMatch, queryValues)
 
 				sb.WriteString(returnValue)
 
@@ -106,9 +106,9 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				sb.WriteString(query)
 
 				firstMatch = true
-				setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
-				setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
-				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+				setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+				setCertifyPkgValues(&sb, certifyPkgSpec, &firstMatch, queryValues)
 
 				sb.WriteString(returnValue)
 			}
@@ -127,9 +127,9 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				sb.WriteString(query)
 
 				firstMatch = true
-				setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
-				setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
-				setCertifyPkgValues(&sb, certifyPkgSpec, firstMatch, queryValues)
+				setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+				setCertifyPkgValues(&sb, certifyPkgSpec, &firstMatch, queryValues)
 
 				sb.WriteString(returnValue)
 			}
@@ -225,23 +225,23 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 	return result.([]*model.CertifyPkg), nil
 }
 
-func setCertifyPkgValues(sb *strings.Builder, certifyPkgSpec *model.CertifyPkgSpec, firstMatch bool, queryValues map[string]any) {
+func setCertifyPkgValues(sb *strings.Builder, certifyPkgSpec *model.CertifyPkgSpec, firstMatch *bool, queryValues map[string]any) {
 	if certifyPkgSpec.Justification != nil {
 
-		matchProperties(sb, firstMatch, "certifyPkg", "justification", "$justification")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "certifyPkg", "justification", "$justification")
+		*firstMatch = false
 		queryValues["justification"] = certifyPkgSpec.Justification
 	}
 	if certifyPkgSpec.Origin != nil {
 
-		matchProperties(sb, firstMatch, "certifyPkg", "origin", "$origin")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "certifyPkg", "origin", "$origin")
+		*firstMatch = false
 		queryValues["origin"] = certifyPkgSpec.Origin
 	}
 	if certifyPkgSpec.Collector != nil {
 
-		matchProperties(sb, firstMatch, "certifyPkg", "collector", "$collector")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "certifyPkg", "collector", "$collector")
+		*firstMatch = false
 		queryValues["collector"] = certifyPkgSpec.Collector
 	}
 }

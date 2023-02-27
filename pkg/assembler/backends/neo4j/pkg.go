@@ -285,7 +285,7 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 
 			sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
 
-			setPkgMatchValues(&sb, pkgSpec, false, firstMatch, queryValues)
+			setPkgMatchValues(&sb, pkgSpec, false, &firstMatch, queryValues)
 
 			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, version.qualifier_list")
 
@@ -697,82 +697,82 @@ func getQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string {
 	return qualifiers
 }
 
-func setPkgMatchValues(sb *strings.Builder, pkg *model.PkgSpec, objectPkg bool, firstMatch bool, queryValues map[string]any) {
+func setPkgMatchValues(sb *strings.Builder, pkg *model.PkgSpec, objectPkg bool, firstMatch *bool, queryValues map[string]any) {
 	if pkg != nil {
 		if pkg.Type != nil {
 			if !objectPkg {
-				matchProperties(sb, firstMatch, "type", "type", "$pkgType")
+				matchProperties(sb, *firstMatch, "type", "type", "$pkgType")
 				queryValues["pkgType"] = pkg.Type
 			} else {
-				matchProperties(sb, firstMatch, "objPkgType", "type", "$objPkgType")
+				matchProperties(sb, *firstMatch, "objPkgType", "type", "$objPkgType")
 				queryValues["objPkgType"] = pkg.Type
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 		if pkg.Namespace != nil {
 			if !objectPkg {
-				matchProperties(sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
+				matchProperties(sb, *firstMatch, "namespace", "namespace", "$pkgNamespace")
 				queryValues["pkgNamespace"] = pkg.Namespace
 			} else {
-				matchProperties(sb, firstMatch, "objPkgNamespace", "namespace", "$objPkgNamespace")
+				matchProperties(sb, *firstMatch, "objPkgNamespace", "namespace", "$objPkgNamespace")
 				queryValues["objPkgNamespace"] = pkg.Namespace
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 		if pkg.Name != nil {
 			if !objectPkg {
-				matchProperties(sb, firstMatch, "name", "name", "$pkgName")
+				matchProperties(sb, *firstMatch, "name", "name", "$pkgName")
 				queryValues["pkgName"] = pkg.Name
 			} else {
-				matchProperties(sb, firstMatch, "objPkgName", "name", "$objPkgName")
+				matchProperties(sb, *firstMatch, "objPkgName", "name", "$objPkgName")
 				queryValues["objPkgName"] = pkg.Name
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 		if pkg.Version != nil {
 			if !objectPkg {
-				matchProperties(sb, firstMatch, "version", "version", "$pkgVersion")
+				matchProperties(sb, *firstMatch, "version", "version", "$pkgVersion")
 				queryValues["pkgVersion"] = pkg.Version
 			} else {
-				matchProperties(sb, firstMatch, "objPkgVersion", "version", "$objPkgVersion")
+				matchProperties(sb, *firstMatch, "objPkgVersion", "version", "$objPkgVersion")
 				queryValues["objPkgVersion"] = pkg.Version
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 
 		if pkg.Subpath != nil {
 			if !objectPkg {
-				matchProperties(sb, firstMatch, "version", "subpath", "$pkgSubpath")
+				matchProperties(sb, *firstMatch, "version", "subpath", "$pkgSubpath")
 				queryValues["pkgSubpath"] = pkg.Subpath
 			} else {
-				matchProperties(sb, firstMatch, "objPkgVersion", "subpath", "$objPkgSubpath")
+				matchProperties(sb, *firstMatch, "objPkgVersion", "subpath", "$objPkgSubpath")
 				queryValues["objPkgSubpath"] = pkg.Subpath
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 
 		if !*pkg.MatchOnlyEmptyQualifiers {
 			if len(pkg.Qualifiers) > 0 {
 				if !objectPkg {
 					qualifiers := getQualifiers(pkg.Qualifiers)
-					matchProperties(sb, firstMatch, "version", "qualifier_list", "$pkgQualifierList")
+					matchProperties(sb, *firstMatch, "version", "qualifier_list", "$pkgQualifierList")
 					queryValues["pkgQualifierList"] = qualifiers
 				} else {
 					qualifiers := getQualifiers(pkg.Qualifiers)
-					matchProperties(sb, firstMatch, "objPkgVersion", "qualifier_list", "$objPkgQualifierList")
+					matchProperties(sb, *firstMatch, "objPkgVersion", "qualifier_list", "$objPkgQualifierList")
 					queryValues["objPkgQualifierList"] = qualifiers
 				}
-				firstMatch = false
+				*firstMatch = false
 			}
 		} else {
 			if !objectPkg {
-				matchProperties(sb, firstMatch, "version", "qualifier_list", "$pkgQualifierList")
+				matchProperties(sb, *firstMatch, "version", "qualifier_list", "$pkgQualifierList")
 				queryValues["pkgQualifierList"] = []string{}
 			} else {
-				matchProperties(sb, firstMatch, "objPkgVersion", "qualifier_list", "$objPkgQualifierList")
+				matchProperties(sb, *firstMatch, "objPkgVersion", "qualifier_list", "$objPkgQualifierList")
 				queryValues["objPkgQualifierList"] = []string{}
 			}
-			firstMatch = false
+			*firstMatch = false
 		}
 	}
 }

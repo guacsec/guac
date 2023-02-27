@@ -64,9 +64,9 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
 			sb.WriteString(query)
 
-			setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
-			setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
-			setIsDependencyValues(&sb, isDependencySpec, firstMatch, queryValues)
+			setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+			setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+			setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
 
@@ -83,9 +83,9 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				sb.WriteString(query)
 
 				firstMatch = true
-				setPkgMatchValues(&sb, selectedPkg, false, firstMatch, queryValues)
-				setPkgMatchValues(&sb, dependentPkg, true, firstMatch, queryValues)
-				setIsDependencyValues(&sb, isDependencySpec, firstMatch, queryValues)
+				setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+				setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
 
 				sb.WriteString(returnValue)
 			}
@@ -173,23 +173,23 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 	return result.([]*model.IsDependency), nil
 }
 
-func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDependencySpec, firstMatch bool, queryValues map[string]any) {
+func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDependencySpec, firstMatch *bool, queryValues map[string]any) {
 	if isDependencySpec.VersionRange != nil {
 
-		matchProperties(sb, firstMatch, "isDependency", "versionRange", "$versionRange")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "isDependency", "versionRange", "$versionRange")
+		*firstMatch = false
 		queryValues["versionRange"] = isDependencySpec.VersionRange
 	}
 	if isDependencySpec.Origin != nil {
 
-		matchProperties(sb, firstMatch, "isDependency", "origin", "$origin")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "isDependency", "origin", "$origin")
+		*firstMatch = false
 		queryValues["origin"] = isDependencySpec.Origin
 	}
 	if isDependencySpec.Collector != nil {
 
-		matchProperties(sb, firstMatch, "isDependency", "collector", "$collector")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "isDependency", "collector", "$collector")
+		*firstMatch = false
 		queryValues["collector"] = isDependencySpec.Collector
 	}
 }
