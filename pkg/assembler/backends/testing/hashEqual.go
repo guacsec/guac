@@ -52,7 +52,7 @@ func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justificatio
 
 // Query HashEqual
 
-func (c *demoClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+func (c *demoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	var hashEquals []*model.HashEqual
 
 	for _, h := range c.hashEquals {

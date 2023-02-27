@@ -221,26 +221,26 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "artifacts", "origin", "collector"}
+	fieldsInOrder := [...]string{"artifacts", "justification", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "justification":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "artifacts":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
 			it.Artifacts, err = ec.unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -225,7 +225,7 @@ type ComplexityRoot struct {
 		HasSBOMs            func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
 		HasSlsa             func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
 		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
-		HashEquals          func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
+		HashEqual           func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
 		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
 		IsOccurrences       func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
@@ -1112,17 +1112,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.HasSourceAt(childComplexity, args["hasSourceAtSpec"].(*model.HasSourceAtSpec)), true
 
-	case "Query.HashEquals":
-		if e.complexity.Query.HashEquals == nil {
+	case "Query.HashEqual":
+		if e.complexity.Query.HashEqual == nil {
 			break
 		}
 
-		args, err := ec.field_Query_HashEquals_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HashEqual_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.HashEquals(childComplexity, args["hashEqualSpec"].(*model.HashEqualSpec)), true
+		return e.complexity.Query.HashEqual(childComplexity, args["hashEqualSpec"].(*model.HashEqualSpec)), true
 
 	case "Query.IsDependency":
 		if e.complexity.Query.IsDependency == nil {
@@ -2201,8 +2201,8 @@ HashEqualSpec allows filtering the list of HashEqual to return.
 Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 """
 input HashEqualSpec {
-  justification: String
   artifacts: [ArtifactSpec]
+  justification: String
   origin: String
   collector: String
 }
@@ -2210,7 +2210,7 @@ input HashEqualSpec {
 
 extend type Query {
   "Returns all HashEqual"
-  HashEquals(hashEqualSpec: HashEqualSpec): [HashEqual!]!
+  HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#

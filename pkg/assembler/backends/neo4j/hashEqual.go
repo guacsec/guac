@@ -17,11 +17,128 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (c *neo4jClient) HashEquals(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
-	panic(fmt.Errorf("not implemented: HashEqual - HashEqual"))
+func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+
+	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) > 2 {
+		return nil, gqlerror.Errorf("cannot specify more than 2 artifacts in HashEquals")
+	}
+
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	var sb strings.Builder
+	var firstMatch bool = true
+
+	var selectedArt *model.ArtifactSpec = nil
+	var dependentArt *model.ArtifactSpec = nil
+	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) != 0 {
+		if len(hashEqualSpec.Artifacts) == 1 {
+			selectedArt = hashEqualSpec.Artifacts[0]
+		} else {
+			selectedArt = hashEqualSpec.Artifacts[0]
+			dependentArt = hashEqualSpec.Artifacts[1]
+		}
+	}
+	queryValues := map[string]any{}
+
+	returnValue := " RETURN a.algorithm, a.digest, hashEqual, objArt.algorithm, objArt.digest"
+
+	// query with selectedArt being subject
+	query := "MATCH (a:Artifact)-[:subject]-(hashEqual:HashEqual)-[:is_equal]-(objArt:Artifact)"
+	sb.WriteString(query)
+
+	setArtifactMatchValues(&sb, selectedArt, false, &firstMatch, queryValues)
+	setArtifactMatchValues(&sb, dependentArt, true, &firstMatch, queryValues)
+	setHashEqualValues(&sb, hashEqualSpec, &firstMatch, queryValues)
+
+	sb.WriteString(returnValue)
+
+	if len(hashEqualSpec.Artifacts) > 0 {
+		sb.WriteString("\nUNION")
+
+		// query with dependentArt being subject
+		query = "\nMATCH (a:Artifact)-[:subject]-(hashEqual:HashEqual)-[:is_equal]-(objArt:Artifact)"
+		sb.WriteString(query)
+
+		firstMatch = true
+		setArtifactMatchValues(&sb, dependentArt, false, &firstMatch, queryValues)
+		setArtifactMatchValues(&sb, selectedArt, true, &firstMatch, queryValues)
+		setHashEqualValues(&sb, hashEqualSpec, &firstMatch, queryValues)
+
+		sb.WriteString(returnValue)
+	}
+
+	result, err := session.ReadTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			collectedHashEqual := []*model.HashEqual{}
+
+			for result.Next() {
+
+				artifact := model.Artifact{
+					Algorithm: result.Record().Values[0].(string),
+					Digest:    result.Record().Values[1].(string),
+				}
+
+				depArtifact := model.Artifact{
+					Algorithm: result.Record().Values[3].(string),
+					Digest:    result.Record().Values[4].(string),
+				}
+
+				hashEqualEdge := dbtype.Node{}
+				if result.Record().Values[2] != nil {
+					hashEqualEdge = result.Record().Values[6].(dbtype.Node)
+				} else {
+					return nil, gqlerror.Errorf("hashEqualEdge not found in neo4j")
+				}
+
+				hashEqual := &model.HashEqual{
+					Artifacts:     []*model.Artifact{&artifact, &depArtifact},
+					Justification: hashEqualEdge.Props[justification].(string),
+					Origin:        hashEqualEdge.Props[origin].(string),
+					Collector:     hashEqualEdge.Props[collector].(string),
+				}
+				collectedHashEqual = append(collectedHashEqual, hashEqual)
+			}
+			if err = result.Err(); err != nil {
+				return nil, err
+			}
+
+			return collectedHashEqual, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.([]*model.HashEqual), nil
+}
+
+func setHashEqualValues(sb *strings.Builder, hashEqualSpec *model.HashEqualSpec, firstMatch *bool, queryValues map[string]any) {
+	if hashEqualSpec.Justification != nil {
+		matchProperties(sb, *firstMatch, "hashEqual", "justification", "$justification")
+		*firstMatch = false
+		queryValues["justification"] = hashEqualSpec.Justification
+	}
+	if hashEqualSpec.Origin != nil {
+		matchProperties(sb, *firstMatch, "hashEqual", "origin", "$origin")
+		*firstMatch = false
+		queryValues["origin"] = hashEqualSpec.Origin
+	}
+	if hashEqualSpec.Collector != nil {
+		matchProperties(sb, *firstMatch, "hashEqual", "collector", "$collector")
+		*firstMatch = false
+		queryValues["collector"] = hashEqualSpec.Collector
+	}
 }
