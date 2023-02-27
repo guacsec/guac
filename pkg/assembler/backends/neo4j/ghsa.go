@@ -99,21 +99,20 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	var sb strings.Builder
-	queryValues := map[string]any{}
-
-	sb.WriteString("MATCH (n:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
-
-	if ghsaSpec.GhsaID != nil {
-		matchProperties(&sb, true, "ghsaID", "id", "$ghsaID")
-		queryValues["ghsaID"] = strings.ToLower(*ghsaSpec.GhsaID)
-	}
-
-	sb.WriteString(" RETURN ghsaID.id")
-
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
 
+			var sb strings.Builder
+			queryValues := map[string]any{}
+
+			sb.WriteString("MATCH (n:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
+
+			if ghsaSpec.GhsaID != nil {
+				matchProperties(&sb, true, "ghsaID", "id", "$ghsaID")
+				queryValues["ghsaID"] = strings.ToLower(*ghsaSpec.GhsaID)
+			}
+
+			sb.WriteString(" RETURN ghsaID.id")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
