@@ -26,22 +26,22 @@ func registerAllGHSA(client *demoClient) {
 	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
 	client.registerGhsa("GHSA-xrw3-wqph-3fxg")
 	client.registerGhsa("GHSA-8v4j-7jgf-5rg9")
-	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
-	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
 }
 
 // Ingest GHSA
 
-func (c *demoClient) registerGhsa(id string) {
+func (c *demoClient) registerGhsa(id string) *model.Ghsa {
 	idLower := strings.ToLower(id)
 	for i, g := range c.ghsa {
 		c.ghsa[i] = registerGhsaID(g, idLower)
-		return
+		return c.ghsa[i]
 	}
 
 	newGhsa := &model.Ghsa{}
 	newGhsa = registerGhsaID(newGhsa, idLower)
 	c.ghsa = append(c.ghsa, newGhsa)
+
+	return newGhsa
 }
 
 func registerGhsaID(g *model.Ghsa, id string) *model.Ghsa {
@@ -84,4 +84,8 @@ func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, erro
 	return &model.Ghsa{
 		GhsaID: ghsaID,
 	}, nil
+}
+
+func (c *demoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
+	return c.registerGhsa(ghsa.GhsaID), nil
 }

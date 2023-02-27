@@ -1,73 +1,102 @@
 fragment allCveTree on CVE {
   year
-  cveId{
+  cveId {
     id
   }
 }
 
-fragment allGHSATree on GHSA {
-  ghsaId{
-    id
-  }
-}
-
-fragment allOSVTree on OSV {
-  osvId{
-    id
-  }
-}
-
-
-query Q1 {
-  cve(cveSpec: {year: "1970"}) {
+query CVEQ1 {
+  cve(cveSpec: {}) {
     ...allCveTree
   }
 }
 
-query Q2 {
+query CVEQ2 {
+  cve(cveSpec: {year: "2014"}) {
+    ...allCveTree
+  }
+}
+
+query CVEQ3 {
   cve(cveSpec: {cveId: "CVE-2014-8139"}) {
     ...allCveTree
   }
 }
 
-query Q3 {
-  cve(cveSpec: {year: "2023"}) {
+query CVEQ4 {
+  cve(cveSpec: {year: "2014", cveId: "CVE-2014-8140"}) {
     ...allCveTree
   }
 }
 
-query Q4 {
-  ghsa(ghsaSpec: {ghsaId: "GHSA-h45f-rjvw-2rv2"}) {
-    ...allGHSATree
+mutation CVEM1 {
+  ingestCVE(cve: {year: "2023", cveId: "CVE-2023-12345"}) {
+    ...allCveTree
   }
 }
 
-query Q5 {
-  ghsa(ghsaSpec: {ghsaId: "GHSA-xrw3-wqph-3fxg"}) {
-    ...allGHSATree
+mutation CVEM2 {
+  ingestCVE(cve: {year: "2032", cveId: "cve-2032-12345"}) {
+    ...allCveTree
   }
 }
 
-query Q6 {
+fragment allGHSATree on GHSA {
+  ghsaId {
+    id
+  }
+}
+
+query GHSAQ1 {
   ghsa(ghsaSpec: {}) {
     ...allGHSATree
   }
 }
 
-query Q7 {
+query GHSAQ2 {
+  ghsa(ghsaSpec: {ghsaId: "GHSA-h45f-rjvw-2rv2"}) {
+    ...allGHSATree
+  }
+}
+
+mutation GHSAM1 {
+  ingestGHSA(ghsa: {ghsaId: "GHSA-abcd-efgh-1234"}) {
+    ...allGHSATree
+  }
+}
+
+fragment allOSVTree on OSV {
+  osvId {
+    id
+  }
+}
+
+query OSVQ1 {
+  osv(osvSpec: {}) {
+    ...allOSVTree
+  }
+}
+
+query OSVQ2 {
   osv(osvSpec: {osvId: "CVE-2014-8139"}) {
     ...allOSVTree
   }
 }
 
-query Q8 {
-  osv(osvSpec: {osvId: "CVE-2022-26499"}) {
+query OSVQ3 {
+  osv(osvSpec: {osvId: "ghsa-h45f-rjvw-2rv2"}) {
     ...allOSVTree
   }
 }
 
-query Q9 {
-  osv(osvSpec: {}) {
+mutation OSVM1 {
+  ingestOSV(osv: {osvId: "GHSA-abcd-efgh-1234"}) {
+    ...allOSVTree
+  }
+}
+
+mutation OSVM2 {
+  ingestOSV(osv: {osvId: "CVE-2023-12345"}) {
     ...allOSVTree
   }
 }

@@ -27,22 +27,23 @@ func registerAllOSV(client *demoClient) {
 	client.registerOSV("CVE-2014-8139")
 	client.registerOSV("CVE-2014-8140")
 	client.registerOSV("CVE-2022-26499")
-	client.registerOSV("CVE-2014-8140")
 	client.registerOSV("GHSA-h45f-rjvw-2rv2")
 }
 
 // Ingest OSV
 
-func (c *demoClient) registerOSV(id string) {
+func (c *demoClient) registerOSV(id string) *model.Osv {
 	idLower := strings.ToLower(id)
 	for i, o := range c.osv {
 		c.osv[i] = registerOsvID(o, idLower)
-		return
+		return c.osv[i]
 	}
 
 	newOsv := &model.Osv{}
 	newOsv = registerOsvID(newOsv, idLower)
 	c.osv = append(c.osv, newOsv)
+
+	return newOsv
 }
 
 func registerOsvID(o *model.Osv, id string) *model.Osv {
@@ -85,4 +86,8 @@ func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 	return &model.Osv{
 		OsvID: osvID,
 	}, nil
+}
+
+func (c *demoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
+	return c.registerOSV(osv.OsvID), nil
 }

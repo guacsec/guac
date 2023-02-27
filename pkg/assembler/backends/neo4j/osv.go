@@ -99,20 +99,20 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Osv)-[:OsvHasID]->(osvID:OsvID)")
+
+	if osvSpec.OsvID != nil {
+		matchProperties(&sb, true, "osvID", "id", "$osvID")
+		queryValues["osvID"] = strings.ToLower(*osvSpec.OsvID)
+	}
+
+	sb.WriteString(" RETURN osvID.id")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-
-			var sb strings.Builder
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Osv)-[:OsvHasID]->(osvID:OsvID)")
-
-			if osvSpec.OsvID != nil {
-				matchProperties(&sb, true, "osvID", "id", "$osvID")
-				queryValues["osvID"] = strings.ToLower(*osvSpec.OsvID)
-			}
-
-			sb.WriteString(" RETURN osvID.id")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -140,4 +140,42 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 	}
 
 	return result.([]*model.Osv), nil
+}
+
+func (c *neo4jClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["id"] = strings.ToLower(osv.OsvID)
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Osv)
+MERGE (root) -[:OsvHasID]-> (osvID:OsvID{id:$id})
+RETURN osvID.id`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			id := record.Values[0].(string)
+			osvID := &model.OSVId{ID: id}
+			osv := &model.Osv{
+				OsvID: []*model.OSVId{osvID},
+			}
+
+			return osv, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Osv), nil
 }

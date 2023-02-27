@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestOsv is the resolver for the ingestOSV field.
+func (r *mutationResolver) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
+	return r.Backend.IngestOsv(ctx, osv)
+}
+
 // Osv is the resolver for the osv field.
 func (r *queryResolver) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
 	return r.Backend.Osv(ctx, osvSpec)

@@ -144,7 +144,6 @@ func (e *cveYearToCveID) IdentifiablePropertyNames() []string {
 }
 
 func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-
 	// fields: [year cveId cveId.id]
 	fields := getPreloads(ctx)
 	cveIDImplRequired := false
@@ -162,29 +161,27 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
+
+	if cveSpec.Year != nil {
+		matchProperties(&sb, firstMatch, "cveYear", "year", "$cveYear")
+		queryValues["cveYear"] = cveSpec.Year
+		firstMatch = false
+	}
+
+	if cveSpec.CveID != nil {
+		matchProperties(&sb, firstMatch, "cveID", "id", "$cveID")
+		queryValues["cveID"] = strings.ToLower(*cveSpec.CveID)
+	}
+
+	sb.WriteString(" RETURN cveYear.year, cveID.id")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-
-			var sb strings.Builder
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
-
-			if cveSpec.Year != nil {
-
-				matchProperties(&sb, firstMatch, "cveYear", "year", "$cveYear")
-				firstMatch = false
-
-				queryValues["cveYear"] = cveSpec.Year
-			}
-
-			if cveSpec.CveID != nil {
-				matchProperties(&sb, firstMatch, "cveID", "id", "$cveID")
-				queryValues["cveID"] = strings.ToLower(*cveSpec.CveID)
-			}
-
-			sb.WriteString(" RETURN cveYear.year, cveID.id")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -223,21 +220,20 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)")
+
+	if cveSpec.Year != nil {
+		matchProperties(&sb, true, "cveYear", "year", "$cveYear")
+		queryValues["cveYear"] = cveSpec.Year
+	}
+
+	sb.WriteString(" RETURN cveYear.year")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-
-			var sb strings.Builder
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)")
-
-			if cveSpec.Year != nil {
-
-				matchProperties(&sb, true, "cveYear", "year", "$cveYear")
-				queryValues["cveYear"] = cveSpec.Year
-			}
-
-			sb.WriteString(" RETURN cveYear.year")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -262,4 +258,48 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 	}
 
 	return result.([]*model.Cve), nil
+}
+
+func (c *neo4jClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["year"] = cve.Year
+	values["id"] = strings.ToLower(cve.CveID)
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Cve)
+MERGE (root) -[:CveIsYear]-> (cveYear:CveYear{year:$year})
+MERGE (cveYear) -[:CveHasID]-> (cveID:CveID{id:$id})
+RETURN cveYear.year, cveID.id`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
+			idStr := record.Values[1].(string)
+			id := &model.CVEId{ID: idStr}
+
+			yearStr := record.Values[0].(string)
+			src := model.Cve{
+				Year:  yearStr,
+				CveID: []*model.CVEId{id},
+			}
+
+			return &src, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Cve), nil
 }

@@ -15,7 +15,8 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the artifact. It contains the algorithm and digest fields
+# Defines a GraphQL schema for the artifact. It contains the algorithm and
+# digest fields
 
 """
 Artifact represents the artifact and contains a digest field

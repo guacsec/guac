@@ -79,10 +79,10 @@ type BuilderSpec struct {
 // CVE represents common vulnerabilities and exposures. It contains the year along
 // with the CVE ID.
 //
-// year is mandatory.
+// The year is mandatory.
 //
-// This node is a singleton: backends guarantee that there is exactly one node with
-// the same `year` value.
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `year` value.
 type Cve struct {
 	Year  string   `json:"year"`
 	CveID []*CVEId `json:"cveId"`
@@ -94,11 +94,17 @@ func (Cve) IsCveGhsaObject() {}
 
 // CVEId is the actual ID that is given to a specific vulnerability
 //
-// id field is mandatory and canonicalized to be lowercase.
+// The `id` field is mandatory and canonicalized to be lowercase.
 //
 // This node can be referred to by other parts of GUAC.
 type CVEId struct {
 	ID string `json:"id"`
+}
+
+// CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
+type CVEInputSpec struct {
+	Year  string `json:"year"`
+	CveID string `json:"cveId"`
 }
 
 // CVESpec allows filtering the list of cves to return.
@@ -262,7 +268,9 @@ type CertifyVulnSpec struct {
 	Collector      *string   `json:"collector"`
 }
 
-// GHSA represents github security advisory. It contains the ghsa ID (GHSA-pgvh-p3g4-86jw)
+// GHSA represents GitHub security advisories.
+//
+// We create a separate node to allow retrieving all GHSAs.
 type Ghsa struct {
 	GhsaID []*GHSAId `json:"ghsaId"`
 }
@@ -271,16 +279,23 @@ func (Ghsa) IsOsvCveGhsaObject() {}
 
 func (Ghsa) IsCveGhsaObject() {}
 
-// GHSAId is the actual ID that is given to a specific vulnerability on github
+// GHSAId is the actual ID that is given to a specific vulnerability on GitHub
 //
-// id field is mandatory and canonicalized to be lowercase.
+// The `id` field is mandatory and canonicalized to be lowercase.
 //
 // This node can be referred to by other parts of GUAC.
 type GHSAId struct {
 	ID string `json:"id"`
 }
 
-// GHSASpec allows filtering the list of ghsa to return.
+// GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
+type GHSAInputSpec struct {
+	GhsaID string `json:"ghsaId"`
+}
+
+// GHSASpec allows filtering the list of GHSA to return.
+//
+// The argument will be canonicalized to lowercase.
 type GHSASpec struct {
 	GhsaID *string `json:"ghsaId"`
 }
@@ -495,7 +510,9 @@ type IsVulnerabilitySpec struct {
 	Collector     *string   `json:"collector"`
 }
 
-// OSV represents Open Source Vulnerability . It contains a OSV ID.
+// OSV represents an Open Source Vulnerability.
+//
+// We create a separate node to allow retrieving all OSVs.
 type Osv struct {
 	OsvID []*OSVId `json:"osvId"`
 }
@@ -504,14 +521,22 @@ func (Osv) IsOsvCveGhsaObject() {}
 
 // OSVId is the actual ID that is given to a specific vulnerability.
 //
-// id field is mandatory and canonicalized to be lowercase. This maps to a GHSA or CVE ID
+// The `id` field is mandatory and canonicalized to be lowercase.
+//
+// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
+// CVE ID).
 //
 // This node can be referred to by other parts of GUAC.
 type OSVId struct {
 	ID string `json:"id"`
 }
 
-// OSVSpec allows filtering the list of osv to return.
+// OSVInputSpec is the same as OSVSpec, but used for mutation ingestion.
+type OSVInputSpec struct {
+	OsvID string `json:"osvId"`
+}
+
+// OSVSpec allows filtering the list of OSV to return.
 type OSVSpec struct {
 	OsvID *string `json:"osvId"`
 }

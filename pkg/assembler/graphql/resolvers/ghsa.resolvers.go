@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestGhsa is the resolver for the ingestGHSA field.
+func (r *mutationResolver) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
+	return r.Backend.IngestGhsa(ctx, ghsa)
+}
+
 // Ghsa is the resolver for the ghsa field.
 func (r *queryResolver) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
 	return r.Backend.Ghsa(ctx, ghsaSpec)

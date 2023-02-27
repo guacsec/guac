@@ -88,35 +88,27 @@ func registerAllGHSA(client *neo4jClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerGhsa("GHSA-h45f-rjvw-2rv2")
-	if err != nil {
-		return err
-	}
-	err = client.registerGhsa("GHSA-h45f-rjvw-2rv2")
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func registerAllOSV(client *neo4jClient) error {
-	err := client.registerOSV("CVE-2019-3456")
+	err := client.registerOSV("CVE-2019-13110")
 	if err != nil {
 		return err
 	}
-	err = client.registerOSV("CVE-2014-53356")
+	err = client.registerOSV("CVE-2014-8139")
 	if err != nil {
 		return err
 	}
-	err = client.registerOSV("CVE-2014-4432")
+	err = client.registerOSV("CVE-2014-8140")
 	if err != nil {
 		return err
 	}
-	err = client.registerOSV("CVE-2022-9876")
+	err = client.registerOSV("CVE-2022-26499")
 	if err != nil {
 		return err
 	}
-	err = client.registerOSV("CVE-2014-4432")
+	err = client.registerOSV("GHSA-h45f-rjvw-2rv2")
 	if err != nil {
 		return err
 	}

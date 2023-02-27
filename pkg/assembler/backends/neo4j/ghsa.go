@@ -99,20 +99,20 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
+
+	if ghsaSpec.GhsaID != nil {
+		matchProperties(&sb, true, "ghsaID", "id", "$ghsaID")
+		queryValues["ghsaID"] = strings.ToLower(*ghsaSpec.GhsaID)
+	}
+
+	sb.WriteString(" RETURN ghsaID.id")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-
-			var sb strings.Builder
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
-
-			if ghsaSpec.GhsaID != nil {
-				matchProperties(&sb, true, "ghsaID", "id", "$ghsaID")
-				queryValues["ghsaID"] = strings.ToLower(*ghsaSpec.GhsaID)
-			}
-
-			sb.WriteString(" RETURN ghsaID.id")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -140,4 +140,42 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 	}
 
 	return result.([]*model.Ghsa), nil
+}
+
+func (c *neo4jClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	values := map[string]any{}
+	values["id"] = strings.ToLower(ghsa.GhsaID)
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			query := `MERGE (root:Ghsa)
+MERGE (root) -[:GhsaHasID]-> (ghsaID:GhsaID{id:$id})
+RETURN ghsaID.id`
+			result, err := tx.Run(query, values)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			id := record.Values[0].(string)
+			ghsaID := &model.GHSAId{ID: id}
+			ghsa := &model.Ghsa{
+				GhsaID: []*model.GHSAId{ghsaID},
+			}
+
+			return ghsa, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Ghsa), nil
 }

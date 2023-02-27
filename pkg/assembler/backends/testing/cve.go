@@ -32,18 +32,20 @@ func registerAllCVE(client *demoClient) {
 
 // Ingest CVE
 
-func (c *demoClient) registerCVE(year, id string) {
+func (c *demoClient) registerCVE(year, id string) *model.Cve {
 	idLower := strings.ToLower(id)
 	for i, s := range c.cve {
 		if s.Year == year {
 			c.cve[i] = registerCveID(s, idLower)
-			return
+			return c.cve[i]
 		}
 	}
 
 	newCve := &model.Cve{Year: year}
 	newCve = registerCveID(newCve, idLower)
 	c.cve = append(c.cve, newCve)
+
+	return newCve
 }
 
 func registerCveID(c *model.Cve, id string) *model.Cve {
@@ -89,4 +91,8 @@ func filterCVEID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
 		Year:  cve.Year,
 		CveID: cveID,
 	}, nil
+}
+
+func (c *demoClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
+	return c.registerCVE(cve.Year, cve.CveID), nil
 }

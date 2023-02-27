@@ -51,6 +51,9 @@ type Backend interface {
 	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
 	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error)
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
+	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
+	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
+	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

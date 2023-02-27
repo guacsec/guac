@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestCve is the resolver for the ingestCVE field.
+func (r *mutationResolver) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
+	return r.Backend.IngestCve(ctx, cve)
+}
+
 // Cve is the resolver for the cve field.
 func (r *queryResolver) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
 	return r.Backend.Cve(ctx, cveSpec)
