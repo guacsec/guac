@@ -18,7 +18,6 @@ package testing
 import (
 	"context"
 	"strings"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -33,16 +32,18 @@ func registerAllOSV(client *demoClient) {
 
 // Ingest OSV
 
-func (c *demoClient) registerOSV(id string) {
+func (c *demoClient) registerOSV(id string) *model.Osv {
 	idLower := strings.ToLower(id)
 	for i, o := range c.osv {
 		c.osv[i] = registerOsvID(o, idLower)
-		return
+		return c.osv[i]
 	}
 
 	newOsv := &model.Osv{}
 	newOsv = registerOsvID(newOsv, idLower)
 	c.osv = append(c.osv, newOsv)
+
+	return newOsv
 }
 
 func registerOsvID(o *model.Osv, id string) *model.Osv {
@@ -88,5 +89,5 @@ func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 }
 
 func (c *demoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
-	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
+	return c.registerOSV(osv.OsvID), nil
 }

@@ -18,7 +18,6 @@ package testing
 import (
 	"context"
 	"strings"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -31,16 +30,18 @@ func registerAllGHSA(client *demoClient) {
 
 // Ingest GHSA
 
-func (c *demoClient) registerGhsa(id string) {
+func (c *demoClient) registerGhsa(id string) *model.Ghsa {
 	idLower := strings.ToLower(id)
 	for i, g := range c.ghsa {
 		c.ghsa[i] = registerGhsaID(g, idLower)
-		return
+		return c.ghsa[i]
 	}
 
 	newGhsa := &model.Ghsa{}
 	newGhsa = registerGhsaID(newGhsa, idLower)
 	c.ghsa = append(c.ghsa, newGhsa)
+
+	return newGhsa
 }
 
 func registerGhsaID(g *model.Ghsa, id string) *model.Ghsa {
@@ -86,5 +87,5 @@ func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, erro
 }
 
 func (c *demoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
-	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
+	return c.registerGhsa(ghsa.GhsaID), nil
 }
