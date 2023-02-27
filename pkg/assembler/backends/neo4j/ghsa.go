@@ -152,8 +152,8 @@ func (c *neo4jClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec)
 	result, err := session.WriteTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
 			query := `MERGE (root:Ghsa)
-MERGE (root) -[:GhsaHasID]-> (ghsa:GhsaID{id:$id})
-RETURN ghsa.id`
+MERGE (root) -[:GhsaHasID]-> (ghsaID:GhsaID{id:$id})
+RETURN ghsaID.id`
 			result, err := tx.Run(query, values)
 			if err != nil {
 				return nil, err

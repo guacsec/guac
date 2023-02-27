@@ -152,8 +152,8 @@ func (c *neo4jClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*
 	result, err := session.WriteTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
 			query := `MERGE (root:Osv)
-MERGE (root) -[:OsvHasID]-> (osv:OsvID{id:$id})
-RETURN osv.id`
+MERGE (root) -[:OsvHasID]-> (osvID:OsvID{id:$id})
+RETURN osvID.id`
 			result, err := tx.Run(query, values)
 			if err != nil {
 				return nil, err

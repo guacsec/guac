@@ -271,9 +271,9 @@ func (c *neo4jClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*
 	result, err := session.WriteTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
 			query := `MERGE (root:Cve)
-MERGE (root) -[:CveIsYear]-> (cy:CveYear{year:$year})
-MERGE (cy) -[:CveHasID]-> (ci:CveID{id:$id})
-RETURN cy.year, ci.id`
+MERGE (root) -[:CveIsYear]-> (cveYear:CveYear{year:$year})
+MERGE (cveYear) -[:CveHasID]-> (cveID:CveID{id:$id})
+RETURN cveYear.year, cveID.id`
 			result, err := tx.Run(query, values)
 			if err != nil {
 				return nil, err
