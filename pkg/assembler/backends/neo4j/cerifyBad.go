@@ -29,6 +29,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 	certifyPkg := false
 	certifySrc := false
 	certifyArt := false
+	queryAll := false
 	if certifyBadSpec.Package != nil {
 		certifyPkg = true
 	}
@@ -37,6 +38,9 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 	}
 	if certifyBadSpec.Artifact != nil {
 		certifyArt = true
+	}
+	if certifyBadSpec.Package == nil && certifyBadSpec.Source == nil && certifyBadSpec.Artifact == nil {
+		queryAll = true
 	}
 
 	if certifyPkg && certifySrc && certifyArt {
@@ -55,72 +59,51 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	var sb strings.Builder
-	var firstMatch bool = true
+	aggregateCertifyBad := []*model.CertifyBad{}
 
-	queryValues := map[string]any{}
+	if certifyPkg || queryAll {
+		var sb strings.Builder
+		var firstMatch bool = true
+		queryValues := map[string]any{}
 
-	if certifyPkg {
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyBad"
 		// query with pkgVersion
 		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-			"-[certifyBad:CertifyBad]"
+			"-[:subject]-(certifyBad:CertifyBad)"
 		sb.WriteString(query)
 
-		setPkgMatchValues(&sb, certifyBadSpec.Package, false, firstMatch, queryValues)
+		setPkgMatchValues(&sb, certifyBadSpec.Package, false, &firstMatch, queryValues)
 		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		if certifyBadSpec.Package.Version == nil && certifyBadSpec.Package.Subpath == nil &&
+		if certifyBadSpec.Package != nil && certifyBadSpec.Package.Version == nil && certifyBadSpec.Package.Subpath == nil &&
 			len(certifyBadSpec.Package.Qualifiers) == 0 && !*certifyBadSpec.Package.MatchOnlyEmptyQualifiers {
 
 			sb.WriteString("\nUNION")
 			// query without pkgVersion
 			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[certifyBad:CertifyBad]" +
+				"-[:PkgHasName]->(name:PkgName)-[:subject]-(certifyBad:CertifyBad)" +
 				"\nWITH *, null AS version"
 			sb.WriteString(query)
 
 			firstMatch = true
-			setPkgMatchValues(&sb, certifyBadSpec.Package, false, firstMatch, queryValues)
+			setPkgMatchValues(&sb, certifyBadSpec.Package, false, &firstMatch, queryValues)
 			setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
 			sb.WriteString(returnValue)
 		}
-	}
-	if certifySrc {
-		query := "MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)" +
-			"-[:SrcHasName]->(name:SrcName)-[certifyBad:CertifyBad]"
-		sb.WriteString(query)
+		result, err := session.ReadTransaction(
+			func(tx neo4j.Transaction) (interface{}, error) {
 
-		setSrcMatchValues(&sb, certifyBadSpec.Source, false, firstMatch, queryValues)
-		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
-		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, certifyBad")
-	}
+				result, err := tx.Run(sb.String(), queryValues)
+				if err != nil {
+					return nil, err
+				}
 
-	if certifyArt {
-		query := "MATCH (a:Artifact)-[certifyBad:CertifyBad]"
-		sb.WriteString(query)
+				collectedCertifyBad := []*model.CertifyBad{}
 
-		setSrcMatchValues(&sb, certifyBadSpec.Source, false, firstMatch, queryValues)
-		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
-		sb.WriteString(" RETURN a.algorithm, a.digest, certifyBad")
-	}
-
-	result, err := session.ReadTransaction(
-		func(tx neo4j.Transaction) (interface{}, error) {
-
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
-			}
-
-			collectedCertifyBad := []*model.CertifyBad{}
-
-			for result.Next() {
-				if certifyPkg {
+				for result.Next() {
 					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
 					subPathString := result.Record().Values[4].(string)
 					versionString := result.Record().Values[3].(string)
@@ -147,22 +130,57 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 						Type:       typeString,
 						Namespaces: []*model.PackageNamespace{namespace},
 					}
-					certifyBadEdge := dbtype.Relationship{}
+					certifyBadNode := dbtype.Node{}
 					if result.Record().Values[6] != nil {
-						certifyBadEdge = result.Record().Values[6].(dbtype.Relationship)
+						certifyBadNode = result.Record().Values[6].(dbtype.Node)
 					} else {
-						return nil, gqlerror.Errorf("certifyBadEdge not found in neo4j")
+						return nil, gqlerror.Errorf("certifyBad Node not found in neo4j")
 					}
 
 					certifyBad := &model.CertifyBad{
 						Subject:       &pkg,
-						Justification: certifyBadEdge.Props[justification].(string),
-						Origin:        certifyBadEdge.Props[origin].(string),
-						Collector:     certifyBadEdge.Props[collector].(string),
+						Justification: certifyBadNode.Props[justification].(string),
+						Origin:        certifyBadNode.Props[origin].(string),
+						Collector:     certifyBadNode.Props[collector].(string),
 					}
 					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
-				if certifySrc {
+				if err = result.Err(); err != nil {
+					return nil, err
+				}
+
+				return collectedCertifyBad, nil
+			})
+		if err != nil {
+			return nil, err
+		}
+
+		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
+	}
+
+	if certifySrc || queryAll {
+		var sb strings.Builder
+		var firstMatch bool = true
+		queryValues := map[string]any{}
+
+		query := "MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)" +
+			"-[:SrcHasName]->(name:SrcName)-[:subject]-(certifyBad:CertifyBad)"
+		sb.WriteString(query)
+
+		setSrcMatchValues(&sb, certifyBadSpec.Source, false, &firstMatch, queryValues)
+		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
+		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, certifyBad")
+		result, err := session.ReadTransaction(
+			func(tx neo4j.Transaction) (interface{}, error) {
+
+				result, err := tx.Run(sb.String(), queryValues)
+				if err != nil {
+					return nil, err
+				}
+
+				collectedCertifyBad := []*model.CertifyBad{}
+
+				for result.Next() {
 					commitString := ""
 					if result.Record().Values[4] != nil {
 						commitString = result.Record().Values[4].(string)
@@ -189,70 +207,102 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 						Type:       typeString,
 						Namespaces: []*model.SourceNamespace{srcNamespace},
 					}
-					certifyBadEdge := dbtype.Relationship{}
+					certifyBadNode := dbtype.Node{}
 					if result.Record().Values[5] != nil {
-						certifyBadEdge = result.Record().Values[5].(dbtype.Relationship)
+						certifyBadNode = result.Record().Values[5].(dbtype.Node)
 					} else {
-						return nil, gqlerror.Errorf("certifyBadEdge not found in neo4j")
+						return nil, gqlerror.Errorf("certifyBad Node not found in neo4j")
 					}
 
 					certifyBad := &model.CertifyBad{
 						Subject:       &src,
-						Justification: certifyBadEdge.Props[justification].(string),
-						Origin:        certifyBadEdge.Props[origin].(string),
-						Collector:     certifyBadEdge.Props[collector].(string),
+						Justification: certifyBadNode.Props[justification].(string),
+						Origin:        certifyBadNode.Props[origin].(string),
+						Collector:     certifyBadNode.Props[collector].(string),
 					}
 					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
-				if certifyArt {
+				if err = result.Err(); err != nil {
+					return nil, err
+				}
+
+				return collectedCertifyBad, nil
+			})
+		if err != nil {
+			return nil, err
+		}
+		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
+	}
+
+	if certifyArt || queryAll {
+		var sb strings.Builder
+		var firstMatch bool = true
+		queryValues := map[string]any{}
+
+		query := "MATCH (a:Artifact)-[:subject]-(certifyBad:CertifyBad)"
+		sb.WriteString(query)
+
+		setArtifactMatchValues(&sb, certifyBadSpec.Artifact, false, &firstMatch, queryValues)
+		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
+		sb.WriteString(" RETURN a.algorithm, a.digest, certifyBad")
+		result, err := session.ReadTransaction(
+			func(tx neo4j.Transaction) (interface{}, error) {
+
+				result, err := tx.Run(sb.String(), queryValues)
+				if err != nil {
+					return nil, err
+				}
+
+				collectedCertifyBad := []*model.CertifyBad{}
+
+				for result.Next() {
 					artifact := model.Artifact{
 						Algorithm: result.Record().Values[0].(string),
 						Digest:    result.Record().Values[1].(string),
 					}
-					certifyBadEdge := dbtype.Relationship{}
+					certifyBadNode := dbtype.Node{}
 					if result.Record().Values[2] != nil {
-						certifyBadEdge = result.Record().Values[2].(dbtype.Relationship)
+						certifyBadNode = result.Record().Values[2].(dbtype.Node)
 					} else {
-						return nil, gqlerror.Errorf("certifyBadEdge not found in neo4j")
+						return nil, gqlerror.Errorf("certifyBad Node not found in neo4j")
 					}
 
 					certifyBad := &model.CertifyBad{
 						Subject:       &artifact,
-						Justification: certifyBadEdge.Props[justification].(string),
-						Origin:        certifyBadEdge.Props[origin].(string),
-						Collector:     certifyBadEdge.Props[collector].(string),
+						Justification: certifyBadNode.Props[justification].(string),
+						Origin:        certifyBadNode.Props[origin].(string),
+						Collector:     certifyBadNode.Props[collector].(string),
 					}
 					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
-			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
+				if err = result.Err(); err != nil {
+					return nil, err
+				}
 
-			return collectedCertifyBad, nil
-		})
-	if err != nil {
-		return nil, err
+				return collectedCertifyBad, nil
+			})
+		if err != nil {
+			return nil, err
+		}
+
+		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
 	}
+	return aggregateCertifyBad, nil
 
-	return result.([]*model.CertifyBad), nil
 }
 
 func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSpec, firstMatch bool, queryValues map[string]any) {
 	if certifyBadSpec.Justification != nil {
-
 		matchProperties(sb, firstMatch, "certifyBad", "justification", "$justification")
 		firstMatch = false
 		queryValues["justification"] = certifyBadSpec.Justification
 	}
 	if certifyBadSpec.Origin != nil {
-
 		matchProperties(sb, firstMatch, "certifyBad", "origin", "$origin")
 		firstMatch = false
 		queryValues["origin"] = certifyBadSpec.Origin
 	}
 	if certifyBadSpec.Collector != nil {
-
 		matchProperties(sb, firstMatch, "certifyBad", "collector", "$collector")
 		firstMatch = false
 		queryValues["collector"] = certifyBadSpec.Collector
