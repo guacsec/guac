@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -84,4 +85,8 @@ func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, erro
 	return &model.Ghsa{
 		GhsaID: ghsaID,
 	}, nil
+}
+
+func (c *demoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
+	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
 }

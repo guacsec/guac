@@ -18,6 +18,7 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -262,4 +263,8 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 	}
 
 	return result.([]*model.Cve), nil
+}
+
+func (c *neo4jClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
+	panic(fmt.Errorf("not implemented: IngestCve - ingestCVE"))
 }

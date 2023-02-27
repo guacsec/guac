@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -89,4 +90,8 @@ func filterCVEID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
 		Year:  cve.Year,
 		CveID: cveID,
 	}, nil
+}
+
+func (c *demoClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
+	panic(fmt.Errorf("not implemented: IngestCve - ingestCVE"))
 }

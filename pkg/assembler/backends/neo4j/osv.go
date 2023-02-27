@@ -18,6 +18,7 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -140,4 +141,8 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 	}
 
 	return result.([]*model.Osv), nil
+}
+
+func (c *neo4jClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
+	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
 }

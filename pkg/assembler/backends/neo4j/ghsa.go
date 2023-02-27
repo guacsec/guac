@@ -18,6 +18,7 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -140,4 +141,8 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 	}
 
 	return result.([]*model.Ghsa), nil
+}
+
+func (c *neo4jClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
+	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
 }

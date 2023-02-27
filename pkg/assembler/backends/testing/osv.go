@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -85,4 +86,8 @@ func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 	return &model.Osv{
 		OsvID: osvID,
 	}, nil
+}
+
+func (c *demoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
+	panic(fmt.Errorf("not implemented: IngestGhsa - ingestGHSA"))
 }
