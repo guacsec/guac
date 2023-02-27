@@ -54,18 +54,19 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 			}
 
 			returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
-				"version.qualifier_list, isDependency, depType.type, depNamespace.namespace, depName.name"
+				"version.qualifier_list, isDependency, objPkgType.type, objPkgNamespace.namespace, objPkgName.name"
 
 			queryValues := map[string]any{}
 			// query with pkgVersion
-			query := "MATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-				"-[isDependency:IsDependency]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-				"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)"
+				"-[isDependency:IsDependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+				"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
 			sb.WriteString(query)
 
-			setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
-			setIsDependencyValues(&sb, isDependencySpec, firstMatch, queryValues)
+			setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+			setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+			setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
 
 			sb.WriteString(returnValue)
 
@@ -74,16 +75,17 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 				sb.WriteString("\nUNION")
 				// query without pkgVersion
-				query = "\nMATCH (n:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 					"-[:PkgHasName]->(name:PkgName)" +
-					"-[isDependency:IsDependency]-(depName:PkgName)<-[:PkgHasName]-(depNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-					"-(depType:PkgType)<-[:PkgHasType]-(depPkg:Pkg)" +
+					"-[isDependency:IsDependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+					"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
 					"\nWITH *, null AS version"
 				sb.WriteString(query)
 
 				firstMatch = true
-				setMatchValues(&sb, selectedPkg, dependentPkg, firstMatch, queryValues)
-				setIsDependencyValues(&sb, isDependencySpec, firstMatch, queryValues)
+				setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+				setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+				setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
 
 				sb.WriteString(returnValue)
 			}
@@ -171,122 +173,23 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 	return result.([]*model.IsDependency), nil
 }
 
-func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDependencySpec, firstMatch bool, queryValues map[string]any) {
+func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDependencySpec, firstMatch *bool, queryValues map[string]any) {
 	if isDependencySpec.VersionRange != nil {
 
-		matchProperties(sb, firstMatch, "isDependency", "versionRange", "$versionRange")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "isDependency", "versionRange", "$versionRange")
+		*firstMatch = false
 		queryValues["versionRange"] = isDependencySpec.VersionRange
 	}
 	if isDependencySpec.Origin != nil {
 
-		matchProperties(sb, firstMatch, "isDependency", "origin", "$origin")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "isDependency", "origin", "$origin")
+		*firstMatch = false
 		queryValues["origin"] = isDependencySpec.Origin
 	}
 	if isDependencySpec.Collector != nil {
 
-		matchProperties(sb, firstMatch, "isDependency", "collector", "$collector")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "isDependency", "collector", "$collector")
+		*firstMatch = false
 		queryValues["collector"] = isDependencySpec.Collector
-	}
-}
-
-// TODO: Refactor to remove reused code by multiple verbs
-func setMatchValues(sb *strings.Builder, pkg *model.PkgSpec, depPkg *model.PkgSpec, firstMatch bool, queryValues map[string]any) {
-	if pkg != nil {
-		if pkg.Type != nil {
-
-			matchProperties(sb, firstMatch, "type", "type", "$pkgType")
-			firstMatch = false
-			queryValues["pkgType"] = pkg.Type
-		}
-		if pkg.Namespace != nil {
-
-			matchProperties(sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
-			firstMatch = false
-			queryValues["pkgNamespace"] = pkg.Namespace
-		}
-		if pkg.Name != nil {
-
-			matchProperties(sb, firstMatch, "name", "name", "$pkgName")
-			firstMatch = false
-			queryValues["pkgName"] = pkg.Name
-		}
-		if pkg.Version != nil {
-
-			matchProperties(sb, firstMatch, "version", "version", "$pkgVersion")
-			firstMatch = false
-			queryValues["pkgVersion"] = pkg.Version
-		}
-
-		if pkg.Subpath != nil {
-
-			matchProperties(sb, firstMatch, "version", "subpath", "$pkgSubpath")
-			firstMatch = false
-			queryValues["pkgSubpath"] = pkg.Subpath
-		}
-
-		if !*pkg.MatchOnlyEmptyQualifiers {
-
-			if len(pkg.Qualifiers) > 0 {
-				qualifiers := getQualifiers(pkg.Qualifiers)
-				matchProperties(sb, firstMatch, "version", "qualifier_list", "$pkgQualifierList")
-				firstMatch = false
-				queryValues["pkgQualifierList"] = qualifiers
-			}
-
-		} else {
-			matchProperties(sb, firstMatch, "version", "qualifier_list", "$pkgQualifierList")
-			firstMatch = false
-			queryValues["pkgQualifierList"] = []string{}
-		}
-	}
-	if depPkg != nil {
-		if depPkg.Type != nil {
-
-			matchProperties(sb, firstMatch, "depType", "type", "$depType")
-			firstMatch = false
-			queryValues["depType"] = depPkg.Type
-		}
-		if depPkg.Namespace != nil {
-
-			matchProperties(sb, firstMatch, "depNamespace", "namespace", "$depNamespace")
-			firstMatch = false
-			queryValues["depNamespace"] = depPkg.Namespace
-		}
-		if depPkg.Name != nil {
-
-			matchProperties(sb, firstMatch, "depName", "name", "$depName")
-			firstMatch = false
-			queryValues["depName"] = depPkg.Name
-		}
-
-		if depPkg.Version != nil {
-
-			matchProperties(sb, firstMatch, "depVersion", "version", "$depVersion")
-			firstMatch = false
-			queryValues["depVersion"] = depPkg.Version
-		}
-
-		if depPkg.Subpath != nil {
-
-			matchProperties(sb, firstMatch, "depVersion", "subpath", "$depSubpath")
-			firstMatch = false
-			queryValues["depSubpath"] = depPkg.Subpath
-		}
-
-		if !*depPkg.MatchOnlyEmptyQualifiers {
-			if len(depPkg.Qualifiers) > 0 {
-				qualifiers := getQualifiers(depPkg.Qualifiers)
-				matchProperties(sb, firstMatch, "depVersion", "qualifier_list", "$depQualifierList")
-				firstMatch = false
-				queryValues["depQualifierList"] = qualifiers
-			}
-		} else {
-			matchProperties(sb, firstMatch, "depVersion", "qualifier_list", "$depQualifierList")
-			firstMatch = false
-			queryValues["depQualifierList"] = []string{}
-		}
 	}
 }
