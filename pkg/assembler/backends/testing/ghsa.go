@@ -27,8 +27,6 @@ func registerAllGHSA(client *demoClient) {
 	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
 	client.registerGhsa("GHSA-xrw3-wqph-3fxg")
 	client.registerGhsa("GHSA-8v4j-7jgf-5rg9")
-	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
-	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
 }
 
 // Ingest GHSA

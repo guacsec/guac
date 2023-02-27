@@ -28,7 +28,6 @@ func registerAllOSV(client *demoClient) {
 	client.registerOSV("CVE-2014-8139")
 	client.registerOSV("CVE-2014-8140")
 	client.registerOSV("CVE-2022-26499")
-	client.registerOSV("CVE-2014-8140")
 	client.registerOSV("GHSA-h45f-rjvw-2rv2")
 }
 
