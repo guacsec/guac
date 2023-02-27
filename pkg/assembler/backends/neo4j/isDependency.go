@@ -33,62 +33,63 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+
+	selectedPkg := isDependencySpec.Package
+	var dependentPkg *model.PkgSpec = nil
+	depMatchOnlyEmptyQualifiers := false
+	if isDependencySpec.DependentPackage != nil {
+		dependentPkg = &model.PkgSpec{
+			Type:      isDependencySpec.DependentPackage.Type,
+			Namespace: isDependencySpec.DependentPackage.Namespace,
+			Name:      isDependencySpec.DependentPackage.Name,
+			// remove version, subpath and set qualifiers to empty list
+			Qualifiers: []*model.PackageQualifierSpec{},
+			// setting to default value of false as package version is not checked for dependent packages
+			MatchOnlyEmptyQualifiers: &depMatchOnlyEmptyQualifiers,
+		}
+	}
+
+	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
+		"version.qualifier_list, isDependency, objPkgType.type, objPkgNamespace.namespace, objPkgName.name"
+
+	queryValues := map[string]any{}
+	// query with pkgVersion
+	query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
+		"-[:subject]-(isDependency:IsDependency)-[:dependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+		"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
+	sb.WriteString(query)
+
+	setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+	setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+	setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
+
+	sb.WriteString(returnValue)
+
+	if selectedPkg == nil || selectedPkg != nil && selectedPkg.Version == nil && selectedPkg.Subpath == nil &&
+		len(selectedPkg.Qualifiers) == 0 && !*selectedPkg.MatchOnlyEmptyQualifiers {
+
+		sb.WriteString("\nUNION")
+		// query without pkgVersion
+		query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)" +
+			"-[:subject]-(isDependency:IsDependency)-[:dependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
+			"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
+			"\nWITH *, null AS version"
+		sb.WriteString(query)
+
+		firstMatch = true
+		setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
+		setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
+		setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
+
+		sb.WriteString(returnValue)
+	}
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var firstMatch bool = true
-
-			selectedPkg := isDependencySpec.Package
-			var dependentPkg *model.PkgSpec = nil
-			depMatchOnlyEmptyQualifiers := false
-			if isDependencySpec.DependentPackage != nil {
-				dependentPkg = &model.PkgSpec{
-					Type:      isDependencySpec.DependentPackage.Type,
-					Namespace: isDependencySpec.DependentPackage.Namespace,
-					Name:      isDependencySpec.DependentPackage.Name,
-					// remove version, subpath and set qualifiers to empty list
-					Qualifiers: []*model.PackageQualifierSpec{},
-					// setting to default value of false as package version is not checked for dependent packages
-					MatchOnlyEmptyQualifiers: &depMatchOnlyEmptyQualifiers,
-				}
-			}
-
-			returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
-				"version.qualifier_list, isDependency, objPkgType.type, objPkgNamespace.namespace, objPkgName.name"
-
-			queryValues := map[string]any{}
-			// query with pkgVersion
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-				"-[:subject]-(isDependency:IsDependency)-[:dependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-				"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
-			sb.WriteString(query)
-
-			setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
-			setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
-			setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
-
-			sb.WriteString(returnValue)
-
-			if selectedPkg == nil || selectedPkg != nil && selectedPkg.Version == nil && selectedPkg.Subpath == nil &&
-				len(selectedPkg.Qualifiers) == 0 && !*selectedPkg.MatchOnlyEmptyQualifiers {
-
-				sb.WriteString("\nUNION")
-				// query without pkgVersion
-				query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-					"-[:PkgHasName]->(name:PkgName)" +
-					"-[:subject]-(isDependency:IsDependency)-[:dependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-					"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
-					"\nWITH *, null AS version"
-				sb.WriteString(query)
-
-				firstMatch = true
-				setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
-				setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
-				setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
-
-				sb.WriteString(returnValue)
-			}
 
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
@@ -148,7 +149,7 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				if result.Record().Values[6] != nil {
 					isDependencyNode = result.Record().Values[6].(dbtype.Node)
 				} else {
-					return nil, gqlerror.Errorf("isDependencyEdge not found in neo4j")
+					return nil, gqlerror.Errorf("isDependency Node not found in neo4j")
 				}
 
 				isDependency := &model.IsDependency{

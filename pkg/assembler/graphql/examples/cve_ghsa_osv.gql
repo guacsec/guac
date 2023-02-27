@@ -19,7 +19,7 @@ fragment allOSVTree on OSV {
 
 
 query Q1 {
-  cve(cveSpec: {year: "1970"}) {
+  cve(cveSpec: {}) {
     ...allCveTree
   }
 }
@@ -31,7 +31,7 @@ query Q2 {
 }
 
 query Q3 {
-  cve(cveSpec: {year: "2023"}) {
+  cve(cveSpec: {year: "2014"}) {
     ...allCveTree
   }
 }
@@ -55,13 +55,13 @@ query Q6 {
 }
 
 query Q7 {
-  osv(osvSpec: {osvId: "CVE-2014-8139"}) {
+  osv(osvSpec: {osvId: "cve-2022-9876"}) {
     ...allOSVTree
   }
 }
 
 query Q8 {
-  osv(osvSpec: {osvId: "CVE-2022-26499"}) {
+  osv(osvSpec: {osvId: "cve-2014-4432"}) {
     ...allOSVTree
   }
 }

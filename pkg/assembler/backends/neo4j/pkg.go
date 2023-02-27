@@ -277,18 +277,18 @@ func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
+
+	setPkgMatchValues(&sb, pkgSpec, false, &firstMatch, queryValues)
+
+	sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, version.qualifier_list")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)")
-
-			setPkgMatchValues(&sb, pkgSpec, false, &firstMatch, queryValues)
-
-			sb.WriteString(" RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, version.qualifier_list")
-
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -374,22 +374,22 @@ func (c *neo4jClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)")
+
+	if pkgSpec.Type != nil {
+
+		matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
+		queryValues["pkgType"] = pkgSpec.Type
+	}
+
+	sb.WriteString(" RETURN type.type")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)")
-
-			if pkgSpec.Type != nil {
-
-				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
-				queryValues["pkgType"] = pkgSpec.Type
-			}
-
-			sb.WriteString(" RETURN type.type")
-
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -420,28 +420,28 @@ func (c *neo4jClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgS
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)")
+
+	if pkgSpec.Type != nil {
+
+		matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
+		firstMatch = false
+		queryValues["pkgType"] = pkgSpec.Type
+	}
+	if pkgSpec.Namespace != nil {
+
+		matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
+		queryValues["pkgNamespace"] = pkgSpec.Namespace
+	}
+
+	sb.WriteString(" RETURN type.type, namespace.namespace")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)")
-
-			if pkgSpec.Type != nil {
-
-				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
-				firstMatch = false
-				queryValues["pkgType"] = pkgSpec.Type
-			}
-			if pkgSpec.Namespace != nil {
-
-				matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
-				queryValues["pkgNamespace"] = pkgSpec.Namespace
-			}
-
-			sb.WriteString(" RETURN type.type, namespace.namespace")
-
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -486,33 +486,33 @@ func (c *neo4jClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)")
+	if pkgSpec.Type != nil {
+
+		matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
+		firstMatch = false
+		queryValues["pkgType"] = pkgSpec.Type
+	}
+	if pkgSpec.Namespace != nil {
+
+		matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
+		firstMatch = false
+		queryValues["pkgNamespace"] = pkgSpec.Namespace
+	}
+	if pkgSpec.Name != nil {
+
+		matchProperties(&sb, firstMatch, "name", "name", "$pkgName")
+		queryValues["pkgName"] = pkgSpec.Name
+	}
+
+	sb.WriteString(" RETURN type.type, namespace.namespace, name.name")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			var sb strings.Builder
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)-[:PkgHasName]->(name:PkgName)")
-			if pkgSpec.Type != nil {
-
-				matchProperties(&sb, firstMatch, "type", "type", "$pkgType")
-				firstMatch = false
-				queryValues["pkgType"] = pkgSpec.Type
-			}
-			if pkgSpec.Namespace != nil {
-
-				matchProperties(&sb, firstMatch, "namespace", "namespace", "$pkgNamespace")
-				firstMatch = false
-				queryValues["pkgNamespace"] = pkgSpec.Namespace
-			}
-			if pkgSpec.Name != nil {
-
-				matchProperties(&sb, firstMatch, "name", "name", "$pkgName")
-				queryValues["pkgName"] = pkgSpec.Name
-			}
-
-			sb.WriteString(" RETURN type.type, namespace.namespace, name.name")
-
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err

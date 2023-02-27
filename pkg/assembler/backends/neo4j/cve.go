@@ -162,29 +162,30 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
+
+	if cveSpec.Year != nil {
+
+		matchProperties(&sb, firstMatch, "cveYear", "year", "$cveYear")
+		firstMatch = false
+
+		queryValues["cveYear"] = cveSpec.Year
+	}
+
+	if cveSpec.CveID != nil {
+		matchProperties(&sb, firstMatch, "cveID", "id", "$cveID")
+		queryValues["cveID"] = strings.ToLower(*cveSpec.CveID)
+	}
+
+	sb.WriteString(" RETURN cveYear.year, cveID.id")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
 
-			var sb strings.Builder
-			var firstMatch bool = true
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
-
-			if cveSpec.Year != nil {
-
-				matchProperties(&sb, firstMatch, "cveYear", "year", "$cveYear")
-				firstMatch = false
-
-				queryValues["cveYear"] = cveSpec.Year
-			}
-
-			if cveSpec.CveID != nil {
-				matchProperties(&sb, firstMatch, "cveID", "id", "$cveID")
-				queryValues["cveID"] = strings.ToLower(*cveSpec.CveID)
-			}
-
-			sb.WriteString(" RETURN cveYear.year, cveID.id")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -223,21 +224,22 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	var sb strings.Builder
+	queryValues := map[string]any{}
+
+	sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)")
+
+	if cveSpec.Year != nil {
+
+		matchProperties(&sb, true, "cveYear", "year", "$cveYear")
+		queryValues["cveYear"] = cveSpec.Year
+	}
+
+	sb.WriteString(" RETURN cveYear.year")
+
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
 
-			var sb strings.Builder
-			queryValues := map[string]any{}
-
-			sb.WriteString("MATCH (n:Cve)-[:CveIsYear]->(cveYear:CveYear)")
-
-			if cveSpec.Year != nil {
-
-				matchProperties(&sb, true, "cveYear", "year", "$cveYear")
-				queryValues["cveYear"] = cveSpec.Year
-			}
-
-			sb.WriteString(" RETURN cveYear.year")
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
