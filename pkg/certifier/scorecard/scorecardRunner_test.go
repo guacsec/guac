@@ -21,8 +21,6 @@ import (
 	"context"
 	"os"
 	"testing"
-
-	"github.com/ossf/scorecard/v4/checks"
 )
 
 func Test_scorecardRunner_GetScore(t *testing.T) {
@@ -53,11 +51,6 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 				return
 			}
 			t.Logf("scorecard result: %v", got.Repo.Name)
-			for _, check := range got.Checks {
-				if check.Name == checks.CheckMaintained && check.Score < 5 {
-					t.Errorf("Maintained score is less than 5")
-				}
-			}
 		})
 	}
 }

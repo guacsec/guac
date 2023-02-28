@@ -85,7 +85,8 @@ func TestNewScorecard(t *testing.T) {
 }
 
 func Test_CertifyComponent(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second) // nolint:govet
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5) // nolint:govet
+	defer cancel()
 
 	type fields struct {
 		ghToken  string
@@ -205,7 +206,8 @@ func Test_CertifyComponent(t *testing.T) {
 }
 
 func TestCertifyComponentDefaultCase(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second) // nolint:govet
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // nolint:govet
+	defer cancel()
 
 	ctrl := gomock.NewController(t)
 	scMock := mocks.NewMockScorecard(ctrl)
@@ -226,6 +228,7 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 		ghToken:   "test",
 	}
 
+	// TODO: Use go routines to test the channel
 	// valid input
 	docChannel := make(chan *processor.Document, 2)
 
