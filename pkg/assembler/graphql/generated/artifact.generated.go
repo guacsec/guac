@@ -1253,20 +1253,8 @@ func (ec *executionContext) fieldContext_Query_scorecards(ctx context.Context, f
 			switch field.Name {
 			case "source":
 				return ec.fieldContext_CertifyScorecard_source(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyScorecard_timeScanned(ctx, field)
-			case "aggregateScore":
-				return ec.fieldContext_CertifyScorecard_aggregateScore(ctx, field)
-			case "checks":
-				return ec.fieldContext_CertifyScorecard_checks(ctx, field)
-			case "scorecardVersion":
-				return ec.fieldContext_CertifyScorecard_scorecardVersion(ctx, field)
-			case "scorecardCommit":
-				return ec.fieldContext_CertifyScorecard_scorecardCommit(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyScorecard_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyScorecard_collector(ctx, field)
+			case "scorecard":
+				return ec.fieldContext_CertifyScorecard_scorecard(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecard", field.Name)
 		},

@@ -36,7 +36,6 @@ const (
 )
 
 func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -54,7 +53,6 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-
 			result, err := tx.Run(sb.String(), queryValues)
 			if err != nil {
 				return nil, err
@@ -67,10 +65,12 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 				if result.Record().Values[4] != nil {
 					commitString = result.Record().Values[4].(string)
 				}
+
 				tagString := ""
 				if result.Record().Values[3] != nil {
 					tagString = result.Record().Values[3].(string)
 				}
+
 				nameString := result.Record().Values[2].(string)
 				namespaceString := result.Record().Values[1].(string)
 				typeString := result.Record().Values[0].(string)
@@ -85,10 +85,12 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 					Namespace: namespaceString,
 					Names:     []*model.SourceName{srcName},
 				}
+
 				src := model.Source{
 					Type:       typeString,
 					Namespaces: []*model.SourceNamespace{srcNamespace},
 				}
+
 				certifyScorecardNode := dbtype.Node{}
 				if result.Record().Values[5] != nil {
 					certifyScorecardNode = result.Record().Values[5].(dbtype.Node)
@@ -100,8 +102,8 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 				if err != nil {
 					return nil, err
 				}
-				certifyScorecard := &model.CertifyScorecard{
-					Source:           &src,
+
+				scorecard := model.Scorecard {
 					TimeScanned:      certifyScorecardNode.Props[timeScanned].(string),
 					AggregateScore:   certifyScorecardNode.Props[aggregateScore].(float64),
 					Checks:           checks,
@@ -110,6 +112,12 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 					Origin:           certifyScorecardNode.Props[origin].(string),
 					Collector:        certifyScorecardNode.Props[collector].(string),
 				}
+
+				certifyScorecard := &model.CertifyScorecard {
+					Source:           &src,
+					Scorecard: &scorecard,
+				}
+
 				collectedCertifyScorecard = append(collectedCertifyScorecard, certifyScorecard)
 			}
 			if err = result.Err(); err != nil {

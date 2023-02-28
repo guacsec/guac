@@ -166,26 +166,11 @@ type CertifyPkgSpec struct {
 
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
-//
-// The attestation has one subject: the source repository that is being scanned.
-// Remaining fields are properties.
 type CertifyScorecard struct {
 	// The source repository that is being scanned (attestation subject)
 	Source *Source `json:"source"`
-	// Exact timestamp when the source was last scanned
-	TimeScanned string `json:"timeScanned"`
-	// Overall Scorecard score for the source
-	AggregateScore float64 `json:"aggregateScore"`
-	// Individual Scorecard check scores (Branch-Protection, Code-Review, ...)
-	Checks []*ScorecardCheck `json:"checks"`
-	// Version of the Scorecard scanner used to analyze the source
-	ScorecardVersion string `json:"scorecardVersion"`
-	// Commit of the Scorecards repository at the time of scanning the source
-	ScorecardCommit string `json:"scorecardCommit"`
-	// Document from which this attestation is generated from
-	Origin string `json:"origin"`
-	// GUAC collector for the document
-	Collector string `json:"collector"`
+	// The Scorecard attached to the repository (attestation object)
+	Scorecard *Scorecard `json:"scorecard"`
 }
 
 // CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
@@ -751,6 +736,28 @@ type SLSAPredicate struct {
 type SLSAPredicateSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+// Scorecard contains all of the fields present in a Scorecard attestation.
+//
+// We also include fields to specify under what conditions the check was performed
+// (time of scan, version of scanners, etc.) as well as how this information got
+// included into GUAC (origin document and the collector for that document).
+type Scorecard struct {
+	// Individual Scorecard check scores (Branch-Protection, Code-Review, ...)
+	Checks []*ScorecardCheck `json:"checks"`
+	// Overall Scorecard score for the source
+	AggregateScore float64 `json:"aggregateScore"`
+	// Exact timestamp when the source was last scanned
+	TimeScanned string `json:"timeScanned"`
+	// Version of the Scorecard scanner used to analyze the source
+	ScorecardVersion string `json:"scorecardVersion"`
+	// Commit of the Scorecards repository at the time of scanning the source
+	ScorecardCommit string `json:"scorecardCommit"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // ScorecardCheck are the individual checks from scorecard and their values as a
