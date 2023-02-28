@@ -225,7 +225,7 @@ type ComplexityRoot struct {
 		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
 		Ghsa                func(childComplexity int, ghsaSpec *model.GHSASpec) int
-		HasSBOMs            func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
+		HasSbom             func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
 		HasSlsa             func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
 		HasSourceAt         func(childComplexity int, hasSourceAtSpec *model.HasSourceAtSpec) int
 		HashEqual           func(childComplexity int, hashEqualSpec *model.HashEqualSpec) int
@@ -1115,17 +1115,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Ghsa(childComplexity, args["ghsaSpec"].(*model.GHSASpec)), true
 
-	case "Query.HasSBOMs":
-		if e.complexity.Query.HasSBOMs == nil {
+	case "Query.HasSBOM":
+		if e.complexity.Query.HasSbom == nil {
 			break
 		}
 
-		args, err := ec.field_Query_HasSBOMs_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_HasSBOM_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.HasSBOMs(childComplexity, args["hasSBOMSpec"].(*model.HasSBOMSpec)), true
+		return e.complexity.Query.HasSbom(childComplexity, args["hasSBOMSpec"].(*model.HasSBOMSpec)), true
 
 	case "Query.HasSLSA":
 		if e.complexity.Query.HasSlsa == nil {
@@ -2057,7 +2057,7 @@ union PkgSrcObject = Package | Source
 
 extend type Query {
   "Returns all HasSBOM"
-  HasSBOMs(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+  HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#

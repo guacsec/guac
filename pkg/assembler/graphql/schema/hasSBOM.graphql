@@ -54,5 +54,5 @@ union PkgSrcObject = Package | Source
 
 extend type Query {
   "Returns all HasSBOM"
-  HasSBOMs(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
+  HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
 }
