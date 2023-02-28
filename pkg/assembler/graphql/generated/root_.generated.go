@@ -1676,24 +1676,12 @@ particular source repository.
 type CertifyScorecard {
   "The source repository that is being scanned (attestation subject)"
   source: Source!
-  "The Scorecard attached to the repository (attestation object)"
-  scorecard: Scorecard!
-}
-
-"""
-Scorecard contains all of the fields present in a Scorecard attestation.
-
-We also include fields to specify under what conditions the check was performed
-(time of scan, version of scanners, etc.) as well as how this information got
-included into GUAC (origin document and the collector for that document).
-"""
-type Scorecard {
-  "Individual Scorecard check scores (Branch-Protection, Code-Review, ...)"
-  checks: [ScorecardCheck!]!
-  "Overall Scorecard score for the source"
-  aggregateScore: Float!
   "Exact timestamp when the source was last scanned"
   timeScanned: String!
+  "Overall Scorecard score for the source"
+  aggregateScore: Float!
+  "Individual Scorecard check scores (Branch-Protection, Code-Review, ...)"
+  checks: [ScorecardCheck!]!
   "Version of the Scorecard scanner used to analyze the source"
   scorecardVersion: String!
   "Commit of the Scorecards repository at the time of scanning the source"
