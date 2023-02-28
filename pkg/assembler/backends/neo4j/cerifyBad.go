@@ -55,7 +55,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		sb.WriteString(query)
 
 		setPkgMatchValues(&sb, certifyBadSpec.Package, false, &firstMatch, queryValues)
-		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
+		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
 		if certifyBadSpec.Package != nil && certifyBadSpec.Package.Version == nil && certifyBadSpec.Package.Subpath == nil &&
@@ -70,7 +70,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 			firstMatch = true
 			setPkgMatchValues(&sb, certifyBadSpec.Package, false, &firstMatch, queryValues)
-			setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
+			setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 			sb.WriteString(returnValue)
 		}
 		result, err := session.ReadTransaction(
@@ -148,7 +148,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		sb.WriteString(query)
 
 		setSrcMatchValues(&sb, certifyBadSpec.Source, false, &firstMatch, queryValues)
-		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
+		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, certifyBad")
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -223,7 +223,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		sb.WriteString(query)
 
 		setArtifactMatchValues(&sb, certifyBadSpec.Artifact, false, &firstMatch, queryValues)
-		setCertifyBadValues(&sb, certifyBadSpec, firstMatch, queryValues)
+		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN a.algorithm, a.digest, certifyBad")
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -292,20 +292,20 @@ func checkCertifyBadInputs(certifyBadSpec *model.CertifyBadSpec) error {
 	return nil
 }
 
-func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSpec, firstMatch bool, queryValues map[string]any) {
+func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSpec, firstMatch *bool, queryValues map[string]any) {
 	if certifyBadSpec.Justification != nil {
-		matchProperties(sb, firstMatch, "certifyBad", "justification", "$justification")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "certifyBad", "justification", "$justification")
+		*firstMatch = false
 		queryValues["justification"] = certifyBadSpec.Justification
 	}
 	if certifyBadSpec.Origin != nil {
-		matchProperties(sb, firstMatch, "certifyBad", "origin", "$origin")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "certifyBad", "origin", "$origin")
+		*firstMatch = false
 		queryValues["origin"] = certifyBadSpec.Origin
 	}
 	if certifyBadSpec.Collector != nil {
-		matchProperties(sb, firstMatch, "certifyBad", "collector", "$collector")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "certifyBad", "collector", "$collector")
+		*firstMatch = false
 		queryValues["collector"] = certifyBadSpec.Collector
 	}
 }

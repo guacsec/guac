@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -58,7 +57,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 		sb.WriteString(query)
 
 		setPkgMatchValues(&sb, hasSBOMSpec.Package, false, &firstMatch, queryValues)
-		setHasSBOMValues(&sb, hasSBOMSpec, firstMatch, queryValues)
+		setHasSBOMValues(&sb, hasSBOMSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
 		if hasSBOMSpec.Package != nil && hasSBOMSpec.Package.Version == nil && hasSBOMSpec.Package.Subpath == nil &&
@@ -73,10 +72,10 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 
 			firstMatch = true
 			setPkgMatchValues(&sb, hasSBOMSpec.Package, false, &firstMatch, queryValues)
-			setHasSBOMValues(&sb, hasSBOMSpec, firstMatch, queryValues)
+			setHasSBOMValues(&sb, hasSBOMSpec, &firstMatch, queryValues)
 			sb.WriteString(returnValue)
 		}
-		fmt.Println(sb.String())
+
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 
@@ -152,9 +151,8 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 		sb.WriteString(query)
 
 		setSrcMatchValues(&sb, hasSBOMSpec.Source, false, &firstMatch, queryValues)
-		setHasSBOMValues(&sb, hasSBOMSpec, firstMatch, queryValues)
+		setHasSBOMValues(&sb, hasSBOMSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, hasSBOM")
-		fmt.Println(sb.String())
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -223,20 +221,20 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 	return aggregateHasSBOM, nil
 }
 
-func setHasSBOMValues(sb *strings.Builder, hasSBOMSpec *model.HasSBOMSpec, firstMatch bool, queryValues map[string]any) {
+func setHasSBOMValues(sb *strings.Builder, hasSBOMSpec *model.HasSBOMSpec, firstMatch *bool, queryValues map[string]any) {
 	if hasSBOMSpec.URI != nil {
-		matchProperties(sb, firstMatch, "hasSBOM", "uri", "$uri")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "hasSBOM", "uri", "$uri")
+		*firstMatch = false
 		queryValues["uri"] = hasSBOMSpec.URI
 	}
 	if hasSBOMSpec.Origin != nil {
-		matchProperties(sb, firstMatch, "hasSBOM", "origin", "$origin")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "hasSBOM", "origin", "$origin")
+		*firstMatch = false
 		queryValues["origin"] = hasSBOMSpec.Origin
 	}
 	if hasSBOMSpec.Collector != nil {
-		matchProperties(sb, firstMatch, "hasSBOM", "collector", "$collector")
-		firstMatch = false
+		matchProperties(sb, *firstMatch, "hasSBOM", "collector", "$collector")
+		*firstMatch = false
 		queryValues["collector"] = hasSBOMSpec.Collector
 	}
 }

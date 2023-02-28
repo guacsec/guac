@@ -121,18 +121,18 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 					Namespaces: []*model.PackageNamespace{namespace},
 				}
 
-				certifyPkgEdge := dbtype.Relationship{}
+				certifyPkgNode := dbtype.Node{}
 				if result.Record().Values[6] != nil {
-					certifyPkgEdge = result.Record().Values[6].(dbtype.Relationship)
+					certifyPkgNode = result.Record().Values[6].(dbtype.Node)
 				} else {
-					return nil, gqlerror.Errorf("certifyPkgEdge not found in neo4j")
+					return nil, gqlerror.Errorf("certifyPkg Node not found in neo4j")
 				}
 
 				certifyPkg := &model.CertifyPkg{
 					Packages:      []*model.Package{&pkg, &depPkg},
-					Justification: certifyPkgEdge.Props[justification].(string),
-					Origin:        certifyPkgEdge.Props[origin].(string),
-					Collector:     certifyPkgEdge.Props[collector].(string),
+					Justification: certifyPkgNode.Props[justification].(string),
+					Origin:        certifyPkgNode.Props[origin].(string),
+					Collector:     certifyPkgNode.Props[collector].(string),
 				}
 				collectedCertifyPkg = append(collectedCertifyPkg, certifyPkg)
 			}
