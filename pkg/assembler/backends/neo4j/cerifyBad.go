@@ -26,34 +26,14 @@ import (
 )
 
 func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	certifyPkg := false
-	certifySrc := false
-	certifyArt := false
-	queryAll := false
-	if certifyBadSpec.Package != nil {
-		certifyPkg = true
-	}
-	if certifyBadSpec.Source != nil {
-		certifySrc = true
-	}
-	if certifyBadSpec.Artifact != nil {
-		certifyArt = true
-	}
-	if certifyBadSpec.Package == nil && certifyBadSpec.Source == nil && certifyBadSpec.Artifact == nil {
-		queryAll = true
+	err := checkCertifyBadInputs(certifyBadSpec)
+	if err != nil {
+		return nil, err
 	}
 
-	if certifyPkg && certifySrc && certifyArt {
-		return nil, gqlerror.Errorf("cannot specify package, source and artifact together for CertifyBad")
-	}
-	if certifyPkg && certifySrc {
-		return nil, gqlerror.Errorf("cannot specify package and source together for CertifyBad")
-	}
-	if certifyPkg && certifyArt {
-		return nil, gqlerror.Errorf("cannot specify package and artifact together for CertifyBad")
-	}
-	if certifySrc && certifyArt {
-		return nil, gqlerror.Errorf("cannot specify source and artifact together for CertifyBad")
+	queryAll := false
+	if certifyBadSpec.Package == nil && certifyBadSpec.Source == nil && certifyBadSpec.Artifact == nil {
+		queryAll = true
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
@@ -61,7 +41,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 	aggregateCertifyBad := []*model.CertifyBad{}
 
-	if certifyPkg || queryAll {
+	if certifyBadSpec.Package != nil || queryAll {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -158,7 +138,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
 	}
 
-	if certifySrc || queryAll {
+	if certifyBadSpec.Source != nil || queryAll {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -234,7 +214,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
 	}
 
-	if certifyArt || queryAll {
+	if certifyBadSpec.Artifact != nil || queryAll {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -289,6 +269,27 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 	}
 	return aggregateCertifyBad, nil
 
+}
+
+// TODO (pxp928): combine with testing backend in shared utility
+func checkCertifyBadInputs(certifyBadSpec *model.CertifyBadSpec) error {
+	invalidSubject := false
+	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
+		invalidSubject = true
+	}
+	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil {
+		invalidSubject = true
+	}
+	if certifyBadSpec.Package != nil && certifyBadSpec.Artifact != nil {
+		invalidSubject = true
+	}
+	if certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
+		invalidSubject = true
+	}
+	if invalidSubject {
+		return gqlerror.Errorf("cannot specify more than one subject for CertifyBad query")
+	}
+	return nil
 }
 
 func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSpec, firstMatch bool, queryValues map[string]any) {
