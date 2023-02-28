@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -144,4 +145,8 @@ func (c *demoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model
 		}
 	}
 	return collectedHasSourceAt, nil
+}
+
+func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+	panic(fmt.Errorf("not implemented: CertifyScorecard - certifyScorecard"))
 }

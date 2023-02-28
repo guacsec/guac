@@ -58,6 +58,7 @@ type Backend interface {
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 
 	// Mutations for evidence trees (read-write queries, assume software trees ingested)
+	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

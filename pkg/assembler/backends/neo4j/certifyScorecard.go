@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -202,4 +203,8 @@ func setCertifyScorecardValues(sb *strings.Builder, certifyScorecardSpec *model.
 		*firstMatch = false
 		queryValues["collector"] = certifyScorecardSpec.Collector
 	}
+}
+
+func (c *neo4jClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+	panic(fmt.Errorf("not implemented: CertifyScorecard - certifyScorecard"))
 }
