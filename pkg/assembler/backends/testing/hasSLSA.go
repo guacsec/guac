@@ -50,7 +50,7 @@ func registerAllHasSLSA(client *demoClient) error {
 	}
 	predicateValues := []*model.SLSAPredicate{{Key: "buildDefinition.externalParameters.repository", Value: "https://github.com/octocat/hello-world"}, {Key: "buildDefinition.externalParameters.ref", Value: "refs/heads/main"}, {Key: "buildDefinition.resolvedDependencies.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"}}
 
-	err = client.registerHasSLSA(selectedPackage[0], nil, nil, nil, selectedSource, nil, &model.Builder{URI: "https://github.com/Attestations/GitHubHostedActions@v1"}, "https://github.com/Attestations/GitHubActionsWorkflow@v1", predicateValues, "v1", time.Now().String(), time.Now().String())
+	err = client.registerHasSLSA(selectedPackage[0], nil, nil, nil, selectedSource, nil, &model.Builder{URI: "https://github.com/Attestations/GitHubHostedActions@v1"}, "https://github.com/Attestations/GitHubActionsWorkflow@v1", predicateValues, "v1", time.Now(), time.Now())
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func registerAllHasSLSA(client *demoClient) error {
 // Ingest HasSlsa
 
 func (c *demoClient) registerHasSLSA(selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact, builtFromPackages []*model.Package,
-	builtFromSouces []*model.Source, builtFromArtifacts []*model.Artifact, builtBy *model.Builder, buildType string, predicate []*model.SLSAPredicate, slsaVersion string, startOn string, finishOn string) error {
+	builtFromSouces []*model.Source, builtFromArtifacts []*model.Artifact, builtBy *model.Builder, buildType string, predicate []*model.SLSAPredicate, slsaVersion string, startOn time.Time, finishOn time.Time) error {
 
 	for _, h := range c.hasSLSA {
 		if h.BuildType == buildType && h.SlsaVersion == slsaVersion {

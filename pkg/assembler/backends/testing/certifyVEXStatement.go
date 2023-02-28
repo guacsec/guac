@@ -99,7 +99,7 @@ func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package,
 	}
 
 	newCertifyVEXStatement := &model.CertifyVEXStatement{
-		KnownSince:    timestamp.String(),
+		KnownSince:    timestamp,
 		Justification: justification,
 		Origin:        "testing backend",
 		Collector:     "testing backend",

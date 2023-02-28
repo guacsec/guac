@@ -48,7 +48,7 @@ func registerAllCertifyScorecard(client *demoClient) error {
 	}
 	_, err = client.registerCertifyScorecard(
 		selectedSource[0],
-		time.Now().String(),
+		time.Now(),
 		7.9,
 		checkResults,
 		"v4.10.2",
@@ -83,7 +83,7 @@ func registerAllCertifyScorecard(client *demoClient) error {
 	}
 	_, err = client.registerCertifyScorecard(
 		selectedSource[0],
-		time.Now().String(),
+		time.Now(),
 		7.9,
 		checkResults,
 		"v4.10.2",
@@ -98,7 +98,7 @@ func registerAllCertifyScorecard(client *demoClient) error {
 
 // Ingest CertifyScorecard
 
-func (c *demoClient) registerCertifyScorecard(selectedSource *model.Source, timeScanned string, aggregateScore float64, collectedChecks []*model.ScorecardCheckInputSpec, scorecardVersion, scorecardCommit, origin, collector string) (*model.CertifyScorecard, error) {
+func (c *demoClient) registerCertifyScorecard(selectedSource *model.Source, timeScanned time.Time, aggregateScore float64, collectedChecks []*model.ScorecardCheckInputSpec, scorecardVersion, scorecardCommit, origin, collector string) (*model.CertifyScorecard, error) {
 	for _, h := range c.certifyScorecard {
 		if h.Source == selectedSource &&
 			h.Scorecard.AggregateScore == aggregateScore &&

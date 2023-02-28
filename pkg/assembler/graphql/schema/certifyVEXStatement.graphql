@@ -23,7 +23,7 @@ CertifyVEXStatement is an attestation that represents when a package or artifact
 subject - union type that represents a package or artifact
 vulnerability (object) - union type that consists of cve or ghsa
 justification (property) - justification for VEX
-knownSince (property) - timestamp of the VEX (exact time)
+knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
@@ -31,7 +31,7 @@ type CertifyVEXStatement {
   subject: PkgArtObject!
   vulnerability: CveGhsaObject!
   justification: String!
-  knownSince: String!
+  knownSince: Time!
   origin: String!
   collector: String!
 }
@@ -46,7 +46,7 @@ input CertifyVEXStatementSpec {
   cve: CVESpec
   ghsa: GHSASpec
   justification: String
-  knownSince: String
+  knownSince: Time
   origin: String
   collector: String
 }

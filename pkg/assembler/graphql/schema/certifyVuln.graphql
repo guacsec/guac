@@ -33,7 +33,7 @@ collector (property) - the GUAC collector that collected the document that gener
 type CertifyVuln {
   package: Package!
   vulnerability: OsvCveGhsaObject!
-  timeScanned: String!
+  timeScanned: Time!
   dbUri: String!
   dbVersion: String!
   scannerUri: String!
@@ -53,7 +53,7 @@ input CertifyVulnSpec {
   osv: OSVSpec
   cve: CVESpec
   ghsa: GHSASpec
-  timeScanned: String
+  timeScanned: Time
   dbUri: String
   dbVersion: String
   scannerUri: String
@@ -71,3 +71,5 @@ extend type Query {
   "Returns all CertifyVuln"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
 }
+
+scalar Time

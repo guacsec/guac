@@ -19,6 +19,7 @@ import (
 	"context"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -104,7 +105,7 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 				}
 
 				scorecard := model.Scorecard{
-					TimeScanned:      certifyScorecardNode.Props[timeScanned].(string),
+					TimeScanned:      certifyScorecardNode.Props[timeScanned].(time.Time),
 					AggregateScore:   certifyScorecardNode.Props[aggregateScore].(float64),
 					Checks:           checks,
 					ScorecardVersion: certifyScorecardNode.Props[scorecardVersion].(string),
@@ -282,7 +283,7 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag, certifyScoreca
 			}
 
 			scorecard := model.Scorecard{
-				TimeScanned:      certifyScorecardNode.Props[timeScanned].(string),
+				TimeScanned:      certifyScorecardNode.Props[timeScanned].(time.Time),
 				AggregateScore:   certifyScorecardNode.Props[aggregateScore].(float64),
 				Checks:           checks,
 				ScorecardVersion: certifyScorecardNode.Props[scorecardVersion].(string),

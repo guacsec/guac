@@ -1707,8 +1707,8 @@ type Scorecard {
   checks: [ScorecardCheck!]!
   "Overall Scorecard score for the source"
   aggregateScore: Float!
-  "Exact timestamp when the source was last scanned"
-  timeScanned: String!
+  "Exact timestamp when the source was last scanned (in RFC 3339 format)"
+  timeScanned: Time!
   "Version of the Scorecard scanner used to analyze the source"
   scorecardVersion: String!
   "Commit of the Scorecards repository at the time of scanning the source"
@@ -1745,7 +1745,7 @@ CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
 """
 input CertifyScorecardSpec {
   source: SourceSpec
-  timeScanned: String
+  timeScanned: Time
   aggregateScore: Float
   checks: [ScorecardCheckSpec!] = []
   scorecardVersion: String
@@ -1770,7 +1770,7 @@ All fields are required.
 input ScorecardInputSpec {
   checks: [ScorecardCheckInputSpec!]!
   aggregateScore: Float!
-  timeScanned: String!
+  timeScanned: Time!
   scorecardVersion: String!
   scorecardCommit: String!
   origin: String!
@@ -1820,7 +1820,7 @@ CertifyVEXStatement is an attestation that represents when a package or artifact
 subject - union type that represents a package or artifact
 vulnerability (object) - union type that consists of cve or ghsa
 justification (property) - justification for VEX
-knownSince (property) - timestamp of the VEX (exact time)
+knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
@@ -1828,7 +1828,7 @@ type CertifyVEXStatement {
   subject: PkgArtObject!
   vulnerability: CveGhsaObject!
   justification: String!
-  knownSince: String!
+  knownSince: Time!
   origin: String!
   collector: String!
 }
@@ -1843,7 +1843,7 @@ input CertifyVEXStatementSpec {
   cve: CVESpec
   ghsa: GHSASpec
   justification: String
-  knownSince: String
+  knownSince: Time
   origin: String
   collector: String
 }
@@ -1856,7 +1856,8 @@ union PkgArtObject = Package | Artifact
 extend type Query {
   "Returns all CertifyVEXStatement"
   CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
@@ -1892,7 +1893,7 @@ collector (property) - the GUAC collector that collected the document that gener
 type CertifyVuln {
   package: Package!
   vulnerability: OsvCveGhsaObject!
-  timeScanned: String!
+  timeScanned: Time!
   dbUri: String!
   dbVersion: String!
   scannerUri: String!
@@ -1912,7 +1913,7 @@ input CertifyVulnSpec {
   osv: OSVSpec
   cve: CVESpec
   ghsa: GHSASpec
-  timeScanned: String
+  timeScanned: Time
   dbUri: String
   dbVersion: String
   scannerUri: String
@@ -1930,6 +1931,8 @@ extend type Query {
   "Returns all CertifyVuln"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
 }
+
+scalar Time
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
@@ -2157,8 +2160,8 @@ builtBy (object) - represents the builder that was used to build the subject
 buildType (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
 slsaPredicate (property) - a list of key value pair that consist of the keys and values of the SLSA predicate
 slsaVersion (property) - version of the SLSA predicate
-startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject
-finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject
+startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject (in RFC 3339 format)
+finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject (in RFC 3339 format)
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
@@ -2169,8 +2172,8 @@ type HasSLSA {
   buildType: String!
   slsaPredicate: [SLSAPredicate!]!
   slsaVersion: String!
-  startedOn: String!
-  finishedOn: String!
+  startedOn: Time!
+  finishedOn: Time!
   origin: String!
   collector: String!
 }
@@ -2228,8 +2231,8 @@ input HasSLSASpec {
   buildType: String
   predicate: [SLSAPredicateSpec!] = []
   slsaVersion: String
-  startedOn: String
-  finishedOn: String
+  startedOn: Time
+  finishedOn: Time
   origin: String
   collector: String
 }
