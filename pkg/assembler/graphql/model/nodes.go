@@ -164,25 +164,28 @@ type CertifyPkgSpec struct {
 	Collector     *string    `json:"collector"`
 }
 
-// CertifyScorecard is an attestation represents the scorecard of a particular source
+// CertifyScorecard is an attestation which represents the scorecard of a
+// particular source repository.
 //
-// source (subject) - the source object type that represents the source
-// timeScanned (property) - timestamp when this was last scanned (exact time)
-// aggregateScore (property) - overall scorecard score for the source
-// checks (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-// scorecardVersion (property) - version of the scorecard when the source was scanned
-// scorecardCommit (property) - commit of scorecard when the source was scanned
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// The attestation has one subject: the source repository that is being scanned.
+// Remaining fields are properties.
 type CertifyScorecard struct {
-	Source           *Source           `json:"source"`
-	TimeScanned      string            `json:"timeScanned"`
-	AggregateScore   float64           `json:"aggregateScore"`
-	Checks           []*ScorecardCheck `json:"checks"`
-	ScorecardVersion string            `json:"scorecardVersion"`
-	ScorecardCommit  string            `json:"scorecardCommit"`
-	Origin           string            `json:"origin"`
-	Collector        string            `json:"collector"`
+	// The source repository that is being scanned (attestation subject)
+	Source *Source `json:"source"`
+	// Exact timestamp when the source was last scanned
+	TimeScanned string `json:"timeScanned"`
+	// Overall Scorecard score for the source
+	AggregateScore float64 `json:"aggregateScore"`
+	// Individual Scorecard check scores (Branch-Protection, Code-Review, ...)
+	Checks []*ScorecardCheck `json:"checks"`
+	// Version of the Scorecard scanner used to analyze the source
+	ScorecardVersion string `json:"scorecardVersion"`
+	// Commit of the Scorecards repository at the time of scanning the source
+	ScorecardCommit string `json:"scorecardCommit"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
@@ -750,16 +753,19 @@ type SLSAPredicateSpec struct {
 	Value string `json:"value"`
 }
 
-// ScorecardCheck are the individual checks from scorecard and their values, a key-value pair.
+// ScorecardCheck are the individual checks from scorecard and their values as a
+// key-value pair.
+//
 // For example:  Branch-Protection, Code-Review...etc
+//
 // Based off scorecard's:
 //
 //	type jsonCheckResultV2 struct {
-//		Details []string                 `json:"details"`
-//		Score   int                      `json:"score"`
-//		Reason  string                   `json:"reason"`
-//		Name    string                   `json:"name"`
-//		Doc     jsonCheckDocumentationV2 `json:"documentation"`
+//	  Details []string                 `json:"details"`
+//	  Score   int                      `json:"score"`
+//	  Reason  string                   `json:"reason"`
+//	  Name    string                   `json:"name"`
+//	  Doc     jsonCheckDocumentationV2 `json:"documentation"`
 //	}
 //
 // This node cannot be directly referred by other parts of GUAC.
@@ -768,8 +774,7 @@ type ScorecardCheck struct {
 	Score int    `json:"score"`
 }
 
-// ScorecardCheckSpec is the same as ScorecardCheck, but usable as query
-// input.
+// ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input.
 type ScorecardCheckSpec struct {
 	Check string `json:"check"`
 	Score int    `json:"score"`

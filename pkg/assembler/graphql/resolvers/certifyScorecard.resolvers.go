@@ -10,7 +10,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-// CertifyScorecard is the resolver for the CertifyScorecard field.
-func (r *queryResolver) CertifyScorecard(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	return r.Backend.CertifyScorecard(ctx, certifyScorecardSpec)
+// Scorecards is the resolver for the scorecards field.
+func (r *queryResolver) Scorecards(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
+	return r.Backend.Scorecards(ctx, scorecardSpec)
 }

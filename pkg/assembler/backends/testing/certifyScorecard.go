@@ -99,7 +99,7 @@ func buildScorecardChecks(checks []model.ScorecardCheckSpec) []*model.ScorecardC
 
 // Query CertifyScorecard
 
-func (c *demoClient) CertifyScorecard(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
+func (c *demoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 
 	var collectedHasSourceAt []*model.CertifyScorecard
 
