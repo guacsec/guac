@@ -21,7 +21,7 @@ import (
 	"os"
 	"time"
 
-	sc "github.com/guacsec/guac/pkg/certifier/components/scorecard"
+	sc "github.com/guacsec/guac/pkg/certifier/components/source_artifact"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"

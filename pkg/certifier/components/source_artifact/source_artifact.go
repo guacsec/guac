@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scorecard
+package source_artifact
 
 import (
 	"context"
@@ -25,11 +25,11 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
-type scorecard struct {
+type sourceArtifacts struct {
 	client graphdb.Client
 }
 
-func (s scorecard) GetComponents(_ context.Context, compChan chan<- interface{}) error {
+func (s sourceArtifacts) GetComponents(_ context.Context, compChan chan<- interface{}) error {
 	// TODO: Add integration tests, have not added it yet because the code needs data to be present in the graphdb to test it
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
@@ -58,12 +58,12 @@ func (s scorecard) GetComponents(_ context.Context, compChan chan<- interface{})
 	return nil
 }
 
-// NewCertifier returns a new scorecard certifier
+// NewCertifier returns a new sourceArtifacts certifier
 func NewCertifier(client graphdb.Client) (certifier.QueryComponents, error) {
 	if client == nil {
 		return nil, fmt.Errorf("client cannot be nil")
 	}
-	return &scorecard{
+	return &sourceArtifacts{
 		client: client,
 	}, nil
 }
