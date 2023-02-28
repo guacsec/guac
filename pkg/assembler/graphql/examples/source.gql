@@ -33,7 +33,6 @@ query SrcQ3 {
   }
 }
 
-
 query SrcQ4 {
   sources(sourceSpec: {name: "github.com/guacsec/guac"}) {
     ...allSrcTree
@@ -53,6 +52,7 @@ query SrcQ6 {
     ...allSrcTree
   }
 }
+
 query SrcQ7 {
   sources(sourceSpec: {type: "svn"}) {
     ...allSrcTree

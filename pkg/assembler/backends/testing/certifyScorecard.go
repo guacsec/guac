@@ -24,7 +24,6 @@ import (
 )
 
 func registerAllCertifyScorecard(client *demoClient) error {
-
 	// "git", "github", "https://github.com/django/django", "tag=1.11.1"
 	selectedSourceType := "git"
 	selectedSourceNameSpace := "github"
@@ -44,7 +43,6 @@ func registerAllCertifyScorecard(client *demoClient) error {
 
 	// "git", "github", "https://github.com/vapor-ware/kubetest", "tag=0.9.5"
 	// client.registerSource("git", "github", "https://github.com/vapor-ware/kubetest", "tag=0.9.5")
-
 	selectedSourceType = "git"
 	selectedSourceNameSpace = "github"
 	selectedSourceName = "https://github.com/vapor-ware/kubetest"
