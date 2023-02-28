@@ -112,18 +112,9 @@ func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selected
 // Query CertifyBad
 
 func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify package, source and artifact together for CertifyBad")
-	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify package and source together for CertifyBad")
-	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify package and artifact together for CertifyBad")
-	}
-	if certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify source and artifact together for CertifyBad")
+	err := checkCertifyBadInputs(certifyBadSpec)
+	if err != nil {
+		return nil, err
 	}
 
 	var foundCertifyBad []*model.CertifyBad
@@ -190,4 +181,25 @@ func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Certi
 	}
 
 	return foundCertifyBad, nil
+}
+
+// TODO (pxp928): combine with neo4j backend in shared utility
+func checkCertifyBadInputs(certifyBadSpec *model.CertifyBadSpec) error {
+	invalidSubject := false
+	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
+		invalidSubject = true
+	}
+	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil {
+		invalidSubject = true
+	}
+	if certifyBadSpec.Package != nil && certifyBadSpec.Artifact != nil {
+		invalidSubject = true
+	}
+	if certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
+		invalidSubject = true
+	}
+	if invalidSubject {
+		return gqlerror.Errorf("cannot specify more than one subject for CertifyBad query")
+	}
+	return nil
 }
