@@ -72,7 +72,7 @@ func TestNewScorecard(t *testing.T) {
 				t.Setenv("GITHUB_AUTH_TOKEN", test.authToken)
 			}
 
-			got, err := NewScorecardCertifier(test.sc, test.client)
+			got, err := NewScorecardCertifier(test.sc)
 			if (err != nil) != test.wantErr {
 				t.Errorf("NewScorecardCertifier() error = %v, wantErr %v", err, test.wantErr)
 				return
@@ -224,7 +224,6 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	sc := scorecard{
 		scorecard: scMock,
 		ghToken:   "test",
-		client:    nil,
 	}
 
 	// valid input

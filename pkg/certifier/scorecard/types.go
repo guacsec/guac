@@ -16,16 +16,10 @@
 package scorecard
 
 import (
-	"github.com/guacsec/guac/pkg/certifier"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
 // Scorecard is an interface for the scorecard library. This can also be mocked for testing.
 type Scorecard interface {
 	GetScore(repoName, commitSHA string) (*sc.ScorecardResult, error)
-}
-
-type CertQuerier interface {
-	certifier.Certifier
-	certifier.QueryComponents
 }

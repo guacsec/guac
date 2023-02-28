@@ -21,6 +21,8 @@ import (
 	"os"
 	"time"
 
+	sc "github.com/guacsec/guac/pkg/certifier/components/scorecard"
+
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"
 
@@ -66,13 +68,24 @@ var scorecardCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner, client)
+		// running and getting the scorecard checks
+		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner)
 
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		// scorecard certifier is the certifier that gets the scorecard data from the graph
+		query, err := sc.NewCertifier(client)
+
+		if err != nil {
+			fmt.Printf("unable to create scorecard certifier: %v\n", err)
+			_ = cmd.Help()
+			os.Exit(1)
+		}
+
 		// this is to satisfy the RegisterCertifier function
 		scCertifier := func() certifier.Certifier { return scorecardCertifier }
 
@@ -136,7 +149,7 @@ var scorecardCmd = &cobra.Command{
 			return false
 		}
 
-		if err := certify.Certify(ctx, scorecardCertifier, emit, errHandler); err != nil {
+		if err := certify.Certify(ctx, query, emit, errHandler); err != nil {
 			logger.Fatal(err)
 		}
 		if gotErr {

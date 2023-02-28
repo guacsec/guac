@@ -22,8 +22,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
+	"github.com/guacsec/guac/pkg/certifier"
+
 	"github.com/ossf/scorecard/v4/docs/checks"
 	"github.com/ossf/scorecard/v4/log"
 
@@ -35,13 +35,12 @@ import (
 type scorecard struct {
 	scorecard Scorecard
 	ghToken   string
-	client    graphdb.Client
 }
 
 var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *assembler.ArtifactNode")
 
 // CertifyComponent is a certifier that generates scorecard attestations
-func (s scorecard) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
 	if docChannel == nil {
 		return fmt.Errorf("docChannel cannot be nil")
 	}
@@ -99,43 +98,13 @@ func (s scorecard) CertifyComponent(ctx context.Context, rootComponent interface
 	return nil
 }
 
-func (s scorecard) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
-	// TODO: Add integration tests, have not added it yet because the code needs data to be present in the graphdb to test it
-	if compChan == nil {
-		return fmt.Errorf("compChan cannot be nil")
-	}
-	roots, err := graphdb.ReadQuery(s.client, "MATCH (n:Artifact) WHERE n.name CONTAINS 'git+' RETURN n", nil)
-	if err != nil {
-		return fmt.Errorf("failed to read query: %w", err)
-	}
-
-	for _, result := range roots {
-		foundNode, ok := result.(dbtype.Node)
-		if !ok {
-			return fmt.Errorf("failed to cast to node type")
-		}
-		artifactNode := assembler.ArtifactNode{}
-		artifactNode.Name, ok = foundNode.Props["name"].(string)
-		if !ok {
-			return fmt.Errorf("failed to cast name property to string type")
-		}
-		artifactNode.Digest, ok = foundNode.Props["digest"].(string)
-		if !ok {
-			return fmt.Errorf("failed to cast digest property to string type")
-		}
-		compChan <- &artifactNode
-	}
-	return nil
-}
-
 // NewScorecardCertifier initializes the scorecard certifier.
 // It checks if the GITHUB_AUTH_TOKEN is set in the environment. If it is not, it returns an error.w
 // The token is used to access the GitHub API, https://github.com/ossf/scorecard#authentication.
-func NewScorecardCertifier(sc Scorecard, client graphdb.Client) (CertQuerier, error) {
+func NewScorecardCertifier(sc Scorecard) (certifier.Certifier, error) {
 	if sc == nil {
 		return nil, fmt.Errorf("scorecard cannot be nil")
 	}
-	// TODO: Add nil check for client, not checking for the client being nil because unit tests cant initialize a client
 
 	// check if the GITHUB_AUTH_TOKEN is set
 	s, ok := os.LookupEnv("GITHUB_AUTH_TOKEN")
@@ -146,6 +115,5 @@ func NewScorecardCertifier(sc Scorecard, client graphdb.Client) (CertQuerier, er
 	return &scorecard{
 		scorecard: sc,
 		ghToken:   s,
-		client:    client,
 	}, nil
 }
