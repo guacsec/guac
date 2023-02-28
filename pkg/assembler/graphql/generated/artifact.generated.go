@@ -36,7 +36,7 @@ type QueryResolver interface {
 	CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
 	Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error)
 	Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error)
-	HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error)
+	HasSbom(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error)
 	HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error)
 	HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
 	HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error)
@@ -232,7 +232,7 @@ func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_HasSBOMs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.HasSBOMSpec
@@ -1545,8 +1545,8 @@ func (ec *executionContext) fieldContext_Query_ghsa(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_HasSBOMs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_HasSBOMs(ctx, field)
+func (ec *executionContext) _Query_HasSBOM(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HasSBOM(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1559,7 +1559,7 @@ func (ec *executionContext) _Query_HasSBOMs(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().HasSBOMs(rctx, fc.Args["hasSBOMSpec"].(*model.HasSBOMSpec))
+		return ec.resolvers.Query().HasSbom(rctx, fc.Args["hasSBOMSpec"].(*model.HasSBOMSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1575,7 +1575,7 @@ func (ec *executionContext) _Query_HasSBOMs(ctx context.Context, field graphql.C
 	return ec.marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbomᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_HasSBOMs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1602,7 +1602,7 @@ func (ec *executionContext) fieldContext_Query_HasSBOMs(ctx context.Context, fie
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_HasSBOMs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_HasSBOM_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2707,7 +2707,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "HasSBOMs":
+		case "HasSBOM":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2716,7 +2716,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_HasSBOMs(ctx, field)
+				res = ec._Query_HasSBOM(ctx, field)
 				return res
 			}
 

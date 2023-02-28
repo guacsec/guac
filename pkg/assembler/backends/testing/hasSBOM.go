@@ -97,7 +97,7 @@ func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSou
 
 // Query HasSBOM
 
-func (c *demoClient) HasSBOMs(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
+func (c *demoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
 	if hasSBOMSpec.Package != nil && hasSBOMSpec.Source != nil {
 		return nil, gqlerror.Errorf("cannot specify both package and source for HasSBOM")
