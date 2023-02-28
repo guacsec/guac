@@ -70,7 +70,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 
 // Subscribe is used by NATS JetStream to stream the documents received from the processor
 // and parse them them via ParseDocumentTree
-func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph, []*common.IdentifierStrings) error) error {
+func Subscribe(ctx context.Context, transportFunc func([]assembler.PlaceholderStruct, []*common.IdentifierStrings) error) error {
 	logger := logging.FromContext(ctx)
 
 	id := uuid.NewV4().String()
@@ -113,8 +113,8 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.Graph, []*com
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.Graph, []*common.IdentifierStrings, error) {
-	assemblerInputs := []assembler.Graph{}
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.PlaceholderStruct, []*common.IdentifierStrings, error) {
+	assemblerInputs := []assembler.PlaceholderStruct{}
 	identifierStrings := []*common.IdentifierStrings{}
 	logger := logging.FromContext(ctx)
 	docTreeBuilder := newDocTreeBuilder()

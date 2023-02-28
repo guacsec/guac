@@ -271,7 +271,7 @@ func (c *neo4jClient) registerArtifact(algorithm, digest string) error {
 		algorithm: strings.ToLower(algorithm),
 		digest:    strings.ToLower(digest),
 	}
-	assemblerinput := assembler.AssemblerInput{
+	assemblerinput := assembler.Graph{
 		Nodes: []assembler.GuacNode{collectedArtifact},
 	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
@@ -285,7 +285,7 @@ func (c *neo4jClient) registerBuilder(uri string) error {
 	collectedBuilder := &builderNode{
 		uri: uri,
 	}
-	assemblerinput := assembler.AssemblerInput{
+	assemblerinput := assembler.Graph{
 		Nodes: []assembler.GuacNode{collectedBuilder},
 	}
 	err := assembler.StoreGraph(assemblerinput, c.driver)
@@ -302,7 +302,7 @@ func (c *neo4jClient) registerCVE(year, id string) error {
 
 	cveToYearEdge := &cveToYear{collectedCve, collectedYear}
 	cveYearToIDEdge := &cveYearToCveID{collectedYear, collecteCveId}
-	assemblerinput := assembler.AssemblerInput{
+	assemblerinput := assembler.Graph{
 		Nodes: []assembler.GuacNode{collectedCve, collectedYear, collecteCveId},
 		Edges: []assembler.GuacEdge{cveToYearEdge, cveYearToIDEdge},
 	}
@@ -318,7 +318,7 @@ func (c *neo4jClient) registerGhsa(id string) error {
 	collecteGhsaId := &ghsaID{id: strings.ToLower(id)}
 
 	ghsaToIDEdge := &ghsaToID{collectedGhsa, collecteGhsaId}
-	assemblerinput := assembler.AssemblerInput{
+	assemblerinput := assembler.Graph{
 		Nodes: []assembler.GuacNode{collectedGhsa, collecteGhsaId},
 		Edges: []assembler.GuacEdge{ghsaToIDEdge},
 	}
@@ -334,7 +334,7 @@ func (c *neo4jClient) registerOSV(id string) error {
 	collecteOsvId := &osvID{id: strings.ToLower(id)}
 
 	osvToIDEdge := &osvToID{collectedOsv, collecteOsvId}
-	assemblerinput := assembler.AssemblerInput{
+	assemblerinput := assembler.Graph{
 		Nodes: []assembler.GuacNode{collectedOsv, collecteOsvId},
 		Edges: []assembler.GuacEdge{osvToIDEdge},
 	}
@@ -372,7 +372,7 @@ func (c *neo4jClient) registerPackage(packageType, namespace, name, version, sub
 	typeToNamespaceEdge := &typeToNamespace{collectedType, collectedNamespace}
 	namespaceToNameEdge := &namespaceToName{collectedNamespace, collectedName}
 	nameToVersionEdge := &nameToVersion{collectedName, collectedVersion}
-	assemblerinput := assembler.AssemblerInput{
+	assemblerinput := assembler.Graph{
 		Nodes: []assembler.GuacNode{collectedPkg, collectedType, collectedNamespace, collectedName, collectedVersion},
 		Edges: []assembler.GuacEdge{pkgToTypeEdge, typeToNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
 	}
@@ -401,7 +401,7 @@ func (c *neo4jClient) registerSource(sourceType, namespace, name, qualifier stri
 	srcToTypeEdge := &srcToType{collectedSrc, collectedType}
 	typetoNamespaceEdge := &srcTypeToNamespace{collectedType, collectedNamespace}
 	namespaceToNameEdge := &srcNamespaceToName{collectedNamespace, collectedName}
-	assemblerinput := assembler.AssemblerInput{
+	assemblerinput := assembler.Graph{
 		Nodes: []assembler.GuacNode{collectedSrc, collectedType, collectedNamespace, collectedName},
 		Edges: []assembler.GuacEdge{srcToTypeEdge, typetoNamespaceEdge, namespaceToNameEdge},
 	}

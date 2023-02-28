@@ -37,10 +37,7 @@ func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assemble
 
 // CreateAssemblerInput creates the GuacNodes and GuacEdges that are needed by the assembler
 func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: b.docParser.CreateNodes(ctx),
-		Edges: b.docParser.CreateEdges(ctx, foundIdentities),
-	}
+	assemblerinput := assembler.AssemblerInput{}
 	return assemblerinput
 }
 
