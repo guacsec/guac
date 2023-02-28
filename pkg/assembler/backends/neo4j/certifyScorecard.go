@@ -103,7 +103,7 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 					return nil, err
 				}
 
-				scorecard := model.Scorecard{
+				scorecard := model.Scorecard {
 					TimeScanned:      certifyScorecardNode.Props[timeScanned].(string),
 					AggregateScore:   certifyScorecardNode.Props[aggregateScore].(float64),
 					Checks:           checks,
@@ -113,7 +113,7 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 					Collector:        certifyScorecardNode.Props[collector].(string),
 				}
 
-				certifyScorecard := &model.CertifyScorecard{
+				certifyScorecard := &model.CertifyScorecard {
 					Source:    &src,
 					Scorecard: &scorecard,
 				}
