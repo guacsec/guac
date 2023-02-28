@@ -36,7 +36,18 @@ type CollectSource interface {
 
 type DataSources struct {
 	OciDataSources []Source
+	// NOTE: Git data sources should follow the URI scheme as defined in:
+	// https://spdx.github.io/spdx-spec/v2.3/package-information/#771-description
+	// <vcs_tool>+<transport>://<host_name>[/<path_to_repository>][@<revision_tag_or_branch>][#<sub_path>]
+	// e.g. git+https://github.com/guacsec/guac@v1
 	GitDataSources []Source
+	// TODO (lumjjb): Csub interface and proto need to be updated to support GithubReleaseDataSources
+	// NOTE: It is expected that a GithubReleaseDataSource is of the form:
+	// https://github.com/<org>/<repo>/releases/<tag> or
+	// https://github.com/<org>/<repo>/releases/tag/<tag> or
+	// https://github.com/<org>/<repo>/releases
+	// Tag is optional and left off will assume latest.
+	GithubReleaseDataSources []Source
 }
 
 type Source struct {

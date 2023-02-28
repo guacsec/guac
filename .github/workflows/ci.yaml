@@ -52,6 +52,8 @@ jobs:
       - name: Setup the project
         run: go mod download
       - name: Run integration tests
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make integration-test
 
   test-unit:
