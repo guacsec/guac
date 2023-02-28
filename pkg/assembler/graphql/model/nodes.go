@@ -781,10 +781,29 @@ type ScorecardCheck struct {
 	Score int    `json:"score"`
 }
 
+// ScorecardCheckInputSpec is the same as ScorecardCheck, but for mutation input.
+type ScorecardCheckInputSpec struct {
+	Check string `json:"check"`
+	Score int    `json:"score"`
+}
+
 // ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input.
 type ScorecardCheckSpec struct {
 	Check string `json:"check"`
 	Score int    `json:"score"`
+}
+
+// ScorecardInputSpec is the same as Scorecard but for mutation input.
+//
+// All fields are required.
+type ScorecardInputSpec struct {
+	Checks           []*ScorecardCheckInputSpec `json:"checks"`
+	AggregateScore   float64                    `json:"aggregateScore"`
+	TimeScanned      string                     `json:"timeScanned"`
+	ScorecardVersion string                     `json:"scorecardVersion"`
+	ScorecardCommit  string                     `json:"scorecardCommit"`
+	Origin           string                     `json:"origin"`
+	Collector        string                     `json:"collector"`
 }
 
 // Source represents a source.

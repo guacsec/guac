@@ -651,6 +651,11 @@ func (ec *executionContext) marshalNSource2ᚖgithubᚗcomᚋguacsecᚋguacᚋpk
 	return ec._Source(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx context.Context, v interface{}) (model.SourceInputSpec, error) {
+	res, err := ec.unmarshalInputSourceInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNSourceName2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceNameᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SourceName) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup

@@ -632,6 +632,42 @@ func (ec *executionContext) unmarshalInputCertifyScorecardSpec(ctx context.Conte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputScorecardCheckInputSpec(ctx context.Context, obj interface{}) (model.ScorecardCheckInputSpec, error) {
+	var it model.ScorecardCheckInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"check", "score"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "check":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("check"))
+			it.Check, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "score":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("score"))
+			it.Score, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputScorecardCheckSpec(ctx context.Context, obj interface{}) (model.ScorecardCheckSpec, error) {
 	var it model.ScorecardCheckSpec
 	asMap := map[string]interface{}{}
@@ -659,6 +695,82 @@ func (ec *executionContext) unmarshalInputScorecardCheckSpec(ctx context.Context
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("score"))
 			it.Score, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputScorecardInputSpec(ctx context.Context, obj interface{}) (model.ScorecardInputSpec, error) {
+	var it model.ScorecardInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"checks", "aggregateScore", "timeScanned", "scorecardVersion", "scorecardCommit", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "checks":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("checks"))
+			it.Checks, err = ec.unmarshalNScorecardCheckInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpecᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "aggregateScore":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("aggregateScore"))
+			it.AggregateScore, err = ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "timeScanned":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
+			it.TimeScanned, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scorecardVersion":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardVersion"))
+			it.ScorecardVersion, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scorecardCommit":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardCommit"))
+			it.ScorecardCommit, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -820,6 +932,10 @@ func (ec *executionContext) _ScorecardCheck(ctx context.Context, sel ast.Selecti
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNCertifyScorecard2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx context.Context, sel ast.SelectionSet, v model.CertifyScorecard) graphql.Marshaler {
+	return ec._CertifyScorecard(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNCertifyScorecard2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyScorecard) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -938,9 +1054,36 @@ func (ec *executionContext) marshalNScorecardCheck2ᚖgithubᚗcomᚋguacsecᚋg
 	return ec._ScorecardCheck(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNScorecardCheckInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.ScorecardCheckInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.ScorecardCheckInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNScorecardCheckInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNScorecardCheckInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckInputSpec(ctx context.Context, v interface{}) (*model.ScorecardCheckInputSpec, error) {
+	res, err := ec.unmarshalInputScorecardCheckInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNScorecardCheckSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckSpec(ctx context.Context, v interface{}) (*model.ScorecardCheckSpec, error) {
 	res, err := ec.unmarshalInputScorecardCheckSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNScorecardInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardInputSpec(ctx context.Context, v interface{}) (model.ScorecardInputSpec, error) {
+	res, err := ec.unmarshalInputScorecardInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOCertifyScorecardSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx context.Context, v interface{}) (*model.CertifyScorecardSpec, error) {
