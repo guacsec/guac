@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllCertifyScorecard(client *demoClient) error {
@@ -29,14 +30,31 @@ func registerAllCertifyScorecard(client *demoClient) error {
 	selectedSourceNameSpace := "github"
 	selectedSourceName := "https://github.com/django/django"
 	selectedTag := "1.11.1"
-	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
+	selectedSourceSpec := &model.SourceSpec{
+		Type:      &selectedSourceType,
+		Namespace: &selectedSourceNameSpace,
+		Name:      &selectedSourceName,
+		Tag:       &selectedTag,
+	}
 	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
 	if err != nil {
 		return err
 	}
-	checkResults := []model.ScorecardCheckSpec{{Check: "Binary-Artifacts", Score: 10}, {Check: "Branch-Protection", Score: 9}, {Check: "Code-Review", Score: 10},
-		{Check: "Contributors", Score: 9}}
-	err = client.registerCertifyScorecard(selectedSource[0], time.Now(), 7.9, checkResults, "v4.10.2", "5e6a521")
+	checkResults := []*model.ScorecardCheckInputSpec{
+		{Check: "Binary-Artifacts", Score: 10},
+		{Check: "Branch-Protection", Score: 9},
+		{Check: "Code-Review", Score: 10},
+		{Check: "Contributors", Score: 9},
+	}
+	_, err = client.registerCertifyScorecard(
+		selectedSource[0],
+		time.Now().String(),
+		7.9,
+		checkResults,
+		"v4.10.2",
+		"5e6a521",
+		"test backend",
+		"test backend")
 	if err != nil {
 		return err
 	}
@@ -47,14 +65,31 @@ func registerAllCertifyScorecard(client *demoClient) error {
 	selectedSourceNameSpace = "github"
 	selectedSourceName = "https://github.com/vapor-ware/kubetest"
 	selectedTag = "0.9.5"
-	selectedSourceSpec = &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
+	selectedSourceSpec = &model.SourceSpec{
+		Type:      &selectedSourceType,
+		Namespace: &selectedSourceNameSpace,
+		Name:      &selectedSourceName,
+		Tag:       &selectedTag,
+	}
 	selectedSource, err = client.Sources(context.TODO(), selectedSourceSpec)
 	if err != nil {
 		return err
 	}
-	checkResults = []model.ScorecardCheckSpec{{Check: "Binary-Artifacts", Score: 10}, {Check: "Branch-Protection", Score: 9}, {Check: "Code-Review", Score: 10},
-		{Check: "Contributors", Score: 9}}
-	err = client.registerCertifyScorecard(selectedSource[0], time.Now(), 7.9, checkResults, "v4.10.2", "5e6a521")
+	checkResults = []*model.ScorecardCheckInputSpec{
+		{Check: "Binary-Artifacts", Score: 10},
+		{Check: "Branch-Protection", Score: 9},
+		{Check: "Code-Review", Score: 10},
+		{Check: "Contributors", Score: 9},
+	}
+	_, err = client.registerCertifyScorecard(
+		selectedSource[0],
+		time.Now().String(),
+		7.9,
+		checkResults,
+		"v4.10.2",
+		"5e6a521",
+		"test backend",
+		"test backend")
 	if err != nil {
 		return err
 	}
@@ -63,34 +98,34 @@ func registerAllCertifyScorecard(client *demoClient) error {
 
 // Ingest CertifyScorecard
 
-func (c *demoClient) registerCertifyScorecard(selectedSource *model.Source, timeScanned time.Time, aggregateScore float64, collectedChecks []model.ScorecardCheckSpec, scorecardVersion, scorecardCommit string) error {
+func (c *demoClient) registerCertifyScorecard(selectedSource *model.Source, timeScanned string, aggregateScore float64, collectedChecks []*model.ScorecardCheckInputSpec, scorecardVersion, scorecardCommit, origin, collector string) (*model.CertifyScorecard, error) {
 	for _, h := range c.certifyScorecard {
 		if h.Source == selectedSource &&
 			h.Scorecard.AggregateScore == aggregateScore &&
 			h.Scorecard.ScorecardVersion == scorecardVersion &&
 			h.Scorecard.ScorecardCommit == scorecardCommit {
-			return nil
+			return h, nil
 		}
 	}
 
 	newCertifyScorecard := &model.CertifyScorecard{
 		Source: selectedSource,
 		Scorecard: &model.Scorecard{
-			TimeScanned:      timeScanned.String(),
+			TimeScanned:      timeScanned,
 			AggregateScore:   aggregateScore,
 			Checks:           buildScorecardChecks(collectedChecks),
 			ScorecardVersion: scorecardVersion,
 			ScorecardCommit:  scorecardCommit,
-			Origin:           "testing backend",
-			Collector:        "testing backend",
+			Origin:           origin,
+			Collector:        collector,
 		},
 	}
 	c.certifyScorecard = append(c.certifyScorecard, newCertifyScorecard)
 
-	return nil
+	return newCertifyScorecard, nil
 }
 
-func buildScorecardChecks(checks []model.ScorecardCheckSpec) []*model.ScorecardCheck {
+func buildScorecardChecks(checks []*model.ScorecardCheckInputSpec) []*model.ScorecardCheck {
 	var sc []*model.ScorecardCheck
 	for _, kv := range checks {
 		sc = append(sc, &model.ScorecardCheck{
@@ -144,4 +179,34 @@ func (c *demoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model
 		}
 	}
 	return collectedHasSourceAt, nil
+}
+
+func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+	sourceSpec := model.SourceSpec{
+		Type:      &source.Type,
+		Namespace: &source.Namespace,
+		Name:      &source.Name,
+		Tag:       source.Tag,
+		Commit:    source.Commit,
+	}
+	sources, err := c.Sources(ctx, &sourceSpec)
+	if err != nil {
+		return nil, err
+	}
+	if len(sources) != 1 {
+		return nil, gqlerror.Errorf(
+			"CertifyScorecard :: source argument must match one"+
+				" single source repository, found %d",
+			len(sources))
+	}
+
+	return c.registerCertifyScorecard(
+		sources[0],
+		scorecard.TimeScanned,
+		scorecard.AggregateScore,
+		scorecard.Checks,
+		scorecard.ScorecardVersion,
+		scorecard.ScorecardCommit,
+		scorecard.Origin,
+		scorecard.Collector)
 }

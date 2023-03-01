@@ -166,13 +166,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		IngestArtifact func(childComplexity int, artifact *model.ArtifactInputSpec) int
-		IngestBuilder  func(childComplexity int, builder *model.BuilderInputSpec) int
-		IngestCve      func(childComplexity int, cve *model.CVEInputSpec) int
-		IngestGhsa     func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestOsv      func(childComplexity int, osv *model.OSVInputSpec) int
-		IngestPackage  func(childComplexity int, pkg *model.PkgInputSpec) int
-		IngestSource   func(childComplexity int, source *model.SourceInputSpec) int
+		CertifyScorecard func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
+		IngestArtifact   func(childComplexity int, artifact *model.ArtifactInputSpec) int
+		IngestBuilder    func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestCve        func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestGhsa       func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestOsv        func(childComplexity int, osv *model.OSVInputSpec) int
+		IngestPackage    func(childComplexity int, pkg *model.PkgInputSpec) int
+		IngestSource     func(childComplexity int, source *model.SourceInputSpec) int
 	}
 
 	OSV struct {
@@ -794,6 +795,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsVulnerability.Vulnerability(childComplexity), true
 
+	case "Mutation.certifyScorecard":
+		if e.complexity.Mutation.CertifyScorecard == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_certifyScorecard_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CertifyScorecard(childComplexity, args["source"].(model.SourceInputSpec), args["scorecard"].(model.ScorecardInputSpec)), true
+
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
 			break
@@ -1359,7 +1372,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
+		ec.unmarshalInputScorecardCheckInputSpec,
 		ec.unmarshalInputScorecardCheckSpec,
+		ec.unmarshalInputScorecardInputSpec,
 		ec.unmarshalInputSourceInputSpec,
 		ec.unmarshalInputSourceSpec,
 	)
@@ -1747,9 +1762,37 @@ input ScorecardCheckSpec {
   score: Int!
 }
 
+"""
+ScorecardInputSpec is the same as Scorecard but for mutation input.
+
+All fields are required.
+"""
+input ScorecardInputSpec {
+  checks: [ScorecardCheckInputSpec!]!
+  aggregateScore: Float!
+  timeScanned: String!
+  scorecardVersion: String!
+  scorecardCommit: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+ScorecardCheckInputSpec is the same as ScorecardCheck, but for mutation input.
+"""
+input ScorecardCheckInputSpec {
+  check: String!
+  score: Int!
+}
+
 extend type Query {
   "Returns all Scorecard certifications matching the filter"
   scorecards(scorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
+}
+
+extend type Mutation {
+  "Certifies the Scorecard scanning of a source repository"
+  certifyScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVEXStatement.graphql", Input: `#

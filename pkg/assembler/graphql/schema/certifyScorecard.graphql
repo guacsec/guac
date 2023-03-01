@@ -95,7 +95,35 @@ input ScorecardCheckSpec {
   score: Int!
 }
 
+"""
+ScorecardInputSpec is the same as Scorecard but for mutation input.
+
+All fields are required.
+"""
+input ScorecardInputSpec {
+  checks: [ScorecardCheckInputSpec!]!
+  aggregateScore: Float!
+  timeScanned: String!
+  scorecardVersion: String!
+  scorecardCommit: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+ScorecardCheckInputSpec is the same as ScorecardCheck, but for mutation input.
+"""
+input ScorecardCheckInputSpec {
+  check: String!
+  score: Int!
+}
+
 extend type Query {
   "Returns all Scorecard certifications matching the filter"
   scorecards(scorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
+}
+
+extend type Mutation {
+  "Certifies the Scorecard scanning of a source repository"
+  certifyScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
 }
