@@ -100,14 +100,12 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 	defer session.Close()
 
 	var sb strings.Builder
+	var firstMatch bool = true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (root:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)")
 
-	if ghsaSpec.GhsaID != nil {
-		matchProperties(&sb, true, "ghsaID", "id", "$ghsaID")
-		queryValues["ghsaID"] = strings.ToLower(*ghsaSpec.GhsaID)
-	}
+	setGhsaMatchValues(&sb, ghsaSpec, &firstMatch, queryValues)
 
 	sb.WriteString(" RETURN ghsaID.id")
 
@@ -140,6 +138,16 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 	}
 
 	return result.([]*model.Ghsa), nil
+}
+
+func setGhsaMatchValues(sb *strings.Builder, ghsa *model.GHSASpec, firstMatch *bool, queryValues map[string]any) {
+	if ghsa != nil {
+		if ghsa.GhsaID != nil {
+			matchProperties(sb, *firstMatch, "ghsaID", "id", "$ghsaID")
+			queryValues["ghsaID"] = strings.ToLower(*ghsa.GhsaID)
+			*firstMatch = false
+		}
+	}
 }
 
 func (c *neo4jClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {

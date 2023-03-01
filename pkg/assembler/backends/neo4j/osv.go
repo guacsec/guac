@@ -100,14 +100,12 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 	defer session.Close()
 
 	var sb strings.Builder
+	var firstMatch bool = true
 	queryValues := map[string]any{}
 
 	sb.WriteString("MATCH (root:Osv)-[:OsvHasID]->(osvID:OsvID)")
 
-	if osvSpec.OsvID != nil {
-		matchProperties(&sb, true, "osvID", "id", "$osvID")
-		queryValues["osvID"] = strings.ToLower(*osvSpec.OsvID)
-	}
+	setOSVMatchValues(&sb, osvSpec, &firstMatch, queryValues)
 
 	sb.WriteString(" RETURN osvID.id")
 
@@ -140,6 +138,16 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 	}
 
 	return result.([]*model.Osv), nil
+}
+
+func setOSVMatchValues(sb *strings.Builder, osv *model.OSVSpec, firstMatch *bool, queryValues map[string]any) {
+	if osv != nil {
+		if osv.OsvID != nil {
+			matchProperties(sb, *firstMatch, "osvID", "id", "$osvID")
+			queryValues["osvID"] = strings.ToLower(*osv.OsvID)
+			*firstMatch = false
+		}
+	}
 }
 
 func (c *neo4jClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
