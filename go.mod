@@ -10,13 +10,13 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.5.0
 	github.com/spf13/cobra v1.6.1
 	go.uber.org/zap v1.24.0
-	google.golang.org/api v0.110.0
+	google.golang.org/api v0.111.0
 )
 
 require (
 	cloud.google.com/go v0.107.0 // indirect
 	cloud.google.com/go/compute v1.18.0 // indirect
-	cloud.google.com/go/iam v0.8.0 // indirect
+	cloud.google.com/go/iam v0.11.0 // indirect
 	cloud.google.com/go/pubsub v1.28.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -42,7 +42,7 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230209215440-0dfe4f8abfcc // indirect
+	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923 // indirect
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
 )
