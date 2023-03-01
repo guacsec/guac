@@ -109,7 +109,7 @@ func (c *demoClient) registerCertifyScorecard(selectedSource *model.Source, time
 	}
 
 	newCertifyScorecard := &model.CertifyScorecard{
-		Source:    selectedSource,
+		Source: selectedSource,
 		Scorecard: &model.Scorecard{
 			TimeScanned:      timeScanned,
 			AggregateScore:   aggregateScore,

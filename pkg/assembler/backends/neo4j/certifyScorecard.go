@@ -113,7 +113,7 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 					Collector:        certifyScorecardNode.Props[collector].(string),
 				}
 
-				certifyScorecard := &model.CertifyScorecard {
+				certifyScorecard := &model.CertifyScorecard{
 					Source:    &src,
 					Scorecard: &scorecard,
 				}
