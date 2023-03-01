@@ -46,14 +46,15 @@ func NewCycloneDXParser() common.DocumentParser {
 	}
 }
 
-func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	nodes = append(nodes, c.rootComponent.curPackage)
-	for _, p := range c.rootComponent.depPackages {
-		nodes = append(nodes, p.curPackage)
-	}
-	return nodes
-}
+// TODO(bulldozer): replace with GetPredicates
+// func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
+// 	nodes := []assembler.GuacNode{}
+// 	nodes = append(nodes, c.rootComponent.curPackage)
+// 	for _, p := range c.rootComponent.depPackages {
+// 		nodes = append(nodes, p.curPackage)
+// 	}
+// 	return nodes
+// }
 
 func addEdges(curPkg component, edges *[]assembler.GuacEdge, visited map[string]bool) {
 	// this could happen if we image purl creation fails for rootPackage
@@ -90,16 +91,17 @@ func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) er
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (c *cyclonedxParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
+func (c *cyclonedxParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 
-func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
-	edges := []assembler.GuacEdge{}
-	visited := make(map[string]bool)
-	addEdges(c.rootComponent, &edges, visited)
-	return edges
-}
+// TODO(bulldozer): replace with GetPredicates
+// func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
+// 	edges := []assembler.GuacEdge{}
+// 	visited := make(map[string]bool)
+// 	addEdges(c.rootComponent, &edges, visited)
+// 	return edges
+// }
 
 func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
@@ -216,4 +218,8 @@ func parseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
 
 func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
+}
+
+func (c *cyclonedxParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+	return nil
 }

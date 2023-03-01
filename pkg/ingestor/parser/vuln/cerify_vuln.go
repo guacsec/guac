@@ -142,23 +142,29 @@ func (c *vulnCertificationParser) CreateNodes(ctx context.Context) []assembler.G
 	return nodes
 }
 
-// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (c *vulnCertificationParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
-	edges := []assembler.GuacEdge{}
-	for _, i := range foundIdentities {
-		edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: c.attestation})
-	}
-	for _, pack := range c.packageNode {
-		edges = append(edges, assembler.AttestationForEdge{AttestationNode: c.attestation, ForPackage: pack})
-	}
-	for _, vuln := range c.vulns {
-		edges = append(edges, assembler.VulnerableEdge{VulnerabilityNode: vuln, AttestationNode: c.attestation})
-	}
-	return edges
+// TODO(bulldozer): replace with GetPredicate
+// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
+// func (c *vulnCertificationParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
+// 	edges := []assembler.GuacEdge{}
+// 	for _, i := range foundIdentities {
+// 		edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: c.attestation})
+// 	}
+// 	for _, pack := range c.packageNode {
+// 		edges = append(edges, assembler.AttestationForEdge{AttestationNode: c.attestation, ForPackage: pack})
+// 	}
+// 	for _, vuln := range c.vulns {
+// 		edges = append(edges, assembler.VulnerableEdge{VulnerabilityNode: vuln, AttestationNode: c.attestation})
+// 	}
+// 	return edges
+// }
+
+// TODO(bulldozer)
+func (c *vulnCertificationParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+	return nil
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (c *vulnCertificationParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
+func (c *vulnCertificationParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 

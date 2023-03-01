@@ -109,48 +109,53 @@ func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
 	return &predicate, nil
 }
 
-// CreateNodes creates the GuacNode for the graph inputs
-func (s *slsaParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	for _, sub := range s.subjects {
-		nodes = append(nodes, sub)
-	}
-	for _, a := range s.attestations {
-		nodes = append(nodes, a)
-	}
-	for _, d := range s.dependencies {
-		nodes = append(nodes, d)
-	}
-	for _, b := range s.builders {
-		nodes = append(nodes, b)
-	}
-	return nodes
-}
+// TODO(bulldozer): replace with GetPredicates
+// // CreateNodes creates the GuacNode for the graph inputs
+// func (s *slsaParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
+// 	nodes := []assembler.GuacNode{}
+// 	for _, sub := range s.subjects {
+// 		nodes = append(nodes, sub)
+// 	}
+// 	for _, a := range s.attestations {
+// 		nodes = append(nodes, a)
+// 	}
+// 	for _, d := range s.dependencies {
+// 		nodes = append(nodes, d)
+// 	}
+// 	for _, b := range s.builders {
+// 		nodes = append(nodes, b)
+// 	}
+// 	return nodes
+// }
+//
+// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
+// func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
+// 	edges := []assembler.GuacEdge{}
+// 	for _, i := range foundIdentities {
+// 		for _, a := range s.attestations {
+// 			edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: a})
+// 		}
+// 	}
+// 	for _, sub := range s.subjects {
+// 		for _, build := range s.builders {
+// 			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: sub, BuilderNode: build})
+// 		}
+// 		for _, a := range s.attestations {
+// 			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ForArtifact: sub})
+// 		}
+// 		for _, d := range s.dependencies {
+// 			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, ArtifactDependency: d})
+// 		}
+// 	}
+// 	return edges
+// }
 
-// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
-	edges := []assembler.GuacEdge{}
-	for _, i := range foundIdentities {
-		for _, a := range s.attestations {
-			edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: a})
-		}
-	}
-	for _, sub := range s.subjects {
-		for _, build := range s.builders {
-			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: sub, BuilderNode: build})
-		}
-		for _, a := range s.attestations {
-			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ForArtifact: sub})
-		}
-		for _, d := range s.dependencies {
-			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, ArtifactDependency: d})
-		}
-	}
-	return edges
+func (s *slsaParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+	return nil
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (s *slsaParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
+func (s *slsaParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 

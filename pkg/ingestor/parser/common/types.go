@@ -25,12 +25,13 @@ import (
 type DocumentParser interface {
 	// Parse breaks out the document into the graph components
 	Parse(ctx context.Context, doc *processor.Document) error
+
 	// GetIdentities gets the identity node from the document if they exist
-	GetIdentities(ctx context.Context) []assembler.IdentityNode
-	// CreateNodes creates the GuacNode for the graph inputs
-	CreateNodes(ctx context.Context) []assembler.GuacNode
-	// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-	CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge
+	GetIdentities(ctx context.Context) []TrustInformation
+
+	// CreatePredicates returns the predicates of the GUAC ontology to be created
+	GetPredicates(ctx context.Context) []assembler.PlaceholderStruct
+
 	// GetIdentifiers returns a set of identifiers that the parser has found to help provide context
 	// for collectors to gather more information around found software identifiers.
 	// This is an optional function to implement and it should return an error if not implemented.
@@ -53,3 +54,5 @@ type IdentifierStrings struct {
 	// parsers may not be sure what category they fall under.
 	UnclassifiedStrings []string
 }
+
+type TrustInformation struct{}

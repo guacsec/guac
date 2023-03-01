@@ -48,13 +48,13 @@ var (
 )
 
 type docTreeBuilder struct {
-	identities    []assembler.IdentityNode
+	identities    []common.TrustInformation
 	graphBuilders []*common.GraphBuilder
 }
 
 func newDocTreeBuilder() *docTreeBuilder {
 	return &docTreeBuilder{
-		identities:    []assembler.IdentityNode{},
+		identities:    []common.TrustInformation{},
 		graphBuilders: []*common.GraphBuilder{},
 	}
 }

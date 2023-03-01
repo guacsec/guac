@@ -62,34 +62,39 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 	return fmt.Errorf("unable to support parsing of Scorecard document format: %v", doc.Format)
 }
 
-// CreateNodes creates the GuacNode for the graph inputs
-func (p *scorecardParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	for _, n := range p.scorecardNodes {
-		nodes = append(nodes, n)
-	}
-	for _, n := range p.artifactNodes {
-		nodes = append(nodes, n)
-	}
+// TODO(bulldozer): replace with GetPredicates
+// // CreateNodes creates the GuacNode for the graph inputs
+// func (p *scorecardParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
+// 	nodes := []assembler.GuacNode{}
+// 	for _, n := range p.scorecardNodes {
+// 		nodes = append(nodes, n)
+// 	}
+// 	for _, n := range p.artifactNodes {
+// 		nodes = append(nodes, n)
+// 	}
+//
+// 	return nodes
+// }
+//
+// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
+// func (p *scorecardParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
+// 	// TODO: handle identity for edges (https://github.com/guacsec/guac/issues/128)
+// 	edges := []assembler.GuacEdge{}
+// 	for i, s := range p.scorecardNodes {
+// 		edges = append(edges, assembler.MetadataForEdge{
+// 			MetadataNode: s,
+// 			ForArtifact:  p.artifactNodes[i],
+// 		})
+// 	}
+// 	return edges
+// }
 
-	return nodes
-}
-
-// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (p *scorecardParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
-	// TODO: handle identity for edges (https://github.com/guacsec/guac/issues/128)
-	edges := []assembler.GuacEdge{}
-	for i, s := range p.scorecardNodes {
-		edges = append(edges, assembler.MetadataForEdge{
-			MetadataNode: s,
-			ForArtifact:  p.artifactNodes[i],
-		})
-	}
-	return edges
+func (p *scorecardParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+	return nil
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (p *scorecardParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
+func (p *scorecardParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 
