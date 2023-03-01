@@ -24,7 +24,6 @@ import (
 )
 
 func registerAllCertifyScorecard(client *demoClient) error {
-
 	// "git", "github", "https://github.com/django/django", "tag=1.11.1"
 	selectedSourceType := "git"
 	selectedSourceNameSpace := "github"
@@ -44,7 +43,6 @@ func registerAllCertifyScorecard(client *demoClient) error {
 
 	// "git", "github", "https://github.com/vapor-ware/kubetest", "tag=0.9.5"
 	// client.registerSource("git", "github", "https://github.com/vapor-ware/kubetest", "tag=0.9.5")
-
 	selectedSourceType = "git"
 	selectedSourceNameSpace = "github"
 	selectedSourceName = "https://github.com/vapor-ware/kubetest"
@@ -66,25 +64,29 @@ func registerAllCertifyScorecard(client *demoClient) error {
 // Ingest CertifyScorecard
 
 func (c *demoClient) registerCertifyScorecard(selectedSource *model.Source, timeScanned time.Time, aggregateScore float64, collectedChecks []model.ScorecardCheckSpec, scorecardVersion, scorecardCommit string) error {
-
 	for _, h := range c.certifyScorecard {
-		if h.AggregateScore == aggregateScore && h.ScorecardVersion == scorecardVersion &&
-			h.ScorecardCommit == scorecardCommit && h.Source == selectedSource {
+		if h.Source == selectedSource &&
+			h.Scorecard.AggregateScore == aggregateScore &&
+			h.Scorecard.ScorecardVersion == scorecardVersion &&
+			h.Scorecard.ScorecardCommit == scorecardCommit {
 			return nil
 		}
 	}
 
 	newCertifyScorecard := &model.CertifyScorecard{
-		Source:           selectedSource,
-		TimeScanned:      timeScanned.String(),
-		AggregateScore:   aggregateScore,
-		Checks:           buildScorecardChecks(collectedChecks),
-		ScorecardVersion: scorecardVersion,
-		ScorecardCommit:  scorecardCommit,
-		Origin:           "testing backend",
-		Collector:        "testing backend",
+		Source: selectedSource,
+		Scorecard: &model.Scorecard{
+			TimeScanned:      timeScanned.String(),
+			AggregateScore:   aggregateScore,
+			Checks:           buildScorecardChecks(collectedChecks),
+			ScorecardVersion: scorecardVersion,
+			ScorecardCommit:  scorecardCommit,
+			Origin:           "testing backend",
+			Collector:        "testing backend",
+		},
 	}
 	c.certifyScorecard = append(c.certifyScorecard, newCertifyScorecard)
+
 	return nil
 }
 
@@ -101,27 +103,31 @@ func buildScorecardChecks(checks []model.ScorecardCheckSpec) []*model.ScorecardC
 
 // Query CertifyScorecard
 
-func (c *demoClient) CertifyScorecard(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-
+func (c *demoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	var collectedHasSourceAt []*model.CertifyScorecard
 
 	for _, h := range c.certifyScorecard {
 		matchOrSkip := true
 
-		if certifyScorecardSpec.ScorecardVersion != nil && h.ScorecardVersion != *certifyScorecardSpec.ScorecardVersion {
+		if certifyScorecardSpec.ScorecardVersion != nil &&
+			h.Scorecard.ScorecardVersion != *certifyScorecardSpec.ScorecardVersion {
 			matchOrSkip = false
 		}
-		if certifyScorecardSpec.ScorecardCommit != nil && h.ScorecardCommit != *certifyScorecardSpec.ScorecardCommit {
+		if certifyScorecardSpec.ScorecardCommit != nil &&
+			h.Scorecard.ScorecardCommit != *certifyScorecardSpec.ScorecardCommit {
 			matchOrSkip = false
 		}
-		if certifyScorecardSpec.Collector != nil && h.Collector != *certifyScorecardSpec.Collector {
+		if certifyScorecardSpec.Collector != nil &&
+			h.Scorecard.Collector != *certifyScorecardSpec.Collector {
 			matchOrSkip = false
 		}
-		if certifyScorecardSpec.Origin != nil && h.Origin != *certifyScorecardSpec.Origin {
+		if certifyScorecardSpec.Origin != nil &&
+			h.Scorecard.Origin != *certifyScorecardSpec.Origin {
 			matchOrSkip = false
 		}
 
-		if certifyScorecardSpec.Source != nil && h.Source != nil {
+		if certifyScorecardSpec.Source != nil &&
+			h.Source != nil {
 			if certifyScorecardSpec.Source.Type == nil || h.Source.Type == *certifyScorecardSpec.Source.Type {
 				newSource, err := filterSourceNamespace(h.Source, certifyScorecardSpec.Source)
 				if err != nil {

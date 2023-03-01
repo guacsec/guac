@@ -31,7 +31,7 @@ type QueryResolver interface {
 	Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error)
 	CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error)
 	CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error)
-	CertifyScorecard(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
+	Scorecards(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
 	Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error)
@@ -184,21 +184,6 @@ func (ec *executionContext) field_Query_CertifyPkg_args(ctx context.Context, raw
 		}
 	}
 	args["certifyPkgSpec"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_CertifyScorecard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.CertifyScorecardSpec
-	if tmp, ok := rawArgs["certifyScorecardSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyScorecardSpec"))
-		arg0, err = ec.unmarshalOCertifyScorecardSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["certifyScorecardSpec"] = arg0
 	return args, nil
 }
 
@@ -439,6 +424,21 @@ func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawAr
 		}
 	}
 	args["pkgSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.CertifyScorecardSpec
+	if tmp, ok := rawArgs["scorecardSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
+		arg0, err = ec.unmarshalOCertifyScorecardSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["scorecardSpec"] = arg0
 	return args, nil
 }
 
@@ -1213,8 +1213,8 @@ func (ec *executionContext) fieldContext_Query_CertifyPkg(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_CertifyScorecard(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_CertifyScorecard(ctx, field)
+func (ec *executionContext) _Query_scorecards(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_scorecards(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1227,7 +1227,7 @@ func (ec *executionContext) _Query_CertifyScorecard(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CertifyScorecard(rctx, fc.Args["certifyScorecardSpec"].(*model.CertifyScorecardSpec))
+		return ec.resolvers.Query().Scorecards(rctx, fc.Args["scorecardSpec"].(*model.CertifyScorecardSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1243,7 +1243,7 @@ func (ec *executionContext) _Query_CertifyScorecard(ctx context.Context, field g
 	return ec.marshalNCertifyScorecard2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_CertifyScorecard(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_scorecards(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1253,20 +1253,8 @@ func (ec *executionContext) fieldContext_Query_CertifyScorecard(ctx context.Cont
 			switch field.Name {
 			case "source":
 				return ec.fieldContext_CertifyScorecard_source(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyScorecard_timeScanned(ctx, field)
-			case "aggregateScore":
-				return ec.fieldContext_CertifyScorecard_aggregateScore(ctx, field)
-			case "checks":
-				return ec.fieldContext_CertifyScorecard_checks(ctx, field)
-			case "scorecardVersion":
-				return ec.fieldContext_CertifyScorecard_scorecardVersion(ctx, field)
-			case "scorecardCommit":
-				return ec.fieldContext_CertifyScorecard_scorecardCommit(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyScorecard_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyScorecard_collector(ctx, field)
+			case "scorecard":
+				return ec.fieldContext_CertifyScorecard_scorecard(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecard", field.Name)
 		},
@@ -1278,7 +1266,7 @@ func (ec *executionContext) fieldContext_Query_CertifyScorecard(ctx context.Cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_CertifyScorecard_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_scorecards_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2607,7 +2595,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "CertifyScorecard":
+		case "scorecards":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2616,7 +2604,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_CertifyScorecard(ctx, field)
+				res = ec._Query_scorecards(ctx, field)
 				return res
 			}
 

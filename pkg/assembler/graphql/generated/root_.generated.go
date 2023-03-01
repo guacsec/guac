@@ -71,14 +71,8 @@ type ComplexityRoot struct {
 	}
 
 	CertifyScorecard struct {
-		AggregateScore   func(childComplexity int) int
-		Checks           func(childComplexity int) int
-		Collector        func(childComplexity int) int
-		Origin           func(childComplexity int) int
-		ScorecardCommit  func(childComplexity int) int
-		ScorecardVersion func(childComplexity int) int
-		Source           func(childComplexity int) int
-		TimeScanned      func(childComplexity int) int
+		Scorecard func(childComplexity int) int
+		Source    func(childComplexity int) int
 	}
 
 	CertifyVEXStatement struct {
@@ -220,7 +214,6 @@ type ComplexityRoot struct {
 		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
 		CertifyBad          func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
 		CertifyPkg          func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
-		CertifyScorecard    func(childComplexity int, certifyScorecardSpec *model.CertifyScorecardSpec) int
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
@@ -234,12 +227,23 @@ type ComplexityRoot struct {
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
 
 	SLSAPredicate struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
+	}
+
+	Scorecard struct {
+		AggregateScore   func(childComplexity int) int
+		Checks           func(childComplexity int) int
+		Collector        func(childComplexity int) int
+		Origin           func(childComplexity int) int
+		ScorecardCommit  func(childComplexity int) int
+		ScorecardVersion func(childComplexity int) int
+		TimeScanned      func(childComplexity int) int
 	}
 
 	ScorecardCheck struct {
@@ -377,47 +381,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyPkg.Packages(childComplexity), true
 
-	case "CertifyScorecard.aggregateScore":
-		if e.complexity.CertifyScorecard.AggregateScore == nil {
+	case "CertifyScorecard.scorecard":
+		if e.complexity.CertifyScorecard.Scorecard == nil {
 			break
 		}
 
-		return e.complexity.CertifyScorecard.AggregateScore(childComplexity), true
-
-	case "CertifyScorecard.checks":
-		if e.complexity.CertifyScorecard.Checks == nil {
-			break
-		}
-
-		return e.complexity.CertifyScorecard.Checks(childComplexity), true
-
-	case "CertifyScorecard.collector":
-		if e.complexity.CertifyScorecard.Collector == nil {
-			break
-		}
-
-		return e.complexity.CertifyScorecard.Collector(childComplexity), true
-
-	case "CertifyScorecard.origin":
-		if e.complexity.CertifyScorecard.Origin == nil {
-			break
-		}
-
-		return e.complexity.CertifyScorecard.Origin(childComplexity), true
-
-	case "CertifyScorecard.scorecardCommit":
-		if e.complexity.CertifyScorecard.ScorecardCommit == nil {
-			break
-		}
-
-		return e.complexity.CertifyScorecard.ScorecardCommit(childComplexity), true
-
-	case "CertifyScorecard.scorecardVersion":
-		if e.complexity.CertifyScorecard.ScorecardVersion == nil {
-			break
-		}
-
-		return e.complexity.CertifyScorecard.ScorecardVersion(childComplexity), true
+		return e.complexity.CertifyScorecard.Scorecard(childComplexity), true
 
 	case "CertifyScorecard.source":
 		if e.complexity.CertifyScorecard.Source == nil {
@@ -425,13 +394,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyScorecard.Source(childComplexity), true
-
-	case "CertifyScorecard.timeScanned":
-		if e.complexity.CertifyScorecard.TimeScanned == nil {
-			break
-		}
-
-		return e.complexity.CertifyScorecard.TimeScanned(childComplexity), true
 
 	case "CertifyVEXStatement.collector":
 		if e.complexity.CertifyVEXStatement.Collector == nil {
@@ -1055,18 +1017,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyPkg(childComplexity, args["certifyPkgSpec"].(*model.CertifyPkgSpec)), true
 
-	case "Query.CertifyScorecard":
-		if e.complexity.Query.CertifyScorecard == nil {
-			break
-		}
-
-		args, err := ec.field_Query_CertifyScorecard_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.CertifyScorecard(childComplexity, args["certifyScorecardSpec"].(*model.CertifyScorecardSpec)), true
-
 	case "Query.CertifyVEXStatement":
 		if e.complexity.Query.CertifyVEXStatement == nil {
 			break
@@ -1223,6 +1173,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(*model.PkgSpec)), true
 
+	case "Query.scorecards":
+		if e.complexity.Query.Scorecards == nil {
+			break
+		}
+
+		args, err := ec.field_Query_scorecards_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Scorecards(childComplexity, args["scorecardSpec"].(*model.CertifyScorecardSpec)), true
+
 	case "Query.sources":
 		if e.complexity.Query.Sources == nil {
 			break
@@ -1248,6 +1210,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SLSAPredicate.Value(childComplexity), true
+
+	case "Scorecard.aggregateScore":
+		if e.complexity.Scorecard.AggregateScore == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.AggregateScore(childComplexity), true
+
+	case "Scorecard.checks":
+		if e.complexity.Scorecard.Checks == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.Checks(childComplexity), true
+
+	case "Scorecard.collector":
+		if e.complexity.Scorecard.Collector == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.Collector(childComplexity), true
+
+	case "Scorecard.origin":
+		if e.complexity.Scorecard.Origin == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.Origin(childComplexity), true
+
+	case "Scorecard.scorecardCommit":
+		if e.complexity.Scorecard.ScorecardCommit == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.ScorecardCommit(childComplexity), true
+
+	case "Scorecard.scorecardVersion":
+		if e.complexity.Scorecard.ScorecardVersion == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.ScorecardVersion(childComplexity), true
+
+	case "Scorecard.timeScanned":
+		if e.complexity.Scorecard.TimeScanned == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.TimeScanned(childComplexity), true
 
 	case "ScorecardCheck.check":
 		if e.complexity.ScorecardCheck.Check == nil {
@@ -1656,41 +1667,56 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyScorecard. It contains the source object, time the source was scanned,
-# aggregate score, individual check scores, scorecard version and commit, origin and collector.
-"""
-CertifyScorecard is an attestation represents the scorecard of a particular source
+# Defines a GraphQL schema to certify Scorecard for a source repository.
 
-source (subject) - the source object type that represents the source
-timeScanned (property) - timestamp when this was last scanned (exact time)
-aggregateScore (property) - overall scorecard score for the source
-checks (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-scorecardVersion (property) - version of the scorecard when the source was scanned
-scorecardCommit (property) - commit of scorecard when the source was scanned
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
+"""
+CertifyScorecard is an attestation which represents the scorecard of a
+particular source repository.
 """
 type CertifyScorecard {
+  "The source repository that is being scanned (attestation subject)"
   source: Source!
-  timeScanned: String!
-  aggregateScore: Float!
+  "The Scorecard attached to the repository (attestation object)"
+  scorecard: Scorecard!
+}
+
+"""
+Scorecard contains all of the fields present in a Scorecard attestation.
+
+We also include fields to specify under what conditions the check was performed
+(time of scan, version of scanners, etc.) as well as how this information got
+included into GUAC (origin document and the collector for that document).
+"""
+type Scorecard {
+  "Individual Scorecard check scores (Branch-Protection, Code-Review, ...)"
   checks: [ScorecardCheck!]!
+  "Overall Scorecard score for the source"
+  aggregateScore: Float!
+  "Exact timestamp when the source was last scanned"
+  timeScanned: String!
+  "Version of the Scorecard scanner used to analyze the source"
   scorecardVersion: String!
+  "Commit of the Scorecards repository at the time of scanning the source"
   scorecardCommit: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-ScorecardCheck are the individual checks from scorecard and their values, a key-value pair.
+ScorecardCheck are the individual checks from scorecard and their values as a
+key-value pair.
+
 For example:  Branch-Protection, Code-Review...etc
+
 Based off scorecard's:
 type jsonCheckResultV2 struct {
-	Details []string                 ` + "`" + `json:"details"` + "`" + `
-	Score   int                      ` + "`" + `json:"score"` + "`" + `
-	Reason  string                   ` + "`" + `json:"reason"` + "`" + `
-	Name    string                   ` + "`" + `json:"name"` + "`" + `
-	Doc     jsonCheckDocumentationV2 ` + "`" + `json:"documentation"` + "`" + `
+  Details []string                 ` + "`" + `json:"details"` + "`" + `
+  Score   int                      ` + "`" + `json:"score"` + "`" + `
+  Reason  string                   ` + "`" + `json:"reason"` + "`" + `
+  Name    string                   ` + "`" + `json:"name"` + "`" + `
+  Doc     jsonCheckDocumentationV2 ` + "`" + `json:"documentation"` + "`" + `
 }
 This node cannot be directly referred by other parts of GUAC.
 """
@@ -1714,8 +1740,7 @@ input CertifyScorecardSpec {
 }
 
 """
-ScorecardCheckSpec is the same as ScorecardCheck, but usable as query
-input.
+ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input.
 """
 input ScorecardCheckSpec {
   check: String!
@@ -1723,8 +1748,8 @@ input ScorecardCheckSpec {
 }
 
 extend type Query {
-  "Returns all CertifyScorecard"
-  CertifyScorecard(certifyScorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
+  "Returns all Scorecard certifications matching the filter"
+  scorecards(scorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVEXStatement.graphql", Input: `#
