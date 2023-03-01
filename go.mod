@@ -57,6 +57,7 @@ require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/alexflint/go-arg v1.4.2 // indirect
 	github.com/alexflint/go-scalar v1.0.0 // indirect
+	github.com/anchore/go-struct-converter v0.0.0-20221118182256-c68fdcfa2092 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bombsimon/logrusr/v2 v2.0.1 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0 // indirect
@@ -166,7 +167,7 @@ require (
 	github.com/regclient/regclient v0.4.5
 	github.com/satori/go.uuid v1.2.0
 	github.com/sigstore/sigstore v1.6.0
-	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
+	github.com/spdx/tools-golang v0.5.0-rc1
 	github.com/spf13/viper v1.15.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	gopkg.in/yaml.v3 v3.0.1
