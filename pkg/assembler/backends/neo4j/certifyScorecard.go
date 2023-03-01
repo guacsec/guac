@@ -228,27 +228,27 @@ func (c *neo4jClient) CertifyScorecard(ctx context.Context, source model.SourceI
 		values["tag"] = *source.Tag
 	}
 
-	values["timeScanned"] = scorecard.TimeScanned
-	values["aggregateScore"] = scorecard.AggregateScore
-	values["scorecardVersion"] = scorecard.ScorecardVersion
-	values["scorecardCommit"] = scorecard.ScorecardCommit
+	values[timeScanned] = scorecard.TimeScanned
+	values[aggregateScore] = scorecard.AggregateScore
+	values[scorecardVersion] = scorecard.ScorecardVersion
+	values[scorecardCommit] = scorecard.ScorecardCommit
 
 	// Cannot use getScorecardChecks due to type mismatch
 	// Generics would be really helpful here :)
 	checksMap := map[string]int{}
-	checkKeys := []string{}
-	checkValues := []int{}
+	checkKeysList := []string{}
+	checkValuesList := []int{}
 	for _, check := range scorecard.Checks {
 		key := removeInvalidCharFromProperty(check.Check)
 		checksMap[key] = check.Score
-		checkKeys = append(checkKeys, key)
+		checkKeysList = append(checkKeysList, key)
 	}
-	sort.Strings(checkKeys)
-	for _, k := range checkKeys {
-		checkValues = append(checkValues, checksMap[k])
+	sort.Strings(checkKeysList)
+	for _, k := range checkKeysList {
+		checkValuesList = append(checkValuesList, checksMap[k])
 	}
-	values["checkKeys"] = checkKeys
-	values["checkValues"] = checkValues
+	values[checkKeys] = checkKeysList
+	values[checkValues] = checkValuesList
 
 	// TODO(mihaimaruseac): Should we put origin/collector on the edge instead?
 	values["origin"] = scorecard.Origin
@@ -275,8 +275,8 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag, certifyScoreca
 			// TODO(mihaimaruseac): Profile to compare returning node vs returning list of properties
 			certifyScorecardNode := record.Values[5].(dbtype.Node)
 			checks, err := getCollectedChecks(
-				certifyScorecardNode.Props["checkKeys"].([]interface{}),
-				certifyScorecardNode.Props["checkValues"].([]interface{}))
+				certifyScorecardNode.Props[checkKeys].([]interface{}),
+				certifyScorecardNode.Props[checkValues].([]interface{}))
 			if err != nil {
 				return nil, err
 			}
