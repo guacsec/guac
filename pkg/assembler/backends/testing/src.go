@@ -173,28 +173,39 @@ func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (
 
 func filterSourceTagCommit(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
 	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
-		if *sourceSpec.Commit == "" && *sourceSpec.Tag == "" {
-			if n.Commit == nil && n.Tag == nil {
-				return n, nil
-			}
-		} else {
+		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
 			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
 		}
 	}
 
-	if sourceSpec.Commit != nil {
-		if n.Commit == nil || *n.Commit != *sourceSpec.Commit {
-			return nil, nil
-		}
+	if !matchInputSpecWithDBField(sourceSpec.Commit, n.Commit) {
+		return nil, nil
 	}
 
-	if sourceSpec.Tag != nil {
-		if n.Tag == nil || *n.Tag != *sourceSpec.Tag {
-			return nil, nil
-		}
+	if !matchInputSpecWithDBField(sourceSpec.Tag, n.Tag) {
+		return nil, nil
 	}
 
 	return n, nil
+}
+
+// TODO(mihaimaruseac): Probably move to utility
+// Matches a field in the database with a spec, considering that null argument
+// means anything is ok whereas empty string means matching only with empty
+// (null/empty). That is:
+// - if spec is nil: match anything
+// - if spec is empty: match nil or empty
+// - otherwise: match exactly spec
+func matchInputSpecWithDBField(spec *string, dbField *string) bool {
+	if spec == nil {
+		return true
+	}
+
+	if *spec == "" {
+		return (dbField == nil || *dbField == "")
+	}
+
+	return (dbField != nil && *dbField == *spec)
 }
 
 func (c *demoClient) IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error) {
