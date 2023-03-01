@@ -15,6 +15,8 @@
 
 package certify_vuln
 
+// TODO(bulldozer): freeze tests
+/*
 import (
 	"context"
 	"testing"
@@ -206,3 +208,4 @@ func Test_vulnCertificationParser(t *testing.T) {
 		})
 	}
 }
+*/

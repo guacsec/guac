@@ -74,14 +74,18 @@ var exampleCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			g.AppendGraph(inputs...)
+			// TODO(bulldozer): collate inputs
+			// g.AppendGraph(inputs...)
+			_ = inputs
 		}
 		logger.Infof("graph nodes: %v, edges: %v", len(g.Nodes), len(g.Edges))
 
-		if err := assembler.StoreGraph(g, client); err != nil {
-			logger.Errorf("unable to store graph: %v", err)
-			os.Exit(1)
-		}
+		// TODO(bulldozer): call routine to ingest
+		// if err := assembler.StoreGraph(g, client); err != nil {
+		// 	logger.Errorf("unable to store graph: %v", err)
+		// 	os.Exit(1)
+		// }
+		_ = client
 	},
 }
 

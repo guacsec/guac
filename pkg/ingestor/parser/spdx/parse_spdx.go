@@ -25,7 +25,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	"github.com/guacsec/guac/pkg/logging"
 	spdx_json "github.com/spdx/tools-golang/json"
 	spdx_common "github.com/spdx/tools-golang/spdx/common"
 	"github.com/spdx/tools-golang/spdx/v2_2"
@@ -133,20 +132,21 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	return spdx, nil
 }
 
-func (s *spdxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	for _, packNodes := range s.packages {
-		for _, packNode := range packNodes {
-			nodes = append(nodes, packNode)
-		}
-	}
-	for _, fileNodes := range s.files {
-		for _, fileNode := range fileNodes {
-			nodes = append(nodes, fileNode)
-		}
-	}
-	return nodes
-}
+// TODO(bulldozer): replace with GetPredicates
+// func (s *spdxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
+// 	nodes := []assembler.GuacNode{}
+// 	for _, packNodes := range s.packages {
+// 		for _, packNode := range packNodes {
+// 			nodes = append(nodes, packNode)
+// 		}
+// 	}
+// 	for _, fileNodes := range s.files {
+// 		for _, fileNode := range fileNodes {
+// 			nodes = append(nodes, fileNode)
+// 		}
+// 	}
+// 	return nodes
+// }
 
 func (s *spdxParser) getPackageElement(elementID string) []assembler.PackageNode {
 	if packNode, ok := s.packages[string(elementID)]; ok {
@@ -162,42 +162,43 @@ func (s *spdxParser) getFileElement(elementID string) []assembler.ArtifactNode {
 	return nil
 }
 
-func (s *spdxParser) CreateEdges(ctx context.Context, foundIdentities []assembler.IdentityNode) []assembler.GuacEdge {
-	logger := logging.FromContext(ctx)
-	edges := []assembler.GuacEdge{}
-	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
-	// adding top level package edge manually for all depends on package
-	if toplevel != nil {
-		edges = append(edges, createTopLevelEdges(toplevel[0], s.packages, s.files)...)
-	}
-	for _, rel := range s.spdxDoc.Relationships {
-		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
-		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
-		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
-		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
-		for _, packNode := range foundPackNodes {
-			createdEdge, err := getEdge(packNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
-			if err != nil {
-				logger.Errorf("error generating spdx edge %v", err)
-				continue
-			}
-			if createdEdge != nil {
-				edges = append(edges, createdEdge)
-			}
-		}
-		for _, fileNode := range foundFileNodes {
-			createdEdge, err := getEdge(fileNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
-			if err != nil {
-				logger.Errorf("error generating spdx edge %v", err)
-				continue
-			}
-			if createdEdge != nil {
-				edges = append(edges, createdEdge)
-			}
-		}
-	}
-	return edges
-}
+// TODO(bulldozer): replace with GetPredicates
+// func (s *spdxParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
+// 	logger := logging.FromContext(ctx)
+// 	edges := []assembler.GuacEdge{}
+// 	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
+// 	// adding top level package edge manually for all depends on package
+// 	if toplevel != nil {
+// 		edges = append(edges, createTopLevelEdges(toplevel[0], s.packages, s.files)...)
+// 	}
+// 	for _, rel := range s.spdxDoc.Relationships {
+// 		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
+// 		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
+// 		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
+// 		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
+// 		for _, packNode := range foundPackNodes {
+// 			createdEdge, err := getEdge(packNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
+// 			if err != nil {
+// 				logger.Errorf("error generating spdx edge %v", err)
+// 				continue
+// 			}
+// 			if createdEdge != nil {
+// 				edges = append(edges, createdEdge)
+// 			}
+// 		}
+// 		for _, fileNode := range foundFileNodes {
+// 			createdEdge, err := getEdge(fileNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
+// 			if err != nil {
+// 				logger.Errorf("error generating spdx edge %v", err)
+// 				continue
+// 			}
+// 			if createdEdge != nil {
+// 				edges = append(edges, createdEdge)
+// 			}
+// 		}
+// 	}
+// 	return edges
+// }
 
 func createTopLevelEdges(toplevel assembler.PackageNode, packages map[string][]assembler.PackageNode, files map[string][]assembler.ArtifactNode) []assembler.GuacEdge {
 	edges := []assembler.GuacEdge{}
@@ -280,10 +281,14 @@ func getDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNo
 	return e
 }
 
-func (s *spdxParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
+func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 
 func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
+}
+
+func (s *spdxParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+	return nil
 }

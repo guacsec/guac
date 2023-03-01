@@ -210,8 +210,8 @@ func getProcessor(ctx context.Context) (func(*processor.Document) (processor.Doc
 		return process.Process(ctx, d)
 	}, nil
 }
-func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.Graph, error), error) {
-	return func(doc processor.DocumentTree) ([]assembler.Graph, error) {
+func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.PlaceholderStruct, error), error) {
+	return func(doc processor.DocumentTree) ([]assembler.PlaceholderStruct, error) {
 		// for guacone collectors, we do not integrate with the collectsub service
 		inputs, _, err := parser.ParseDocumentTree(ctx, doc)
 		if err != nil {
@@ -222,37 +222,39 @@ func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler
 	}, nil
 }
 
-func getAssembler(opts options) (func([]assembler.Graph) error, error) {
-	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
-		opts.user,
-		opts.pass,
-		opts.realm,
-	)
-
-	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-	if err != nil {
-		return nil, err
-	}
-
-	err = createIndices(client)
-	if err != nil {
-		return nil, err
-	}
-
-	return func(gs []assembler.Graph) error {
-		combined := assembler.Graph{
-			Nodes: []assembler.GuacNode{},
-			Edges: []assembler.GuacEdge{},
-		}
-		for _, g := range gs {
-			combined.AppendGraph(g)
-		}
-		if err := assembler.StoreGraph(combined, client); err != nil {
-			return err
-		}
-
-		return nil
-	}, nil
+func getAssembler(opts options) (func([]assembler.PlaceholderStruct) error, error) {
+	// TODO(bulldozer): create an assbebler function to call graphQL ingestion
+	// 	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
+	// 		opts.user,
+	// 		opts.pass,
+	// 		opts.realm,
+	// 	)
+	//
+	// 	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	//
+	// 	err = createIndices(client)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	//
+	// 	return func(gs []assembler.Graph) error {
+	// 		combined := assembler.Graph{
+	// 			Nodes: []assembler.GuacNode{},
+	// 			Edges: []assembler.GuacEdge{},
+	// 		}
+	// 		for _, g := range gs {
+	// 			combined.AppendGraph(g)
+	// 		}
+	// 		if err := assembler.StoreGraph(combined, client); err != nil {
+	// 			return err
+	// 		}
+	//
+	// 		return nil
+	// 	}, nil
+	return func(_ []assembler.PlaceholderStruct) error { return nil }, nil
 }
 
 func createIndices(client graphdb.Client) error {

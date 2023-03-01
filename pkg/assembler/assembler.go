@@ -138,5 +138,9 @@ func (g *Graph) AppendGraph(gs ...Graph) {
 
 // TODO(mihaimaruseac): Write queries to write/read subgraphs from DB?
 
+type PlaceholderStruct struct {
+	Tmp any
+}
+
 // AssemblerInput represents the inputs to add to the graph
-type AssemblerInput = Graph
+type AssemblerInput = PlaceholderStruct

@@ -24,11 +24,11 @@ import (
 // GraphBuilder creates the assembler inputs based on the documents being parsed
 type GraphBuilder struct {
 	docParser       DocumentParser
-	foundIdentities []assembler.IdentityNode
+	foundIdentities []TrustInformation
 }
 
 // NewGenericGraphBuilder initializes the graphbulder
-func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assembler.IdentityNode) *GraphBuilder {
+func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []TrustInformation) *GraphBuilder {
 	return &GraphBuilder{
 		docParser:       docParser,
 		foundIdentities: foundIdentities,
@@ -36,16 +36,14 @@ func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []assemble
 }
 
 // CreateAssemblerInput creates the GuacNodes and GuacEdges that are needed by the assembler
-func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []assembler.IdentityNode) assembler.AssemblerInput {
-	assemblerinput := assembler.AssemblerInput{
-		Nodes: b.docParser.CreateNodes(ctx),
-		Edges: b.docParser.CreateEdges(ctx, foundIdentities),
-	}
+func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []TrustInformation) assembler.AssemblerInput {
+	// TODO(bulldozer): call docParser to get assemblerinput, add trust information when needed
+	assemblerinput := assembler.AssemblerInput{}
 	return assemblerinput
 }
 
 // GetIdentities returns the identity that is found when parsing a document
-func (b *GraphBuilder) GetIdentities() []assembler.IdentityNode {
+func (b *GraphBuilder) GetIdentities() []TrustInformation {
 	return b.foundIdentities
 }
 

@@ -17,7 +17,6 @@ package dsse
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -30,13 +29,13 @@ import (
 
 type dsseParser struct {
 	doc        *processor.Document
-	identities []assembler.IdentityNode
+	identities []common.TrustInformation
 }
 
 // NewDSSEParser initializes the dsseParser
 func NewDSSEParser() common.DocumentParser {
 	return &dsseParser{
-		identities: []assembler.IdentityNode{},
+		identities: []common.TrustInformation{},
 	}
 }
 
@@ -61,9 +60,11 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("MarshalPublicKeyToPEM returned error: %w", err)
 			}
-			d.identities = append(d.identities, assembler.IdentityNode{
-				ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
-				KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), NodeData: *assembler.NewObjectMetadata(d.doc.SourceInformation)})
+			// TODO(bulldozer): change this to new TrustInformation struct
+			// d.identities = append(d.identities, common.TrustInformation{
+			// 	ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
+			// 	KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), NodeData: *assembler.NewObjectMetadata(d.doc.SourceInformation)})
+			_ = pemBytes
 		} else {
 			logger := logging.FromContext(ctx)
 			logger.Errorf("failed to verify DSSE with provided key: %w", i.ID)
@@ -72,25 +73,32 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 	return nil
 }
 
+// TODO(bulldozer): implement GetIdentities
 // GetIdentities gets the identity node from the document if they exist
-func (d *dsseParser) GetIdentities(ctx context.Context) []assembler.IdentityNode {
-	return d.identities
+func (d *dsseParser) GetIdentities(ctx context.Context) []common.TrustInformation {
+	return []common.TrustInformation{}
+	//return d.identities
 }
 
-// CreateNodes creates the GuacNode for the graph inputs
-func (d *dsseParser) CreateNodes(_ context.Context) []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	for _, i := range d.identities {
-		nodes = append(nodes, i)
-	}
-	return nodes
-}
-
-// CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-func (d *dsseParser) CreateEdges(_ context.Context, _ []assembler.IdentityNode) []assembler.GuacEdge {
-	return []assembler.GuacEdge{}
-}
+// TODO(bulldozer): replace with GetPredicates
+// // CreateNodes creates the GuacNode for the graph inputs
+// func (d *dsseParser) CreateNodes(_ context.Context) []assembler.GuacNode {
+// 	nodes := []assembler.GuacNode{}
+// 	for _, i := range d.identities {
+// 		nodes = append(nodes, i)
+// 	}
+// 	return nodes
+// }
+//
+// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
+// func (d *dsseParser) CreateEdges(_ context.Context, _ []common.TrustInformation) []assembler.GuacEdge {
+// 	return []assembler.GuacEdge{}
+// }
 
 func (d *dsseParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
+}
+
+func (d *dsseParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+	return nil
 }
