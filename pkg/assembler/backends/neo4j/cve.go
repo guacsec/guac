@@ -167,16 +167,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 
 	sb.WriteString("MATCH (root:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)")
 
-	if cveSpec.Year != nil {
-		matchProperties(&sb, firstMatch, "cveYear", "year", "$cveYear")
-		queryValues["cveYear"] = cveSpec.Year
-		firstMatch = false
-	}
-
-	if cveSpec.CveID != nil {
-		matchProperties(&sb, firstMatch, "cveID", "id", "$cveID")
-		queryValues["cveID"] = strings.ToLower(*cveSpec.CveID)
-	}
+	setCveMatchValues(&sb, cveSpec, &firstMatch, queryValues)
 
 	sb.WriteString(" RETURN cveYear.year, cveID.id")
 
@@ -258,6 +249,22 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 	}
 
 	return result.([]*model.Cve), nil
+}
+
+func setCveMatchValues(sb *strings.Builder, cve *model.CVESpec, firstMatch *bool, queryValues map[string]any) {
+	if cve != nil {
+		if cve.Year != nil {
+			matchProperties(sb, *firstMatch, "cveYear", "year", "$cveYear")
+			queryValues["cveYear"] = cve.Year
+			*firstMatch = false
+		}
+
+		if cve.CveID != nil {
+			matchProperties(sb, *firstMatch, "cveID", "id", "$cveID")
+			queryValues["cveID"] = strings.ToLower(*cve.CveID)
+			*firstMatch = false
+		}
+	}
 }
 
 func (c *neo4jClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
