@@ -67,3 +67,22 @@ query Q4 {
     ...allCertifyVuln
   }
 }
+
+query Q5 {
+  CertifyVuln(certifyVulnSpec: {cve: {cveId: "CVE-2019-13110"}}) {
+    ...allCertifyVuln
+  }
+}
+
+
+query Q6 {
+  CertifyVuln(certifyVulnSpec: {ghsa: {ghsaId: "GHSA-h45f-rjvw-2rv2"}}) {
+    ...allCertifyVuln
+  }
+}
+
+query Q7 {
+  CertifyVuln(certifyVulnSpec: {osv: {osvId: "CVE-2019-13110"}}) {
+    ...allCertifyVuln
+  }
+}
