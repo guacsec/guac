@@ -123,6 +123,9 @@ func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package,
 
 func (c *demoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 
+	if certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Artifact != nil {
+		return nil, gqlerror.Errorf("cannot specify package and artifact together for CertifyVEXStatement")
+	}
 	if certifyVEXStatementSpec.Cve != nil && certifyVEXStatementSpec.Ghsa != nil {
 		return nil, gqlerror.Errorf("cannot specify cve and ghsa together for CertifyVEXStatement")
 	}

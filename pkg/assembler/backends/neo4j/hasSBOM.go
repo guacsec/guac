@@ -60,7 +60,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 		setHasSBOMValues(&sb, hasSBOMSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		if hasSBOMSpec.Package != nil && hasSBOMSpec.Package.Version == nil && hasSBOMSpec.Package.Subpath == nil &&
+		if hasSBOMSpec.Package == nil || hasSBOMSpec.Package != nil && hasSBOMSpec.Package.Version == nil && hasSBOMSpec.Package.Subpath == nil &&
 			len(hasSBOMSpec.Package.Qualifiers) == 0 && !*hasSBOMSpec.Package.MatchOnlyEmptyQualifiers {
 
 			sb.WriteString("\nUNION")
