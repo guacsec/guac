@@ -182,6 +182,7 @@ func setCertifyScorecardValues(sb *strings.Builder, certifyScorecardSpec *model.
 		queryValues[checkKeys] = keys
 		matchProperties(sb, *firstMatch, "certifyScorecard", checkValues, "$"+checkValues)
 		queryValues[checkValues] = values
+		*firstMatch = false
 	}
 	if certifyScorecardSpec.ScorecardVersion != nil {
 		matchProperties(sb, *firstMatch, "certifyScorecard", scorecardVersion, "$"+scorecardVersion)
