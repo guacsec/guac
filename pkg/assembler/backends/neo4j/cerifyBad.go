@@ -58,7 +58,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		if certifyBadSpec.Package != nil && certifyBadSpec.Package.Version == nil && certifyBadSpec.Package.Subpath == nil &&
+		if certifyBadSpec.Package == nil || certifyBadSpec.Package != nil && certifyBadSpec.Package.Version == nil && certifyBadSpec.Package.Subpath == nil &&
 			len(certifyBadSpec.Package.Qualifiers) == 0 && !*certifyBadSpec.Package.MatchOnlyEmptyQualifiers {
 
 			sb.WriteString("\nUNION")

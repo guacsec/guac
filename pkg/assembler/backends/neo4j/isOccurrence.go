@@ -26,13 +26,13 @@ import (
 )
 
 func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	matchPkgSrc := false
+	queryAll := false
 	if isOccurrenceSpec.Package != nil && isOccurrenceSpec.Source != nil {
 		return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
 	}
 
 	if isOccurrenceSpec.Package == nil && isOccurrenceSpec.Source == nil {
-		matchPkgSrc = true
+		queryAll = true
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
@@ -40,7 +40,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 
 	aggregateIsOccurrence := []*model.IsOccurrence{}
 
-	if matchPkgSrc || isOccurrenceSpec.Package != nil {
+	if queryAll || isOccurrenceSpec.Package != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -59,7 +59,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		setIsOccurrenceValues(&sb, isOccurrenceSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		if isOccurrenceSpec.Package != nil && isOccurrenceSpec.Package.Version == nil && isOccurrenceSpec.Package.Subpath == nil &&
+		if isOccurrenceSpec.Package == nil || isOccurrenceSpec.Package != nil && isOccurrenceSpec.Package.Version == nil && isOccurrenceSpec.Package.Subpath == nil &&
 			len(isOccurrenceSpec.Package.Qualifiers) == 0 && !*isOccurrenceSpec.Package.MatchOnlyEmptyQualifiers {
 
 			sb.WriteString("\nUNION")
@@ -148,7 +148,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		aggregateIsOccurrence = append(aggregateIsOccurrence, result.([]*model.IsOccurrence)...)
 	}
 
-	if matchPkgSrc || isOccurrenceSpec.Source != nil {
+	if queryAll || isOccurrenceSpec.Source != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
