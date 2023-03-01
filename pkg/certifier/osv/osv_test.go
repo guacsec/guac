@@ -28,7 +28,7 @@ import (
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
-	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
+	"github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -252,7 +252,7 @@ func Test_createAttestation(t *testing.T) {
 					Subject: []intoto.Subject{
 						{
 							Name: "",
-							Digest: slsa.DigestSet{
+							Digest: common.DigestSet{
 								"test": "Digest",
 							},
 						},

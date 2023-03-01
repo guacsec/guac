@@ -29,7 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
-	slsa "github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/v0.2"
+	"github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 )
 
 const (
@@ -211,7 +211,7 @@ func createAttestation(packageURL string, digests []string, vulns []osv_scanner.
 		digestSplit := strings.Split(digest, ":")
 		subjects = append(subjects, intoto.Subject{
 			Name: packageURL,
-			Digest: slsa.DigestSet{
+			Digest: common.DigestSet{
 				digestSplit[0]: digestSplit[1],
 			},
 		})
