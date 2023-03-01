@@ -163,7 +163,7 @@ require (
 	github.com/package-url/packageurl-go v0.1.1-0.20220428063043-89078438f170
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
-	github.com/regclient/regclient v0.4.5
+	github.com/regclient/regclient v0.4.7
 	github.com/satori/go.uuid v1.2.0
 	github.com/sigstore/sigstore v1.6.0
 	github.com/spdx/tools-golang v0.3.1-0.20221003161519-fb7fe8874d01
