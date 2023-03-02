@@ -15,15 +15,14 @@
 
 package scorecard
 
-// TODO(bulldozer): freeze test
-/*
 import (
 	"context"
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -31,11 +30,10 @@ import (
 func Test_scorecardParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name      string
-		doc       *processor.Document
-		wantNodes []assembler.GuacNode
-		wantEdges []assembler.GuacEdge
-		wantErr   bool
+		name           string
+		doc            *processor.Document
+		wantPredicates *assembler.PlaceholderStruct
+		wantErr        bool
 	}{{
 		name: "testing",
 		doc: &processor.Document{
@@ -44,35 +42,39 @@ func Test_scorecardParser(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		wantNodes: []assembler.GuacNode{
-			assembler.MetadataNode{
-				MetadataType: "scorecard",
-				ID:           "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
-				Details: map[string]interface{}{
-					"repo":                "git+https://github.com/kubernetes/kubernetes",
-					"commit":              "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
-					"scorecard_version":   "v4.7.0",
-					"scorecard_commit":    "sha1:7cd6406aef0b80a819402e631919293d5eb6adcf",
-					"score":               8.9,
-					"Binary_Artifacts":    10,
-					"CI_Tests":            10,
-					"Code_Review":         7,
-					"Dangerous_Workflow":  10,
-					"License":             10,
-					"Pinned_Dependencies": 2,
-					"Security_Policy":     10,
-					"Token_Permissions":   10,
-					"Vulnerabilities":     10,
+		wantPredicates: &assembler.PlaceholderStruct{
+			CertifyScorecard: []assembler.CertifyScorecardIngest{
+				{
+					Source: &model.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/kubernetes",
+						Name:      "kubernetes",
+						Commit:    strP("5835544ca568b757a8ecae5c153f317e5736700e"),
+					},
+					Scorecard: &model.ScorecardInputSpec{
+						Checks: []*model.ScorecardCheckInputSpec{
+							{Check: "Binary-Artifacts", Score: 10},
+							{Check: "CI-Tests", Score: 10},
+							{Check: "Code-Review", Score: 7},
+							{Check: "Dangerous-Workflow", Score: 10},
+							{Check: "License", Score: 10},
+							{Check: "Pinned-Dependencies", Score: 2},
+							{Check: "Security-Policy", Score: 10},
+							{Check: "Token-Permissions", Score: 10},
+							{Check: "Vulnerabilities", Score: 10},
+						},
+						AggregateScore: 8.9,
+						// TODO
+						TimeScanned:      "2022-10-06",
+						ScorecardVersion: "v4.7.0",
+						ScorecardCommit:  "7cd6406aef0b80a819402e631919293d5eb6adcf",
+					},
 				},
 			},
-			assembler.ArtifactNode{
-				Name:   "git+https://github.com/kubernetes/kubernetes",
-				Digest: "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
-			},
 		},
-		wantEdges: []assembler.GuacEdge{
-			assembler.MetadataForEdge{
-				MetadataNode: assembler.MetadataNode{
+		/*
+			wantNodes: []assembler.GuacNode{
+				assembler.MetadataNode{
 					MetadataType: "scorecard",
 					ID:           "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
 					Details: map[string]interface{}{
@@ -92,12 +94,40 @@ func Test_scorecardParser(t *testing.T) {
 						"Vulnerabilities":     10,
 					},
 				},
-				ForArtifact: assembler.ArtifactNode{
+				assembler.ArtifactNode{
 					Name:   "git+https://github.com/kubernetes/kubernetes",
 					Digest: "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
 				},
 			},
-		},
+			wantEdges: []assembler.GuacEdge{
+				assembler.MetadataForEdge{
+					MetadataNode: assembler.MetadataNode{
+						MetadataType: "scorecard",
+						ID:           "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
+						Details: map[string]interface{}{
+							"repo":                "git+https://github.com/kubernetes/kubernetes",
+							"commit":              "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
+							"scorecard_version":   "v4.7.0",
+							"scorecard_commit":    "sha1:7cd6406aef0b80a819402e631919293d5eb6adcf",
+							"score":               8.9,
+							"Binary_Artifacts":    10,
+							"CI_Tests":            10,
+							"Code_Review":         7,
+							"Dangerous_Workflow":  10,
+							"License":             10,
+							"Pinned_Dependencies": 2,
+							"Security_Policy":     10,
+							"Token_Permissions":   10,
+							"Vulnerabilities":     10,
+						},
+					},
+					ForArtifact: assembler.ArtifactNode{
+						Name:   "git+https://github.com/kubernetes/kubernetes",
+						Digest: "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
+					},
+				},
+			},
+		*/
 		wantErr: false,
 	}}
 	for _, tt := range tests {
@@ -106,13 +136,14 @@ func Test_scorecardParser(t *testing.T) {
 			if err := s.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("scorecard.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if nodes := s.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
-				t.Errorf("scorecard.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
-			}
-			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
-				t.Errorf("scorecard.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+			preds := s.GetPredicates(ctx)
+			if d := cmp.Diff(tt.wantPredicates, preds); len(d) != 0 {
+				t.Errorf("scorecard.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
 }
-*/
+
+func strP(s string) *string {
+	return &s
+}
