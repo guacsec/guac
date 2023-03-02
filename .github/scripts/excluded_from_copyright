@@ -1,3 +1,4 @@
+./pkg/assembler/clients/generated/operations.go
 ./pkg/assembler/graphql/model/nodes.go
 ./pkg/assembler/graphql/resolvers/schema.resolvers.go
 ./pkg/assembler/graphql/generated/root_.generated.go
