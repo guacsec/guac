@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -54,7 +55,10 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 		if err := json.Unmarshal(doc.Blob, &scorecard); err != nil {
 			return err
 		}
-		scPred, srcPred := getPredicates(&scorecard)
+		scPred, srcPred, err := getPredicates(&scorecard)
+		if err != nil {
+			return fmt.Errorf("error parsing scorecard document: %w", err)
+		}
 		p.scorecardPredicates = append(p.scorecardPredicates, scPred)
 		p.srcPredicates = append(p.srcPredicates, srcPred)
 		return nil
@@ -84,7 +88,7 @@ func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 	return nil, fmt.Errorf("not yet implemented")
 }
 
-func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *model.SourceInputSpec) {
+func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *model.SourceInputSpec, error) {
 	var ns, name string
 	idx := strings.LastIndex(s.Repo.Name, "/")
 	if idx < 0 {
@@ -110,12 +114,28 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 		})
 	}
 
+	var (
+		timeScanned time.Time
+		err         error
+	)
+	timeScanned, err = time.Parse(time.RFC3339, s.Date)
+	if err != nil {
+		// at the moment, scorecard doesn't use RFC3339 and a custom format
+		// heuristic to check this and convert to RFC3339.
+		//
+		// https://github.com/ossf/scorecard/issues/2711
+		timeScanned, err = time.Parse("2006-01-02", s.Date)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
 	scInput := model.ScorecardInputSpec{
-		TimeScanned:      s.Date,
+		TimeScanned:      timeScanned,
 		AggregateScore:   (float64)(s.AggregateScore),
 		Checks:           checks,
 		ScorecardVersion: s.Scorecard.Version,
 		ScorecardCommit:  s.Scorecard.Commit,
 	}
-	return &scInput, &srcInput
+	return &scInput, &srcInput, nil
 }

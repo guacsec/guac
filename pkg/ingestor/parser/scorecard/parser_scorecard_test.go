@@ -18,6 +18,7 @@ package scorecard
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -64,7 +65,7 @@ func Test_scorecardParser(t *testing.T) {
 							{Check: "Vulnerabilities", Score: 10},
 						},
 						AggregateScore:   8.9,
-						TimeScanned:      "2022-10-06",
+						TimeScanned:      toTime("2022-10-06"),
 						ScorecardVersion: "v4.7.0",
 						ScorecardCommit:  "7cd6406aef0b80a819402e631919293d5eb6adcf",
 					},
@@ -89,4 +90,12 @@ func Test_scorecardParser(t *testing.T) {
 
 func strP(s string) *string {
 	return &s
+}
+
+func toTime(s string) time.Time {
+	timeScanned, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		panic(err)
+	}
+	return timeScanned
 }
