@@ -63,8 +63,7 @@ func Test_scorecardParser(t *testing.T) {
 							{Check: "Token-Permissions", Score: 10},
 							{Check: "Vulnerabilities", Score: 10},
 						},
-						AggregateScore: 8.9,
-						// TODO
+						AggregateScore:   8.9,
 						TimeScanned:      "2022-10-06",
 						ScorecardVersion: "v4.7.0",
 						ScorecardCommit:  "7cd6406aef0b80a819402e631919293d5eb6adcf",
@@ -72,62 +71,6 @@ func Test_scorecardParser(t *testing.T) {
 				},
 			},
 		},
-		/*
-			wantNodes: []assembler.GuacNode{
-				assembler.MetadataNode{
-					MetadataType: "scorecard",
-					ID:           "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
-					Details: map[string]interface{}{
-						"repo":                "git+https://github.com/kubernetes/kubernetes",
-						"commit":              "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
-						"scorecard_version":   "v4.7.0",
-						"scorecard_commit":    "sha1:7cd6406aef0b80a819402e631919293d5eb6adcf",
-						"score":               8.9,
-						"Binary_Artifacts":    10,
-						"CI_Tests":            10,
-						"Code_Review":         7,
-						"Dangerous_Workflow":  10,
-						"License":             10,
-						"Pinned_Dependencies": 2,
-						"Security_Policy":     10,
-						"Token_Permissions":   10,
-						"Vulnerabilities":     10,
-					},
-				},
-				assembler.ArtifactNode{
-					Name:   "git+https://github.com/kubernetes/kubernetes",
-					Digest: "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
-				},
-			},
-			wantEdges: []assembler.GuacEdge{
-				assembler.MetadataForEdge{
-					MetadataNode: assembler.MetadataNode{
-						MetadataType: "scorecard",
-						ID:           "github.com/kubernetes/kubernetes:5835544ca568b757a8ecae5c153f317e5736700e",
-						Details: map[string]interface{}{
-							"repo":                "git+https://github.com/kubernetes/kubernetes",
-							"commit":              "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
-							"scorecard_version":   "v4.7.0",
-							"scorecard_commit":    "sha1:7cd6406aef0b80a819402e631919293d5eb6adcf",
-							"score":               8.9,
-							"Binary_Artifacts":    10,
-							"CI_Tests":            10,
-							"Code_Review":         7,
-							"Dangerous_Workflow":  10,
-							"License":             10,
-							"Pinned_Dependencies": 2,
-							"Security_Policy":     10,
-							"Token_Permissions":   10,
-							"Vulnerabilities":     10,
-						},
-					},
-					ForArtifact: assembler.ArtifactNode{
-						Name:   "git+https://github.com/kubernetes/kubernetes",
-						Digest: "sha1:5835544ca568b757a8ecae5c153f317e5736700e",
-					},
-				},
-			},
-		*/
 		wantErr: false,
 	}}
 	for _, tt := range tests {

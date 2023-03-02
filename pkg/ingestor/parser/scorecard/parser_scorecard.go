@@ -80,52 +80,6 @@ func (p *scorecardParser) GetIdentities(ctx context.Context) []common.TrustInfor
 	return nil
 }
 
-func metadataId(s *sc.JSONScorecardResultV2) string {
-	return fmt.Sprintf("%v:%v", s.Repo.Name, s.Repo.Commit)
-}
-
-func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
-	mnNode := assembler.MetadataNode{
-		MetadataType: "scorecard",
-		ID:           metadataId(s),
-		Details:      map[string]interface{}{},
-	}
-
-	for _, c := range s.Checks {
-		mnNode.Details[strings.ReplaceAll(c.Name, "-", "_")] = c.Score
-	}
-	mnNode.Details["repo"] = sourceUri(s.Repo.Name)
-	mnNode.Details["commit"] = hashToDigest(s.Repo.Commit)
-	mnNode.Details["scorecard_version"] = s.Scorecard.Version
-	mnNode.Details["scorecard_commit"] = hashToDigest(s.Scorecard.Commit)
-	mnNode.Details["score"] = float64(s.AggregateScore)
-
-	return mnNode
-}
-
-func getArtifactNode(s *sc.JSONScorecardResultV2) assembler.ArtifactNode {
-	return assembler.ArtifactNode{
-		Name:   sourceUri(s.Repo.Name),
-		Digest: hashToDigest(s.Repo.Commit),
-	}
-}
-
-func sourceUri(s string) string {
-	return "git+https://" + s
-}
-
-func hashToDigest(h string) string {
-	switch len(h) {
-	case 40:
-		return "sha1:" + h
-	case 64:
-		return "sha256:" + h
-	case 128:
-		return "sha512:" + h
-	}
-	return h
-}
-
 func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
 }
