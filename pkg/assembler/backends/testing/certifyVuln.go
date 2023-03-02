@@ -174,6 +174,8 @@ func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Cer
 				if newPkg == nil {
 					matchOrSkip = false
 				}
+			} else {
+				matchOrSkip = false
 			}
 		}
 
