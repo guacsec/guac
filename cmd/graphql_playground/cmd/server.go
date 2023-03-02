@@ -42,10 +42,10 @@ func startServer() {
 	var topResolver resolvers.Resolver
 	if flags.neo4jBackend {
 		args := neo4j.Neo4jConfig{
-			User:     flags.gdbuser,
-			Pass:     flags.gdbpass,
-			Realm:    flags.realm,
-			DBAddr:   flags.dbAddr,
+			User:   flags.gdbuser,
+			Pass:   flags.gdbpass,
+			Realm:  flags.realm,
+			DBAddr: flags.dbAddr,
 			// TODO(mihaimaruseac): Once all ingestion is done, remove from here
 			TestData: flags.addTestData,
 		}
