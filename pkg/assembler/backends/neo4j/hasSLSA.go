@@ -19,6 +19,7 @@ import (
 	"context"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -149,7 +150,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						}
 						hasSLSA := generateModelHasSLSA(pkg, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
 							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
-							hasSLSANode.Props[origin].(string), hasSLSANode.Props[collector].(string))
+							hasSLSANode.Props[origin].(time.Time), hasSLSANode.Props[collector].(time.Time))
 
 						resultHasSlsaMap[pkg] = &hasSLSA
 					}
@@ -287,7 +288,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						}
 						hasSLSA := generateModelHasSLSA(src, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
 							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
-							hasSLSANode.Props[origin].(string), hasSLSANode.Props[collector].(string))
+							hasSLSANode.Props[origin].(time.Time), hasSLSANode.Props[collector].(time.Time))
 
 						resultHasSlsaMap[src] = &hasSLSA
 					}
@@ -415,7 +416,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						}
 						hasSLSA := generateModelHasSLSA(artifact, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
 							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
-							hasSLSANode.Props[origin].(string), hasSLSANode.Props[collector].(string))
+							hasSLSANode.Props[origin].(time.Time), hasSLSANode.Props[collector].(time.Time))
 
 						resultHasSlsaMap[artifact] = &hasSLSA
 					}
@@ -578,7 +579,7 @@ func setHasSLSAValues(sb *strings.Builder, hasSLSASpec *model.HasSLSASpec, first
 }
 
 func generateModelHasSLSA(subject model.PkgSrcArtObject, builder *model.Builder, slsaPredicate []interface{}, buildType,
-	slsaVersion, startedOn, finishedOn, origin, collector string) model.HasSlsa {
+	slsaVersion, origin, collector string, startedOn, finishedOn time.Time) model.HasSlsa {
 	hasSLSA := model.HasSlsa{
 		Subject:       subject,
 		BuiltBy:       builder,
