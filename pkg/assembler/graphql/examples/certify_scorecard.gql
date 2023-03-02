@@ -1,52 +1,100 @@
-fragment allCertifyScorecard on CertifyScorecard {
-  source {
-    type
-    namespaces {
-      namespace
-      names {
-        name
-        tag
-        commit
-      }
+fragment allSrcTree on Source {
+  type
+  namespaces {
+    namespace
+    names {
+      name
+      tag
+      commit
     }
   }
-  timeScanned
-  aggregateScore
-  checks {
-    check
-    score
-  }
-  scorecardVersion
-  scorecardCommit
-  origin
-  collector
 }
 
-query Q1 {
-  CertifyScorecard(certifyScorecardSpec: {}) {
+fragment allCertifyScorecard on CertifyScorecard {
+  source {
+    ...allSrcTree
+  }
+  scorecard {
+    timeScanned
+    aggregateScore
+    checks {
+      check
+      score
+    }
+    scorecardVersion
+    scorecardCommit
+    origin
+    collector
+  }
+}
+
+query ScorecardQ1 {
+  scorecards(scorecardSpec: {}) {
     ...allCertifyScorecard
   }
 }
 
-query Q2 {
-  CertifyScorecard(certifyScorecardSpec: {origin: "testing backend"}) {
+query ScorecardQ2 {
+  scorecards(scorecardSpec: {origin: "testing backend"}) {
     ...allCertifyScorecard
   }
 }
 
-query Q3 {
-  CertifyScorecard(
-    certifyScorecardSpec: {source: {name: "https://github.com/django/django"}}
+query ScorecardQ3 {
+  scorecards(scorecardSpec: {source: {name: "https://github.com/django/django"}}) {
+    ...allCertifyScorecard
+  }
+}
+
+query ScorecardQ4 {
+  scorecards(
+    scorecardSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
   ) {
     ...allCertifyScorecard
   }
 }
 
-
-query Q4 {
-  CertifyScorecard(
-    certifyScorecardSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
-  ) {
+mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
+  ingestSource(source: $source) {
+    ...allSrcTree
+  }
+  certifyScorecard(source: $source, scorecard: $scorecard) {
     ...allCertifyScorecard
+  }
+}
+
+==== args for mutation ====
+{
+  "source": {
+    "type": "git",
+    "namespace": "github",
+    "name": "github.com/tensorflow/tensorflow",
+    "tag": "v2.12.0"
+  },
+  "scorecard": {
+    "timeScanned": "2023-02-28 15:51:26.960629544 -0800 PST m=+0.002464876",
+    "aggregateScore": 2.9,
+    "checks": [
+      {
+        "check": "Binary_Artifacts",
+        "score": 4
+      },
+      {
+        "check": "Branch_Protection",
+        "score": 3
+      },
+      {
+        "check": "Code_Review",
+        "score": 2
+      },
+      {
+        "check": "Contributors",
+        "score": 1
+      }
+    ],
+    "scorecardVersion": "v4.10.2",
+    "scorecardCommit": "5e6a521",
+    "origin": "testing backend",
+    "collector": "testing backend"
   }
 }
