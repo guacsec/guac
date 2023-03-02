@@ -13,14 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
-
-// This is experimental server only used to test the GraphQL interface during
-// development. Do not use in production!
+package cmd
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -30,36 +27,30 @@ import (
 	testing "github.com/guacsec/guac/pkg/assembler/backends/testing"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 const defaultPort = "8080"
 
-func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
+func startServer() {
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
 
-	backend := os.Getenv("BACKEND")
-	if backend != "testing" {
-		backend = "neo4j"
-	}
-
-	neo4jTest := os.Getenv("TEST")
-	testData := false
-	if neo4jTest == "true" {
-		testData = true
+	if flags.neo4jBackend == flags.inMemoryBackend {
+		fmt.Fprintf(os.Stderr, "Must use either Neo4j or in-memory backend\n")
+		os.Exit(1)
 	}
 
 	var topResolver resolvers.Resolver
-	if backend == "neo4j" {
+	if flags.neo4jBackend {
 		args := neo4j.Neo4jConfig{
-			User:     "neo4j",
-			Pass:     "s3cr3t",
-			Realm:    "neo4j",
-			DBAddr:   "neo4j://localhost:7687",
-			TestData: testData,
+			User:     flags.gdbuser,
+			Pass:     flags.gdbpass,
+			Realm:    flags.realm,
+			DBAddr:   flags.dbAddr,
+			TestData: flags.addTestData,
 		}
+
 		backend, err := neo4j.GetBackend(&args)
 		if err != nil {
 			fmt.Printf("Error creating Neo4J Backend: %v", err)
@@ -84,6 +75,7 @@ func main() {
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	port := flags.playgroundPort
+	logger.Infof("connect to http://localhost:%d/ for GraphQL playground", port)
+	logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
