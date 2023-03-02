@@ -104,40 +104,19 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 				collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
-
-					cveID := &model.CVEId{
-						ID: result.Record().Values[8].(string),
-					}
-					cve := &model.Cve{
-						Year:  result.Record().Values[7].(string),
-						CveID: []*model.CVEId{cveID},
-					}
+					idStr := result.Record().Values[8].(string)
+					yearStr := result.Record().Values[7].(string)
+					cve := generateModelCve(yearStr, idStr)
 
 					certifyVEXStatementNode := dbtype.Node{}
 					if result.Record().Values[1] != nil {
@@ -146,13 +125,9 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := &model.CertifyVEXStatement{
-						Subject:       &pkg,
-						Vulnerability: cve,
-						Justification: certifyVEXStatementNode.Props[justification].(string),
-						Origin:        certifyVEXStatementNode.Props[origin].(string),
-						Collector:     certifyVEXStatementNode.Props[collector].(string),
-					}
+					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, cve, certifyVEXStatementNode.Props[justification].(string),
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
@@ -221,39 +196,17 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 				collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
-
-					ghsaId := &model.GHSAId{
-						ID: result.Record().Values[7].(string),
-					}
-					ghsa := &model.Ghsa{
-						GhsaID: []*model.GHSAId{ghsaId},
-					}
+					idStr := result.Record().Values[7].(string)
+					ghsa := generateModelGhsa(idStr)
 
 					certifyVEXStatementNode := dbtype.Node{}
 					if result.Record().Values[1] != nil {
@@ -262,13 +215,9 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := &model.CertifyVEXStatement{
-						Subject:       &pkg,
-						Vulnerability: ghsa,
-						Justification: certifyVEXStatementNode.Props[justification].(string),
-						Origin:        certifyVEXStatementNode.Props[origin].(string),
-						Collector:     certifyVEXStatementNode.Props[collector].(string),
-					}
+					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, ghsa, certifyVEXStatementNode.Props[justification].(string),
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
@@ -314,18 +263,13 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 				collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
 				for result.Next() {
-					artifact := model.Artifact{
-						Algorithm: result.Record().Values[0].(string),
-						Digest:    result.Record().Values[1].(string),
-					}
+					algorithm := result.Record().Values[0].(string)
+					digest := result.Record().Values[1].(string)
+					artifact := generateModelArtifact(algorithm, digest)
 
-					cveID := &model.CVEId{
-						ID: result.Record().Values[4].(string),
-					}
-					cve := &model.Cve{
-						Year:  result.Record().Values[3].(string),
-						CveID: []*model.CVEId{cveID},
-					}
+					idStr := result.Record().Values[4].(string)
+					yearStr := result.Record().Values[3].(string)
+					cve := generateModelCve(yearStr, idStr)
 
 					certifyVEXStatementNode := dbtype.Node{}
 					if result.Record().Values[1] != nil {
@@ -334,13 +278,9 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := &model.CertifyVEXStatement{
-						Subject:       &artifact,
-						Vulnerability: cve,
-						Justification: certifyVEXStatementNode.Props[justification].(string),
-						Origin:        certifyVEXStatementNode.Props[origin].(string),
-						Collector:     certifyVEXStatementNode.Props[collector].(string),
-					}
+					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, cve, certifyVEXStatementNode.Props[justification].(string),
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
@@ -387,17 +327,12 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 				collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
 				for result.Next() {
-					artifact := model.Artifact{
-						Algorithm: result.Record().Values[0].(string),
-						Digest:    result.Record().Values[1].(string),
-					}
+					algorithm := result.Record().Values[0].(string)
+					digest := result.Record().Values[1].(string)
+					artifact := generateModelArtifact(algorithm, digest)
 
-					ghsaId := &model.GHSAId{
-						ID: result.Record().Values[3].(string),
-					}
-					ghsa := &model.Ghsa{
-						GhsaID: []*model.GHSAId{ghsaId},
-					}
+					idStr := result.Record().Values[3].(string)
+					ghsa := generateModelGhsa(idStr)
 
 					certifyVEXStatementNode := dbtype.Node{}
 					if result.Record().Values[1] != nil {
@@ -406,13 +341,9 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := &model.CertifyVEXStatement{
-						Subject:       &artifact,
-						Vulnerability: ghsa,
-						Justification: certifyVEXStatementNode.Props[justification].(string),
-						Origin:        certifyVEXStatementNode.Props[origin].(string),
-						Collector:     certifyVEXStatementNode.Props[collector].(string),
-					}
+					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, ghsa, certifyVEXStatementNode.Props[justification].(string),
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
@@ -450,4 +381,15 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 		*firstMatch = false
 		queryValues[collector] = certifyVEXStatementSpec.Collector
 	}
+}
+
+func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveGhsaObject, justification, origin, collector string) *model.CertifyVEXStatement {
+	certifyVEXStatement := model.CertifyVEXStatement{
+		Subject:       subject,
+		Vulnerability: vuln,
+		Justification: justification,
+		Origin:        origin,
+		Collector:     collector,
+	}
+	return &certifyVEXStatement
 }

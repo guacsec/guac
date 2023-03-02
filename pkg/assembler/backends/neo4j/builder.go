@@ -68,9 +68,8 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 
 			builders := []*model.Builder{}
 			for result.Next() {
-				builder := &model.Builder{
-					URI: result.Record().Values[0].(string),
-				}
+				uri := result.Record().Values[0].(string)
+				builder := generateModelBuilder(uri)
 				builders = append(builders, builder)
 			}
 			if err = result.Err(); err != nil {
@@ -106,15 +105,21 @@ func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderI
 			if err != nil {
 				return nil, err
 			}
-
 			uri := record.Values[0].(string)
-			builder := model.Builder{URI: uri}
+			builder := generateModelBuilder(uri)
 
-			return &builder, nil
+			return builder, nil
 		})
 	if err != nil {
 		return nil, err
 	}
 
 	return result.(*model.Builder), nil
+}
+
+func generateModelBuilder(uri string) *model.Builder {
+	builder := model.Builder{
+		URI: uri,
+	}
+	return &builder
 }

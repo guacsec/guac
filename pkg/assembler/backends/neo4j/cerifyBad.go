@@ -84,32 +84,15 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 				collectedCertifyBad := []*model.CertifyBad{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
 					certifyBadNode := dbtype.Node{}
 					if result.Record().Values[6] != nil {
 						certifyBadNode = result.Record().Values[6].(dbtype.Node)
@@ -117,12 +100,8 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 						return nil, gqlerror.Errorf("certifyBad Node not found in neo4j")
 					}
 
-					certifyBad := &model.CertifyBad{
-						Subject:       &pkg,
-						Justification: certifyBadNode.Props[justification].(string),
-						Origin:        certifyBadNode.Props[origin].(string),
-						Collector:     certifyBadNode.Props[collector].(string),
-					}
+					certifyBad := generateModelCertifyBad(pkg, certifyBadNode.Props[justification].(string), certifyBadNode.Props[origin].(string), certifyBadNode.Props[collector].(string))
+
 					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
 				if err = result.Err(); err != nil {
@@ -161,32 +140,14 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 				collectedCertifyBad := []*model.CertifyBad{}
 
 				for result.Next() {
-					commitString := ""
-					if result.Record().Values[4] != nil {
-						commitString = result.Record().Values[4].(string)
-					}
-					tagString := ""
-					if result.Record().Values[3] != nil {
-						tagString = result.Record().Values[3].(string)
-					}
-					nameString := result.Record().Values[2].(string)
-					namespaceString := result.Record().Values[1].(string)
-					typeString := result.Record().Values[0].(string)
+					tag := result.Record().Values[3]
+					commit := result.Record().Values[4]
+					nameStr := result.Record().Values[2].(string)
+					namespaceStr := result.Record().Values[1].(string)
+					srcType := result.Record().Values[0].(string)
 
-					srcName := &model.SourceName{
-						Name:   nameString,
-						Tag:    &tagString,
-						Commit: &commitString,
-					}
+					src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
-					srcNamespace := &model.SourceNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.SourceName{srcName},
-					}
-					src := model.Source{
-						Type:       typeString,
-						Namespaces: []*model.SourceNamespace{srcNamespace},
-					}
 					certifyBadNode := dbtype.Node{}
 					if result.Record().Values[5] != nil {
 						certifyBadNode = result.Record().Values[5].(dbtype.Node)
@@ -194,12 +155,8 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 						return nil, gqlerror.Errorf("certifyBad Node not found in neo4j")
 					}
 
-					certifyBad := &model.CertifyBad{
-						Subject:       &src,
-						Justification: certifyBadNode.Props[justification].(string),
-						Origin:        certifyBadNode.Props[origin].(string),
-						Collector:     certifyBadNode.Props[collector].(string),
-					}
+					certifyBad := generateModelCertifyBad(src, certifyBadNode.Props[justification].(string), certifyBadNode.Props[origin].(string), certifyBadNode.Props[collector].(string))
+
 					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
 				if err = result.Err(); err != nil {
@@ -236,10 +193,10 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 				collectedCertifyBad := []*model.CertifyBad{}
 
 				for result.Next() {
-					artifact := model.Artifact{
-						Algorithm: result.Record().Values[0].(string),
-						Digest:    result.Record().Values[1].(string),
-					}
+					algorithm := result.Record().Values[0].(string)
+					digest := result.Record().Values[1].(string)
+					artifact := generateModelArtifact(algorithm, digest)
+
 					certifyBadNode := dbtype.Node{}
 					if result.Record().Values[2] != nil {
 						certifyBadNode = result.Record().Values[2].(dbtype.Node)
@@ -247,12 +204,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 						return nil, gqlerror.Errorf("certifyBad Node not found in neo4j")
 					}
 
-					certifyBad := &model.CertifyBad{
-						Subject:       &artifact,
-						Justification: certifyBadNode.Props[justification].(string),
-						Origin:        certifyBadNode.Props[origin].(string),
-						Collector:     certifyBadNode.Props[collector].(string),
-					}
+					certifyBad := generateModelCertifyBad(artifact, certifyBadNode.Props[justification].(string), certifyBadNode.Props[origin].(string), certifyBadNode.Props[collector].(string))
 					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
 				if err = result.Err(); err != nil {
@@ -308,4 +260,14 @@ func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSp
 		*firstMatch = false
 		queryValues["collector"] = certifyBadSpec.Collector
 	}
+}
+
+func generateModelCertifyBad(subject model.PkgSrcArtObject, justification, origin, collector string) *model.CertifyBad {
+	certifyBad := model.CertifyBad{
+		Subject:       subject,
+		Justification: justification,
+		Origin:        origin,
+		Collector:     collector,
+	}
+	return &certifyBad
 }

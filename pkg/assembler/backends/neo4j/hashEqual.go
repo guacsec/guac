@@ -87,15 +87,13 @@ func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEq
 
 			for result.Next() {
 
-				artifact := model.Artifact{
-					Algorithm: result.Record().Values[0].(string),
-					Digest:    result.Record().Values[1].(string),
-				}
+				algorithm := result.Record().Values[0].(string)
+				digest := result.Record().Values[1].(string)
+				artifact := generateModelArtifact(algorithm, digest)
 
-				depArtifact := model.Artifact{
-					Algorithm: result.Record().Values[3].(string),
-					Digest:    result.Record().Values[4].(string),
-				}
+				algorithm = result.Record().Values[3].(string)
+				digest = result.Record().Values[4].(string)
+				depArtifact := generateModelArtifact(algorithm, digest)
 
 				hashEqualNode := dbtype.Node{}
 				if result.Record().Values[2] != nil {
@@ -105,7 +103,7 @@ func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEq
 				}
 
 				hashEqual := &model.HashEqual{
-					Artifacts:     []*model.Artifact{&artifact, &depArtifact},
+					Artifacts:     []*model.Artifact{artifact, depArtifact},
 					Justification: hashEqualNode.Props[justification].(string),
 					Origin:        hashEqualNode.Props[origin].(string),
 					Collector:     hashEqualNode.Props[collector].(string),

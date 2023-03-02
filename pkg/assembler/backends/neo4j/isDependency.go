@@ -99,51 +99,20 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 			collectedIsDependency := []*model.IsDependency{}
 
 			for result.Next() {
-
-				pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-				subPathString := result.Record().Values[4].(string)
-				versionString := result.Record().Values[3].(string)
+				pkgQualifiers := result.Record().Values[5]
+				subPath := result.Record().Values[4]
+				version := result.Record().Values[3]
 				nameString := result.Record().Values[2].(string)
 				namespaceString := result.Record().Values[1].(string)
 				typeString := result.Record().Values[0].(string)
 
-				version := &model.PackageVersion{
-					Version:    versionString,
-					Subpath:    subPathString,
-					Qualifiers: pkgQualifiers,
-				}
-
-				name := &model.PackageName{
-					Name:     nameString,
-					Versions: []*model.PackageVersion{version},
-				}
-
-				namespace := &model.PackageNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.PackageName{name},
-				}
-				pkg := model.Package{
-					Type:       typeString,
-					Namespaces: []*model.PackageNamespace{namespace},
-				}
+				pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
 				nameString = result.Record().Values[9].(string)
 				namespaceString = result.Record().Values[8].(string)
 				typeString = result.Record().Values[7].(string)
 
-				name = &model.PackageName{
-					Name:     nameString,
-					Versions: []*model.PackageVersion{version},
-				}
-
-				namespace = &model.PackageNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.PackageName{name},
-				}
-				depPkg := model.Package{
-					Type:       typeString,
-					Namespaces: []*model.PackageNamespace{namespace},
-				}
+				depPkg := generateModelPackage(typeString, namespaceString, nameString, nil, nil, nil)
 
 				isDependencyNode := dbtype.Node{}
 				if result.Record().Values[6] != nil {
@@ -153,8 +122,8 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				}
 
 				isDependency := &model.IsDependency{
-					Package:          &pkg,
-					DependentPackage: &depPkg,
+					Package:          pkg,
+					DependentPackage: depPkg,
 					VersionRange:     isDependencyNode.Props[versionRange].(string),
 					Origin:           isDependencyNode.Props[origin].(string),
 					Collector:        isDependencyNode.Props[collector].(string),

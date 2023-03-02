@@ -87,32 +87,15 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 				collectedHasSBOM := []*model.HasSbom{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
 					hasSBOMNode := dbtype.Node{}
 					if result.Record().Values[6] != nil {
 						hasSBOMNode = result.Record().Values[6].(dbtype.Node)
@@ -120,12 +103,8 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 						return nil, gqlerror.Errorf("hasSBOM Node not found in neo4j")
 					}
 
-					hasSBOM := &model.HasSbom{
-						Subject:   &pkg,
-						URI:       hasSBOMNode.Props[uri].(string),
-						Origin:    hasSBOMNode.Props[origin].(string),
-						Collector: hasSBOMNode.Props[collector].(string),
-					}
+					hasSBOM := generateModelHasSBOM(pkg, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
+
 					collectedHasSBOM = append(collectedHasSBOM, hasSBOM)
 				}
 				if err = result.Err(); err != nil {
@@ -165,32 +144,14 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 				collectedHasSBOM := []*model.HasSbom{}
 
 				for result.Next() {
-					commitString := ""
-					if result.Record().Values[4] != nil {
-						commitString = result.Record().Values[4].(string)
-					}
-					tagString := ""
-					if result.Record().Values[3] != nil {
-						tagString = result.Record().Values[3].(string)
-					}
-					nameString := result.Record().Values[2].(string)
-					namespaceString := result.Record().Values[1].(string)
-					typeString := result.Record().Values[0].(string)
+					tag := result.Record().Values[3]
+					commit := result.Record().Values[4]
+					nameStr := result.Record().Values[2].(string)
+					namespaceStr := result.Record().Values[1].(string)
+					srcType := result.Record().Values[0].(string)
 
-					srcName := &model.SourceName{
-						Name:   nameString,
-						Tag:    &tagString,
-						Commit: &commitString,
-					}
+					src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
-					srcNamespace := &model.SourceNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.SourceName{srcName},
-					}
-					src := model.Source{
-						Type:       typeString,
-						Namespaces: []*model.SourceNamespace{srcNamespace},
-					}
 					hasSBOMNode := dbtype.Node{}
 					if result.Record().Values[5] != nil {
 						hasSBOMNode = result.Record().Values[5].(dbtype.Node)
@@ -198,12 +159,8 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 						return nil, gqlerror.Errorf("hasSBOM Node not found in neo4j")
 					}
 
-					hasSBOM := &model.HasSbom{
-						Subject:   &src,
-						URI:       hasSBOMNode.Props[uri].(string),
-						Origin:    hasSBOMNode.Props[origin].(string),
-						Collector: hasSBOMNode.Props[collector].(string),
-					}
+					hasSBOM := generateModelHasSBOM(src, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
+
 					collectedHasSBOM = append(collectedHasSBOM, hasSBOM)
 				}
 				if err = result.Err(); err != nil {
@@ -237,4 +194,14 @@ func setHasSBOMValues(sb *strings.Builder, hasSBOMSpec *model.HasSBOMSpec, first
 		*firstMatch = false
 		queryValues["collector"] = hasSBOMSpec.Collector
 	}
+}
+
+func generateModelHasSBOM(subject model.PkgSrcObject, uri, origin, collector string) *model.HasSbom {
+	hasSBOM := model.HasSbom{
+		Subject:   subject,
+		URI:       uri,
+		Origin:    origin,
+		Collector: collector,
+	}
+	return &hasSBOM
 }

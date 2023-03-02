@@ -82,60 +82,22 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 			collectedHasSourceAt := []*model.HasSourceAt{}
 
 			for result.Next() {
-
-				pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-				subPathString := result.Record().Values[4].(string)
-				versionString := result.Record().Values[3].(string)
+				pkgQualifiers := result.Record().Values[5]
+				subPath := result.Record().Values[4]
+				version := result.Record().Values[3]
 				nameString := result.Record().Values[2].(string)
 				namespaceString := result.Record().Values[1].(string)
 				typeString := result.Record().Values[0].(string)
 
-				version := &model.PackageVersion{
-					Version:    versionString,
-					Subpath:    subPathString,
-					Qualifiers: pkgQualifiers,
-				}
+				pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-				name := &model.PackageName{
-					Name:     nameString,
-					Versions: []*model.PackageVersion{version},
-				}
+				tag := result.Record().Values[10]
+				commit := result.Record().Values[11]
+				nameStr := result.Record().Values[9].(string)
+				namespaceStr := result.Record().Values[8].(string)
+				srcType := result.Record().Values[7].(string)
 
-				namespace := &model.PackageNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.PackageName{name},
-				}
-				pkg := model.Package{
-					Type:       typeString,
-					Namespaces: []*model.PackageNamespace{namespace},
-				}
-
-				commitString := ""
-				if result.Record().Values[11] != nil {
-					commitString = result.Record().Values[11].(string)
-				}
-				tagString := ""
-				if result.Record().Values[10] != nil {
-					tagString = result.Record().Values[10].(string)
-				}
-				nameString = result.Record().Values[9].(string)
-				namespaceString = result.Record().Values[8].(string)
-				typeString = result.Record().Values[7].(string)
-
-				srcName := &model.SourceName{
-					Name:   nameString,
-					Tag:    &tagString,
-					Commit: &commitString,
-				}
-
-				srcNamespace := &model.SourceNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.SourceName{srcName},
-				}
-				src := model.Source{
-					Type:       typeString,
-					Namespaces: []*model.SourceNamespace{srcNamespace},
-				}
+				src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
 				hasSourceAtNode := dbtype.Node{}
 				if result.Record().Values[6] != nil {
@@ -145,8 +107,8 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 				}
 
 				hasSourceAt := &model.HasSourceAt{
-					Package:       &pkg,
-					Source:        &src,
+					Package:       pkg,
+					Source:        src,
 					KnownSince:    hasSourceAtNode.Props[knownSince].(string),
 					Justification: hasSourceAtNode.Props[justification].(string),
 					Origin:        hasSourceAtNode.Props[origin].(string),
