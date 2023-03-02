@@ -10,3 +10,8 @@ natsaddr: nats://nats:4222
 # collect-sub
 csub-addr: guac-collectsub:2782
 csub-listen-port: 2782
+
+# graphql
+gql-backend: neo4j
+gql-port: 8080
+gql-debug: false

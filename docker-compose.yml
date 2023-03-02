@@ -60,6 +60,19 @@ services:
     volumes:
       - ./container_files/guac:/guac
 
+  guac-graphql:
+    image: "local-organic-guac"
+    command: "/opt/guac/guacone gql-server"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      service-health-1:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./container_files/guac:/guac
+
   # GUAC ingestor and oci collector are dependent on the collectsub service to be up
   service-health-2:
     image: "local-healthcheck"
@@ -72,6 +85,9 @@ services:
         echo "checking-for-services";
         until nc -z guac-collectsub 2782 > /dev/null 2>&1; do sleep 5; done;
         echo "guac collectsub up";
+        until curl -I http://guac-graphql:8080/query > /dev/null 2>&1; do sleep 5; done;
+        echo "graphql up";
+
     depends_on:
       service-health-1:
         condition: service_completed_successfully
