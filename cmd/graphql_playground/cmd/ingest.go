@@ -63,7 +63,7 @@ func ingestData(port int) {
 		Origin:           "Demo ingestion",
 		Collector:        "Demo ingestion",
 	}
-	resp, err := generated.Scorecard(context.Background(), gqlclient,
+	resp, err := model.Scorecard(context.Background(), gqlclient,
 		source, scorecard)
 	if err != nil {
 		// TODO(mihaimaruseac): Panic or just error and continue?
