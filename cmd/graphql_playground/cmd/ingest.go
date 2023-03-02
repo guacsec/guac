@@ -43,7 +43,7 @@ func ingestData(port int) {
 	logger.Infof("Finished ingesting test data into backend server")
 }
 
-func ingestScorecards(ctx Context, client graphql.Client) {
+func ingestScorecards(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
 	source := model.SourceInputSpec{
