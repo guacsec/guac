@@ -39,7 +39,11 @@ func ingestData(port int) {
 	gqlclient := graphql.NewClient(url, &httpClient)
 
 	logger.Infof("Ingesting test data into backend server")
+	ingestScorecards(gqlclient)
+	logger.Infof("Finished ingesting test data into backend server")
+}
 
+func ingestScorecards(client graphql.Client) {
 	// Ingest one demo Scorecards
 	// TODO(mihaimaruseac): Refactor as we migrate to ingest more data this way
 	source := model.SourceInputSpec{
@@ -63,13 +67,10 @@ func ingestData(port int) {
 		Origin:           "Demo ingestion",
 		Collector:        "Demo ingestion",
 	}
-	resp, err := model.Scorecard(context.Background(), gqlclient,
-		source, scorecard)
+	resp, err := model.Scorecard(context.Background(), client, source, scorecard)
 	if err != nil {
 		// TODO(mihaimaruseac): Panic or just error and continue?
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
 	fmt.Printf("Response is |%v|\n", resp)
-
-	logger.Infof("Finished ingesting test data into backend server")
 }
