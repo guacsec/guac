@@ -39,13 +39,13 @@ func ingestData(port int) {
 	gqlclient := graphql.NewClient(url, &httpClient)
 
 	logger.Infof("Ingesting test data into backend server")
-	ingestScorecards(gqlclient)
+	ingestScorecards(ctx, gqlclient)
 	logger.Infof("Finished ingesting test data into backend server")
 }
 
-func ingestScorecards(client graphql.Client) {
-	// Ingest one demo Scorecards
-	// TODO(mihaimaruseac): Refactor as we migrate to ingest more data this way
+func ingestScorecards(ctx Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
 	source := model.SourceInputSpec{
 		Type:      "git",
 		Namespace: "github",
