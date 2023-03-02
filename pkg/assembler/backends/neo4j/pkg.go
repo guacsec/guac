@@ -631,33 +631,14 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 				return nil, err
 			}
 
-			qualifiers := getCollectedPackageQualifiers(record.Values[5].([]interface{}))
-			subPathStr := record.Values[4].(string)
-			versionStr := record.Values[3].(string)
-			version := &model.PackageVersion{
-				Version:    versionStr,
-				Subpath:    subPathStr,
-				Qualifiers: qualifiers,
-			}
-
+			qualifiersList := record.Values[5]
+			subPath := record.Values[4]
+			version := record.Values[3]
 			nameStr := record.Values[2].(string)
-			name := &model.PackageName{
-				Name:     nameStr,
-				Versions: []*model.PackageVersion{version},
-			}
-
 			namespaceStr := record.Values[1].(string)
-			namespace := &model.PackageNamespace{
-				Namespace: namespaceStr,
-				Names:     []*model.PackageName{name},
-			}
-
 			pkgType := record.Values[0].(string)
-			pkg := model.Package{
-				Type:       pkgType,
-				Namespaces: []*model.PackageNamespace{namespace},
-			}
 
+			pkg := generateModelPackage(pkgType, namespaceStr, nameStr, version, subPath, qualifiersList)
 			return &pkg, nil
 		})
 	if err != nil {
@@ -775,4 +756,37 @@ func setPkgMatchValues(sb *strings.Builder, pkg *model.PkgSpec, objectPkg bool, 
 			*firstMatch = false
 		}
 	}
+}
+
+func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, subPathValue, qualifiersValue interface{}) model.Package {
+	var version *model.PackageVersion = nil
+	if versionValue != nil && subPathValue != nil && qualifiersValue != nil {
+		qualifiersList := qualifiersValue.([]interface{})
+		subPathString := subPathValue.(string)
+		versionString := versionValue.(string)
+		qualifiers := getCollectedPackageQualifiers(qualifiersList)
+		version = &model.PackageVersion{
+			Version:    versionString,
+			Subpath:    subPathString,
+			Qualifiers: qualifiers,
+		}
+	}
+
+	versions := []*model.PackageVersion{}
+	if version != nil {
+		versions = append(versions, version)
+	}
+	name := &model.PackageName{
+		Name:     nameStr,
+		Versions: versions,
+	}
+	namespace := &model.PackageNamespace{
+		Namespace: namespaceStr,
+		Names:     []*model.PackageName{name},
+	}
+	pkg := model.Package{
+		Type:       pkgType,
+		Namespaces: []*model.PackageNamespace{namespace},
+	}
+	return pkg
 }

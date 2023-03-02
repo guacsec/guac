@@ -174,16 +174,21 @@ RETURN osvID.id`
 			}
 
 			id := record.Values[0].(string)
-			osvID := &model.OSVId{ID: id}
-			osv := &model.Osv{
-				OsvID: []*model.OSVId{osvID},
-			}
+			osv := generateModelOsv(id)
 
-			return osv, nil
+			return &osv, nil
 		})
 	if err != nil {
 		return nil, err
 	}
 
 	return result.(*model.Osv), nil
+}
+
+func generateModelOsv(id string) model.Osv {
+	osvID := &model.OSVId{ID: id}
+	osv := model.Osv{
+		OsvID: []*model.OSVId{osvID},
+	}
+	return osv
 }

@@ -88,37 +88,18 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 				collectedIsOccurrence := []*model.IsOccurrence{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
-
-					artifact := model.Artifact{
-						Algorithm: result.Record().Values[7].(string),
-						Digest:    result.Record().Values[8].(string),
-					}
+					algorithm := result.Record().Values[7].(string)
+					digest := result.Record().Values[8].(string)
+					artifact := generateModelArtifact(algorithm, digest)
 
 					isOccurrenceNode := dbtype.Node{}
 					if result.Record().Values[6] != nil {
@@ -127,14 +108,10 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 						return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
 					}
 
-					isOccurrence := &model.IsOccurrence{
-						Subject:            &pkg,
-						OccurrenceArtifact: &artifact,
-						Justification:      isOccurrenceNode.Props[justification].(string),
-						Origin:             isOccurrenceNode.Props[origin].(string),
-						Collector:          isOccurrenceNode.Props[collector].(string),
-					}
-					collectedIsOccurrence = append(collectedIsOccurrence, isOccurrence)
+					isOccurrence := generateModelIsOccurrence(pkg, &artifact, isOccurrenceNode.Props[justification].(string),
+						isOccurrenceNode.Props[origin].(string), isOccurrenceNode.Props[collector].(string))
+
+					collectedIsOccurrence = append(collectedIsOccurrence, &isOccurrence)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -173,37 +150,16 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 				collectedIsOccurrence := []*model.IsOccurrence{}
 
 				for result.Next() {
-					commitString := ""
-					if result.Record().Values[4] != nil {
-						commitString = result.Record().Values[4].(string)
-					}
-					tagString := ""
-					if result.Record().Values[3] != nil {
-						tagString = result.Record().Values[3].(string)
-					}
-					nameString := result.Record().Values[2].(string)
-					namespaceString := result.Record().Values[1].(string)
-					typeString := result.Record().Values[0].(string)
+					tag := result.Record().Values[3]
+					commit := result.Record().Values[4]
+					nameStr := result.Record().Values[2].(string)
+					namespaceStr := result.Record().Values[1].(string)
+					srcType := result.Record().Values[0].(string)
+					src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
-					srcName := &model.SourceName{
-						Name:   nameString,
-						Tag:    &tagString,
-						Commit: &commitString,
-					}
-
-					srcNamespace := &model.SourceNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.SourceName{srcName},
-					}
-					src := model.Source{
-						Type:       typeString,
-						Namespaces: []*model.SourceNamespace{srcNamespace},
-					}
-
-					artifact := model.Artifact{
-						Algorithm: result.Record().Values[6].(string),
-						Digest:    result.Record().Values[7].(string),
-					}
+					algorithm := result.Record().Values[6].(string)
+					digest := result.Record().Values[7].(string)
+					artifact := generateModelArtifact(algorithm, digest)
 
 					isOccurrenceNode := dbtype.Node{}
 					if result.Record().Values[5] != nil {
@@ -212,14 +168,10 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 						return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
 					}
 
-					isOccurrence := &model.IsOccurrence{
-						Subject:            &src,
-						OccurrenceArtifact: &artifact,
-						Justification:      isOccurrenceNode.Props[justification].(string),
-						Origin:             isOccurrenceNode.Props[origin].(string),
-						Collector:          isOccurrenceNode.Props[collector].(string),
-					}
-					collectedIsOccurrence = append(collectedIsOccurrence, isOccurrence)
+					isOccurrence := generateModelIsOccurrence(src, &artifact, isOccurrenceNode.Props[justification].(string),
+						isOccurrenceNode.Props[origin].(string), isOccurrenceNode.Props[collector].(string))
+
+					collectedIsOccurrence = append(collectedIsOccurrence, &isOccurrence)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -251,4 +203,15 @@ func setIsOccurrenceValues(sb *strings.Builder, isOccurrenceSpec *model.IsOccurr
 		*firstMatch = false
 		queryValues["collector"] = isOccurrenceSpec.Collector
 	}
+}
+
+func generateModelIsOccurrence(subject model.PkgSrcObject, artifact *model.Artifact, justification, origin, collector string) model.IsOccurrence {
+	isOccurrence := model.IsOccurrence{
+		Subject:            subject,
+		OccurrenceArtifact: artifact,
+		Justification:      justification,
+		Origin:             origin,
+		Collector:          collector,
+	}
+	return isOccurrence
 }

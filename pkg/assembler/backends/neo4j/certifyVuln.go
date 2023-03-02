@@ -101,40 +101,18 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 				collectedCertifyVuln := []*model.CertifyVuln{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
-
-					cveID := &model.CVEId{
-						ID: result.Record().Values[8].(string),
-					}
-					cve := &model.Cve{
-						Year:  result.Record().Values[7].(string),
-						CveID: []*model.CVEId{cveID},
-					}
+					idStr := result.Record().Values[8].(string)
+					yearStr := result.Record().Values[7].(string)
+					cve := generateModelCve(yearStr, idStr)
 
 					certifyVulnNode := dbtype.Node{}
 					if result.Record().Values[1] != nil {
@@ -143,18 +121,11 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 						return nil, gqlerror.Errorf("certifyVuln Node not found in neo4j")
 					}
 
-					certifyVuln := &model.CertifyVuln{
-						Package:        &pkg,
-						Vulnerability:  cve,
-						TimeScanned:    certifyVulnNode.Props[timeScanned].(time.Time),
-						DbURI:          certifyVulnNode.Props[dbUri].(string),
-						DbVersion:      certifyVulnNode.Props[dbVersion].(string),
-						ScannerURI:     certifyVulnNode.Props[scannerUri].(string),
-						ScannerVersion: certifyVulnNode.Props[scannerVersion].(string),
-						Origin:         certifyVulnNode.Props[origin].(string),
-						Collector:      certifyVulnNode.Props[collector].(string),
-					}
-					collectedCertifyVuln = append(collectedCertifyVuln, certifyVuln)
+					certifyVuln := generateModelCertifyVuln(&pkg, cve, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
+						certifyVulnNode.Props[dbVersion].(string), certifyVulnNode.Props[scannerUri].(string), certifyVulnNode.Props[scannerVersion].(string),
+						certifyVulnNode.Props[origin].(string), certifyVulnNode.Props[collector].(string))
+
+					collectedCertifyVuln = append(collectedCertifyVuln, &certifyVuln)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -221,39 +192,17 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 				collectedCertifyVuln := []*model.CertifyVuln{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
-
-					ghsaId := &model.GHSAId{
-						ID: result.Record().Values[7].(string),
-					}
-					ghsa := &model.Ghsa{
-						GhsaID: []*model.GHSAId{ghsaId},
-					}
+					idStr := result.Record().Values[7].(string)
+					ghsa := generateModelGhsa(idStr)
 
 					certifyVulnNode := dbtype.Node{}
 					if result.Record().Values[1] != nil {
@@ -262,18 +211,11 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 						return nil, gqlerror.Errorf("certifyVuln Node not found in neo4j")
 					}
 
-					certifyVuln := &model.CertifyVuln{
-						Package:        &pkg,
-						Vulnerability:  ghsa,
-						TimeScanned:    certifyVulnNode.Props[timeScanned].(time.Time),
-						DbURI:          certifyVulnNode.Props[dbUri].(string),
-						DbVersion:      certifyVulnNode.Props[dbVersion].(string),
-						ScannerURI:     certifyVulnNode.Props[scannerUri].(string),
-						ScannerVersion: certifyVulnNode.Props[scannerVersion].(string),
-						Origin:         certifyVulnNode.Props[origin].(string),
-						Collector:      certifyVulnNode.Props[collector].(string),
-					}
-					collectedCertifyVuln = append(collectedCertifyVuln, certifyVuln)
+					certifyVuln := generateModelCertifyVuln(&pkg, ghsa, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
+						certifyVulnNode.Props[dbVersion].(string), certifyVulnNode.Props[scannerUri].(string), certifyVulnNode.Props[scannerVersion].(string),
+						certifyVulnNode.Props[origin].(string), certifyVulnNode.Props[collector].(string))
+
+					collectedCertifyVuln = append(collectedCertifyVuln, &certifyVuln)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -341,39 +283,17 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 				collectedCertifyVuln := []*model.CertifyVuln{}
 
 				for result.Next() {
-					pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-					subPathString := result.Record().Values[4].(string)
-					versionString := result.Record().Values[3].(string)
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					version := &model.PackageVersion{
-						Version:    versionString,
-						Subpath:    subPathString,
-						Qualifiers: pkgQualifiers,
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: []*model.PackageVersion{version},
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
-
-					osvId := &model.OSVId{
-						ID: result.Record().Values[7].(string),
-					}
-					osv := &model.Osv{
-						OsvID: []*model.OSVId{osvId},
-					}
+					id := result.Record().Values[7].(string)
+					osv := generateModelOsv(id)
 
 					certifyVulnNode := dbtype.Node{}
 					if result.Record().Values[1] != nil {
@@ -382,18 +302,11 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 						return nil, gqlerror.Errorf("certifyVuln Node not found in neo4j")
 					}
 
-					certifyVuln := &model.CertifyVuln{
-						Package:        &pkg,
-						Vulnerability:  osv,
-						TimeScanned:    certifyVulnNode.Props[timeScanned].(time.Time),
-						DbURI:          certifyVulnNode.Props[dbUri].(string),
-						DbVersion:      certifyVulnNode.Props[dbVersion].(string),
-						ScannerURI:     certifyVulnNode.Props[scannerUri].(string),
-						ScannerVersion: certifyVulnNode.Props[scannerVersion].(string),
-						Origin:         certifyVulnNode.Props[origin].(string),
-						Collector:      certifyVulnNode.Props[collector].(string),
-					}
-					collectedCertifyVuln = append(collectedCertifyVuln, certifyVuln)
+					certifyVuln := generateModelCertifyVuln(&pkg, osv, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
+						certifyVulnNode.Props[dbVersion].(string), certifyVulnNode.Props[scannerUri].(string), certifyVulnNode.Props[scannerVersion].(string),
+						certifyVulnNode.Props[origin].(string), certifyVulnNode.Props[collector].(string))
+
+					collectedCertifyVuln = append(collectedCertifyVuln, &certifyVuln)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -466,4 +379,21 @@ func setCertifyVulnValues(sb *strings.Builder, certifyVulnSpec *model.CertifyVul
 		*firstMatch = false
 		queryValues[collector] = certifyVulnSpec.Collector
 	}
+}
+
+func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveGhsaObject, timeScanned time.Time, dbUri, dbVersion, scannerUri,
+	scannerVersion, origin, collector string) model.CertifyVuln {
+
+	certifyVuln := model.CertifyVuln{
+		Package:        pkg,
+		Vulnerability:  vuln,
+		TimeScanned:    timeScanned,
+		DbURI:          dbUri,
+		DbVersion:      dbVersion,
+		ScannerURI:     scannerUri,
+		ScannerVersion: scannerVersion,
+		Origin:         origin,
+		Collector:      collector,
+	}
+	return certifyVuln
 }

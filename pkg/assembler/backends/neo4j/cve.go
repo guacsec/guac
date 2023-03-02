@@ -292,21 +292,24 @@ RETURN cveYear.year, cveID.id`
 				return nil, err
 			}
 
-			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
 			idStr := record.Values[1].(string)
-			id := &model.CVEId{ID: idStr}
-
 			yearStr := record.Values[0].(string)
-			src := model.Cve{
-				Year:  yearStr,
-				CveID: []*model.CVEId{id},
-			}
+			cve := generateModelCve(yearStr, idStr)
 
-			return &src, nil
+			return &cve, nil
 		})
 	if err != nil {
 		return nil, err
 	}
 
 	return result.(*model.Cve), nil
+}
+
+func generateModelCve(yearStr, idStr string) model.Cve {
+	id := &model.CVEId{ID: idStr}
+	cve := model.Cve{
+		Year:  yearStr,
+		CveID: []*model.CVEId{id},
+	}
+	return cve
 }

@@ -62,35 +62,13 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 			collectedCertifyScorecard := []*model.CertifyScorecard{}
 
 			for result.Next() {
-				commitString := ""
-				if result.Record().Values[4] != nil {
-					commitString = result.Record().Values[4].(string)
-				}
+				tag := result.Record().Values[4]
+				commit := result.Record().Values[3]
+				nameStr := result.Record().Values[2].(string)
+				namespaceStr := result.Record().Values[1].(string)
+				srcType := result.Record().Values[0].(string)
 
-				tagString := ""
-				if result.Record().Values[3] != nil {
-					tagString = result.Record().Values[3].(string)
-				}
-
-				nameString := result.Record().Values[2].(string)
-				namespaceString := result.Record().Values[1].(string)
-				typeString := result.Record().Values[0].(string)
-
-				srcName := &model.SourceName{
-					Name:   nameString,
-					Tag:    &tagString,
-					Commit: &commitString,
-				}
-
-				srcNamespace := &model.SourceNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.SourceName{srcName},
-				}
-
-				src := model.Source{
-					Type:       typeString,
-					Namespaces: []*model.SourceNamespace{srcNamespace},
-				}
+				src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
 				certifyScorecardNode := dbtype.Node{}
 				if result.Record().Values[5] != nil {
@@ -293,37 +271,13 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag, certifyScoreca
 				Collector:        certifyScorecardNode.Props[collector].(string),
 			}
 
-			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
-			tag := (*string)(nil)
-			if record.Values[4] != nil {
-				// make sure to take a copy
-				tagStr := record.Values[4].(string)
-				tag = &tagStr
-			}
-			commit := (*string)(nil)
-			if record.Values[3] != nil {
-				// make sure to take a copy
-				commitStr := record.Values[3].(string)
-				commit = &commitStr
-			}
+			tag := record.Values[4]
+			commit := record.Values[3]
 			nameStr := record.Values[2].(string)
-			name := &model.SourceName{
-				Name:   nameStr,
-				Tag:    tag,
-				Commit: commit,
-			}
-
 			namespaceStr := record.Values[1].(string)
-			namespace := &model.SourceNamespace{
-				Namespace: namespaceStr,
-				Names:     []*model.SourceName{name},
-			}
-
 			srcType := record.Values[0].(string)
-			src := model.Source{
-				Type:       srcType,
-				Namespaces: []*model.SourceNamespace{namespace},
-			}
+
+			src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
 			certification := model.CertifyScorecard{
 				Source:    &src,

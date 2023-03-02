@@ -452,37 +452,13 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
 				return nil, err
 			}
 
-			// TODO(mihaimaruseac): Extract this to a utility since it is repeated
-			tag := (*string)(nil)
-			if record.Values[4] != nil {
-				// make sure to take a copy
-				tagStr := record.Values[4].(string)
-				tag = &tagStr
-			}
-			commit := (*string)(nil)
-			if record.Values[3] != nil {
-				// make sure to take a copy
-				commitStr := record.Values[3].(string)
-				commit = &commitStr
-			}
+			tag := record.Values[4]
+			commit := record.Values[3]
 			nameStr := record.Values[2].(string)
-			name := &model.SourceName{
-				Name:   nameStr,
-				Tag:    tag,
-				Commit: commit,
-			}
-
 			namespaceStr := record.Values[1].(string)
-			namespace := &model.SourceNamespace{
-				Namespace: namespaceStr,
-				Names:     []*model.SourceName{name},
-			}
-
 			srcType := record.Values[0].(string)
-			src := model.Source{
-				Type:       srcType,
-				Namespaces: []*model.SourceNamespace{namespace},
-			}
+
+			src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
 			return &src, nil
 		})
@@ -548,4 +524,35 @@ func setSrcMatchValues(sb *strings.Builder, src *model.SourceSpec, objectSrc boo
 			*firstMatch = false
 		}
 	}
+}
+
+func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tagValue interface{}) model.Source {
+	tag := (*string)(nil)
+	if tagValue != nil {
+		// make sure to take a copy
+		tagStr := tagValue.(string)
+		tag = &tagStr
+	}
+	commit := (*string)(nil)
+	if commitValue != nil {
+		// make sure to take a copy
+		commitStr := commitValue.(string)
+		commit = &commitStr
+	}
+	name := &model.SourceName{
+		Name:   nameStr,
+		Tag:    tag,
+		Commit: commit,
+	}
+
+	namespace := &model.SourceNamespace{
+		Namespace: namespaceStr,
+		Names:     []*model.SourceName{name},
+	}
+
+	src := model.Source{
+		Type:       srcType,
+		Namespaces: []*model.SourceNamespace{namespace},
+	}
+	return src
 }

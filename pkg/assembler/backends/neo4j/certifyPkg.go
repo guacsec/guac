@@ -67,59 +67,23 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 
 			for result.Next() {
 
-				pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-				subPathString := result.Record().Values[4].(string)
-				versionString := result.Record().Values[3].(string)
+				pkgQualifiers := result.Record().Values[5]
+				subPath := result.Record().Values[4]
+				version := result.Record().Values[3]
 				nameString := result.Record().Values[2].(string)
 				namespaceString := result.Record().Values[1].(string)
 				typeString := result.Record().Values[0].(string)
 
-				version := &model.PackageVersion{
-					Version:    versionString,
-					Subpath:    subPathString,
-					Qualifiers: pkgQualifiers,
-				}
+				pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-				name := &model.PackageName{
-					Name:     nameString,
-					Versions: []*model.PackageVersion{version},
-				}
-
-				namespace := &model.PackageNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.PackageName{name},
-				}
-				pkg := model.Package{
-					Type:       typeString,
-					Namespaces: []*model.PackageNamespace{namespace},
-				}
-
-				pkgQualifiers = getCollectedPackageQualifiers(result.Record().Values[12].([]interface{}))
-				subPathString = result.Record().Values[11].(string)
-				versionString = result.Record().Values[10].(string)
+				pkgQualifiers = result.Record().Values[12]
+				subPath = result.Record().Values[11]
+				version = result.Record().Values[10]
 				nameString = result.Record().Values[9].(string)
 				namespaceString = result.Record().Values[8].(string)
 				typeString = result.Record().Values[7].(string)
 
-				version = &model.PackageVersion{
-					Version:    versionString,
-					Subpath:    subPathString,
-					Qualifiers: pkgQualifiers,
-				}
-
-				name = &model.PackageName{
-					Name:     nameString,
-					Versions: []*model.PackageVersion{version},
-				}
-
-				namespace = &model.PackageNamespace{
-					Namespace: namespaceString,
-					Names:     []*model.PackageName{name},
-				}
-				depPkg := model.Package{
-					Type:       typeString,
-					Namespaces: []*model.PackageNamespace{namespace},
-				}
+				depPkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
 				certifyPkgNode := dbtype.Node{}
 				if result.Record().Values[6] != nil {

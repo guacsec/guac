@@ -129,62 +129,29 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				resultBuiltFromMap := map[model.PkgSrcArtObject][]model.PkgSrcArtObject{}
 				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
 				for result.Next() {
-					var version *model.PackageVersion = nil
-					if result.Record().Values[5] != nil && result.Record().Values[4] != nil && result.Record().Values[3] != nil {
-						pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[5].([]interface{}))
-						subPathString := result.Record().Values[4].(string)
-						versionString := result.Record().Values[3].(string)
-						version = &model.PackageVersion{
-							Version:    versionString,
-							Subpath:    subPathString,
-							Qualifiers: pkgQualifiers,
-						}
-					}
-
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
 					nameString := result.Record().Values[2].(string)
 					namespaceString := result.Record().Values[1].(string)
 					typeString := result.Record().Values[0].(string)
 
-					versions := []*model.PackageVersion{}
-					if version != nil {
-						versions = append(versions, version)
-					}
-					name := &model.PackageName{
-						Name:     nameString,
-						Versions: versions,
-					}
-
-					namespace := &model.PackageNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.PackageName{name},
-					}
-					pkg := model.Package{
-						Type:       typeString,
-						Namespaces: []*model.PackageNamespace{namespace},
-					}
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
 					if _, ok := resultHasSlsaMap[pkg]; !ok {
-						builder := &model.Builder{
-							URI: result.Record().Values[7].(string),
-						}
+						uri := result.Record().Values[7].(string)
+						builder := generateModelBuilder(uri)
 						hasSLSANode := dbtype.Node{}
 						if result.Record().Values[6] != nil {
 							hasSLSANode = result.Record().Values[6].(dbtype.Node)
 						} else {
 							return nil, gqlerror.Errorf("HasSLSA Node not found in neo4j")
 						}
-						hasSLSA := &model.HasSlsa{
-							Subject:       &pkg,
-							BuiltBy:       builder,
-							BuildType:     hasSLSANode.Props[buildType].(string),
-							SlsaPredicate: getCollectedPredicate(hasSLSANode.Props[predicate].([]interface{})),
-							SlsaVersion:   hasSLSANode.Props[slsaVersion].(string),
-							StartedOn:     hasSLSANode.Props[startedOn].(string),
-							FinishedOn:    hasSLSANode.Props[finishedOn].(string),
-							Origin:        hasSLSANode.Props[origin].(string),
-							Collector:     hasSLSANode.Props[collector].(string),
-						}
-						resultHasSlsaMap[pkg] = hasSLSA
+						hasSLSA := generateModelHasSLSA(pkg, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
+							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
+							hasSLSANode.Props[origin].(string), hasSLSANode.Props[collector].(string))
+
+						resultHasSlsaMap[pkg] = &hasSLSA
 					}
 
 					if _, ok := resultBuiltFromMap[pkg]; !ok {
@@ -192,81 +159,41 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if result.Record().Values[8] != nil && result.Record().Values[9] != nil {
-						objArt := model.Artifact{
-							Algorithm: result.Record().Values[7].(string),
-							Digest:    result.Record().Values[8].(string),
-						}
+
+						algorithm := result.Record().Values[7].(string)
+						digest := result.Record().Values[8].(string)
+						objArt := generateModelArtifact(algorithm, digest)
+
 						if _, ok := resultBuiltFromMap[pkg]; ok {
 							resultBuiltFromMap[pkg] = append(resultBuiltFromMap[pkg], objArt)
 						}
 					}
 
 					if result.Record().Values[10] != nil && result.Record().Values[11] != nil && result.Record().Values[12] != nil {
-						commitString := ""
-						if result.Record().Values[14] != nil {
-							commitString = result.Record().Values[14].(string)
-						}
-						tagString := ""
-						if result.Record().Values[13] != nil {
-							tagString = result.Record().Values[13].(string)
-						}
-						nameString := result.Record().Values[12].(string)
-						namespaceString := result.Record().Values[11].(string)
-						typeString := result.Record().Values[10].(string)
+						tag := result.Record().Values[13]
+						commit := result.Record().Values[14]
+						nameStr := result.Record().Values[12].(string)
+						namespaceStr := result.Record().Values[11].(string)
+						srcType := result.Record().Values[10].(string)
 
-						srcName := &model.SourceName{
-							Name:   nameString,
-							Tag:    &tagString,
-							Commit: &commitString,
-						}
+						objSrc := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
-						srcNamespace := &model.SourceNamespace{
-							Namespace: namespaceString,
-							Names:     []*model.SourceName{srcName},
-						}
-						objSrc := model.Source{
-							Type:       typeString,
-							Namespaces: []*model.SourceNamespace{srcNamespace},
-						}
 						if _, ok := resultBuiltFromMap[pkg]; ok {
 							resultBuiltFromMap[pkg] = append(resultBuiltFromMap[pkg], objSrc)
 						}
 					}
 
 					if result.Record().Values[15] != nil && result.Record().Values[16] != nil && result.Record().Values[17] != nil {
-						var version *model.PackageVersion = nil
-						if result.Record().Values[20] != nil && result.Record().Values[19] != nil && result.Record().Values[18] != nil {
-							pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[20].([]interface{}))
-							subPathString := result.Record().Values[19].(string)
-							versionString := result.Record().Values[18].(string)
-							version = &model.PackageVersion{
-								Version:    versionString,
-								Subpath:    subPathString,
-								Qualifiers: pkgQualifiers,
-							}
-						}
 
+						pkgQualifiers := result.Record().Values[20]
+						subPath := result.Record().Values[19]
+						version := result.Record().Values[18]
 						nameString := result.Record().Values[17].(string)
 						namespaceString := result.Record().Values[16].(string)
 						typeString := result.Record().Values[15].(string)
 
-						versions := []*model.PackageVersion{}
-						if version != nil {
-							versions = append(versions, version)
-						}
-						name := &model.PackageName{
-							Name:     nameString,
-							Versions: versions,
-						}
+						artPkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-						namespace := &model.PackageNamespace{
-							Namespace: namespaceString,
-							Names:     []*model.PackageName{name},
-						}
-						artPkg := model.Package{
-							Type:       typeString,
-							Namespaces: []*model.PackageNamespace{namespace},
-						}
 						if _, ok := resultBuiltFromMap[pkg]; ok {
 							resultBuiltFromMap[pkg] = append(resultBuiltFromMap[pkg], artPkg)
 						}
@@ -340,37 +267,17 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
 
 				for result.Next() {
-					commitString := ""
-					if result.Record().Values[4] != nil {
-						commitString = result.Record().Values[4].(string)
-					}
-					tagString := ""
-					if result.Record().Values[3] != nil {
-						tagString = result.Record().Values[3].(string)
-					}
-					nameString := result.Record().Values[2].(string)
-					namespaceString := result.Record().Values[1].(string)
-					typeString := result.Record().Values[0].(string)
+					tag := result.Record().Values[3]
+					commit := result.Record().Values[4]
+					nameStr := result.Record().Values[2].(string)
+					namespaceStr := result.Record().Values[1].(string)
+					srcType := result.Record().Values[0].(string)
 
-					srcName := &model.SourceName{
-						Name:   nameString,
-						Tag:    &tagString,
-						Commit: &commitString,
-					}
-
-					srcNamespace := &model.SourceNamespace{
-						Namespace: namespaceString,
-						Names:     []*model.SourceName{srcName},
-					}
-					src := model.Source{
-						Type:       typeString,
-						Namespaces: []*model.SourceNamespace{srcNamespace},
-					}
+					src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
 					if _, ok := resultHasSlsaMap[src]; !ok {
-						builder := &model.Builder{
-							URI: result.Record().Values[6].(string),
-						}
+						uri := result.Record().Values[6].(string)
+						builder := generateModelBuilder(uri)
 
 						hasSLSANode := dbtype.Node{}
 						if result.Record().Values[5] != nil {
@@ -378,18 +285,11 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						} else {
 							return nil, gqlerror.Errorf("HasSLSA Node not found in neo4j")
 						}
-						hasSLSA := &model.HasSlsa{
-							Subject:       &src,
-							BuiltBy:       builder,
-							BuildType:     hasSLSANode.Props[buildType].(string),
-							SlsaPredicate: getCollectedPredicate(hasSLSANode.Props[predicate].([]interface{})),
-							SlsaVersion:   hasSLSANode.Props[slsaVersion].(string),
-							StartedOn:     hasSLSANode.Props[startedOn].(string),
-							FinishedOn:    hasSLSANode.Props[finishedOn].(string),
-							Origin:        hasSLSANode.Props[origin].(string),
-							Collector:     hasSLSANode.Props[collector].(string),
-						}
-						resultHasSlsaMap[src] = hasSLSA
+						hasSLSA := generateModelHasSLSA(src, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
+							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
+							hasSLSANode.Props[origin].(string), hasSLSANode.Props[collector].(string))
+
+						resultHasSlsaMap[src] = &hasSLSA
 					}
 
 					if _, ok := resultBuiltFromMap[src]; !ok {
@@ -397,81 +297,37 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if result.Record().Values[7] != nil && result.Record().Values[8] != nil {
-						objArt := model.Artifact{
-							Algorithm: result.Record().Values[7].(string),
-							Digest:    result.Record().Values[8].(string),
-						}
+						algorithm := result.Record().Values[7].(string)
+						digest := result.Record().Values[8].(string)
+						objArt := generateModelArtifact(algorithm, digest)
 						if _, ok := resultBuiltFromMap[src]; ok {
 							resultBuiltFromMap[src] = append(resultBuiltFromMap[src], objArt)
 						}
 					}
 
 					if result.Record().Values[9] != nil && result.Record().Values[10] != nil && result.Record().Values[11] != nil {
-						commitString := ""
-						if result.Record().Values[13] != nil {
-							commitString = result.Record().Values[14].(string)
-						}
-						tagString := ""
-						if result.Record().Values[12] != nil {
-							tagString = result.Record().Values[12].(string)
-						}
-						nameString := result.Record().Values[11].(string)
-						namespaceString := result.Record().Values[10].(string)
-						typeString := result.Record().Values[9].(string)
+						tag := result.Record().Values[12]
+						commit := result.Record().Values[13]
+						nameStr := result.Record().Values[11].(string)
+						namespaceStr := result.Record().Values[10].(string)
+						srcType := result.Record().Values[9].(string)
 
-						srcName := &model.SourceName{
-							Name:   nameString,
-							Tag:    &tagString,
-							Commit: &commitString,
-						}
+						objSrc := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
-						srcNamespace := &model.SourceNamespace{
-							Namespace: namespaceString,
-							Names:     []*model.SourceName{srcName},
-						}
-						objSrc := &model.Source{
-							Type:       typeString,
-							Namespaces: []*model.SourceNamespace{srcNamespace},
-						}
 						if _, ok := resultBuiltFromMap[src]; ok {
 							resultBuiltFromMap[src] = append(resultBuiltFromMap[src], objSrc)
 						}
 					}
 
 					if result.Record().Values[14] != nil && result.Record().Values[15] != nil && result.Record().Values[16] != nil {
-						var version *model.PackageVersion = nil
-						if result.Record().Values[19] != nil && result.Record().Values[18] != nil && result.Record().Values[17] != nil {
-							pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[19].([]interface{}))
-							subPathString := result.Record().Values[18].(string)
-							versionString := result.Record().Values[17].(string)
-							version = &model.PackageVersion{
-								Version:    versionString,
-								Subpath:    subPathString,
-								Qualifiers: pkgQualifiers,
-							}
-						}
-
+						pkgQualifiers := result.Record().Values[19]
+						subPath := result.Record().Values[18]
+						version := result.Record().Values[17]
 						nameString := result.Record().Values[16].(string)
 						namespaceString := result.Record().Values[15].(string)
 						typeString := result.Record().Values[14].(string)
 
-						versions := []*model.PackageVersion{}
-						if version != nil {
-							versions = append(versions, version)
-						}
-						name := &model.PackageName{
-							Name:     nameString,
-							Versions: versions,
-						}
-
-						namespace := &model.PackageNamespace{
-							Namespace: namespaceString,
-							Names:     []*model.PackageName{name},
-						}
-						artPkg := &model.Package{
-							Type:       typeString,
-							Namespaces: []*model.PackageNamespace{namespace},
-						}
+						artPkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 						if _, ok := resultBuiltFromMap[src]; ok {
 							resultBuiltFromMap[src] = append(resultBuiltFromMap[src], artPkg)
 						}
@@ -543,14 +399,13 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
 
 				for result.Next() {
-					artifact := model.Artifact{
-						Algorithm: result.Record().Values[0].(string),
-						Digest:    result.Record().Values[1].(string),
-					}
+					algorithm := result.Record().Values[0].(string)
+					digest := result.Record().Values[1].(string)
+					artifact := generateModelArtifact(algorithm, digest)
+
 					if _, ok := resultHasSlsaMap[artifact]; !ok {
-						builder := &model.Builder{
-							URI: result.Record().Values[3].(string),
-						}
+						uri := result.Record().Values[3].(string)
+						builder := generateModelBuilder(uri)
 
 						hasSLSANode := dbtype.Node{}
 						if result.Record().Values[2] != nil {
@@ -558,18 +413,11 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						} else {
 							return nil, gqlerror.Errorf("HasSLSA Node not found in neo4j")
 						}
-						hasSLSA := &model.HasSlsa{
-							Subject:       &artifact,
-							BuiltBy:       builder,
-							BuildType:     hasSLSANode.Props[buildType].(string),
-							SlsaPredicate: getCollectedPredicate(hasSLSANode.Props[predicate].([]interface{})),
-							SlsaVersion:   hasSLSANode.Props[slsaVersion].(string),
-							StartedOn:     hasSLSANode.Props[startedOn].(string),
-							FinishedOn:    hasSLSANode.Props[finishedOn].(string),
-							Origin:        hasSLSANode.Props[origin].(string),
-							Collector:     hasSLSANode.Props[collector].(string),
-						}
-						resultHasSlsaMap[artifact] = hasSLSA
+						hasSLSA := generateModelHasSLSA(artifact, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
+							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
+							hasSLSANode.Props[origin].(string), hasSLSANode.Props[collector].(string))
+
+						resultHasSlsaMap[artifact] = &hasSLSA
 					}
 
 					if _, ok := resultBuiltFromMap[artifact]; !ok {
@@ -577,81 +425,39 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if result.Record().Values[4] != nil && result.Record().Values[5] != nil {
-						objArt := model.Artifact{
-							Algorithm: result.Record().Values[4].(string),
-							Digest:    result.Record().Values[5].(string),
-						}
+						algorithm := result.Record().Values[4].(string)
+						digest := result.Record().Values[5].(string)
+						objArt := generateModelArtifact(algorithm, digest)
 						if _, ok := resultBuiltFromMap[artifact]; ok {
 							resultBuiltFromMap[artifact] = append(resultBuiltFromMap[artifact], objArt)
 						}
 					}
 
 					if result.Record().Values[6] != nil && result.Record().Values[7] != nil && result.Record().Values[8] != nil {
-						commitString := ""
-						if result.Record().Values[10] != nil {
-							commitString = result.Record().Values[10].(string)
-						}
-						tagString := ""
-						if result.Record().Values[9] != nil {
-							tagString = result.Record().Values[9].(string)
-						}
-						nameString := result.Record().Values[8].(string)
-						namespaceString := result.Record().Values[7].(string)
-						typeString := result.Record().Values[6].(string)
+						tag := result.Record().Values[9]
+						commit := result.Record().Values[10]
+						nameStr := result.Record().Values[8].(string)
+						namespaceStr := result.Record().Values[7].(string)
+						srcType := result.Record().Values[6].(string)
 
-						srcName := &model.SourceName{
-							Name:   nameString,
-							Tag:    &tagString,
-							Commit: &commitString,
-						}
+						objSrc := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
-						srcNamespace := &model.SourceNamespace{
-							Namespace: namespaceString,
-							Names:     []*model.SourceName{srcName},
-						}
-						objSrc := &model.Source{
-							Type:       typeString,
-							Namespaces: []*model.SourceNamespace{srcNamespace},
-						}
 						if _, ok := resultBuiltFromMap[artifact]; ok {
 							resultBuiltFromMap[artifact] = append(resultBuiltFromMap[artifact], objSrc)
 						}
 					}
 
 					if result.Record().Values[13] != nil && result.Record().Values[12] != nil && result.Record().Values[11] != nil {
-						var version *model.PackageVersion = nil
-						if result.Record().Values[16] != nil && result.Record().Values[15] != nil && result.Record().Values[14] != nil {
-							pkgQualifiers := getCollectedPackageQualifiers(result.Record().Values[16].([]interface{}))
-							subPathString := result.Record().Values[15].(string)
-							versionString := result.Record().Values[14].(string)
-							version = &model.PackageVersion{
-								Version:    versionString,
-								Subpath:    subPathString,
-								Qualifiers: pkgQualifiers,
-							}
-						}
 
+						pkgQualifiers := result.Record().Values[16]
+						subPath := result.Record().Values[15]
+						version := result.Record().Values[14]
 						nameString := result.Record().Values[13].(string)
 						namespaceString := result.Record().Values[12].(string)
 						typeString := result.Record().Values[11].(string)
 
-						versions := []*model.PackageVersion{}
-						if version != nil {
-							versions = append(versions, version)
-						}
-						name := &model.PackageName{
-							Name:     nameString,
-							Versions: versions,
-						}
+						artPkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
-						namespace := &model.PackageNamespace{
-							Namespace: namespaceString,
-							Names:     []*model.PackageName{name},
-						}
-						artPkg := &model.Package{
-							Type:       typeString,
-							Namespaces: []*model.PackageNamespace{namespace},
-						}
 						if _, ok := resultBuiltFromMap[artifact]; ok {
 							resultBuiltFromMap[artifact] = append(resultBuiltFromMap[artifact], artPkg)
 						}
@@ -769,4 +575,20 @@ func setHasSLSAValues(sb *strings.Builder, hasSLSASpec *model.HasSLSASpec, first
 		*firstMatch = false
 		queryValues["collector"] = hasSLSASpec.Collector
 	}
+}
+
+func generateModelHasSLSA(subject model.PkgSrcArtObject, builder *model.Builder, slsaPredicate []interface{}, buildType,
+	slsaVersion, startedOn, finishedOn, origin, collector string) model.HasSlsa {
+	hasSLSA := model.HasSlsa{
+		Subject:       subject,
+		BuiltBy:       builder,
+		BuildType:     buildType,
+		SlsaPredicate: getCollectedPredicate(slsaPredicate),
+		SlsaVersion:   slsaVersion,
+		StartedOn:     startedOn,
+		FinishedOn:    finishedOn,
+		Origin:        origin,
+		Collector:     collector,
+	}
+	return hasSLSA
 }

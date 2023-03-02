@@ -174,16 +174,21 @@ RETURN ghsaID.id`
 			}
 
 			id := record.Values[0].(string)
-			ghsaID := &model.GHSAId{ID: id}
-			ghsa := &model.Ghsa{
-				GhsaID: []*model.GHSAId{ghsaID},
-			}
+			ghsa := generateModelGhsa(id)
 
-			return ghsa, nil
+			return &ghsa, nil
 		})
 	if err != nil {
 		return nil, err
 	}
 
 	return result.(*model.Ghsa), nil
+}
+
+func generateModelGhsa(id string) model.Ghsa {
+	ghsaID := &model.GHSAId{ID: id}
+	ghsa := model.Ghsa{
+		GhsaID: []*model.GHSAId{ghsaID},
+	}
+	return ghsa
 }

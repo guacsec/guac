@@ -73,11 +73,10 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 
 			artifacts := []*model.Artifact{}
 			for result.Next() {
-				artifact := &model.Artifact{
-					Algorithm: result.Record().Values[0].(string),
-					Digest:    result.Record().Values[1].(string),
-				}
-				artifacts = append(artifacts, artifact)
+				algorithm := result.Record().Values[0].(string)
+				digest := result.Record().Values[1].(string)
+				artifact := generateModelArtifact(algorithm, digest)
+				artifacts = append(artifacts, &artifact)
 			}
 			if err = result.Err(); err != nil {
 				return nil, err
@@ -116,12 +115,9 @@ RETURN a.algorithm, a.digest`
 				return nil, err
 			}
 
-			digest := record.Values[1].(string)
 			algorithm := record.Values[0].(string)
-			artifact := model.Artifact{
-				Algorithm: algorithm,
-				Digest:    digest,
-			}
+			digest := record.Values[1].(string)
+			artifact := generateModelArtifact(algorithm, digest)
 
 			return &artifact, nil
 		})
@@ -156,4 +152,12 @@ func setArtifactMatchValues(sb *strings.Builder, art *model.ArtifactSpec, object
 			*firstMatch = false
 		}
 	}
+}
+
+func generateModelArtifact(algorithm, digest string) model.Artifact {
+	artifact := model.Artifact{
+		Algorithm: algorithm,
+		Digest:    digest,
+	}
+	return artifact
 }
