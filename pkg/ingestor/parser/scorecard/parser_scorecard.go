@@ -89,7 +89,7 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 // 	return edges
 // }
 
-func (p *scorecardParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+func (p *scorecardParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
 	var preds []assembler.CertifyScorecardIngest
 	for i, scPred := range p.scorecardPredicates {
 		preds = append(preds, assembler.CertifyScorecardIngest{
@@ -97,8 +97,8 @@ func (p *scorecardParser) GetPredicates(ctx context.Context) []assembler.Placeho
 			Source:    p.srcPredicates[i],
 		})
 	}
-	return []assembler.PlaceholderStruct{
-		{CertifyScorecard: preds},
+	return &assembler.PlaceholderStruct{
+		CertifyScorecard: preds,
 	}
 }
 
@@ -183,9 +183,7 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 		})
 	}
 
-	// TODO: will become CertifyScorecardInputSpec
 	scInput := model.ScorecardInputSpec{
-		// TODO: Put the above source input here
 		TimeScanned:      s.Date,
 		AggregateScore:   (float64)(s.AggregateScore),
 		Checks:           checks,

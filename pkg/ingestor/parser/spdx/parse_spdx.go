@@ -289,6 +289,6 @@ func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStri
 	return nil, fmt.Errorf("not yet implemented")
 }
 
-func (s *spdxParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
 	return nil
 }
