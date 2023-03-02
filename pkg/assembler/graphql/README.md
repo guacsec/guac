@@ -10,7 +10,7 @@ project.
 
 ## GraphQL server configuration
 
-- `./gqlgen.yml`: the configuration file for
+- `gqlgen.yml`: the configuration file for
   [`gqlgen`](https://github.com/99designs/gqlgen) to generate Go code from
   GraphQL schema specification
 - `schema/`: the GraphQL schema from which the codegen starts

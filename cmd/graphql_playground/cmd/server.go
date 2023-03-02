@@ -30,8 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-const defaultPort = "8080"
-
 func startServer() {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
@@ -44,10 +42,11 @@ func startServer() {
 	var topResolver resolvers.Resolver
 	if flags.neo4jBackend {
 		args := neo4j.Neo4jConfig{
-			User:     flags.gdbuser,
-			Pass:     flags.gdbpass,
-			Realm:    flags.realm,
-			DBAddr:   flags.dbAddr,
+			User:   flags.gdbuser,
+			Pass:   flags.gdbpass,
+			Realm:  flags.realm,
+			DBAddr: flags.dbAddr,
+			// TODO(mihaimaruseac): Once all ingestion is done, remove from here
 			TestData: flags.addTestData,
 		}
 
@@ -72,10 +71,16 @@ func startServer() {
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
+	// Ingest additional test data in a go-routine.
+	port := flags.playgroundPort
+	if flags.addTestData {
+		go ingestData(port)
+	}
+
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	port := flags.playgroundPort
 	logger.Infof("connect to http://localhost:%d/ for GraphQL playground", port)
+	// blocking until termination
 	logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
