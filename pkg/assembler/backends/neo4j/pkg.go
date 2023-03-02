@@ -639,7 +639,7 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 			pkgType := record.Values[0].(string)
 
 			pkg := generateModelPackage(pkgType, namespaceStr, nameStr, version, subPath, qualifiersList)
-			return &pkg, nil
+			return pkg, nil
 		})
 	if err != nil {
 		return nil, err
@@ -758,7 +758,7 @@ func setPkgMatchValues(sb *strings.Builder, pkg *model.PkgSpec, objectPkg bool, 
 	}
 }
 
-func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, subPathValue, qualifiersValue interface{}) model.Package {
+func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, subPathValue, qualifiersValue interface{}) *model.Package {
 	var version *model.PackageVersion = nil
 	if versionValue != nil && subPathValue != nil && qualifiersValue != nil {
 		qualifiersList := qualifiersValue.([]interface{})
@@ -788,5 +788,5 @@ func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, s
 		Type:       pkgType,
 		Namespaces: []*model.PackageNamespace{namespace},
 	}
-	return pkg
+	return &pkg
 }

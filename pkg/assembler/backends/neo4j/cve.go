@@ -296,7 +296,7 @@ RETURN cveYear.year, cveID.id`
 			yearStr := record.Values[0].(string)
 			cve := generateModelCve(yearStr, idStr)
 
-			return &cve, nil
+			return cve, nil
 		})
 	if err != nil {
 		return nil, err
@@ -305,11 +305,11 @@ RETURN cveYear.year, cveID.id`
 	return result.(*model.Cve), nil
 }
 
-func generateModelCve(yearStr, idStr string) model.Cve {
+func generateModelCve(yearStr, idStr string) *model.Cve {
 	id := &model.CVEId{ID: idStr}
 	cve := model.Cve{
 		Year:  yearStr,
 		CveID: []*model.CVEId{id},
 	}
-	return cve
+	return &cve
 }

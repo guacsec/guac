@@ -93,7 +93,7 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 				}
 
 				certifyPkg := &model.CertifyPkg{
-					Packages:      []*model.Package{&pkg, &depPkg},
+					Packages:      []*model.Package{pkg, depPkg},
 					Justification: certifyPkgNode.Props[justification].(string),
 					Origin:        certifyPkgNode.Props[origin].(string),
 					Collector:     certifyPkgNode.Props[collector].(string),

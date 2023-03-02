@@ -103,7 +103,7 @@ func (c *neo4jClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEq
 				}
 
 				hashEqual := &model.HashEqual{
-					Artifacts:     []*model.Artifact{&artifact, &depArtifact},
+					Artifacts:     []*model.Artifact{artifact, depArtifact},
 					Justification: hashEqualNode.Props[justification].(string),
 					Origin:        hashEqualNode.Props[origin].(string),
 					Collector:     hashEqualNode.Props[collector].(string),

@@ -107,8 +107,8 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 				}
 
 				hasSourceAt := &model.HasSourceAt{
-					Package:       &pkg,
-					Source:        &src,
+					Package:       pkg,
+					Source:        src,
 					KnownSince:    hasSourceAtNode.Props[knownSince].(string),
 					Justification: hasSourceAtNode.Props[justification].(string),
 					Origin:        hasSourceAtNode.Props[origin].(string),

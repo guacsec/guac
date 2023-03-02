@@ -105,7 +105,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 
 					hasSBOM := generateModelHasSBOM(pkg, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
 
-					collectedHasSBOM = append(collectedHasSBOM, &hasSBOM)
+					collectedHasSBOM = append(collectedHasSBOM, hasSBOM)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -161,7 +161,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 
 					hasSBOM := generateModelHasSBOM(src, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
 
-					collectedHasSBOM = append(collectedHasSBOM, &hasSBOM)
+					collectedHasSBOM = append(collectedHasSBOM, hasSBOM)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -196,12 +196,12 @@ func setHasSBOMValues(sb *strings.Builder, hasSBOMSpec *model.HasSBOMSpec, first
 	}
 }
 
-func generateModelHasSBOM(subject model.PkgSrcObject, uri, origin, collector string) model.HasSbom {
+func generateModelHasSBOM(subject model.PkgSrcObject, uri, origin, collector string) *model.HasSbom {
 	hasSBOM := model.HasSbom{
 		Subject:   subject,
 		URI:       uri,
 		Origin:    origin,
 		Collector: collector,
 	}
-	return hasSBOM
+	return &hasSBOM
 }

@@ -122,8 +122,8 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 				}
 
 				isDependency := &model.IsDependency{
-					Package:          &pkg,
-					DependentPackage: &depPkg,
+					Package:          pkg,
+					DependentPackage: depPkg,
 					VersionRange:     isDependencyNode.Props[versionRange].(string),
 					Origin:           isDependencyNode.Props[origin].(string),
 					Collector:        isDependencyNode.Props[collector].(string),

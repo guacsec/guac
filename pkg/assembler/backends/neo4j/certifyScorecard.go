@@ -93,7 +93,7 @@ func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *mode
 				}
 
 				certifyScorecard := &model.CertifyScorecard{
-					Source:    &src,
+					Source:    src,
 					Scorecard: &scorecard,
 				}
 
@@ -280,7 +280,7 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag, certifyScoreca
 			src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
 			certification := model.CertifyScorecard{
-				Source:    &src,
+				Source:    src,
 				Scorecard: &scorecard,
 			}
 

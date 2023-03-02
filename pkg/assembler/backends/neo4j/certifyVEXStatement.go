@@ -128,7 +128,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, cve, certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
 
-					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, &certifyVEXStatement)
+					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -218,7 +218,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, ghsa, certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
 
-					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, &certifyVEXStatement)
+					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -281,7 +281,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, cve, certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
 
-					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, &certifyVEXStatement)
+					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -344,7 +344,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, ghsa, certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
 
-					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, &certifyVEXStatement)
+					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -383,7 +383,7 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	}
 }
 
-func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveGhsaObject, justification, origin, collector string) model.CertifyVEXStatement {
+func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveGhsaObject, justification, origin, collector string) *model.CertifyVEXStatement {
 	certifyVEXStatement := model.CertifyVEXStatement{
 		Subject:       subject,
 		Vulnerability: vuln,
@@ -391,5 +391,5 @@ func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.Cve
 		Origin:        origin,
 		Collector:     collector,
 	}
-	return certifyVEXStatement
+	return &certifyVEXStatement
 }

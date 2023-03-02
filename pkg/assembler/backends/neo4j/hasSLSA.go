@@ -148,11 +148,11 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						} else {
 							return nil, gqlerror.Errorf("HasSLSA Node not found in neo4j")
 						}
-						hasSLSA := generateModelHasSLSA(pkg, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
+						hasSLSA := generateModelHasSLSA(pkg, builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
 							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
 							hasSLSANode.Props[origin].(time.Time), hasSLSANode.Props[collector].(time.Time))
 
-						resultHasSlsaMap[pkg] = &hasSLSA
+						resultHasSlsaMap[pkg] = hasSLSA
 					}
 
 					if _, ok := resultBuiltFromMap[pkg]; !ok {
@@ -286,11 +286,11 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						} else {
 							return nil, gqlerror.Errorf("HasSLSA Node not found in neo4j")
 						}
-						hasSLSA := generateModelHasSLSA(src, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
+						hasSLSA := generateModelHasSLSA(src, builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
 							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
 							hasSLSANode.Props[origin].(time.Time), hasSLSANode.Props[collector].(time.Time))
 
-						resultHasSlsaMap[src] = &hasSLSA
+						resultHasSlsaMap[src] = hasSLSA
 					}
 
 					if _, ok := resultBuiltFromMap[src]; !ok {
@@ -414,11 +414,11 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 						} else {
 							return nil, gqlerror.Errorf("HasSLSA Node not found in neo4j")
 						}
-						hasSLSA := generateModelHasSLSA(artifact, &builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
+						hasSLSA := generateModelHasSLSA(artifact, builder, hasSLSANode.Props[predicate].([]interface{}), hasSLSANode.Props[buildType].(string),
 							hasSLSANode.Props[slsaVersion].(string), hasSLSANode.Props[startedOn].(string), hasSLSANode.Props[finishedOn].(string),
 							hasSLSANode.Props[origin].(time.Time), hasSLSANode.Props[collector].(time.Time))
 
-						resultHasSlsaMap[artifact] = &hasSLSA
+						resultHasSlsaMap[artifact] = hasSLSA
 					}
 
 					if _, ok := resultBuiltFromMap[artifact]; !ok {
@@ -579,7 +579,7 @@ func setHasSLSAValues(sb *strings.Builder, hasSLSASpec *model.HasSLSASpec, first
 }
 
 func generateModelHasSLSA(subject model.PkgSrcArtObject, builder *model.Builder, slsaPredicate []interface{}, buildType,
-	slsaVersion, origin, collector string, startedOn, finishedOn time.Time) model.HasSlsa {
+	slsaVersion, origin, collector string, startedOn, finishedOn time.Time) *model.HasSlsa {
 	hasSLSA := model.HasSlsa{
 		Subject:       subject,
 		BuiltBy:       builder,
@@ -591,5 +591,5 @@ func generateModelHasSLSA(subject model.PkgSrcArtObject, builder *model.Builder,
 		Origin:        origin,
 		Collector:     collector,
 	}
-	return hasSLSA
+	return &hasSLSA
 }

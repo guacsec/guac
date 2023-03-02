@@ -460,7 +460,7 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
 
 			src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
 
-			return &src, nil
+			return src, nil
 		})
 	if err != nil {
 		return nil, err
@@ -526,16 +526,14 @@ func setSrcMatchValues(sb *strings.Builder, src *model.SourceSpec, objectSrc boo
 	}
 }
 
-func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tagValue interface{}) model.Source {
+func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tagValue interface{}) *model.Source {
 	tag := (*string)(nil)
 	if tagValue != nil {
-		// make sure to take a copy
 		tagStr := tagValue.(string)
 		tag = &tagStr
 	}
 	commit := (*string)(nil)
 	if commitValue != nil {
-		// make sure to take a copy
 		commitStr := commitValue.(string)
 		commit = &commitStr
 	}
@@ -554,5 +552,5 @@ func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tag
 		Type:       srcType,
 		Namespaces: []*model.SourceNamespace{namespace},
 	}
-	return src
+	return &src
 }

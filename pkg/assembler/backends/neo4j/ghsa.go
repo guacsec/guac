@@ -176,7 +176,7 @@ RETURN ghsaID.id`
 			id := record.Values[0].(string)
 			ghsa := generateModelGhsa(id)
 
-			return &ghsa, nil
+			return ghsa, nil
 		})
 	if err != nil {
 		return nil, err
@@ -185,10 +185,10 @@ RETURN ghsaID.id`
 	return result.(*model.Ghsa), nil
 }
 
-func generateModelGhsa(id string) model.Ghsa {
+func generateModelGhsa(id string) *model.Ghsa {
 	ghsaID := &model.GHSAId{ID: id}
 	ghsa := model.Ghsa{
 		GhsaID: []*model.GHSAId{ghsaID},
 	}
-	return ghsa
+	return &ghsa
 }

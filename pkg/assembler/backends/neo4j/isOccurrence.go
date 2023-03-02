@@ -108,10 +108,10 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 						return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
 					}
 
-					isOccurrence := generateModelIsOccurrence(pkg, &artifact, isOccurrenceNode.Props[justification].(string),
+					isOccurrence := generateModelIsOccurrence(pkg, artifact, isOccurrenceNode.Props[justification].(string),
 						isOccurrenceNode.Props[origin].(string), isOccurrenceNode.Props[collector].(string))
 
-					collectedIsOccurrence = append(collectedIsOccurrence, &isOccurrence)
+					collectedIsOccurrence = append(collectedIsOccurrence, isOccurrence)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -168,10 +168,10 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 						return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
 					}
 
-					isOccurrence := generateModelIsOccurrence(src, &artifact, isOccurrenceNode.Props[justification].(string),
+					isOccurrence := generateModelIsOccurrence(src, artifact, isOccurrenceNode.Props[justification].(string),
 						isOccurrenceNode.Props[origin].(string), isOccurrenceNode.Props[collector].(string))
 
-					collectedIsOccurrence = append(collectedIsOccurrence, &isOccurrence)
+					collectedIsOccurrence = append(collectedIsOccurrence, isOccurrence)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -205,7 +205,7 @@ func setIsOccurrenceValues(sb *strings.Builder, isOccurrenceSpec *model.IsOccurr
 	}
 }
 
-func generateModelIsOccurrence(subject model.PkgSrcObject, artifact *model.Artifact, justification, origin, collector string) model.IsOccurrence {
+func generateModelIsOccurrence(subject model.PkgSrcObject, artifact *model.Artifact, justification, origin, collector string) *model.IsOccurrence {
 	isOccurrence := model.IsOccurrence{
 		Subject:            subject,
 		OccurrenceArtifact: artifact,
@@ -213,5 +213,5 @@ func generateModelIsOccurrence(subject model.PkgSrcObject, artifact *model.Artif
 		Origin:             origin,
 		Collector:          collector,
 	}
-	return isOccurrence
+	return &isOccurrence
 }

@@ -102,7 +102,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 					certifyBad := generateModelCertifyBad(pkg, certifyBadNode.Props[justification].(string), certifyBadNode.Props[origin].(string), certifyBadNode.Props[collector].(string))
 
-					collectedCertifyBad = append(collectedCertifyBad, &certifyBad)
+					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -157,7 +157,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 					certifyBad := generateModelCertifyBad(src, certifyBadNode.Props[justification].(string), certifyBadNode.Props[origin].(string), certifyBadNode.Props[collector].(string))
 
-					collectedCertifyBad = append(collectedCertifyBad, &certifyBad)
+					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -205,7 +205,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 					}
 
 					certifyBad := generateModelCertifyBad(artifact, certifyBadNode.Props[justification].(string), certifyBadNode.Props[origin].(string), certifyBadNode.Props[collector].(string))
-					collectedCertifyBad = append(collectedCertifyBad, &certifyBad)
+					collectedCertifyBad = append(collectedCertifyBad, certifyBad)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -262,12 +262,12 @@ func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSp
 	}
 }
 
-func generateModelCertifyBad(subject model.PkgSrcArtObject, justification, origin, collector string) model.CertifyBad {
+func generateModelCertifyBad(subject model.PkgSrcArtObject, justification, origin, collector string) *model.CertifyBad {
 	certifyBad := model.CertifyBad{
 		Subject:       subject,
 		Justification: justification,
 		Origin:        origin,
 		Collector:     collector,
 	}
-	return certifyBad
+	return &certifyBad
 }

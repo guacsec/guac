@@ -121,11 +121,11 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 						return nil, gqlerror.Errorf("certifyVuln Node not found in neo4j")
 					}
 
-					certifyVuln := generateModelCertifyVuln(&pkg, cve, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
+					certifyVuln := generateModelCertifyVuln(pkg, cve, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
 						certifyVulnNode.Props[dbVersion].(string), certifyVulnNode.Props[scannerUri].(string), certifyVulnNode.Props[scannerVersion].(string),
 						certifyVulnNode.Props[origin].(string), certifyVulnNode.Props[collector].(string))
 
-					collectedCertifyVuln = append(collectedCertifyVuln, &certifyVuln)
+					collectedCertifyVuln = append(collectedCertifyVuln, certifyVuln)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -211,11 +211,11 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 						return nil, gqlerror.Errorf("certifyVuln Node not found in neo4j")
 					}
 
-					certifyVuln := generateModelCertifyVuln(&pkg, ghsa, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
+					certifyVuln := generateModelCertifyVuln(pkg, ghsa, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
 						certifyVulnNode.Props[dbVersion].(string), certifyVulnNode.Props[scannerUri].(string), certifyVulnNode.Props[scannerVersion].(string),
 						certifyVulnNode.Props[origin].(string), certifyVulnNode.Props[collector].(string))
 
-					collectedCertifyVuln = append(collectedCertifyVuln, &certifyVuln)
+					collectedCertifyVuln = append(collectedCertifyVuln, certifyVuln)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -302,11 +302,11 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 						return nil, gqlerror.Errorf("certifyVuln Node not found in neo4j")
 					}
 
-					certifyVuln := generateModelCertifyVuln(&pkg, osv, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
+					certifyVuln := generateModelCertifyVuln(pkg, osv, certifyVulnNode.Props[timeScanned].(time.Time), certifyVulnNode.Props[dbUri].(string),
 						certifyVulnNode.Props[dbVersion].(string), certifyVulnNode.Props[scannerUri].(string), certifyVulnNode.Props[scannerVersion].(string),
 						certifyVulnNode.Props[origin].(string), certifyVulnNode.Props[collector].(string))
 
-					collectedCertifyVuln = append(collectedCertifyVuln, &certifyVuln)
+					collectedCertifyVuln = append(collectedCertifyVuln, certifyVuln)
 				}
 				if err = result.Err(); err != nil {
 					return nil, err
@@ -382,7 +382,7 @@ func setCertifyVulnValues(sb *strings.Builder, certifyVulnSpec *model.CertifyVul
 }
 
 func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveGhsaObject, timeScanned time.Time, dbUri, dbVersion, scannerUri,
-	scannerVersion, origin, collector string) model.CertifyVuln {
+	scannerVersion, origin, collector string) *model.CertifyVuln {
 
 	certifyVuln := model.CertifyVuln{
 		Package:        pkg,
@@ -395,5 +395,5 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveGhsaObject, t
 		Origin:         origin,
 		Collector:      collector,
 	}
-	return certifyVuln
+	return &certifyVuln
 }
