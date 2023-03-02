@@ -8,8 +8,6 @@ project.
 
 **Note**: This is still in experimental state and might change in the future!
 
-Here is a description of the contents of this subtree:
-
 ## Backend definition
 
 - `backends.go`: defines the 2 interfaces needed to create a backend: one that
