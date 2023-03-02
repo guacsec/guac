@@ -43,10 +43,10 @@ func ingestData(port int) {
 	// Ingest one demo Scorecards
 	// TODO(mihaimaruseac): Refactor as we migrate to ingest more data this way
 	source := model.SourceInputSpec{
-		Type: "git",
+		Type:      "git",
 		Namespace: "github",
-		Name: "github.com/tensorflow/tensorflow",
-		Tag: "v2.12.0",
+		Name:      "github.com/tensorflow/tensorflow",
+		Tag:       "v2.12.0",
 	}
 	checks := []model.ScorecardCheckInputSpec{
 		{Check: "Binary_Artifacts", Score: 4},
@@ -55,13 +55,13 @@ func ingestData(port int) {
 		{Check: "Contributors", Score: 1},
 	}
 	scorecard := model.ScorecardInputSpec{
-		Checks: checks,
-		AggregateScore: 2.9,
-		TimeScanned: time.Now(),
+		Checks:           checks,
+		AggregateScore:   2.9,
+		TimeScanned:      time.Now(),
 		ScorecardVersion: "v4.10.2",
-		ScorecardCommit: "5e6a521",
-		Origin: "Demo ingestion",
-		Collector: "Demo ingestion",
+		ScorecardCommit:  "5e6a521",
+		Origin:           "Demo ingestion",
+		Collector:        "Demo ingestion",
 	}
 	resp, err := generated.Scorecard(context.Background(), gqlclient,
 		source, scorecard)
