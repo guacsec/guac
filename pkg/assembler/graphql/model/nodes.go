@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"time"
+)
+
 // CveGhsaObject is a union of CVE and GHSA.
 type CveGhsaObject interface {
 	IsCveGhsaObject()
@@ -176,7 +180,7 @@ type CertifyScorecard struct {
 // CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
 type CertifyScorecardSpec struct {
 	Source           *SourceSpec           `json:"source"`
-	TimeScanned      *string               `json:"timeScanned"`
+	TimeScanned      *time.Time            `json:"timeScanned"`
 	AggregateScore   *float64              `json:"aggregateScore"`
 	Checks           []*ScorecardCheckSpec `json:"checks"`
 	ScorecardVersion *string               `json:"scorecardVersion"`
@@ -190,14 +194,14 @@ type CertifyScorecardSpec struct {
 // subject - union type that represents a package or artifact
 // vulnerability (object) - union type that consists of cve or ghsa
 // justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time)
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type CertifyVEXStatement struct {
 	Subject       PkgArtObject  `json:"subject"`
 	Vulnerability CveGhsaObject `json:"vulnerability"`
 	Justification string        `json:"justification"`
-	KnownSince    string        `json:"knownSince"`
+	KnownSince    time.Time     `json:"knownSince"`
 	Origin        string        `json:"origin"`
 	Collector     string        `json:"collector"`
 }
@@ -210,7 +214,7 @@ type CertifyVEXStatementSpec struct {
 	Cve           *CVESpec      `json:"cve"`
 	Ghsa          *GHSASpec     `json:"ghsa"`
 	Justification *string       `json:"justification"`
-	KnownSince    *string       `json:"knownSince"`
+	KnownSince    *time.Time    `json:"knownSince"`
 	Origin        *string       `json:"origin"`
 	Collector     *string       `json:"collector"`
 }
@@ -229,7 +233,7 @@ type CertifyVEXStatementSpec struct {
 type CertifyVuln struct {
 	Package        *Package         `json:"package"`
 	Vulnerability  OsvCveGhsaObject `json:"vulnerability"`
-	TimeScanned    string           `json:"timeScanned"`
+	TimeScanned    time.Time        `json:"timeScanned"`
 	DbURI          string           `json:"dbUri"`
 	DbVersion      string           `json:"dbVersion"`
 	ScannerURI     string           `json:"scannerUri"`
@@ -243,17 +247,17 @@ type CertifyVuln struct {
 // Specifying just the package allows to query for all vulnerabilities associated with the package.
 // Only OSV, CVE or GHSA can be specified at once
 type CertifyVulnSpec struct {
-	Package        *PkgSpec  `json:"package"`
-	Osv            *OSVSpec  `json:"osv"`
-	Cve            *CVESpec  `json:"cve"`
-	Ghsa           *GHSASpec `json:"ghsa"`
-	TimeScanned    *string   `json:"timeScanned"`
-	DbURI          *string   `json:"dbUri"`
-	DbVersion      *string   `json:"dbVersion"`
-	ScannerURI     *string   `json:"scannerUri"`
-	ScannerVersion *string   `json:"scannerVersion"`
-	Origin         *string   `json:"origin"`
-	Collector      *string   `json:"collector"`
+	Package        *PkgSpec   `json:"package"`
+	Osv            *OSVSpec   `json:"osv"`
+	Cve            *CVESpec   `json:"cve"`
+	Ghsa           *GHSASpec  `json:"ghsa"`
+	TimeScanned    *time.Time `json:"timeScanned"`
+	DbURI          *string    `json:"dbUri"`
+	DbVersion      *string    `json:"dbVersion"`
+	ScannerURI     *string    `json:"scannerUri"`
+	ScannerVersion *string    `json:"scannerVersion"`
+	Origin         *string    `json:"origin"`
+	Collector      *string    `json:"collector"`
 }
 
 // GHSA represents GitHub security advisories.
@@ -323,8 +327,8 @@ type HasSBOMSpec struct {
 // buildType (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
 // slsaPredicate (property) - a list of key value pair that consist of the keys and values of the SLSA predicate
 // slsaVersion (property) - version of the SLSA predicate
-// startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject
-// finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject
+// startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject (in RFC 3339 format)
+// finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject (in RFC 3339 format)
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type HasSlsa struct {
@@ -334,8 +338,8 @@ type HasSlsa struct {
 	BuildType     string            `json:"buildType"`
 	SlsaPredicate []*SLSAPredicate  `json:"slsaPredicate"`
 	SlsaVersion   string            `json:"slsaVersion"`
-	StartedOn     string            `json:"startedOn"`
-	FinishedOn    string            `json:"finishedOn"`
+	StartedOn     time.Time         `json:"startedOn"`
+	FinishedOn    time.Time         `json:"finishedOn"`
 	Origin        string            `json:"origin"`
 	Collector     string            `json:"collector"`
 }
@@ -352,8 +356,8 @@ type HasSLSASpec struct {
 	BuildType         *string              `json:"buildType"`
 	Predicate         []*SLSAPredicateSpec `json:"predicate"`
 	SlsaVersion       *string              `json:"slsaVersion"`
-	StartedOn         *string              `json:"startedOn"`
-	FinishedOn        *string              `json:"finishedOn"`
+	StartedOn         *time.Time           `json:"startedOn"`
+	FinishedOn        *time.Time           `json:"finishedOn"`
 	Origin            *string              `json:"origin"`
 	Collector         *string              `json:"collector"`
 }
@@ -748,8 +752,8 @@ type Scorecard struct {
 	Checks []*ScorecardCheck `json:"checks"`
 	// Overall Scorecard score for the source
 	AggregateScore float64 `json:"aggregateScore"`
-	// Exact timestamp when the source was last scanned
-	TimeScanned string `json:"timeScanned"`
+	// Exact timestamp when the source was last scanned (in RFC 3339 format)
+	TimeScanned time.Time `json:"timeScanned"`
 	// Version of the Scorecard scanner used to analyze the source
 	ScorecardVersion string `json:"scorecardVersion"`
 	// Commit of the Scorecards repository at the time of scanning the source
@@ -799,7 +803,7 @@ type ScorecardCheckSpec struct {
 type ScorecardInputSpec struct {
 	Checks           []*ScorecardCheckInputSpec `json:"checks"`
 	AggregateScore   float64                    `json:"aggregateScore"`
-	TimeScanned      string                     `json:"timeScanned"`
+	TimeScanned      time.Time                  `json:"timeScanned"`
 	ScorecardVersion string                     `json:"scorecardVersion"`
 	ScorecardCommit  string                     `json:"scorecardCommit"`
 	Origin           string                     `json:"origin"`

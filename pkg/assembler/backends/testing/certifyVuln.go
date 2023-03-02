@@ -108,7 +108,7 @@ func (c *demoClient) registerCertifyVuln(selectedPackage *model.Package, selecte
 
 	newCertifyVuln := &model.CertifyVuln{
 		Package:        selectedPackage,
-		TimeScanned:    timeScanned.String(),
+		TimeScanned:    timeScanned,
 		DbURI:          dbUri,
 		DbVersion:      dbVersion,
 		ScannerURI:     scannerUri,
@@ -130,7 +130,6 @@ func (c *demoClient) registerCertifyVuln(selectedPackage *model.Package, selecte
 // Query CertifyPkg
 
 func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-
 	if certifyVulnSpec.Cve != nil && certifyVulnSpec.Osv != nil && certifyVulnSpec.Ghsa != nil {
 		return nil, gqlerror.Errorf("cannot specify cve, osv and ghsa together for CertifyVuln")
 	}

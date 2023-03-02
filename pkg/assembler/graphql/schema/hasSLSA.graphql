@@ -27,8 +27,8 @@ builtBy (object) - represents the builder that was used to build the subject
 buildType (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
 slsaPredicate (property) - a list of key value pair that consist of the keys and values of the SLSA predicate
 slsaVersion (property) - version of the SLSA predicate
-startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject
-finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject
+startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject (in RFC 3339 format)
+finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject (in RFC 3339 format)
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
@@ -39,8 +39,8 @@ type HasSLSA {
   buildType: String!
   slsaPredicate: [SLSAPredicate!]!
   slsaVersion: String!
-  startedOn: String!
-  finishedOn: String!
+  startedOn: Time!
+  finishedOn: Time!
   origin: String!
   collector: String!
 }
@@ -98,8 +98,8 @@ input HasSLSASpec {
   buildType: String
   predicate: [SLSAPredicateSpec!] = []
   slsaVersion: String
-  startedOn: String
-  finishedOn: String
+  startedOn: Time
+  finishedOn: Time
   origin: String
   collector: String
 }

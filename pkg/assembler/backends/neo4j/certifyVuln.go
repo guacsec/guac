@@ -18,6 +18,7 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -145,7 +146,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 					certifyVuln := &model.CertifyVuln{
 						Package:        &pkg,
 						Vulnerability:  cve,
-						TimeScanned:    certifyVulnNode.Props[timeScanned].(string),
+						TimeScanned:    certifyVulnNode.Props[timeScanned].(time.Time),
 						DbURI:          certifyVulnNode.Props[dbUri].(string),
 						DbVersion:      certifyVulnNode.Props[dbVersion].(string),
 						ScannerURI:     certifyVulnNode.Props[scannerUri].(string),
@@ -264,7 +265,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 					certifyVuln := &model.CertifyVuln{
 						Package:        &pkg,
 						Vulnerability:  ghsa,
-						TimeScanned:    certifyVulnNode.Props[timeScanned].(string),
+						TimeScanned:    certifyVulnNode.Props[timeScanned].(time.Time),
 						DbURI:          certifyVulnNode.Props[dbUri].(string),
 						DbVersion:      certifyVulnNode.Props[dbVersion].(string),
 						ScannerURI:     certifyVulnNode.Props[scannerUri].(string),
@@ -384,7 +385,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 					certifyVuln := &model.CertifyVuln{
 						Package:        &pkg,
 						Vulnerability:  osv,
-						TimeScanned:    certifyVulnNode.Props[timeScanned].(string),
+						TimeScanned:    certifyVulnNode.Props[timeScanned].(time.Time),
 						DbURI:          certifyVulnNode.Props[dbUri].(string),
 						DbVersion:      certifyVulnNode.Props[dbVersion].(string),
 						ScannerURI:     certifyVulnNode.Props[scannerUri].(string),

@@ -40,8 +40,8 @@ type Scorecard {
   checks: [ScorecardCheck!]!
   "Overall Scorecard score for the source"
   aggregateScore: Float!
-  "Exact timestamp when the source was last scanned"
-  timeScanned: String!
+  "Exact timestamp when the source was last scanned (in RFC 3339 format)"
+  timeScanned: Time!
   "Version of the Scorecard scanner used to analyze the source"
   scorecardVersion: String!
   "Commit of the Scorecards repository at the time of scanning the source"
@@ -78,7 +78,7 @@ CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
 """
 input CertifyScorecardSpec {
   source: SourceSpec
-  timeScanned: String
+  timeScanned: Time
   aggregateScore: Float
   checks: [ScorecardCheckSpec!] = []
   scorecardVersion: String
@@ -103,7 +103,7 @@ All fields are required.
 input ScorecardInputSpec {
   checks: [ScorecardCheckInputSpec!]!
   aggregateScore: Float!
-  timeScanned: String!
+  timeScanned: Time!
   scorecardVersion: String!
   scorecardCommit: String!
   origin: String!
