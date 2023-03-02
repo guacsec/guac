@@ -20,25 +20,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
 type scorecardParser struct {
-	scorecardNodes []assembler.MetadataNode
-	// artifactNode should have a 1:1 mapping to the index
-	// of scorecardNodes.
-	artifactNodes []assembler.ArtifactNode
+	scorecardPredicates []*model.ScorecardInputSpec
+	srcPredicates       []*model.SourceInputSpec
 }
 
 // NewSLSAParser initializes the slsaParser
 func NewScorecardParser() common.DocumentParser {
 	return &scorecardParser{
-		scorecardNodes: []assembler.MetadataNode{},
-		artifactNodes:  []assembler.ArtifactNode{},
+		scorecardPredicates: []*model.ScorecardInputSpec{},
+		srcPredicates:       []*model.SourceInputSpec{},
 	}
 }
 
@@ -55,42 +55,28 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 		if err := json.Unmarshal(doc.Blob, &scorecard); err != nil {
 			return err
 		}
-		p.scorecardNodes = append(p.scorecardNodes, getMetadataNode(&scorecard))
-		p.artifactNodes = append(p.artifactNodes, getArtifactNode(&scorecard))
+		scPred, srcPred, err := getPredicates(&scorecard)
+		if err != nil {
+			return fmt.Errorf("error parsing scorecard document: %w", err)
+		}
+		p.scorecardPredicates = append(p.scorecardPredicates, scPred)
+		p.srcPredicates = append(p.srcPredicates, srcPred)
 		return nil
 	}
 	return fmt.Errorf("unable to support parsing of Scorecard document format: %v", doc.Format)
 }
 
-// TODO(bulldozer): replace with GetPredicates
-// // CreateNodes creates the GuacNode for the graph inputs
-// func (p *scorecardParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-// 	nodes := []assembler.GuacNode{}
-// 	for _, n := range p.scorecardNodes {
-// 		nodes = append(nodes, n)
-// 	}
-// 	for _, n := range p.artifactNodes {
-// 		nodes = append(nodes, n)
-// 	}
-//
-// 	return nodes
-// }
-//
-// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-// func (p *scorecardParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
-// 	// TODO: handle identity for edges (https://github.com/guacsec/guac/issues/128)
-// 	edges := []assembler.GuacEdge{}
-// 	for i, s := range p.scorecardNodes {
-// 		edges = append(edges, assembler.MetadataForEdge{
-// 			MetadataNode: s,
-// 			ForArtifact:  p.artifactNodes[i],
-// 		})
-// 	}
-// 	return edges
-// }
-
-func (p *scorecardParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
-	return nil
+func (p *scorecardParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
+	var preds []assembler.CertifyScorecardIngest
+	for i, scPred := range p.scorecardPredicates {
+		preds = append(preds, assembler.CertifyScorecardIngest{
+			Scorecard: scPred,
+			Source:    p.srcPredicates[i],
+		})
+	}
+	return &assembler.PlaceholderStruct{
+		CertifyScorecard: preds,
+	}
 }
 
 // GetIdentities gets the identity node from the document if they exist
@@ -98,52 +84,58 @@ func (p *scorecardParser) GetIdentities(ctx context.Context) []common.TrustInfor
 	return nil
 }
 
-func metadataId(s *sc.JSONScorecardResultV2) string {
-	return fmt.Sprintf("%v:%v", s.Repo.Name, s.Repo.Commit)
-}
-
-func getMetadataNode(s *sc.JSONScorecardResultV2) assembler.MetadataNode {
-	mnNode := assembler.MetadataNode{
-		MetadataType: "scorecard",
-		ID:           metadataId(s),
-		Details:      map[string]interface{}{},
-	}
-
-	for _, c := range s.Checks {
-		mnNode.Details[strings.ReplaceAll(c.Name, "-", "_")] = c.Score
-	}
-	mnNode.Details["repo"] = sourceUri(s.Repo.Name)
-	mnNode.Details["commit"] = hashToDigest(s.Repo.Commit)
-	mnNode.Details["scorecard_version"] = s.Scorecard.Version
-	mnNode.Details["scorecard_commit"] = hashToDigest(s.Scorecard.Commit)
-	mnNode.Details["score"] = float64(s.AggregateScore)
-
-	return mnNode
-}
-
-func getArtifactNode(s *sc.JSONScorecardResultV2) assembler.ArtifactNode {
-	return assembler.ArtifactNode{
-		Name:   sourceUri(s.Repo.Name),
-		Digest: hashToDigest(s.Repo.Commit),
-	}
-}
-
-func sourceUri(s string) string {
-	return "git+https://" + s
-}
-
-func hashToDigest(h string) string {
-	switch len(h) {
-	case 40:
-		return "sha1:" + h
-	case 64:
-		return "sha256:" + h
-	case 128:
-		return "sha512:" + h
-	}
-	return h
-}
-
 func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
+}
+
+func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *model.SourceInputSpec, error) {
+	var ns, name string
+	idx := strings.LastIndex(s.Repo.Name, "/")
+	if idx < 0 {
+		name = s.Repo.Name
+	}
+
+	ns = s.Repo.Name[:idx]
+	name = s.Repo.Name[idx+1:]
+
+	srcInput := model.SourceInputSpec{
+		// assuming scorecards is only git
+		Type:      "git",
+		Namespace: ns,
+		Name:      name,
+		Commit:    &s.Repo.Commit,
+	}
+
+	var checks []*model.ScorecardCheckInputSpec
+	for _, c := range s.Checks {
+		checks = append(checks, &model.ScorecardCheckInputSpec{
+			Check: c.Name,
+			Score: c.Score,
+		})
+	}
+
+	var (
+		timeScanned time.Time
+		err         error
+	)
+	timeScanned, err = time.Parse(time.RFC3339, s.Date)
+	if err != nil {
+		// at the moment, scorecard doesn't use RFC3339 and a custom format
+		// heuristic to check this and convert to RFC3339.
+		//
+		// https://github.com/ossf/scorecard/issues/2711
+		timeScanned, err = time.Parse("2006-01-02", s.Date)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	scInput := model.ScorecardInputSpec{
+		TimeScanned:      timeScanned,
+		AggregateScore:   (float64)(s.AggregateScore),
+		Checks:           checks,
+		ScorecardVersion: s.Scorecard.Version,
+		ScorecardCommit:  s.Scorecard.Commit,
+	}
+	return &scInput, &srcInput, nil
 }

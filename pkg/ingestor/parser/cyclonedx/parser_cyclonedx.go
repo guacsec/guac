@@ -220,6 +220,6 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 	return nil, fmt.Errorf("not yet implemented")
 }
 
-func (c *cyclonedxParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
+func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
 	return nil
 }
