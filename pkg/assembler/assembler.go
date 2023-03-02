@@ -15,6 +15,8 @@
 
 package assembler
 
+import "github.com/guacsec/guac/pkg/assembler/graphql/model"
+
 type assembler struct{} //nolint: unused
 
 // NOTE: `GuacNode` and `GuacEdge` interfaces are very experimental and might
@@ -138,8 +140,17 @@ func (g *Graph) AppendGraph(gs ...Graph) {
 
 // TODO(mihaimaruseac): Write queries to write/read subgraphs from DB?
 
+// PlaceholderStruct contains the set of predicates that want to be
+// ingested based on the GUAC ontology. It only has evidence trees as
+// ingestion of the software trees are implicit and handled by the
+// client library.
 type PlaceholderStruct struct {
-	Tmp any
+	CertifyScorecard []CertifyScorecardIngest
+}
+
+type CertifyScorecardIngest struct {
+	Source    *model.SourceInputSpec
+	Scorecard *model.ScorecardInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph

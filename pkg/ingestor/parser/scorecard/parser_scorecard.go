@@ -22,23 +22,22 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
 type scorecardParser struct {
-	scorecardNodes []assembler.MetadataNode
-	// artifactNode should have a 1:1 mapping to the index
-	// of scorecardNodes.
-	artifactNodes []assembler.ArtifactNode
+	scorecardPredicates []*model.ScorecardInputSpec
+	srcPredicates       []*model.SourceInputSpec
 }
 
 // NewSLSAParser initializes the slsaParser
 func NewScorecardParser() common.DocumentParser {
 	return &scorecardParser{
-		scorecardNodes: []assembler.MetadataNode{},
-		artifactNodes:  []assembler.ArtifactNode{},
+		scorecardPredicates: []*model.ScorecardInputSpec{},
+		srcPredicates:       []*model.SourceInputSpec{},
 	}
 }
 
@@ -55,8 +54,9 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 		if err := json.Unmarshal(doc.Blob, &scorecard); err != nil {
 			return err
 		}
-		p.scorecardNodes = append(p.scorecardNodes, getMetadataNode(&scorecard))
-		p.artifactNodes = append(p.artifactNodes, getArtifactNode(&scorecard))
+		scPred, srcPred := getPredicates(&scorecard)
+		p.scorecardPredicates = append(p.scorecardPredicates, scPred)
+		p.srcPredicates = append(p.srcPredicates, srcPred)
 		return nil
 	}
 	return fmt.Errorf("unable to support parsing of Scorecard document format: %v", doc.Format)
@@ -90,7 +90,16 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 // }
 
 func (p *scorecardParser) GetPredicates(ctx context.Context) []assembler.PlaceholderStruct {
-	return nil
+	var preds []assembler.CertifyScorecardIngest
+	for i, scPred := range p.scorecardPredicates {
+		preds = append(preds, assembler.CertifyScorecardIngest{
+			Scorecard: scPred,
+			Source:    p.srcPredicates[i],
+		})
+	}
+	return []assembler.PlaceholderStruct{
+		{CertifyScorecard: preds},
+	}
 }
 
 // GetIdentities gets the identity node from the document if they exist
@@ -146,4 +155,42 @@ func hashToDigest(h string) string {
 
 func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
+}
+
+func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *model.SourceInputSpec) {
+	var ns, name string
+	idx := strings.LastIndex(s.Repo.Name, "/")
+	if idx < 0 {
+		name = s.Repo.Name
+	}
+
+	ns = s.Repo.Name[:idx]
+	name = s.Repo.Name[idx+1:]
+
+	srcInput := model.SourceInputSpec{
+		// assuming scorecards is only git
+		Type:      "git",
+		Namespace: ns,
+		Name:      name,
+		Commit:    &s.Repo.Commit,
+	}
+
+	var checks []*model.ScorecardCheckInputSpec
+	for _, c := range s.Checks {
+		checks = append(checks, &model.ScorecardCheckInputSpec{
+			Check: c.Name,
+			Score: c.Score,
+		})
+	}
+
+	// TODO: will become CertifyScorecardInputSpec
+	scInput := model.ScorecardInputSpec{
+		// TODO: Put the above source input here
+		TimeScanned:      s.Date,
+		AggregateScore:   (float64)(s.AggregateScore),
+		Checks:           checks,
+		ScorecardVersion: s.Scorecard.Version,
+		ScorecardCommit:  s.Scorecard.Commit,
+	}
+	return &scInput, &srcInput
 }
