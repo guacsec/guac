@@ -165,7 +165,7 @@ func registerVersion(n *model.PackageName, version, subpath string, qualifiers .
 func buildQualifierSet(qualifiers ...string) []*model.PackageQualifier {
 	var qs []*model.PackageQualifier
 	for i, _ := range qualifiers {
-		if i % 2 == 0 {
+		if i%2 == 0 {
 			qs = append(qs, &model.PackageQualifier{
 				Key:   qualifiers[i],
 				Value: qualifiers[i+1],
