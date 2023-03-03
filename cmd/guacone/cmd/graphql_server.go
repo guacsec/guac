@@ -33,9 +33,8 @@ import (
 )
 
 const (
-	gqlBackendNeo4j   = "neo4j"
-	gqlBackendInmem   = "inmem"
-	gqlBackendTesting = "testing"
+	gqlBackendNeo4j = "neo4j"
+	gqlBackendInmem = "inmem"
 )
 
 type graphqlServerOptions struct {
@@ -86,10 +85,6 @@ var graphqlServerCmd = &cobra.Command{
 			http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 			logger.Infof("connect to http://localhost:%d/ for GraphQL playground", opts.graphqlPort)
 		}
-		if opts.graphqlBackend == gqlBackendTesting {
-			logger.Infof("using testing backend, test data will be bootstrapped in the API")
-		}
-
 		logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", opts.graphqlPort), nil))
 
 	},
@@ -105,8 +100,7 @@ func validateGraphqlServerFlags(user string, pass string, dbAddr string, realm s
 	opts.realm = realm
 
 	if graphqlBackend != gqlBackendNeo4j &&
-		graphqlBackend != gqlBackendInmem &&
-		graphqlBackend != gqlBackendTesting {
+		graphqlBackend != gqlBackendInmem {
 		return opts, fmt.Errorf("invalid graphql backend specified: %v", graphqlBackend)
 	}
 
@@ -136,16 +130,6 @@ func getGraphqlServer(opts graphqlServerOptions) (*handler.Server, error) {
 		}
 
 		topResolver = resolvers.Resolver{Backend: backend}
-
-	case gqlBackendTesting:
-		args := testing.DemoCredentials{}
-		backend, err := testing.GetBackend(&args)
-		if err != nil {
-			return nil, fmt.Errorf("Error creating testing backend: %w", err)
-		}
-
-		topResolver = resolvers.Resolver{Backend: backend}
-
 	case gqlBackendInmem:
 		args := testing.DemoCredentials{}
 		backend, err := testing.GetEmptyBackend(&args)
