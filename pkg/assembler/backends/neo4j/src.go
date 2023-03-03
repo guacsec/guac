@@ -428,10 +428,14 @@ func (c *neo4jClient) IngestSource(ctx context.Context, source *model.SourceInpu
 
 	if source.Commit != nil {
 		values["commit"] = *source.Commit
+	} else {
+		values["commit"] = ""
 	}
 
 	if source.Tag != nil {
 		values["tag"] = *source.Tag
+	} else {
+		values["tag"] = ""
 	}
 
 	result, err := session.WriteTransaction(
