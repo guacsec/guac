@@ -103,7 +103,7 @@ var ingestCmd = &cobra.Command{
 			return nil
 		}
 
-		ingestorTransportFunc := func(d []assembler.PlaceholderStruct, i []*parser_common.IdentifierStrings) error {
+		ingestorTransportFunc := func(d []assembler.IngestPredicates, i []*parser_common.IdentifierStrings) error {
 			err := assemblerFunc(d)
 			if err != nil {
 				return err
@@ -173,7 +173,7 @@ func getProcessor(ctx context.Context, transportFunc func(processor.DocumentTree
 	}, nil
 }
 
-func getIngestor(ctx context.Context, transportFunc func([]assembler.PlaceholderStruct, []*parser_common.IdentifierStrings) error) (func() error, error) {
+func getIngestor(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*parser_common.IdentifierStrings) error) (func() error, error) {
 	return func() error {
 		err := parser.Subscribe(ctx, transportFunc)
 		if err != nil {
@@ -183,7 +183,7 @@ func getIngestor(ctx context.Context, transportFunc func([]assembler.Placeholder
 	}, nil
 }
 
-func getAssembler(opts options) (func([]assembler.PlaceholderStruct) error, error) {
+func getAssembler(opts options) (func([]assembler.IngestPredicates) error, error) {
 	// TODO(bulldozer): return function to talk to graphQL
 	// 	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
 	// 		opts.user,
@@ -214,7 +214,7 @@ func getAssembler(opts options) (func([]assembler.PlaceholderStruct) error, erro
 	// 	}
 	// 	return nil
 	// }, nil
-	return func(_ []assembler.PlaceholderStruct) error { return nil }, nil
+	return func(_ []assembler.IngestPredicates) error { return nil }, nil
 }
 
 func createIndices(client graphdb.Client) error {

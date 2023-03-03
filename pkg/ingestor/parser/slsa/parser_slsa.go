@@ -150,7 +150,7 @@ func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
 // 	return edges
 // }
 
-func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
+func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	return nil
 }
 
