@@ -40,7 +40,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 
 func ingestCertifyScorecards(ctx context.Context, client graphql.Client, vs []assembler.CertifyScorecardIngest) error {
 	for _, v := range vs {
-		_, err := model.Scorecard(context.Background(), client, *v.Source, *v.Scorecard)
+		_, err := model.Scorecard(ctx, client, *v.Source, *v.Scorecard)
 		if err != nil {
 			return err
 		}
