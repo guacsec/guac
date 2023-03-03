@@ -218,7 +218,7 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 	} else {
-		query := "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
 			"-[:PkgHasName]->(objPkgName:PkgName)"
 
