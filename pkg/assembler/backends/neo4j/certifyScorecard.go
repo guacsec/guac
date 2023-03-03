@@ -202,10 +202,14 @@ func (c *neo4jClient) CertifyScorecard(ctx context.Context, source model.SourceI
 
 	if source.Commit != nil {
 		values["commit"] = *source.Commit
+	} else {
+		values["commit"] = ""
 	}
 
 	if source.Tag != nil {
 		values["tag"] = *source.Tag
+	} else {
+		values["tag"] = ""
 	}
 
 	values[timeScanned] = scorecard.TimeScanned
