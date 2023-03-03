@@ -34,7 +34,7 @@ import (
 
 var ociCmd = &cobra.Command{
 	Use:   "image [flags] image_path1 image_path2...",
-	Short: "takes images to download sbom and attestation stored in OCI to add to GUAC graph",
+	Short: "takes images to download sbom and attestation stored in OCI to add to GUAC graph, this command talks directly to the graphQL endpoint",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
@@ -70,7 +70,7 @@ var ociCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(opts)
+		assemblerFunc, err := getAssembler(ctx, opts)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)

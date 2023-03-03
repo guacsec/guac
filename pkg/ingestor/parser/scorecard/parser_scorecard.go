@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	sc "github.com/ossf/scorecard/v4/pkg"
@@ -106,9 +106,9 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 		Commit:    &s.Repo.Commit,
 	}
 
-	var checks []*model.ScorecardCheckInputSpec
+	var checks []model.ScorecardCheckInputSpec
 	for _, c := range s.Checks {
-		checks = append(checks, &model.ScorecardCheckInputSpec{
+		checks = append(checks, model.ScorecardCheckInputSpec{
 			Check: c.Name,
 			Score: c.Score,
 		})

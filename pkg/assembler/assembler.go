@@ -15,7 +15,7 @@
 
 package assembler
 
-import "github.com/guacsec/guac/pkg/assembler/graphql/model"
+import "github.com/guacsec/guac/pkg/assembler/clients/generated"
 
 type assembler struct{} //nolint: unused
 
@@ -149,8 +149,8 @@ type IngestPredicates struct {
 }
 
 type CertifyScorecardIngest struct {
-	Source    *model.SourceInputSpec
-	Scorecard *model.ScorecardInputSpec
+	Source    *generated.SourceInputSpec
+	Scorecard *generated.ScorecardInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph

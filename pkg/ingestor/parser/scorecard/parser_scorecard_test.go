@@ -23,7 +23,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -53,7 +53,7 @@ func Test_scorecardParser(t *testing.T) {
 						Commit:    strP("5835544ca568b757a8ecae5c153f317e5736700e"),
 					},
 					Scorecard: &model.ScorecardInputSpec{
-						Checks: []*model.ScorecardCheckInputSpec{
+						Checks: []model.ScorecardCheckInputSpec{
 							{Check: "Binary-Artifacts", Score: 10},
 							{Check: "CI-Tests", Score: 10},
 							{Check: "Code-Review", Score: 7},

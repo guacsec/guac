@@ -23,6 +23,8 @@ documents that we want to send to the server.
   GraphQL schema specification and the operation queries
 - `operations/`: the GraphQL queries that the client (e.g., GUAC) sends to the
   server (e.g., GUAC database backend, via GraphQL)
+- `helpers/`: the GraphQL helper functions to return an assembler function given
+  a graphql client.
 
 ## GraphQL client code generation
 

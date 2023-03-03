@@ -15,3 +15,4 @@ csub-listen-port: 2782
 gql-backend: neo4j
 gql-port: 8080
 gql-debug: false
+gql-endpoint: http://guac-graphql:8080/query

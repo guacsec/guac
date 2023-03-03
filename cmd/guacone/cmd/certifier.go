@@ -35,7 +35,7 @@ import (
 
 var certifierCmd = &cobra.Command{
 	Use:   "certifier",
-	Short: "certifies packages in GUAC graph",
+	Short: "certifies packages in GUAC graph, this command talks directly to the graphQL endpoint",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
@@ -75,7 +75,7 @@ var certifierCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(opts)
+		assemblerFunc, err := getAssembler(ctx, opts)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)

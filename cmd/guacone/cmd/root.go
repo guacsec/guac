@@ -44,6 +44,9 @@ var flags = struct {
 	graphqlBackend string
 	graphqlPort    int
 	graphqlDebug   bool
+
+	// graphQL client flags
+	graphqlEndpoint string
 }{}
 
 var cfgFile string
@@ -57,18 +60,23 @@ func init() {
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.keyPath, "verifier-keyPath", "", "path to pem file to verify dsse")
 	persistentFlags.StringVar(&flags.keyID, "verifier-keyID", "", "ID of the key to be stored")
+
 	// collectsub flags
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
-	// graphql flags
+
+	// graphql server flags
 	persistentFlags.StringVar(&flags.graphqlBackend, "gql-backend", "neo4j", "backend used for graphql api server: [neo4j | inmem]")
 	persistentFlags.IntVar(&flags.graphqlPort, "gql-port", 8080, "port used for graphql api server")
 	persistentFlags.BoolVar(&flags.graphqlDebug, "gql-debug", false, "debug flag which enables the graphQL playground")
 
+	// graphql client flags
+	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
+
 	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm",
 		"verifier-keyPath", "verifier-keyID",
 		"csub-addr", "csub-listen-port",
-		"gql-backend", "gql-port", "gql-debug",
+		"gql-backend", "gql-port", "gql-debug", "gql-endpoint",
 	}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
