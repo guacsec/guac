@@ -103,9 +103,7 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 		Type:      "git",
 		Namespace: ns,
 		Name:      name,
-		Commit:    s.Repo.Commit,
-		// TODO: fix after update model
-		//Commit:    &s.Repo.Commit,
+		Commit:    &s.Repo.Commit,
 	}
 
 	var checks []model.ScorecardCheckInputSpec
