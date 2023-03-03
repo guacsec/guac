@@ -19,6 +19,7 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
 // GraphBuilder creates the assembler inputs based on the documents being parsed
@@ -36,10 +37,11 @@ func NewGenericGraphBuilder(docParser DocumentParser, foundIdentities []TrustInf
 }
 
 // CreateAssemblerInput creates the GuacNodes and GuacEdges that are needed by the assembler
-func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []TrustInformation) assembler.AssemblerInput {
-	// TODO(bulldozer): call docParser to get assemblerinput, add trust information when needed
-	assemblerinput := assembler.AssemblerInput{}
-	return assemblerinput
+func (b *GraphBuilder) CreateAssemblerInput(ctx context.Context, foundIdentities []TrustInformation, srcInfo processor.SourceInformation) *assembler.AssemblerInput {
+	predicates := b.docParser.GetPredicates(ctx)
+	addMetadata(predicates, foundIdentities, srcInfo)
+
+	return predicates
 }
 
 // GetIdentities returns the identity that is found when parsing a document
@@ -49,4 +51,16 @@ func (b *GraphBuilder) GetIdentities() []TrustInformation {
 
 func (b *GraphBuilder) GetIdentifiers(ctx context.Context) (*IdentifierStrings, error) {
 	return b.docParser.GetIdentifiers(ctx)
+}
+
+// addMetadata adds trust and source collector metadata
+func addMetadata(predicates *assembler.IngestPredicates, foundIdentities []TrustInformation, srcInfo processor.SourceInformation) {
+	// TODO: when trust information fields need to be added to GQL nodes
+	// and added here.
+	_ = foundIdentities
+
+	for _, v := range predicates.CertifyScorecard {
+		v.Scorecard.Collector = srcInfo.Collector
+		v.Scorecard.Origin = srcInfo.Source
+	}
 }
