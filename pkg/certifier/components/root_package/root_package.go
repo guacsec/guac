@@ -58,12 +58,13 @@ func (q *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 		if !ok {
 			return errors.New("failed to cast to node type")
 		}
+		visited := map[int64]bool{foundNode.Id: true}
 		rootPackage := assembler.PackageNode{}
 		rootPackage.Purl, ok = foundNode.Props["purl"].(string)
 		if !ok {
 			return errors.New("failed to cast purl property to string type")
 		}
-		deps, err := getCompHelper(ctx, q.client, rootPackage.Purl, map[int64]bool{})
+		deps, err := getCompHelper(ctx, q.client, rootPackage.Purl, visited)
 		if err != nil {
 			return err
 		}
