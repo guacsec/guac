@@ -120,3 +120,28 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	}
 	return client, nil
 }
+
+func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
+	client := &demoClient{
+		packages:            []*model.Package{},
+		sources:             []*model.Source{},
+		cve:                 []*model.Cve{},
+		ghsa:                []*model.Ghsa{},
+		osv:                 []*model.Osv{},
+		artifacts:           []*model.Artifact{},
+		builders:            []*model.Builder{},
+		hashEquals:          []*model.HashEqual{},
+		isOccurrence:        []*model.IsOccurrence{},
+		hasSBOM:             []*model.HasSbom{},
+		isDependency:        []*model.IsDependency{},
+		certifyPkg:          []*model.CertifyPkg{},
+		certifyVuln:         []*model.CertifyVuln{},
+		hasSourceAt:         []*model.HasSourceAt{},
+		certifyScorecard:    []*model.CertifyScorecard{},
+		certifyBad:          []*model.CertifyBad{},
+		isVulnerability:     []*model.IsVulnerability{},
+		certifyVEXStatement: []*model.CertifyVEXStatement{},
+		hasSLSA:             []*model.HasSlsa{},
+	}
+	return client, nil
+}
