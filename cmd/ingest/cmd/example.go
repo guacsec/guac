@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser"
 	"github.com/guacsec/guac/pkg/logging"
@@ -45,6 +44,7 @@ var exampleCmd = &cobra.Command{
 			viper.GetString("realm"),
 			viper.GetString("natsaddr"),
 			viper.GetString("csub-addr"),
+			viper.GetString("gql-endpoint"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -52,23 +52,16 @@ var exampleCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// Access graphDB
-
-		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
-		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
+		assembleFn, err := getAssembler(ctx, opts)
 		if err != nil {
-			logger.Errorf("unable to initialize graph client: %v", err)
+			fmt.Printf("unable to initialize assembler: %v\n", err)
 			os.Exit(1)
 		}
 
-		// Parse sample documents
-		g := assembler.Graph{
-			Nodes: []assembler.GuacNode{},
-			Edges: []assembler.GuacEdge{},
-		}
+		var inputs []assembler.IngestPredicates
 		for _, doc := range docs {
 			// This is a test example, so we will ignore calling out to a collectsub service
-			inputs, _, err := parser.ParseDocumentTree(ctx, doc)
+			input, _, err := parser.ParseDocumentTree(ctx, doc)
 			if err != nil {
 				logger.Errorf("unable to parse document: %v", err)
 				os.Exit(1)
@@ -77,15 +70,15 @@ var exampleCmd = &cobra.Command{
 			// TODO(bulldozer): collate inputs
 			// g.AppendGraph(inputs...)
 			_ = inputs
+			inputs = append(inputs, input...)
 		}
-		logger.Infof("graph nodes: %v, edges: %v", len(g.Nodes), len(g.Edges))
 
-		// TODO(bulldozer): call routine to ingest
-		// if err := assembler.StoreGraph(g, client); err != nil {
-		// 	logger.Errorf("unable to store graph: %v", err)
-		// 	os.Exit(1)
-		// }
-		_ = client
+		logger.Infof("predicates: %+v", inputs)
+		err = assembleFn(inputs)
+		if err != nil {
+			fmt.Printf("unable to assemble ingested input: %v", err)
+			os.Exit(1)
+		}
 	},
 }
 

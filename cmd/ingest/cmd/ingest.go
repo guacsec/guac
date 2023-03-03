@@ -19,10 +19,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"sync"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/helpers"
 	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/collectsub/input"
@@ -37,12 +40,13 @@ import (
 )
 
 type options struct {
-	dbAddr   string
-	user     string
-	pass     string
-	realm    string
-	natsAddr string
-	csubAddr string
+	dbAddr          string
+	user            string
+	pass            string
+	realm           string
+	natsAddr        string
+	csubAddr        string
+	graphqlEndpoint string
 }
 
 var ingestCmd = &cobra.Command{
@@ -57,6 +61,7 @@ var ingestCmd = &cobra.Command{
 			viper.GetString("realm"),
 			viper.GetString("natsaddr"),
 			viper.GetString("csub-addr"),
+			viper.GetString("gql-endpoint"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -85,7 +90,7 @@ var ingestCmd = &cobra.Command{
 		}
 		defer csubClient.Close()
 
-		assemblerFunc, err := getAssembler(opts)
+		assemblerFunc, err := getAssembler(ctx, opts)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -155,7 +160,7 @@ var ingestCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, csubAddr string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, csubAddr string, graphqlEndpoint string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
@@ -163,6 +168,7 @@ func validateFlags(user string, pass string, dbAddr string, realm string, natsAd
 	opts.realm = realm
 	opts.natsAddr = natsAddr
 	opts.csubAddr = csubAddr
+	opts.graphqlEndpoint = graphqlEndpoint
 
 	return opts, nil
 }
@@ -181,40 +187,6 @@ func getIngestor(ctx context.Context, transportFunc func([]assembler.IngestPredi
 		}
 		return nil
 	}, nil
-}
-
-func getAssembler(opts options) (func([]assembler.IngestPredicates) error, error) {
-	// TODO(bulldozer): return function to talk to graphQL
-	// 	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
-	// 		opts.user,
-	// 		opts.pass,
-	// 		opts.realm,
-	// 	)
-	//
-	// 	client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	//
-	// 	err = createIndices(client)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	//
-	// return func(gs []assembler.Graph) error {
-	// 	combined := assembler.Graph{
-	// 		Nodes: []assembler.GuacNode{},
-	// 		Edges: []assembler.GuacEdge{},
-	// 	}
-	// 	for _, g := range gs {
-	// 		combined.AppendGraph(g)
-	// 	}
-	// 	if err := assembler.StoreGraph(combined, client); err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }, nil
-	return func(_ []assembler.IngestPredicates) error { return nil }, nil
 }
 
 func createIndices(client graphdb.Client) error {
@@ -240,4 +212,11 @@ func createIndices(client graphdb.Client) error {
 
 func init() {
 	rootCmd.AddCommand(ingestCmd)
+}
+
+func getAssembler(ctx context.Context, opts options) (func([]assembler.IngestPredicates) error, error) {
+	httpClient := http.Client{}
+	gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
+	f := helpers.GetAssembler(ctx, gqlclient)
+	return f, nil
 }
