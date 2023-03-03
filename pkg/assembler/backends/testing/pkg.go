@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -25,45 +24,45 @@ import (
 func registerAllPackages(client *demoClient) {
 	// TODO: add util to convert from pURL to package fields
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-	client.registerPackage("apk", "alpine", "apk", "2.12.9-r3", "", "arch=x86")
+	client.registerPackage("apk", "alpine", "apk", "2.12.9-r3", "", "arch", "x86")
 	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
-	client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch=x86")
+	client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch", "x86")
 	// pkg:conan/openssl.org/openssl@3.0.3?arch=x86_64&build_type=Debug&compiler=Visual%20Studio&compiler.runtime=MDd&compiler.version=16&os=Windows&shared=True&rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e&prev=b429db8a0e324114c25ec387bfd8281f330d7c5c
-	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "arch=x86_64", "build_type=Debug", "compiler=Visual%20Studio", "compiler.runtime=MDd", "compiler.version=16", "os=Windows", "shared=True", "rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e", "prev=b429db8a0e324114c25ec387bfd8281f330d7c5c")
+	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "arch", "x86_64", "build_type", "Debug", "compiler", "Visual%20Studio", "compiler.runtime", "MDd", "compiler.version", "16", "os", "Windows", "shared", "True", "rrev", "93a82349c31917d2d674d22065c7a9ef9f380c8e", "prev", "b429db8a0e324114c25ec387bfd8281f330d7c5c")
 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable")
+	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "user", "bincrafters", "channel", "stable")
 	// pkg:conan/openssl@3.0.3
 	client.registerPackage("conan", "", "openssl", "3.0.3", "")
 	// pkg:deb/debian/attr@1:2.4.47-2?arch=amd64
-	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch=amd64")
+	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch", "amd64")
 	// pkg:deb/debian/attr@1:2.4.47-2?arch=source
-	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch=source")
+	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch", "source")
 	// pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie
-	client.registerPackage("deb", "debian", "curl", "7.50.3-1", "", "arch=i386", "distro=jessie")
+	client.registerPackage("deb", "debian", "curl", "7.50.3-1", "", "arch", "i386", "distro", "jessie")
 	// pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch
-	client.registerPackage("deb", "debian", "dpkg", "1.19.0.4", "", "arch=amd64", "distro=stretch")
+	client.registerPackage("deb", "debian", "dpkg", "1.19.0.4", "", "arch", "amd64", "distro", "stretch")
 	// pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64
-	client.registerPackage("deb", "ubuntu", "dpkg", "1.19.0.4", "", "arch=amd64")
+	client.registerPackage("deb", "ubuntu", "dpkg", "1.19.0.4", "", "arch", "amd64")
 	// pkg:docker/cassandra@latest
 	client.registerPackage("docker", "", "cassandra", "latest", "")
 	// pkg:docker/cassandra@sha256:244fd47e07d1004f0aed9c
 	client.registerPackage("docker", "", "cassandra", "sha256:244fd47e07d1004f0aed9c", "")
 	// pkg:docker/customer/dockerimage@sha256:244fd47e07d1004f0aed9c?repository_url=gcr.io
-	client.registerPackage("docker", "customer", "dockerimage", "sha256:244fd47e07d1004f0aed9c", "", "repository_url=gcr.io")
+	client.registerPackage("docker", "customer", "dockerimage", "sha256:244fd47e07d1004f0aed9c", "", "repository_url", "gcr.io")
 	// pkg:docker/smartentry/debian@dc437cc87d10
 	client.registerPackage("docker", "smartentry", "debian", "dc437cc87d10", "")
 	// pkg:generic/bitwarderl?vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32
-	client.registerPackage("generic", "", "bitwarderl", "", "", "vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32")
+	client.registerPackage("generic", "", "bitwarderl", "", "", "vcs_url", "git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32")
 	// pkg:generic/openssl@1.1.10g
 	client.registerPackage("generic", "", "openssl", "1.1.10g", "")
 	// pkg:generic/openssl@1.1.10g?download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da
-	client.registerPackage("generic", "", "openssl", "1.1.10g", "", "download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum=sha256:de4d501267da")
+	client.registerPackage("generic", "", "openssl", "1.1.10g", "", "download_url", "https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum", "sha256:de4d501267da")
 	// pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
-	client.registerPackage("oci", "", "debian", "sha256:244fd47e07d10", "", "repository_url=ghcr.io/debian", "tag=bullseye")
+	client.registerPackage("oci", "", "debian", "sha256:244fd47e07d10", "", "repository_url", "ghcr.io/debian", "tag", "bullseye")
 	// pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1
-	client.registerPackage("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", "tag=v1")
+	client.registerPackage("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", "tag", "v1")
 	// pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io/distroless/static&tag=latest
-	client.registerPackage("oci", "", "static", "sha256:244fd47e07d10", "", "repository_url=gcr.io/distroless/static", "tag=latest")
+	client.registerPackage("oci", "", "static", "sha256:244fd47e07d10", "", "repository_url", "gcr.io/distroless/static", "tag", "latest")
 	// pkg:pypi/django-allauth@12.23
 	client.registerPackage("pypi", "", "django-allauth", "12.23", "")
 	// pkg:pypi/django@1.11.1
@@ -165,12 +164,13 @@ func registerVersion(n *model.PackageName, version, subpath string, qualifiers .
 
 func buildQualifierSet(qualifiers ...string) []*model.PackageQualifier {
 	var qs []*model.PackageQualifier
-	for _, kv := range qualifiers {
-		pair := strings.Split(kv, "=")
-		qs = append(qs, &model.PackageQualifier{
-			Key:   pair[0],
-			Value: pair[1],
-		})
+	for i, _ := range qualifiers {
+		if i%2 == 0 {
+			qs = append(qs, &model.PackageQualifier{
+				Key:   qualifiers[i],
+				Value: qualifiers[i+1],
+			})
+		}
 	}
 	return qs
 }

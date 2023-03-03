@@ -77,7 +77,7 @@ func registerAllIsDependency(client *demoClient) error {
 
 	// Dependent Package:
 	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
-	client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch=x86")
+	client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch", "x86")
 
 	depType = "apk"
 	depdNameSpace = "alpine"
