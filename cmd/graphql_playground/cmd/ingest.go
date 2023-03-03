@@ -47,11 +47,12 @@ func ingestData(port int) {
 func ingestScorecards(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
+	tag := "v2.12.0"
 	source := model.SourceInputSpec{
 		Type:      "git",
 		Namespace: "github",
 		Name:      "github.com/tensorflow/tensorflow",
-		Tag:       "v2.12.0",
+		Tag:       &tag,
 	}
 	checks := []model.ScorecardCheckInputSpec{
 		{Check: "Binary_Artifacts", Score: 4},
@@ -79,16 +80,19 @@ func ingestScorecards(ctx context.Context, client graphql.Client) {
 func ingestDependency(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
+	ns := "ubuntu"
+	version := "1.19.0.4"
 	pkg := model.PkgInputSpec{
 		Type:       "deb",
-		Namespace:  "ubuntu",
+		Namespace:  &ns,
 		Name:       "dpkg",
-		Version:    "1.19.0.4",
+		Version:    &version,
 		Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "amd64"}},
 	}
+	depns := "openssl.org"
 	depPkg := model.PkgInputSpec{
 		Type:      "conan",
-		Namespace: "openssl.org",
+		Namespace: &depns,
 		Name:      "openssl",
 	}
 	dependency := model.IsDependencyInputSpec{
