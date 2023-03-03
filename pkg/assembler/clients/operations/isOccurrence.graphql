@@ -1,0 +1,65 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines the GraphQL operations to ingest a IsOccurrence into GUAC
+
+fragment allArtifactTree on Artifact {
+  algorithm
+  digest
+}
+
+fragment allIsOccurrencesTree on IsOccurrence {
+  subject {
+    __typename 
+    ... on Package {
+      ...allPkgTree
+    }
+   ...on Source {
+      ...allSrcTree
+    }
+  }
+  occurrenceArtifact {
+    ...allArtifactTree
+  }
+  justification
+  origin
+  collector
+}
+
+mutation IsOccurrencePkg($pkg: PkgInputSpec, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceSpecInputSpec!) {
+  ingestPackage(pkg: $pkg) {
+    ...allPkgTree
+  }
+  ingestArtifact(artifact: $artifact) {
+    ...allArtifactTree
+  }
+  ingestOccurrence(pkg: $pkg, artifact: $artifact, occurrence: $occurrence) {
+    ...allIsOccurrencesTree
+  }
+}
+
+mutation IsOccurrenceSrc($source: SourceInputSpec, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceSpecInputSpec!) {
+  ingestSource(source: $source) {
+    ...allSrcTree
+  }
+  ingestArtifact(artifact: $artifact) {
+    ...allArtifactTree
+  }
+  ingestOccurrence(source: $source, artifact: $artifact, occurrence: $occurrence) {
+    ...allIsOccurrencesTree
+  }
+}

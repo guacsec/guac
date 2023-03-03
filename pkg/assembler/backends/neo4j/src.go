@@ -558,3 +558,15 @@ func generateModelSource(srcType, namespaceStr, nameStr string, commitValue, tag
 	}
 	return &src
 }
+
+// TODO: maybe use generics for SourceInputSpec and SourceSpec?
+func convertSrcInputSpecToSrcSpec(srcInput *model.SourceInputSpec) *model.SourceSpec {
+	srcSpec := model.SourceSpec{
+		Type:      &srcInput.Type,
+		Namespace: &srcInput.Namespace,
+		Name:      &srcInput.Name,
+		Tag:       srcInput.Tag,
+		Commit:    srcInput.Commit,
+	}
+	return &srcSpec
+}

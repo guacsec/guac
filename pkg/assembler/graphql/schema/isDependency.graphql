@@ -84,4 +84,3 @@ extend type Mutation {
   "Adds dependency between two packages"
   ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
 }
-

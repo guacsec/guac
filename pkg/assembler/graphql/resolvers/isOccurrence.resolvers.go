@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestOccurrence is the resolver for the ingestOccurrence field.
+func (r *mutationResolver) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) (*model.IsOccurrence, error) {
+	return r.Backend.IngestOccurrence(ctx, pkg, source, artifact, occurrence)
+}
+
 // IsOccurrence is the resolver for the IsOccurrence field.
 func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	return r.Backend.IsOccurrence(ctx, isOccurrenceSpec)

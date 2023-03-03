@@ -24,6 +24,7 @@ type MutationResolver interface {
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
+	IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) (*model.IsOccurrence, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
@@ -183,6 +184,48 @@ func (ec *executionContext) field_Mutation_ingestOSV_args(ctx context.Context, r
 		}
 	}
 	args["osv"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.PkgInputSpec
+	if tmp, ok := rawArgs["pkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+		arg0, err = ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkg"] = arg0
+	var arg1 *model.SourceInputSpec
+	if tmp, ok := rawArgs["source"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+		arg1, err = ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["source"] = arg1
+	var arg2 model.ArtifactInputSpec
+	if tmp, ok := rawArgs["artifact"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+		arg2, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["artifact"] = arg2
+	var arg3 model.IsOccurrenceSpecInputSpec
+	if tmp, ok := rawArgs["occurrence"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrence"))
+		arg3, err = ec.unmarshalNIsOccurrenceSpecInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpecInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["occurrence"] = arg3
 	return args, nil
 }
 
@@ -970,6 +1013,72 @@ func (ec *executionContext) fieldContext_Mutation_ingestDependency(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestDependency_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestOccurrence(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestOccurrence(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestOccurrence(rctx, fc.Args["pkg"].(*model.PkgInputSpec), fc.Args["source"].(*model.SourceInputSpec), fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["occurrence"].(model.IsOccurrenceSpecInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.IsOccurrence)
+	fc.Result = res
+	return ec.marshalNIsOccurrence2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrence(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestOccurrence(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "subject":
+				return ec.fieldContext_IsOccurrence_subject(ctx, field)
+			case "occurrenceArtifact":
+				return ec.fieldContext_IsOccurrence_occurrenceArtifact(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsOccurrence_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsOccurrence_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsOccurrence_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsOccurrence", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestOccurrence_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2670,6 +2779,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_ingestDependency(ctx, field)
 			})
 
+		case "ingestOccurrence":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestOccurrence(ctx, field)
+			})
+
 		case "ingestOSV":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -3174,6 +3289,11 @@ func (ec *executionContext) marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋ
 		return graphql.Null
 	}
 	return ec._Artifact(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (model.ArtifactInputSpec, error) {
+	res, err := ec.unmarshalInputArtifactInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (*model.ArtifactInputSpec, error) {

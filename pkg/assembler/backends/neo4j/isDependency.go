@@ -177,7 +177,7 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 	queryValues := map[string]any{}
 
 	// TODO: use generics here between PkgInputSpec and PkgSpec?
-	selectedPkgSpec := convertPkgInputSpecToPkgSpec(pkg)
+	selectedPkgSpec := convertPkgInputSpecToPkgSpec(&pkg)
 	// Note: depPkgSpec only takes up to the pkgName as IsDependency does not allow for the attestation
 	// to be made at the pkgVersion level. Version range for the dependent package is defined as a property
 	// on IsDependency.
@@ -209,12 +209,11 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 			"\nWITH *, null AS version"
 
 		sb.WriteString(query)
-		setPkgMatchValues(&sb, &selectedPkgSpec, false, &firstMatch, queryValues)
+		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
 		setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
 
 		merge := "\nMERGE (name)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,justification:$justification,origin:$origin,collector:$collector})" +
-			"-[:dependency]->(objPkgName)" +
-			"\nRETURN RETURN type.type, namespace.namespace, name.name, isDependency, objPkgType.type, objPkgNamespace.namespace, objPkgName.name"
+			"-[:dependency]->(objPkgName)"
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 	} else {
@@ -223,10 +222,10 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 			"-[:PkgHasName]->(objPkgName:PkgName)"
 
 		sb.WriteString(query)
-		setPkgMatchValues(&sb, &selectedPkgSpec, false, &firstMatch, queryValues)
+		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
 		setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
 
-		merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,origin:$origin,collector:$collector})" +
+		merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,justification:$justification,origin:$origin,collector:$collector})" +
 			"-[:dependency]->(objPkgName)"
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)

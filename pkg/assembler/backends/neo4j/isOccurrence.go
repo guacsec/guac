@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -24,6 +25,8 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+// Query IsOccurrence
 
 func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	queryAll := false
@@ -214,4 +217,172 @@ func generateModelIsOccurrence(subject model.PkgSrcObject, artifact *model.Artif
 		Collector:          collector,
 	}
 	return &isOccurrence
+}
+
+// Ingest IngestOccurrence
+
+func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) (*model.IsOccurrence, error) {
+
+	if pkg != nil && source != nil {
+		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
+	}
+
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	occurrenceArt := convertArtInputSpecToArtSpec(&artifact)
+
+	queryValues[justification] = occurrence.Justification
+	queryValues[origin] = occurrence.Origin
+	queryValues[collector] = occurrence.Collector
+
+	if pkg != nil {
+		// TODO: use generics here between PkgInputSpec and PkgSpecs?
+		selectedPkgSpec := convertPkgInputSpecToPkgSpec(pkg)
+
+		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
+			"version.qualifier_list, isOccurrence, objArt.algorithm, objArt.digest"
+
+		if selectedPkgSpec.Version == nil && selectedPkgSpec.Subpath == nil &&
+			len(selectedPkgSpec.Qualifiers) == 0 && !*selectedPkgSpec.MatchOnlyEmptyQualifiers {
+
+			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				"-[:PkgHasName]->(name:PkgName), (objArt:Artifact)" +
+				"\nWITH *, null AS version"
+
+			sb.WriteString(query)
+			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
+			setArtifactMatchValues(&sb, occurrenceArt, true, &firstMatch, queryValues)
+
+			merge := "\nMERGE (name)<-[:subject]-(isOccurrence:IsOccurrence{justification:$justification,origin:$origin,collector:$collector})" +
+				"-[:has_occurrence]->(objArt)"
+			sb.WriteString(merge)
+			sb.WriteString(returnValue)
+		} else {
+			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objArt:Artifact)"
+
+			sb.WriteString(query)
+			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
+			setArtifactMatchValues(&sb, occurrenceArt, true, &firstMatch, queryValues)
+
+			merge := "\nMERGE (version)<-[:subject]-(isOccurrence:IsOccurrence{justification:$justification,origin:$origin,collector:$collector})" +
+				"-[:has_occurrence]->(objArt)"
+			sb.WriteString(merge)
+			sb.WriteString(returnValue)
+
+		}
+		fmt.Println(sb.String())
+		result, err := session.WriteTransaction(
+			func(tx neo4j.Transaction) (interface{}, error) {
+				result, err := tx.Run(sb.String(), queryValues)
+				if err != nil {
+					return nil, err
+				}
+
+				// query returns a single record
+				record, err := result.Single()
+				if err != nil {
+					return nil, err
+				}
+
+				pkgQualifiers := record.Values[5]
+				subPath := record.Values[4]
+				version := record.Values[3]
+				nameString := record.Values[2].(string)
+				namespaceString := record.Values[1].(string)
+				typeString := record.Values[0].(string)
+
+				pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
+
+				algorithm := record.Values[7].(string)
+				digest := record.Values[8].(string)
+				artifact := generateModelArtifact(algorithm, digest)
+
+				isOccurrenceNode := dbtype.Node{}
+				if record.Values[6] != nil {
+					isOccurrenceNode = record.Values[6].(dbtype.Node)
+				} else {
+					return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
+				}
+
+				isOccurrence := generateModelIsOccurrence(pkg, artifact, isOccurrenceNode.Props[justification].(string),
+					isOccurrenceNode.Props[origin].(string), isOccurrenceNode.Props[collector].(string))
+
+				return isOccurrence, nil
+			})
+		if err != nil {
+			return nil, err
+		}
+
+		return result.(*model.IsOccurrence), nil
+	} else if source != nil {
+		// TODO: use generics here between SourceInputSpec and SourceSpec?
+		selectedSrcSpec := convertSrcInputSpecToSrcSpec(source)
+
+		returnValue := " RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, isOccurrence, objArt.algorithm, objArt.digest"
+
+		query := "MATCH (root:Src)-[:SrcHasType]->(type:SrcType)-[:SrcHasNamespace]->(namespace:SrcNamespace)" +
+			"-[:SrcHasName]->(name:SrcName), (objArt:Artifact)"
+
+		sb.WriteString(query)
+		setSrcMatchValues(&sb, selectedSrcSpec, false, &firstMatch, queryValues)
+		setArtifactMatchValues(&sb, occurrenceArt, true, &firstMatch, queryValues)
+
+		merge := "\nMERGE (name)<-[:subject]-(isOccurrence:IsOccurrence{justification:$justification,origin:$origin,collector:$collector})" +
+			"-[:has_occurrence]->(objArt)"
+		sb.WriteString(merge)
+		sb.WriteString(returnValue)
+		fmt.Println(sb.String())
+		result, err := session.WriteTransaction(
+			func(tx neo4j.Transaction) (interface{}, error) {
+				result, err := tx.Run(sb.String(), queryValues)
+				if err != nil {
+					return nil, err
+				}
+
+				// query returns a single record
+				record, err := result.Single()
+				if err != nil {
+					return nil, err
+				}
+
+				tag := record.Values[3]
+				commit := record.Values[4]
+				nameStr := record.Values[2].(string)
+				namespaceStr := record.Values[1].(string)
+				srcType := record.Values[0].(string)
+				src := generateModelSource(srcType, namespaceStr, nameStr, commit, tag)
+
+				algorithm := record.Values[6].(string)
+				digest := record.Values[7].(string)
+				artifact := generateModelArtifact(algorithm, digest)
+
+				isOccurrenceNode := dbtype.Node{}
+				if record.Values[5] != nil {
+					isOccurrenceNode = record.Values[5].(dbtype.Node)
+				} else {
+					return nil, gqlerror.Errorf("isOccurrence Node not found in neo4j")
+				}
+
+				isOccurrence := generateModelIsOccurrence(src, artifact, isOccurrenceNode.Props[justification].(string),
+					isOccurrenceNode.Props[origin].(string), isOccurrenceNode.Props[collector].(string))
+
+				return isOccurrence, nil
+			})
+		if err != nil {
+			return nil, err
+		}
+
+		return result.(*model.IsOccurrence), nil
+
+	} else {
+		return nil, gqlerror.Errorf("package or source not specified for IngestOccurrence")
+	}
+
+	return nil, nil
 }
