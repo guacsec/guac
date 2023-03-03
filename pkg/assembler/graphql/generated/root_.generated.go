@@ -170,6 +170,7 @@ type ComplexityRoot struct {
 		IngestArtifact   func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestBuilder    func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestCve        func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestDependency func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa       func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestOsv        func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage    func(childComplexity int, pkg *model.PkgInputSpec) int
@@ -843,6 +844,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestCve(childComplexity, args["cve"].(*model.CVEInputSpec)), true
 
+	case "Mutation.ingestDependency":
+		if e.complexity.Mutation.IngestDependency == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestDependency_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestDependency(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["dependency"].(model.IsDependencyInputSpec)), true
+
 	case "Mutation.ingestGHSA":
 		if e.complexity.Mutation.IngestGhsa == nil {
 			break
@@ -1361,6 +1374,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputHasSLSASpec,
 		ec.unmarshalInputHasSourceAtSpec,
 		ec.unmarshalInputHashEqualSpec,
+		ec.unmarshalInputIsDependencyInputSpec,
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputIsVulnerabilitySpec,
@@ -2421,11 +2435,29 @@ input PkgNameSpec {
   name: String
 }
 
+"""
+IsDependencyInputSpec is the same as IsDependency but for mutation input.
+
+All fields are required.
+"""
+input IsDependencyInputSpec {
+  versionRange: String!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
 
 extend type Query {
   "Returns all IsDependency"
   IsDependency(isDependencySpec: IsDependencySpec): [IsDependency!]!
 }
+
+extend type Mutation {
+  "Adds dependency between two packages"
+  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
+}
+
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.

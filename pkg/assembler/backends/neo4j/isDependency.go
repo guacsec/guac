@@ -29,6 +29,8 @@ const (
 	versionRange string = "versionRange"
 )
 
+// Query IsDependency
+
 func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
@@ -146,20 +148,138 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDependencySpec, firstMatch *bool, queryValues map[string]any) {
 	if isDependencySpec.VersionRange != nil {
 
-		matchProperties(sb, *firstMatch, "isDependency", "versionRange", "$versionRange")
+		matchProperties(sb, *firstMatch, "isDependency", versionRange, "$"+versionRange)
 		*firstMatch = false
-		queryValues["versionRange"] = isDependencySpec.VersionRange
+		queryValues[versionRange] = isDependencySpec.VersionRange
 	}
 	if isDependencySpec.Origin != nil {
 
-		matchProperties(sb, *firstMatch, "isDependency", "origin", "$origin")
+		matchProperties(sb, *firstMatch, "isDependency", origin, "$"+origin)
 		*firstMatch = false
-		queryValues["origin"] = isDependencySpec.Origin
+		queryValues[origin] = isDependencySpec.Origin
 	}
 	if isDependencySpec.Collector != nil {
 
-		matchProperties(sb, *firstMatch, "isDependency", "collector", "$collector")
+		matchProperties(sb, *firstMatch, "isDependency", collector, "$"+collector)
 		*firstMatch = false
-		queryValues["collector"] = isDependencySpec.Collector
+		queryValues[collector] = isDependencySpec.Collector
 	}
+}
+
+// Ingest IsDependency
+
+func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	var sb strings.Builder
+	var firstMatch bool = true
+	queryValues := map[string]any{}
+
+	// TODO: use generics here between PkgInputSpec and PkgSpec?
+	selectedPkgSpec := convertPkgInputSpecToPkgSpec(pkg)
+	// Note: depPkgSpec only takes up to the pkgName as IsDependency does not allow for the attestation
+	// to be made at the pkgVersion level. Version range for the dependent package is defined as a property
+	// on IsDependency.
+	matchEmpty := false
+	depPkgSpec := model.PkgSpec{
+		Type:                     &depPkg.Type,
+		Namespace:                depPkg.Namespace,
+		Name:                     &depPkg.Name,
+		Version:                  nil,
+		Subpath:                  nil,
+		Qualifiers:               nil,
+		MatchOnlyEmptyQualifiers: &matchEmpty,
+	}
+
+	queryValues[versionRange] = dependency.VersionRange
+	queryValues[justification] = dependency.Justification
+	queryValues[origin] = dependency.Origin
+	queryValues[collector] = dependency.Collector
+
+	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
+		"version.qualifier_list, isDependency, objPkgType.type, objPkgNamespace.namespace, objPkgName.name"
+
+	if selectedPkgSpec.Version == nil && selectedPkgSpec.Subpath == nil &&
+		len(selectedPkgSpec.Qualifiers) == 0 && !*selectedPkgSpec.MatchOnlyEmptyQualifiers {
+
+		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName), (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
+			"-[:PkgHasName]->(objPkgName:PkgName)" +
+			"\nWITH *, null AS version"
+
+		sb.WriteString(query)
+		setPkgMatchValues(&sb, &selectedPkgSpec, false, &firstMatch, queryValues)
+		setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
+
+		merge := "\nMERGE (name)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,justification:$justification,origin:$origin,collector:$collector})" +
+			"-[:dependency]->(objPkgName)" +
+			"\nRETURN RETURN type.type, namespace.namespace, name.name, isDependency, objPkgType.type, objPkgNamespace.namespace, objPkgName.name"
+		sb.WriteString(merge)
+		sb.WriteString(returnValue)
+	} else {
+		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
+			"-[:PkgHasName]->(objPkgName:PkgName)"
+
+		sb.WriteString(query)
+		setPkgMatchValues(&sb, &selectedPkgSpec, false, &firstMatch, queryValues)
+		setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
+
+		merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,origin:$origin,collector:$collector})" +
+			"-[:dependency]->(objPkgName)"
+		sb.WriteString(merge)
+		sb.WriteString(returnValue)
+	}
+
+	result, err := session.WriteTransaction(
+		func(tx neo4j.Transaction) (interface{}, error) {
+			result, err := tx.Run(sb.String(), queryValues)
+			if err != nil {
+				return nil, err
+			}
+
+			// query returns a single record
+			record, err := result.Single()
+			if err != nil {
+				return nil, err
+			}
+
+			pkgQualifiers := record.Values[5]
+			subPath := record.Values[4]
+			version := record.Values[3]
+			nameString := record.Values[2].(string)
+			namespaceString := record.Values[1].(string)
+			typeString := record.Values[0].(string)
+
+			pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
+
+			nameString = record.Values[9].(string)
+			namespaceString = record.Values[8].(string)
+			typeString = record.Values[7].(string)
+
+			depPkg := generateModelPackage(typeString, namespaceString, nameString, nil, nil, nil)
+
+			isDependencyNode := dbtype.Node{}
+			if record.Values[6] != nil {
+				isDependencyNode = record.Values[6].(dbtype.Node)
+			} else {
+				return nil, gqlerror.Errorf("isDependency Node not found in neo4j")
+			}
+
+			isDependency := &model.IsDependency{
+				Package:          pkg,
+				DependentPackage: depPkg,
+				VersionRange:     isDependencyNode.Props[versionRange].(string),
+				Origin:           isDependencyNode.Props[origin].(string),
+				Collector:        isDependencyNode.Props[collector].(string),
+			}
+
+			return isDependency, nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.IsDependency), nil
 }

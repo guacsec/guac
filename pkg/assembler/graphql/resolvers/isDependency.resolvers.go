@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestDependency is the resolver for the ingestDependency field.
+func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+	return r.Backend.IngestDependency(ctx, pkg, depPkg, dependency)
+}
+
 // IsDependency is the resolver for the IsDependency field.
 func (r *queryResolver) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	return r.Backend.IsDependency(ctx, isDependencySpec)

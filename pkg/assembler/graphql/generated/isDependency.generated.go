@@ -308,6 +308,58 @@ func (ec *executionContext) fieldContext_IsDependency_collector(ctx context.Cont
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Context, obj interface{}) (model.IsDependencyInputSpec, error) {
+	var it model.IsDependencyInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"versionRange", "justification", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "versionRange":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionRange"))
+			it.VersionRange, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, obj interface{}) (model.IsDependencySpec, error) {
 	var it model.IsDependencySpec
 	asMap := map[string]interface{}{}
@@ -495,6 +547,10 @@ func (ec *executionContext) _IsDependency(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNIsDependency2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependency(ctx context.Context, sel ast.SelectionSet, v model.IsDependency) graphql.Marshaler {
+	return ec._IsDependency(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.IsDependency) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -547,6 +603,11 @@ func (ec *executionContext) marshalNIsDependency2ᚖgithubᚗcomᚋguacsecᚋgua
 		return graphql.Null
 	}
 	return ec._IsDependency(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx context.Context, v interface{}) (model.IsDependencyInputSpec, error) {
+	res, err := ec.unmarshalInputIsDependencyInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) (*model.IsDependencySpec, error) {

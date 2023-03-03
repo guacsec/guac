@@ -790,3 +790,30 @@ func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, s
 	}
 	return &pkg
 }
+
+// TODO: maybe use generics for PkgInputSpec and PkgSpec?
+func convertPkgInputSpecToPkgSpec(pkgInput model.PkgInputSpec) model.PkgSpec {
+	matchEmpty := false
+	pkgSpec := model.PkgSpec{
+		Type:                     &pkgInput.Type,
+		Namespace:                pkgInput.Namespace,
+		Name:                     &pkgInput.Name,
+		Version:                  pkgInput.Version,
+		Subpath:                  pkgInput.Subpath,
+		Qualifiers:               convertQualifierInputToQualifierSpec(pkgInput.Qualifiers),
+		MatchOnlyEmptyQualifiers: &matchEmpty,
+	}
+	return pkgSpec
+}
+
+func convertQualifierInputToQualifierSpec(qualifiers []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
+	pkgQualifiers := []*model.PackageQualifierSpec{}
+	for _, quali := range qualifiers {
+		pkgQualifier := &model.PackageQualifierSpec{
+			Key:   quali.Key,
+			Value: &quali.Value,
+		}
+		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+	}
+	return pkgQualifiers
+}

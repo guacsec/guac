@@ -23,6 +23,7 @@ type MutationResolver interface {
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
+	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
@@ -119,6 +120,39 @@ func (ec *executionContext) field_Mutation_ingestCVE_args(ctx context.Context, r
 		}
 	}
 	args["cve"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PkgInputSpec
+	if tmp, ok := rawArgs["pkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkg"] = arg0
+	var arg1 model.PkgInputSpec
+	if tmp, ok := rawArgs["depPkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
+		arg1, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["depPkg"] = arg1
+	var arg2 model.IsDependencyInputSpec
+	if tmp, ok := rawArgs["dependency"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependency"))
+		arg2, err = ec.unmarshalNIsDependencyInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["dependency"] = arg2
 	return args, nil
 }
 
@@ -868,6 +902,74 @@ func (ec *executionContext) fieldContext_Mutation_ingestGHSA(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestGHSA_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestDependency(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestDependency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestDependency(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["depPkg"].(model.PkgInputSpec), fc.Args["dependency"].(model.IsDependencyInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.IsDependency)
+	fc.Result = res
+	return ec.marshalNIsDependency2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependency(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestDependency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "package":
+				return ec.fieldContext_IsDependency_package(ctx, field)
+			case "dependentPackage":
+				return ec.fieldContext_IsDependency_dependentPackage(ctx, field)
+			case "versionRange":
+				return ec.fieldContext_IsDependency_versionRange(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsDependency_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsDependency_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsDependency_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestDependency_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2560,6 +2662,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestGHSA(ctx, field)
+			})
+
+		case "ingestDependency":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestDependency(ctx, field)
 			})
 
 		case "ingestOSV":

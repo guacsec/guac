@@ -10,6 +10,353 @@ import (
 	"github.com/Khan/genqlient/graphql"
 )
 
+// IsDependencyDependentPkgPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type IsDependencyDependentPkgPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns IsDependencyDependentPkgPackage.Type, and is useful for accessing the field via an interface.
+func (v *IsDependencyDependentPkgPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns IsDependencyDependentPkgPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *IsDependencyDependentPkgPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *IsDependencyDependentPkgPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsDependencyDependentPkgPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsDependencyDependentPkgPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsDependencyDependentPkgPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *IsDependencyDependentPkgPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsDependencyDependentPkgPackage) __premarshalJSON() (*__premarshalIsDependencyDependentPkgPackage, error) {
+	var retval __premarshalIsDependencyDependentPkgPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// IsDependencyIngestDependencyIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// # IsDependency is an attestation that represents when a package is dependent on another package
+//
+// package (subject) - the package object type that represents the package
+// dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
+// versionRange (property) - string value for version range that applies to the dependent package
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type IsDependencyIngestDependencyIsDependency struct {
+	allIsDependencyTree `json:"-"`
+}
+
+// GetJustification returns IsDependencyIngestDependencyIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetJustification() string {
+	return v.allIsDependencyTree.Justification
+}
+
+// GetPackage returns IsDependencyIngestDependencyIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetPackage() allIsDependencyTreePackage {
+	return v.allIsDependencyTree.Package
+}
+
+// GetDependentPackage returns IsDependencyIngestDependencyIsDependency.DependentPackage, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
+	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetVersionRange returns IsDependencyIngestDependencyIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetVersionRange() string {
+	return v.allIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns IsDependencyIngestDependencyIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetOrigin() string {
+	return v.allIsDependencyTree.Origin
+}
+
+// GetCollector returns IsDependencyIngestDependencyIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetCollector() string {
+	return v.allIsDependencyTree.Collector
+}
+
+func (v *IsDependencyIngestDependencyIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsDependencyIngestDependencyIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsDependencyIngestDependencyIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsDependencyIngestDependencyIsDependency struct {
+	Justification string `json:"justification"`
+
+	Package allIsDependencyTreePackage `json:"package"`
+
+	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsDependencyIngestDependencyIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsDependencyIngestDependencyIsDependency) __premarshalJSON() (*__premarshalIsDependencyIngestDependencyIsDependency, error) {
+	var retval __premarshalIsDependencyIngestDependencyIsDependency
+
+	retval.Justification = v.allIsDependencyTree.Justification
+	retval.Package = v.allIsDependencyTree.Package
+	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.VersionRange = v.allIsDependencyTree.VersionRange
+	retval.Origin = v.allIsDependencyTree.Origin
+	retval.Collector = v.allIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// IsDependencyInputSpec is the same as IsDependency but for mutation input.
+//
+// All fields are required.
+type IsDependencyInputSpec struct {
+	VersionRange  string `json:"versionRange"`
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
+// GetVersionRange returns IsDependencyInputSpec.VersionRange, and is useful for accessing the field via an interface.
+func (v *IsDependencyInputSpec) GetVersionRange() string { return v.VersionRange }
+
+// GetJustification returns IsDependencyInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *IsDependencyInputSpec) GetJustification() string { return v.Justification }
+
+// GetOrigin returns IsDependencyInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *IsDependencyInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns IsDependencyInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *IsDependencyInputSpec) GetCollector() string { return v.Collector }
+
+// IsDependencyPkgPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type IsDependencyPkgPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns IsDependencyPkgPackage.Type, and is useful for accessing the field via an interface.
+func (v *IsDependencyPkgPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns IsDependencyPkgPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *IsDependencyPkgPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *IsDependencyPkgPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsDependencyPkgPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsDependencyPkgPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsDependencyPkgPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *IsDependencyPkgPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsDependencyPkgPackage) __premarshalJSON() (*__premarshalIsDependencyPkgPackage, error) {
+	var retval __premarshalIsDependencyPkgPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// IsDependencyResponse is returned by IsDependency on success.
+type IsDependencyResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	Pkg IsDependencyPkgPackage `json:"pkg"`
+	// Ingest a new package. Returns the ingested package trie
+	DependentPkg IsDependencyDependentPkgPackage `json:"dependentPkg"`
+	// Adds dependency between two packages
+	IngestDependency IsDependencyIngestDependencyIsDependency `json:"ingestDependency"`
+}
+
+// GetPkg returns IsDependencyResponse.Pkg, and is useful for accessing the field via an interface.
+func (v *IsDependencyResponse) GetPkg() IsDependencyPkgPackage { return v.Pkg }
+
+// GetDependentPkg returns IsDependencyResponse.DependentPkg, and is useful for accessing the field via an interface.
+func (v *IsDependencyResponse) GetDependentPkg() IsDependencyDependentPkgPackage {
+	return v.DependentPkg
+}
+
+// GetIngestDependency returns IsDependencyResponse.IngestDependency, and is useful for accessing the field via an interface.
+func (v *IsDependencyResponse) GetIngestDependency() IsDependencyIngestDependencyIsDependency {
+	return v.IngestDependency
+}
+
+// PackageQualifierInputSpec is the same as PackageQualifier, but usable as
+// mutation input.
+//
+// GraphQL does not allow input types to contain composite types and does not allow
+// composite types to contain input types. So, although in this case these two
+// types are semantically the same, we have to duplicate the definition.
+//
+// Both fields are mandatory.
+type PackageQualifierInputSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns PackageQualifierInputSpec.Key, and is useful for accessing the field via an interface.
+func (v *PackageQualifierInputSpec) GetKey() string { return v.Key }
+
+// GetValue returns PackageQualifierInputSpec.Value, and is useful for accessing the field via an interface.
+func (v *PackageQualifierInputSpec) GetValue() string { return v.Value }
+
+// PkgInputSpec specifies a package for a mutation.
+//
+// This is different than PkgSpec because we want to encode mandatory fields:
+// `type` and `name`. All optional fields are given empty default values.
+type PkgInputSpec struct {
+	Type       string                      `json:"type"`
+	Namespace  string                      `json:"namespace"`
+	Name       string                      `json:"name"`
+	Version    string                      `json:"version"`
+	Qualifiers []PackageQualifierInputSpec `json:"qualifiers"`
+	Subpath    string                      `json:"subpath"`
+}
+
+// GetType returns PkgInputSpec.Type, and is useful for accessing the field via an interface.
+func (v *PkgInputSpec) GetType() string { return v.Type }
+
+// GetNamespace returns PkgInputSpec.Namespace, and is useful for accessing the field via an interface.
+func (v *PkgInputSpec) GetNamespace() string { return v.Namespace }
+
+// GetName returns PkgInputSpec.Name, and is useful for accessing the field via an interface.
+func (v *PkgInputSpec) GetName() string { return v.Name }
+
+// GetVersion returns PkgInputSpec.Version, and is useful for accessing the field via an interface.
+func (v *PkgInputSpec) GetVersion() string { return v.Version }
+
+// GetQualifiers returns PkgInputSpec.Qualifiers, and is useful for accessing the field via an interface.
+func (v *PkgInputSpec) GetQualifiers() []PackageQualifierInputSpec { return v.Qualifiers }
+
+// GetSubpath returns PkgInputSpec.Subpath, and is useful for accessing the field via an interface.
+func (v *PkgInputSpec) GetSubpath() string { return v.Subpath }
+
 // ScorecardCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
 //
@@ -240,6 +587,22 @@ func (v *SourceInputSpec) GetTag() string { return v.Tag }
 // GetCommit returns SourceInputSpec.Commit, and is useful for accessing the field via an interface.
 func (v *SourceInputSpec) GetCommit() string { return v.Commit }
 
+// __IsDependencyInput is used internally by genqlient
+type __IsDependencyInput struct {
+	Pkg        PkgInputSpec          `json:"pkg"`
+	DepPkg     PkgInputSpec          `json:"depPkg"`
+	Dependency IsDependencyInputSpec `json:"dependency"`
+}
+
+// GetPkg returns __IsDependencyInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__IsDependencyInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetDepPkg returns __IsDependencyInput.DepPkg, and is useful for accessing the field via an interface.
+func (v *__IsDependencyInput) GetDepPkg() PkgInputSpec { return v.DepPkg }
+
+// GetDependency returns __IsDependencyInput.Dependency, and is useful for accessing the field via an interface.
+func (v *__IsDependencyInput) GetDependency() IsDependencyInputSpec { return v.Dependency }
+
 // __ScorecardInput is used internally by genqlient
 type __ScorecardInput struct {
 	Source    SourceInputSpec    `json:"source"`
@@ -417,6 +780,336 @@ func (v *allCertifyScorecardSource) __premarshalJSON() (*__premarshalallCertifyS
 	return &retval, nil
 }
 
+// allIsDependencyTree includes the GraphQL fields of IsDependency requested by the fragment allIsDependencyTree.
+// The GraphQL type's documentation follows.
+//
+// # IsDependency is an attestation that represents when a package is dependent on another package
+//
+// package (subject) - the package object type that represents the package
+// dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
+// versionRange (property) - string value for version range that applies to the dependent package
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type allIsDependencyTree struct {
+	Justification    string                              `json:"justification"`
+	Package          allIsDependencyTreePackage          `json:"package"`
+	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
+	VersionRange     string                              `json:"versionRange"`
+	Origin           string                              `json:"origin"`
+	Collector        string                              `json:"collector"`
+}
+
+// GetJustification returns allIsDependencyTree.Justification, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetJustification() string { return v.Justification }
+
+// GetPackage returns allIsDependencyTree.Package, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetPackage() allIsDependencyTreePackage { return v.Package }
+
+// GetDependentPackage returns allIsDependencyTree.DependentPackage, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetDependentPackage() allIsDependencyTreeDependentPackage {
+	return v.DependentPackage
+}
+
+// GetVersionRange returns allIsDependencyTree.VersionRange, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetVersionRange() string { return v.VersionRange }
+
+// GetOrigin returns allIsDependencyTree.Origin, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allIsDependencyTree.Collector, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetCollector() string { return v.Collector }
+
+// allIsDependencyTreeDependentPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type allIsDependencyTreeDependentPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns allIsDependencyTreeDependentPackage.Type, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTreeDependentPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns allIsDependencyTreeDependentPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTreeDependentPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *allIsDependencyTreeDependentPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allIsDependencyTreeDependentPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allIsDependencyTreeDependentPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallIsDependencyTreeDependentPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *allIsDependencyTreeDependentPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allIsDependencyTreeDependentPackage) __premarshalJSON() (*__premarshalallIsDependencyTreeDependentPackage, error) {
+	var retval __premarshalallIsDependencyTreeDependentPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// allIsDependencyTreePackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type allIsDependencyTreePackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns allIsDependencyTreePackage.Type, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTreePackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns allIsDependencyTreePackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTreePackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *allIsDependencyTreePackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allIsDependencyTreePackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allIsDependencyTreePackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallIsDependencyTreePackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *allIsDependencyTreePackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allIsDependencyTreePackage) __premarshalJSON() (*__premarshalallIsDependencyTreePackage, error) {
+	var retval __premarshalallIsDependencyTreePackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// allPkgTree includes the GraphQL fields of Package requested by the fragment allPkgTree.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type allPkgTree struct {
+	Type       string                                 `json:"type"`
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+// GetType returns allPkgTree.Type, and is useful for accessing the field via an interface.
+func (v *allPkgTree) GetType() string { return v.Type }
+
+// GetNamespaces returns allPkgTree.Namespaces, and is useful for accessing the field via an interface.
+func (v *allPkgTree) GetNamespaces() []allPkgTreeNamespacesPackageNamespace { return v.Namespaces }
+
+// allPkgTreeNamespacesPackageNamespace includes the requested fields of the GraphQL type PackageNamespace.
+// The GraphQL type's documentation follows.
+//
+// PackageNamespace is a namespace for packages.
+//
+// In the pURL representation, each PackageNamespace matches the
+// `pkg:<type>/<namespace>/` partial pURL.
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type allPkgTreeNamespacesPackageNamespace struct {
+	Namespace string                                                 `json:"namespace"`
+	Names     []allPkgTreeNamespacesPackageNamespaceNamesPackageName `json:"names"`
+}
+
+// GetNamespace returns allPkgTreeNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespace) GetNamespace() string { return v.Namespace }
+
+// GetNames returns allPkgTreeNamespacesPackageNamespace.Names, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespace) GetNames() []allPkgTreeNamespacesPackageNamespaceNamesPackageName {
+	return v.Names
+}
+
+// allPkgTreeNamespacesPackageNamespaceNamesPackageName includes the requested fields of the GraphQL type PackageName.
+// The GraphQL type's documentation follows.
+//
+// PackageName is a name for packages.
+//
+// In the pURL representation, each PackageName matches the
+// `pkg:<type>/<namespace>/<name>` pURL.
+//
+// Names are always mandatory.
+//
+// This is the first node in the trie that can be referred to by other parts of
+// GUAC.
+type allPkgTreeNamespacesPackageNamespaceNamesPackageName struct {
+	Name     string                                                                       `json:"name"`
+	Versions []allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion `json:"versions"`
+}
+
+// GetName returns allPkgTreeNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageName) GetName() string { return v.Name }
+
+// GetVersions returns allPkgTreeNamespacesPackageNamespaceNamesPackageName.Versions, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageName) GetVersions() []allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion {
+	return v.Versions
+}
+
+// allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+// The GraphQL type's documentation follows.
+//
+// PackageVersion is a package version.
+//
+// In the pURL representation, each PackageName matches the
+// `pkg:<type>/<namespace>/<name>@<version>` pURL.
+//
+// Versions are optional and each Package type defines own rules for handling them.
+// For this level of GUAC, these are just opaque strings.
+//
+// This node can be referred to by other parts of GUAC.
+//
+// Subpath and qualifiers are optional. Lack of qualifiers is represented by an
+// empty list and lack of subpath by empty string (to be consistent with
+// optionality of namespace and version). Two nodes that have different qualifiers
+// and/or subpath but the same version mean two different packages in the trie
+// (they are different). Two nodes that have same version but qualifiers of one are
+// a subset of the qualifier of the other also mean two different packages in the
+// trie.
+type allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
+	Version    string                                                                                                 `json:"version"`
+	Qualifiers []allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
+	Subpath    string                                                                                                 `json:"subpath"`
+}
+
+// GetVersion returns allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetQualifiers returns allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetQualifiers() []allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier {
+	return v.Qualifiers
+}
+
+// GetSubpath returns allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Subpath, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetSubpath() string {
+	return v.Subpath
+}
+
+// allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier includes the requested fields of the GraphQL type PackageQualifier.
+// The GraphQL type's documentation follows.
+//
+// PackageQualifier is a qualifier for a package, a key-value pair.
+//
+// In the pURL representation, it is a part of the `<qualifiers>` part of the
+// `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` pURL.
+//
+// Qualifiers are optional, each Package type defines own rules for handling them,
+// and multiple qualifiers could be attached to the same package.
+//
+// This node cannot be directly referred by other parts of GUAC.
+type allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Key, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetKey() string {
+	return v.Key
+}
+
+// GetValue returns allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Value, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetValue() string {
+	return v.Value
+}
+
 // allSrcTree includes the GraphQL fields of Source requested by the fragment allSrcTree.
 // The GraphQL type's documentation follows.
 //
@@ -485,6 +1178,77 @@ func (v *allSrcTreeNamespacesSourceNamespaceNamesSourceName) GetTag() string { r
 
 // GetCommit returns allSrcTreeNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
 func (v *allSrcTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() string { return v.Commit }
+
+func IsDependency(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	depPkg PkgInputSpec,
+	dependency IsDependencyInputSpec,
+) (*IsDependencyResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsDependency",
+		Query: `
+mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
+	pkg: ingestPackage(pkg: $pkg) {
+		... allPkgTree
+	}
+	dependentPkg: ingestPackage(pkg: $depPkg) {
+		... allPkgTree
+	}
+	ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
+		... allIsDependencyTree
+	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allIsDependencyTree on IsDependency {
+	justification
+	package {
+		... allPkgTree
+	}
+	dependentPackage {
+		... allPkgTree
+	}
+	versionRange
+	origin
+	collector
+}
+`,
+		Variables: &__IsDependencyInput{
+			Pkg:        pkg,
+			DepPkg:     depPkg,
+			Dependency: dependency,
+		},
+	}
+	var err error
+
+	var data IsDependencyResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
 
 func Scorecard(
 	ctx context.Context,
