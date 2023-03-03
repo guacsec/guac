@@ -63,7 +63,7 @@ type options struct {
 
 var exampleCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
-	Short: "take a folder of files and create a GUAC graph",
+	Short: "take a folder of files and create a GUAC graph, this command talks directly to the graphQL endpoint",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
