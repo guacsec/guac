@@ -210,8 +210,8 @@ func getProcessor(ctx context.Context) (func(*processor.Document) (processor.Doc
 		return process.Process(ctx, d)
 	}, nil
 }
-func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.PlaceholderStruct, error), error) {
-	return func(doc processor.DocumentTree) ([]assembler.PlaceholderStruct, error) {
+func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.IngestPredicates, error), error) {
+	return func(doc processor.DocumentTree) ([]assembler.IngestPredicates, error) {
 		// for guacone collectors, we do not integrate with the collectsub service
 		inputs, _, err := parser.ParseDocumentTree(ctx, doc)
 		if err != nil {
@@ -222,7 +222,7 @@ func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler
 	}, nil
 }
 
-func getAssembler(opts options) (func([]assembler.PlaceholderStruct) error, error) {
+func getAssembler(opts options) (func([]assembler.IngestPredicates) error, error) {
 	// TODO(bulldozer): create an assbebler function to call graphQL ingestion
 	// 	authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
 	// 		opts.user,
@@ -254,7 +254,7 @@ func getAssembler(opts options) (func([]assembler.PlaceholderStruct) error, erro
 	//
 	// 		return nil
 	// 	}, nil
-	return func(_ []assembler.PlaceholderStruct) error { return nil }, nil
+	return func(_ []assembler.IngestPredicates) error { return nil }, nil
 }
 
 func createIndices(client graphdb.Client) error {

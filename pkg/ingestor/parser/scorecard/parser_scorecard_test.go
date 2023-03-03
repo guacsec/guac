@@ -33,7 +33,7 @@ func Test_scorecardParser(t *testing.T) {
 	tests := []struct {
 		name           string
 		doc            *processor.Document
-		wantPredicates *assembler.PlaceholderStruct
+		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
 	}{{
 		name: "testing",
@@ -43,7 +43,7 @@ func Test_scorecardParser(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		wantPredicates: &assembler.PlaceholderStruct{
+		wantPredicates: &assembler.IngestPredicates{
 			CertifyScorecard: []assembler.CertifyScorecardIngest{
 				{
 					Source: &model.SourceInputSpec{

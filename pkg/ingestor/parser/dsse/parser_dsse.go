@@ -99,6 +99,6 @@ func (d *dsseParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStri
 	return nil, fmt.Errorf("not yet implemented")
 }
 
-func (d *dsseParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
+func (d *dsseParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	return nil
 }

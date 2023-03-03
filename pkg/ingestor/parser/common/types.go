@@ -30,7 +30,7 @@ type DocumentParser interface {
 	GetIdentities(ctx context.Context) []TrustInformation
 
 	// CreatePredicates returns the predicates of the GUAC ontology to be created
-	GetPredicates(ctx context.Context) *assembler.PlaceholderStruct
+	GetPredicates(ctx context.Context) *assembler.IngestPredicates
 
 	// GetIdentifiers returns a set of identifiers that the parser has found to help provide context
 	// for collectors to gather more information around found software identifiers.

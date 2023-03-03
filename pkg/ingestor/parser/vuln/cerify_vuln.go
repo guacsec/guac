@@ -159,7 +159,7 @@ func (c *vulnCertificationParser) CreateNodes(ctx context.Context) []assembler.G
 // }
 
 // TODO(bulldozer)
-func (c *vulnCertificationParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
+func (c *vulnCertificationParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	return nil
 }
 

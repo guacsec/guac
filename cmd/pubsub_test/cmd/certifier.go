@@ -110,7 +110,7 @@ var certifierCmd = &cobra.Command{
 		}
 
 		// for pubsub_test we ignore identifier strings as we don't connect to a collectsub service
-		ingestorTransportFunc := func(d []assembler.PlaceholderStruct, i []*parser_common.IdentifierStrings) error {
+		ingestorTransportFunc := func(d []assembler.IngestPredicates, i []*parser_common.IdentifierStrings) error {
 			err := assemblerFunc(d)
 			if err != nil {
 				return err

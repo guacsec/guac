@@ -66,7 +66,7 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 	return fmt.Errorf("unable to support parsing of Scorecard document format: %v", doc.Format)
 }
 
-func (p *scorecardParser) GetPredicates(ctx context.Context) *assembler.PlaceholderStruct {
+func (p *scorecardParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	var preds []assembler.CertifyScorecardIngest
 	for i, scPred := range p.scorecardPredicates {
 		preds = append(preds, assembler.CertifyScorecardIngest{
@@ -74,7 +74,7 @@ func (p *scorecardParser) GetPredicates(ctx context.Context) *assembler.Placehol
 			Source:    p.srcPredicates[i],
 		})
 	}
-	return &assembler.PlaceholderStruct{
+	return &assembler.IngestPredicates{
 		CertifyScorecard: preds,
 	}
 }
