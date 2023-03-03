@@ -75,7 +75,7 @@ var certifierCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(opts)
+		assemblerFunc, err := getAssembler(ctx, opts)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
