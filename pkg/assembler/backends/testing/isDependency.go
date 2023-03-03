@@ -19,6 +19,7 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllIsDependency(client *demoClient) error {
@@ -57,7 +58,7 @@ func registerAllIsDependency(client *demoClient) error {
 		return err
 	}
 
-	client.registerIsDependency(selectedPackage[0], depPackage[0], "3.0.3", "deb: part of SBOM - openssl")
+	client.registerIsDependency(selectedPackage[0], depPackage[0], "3.0.3", "deb: part of SBOM - openssl", "testing backend", "testing backend")
 
 	// TestData2
 
@@ -88,7 +89,7 @@ func registerAllIsDependency(client *demoClient) error {
 		return err
 	}
 
-	client.registerIsDependency(selectedPackage[0], depPackage[0], "7.83.0-r0", "docker: part of SBOM - curl")
+	client.registerIsDependency(selectedPackage[0], depPackage[0], "7.83.0-r0", "docker: part of SBOM - curl", "testing backend", "testing backend")
 
 	// TestData3
 
@@ -109,19 +110,19 @@ func registerAllIsDependency(client *demoClient) error {
 		return err
 	}
 
-	client.registerIsDependency(selectedPackage[0], depPackage[0], "3.0.3", "docker: part of SBOM - openssl")
+	client.registerIsDependency(selectedPackage[0], depPackage[0], "3.0.3", "docker: part of SBOM - openssl", "testing backend", "testing backend")
 
 	return nil
 }
 
 // Ingest IsDependency
 
-func (c *demoClient) registerIsDependency(selectedPackage *model.Package, dependentPackage *model.Package, versionRange string, justification string) {
+func (c *demoClient) registerIsDependency(selectedPackage *model.Package, dependentPackage *model.Package, versionRange, justification, origin, collector string) *model.IsDependency {
 
 	for _, dependency := range c.isDependency {
 		if dependency.DependentPackage == dependentPackage && dependency.Justification == justification &&
 			dependency.Package == selectedPackage && dependency.VersionRange == versionRange {
-			return
+			return dependency
 		}
 	}
 
@@ -130,10 +131,65 @@ func (c *demoClient) registerIsDependency(selectedPackage *model.Package, depend
 		DependentPackage: dependentPackage,
 		VersionRange:     versionRange,
 		Justification:    justification,
-		Origin:           "testing backend",
-		Collector:        "testing backend",
+		Origin:           origin,
+		Collector:        collector,
 	}
 	c.isDependency = append(c.isDependency, newIsOccurrence)
+	return newIsOccurrence
+}
+
+func (c *demoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+
+	pkgQualifiers := []*model.PackageQualifierSpec{}
+	for _, quali := range pkg.Qualifiers {
+		pkgQualifier := &model.PackageQualifierSpec{
+			Key:   quali.Key,
+			Value: &quali.Value,
+		}
+		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+	}
+
+	pkgSpec := model.PkgSpec{
+		Type:       &pkg.Type,
+		Namespace:  pkg.Namespace,
+		Name:       &pkg.Name,
+		Version:    pkg.Version,
+		Qualifiers: pkgQualifiers,
+		Subpath:    pkg.Subpath,
+	}
+	collectedPkg, err := c.Packages(ctx, &pkgSpec)
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedPkg) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestDependency :: multiple package found")
+	}
+
+	// Note: depPkgSpec only takes up to the pkgName as IsDependency does not allow for the attestation
+	// to be made at the pkgVersion level. Version range for the dependent package is defined as a property
+	// on IsDependency.
+	depPkgSpec := model.PkgSpec{
+		Type:      &pkg.Type,
+		Namespace: pkg.Namespace,
+		Name:      &pkg.Name,
+	}
+	collectedDepPkg, err := c.Packages(ctx, &depPkgSpec)
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedDepPkg) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestDependency :: multiple dependent package found")
+	}
+
+	return c.registerIsDependency(
+		collectedPkg[0],
+		collectedDepPkg[0],
+		dependency.VersionRange,
+		dependency.Justification,
+		dependency.Origin,
+		dependency.Collector), nil
 }
 
 // Query IsDependency

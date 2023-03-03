@@ -429,6 +429,16 @@ type IsDependency struct {
 	Collector        string   `json:"collector"`
 }
 
+// IsDependencyInputSpec is the same as IsDependency but for mutation input.
+//
+// All fields are required.
+type IsDependencyInputSpec struct {
+	VersionRange  string `json:"versionRange"`
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
 // IsDependencySpec allows filtering the list of IsDependency to return.
 //
 // Note: the package object must be defined to return its dependent packages.

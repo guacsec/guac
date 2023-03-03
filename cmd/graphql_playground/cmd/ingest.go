@@ -40,6 +40,7 @@ func ingestData(port int) {
 
 	logger.Infof("Ingesting test data into backend server")
 	ingestScorecards(ctx, gqlclient)
+	ingestDependency(ctx, gqlclient)
 	logger.Infof("Finished ingesting test data into backend server")
 }
 
@@ -70,6 +71,34 @@ func ingestScorecards(ctx context.Context, client graphql.Client) {
 	resp, err := model.Scorecard(context.Background(), client, source, scorecard)
 	if err != nil {
 		// TODO(mihaimaruseac): Panic or just error and continue?
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	fmt.Printf("Response is |%v|\n", resp)
+}
+
+func ingestDependency(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	pkg := model.PkgInputSpec{
+		Type:       "deb",
+		Namespace:  "ubuntu",
+		Name:       "dpkg",
+		Version:    "1.19.0.4",
+		Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "amd64"}},
+	}
+	depPkg := model.PkgInputSpec{
+		Type:      "conan",
+		Namespace: "openssl.org",
+		Name:      "openssl",
+	}
+	dependency := model.IsDependencyInputSpec{
+		VersionRange:  "3.0.3",
+		Justification: "deb: part of SBOM - openssl",
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
+	}
+	resp, err := model.IsDependency(context.Background(), client, pkg, depPkg, dependency)
+	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
 	fmt.Printf("Response is |%v|\n", resp)

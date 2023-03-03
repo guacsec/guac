@@ -62,8 +62,26 @@ input PkgNameSpec {
   name: String
 }
 
+"""
+IsDependencyInputSpec is the same as IsDependency but for mutation input.
+
+All fields are required.
+"""
+input IsDependencyInputSpec {
+  versionRange: String!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
 
 extend type Query {
   "Returns all IsDependency"
   IsDependency(isDependencySpec: IsDependencySpec): [IsDependency!]!
 }
+
+extend type Mutation {
+  "Adds dependency between two packages"
+  ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
+}
+

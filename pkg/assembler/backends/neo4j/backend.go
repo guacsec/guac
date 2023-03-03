@@ -59,7 +59,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		return nil, err
 	}
 	client := &neo4jClient{driver}
-	if config.TestData {
+	/* if config.TestData {
 		err = registerAllPackages(client)
 		if err != nil {
 			return nil, err
@@ -88,7 +88,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
+	} */
 	return client, nil
 }
 
