@@ -31,3 +31,8 @@ package: generated
 bindings:
   Time:
     type: time.Time
+
+# Generate pointers for optional values instead of defaults.
+# We use "" to signal match for exactly empty string or nil, so we need to use
+# pointers.
+optional: pointer

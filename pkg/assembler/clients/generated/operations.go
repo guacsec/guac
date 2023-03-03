@@ -332,30 +332,30 @@ func (v *PackageQualifierInputSpec) GetValue() string { return v.Value }
 // `type` and `name`. All optional fields are given empty default values.
 type PkgInputSpec struct {
 	Type       string                      `json:"type"`
-	Namespace  string                      `json:"namespace"`
+	Namespace  *string                     `json:"namespace"`
 	Name       string                      `json:"name"`
-	Version    string                      `json:"version"`
+	Version    *string                     `json:"version"`
 	Qualifiers []PackageQualifierInputSpec `json:"qualifiers"`
-	Subpath    string                      `json:"subpath"`
+	Subpath    *string                     `json:"subpath"`
 }
 
 // GetType returns PkgInputSpec.Type, and is useful for accessing the field via an interface.
 func (v *PkgInputSpec) GetType() string { return v.Type }
 
 // GetNamespace returns PkgInputSpec.Namespace, and is useful for accessing the field via an interface.
-func (v *PkgInputSpec) GetNamespace() string { return v.Namespace }
+func (v *PkgInputSpec) GetNamespace() *string { return v.Namespace }
 
 // GetName returns PkgInputSpec.Name, and is useful for accessing the field via an interface.
 func (v *PkgInputSpec) GetName() string { return v.Name }
 
 // GetVersion returns PkgInputSpec.Version, and is useful for accessing the field via an interface.
-func (v *PkgInputSpec) GetVersion() string { return v.Version }
+func (v *PkgInputSpec) GetVersion() *string { return v.Version }
 
 // GetQualifiers returns PkgInputSpec.Qualifiers, and is useful for accessing the field via an interface.
 func (v *PkgInputSpec) GetQualifiers() []PackageQualifierInputSpec { return v.Qualifiers }
 
 // GetSubpath returns PkgInputSpec.Subpath, and is useful for accessing the field via an interface.
-func (v *PkgInputSpec) GetSubpath() string { return v.Subpath }
+func (v *PkgInputSpec) GetSubpath() *string { return v.Subpath }
 
 // ScorecardCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -565,11 +565,11 @@ func (v *ScorecardResponse) GetCertifyScorecard() ScorecardCertifyScorecard {
 // It is an error to set both `tag` and `commit` fields to values different than
 // the default.
 type SourceInputSpec struct {
-	Type      string `json:"type"`
-	Namespace string `json:"namespace"`
-	Name      string `json:"name"`
-	Tag       string `json:"tag"`
-	Commit    string `json:"commit"`
+	Type      string  `json:"type"`
+	Namespace string  `json:"namespace"`
+	Name      string  `json:"name"`
+	Tag       *string `json:"tag"`
+	Commit    *string `json:"commit"`
 }
 
 // GetType returns SourceInputSpec.Type, and is useful for accessing the field via an interface.
@@ -582,10 +582,10 @@ func (v *SourceInputSpec) GetNamespace() string { return v.Namespace }
 func (v *SourceInputSpec) GetName() string { return v.Name }
 
 // GetTag returns SourceInputSpec.Tag, and is useful for accessing the field via an interface.
-func (v *SourceInputSpec) GetTag() string { return v.Tag }
+func (v *SourceInputSpec) GetTag() *string { return v.Tag }
 
 // GetCommit returns SourceInputSpec.Commit, and is useful for accessing the field via an interface.
-func (v *SourceInputSpec) GetCommit() string { return v.Commit }
+func (v *SourceInputSpec) GetCommit() *string { return v.Commit }
 
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
@@ -1165,19 +1165,19 @@ func (v *allSrcTreeNamespacesSourceNamespace) GetNames() []allSrcTreeNamespacesS
 // This is the only source trie node that can be referenced by other parts of
 // GUAC.
 type allSrcTreeNamespacesSourceNamespaceNamesSourceName struct {
-	Name   string `json:"name"`
-	Tag    string `json:"tag"`
-	Commit string `json:"commit"`
+	Name   string  `json:"name"`
+	Tag    *string `json:"tag"`
+	Commit *string `json:"commit"`
 }
 
 // GetName returns allSrcTreeNamespacesSourceNamespaceNamesSourceName.Name, and is useful for accessing the field via an interface.
 func (v *allSrcTreeNamespacesSourceNamespaceNamesSourceName) GetName() string { return v.Name }
 
 // GetTag returns allSrcTreeNamespacesSourceNamespaceNamesSourceName.Tag, and is useful for accessing the field via an interface.
-func (v *allSrcTreeNamespacesSourceNamespaceNamesSourceName) GetTag() string { return v.Tag }
+func (v *allSrcTreeNamespacesSourceNamespaceNamesSourceName) GetTag() *string { return v.Tag }
 
 // GetCommit returns allSrcTreeNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
-func (v *allSrcTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() string { return v.Commit }
+func (v *allSrcTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() *string { return v.Commit }
 
 func IsDependency(
 	ctx context.Context,
