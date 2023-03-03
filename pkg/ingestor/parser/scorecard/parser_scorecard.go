@@ -23,22 +23,22 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	sc "github.com/ossf/scorecard/v4/pkg"
 )
 
 type scorecardParser struct {
-	scorecardPredicates []*generated.ScorecardInputSpec
-	srcPredicates       []*generated.SourceInputSpec
+	scorecardPredicates []*model.ScorecardInputSpec
+	srcPredicates       []*model.SourceInputSpec
 }
 
 // NewSLSAParser initializes the slsaParser
 func NewScorecardParser() common.DocumentParser {
 	return &scorecardParser{
-		scorecardPredicates: []*generated.ScorecardInputSpec{},
-		srcPredicates:       []*generated.SourceInputSpec{},
+		scorecardPredicates: []*model.ScorecardInputSpec{},
+		srcPredicates:       []*model.SourceInputSpec{},
 	}
 }
 
@@ -88,7 +88,7 @@ func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 	return nil, fmt.Errorf("not yet implemented")
 }
 
-func getPredicates(s *sc.JSONScorecardResultV2) (*generated.ScorecardInputSpec, *generated.SourceInputSpec, error) {
+func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *model.SourceInputSpec, error) {
 	var ns, name string
 	idx := strings.LastIndex(s.Repo.Name, "/")
 	if idx < 0 {
@@ -98,7 +98,7 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*generated.ScorecardInputSpec, 
 	ns = s.Repo.Name[:idx]
 	name = s.Repo.Name[idx+1:]
 
-	srcInput := generated.SourceInputSpec{
+	srcInput := model.SourceInputSpec{
 		// assuming scorecards is only git
 		Type:      "git",
 		Namespace: ns,
@@ -108,9 +108,9 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*generated.ScorecardInputSpec, 
 		//Commit:    &s.Repo.Commit,
 	}
 
-	var checks []generated.ScorecardCheckInputSpec
+	var checks []model.ScorecardCheckInputSpec
 	for _, c := range s.Checks {
-		checks = append(checks, generated.ScorecardCheckInputSpec{
+		checks = append(checks, model.ScorecardCheckInputSpec{
 			Check: c.Name,
 			Score: c.Score,
 		})
@@ -132,7 +132,7 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*generated.ScorecardInputSpec, 
 		}
 	}
 
-	scInput := generated.ScorecardInputSpec{
+	scInput := model.ScorecardInputSpec{
 		TimeScanned:      timeScanned,
 		AggregateScore:   (float64)(s.AggregateScore),
 		Checks:           checks,
