@@ -17,7 +17,6 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -274,9 +273,8 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputS
 				"-[:has_occurrence]->(objArt)"
 			sb.WriteString(merge)
 			sb.WriteString(returnValue)
-
 		}
-		fmt.Println(sb.String())
+
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)
@@ -337,7 +335,7 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputS
 			"-[:has_occurrence]->(objArt)"
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
-		fmt.Println(sb.String())
+
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)

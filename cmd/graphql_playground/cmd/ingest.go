@@ -140,11 +140,30 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 		Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 	}
 	occurrence := model.IsOccurrenceSpecInputSpec{
-		Justification: "this artifact is an occurrence of this package",
+		Justification: "this artifact is an occurrence of this openssl",
 		Origin:        "Demo ingestion",
 		Collector:     "Demo ingestion",
 	}
-	respPkg, err := model.IsOccurrencePkg(context.Background(), client, &pkg, model.ArtifactInputSpec{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, occurrence)
+	respPkg, err := model.IsOccurrencePkg(context.Background(), client, &pkg,
+		model.ArtifactInputSpec{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, occurrence)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	fmt.Printf("Response is |%v|\n", respPkg)
+
+	ns = "smartentry"
+	pkg = model.PkgInputSpec{
+		Type:      "docker",
+		Namespace: &ns,
+		Name:      "debian",
+	}
+	occurrence = model.IsOccurrenceSpecInputSpec{
+		Justification: "this artifact is an occurrence of this debian",
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
+	}
+	respPkg, err = model.IsOccurrencePkg(context.Background(), client, &pkg,
+		model.ArtifactInputSpec{Digest: "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7", Algorithm: "sha512"}, occurrence)
 	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
@@ -162,7 +181,8 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 		Origin:        "Demo ingestion",
 		Collector:     "Demo ingestion",
 	}
-	respSrc, err := model.IsOccurrenceSrc(context.Background(), client, &src, model.ArtifactInputSpec{Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", Algorithm: "sha256"}, occurrence)
+	respSrc, err := model.IsOccurrenceSrc(context.Background(), client, &src,
+		model.ArtifactInputSpec{Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", Algorithm: "sha256"}, occurrence)
 	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
