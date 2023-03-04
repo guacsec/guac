@@ -21,12 +21,15 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assembler.AssemblerInput) error {
 
+	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
+			logger.Infof("assembling CertifyScorecard: %+v", p.CertifyScorecard)
 			if err := ingestCertifyScorecards(ctx, gqlclient, p.CertifyScorecard); err != nil {
 				return err
 			}
@@ -37,7 +40,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 
 func ingestCertifyScorecards(ctx context.Context, client graphql.Client, vs []assembler.CertifyScorecardIngest) error {
 	for _, v := range vs {
-		_, err := model.Scorecard(context.Background(), client, *v.Source, *v.Scorecard)
+		_, err := model.Scorecard(ctx, client, *v.Source, *v.Scorecard)
 		if err != nil {
 			return err
 		}

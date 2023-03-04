@@ -41,6 +41,9 @@ var flags = struct {
 
 	// collectsub service
 	collectSubAddr string
+
+	// graphql client
+	graphqlEndpoint string
 }{}
 
 func init() {
@@ -52,7 +55,8 @@ func init() {
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr"}
+	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
+	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr", "csub-addr", "gql-endpoint"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
