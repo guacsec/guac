@@ -489,6 +489,15 @@ type IsOccurrenceSpec struct {
 	Collector     *string       `json:"collector"`
 }
 
+// IsOccurrenceSpecInputSpec is the same as IsOccurrence but for mutation input.
+//
+// All fields are required.
+type IsOccurrenceSpecInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
 // IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
 //
 // osv (subject) - the osv object type that represents OSV and its ID

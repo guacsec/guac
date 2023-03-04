@@ -172,6 +172,7 @@ type ComplexityRoot struct {
 		IngestCve        func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa       func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestOccurrence func(childComplexity int, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) int
 		IngestOsv        func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage    func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSource     func(childComplexity int, source *model.SourceInputSpec) int
@@ -868,6 +869,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
 
+	case "Mutation.ingestOccurrence":
+		if e.complexity.Mutation.IngestOccurrence == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestOccurrence_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["pkg"].(*model.PkgInputSpec), args["source"].(*model.SourceInputSpec), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceSpecInputSpec)), true
+
 	case "Mutation.ingestOSV":
 		if e.complexity.Mutation.IngestOsv == nil {
 			break
@@ -1377,6 +1390,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsDependencyInputSpec,
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceSpec,
+		ec.unmarshalInputIsOccurrenceSpecInputSpec,
 		ec.unmarshalInputIsVulnerabilitySpec,
 		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
@@ -2457,7 +2471,6 @@ extend type Mutation {
   "Adds dependency between two packages"
   ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
 }
-
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
@@ -2519,10 +2532,26 @@ input IsOccurrenceSpec {
   collector: String
 }
 
+"""
+IsOccurrenceSpecInputSpec is the same as IsOccurrence but for mutation input.
+
+All fields are required.
+"""
+input IsOccurrenceSpecInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
 
 extend type Query {
   "Returns all IsOccurrence"
   IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
+}
+
+extend type Mutation {
+  "Adds an artifact as an occurrence for either a package or a source"
+  ingestOccurrence(pkg: PkgInputSpec, source: SourceInputSpec, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceSpecInputSpec!): IsOccurrence!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#

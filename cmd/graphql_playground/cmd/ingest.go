@@ -41,6 +41,7 @@ func ingestData(port int) {
 	logger.Infof("Ingesting test data into backend server")
 	ingestScorecards(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
+	ingestOccurrence(ctx, gqlclient)
 	logger.Infof("Finished ingesting test data into backend server")
 }
 
@@ -106,4 +107,84 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
 	fmt.Printf("Response is |%v|\n", resp)
+
+	ns = "smartentry"
+	pkg = model.PkgInputSpec{
+		Type:      "docker",
+		Namespace: &ns,
+		Name:      "debian",
+	}
+	dependency = model.IsDependencyInputSpec{
+		VersionRange:  "3.0.3",
+		Justification: "docker: part of SBOM - openssl",
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
+	}
+	resp, err = model.IsDependency(context.Background(), client, pkg, depPkg, dependency)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	fmt.Printf("Response is |%v|\n", resp)
+}
+
+func ingestOccurrence(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	ns := "openssl.org"
+	version := "3.0.3"
+	pkg := model.PkgInputSpec{
+		Type:       "conan",
+		Namespace:  &ns,
+		Name:       "openssl",
+		Version:    &version,
+		Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+	}
+	occurrence := model.IsOccurrenceSpecInputSpec{
+		Justification: "this artifact is an occurrence of this openssl",
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
+	}
+	respPkg, err := model.IsOccurrencePkg(context.Background(), client, &pkg,
+		model.ArtifactInputSpec{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, occurrence)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	fmt.Printf("Response is |%v|\n", respPkg)
+
+	ns = "smartentry"
+	pkg = model.PkgInputSpec{
+		Type:      "docker",
+		Namespace: &ns,
+		Name:      "debian",
+	}
+	occurrence = model.IsOccurrenceSpecInputSpec{
+		Justification: "this artifact is an occurrence of this debian",
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
+	}
+	respPkg, err = model.IsOccurrencePkg(context.Background(), client, &pkg,
+		model.ArtifactInputSpec{Digest: "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7", Algorithm: "sha512"}, occurrence)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	fmt.Printf("Response is |%v|\n", respPkg)
+
+	selectedTag := "v0.0.1"
+	src := model.SourceInputSpec{
+		Type:      "git",
+		Namespace: "github",
+		Name:      "github.com/guacsec/guac",
+		Tag:       &selectedTag,
+	}
+	occurrence = model.IsOccurrenceSpecInputSpec{
+		Justification: "this artifact is an occurrence of this source",
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
+	}
+	respSrc, err := model.IsOccurrenceSrc(context.Background(), client, &src,
+		model.ArtifactInputSpec{Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", Algorithm: "sha256"}, occurrence)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	fmt.Printf("Response is |%v|\n", respSrc)
 }

@@ -60,6 +60,7 @@ type Backend interface {
 	// Mutations for evidence trees (read-write queries, assume software trees ingested)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
+	IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) (*model.IsOccurrence, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

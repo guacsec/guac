@@ -161,3 +161,12 @@ func generateModelArtifact(algorithm, digest string) *model.Artifact {
 	}
 	return &artifact
 }
+
+// TODO: maybe use generics for ArtifactInputSpec and ArtifactSpec?
+func convertArtInputSpecToArtSpec(artInput *model.ArtifactInputSpec) *model.ArtifactSpec {
+	artSpec := model.ArtifactSpec{
+		Algorithm: &artInput.Algorithm,
+		Digest:    &artInput.Digest,
+	}
+	return &artSpec
+}

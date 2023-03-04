@@ -38,7 +38,7 @@ func registerAllIsOccurrence(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerIsOccurrence(selectedPackage[0], nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is an occurrence of this package")
+	_, err = client.registerIsOccurrence(selectedPackage[0], nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is an occurrence of this package", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func registerAllIsOccurrence(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerIsOccurrence(nil, selectedSource[0], client.artifacts[0], "this artifact is an occurrence of this source")
+	_, err = client.registerIsOccurrence(nil, selectedSource[0], client.artifacts[0], "this artifact is an occurrence of this source", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -61,21 +61,21 @@ func registerAllIsOccurrence(client *demoClient) error {
 
 // Ingest IsOccurrence
 
-func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, selectedSource *model.Source, artifact *model.Artifact, justification string) error {
+func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, selectedSource *model.Source, artifact *model.Artifact, justification, origin, collector string) (*model.IsOccurrence, error) {
 
 	if selectedPackage != nil && selectedSource != nil {
-		return fmt.Errorf("cannot specify both package and source for IsOccurrence")
+		return nil, fmt.Errorf("cannot specify both package and source for IsOccurrence")
 	}
 
 	for _, occurrence := range c.isOccurrence {
 		if occurrence.OccurrenceArtifact == artifact && occurrence.Justification == justification {
 			if val, ok := occurrence.Subject.(model.Package); ok {
 				if &val == selectedPackage {
-					return nil
+					return occurrence, nil
 				}
 			} else if val, ok := occurrence.Subject.(model.Source); ok {
 				if &val == selectedSource {
-					return nil
+					return occurrence, nil
 				}
 			}
 		}
@@ -84,8 +84,8 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	newIsOccurrence := &model.IsOccurrence{
 		Justification:      justification,
 		OccurrenceArtifact: artifact,
-		Origin:             "testing backend",
-		Collector:          "testing backend",
+		Origin:             origin,
+		Collector:          collector,
 	}
 	if selectedPackage != nil {
 		newIsOccurrence.Subject = selectedPackage
@@ -94,7 +94,87 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	}
 
 	c.isOccurrence = append(c.isOccurrence, newIsOccurrence)
-	return nil
+	return newIsOccurrence, nil
+}
+
+func (c *demoClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) (*model.IsOccurrence, error) {
+
+	if pkg != nil && source != nil {
+		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
+	}
+
+	collectedArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &artifact.Algorithm, Digest: &artifact.Digest})
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedArt) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestOccurrence :: multiple artifacts found")
+	}
+
+	if pkg != nil {
+		pkgQualifiers := []*model.PackageQualifierSpec{}
+		for _, quali := range pkg.Qualifiers {
+			pkgQualifier := &model.PackageQualifierSpec{
+				Key:   quali.Key,
+				Value: &quali.Value,
+			}
+			pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+		}
+
+		pkgSpec := model.PkgSpec{
+			Type:       &pkg.Type,
+			Namespace:  pkg.Namespace,
+			Name:       &pkg.Name,
+			Version:    pkg.Version,
+			Qualifiers: pkgQualifiers,
+			Subpath:    pkg.Subpath,
+		}
+		collectedPkg, err := c.Packages(ctx, &pkgSpec)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(collectedPkg) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestOccurrence :: multiple packages found")
+		}
+		return c.registerIsOccurrence(
+			collectedPkg[0],
+			nil,
+			collectedArt[0],
+			occurrence.Justification,
+			occurrence.Origin,
+			occurrence.Collector)
+	}
+
+	if source != nil {
+		sourceSpec := model.SourceSpec{
+			Type:      &source.Type,
+			Namespace: &source.Namespace,
+			Name:      &source.Name,
+			Tag:       source.Tag,
+			Commit:    source.Commit,
+		}
+		sources, err := c.Sources(ctx, &sourceSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(sources) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestOccurrence :: source argument must match one"+
+					" single source repository, found %d",
+				len(sources))
+		}
+		return c.registerIsOccurrence(
+			nil,
+			sources[0],
+			collectedArt[0],
+			occurrence.Justification,
+			occurrence.Origin,
+			occurrence.Collector)
+	}
+	return nil, nil
 }
 
 // Query IsOccurrence

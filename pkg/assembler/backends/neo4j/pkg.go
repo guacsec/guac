@@ -792,7 +792,7 @@ func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, s
 }
 
 // TODO: maybe use generics for PkgInputSpec and PkgSpec?
-func convertPkgInputSpecToPkgSpec(pkgInput model.PkgInputSpec) model.PkgSpec {
+func convertPkgInputSpecToPkgSpec(pkgInput *model.PkgInputSpec) *model.PkgSpec {
 	matchEmpty := false
 	pkgSpec := model.PkgSpec{
 		Type:                     &pkgInput.Type,
@@ -803,7 +803,7 @@ func convertPkgInputSpecToPkgSpec(pkgInput model.PkgInputSpec) model.PkgSpec {
 		Qualifiers:               convertQualifierInputToQualifierSpec(pkgInput.Qualifiers),
 		MatchOnlyEmptyQualifiers: &matchEmpty,
 	}
-	return pkgSpec
+	return &pkgSpec
 }
 
 func convertQualifierInputToQualifierSpec(qualifiers []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {

@@ -326,6 +326,50 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputIsOccurrenceSpecInputSpec(ctx context.Context, obj interface{}) (model.IsOccurrenceSpecInputSpec, error) {
+	var it model.IsOccurrenceSpecInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"justification", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -394,6 +438,10 @@ func (ec *executionContext) _IsOccurrence(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNIsOccurrence2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrence(ctx context.Context, sel ast.SelectionSet, v model.IsOccurrence) graphql.Marshaler {
+	return ec._IsOccurrence(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.IsOccurrence) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -446,6 +494,11 @@ func (ec *executionContext) marshalNIsOccurrence2ᚖgithubᚗcomᚋguacsecᚋgua
 		return graphql.Null
 	}
 	return ec._IsOccurrence(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNIsOccurrenceSpecInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpecInputSpec(ctx context.Context, v interface{}) (model.IsOccurrenceSpecInputSpec, error) {
+	res, err := ec.unmarshalInputIsOccurrenceSpecInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOIsOccurrenceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx context.Context, v interface{}) (*model.IsOccurrenceSpec, error) {
