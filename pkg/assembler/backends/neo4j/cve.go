@@ -313,3 +313,12 @@ func generateModelCve(yearStr, idStr string) *model.Cve {
 	}
 	return &cve
 }
+
+// TODO: maybe use generics for CVEInputSpec and CVESpec?
+func convertCveInputSpecToCveSpec(cveInput *model.CVEInputSpec) *model.CVESpec {
+	cveSpec := model.CVESpec{
+		Year:  &cveInput.Year,
+		CveID: &cveInput.CveID,
+	}
+	return &cveSpec
+}

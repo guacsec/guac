@@ -40,7 +40,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
   collector
 }
 
-mutation IsOccurrencePkg($pkg: PkgInputSpec, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceSpecInputSpec!) {
+mutation IsOccurrencePkg($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
@@ -52,7 +52,7 @@ mutation IsOccurrencePkg($pkg: PkgInputSpec, $artifact: ArtifactInputSpec!, $occ
   }
 }
 
-mutation IsOccurrenceSrc($source: SourceInputSpec, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceSpecInputSpec!) {
+mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
   ingestSource(source: $source) {
     ...allSrcTree
   }

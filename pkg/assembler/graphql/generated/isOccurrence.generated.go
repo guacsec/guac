@@ -258,6 +258,50 @@ func (ec *executionContext) fieldContext_IsOccurrence_collector(ctx context.Cont
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputIsOccurrenceInputSpec(ctx context.Context, obj interface{}) (model.IsOccurrenceInputSpec, error) {
+	var it model.IsOccurrenceInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"justification", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, obj interface{}) (model.IsOccurrenceSpec, error) {
 	var it model.IsOccurrenceSpec
 	asMap := map[string]interface{}{}
@@ -317,50 +361,6 @@ func (ec *executionContext) unmarshalInputIsOccurrenceSpec(ctx context.Context, 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			it.Collector, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputIsOccurrenceSpecInputSpec(ctx context.Context, obj interface{}) (model.IsOccurrenceSpecInputSpec, error) {
-	var it model.IsOccurrenceSpecInputSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"justification", "origin", "collector"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "justification":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "origin":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
-			it.Origin, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "collector":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
-			it.Collector, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -496,8 +496,8 @@ func (ec *executionContext) marshalNIsOccurrence2ᚖgithubᚗcomᚋguacsecᚋgua
 	return ec._IsOccurrence(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNIsOccurrenceSpecInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpecInputSpec(ctx context.Context, v interface{}) (model.IsOccurrenceSpecInputSpec, error) {
-	res, err := ec.unmarshalInputIsOccurrenceSpecInputSpec(ctx, v)
+func (ec *executionContext) unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx context.Context, v interface{}) (model.IsOccurrenceInputSpec, error) {
+	res, err := ec.unmarshalInputIsOccurrenceInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

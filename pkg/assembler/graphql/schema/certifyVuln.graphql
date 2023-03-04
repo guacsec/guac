@@ -63,6 +63,21 @@ input CertifyVulnSpec {
 }
 
 """
+CertifyVulnInputSpec is the same as CertifyVuln but for mutation input.
+
+All fields are required.
+"""
+input CertifyVulnInputSpec {
+  timeScanned: Time!
+  dbUri: String!
+  dbVersion: String!
+  scannerUri: String!
+  scannerVersion: String!
+  origin: String!
+  collector: String!
+}
+
+"""
 OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
 """
 union OsvCveGhsaObject = OSV | CVE | GHSA
@@ -70,4 +85,9 @@ union OsvCveGhsaObject = OSV | CVE | GHSA
 extend type Query {
   "Returns all CertifyVuln"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
+}
+
+extend type Mutation {
+  "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
+  ingestVulnerability(pkg: PkgInputSpec!, osv: OSVInputSpec, cve: CVEInputSpec, ghsa: GHSAInputSpec, certifyVuln: CertifyVulnInputSpec!): CertifyVuln!
 }

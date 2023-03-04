@@ -242,6 +242,19 @@ type CertifyVuln struct {
 	Collector      string           `json:"collector"`
 }
 
+// CertifyVulnInputSpec is the same as CertifyVuln but for mutation input.
+//
+// All fields are required.
+type CertifyVulnInputSpec struct {
+	TimeScanned    time.Time `json:"timeScanned"`
+	DbURI          string    `json:"dbUri"`
+	DbVersion      string    `json:"dbVersion"`
+	ScannerURI     string    `json:"scannerUri"`
+	ScannerVersion string    `json:"scannerVersion"`
+	Origin         string    `json:"origin"`
+	Collector      string    `json:"collector"`
+}
+
 // CertifyVulnSpec allows filtering the list of CertifyVuln to return.
 //
 // Specifying just the package allows to query for all vulnerabilities associated with the package.
@@ -476,6 +489,15 @@ type IsOccurrence struct {
 	Collector          string       `json:"collector"`
 }
 
+// IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
+//
+// All fields are required.
+type IsOccurrenceInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
 // IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 // Note: Package or Source must be specified but not both at the same time
 // For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
@@ -487,15 +509,6 @@ type IsOccurrenceSpec struct {
 	Justification *string       `json:"justification"`
 	Origin        *string       `json:"origin"`
 	Collector     *string       `json:"collector"`
-}
-
-// IsOccurrenceSpecInputSpec is the same as IsOccurrence but for mutation input.
-//
-// All fields are required.
-type IsOccurrenceSpecInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
 }
 
 // IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA

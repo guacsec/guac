@@ -220,7 +220,7 @@ func generateModelIsOccurrence(subject model.PkgSrcObject, artifact *model.Artif
 
 // Ingest IngestOccurrence
 
-func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) (*model.IsOccurrence, error) {
+func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 
 	if pkg != nil && source != nil {
 		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
@@ -381,6 +381,4 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputS
 	} else {
 		return nil, gqlerror.Errorf("package or source not specified for IngestOccurrence")
 	}
-
-	return nil, nil
 }

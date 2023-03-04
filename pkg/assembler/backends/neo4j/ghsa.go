@@ -192,3 +192,11 @@ func generateModelGhsa(id string) *model.Ghsa {
 	}
 	return &ghsa
 }
+
+// TODO: maybe use generics for GHSAInputSpec and GHSASpec?
+func convertGhsaInputSpecToGhsaSpec(ghsaInput *model.GHSAInputSpec) *model.GHSASpec {
+	ghsaSpec := model.GHSASpec{
+		GhsaID: &ghsaInput.GhsaID,
+	}
+	return &ghsaSpec
+}

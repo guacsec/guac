@@ -192,3 +192,11 @@ func generateModelOsv(id string) *model.Osv {
 	}
 	return &osv
 }
+
+// TODO: maybe use generics for OSVInputSpec and OSVSpec?
+func convertOsvInputSpecToOsvSpec(osvInput *model.OSVInputSpec) *model.OSVSpec {
+	osvSpec := model.OSVSpec{
+		OsvID: &osvInput.OsvID,
+	}
+	return &osvSpec
+}

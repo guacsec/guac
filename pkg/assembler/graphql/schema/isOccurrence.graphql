@@ -59,16 +59,15 @@ input IsOccurrenceSpec {
 }
 
 """
-IsOccurrenceSpecInputSpec is the same as IsOccurrence but for mutation input.
+IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
 
 All fields are required.
 """
-input IsOccurrenceSpecInputSpec {
+input IsOccurrenceInputSpec {
   justification: String!
   origin: String!
   collector: String!
 }
-
 
 extend type Query {
   "Returns all IsOccurrence"
@@ -77,5 +76,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds an artifact as an occurrence for either a package or a source"
-  ingestOccurrence(pkg: PkgInputSpec, source: SourceInputSpec, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceSpecInputSpec!): IsOccurrence!
+  ingestOccurrence(pkg: PkgInputSpec, source: SourceInputSpec, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
 }

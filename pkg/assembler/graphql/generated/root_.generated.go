@@ -166,16 +166,17 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CertifyScorecard func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
-		IngestArtifact   func(childComplexity int, artifact *model.ArtifactInputSpec) int
-		IngestBuilder    func(childComplexity int, builder *model.BuilderInputSpec) int
-		IngestCve        func(childComplexity int, cve *model.CVEInputSpec) int
-		IngestDependency func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
-		IngestGhsa       func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestOccurrence func(childComplexity int, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceSpecInputSpec) int
-		IngestOsv        func(childComplexity int, osv *model.OSVInputSpec) int
-		IngestPackage    func(childComplexity int, pkg *model.PkgInputSpec) int
-		IngestSource     func(childComplexity int, source *model.SourceInputSpec) int
+		CertifyScorecard    func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
+		IngestArtifact      func(childComplexity int, artifact *model.ArtifactInputSpec) int
+		IngestBuilder       func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
+		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestOccurrence    func(childComplexity int, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
+		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
+		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
+		IngestSource        func(childComplexity int, source *model.SourceInputSpec) int
+		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, osv *model.OSVInputSpec, cve *model.CVEInputSpec, ghsa *model.GHSAInputSpec, certifyVuln model.CertifyVulnInputSpec) int
 	}
 
 	OSV struct {
@@ -879,7 +880,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["pkg"].(*model.PkgInputSpec), args["source"].(*model.SourceInputSpec), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceSpecInputSpec)), true
+		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["pkg"].(*model.PkgInputSpec), args["source"].(*model.SourceInputSpec), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceInputSpec)), true
 
 	case "Mutation.ingestOSV":
 		if e.complexity.Mutation.IngestOsv == nil {
@@ -916,6 +917,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(*model.SourceInputSpec)), true
+
+	case "Mutation.ingestVulnerability":
+		if e.complexity.Mutation.IngestVulnerability == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestVulnerability_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["osv"].(*model.OSVInputSpec), args["cve"].(*model.CVEInputSpec), args["ghsa"].(*model.GHSAInputSpec), args["certifyVuln"].(model.CertifyVulnInputSpec)), true
 
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
@@ -1380,6 +1393,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
+		ec.unmarshalInputCertifyVulnInputSpec,
 		ec.unmarshalInputCertifyVulnSpec,
 		ec.unmarshalInputGHSAInputSpec,
 		ec.unmarshalInputGHSASpec,
@@ -1389,8 +1403,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputHashEqualSpec,
 		ec.unmarshalInputIsDependencyInputSpec,
 		ec.unmarshalInputIsDependencySpec,
+		ec.unmarshalInputIsOccurrenceInputSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
-		ec.unmarshalInputIsOccurrenceSpecInputSpec,
 		ec.unmarshalInputIsVulnerabilitySpec,
 		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
@@ -1960,6 +1974,21 @@ input CertifyVulnSpec {
 }
 
 """
+CertifyVulnInputSpec is the same as CertifyVuln but for mutation input.
+
+All fields are required.
+"""
+input CertifyVulnInputSpec {
+  timeScanned: Time!
+  dbUri: String!
+  dbVersion: String!
+  scannerUri: String!
+  scannerVersion: String!
+  origin: String!
+  collector: String!
+}
+
+"""
 OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
 """
 union OsvCveGhsaObject = OSV | CVE | GHSA
@@ -1967,6 +1996,11 @@ union OsvCveGhsaObject = OSV | CVE | GHSA
 extend type Query {
   "Returns all CertifyVuln"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
+}
+
+extend type Mutation {
+  "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
+  ingestVulnerability(pkg: PkgInputSpec!, osv: OSVInputSpec, cve: CVEInputSpec, ghsa: GHSAInputSpec, certifyVuln: CertifyVulnInputSpec!): CertifyVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
@@ -2540,16 +2574,15 @@ input IsOccurrenceSpec {
 }
 
 """
-IsOccurrenceSpecInputSpec is the same as IsOccurrence but for mutation input.
+IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
 
 All fields are required.
 """
-input IsOccurrenceSpecInputSpec {
+input IsOccurrenceInputSpec {
   justification: String!
   origin: String!
   collector: String!
 }
-
 
 extend type Query {
   "Returns all IsOccurrence"
@@ -2558,7 +2591,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds an artifact as an occurrence for either a package or a source"
-  ingestOccurrence(pkg: PkgInputSpec, source: SourceInputSpec, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceSpecInputSpec!): IsOccurrence!
+  ingestOccurrence(pkg: PkgInputSpec, source: SourceInputSpec, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#

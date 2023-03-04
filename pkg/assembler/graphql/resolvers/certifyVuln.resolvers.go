@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestVulnerability is the resolver for the ingestVulnerability field.
+func (r *mutationResolver) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, osv *model.OSVInputSpec, cve *model.CVEInputSpec, ghsa *model.GHSAInputSpec, certifyVuln model.CertifyVulnInputSpec) (*model.CertifyVuln, error) {
+	return r.Backend.IngestVulnerability(ctx, pkg, osv, cve, ghsa, certifyVuln)
+}
+
 // CertifyVuln is the resolver for the CertifyVuln field.
 func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	return r.Backend.CertifyVuln(ctx, certifyVulnSpec)
