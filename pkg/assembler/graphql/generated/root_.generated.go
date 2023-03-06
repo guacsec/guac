@@ -1638,7 +1638,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 """
 type CertifyBad {
-  subject: PkgSrcArtObject!
+  subject: PackageSourceOrArtifact!
   justification: String!
   origin: String!
   collector: String!
@@ -1658,11 +1658,6 @@ input CertifyBadSpec {
   origin: String
   collector: String
 }
-
-"""
-PkgSrcArtObject is a union of Package, Source and Artifact. Any of these objects can be specified
-"""
-union PkgSrcArtObject = Package | Source | Artifact
 
 extend type Query {
   "Returns all CertifyBad"
@@ -2255,7 +2250,14 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSLSA. It contains the Subject which can be of type package, source or artifact,
+# Defines a GraphQL schema for specifiying SLSA provenance.
+
+"""
+PackageSourceOrArtifact is a union of Package, Source and Artifact.
+"""
+union PackageSourceOrArtifact = Package | Source | Artifact
+
+# the HasSLSA. It contains the Subject which can be of type package, source or artifact,
 # buliltFrom which can also be of type package, source or artifact, builtby (builder object), build type,  predicate (key value pair of
 # the predicate values), slsa version, started on, finished on, origin and collector.
 """
@@ -2273,8 +2275,8 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HasSLSA {
-  subject: PkgSrcArtObject!
-  builtFrom: [PkgSrcArtObject!]!
+  subject: PackageSourceOrArtifact!
+  builtFrom: [PackageSourceOrArtifact!]!
   builtBy: Builder!
   buildType: String!
   slsaPredicate: [SLSAPredicate!]!

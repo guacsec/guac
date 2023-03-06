@@ -2774,7 +2774,7 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 
 // region    **************************** object.gotpl ****************************
 
-var artifactImplementors = []string{"Artifact", "PkgSrcArtObject", "PkgArtObject"}
+var artifactImplementors = []string{"Artifact", "PkgArtObject", "PackageSourceOrArtifact"}
 
 func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet, obj *model.Artifact) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, artifactImplementors)

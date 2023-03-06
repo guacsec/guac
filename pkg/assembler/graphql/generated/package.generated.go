@@ -786,7 +786,7 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
-var packageImplementors = []string{"Package", "PkgSrcArtObject", "PkgArtObject", "PkgSrcObject"}
+var packageImplementors = []string{"Package", "PkgArtObject", "PkgSrcObject", "PackageSourceOrArtifact"}
 
 func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, obj *model.Package) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, packageImplementors)

@@ -16,14 +16,14 @@ type OsvCveOrGhsa interface {
 	IsOsvCveOrGhsa()
 }
 
+// PackageSourceOrArtifact is a union of Package, Source and Artifact.
+type PackageSourceOrArtifact interface {
+	IsPackageSourceOrArtifact()
+}
+
 // PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
 type PkgArtObject interface {
 	IsPkgArtObject()
-}
-
-// PkgSrcArtObject is a union of Package, Source and Artifact. Any of these objects can be specified
-type PkgSrcArtObject interface {
-	IsPkgSrcArtObject()
 }
 
 // PkgSrcObject is a union of Package and Source. Any of these objects can be specified
@@ -43,9 +43,9 @@ type Artifact struct {
 	Digest    string `json:"digest"`
 }
 
-func (Artifact) IsPkgSrcArtObject() {}
-
 func (Artifact) IsPkgArtObject() {}
+
+func (Artifact) IsPackageSourceOrArtifact() {}
 
 // ArtifactInputSpec is the same as Artifact, but used as mutation input.
 //
@@ -126,10 +126,10 @@ type CVESpec struct {
 //
 // Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 type CertifyBad struct {
-	Subject       PkgSrcArtObject `json:"subject"`
-	Justification string          `json:"justification"`
-	Origin        string          `json:"origin"`
-	Collector     string          `json:"collector"`
+	Subject       PackageSourceOrArtifact `json:"subject"`
+	Justification string                  `json:"justification"`
+	Origin        string                  `json:"origin"`
+	Collector     string                  `json:"collector"`
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad to return.
@@ -317,16 +317,16 @@ type HasSBOMSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type HasSlsa struct {
-	Subject       PkgSrcArtObject   `json:"subject"`
-	BuiltFrom     []PkgSrcArtObject `json:"builtFrom"`
-	BuiltBy       *Builder          `json:"builtBy"`
-	BuildType     string            `json:"buildType"`
-	SlsaPredicate []*SLSAPredicate  `json:"slsaPredicate"`
-	SlsaVersion   string            `json:"slsaVersion"`
-	StartedOn     time.Time         `json:"startedOn"`
-	FinishedOn    time.Time         `json:"finishedOn"`
-	Origin        string            `json:"origin"`
-	Collector     string            `json:"collector"`
+	Subject       PackageSourceOrArtifact   `json:"subject"`
+	BuiltFrom     []PackageSourceOrArtifact `json:"builtFrom"`
+	BuiltBy       *Builder                  `json:"builtBy"`
+	BuildType     string                    `json:"buildType"`
+	SlsaPredicate []*SLSAPredicate          `json:"slsaPredicate"`
+	SlsaVersion   string                    `json:"slsaVersion"`
+	StartedOn     time.Time                 `json:"startedOn"`
+	FinishedOn    time.Time                 `json:"finishedOn"`
+	Origin        string                    `json:"origin"`
+	Collector     string                    `json:"collector"`
 }
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
@@ -575,11 +575,11 @@ type Package struct {
 	Namespaces []*PackageNamespace `json:"namespaces"`
 }
 
-func (Package) IsPkgSrcArtObject() {}
-
 func (Package) IsPkgArtObject() {}
 
 func (Package) IsPkgSrcObject() {}
+
+func (Package) IsPackageSourceOrArtifact() {}
 
 // PackageName is a name for packages.
 //
@@ -846,9 +846,9 @@ type Source struct {
 	Namespaces []*SourceNamespace `json:"namespaces"`
 }
 
-func (Source) IsPkgSrcArtObject() {}
-
 func (Source) IsPkgSrcObject() {}
+
+func (Source) IsPackageSourceOrArtifact() {}
 
 // SourceInputSpec specifies a source for a mutation.
 //
