@@ -654,7 +654,7 @@ func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-			it.Subject, err = ec.unmarshalOPackageSourceOrArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, v)
+			it.Subject, err = ec.unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -662,7 +662,7 @@ func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFrom"))
-			it.BuiltFrom, err = ec.unmarshalOPackageSourceOrArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputᚄ(ctx, v)
+			it.BuiltFrom, err = ec.unmarshalOPackageSourceOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpecᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -754,6 +754,50 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
+			it.Package, err = ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "source":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+			it.Source, err = ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "artifact":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+			it.Artifact, err = ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactSpec, error) {
+	var it model.PackageSourceOrArtifactSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"package", "source", "artifact"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "package":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
 			it.Package, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
 			if err != nil {
 				return it, err
@@ -771,6 +815,134 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
 			it.Artifact, err = ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSLSAInputSpec(ctx context.Context, obj interface{}) (model.SLSAInputSpec, error) {
+	var it model.SLSAInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"builtFrom", "builtBy", "buildType", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "builtFrom":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFrom"))
+			it.BuiltFrom, err = ec.unmarshalOPackageSourceOrArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "builtBy":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtBy"))
+			it.BuiltBy, err = ec.unmarshalNBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "buildType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("buildType"))
+			it.BuildType, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "slsaPredicate":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slsaPredicate"))
+			it.SlsaPredicate, err = ec.unmarshalNSLSAPredicateInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpecᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "slsaVersion":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slsaVersion"))
+			it.SlsaVersion, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startedOn":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startedOn"))
+			it.StartedOn, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "finishedOn":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("finishedOn"))
+			it.FinishedOn, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSLSAPredicateInputSpec(ctx context.Context, obj interface{}) (model.SLSAPredicateInputSpec, error) {
+	var it model.SLSAPredicateInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"key", "value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "key":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+			it.Key, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -1009,6 +1181,10 @@ func (ec *executionContext) _SLSAPredicate(ctx context.Context, sel ast.Selectio
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNHasSLSA2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsa(ctx context.Context, sel ast.SelectionSet, v model.HasSlsa) graphql.Marshaler {
+	return ec._HasSLSA(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNHasSLSA2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSlsaᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasSlsa) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -1117,9 +1293,24 @@ func (ec *executionContext) marshalNPackageSourceOrArtifact2ᚕgithubᚗcomᚋgu
 	return ret
 }
 
+func (ec *executionContext) unmarshalNPackageSourceOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx context.Context, v interface{}) (model.PackageSourceOrArtifactInput, error) {
+	res, err := ec.unmarshalInputPackageSourceOrArtifactInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNPackageSourceOrArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactInput, error) {
 	res, err := ec.unmarshalInputPackageSourceOrArtifactInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactSpec, error) {
+	res, err := ec.unmarshalInputPackageSourceOrArtifactSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v interface{}) (model.SLSAInputSpec, error) {
+	res, err := ec.unmarshalInputSLSAInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNSLSAPredicate2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SLSAPredicate) graphql.Marshaler {
@@ -1176,6 +1367,28 @@ func (ec *executionContext) marshalNSLSAPredicate2ᚖgithubᚗcomᚋguacsecᚋgu
 	return ec._SLSAPredicate(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.SLSAPredicateInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.SLSAPredicateInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNSLSAPredicateInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNSLSAPredicateInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateInputSpec(ctx context.Context, v interface{}) (*model.SLSAPredicateInputSpec, error) {
+	res, err := ec.unmarshalInputSLSAPredicateInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNSLSAPredicateSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpec(ctx context.Context, v interface{}) (*model.SLSAPredicateSpec, error) {
 	res, err := ec.unmarshalInputSLSAPredicateSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
@@ -1209,11 +1422,31 @@ func (ec *executionContext) unmarshalOPackageSourceOrArtifactInput2ᚕᚖgithub�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOPackageSourceOrArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactInput, error) {
+func (ec *executionContext) unmarshalOPackageSourceOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageSourceOrArtifactSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputPackageSourceOrArtifactInput(ctx, v)
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.PackageSourceOrArtifactSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPackageSourceOrArtifactSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

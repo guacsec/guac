@@ -162,6 +162,7 @@ type ComplexityRoot struct {
 		IngestOccurrence    func(childComplexity int, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
+		IngestSlsa          func(childComplexity int, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) int
 		IngestSource        func(childComplexity int, source *model.SourceInputSpec) int
 		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
@@ -829,6 +830,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(*model.PkgInputSpec)), true
 
+	case "Mutation.ingestSLSA":
+		if e.complexity.Mutation.IngestSlsa == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestSLSA_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestSlsa(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["slsa"].(model.SLSAInputSpec)), true
+
 	case "Mutation.ingestSource":
 		if e.complexity.Mutation.IngestSource == nil {
 			break
@@ -1448,9 +1461,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
+		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
+		ec.unmarshalInputSLSAInputSpec,
+		ec.unmarshalInputSLSAPredicateInputSpec,
 		ec.unmarshalInputSLSAPredicateSpec,
 		ec.unmarshalInputScorecardCheckInputSpec,
 		ec.unmarshalInputScorecardCheckSpec,
@@ -2295,15 +2311,27 @@ extend type Query {
 union PackageSourceOrArtifact = Package | Source | Artifact
 
 """
+PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
+input type to be used in read queries.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceOrArtifactSpec {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+}
+
+"""
 PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
-input type.
+input type to be used in mutations.
 
 Exactly one of the value must be set to non-nil.
 """
 input PackageSourceOrArtifactInput {
-  package: PkgSpec
-  source: SourceSpec
-  artifact: ArtifactSpec
+  package: PkgInputSpec
+  source: SourceInputSpec
+  artifact: ArtifactInputSpec
 }
 
 "HasSLSA records that a subject node has a SLSA attestation."
@@ -2381,8 +2409,8 @@ type SLSAPredicate {
 
 "HasSLSASpec allows filtering the list of HasSLSA to return."
 input HasSLSASpec {
-  subject: PackageSourceOrArtifactInput
-  builtFrom: [PackageSourceOrArtifactInput!]
+  subject: PackageSourceOrArtifactSpec
+  builtFrom: [PackageSourceOrArtifactSpec!]
   builtBy: BuilderSpec
   buildType: String
   predicate: [SLSAPredicateSpec!] = []
@@ -2393,10 +2421,34 @@ input HasSLSASpec {
   collector: String
 }
 
-"""
-SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query input.
-"""
+"SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input."
 input SLSAPredicateSpec {
+  key: String!
+  value: String!
+}
+
+"""
+SLSAInputSpec is the same as SLSA but for mutation input.
+
+All fields are required.
+"""
+input SLSAInputSpec {
+  builtFrom: [PackageSourceOrArtifactInput!]
+  builtBy: BuilderInputSpec!
+  buildType: String!
+  slsaPredicate: [SLSAPredicateInputSpec!]!
+  slsaVersion: String!
+  startedOn: Time!
+  finishedOn: Time!
+  origin: String!
+  collector: String!
+}
+
+"""
+SLSAPredicateInputSpec is the same as SLSAPredicateSpec, but for mutation
+input.
+"""
+input SLSAPredicateInputSpec {
   key: String!
   value: String!
 }
@@ -2404,6 +2456,11 @@ input SLSAPredicateSpec {
 extend type Query {
   "Returns all SLSA attestations matching the filter"
   HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
+}
+
+extend type Mutation {
+  "Ingests a SLSA attestation"
+  ingestSLSA(subject: PackageSourceOrArtifactInput!, slsa: SLSAInputSpec!): HasSLSA!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSourceAt.graphql", Input: `#
