@@ -483,7 +483,7 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 
 // region    **************************** object.gotpl ****************************
 
-var sourceImplementors = []string{"Source", "PkgSrcArtObject", "PkgSrcObject"}
+var sourceImplementors = []string{"Source", "PkgSrcObject", "PackageSourceOrArtifact"}
 
 func (ec *executionContext) _Source(ctx context.Context, sel ast.SelectionSet, obj *model.Source) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, sourceImplementors)

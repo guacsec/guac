@@ -28,7 +28,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 """
 type CertifyBad {
-  subject: PkgSrcArtObject!
+  subject: PackageSourceOrArtifact!
   justification: String!
   origin: String!
   collector: String!
@@ -48,11 +48,6 @@ input CertifyBadSpec {
   origin: String
   collector: String
 }
-
-"""
-PkgSrcArtObject is a union of Package, Source and Artifact. Any of these objects can be specified
-"""
-union PkgSrcArtObject = Package | Source | Artifact
 
 extend type Query {
   "Returns all CertifyBad"

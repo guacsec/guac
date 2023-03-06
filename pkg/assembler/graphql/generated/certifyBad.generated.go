@@ -5,7 +5,6 @@ package generated
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"sync"
 
@@ -54,9 +53,9 @@ func (ec *executionContext) _CertifyBad_subject(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.PkgSrcArtObject)
+	res := resTmp.(model.PackageSourceOrArtifact)
 	fc.Result = res
-	return ec.marshalNPkgSrcArtObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcArtObject(ctx, field.Selections, res)
+	return ec.marshalNPackageSourceOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifact(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyBad_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -66,7 +65,7 @@ func (ec *executionContext) fieldContext_CertifyBad_subject(ctx context.Context,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type PkgSrcArtObject does not have child fields")
+			return nil, errors.New("field of type PackageSourceOrArtifact does not have child fields")
 		},
 	}
 	return fc, nil
@@ -280,36 +279,6 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _PkgSrcArtObject(ctx context.Context, sel ast.SelectionSet, obj model.PkgSrcArtObject) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Package(ctx, sel, obj)
-	case model.Source:
-		return ec._Source(ctx, sel, &obj)
-	case *model.Source:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Source(ctx, sel, obj)
-	case model.Artifact:
-		return ec._Artifact(ctx, sel, &obj)
-	case *model.Artifact:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Artifact(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -419,60 +388,6 @@ func (ec *executionContext) marshalNCertifyBad2ᚖgithubᚗcomᚋguacsecᚋguac�
 		return graphql.Null
 	}
 	return ec._CertifyBad(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNPkgSrcArtObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcArtObject(ctx context.Context, sel ast.SelectionSet, v model.PkgSrcArtObject) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._PkgSrcArtObject(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNPkgSrcArtObject2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcArtObjectᚄ(ctx context.Context, sel ast.SelectionSet, v []model.PkgSrcArtObject) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNPkgSrcArtObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcArtObject(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) unmarshalOCertifyBadSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx context.Context, v interface{}) (*model.CertifyBadSpec, error) {

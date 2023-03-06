@@ -127,8 +127,8 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					return nil, err
 				}
 
-				resultBuiltFromMap := map[model.PkgSrcArtObject][]model.PkgSrcArtObject{}
-				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
+				resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
+				resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 				for result.Next() {
 					pkgQualifiers := result.Record().Values[5]
 					subPath := result.Record().Values[4]
@@ -156,7 +156,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if _, ok := resultBuiltFromMap[pkg]; !ok {
-						resultBuiltFromMap[pkg] = []model.PkgSrcArtObject{}
+						resultBuiltFromMap[pkg] = []model.PackageSourceOrArtifact{}
 					}
 
 					if result.Record().Values[8] != nil && result.Record().Values[9] != nil {
@@ -264,8 +264,8 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					return nil, err
 				}
 
-				resultBuiltFromMap := map[model.PkgSrcArtObject][]model.PkgSrcArtObject{}
-				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
+				resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
+				resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 
 				for result.Next() {
 					tag := result.Record().Values[3]
@@ -294,7 +294,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if _, ok := resultBuiltFromMap[src]; !ok {
-						resultBuiltFromMap[src] = []model.PkgSrcArtObject{}
+						resultBuiltFromMap[src] = []model.PackageSourceOrArtifact{}
 					}
 
 					if result.Record().Values[7] != nil && result.Record().Values[8] != nil {
@@ -396,8 +396,8 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					return nil, err
 				}
 
-				resultBuiltFromMap := map[model.PkgSrcArtObject][]model.PkgSrcArtObject{}
-				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
+				resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
+				resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 
 				for result.Next() {
 					algorithm := result.Record().Values[0].(string)
@@ -422,7 +422,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if _, ok := resultBuiltFromMap[artifact]; !ok {
-						resultBuiltFromMap[artifact] = []model.PkgSrcArtObject{}
+						resultBuiltFromMap[artifact] = []model.PackageSourceOrArtifact{}
 					}
 
 					if result.Record().Values[4] != nil && result.Record().Values[5] != nil {
@@ -578,7 +578,7 @@ func setHasSLSAValues(sb *strings.Builder, hasSLSASpec *model.HasSLSASpec, first
 	}
 }
 
-func generateModelHasSLSA(subject model.PkgSrcArtObject, builder *model.Builder, slsaPredicate []interface{}, buildType,
+func generateModelHasSLSA(subject model.PackageSourceOrArtifact, builder *model.Builder, slsaPredicate []interface{}, buildType,
 	slsaVersion, origin, collector string, startedOn, finishedOn time.Time) *model.HasSlsa {
 	hasSLSA := model.HasSlsa{
 		Subject:       subject,
