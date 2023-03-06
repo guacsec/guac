@@ -16,7 +16,7 @@ type OsvCveGhsaObject interface {
 	IsOsvCveGhsaObject()
 }
 
-// PackageSourceOrArtifact is a union of Package, Source and Artifact.
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
 type PackageSourceOrArtifact interface {
 	IsPackageSourceOrArtifact()
 }
@@ -319,29 +319,12 @@ type HasSBOMSpec struct {
 	Collector *string     `json:"collector"`
 }
 
-// HasSLSA is an attestation represents that the subject has a SLSA attestation associated with it.
-//
-// subject - an union type that consists of package, source or artifact
-// builtFrom (object) - list of union types that consists of the package, source or artifact that the subject was build from
-// builtBy (object) - represents the builder that was used to build the subject
-// buildType (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-// slsaPredicate (property) - a list of key value pair that consist of the keys and values of the SLSA predicate
-// slsaVersion (property) - version of the SLSA predicate
-// startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject (in RFC 3339 format)
-// finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject (in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// HasSLSA records that a subject node has a SLSA attestation.
 type HasSlsa struct {
-	Subject       PackageSourceOrArtifact   `json:"subject"`
-	BuiltFrom     []PackageSourceOrArtifact `json:"builtFrom"`
-	BuiltBy       *Builder                  `json:"builtBy"`
-	BuildType     string                    `json:"buildType"`
-	SlsaPredicate []*SLSAPredicate          `json:"slsaPredicate"`
-	SlsaVersion   string                    `json:"slsaVersion"`
-	StartedOn     time.Time                 `json:"startedOn"`
-	FinishedOn    time.Time                 `json:"finishedOn"`
-	Origin        string                    `json:"origin"`
-	Collector     string                    `json:"collector"`
+	// The subject of SLSA attestation: package, source, or artifact.
+	Subject PackageSourceOrArtifact `json:"subject"`
+	// The SLSA attestation.
+	Slsa *Slsa `json:"slsa"`
 }
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
@@ -714,41 +697,64 @@ type PkgSpec struct {
 	Subpath                  *string                 `json:"subpath"`
 }
 
+// SLSA contains all of the fields present in a SLSA attestation.
+//
+// The materials and builders are objects of the HasSLSA predicate, everything
+// else are properties extracted from the attestation.
+//
+// We also include fields to specify under what conditions the check was performed
+// (time of scan, version of scanners, etc.) as well as how this information got
+// included into GUAC (origin document and the collector for that document).
+type Slsa struct {
+	// Sources of the build resulting in subject (materials)
+	BuiltFrom []PackageSourceOrArtifact `json:"builtFrom"`
+	// Builder performing the build
+	BuiltBy *Builder `json:"builtBy"`
+	// Type of the builder
+	BuildType string `json:"buildType"`
+	// Individual predicates found in the attestation
+	SlsaPredicate []*SLSAPredicate `json:"slsaPredicate"`
+	// Version of the SLSA predicate
+	SlsaVersion string `json:"slsaVersion"`
+	// Timestamp (RFC3339Nano format) of build start time
+	StartedOn time.Time `json:"startedOn"`
+	// Timestamp (RFC3339Nano format) of build end time
+	FinishedOn time.Time `json:"finishedOn"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+}
+
 // SLSAPredicate are the values from the SLSA predicate in key-value pair form.
-// // Predicate:
-// "predicateType": "https://slsa.dev/provenance/v1",
+//
+// # For example, given the following predicate
+//
+// ```
 //
 //	"predicate": {
-//	    "buildDefinition": {
-//	        "buildType": string,
-//	        "externalParameters": object,
-//	        "systemParameters": object,
-//	        "resolvedDependencies": [ ...#ArtifactReference ],
+//	  "buildDefinition": {
+//	    "externalParameters": {
+//	      "repository": "https://github.com/octocat/hello-world",
+//	      ...
 //	    },
-//	    "runDetails": {
-//	        "builder": {
-//	            "id": string,
-//	            "version": string,
-//	            "builderDependencies": [ ...#ArtifactReference ],
-//	        },
-//	        "metadata": {
-//	            "invocationId": string,
-//	            "startedOn": #Timestamp,
-//	            "finishedOn": #Timestamp,
-//	        },
-//	        "byproducts": [ ...#ArtifactReference ],
-//	    }
+//	    ...
+//	  },
+//	  ...
 //	}
 //
-// where
+// ```
 //
-//	"externalParameters": {
-//	    "repository": "https://github.com/octocat/hello-world",
-//	    "ref": "refs/heads/main"
-//	},
+// we have
 //
-// For example: key = "buildDefinition.externalParameters.repository" value = "https://github.com/octocat/hello-world"
+// ```
+// key   = "buildDefinition.externalParameters.repository"
+// value = "https://github.com/octocat/hello-world"
+// ```
+//
 // This node cannot be directly referred by other parts of GUAC.
+//
+// TODO(mihaimaruseac): Can we define these directly?
 type SLSAPredicate struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`

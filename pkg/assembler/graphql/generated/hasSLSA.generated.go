@@ -73,8 +73,69 @@ func (ec *executionContext) fieldContext_HasSLSA_subject(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_builtFrom(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_builtFrom(ctx, field)
+func (ec *executionContext) _HasSLSA_slsa(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HasSLSA_slsa(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Slsa, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Slsa)
+	fc.Result = res
+	return ec.marshalOSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_HasSLSA_slsa(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "HasSLSA",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "builtFrom":
+				return ec.fieldContext_SLSA_builtFrom(ctx, field)
+			case "builtBy":
+				return ec.fieldContext_SLSA_builtBy(ctx, field)
+			case "buildType":
+				return ec.fieldContext_SLSA_buildType(ctx, field)
+			case "slsaPredicate":
+				return ec.fieldContext_SLSA_slsaPredicate(ctx, field)
+			case "slsaVersion":
+				return ec.fieldContext_SLSA_slsaVersion(ctx, field)
+			case "startedOn":
+				return ec.fieldContext_SLSA_startedOn(ctx, field)
+			case "finishedOn":
+				return ec.fieldContext_SLSA_finishedOn(ctx, field)
+			case "origin":
+				return ec.fieldContext_SLSA_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_SLSA_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SLSA", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SLSA_builtFrom(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_builtFrom(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -104,9 +165,9 @@ func (ec *executionContext) _HasSLSA_builtFrom(ctx context.Context, field graphq
 	return ec.marshalNPackageSourceOrArtifact2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_builtFrom(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_builtFrom(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -117,8 +178,8 @@ func (ec *executionContext) fieldContext_HasSLSA_builtFrom(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_builtBy(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_builtBy(ctx, field)
+func (ec *executionContext) _SLSA_builtBy(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_builtBy(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -148,9 +209,9 @@ func (ec *executionContext) _HasSLSA_builtBy(ctx context.Context, field graphql.
 	return ec.marshalNBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilder(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_builtBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_builtBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -165,8 +226,8 @@ func (ec *executionContext) fieldContext_HasSLSA_builtBy(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_buildType(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_buildType(ctx, field)
+func (ec *executionContext) _SLSA_buildType(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_buildType(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -196,9 +257,9 @@ func (ec *executionContext) _HasSLSA_buildType(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_buildType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_buildType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -209,8 +270,8 @@ func (ec *executionContext) fieldContext_HasSLSA_buildType(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_slsaPredicate(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_slsaPredicate(ctx, field)
+func (ec *executionContext) _SLSA_slsaPredicate(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_slsaPredicate(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -240,9 +301,9 @@ func (ec *executionContext) _HasSLSA_slsaPredicate(ctx context.Context, field gr
 	return ec.marshalNSLSAPredicate2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_slsaPredicate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_slsaPredicate(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -259,8 +320,8 @@ func (ec *executionContext) fieldContext_HasSLSA_slsaPredicate(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_slsaVersion(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_slsaVersion(ctx, field)
+func (ec *executionContext) _SLSA_slsaVersion(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_slsaVersion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -290,9 +351,9 @@ func (ec *executionContext) _HasSLSA_slsaVersion(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_slsaVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_slsaVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -303,8 +364,8 @@ func (ec *executionContext) fieldContext_HasSLSA_slsaVersion(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_startedOn(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_startedOn(ctx, field)
+func (ec *executionContext) _SLSA_startedOn(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_startedOn(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -334,9 +395,9 @@ func (ec *executionContext) _HasSLSA_startedOn(ctx context.Context, field graphq
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_startedOn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_startedOn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -347,8 +408,8 @@ func (ec *executionContext) fieldContext_HasSLSA_startedOn(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_finishedOn(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_finishedOn(ctx, field)
+func (ec *executionContext) _SLSA_finishedOn(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_finishedOn(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -378,9 +439,9 @@ func (ec *executionContext) _HasSLSA_finishedOn(ctx context.Context, field graph
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_finishedOn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_finishedOn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -391,8 +452,8 @@ func (ec *executionContext) fieldContext_HasSLSA_finishedOn(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_origin(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_origin(ctx, field)
+func (ec *executionContext) _SLSA_origin(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_origin(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -422,9 +483,9 @@ func (ec *executionContext) _HasSLSA_origin(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -435,8 +496,8 @@ func (ec *executionContext) fieldContext_HasSLSA_origin(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _HasSLSA_collector(ctx context.Context, field graphql.CollectedField, obj *model.HasSlsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasSLSA_collector(ctx, field)
+func (ec *executionContext) _SLSA_collector(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_collector(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -466,9 +527,9 @@ func (ec *executionContext) _HasSLSA_collector(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HasSLSA_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SLSA_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "HasSLSA",
+		Object:     "SLSA",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -798,65 +859,90 @@ func (ec *executionContext) _HasSLSA(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "slsa":
+
+			out.Values[i] = ec._HasSLSA_slsa(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var sLSAImplementors = []string{"SLSA"}
+
+func (ec *executionContext) _SLSA(ctx context.Context, sel ast.SelectionSet, obj *model.Slsa) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sLSAImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SLSA")
 		case "builtFrom":
 
-			out.Values[i] = ec._HasSLSA_builtFrom(ctx, field, obj)
+			out.Values[i] = ec._SLSA_builtFrom(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "builtBy":
 
-			out.Values[i] = ec._HasSLSA_builtBy(ctx, field, obj)
+			out.Values[i] = ec._SLSA_builtBy(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "buildType":
 
-			out.Values[i] = ec._HasSLSA_buildType(ctx, field, obj)
+			out.Values[i] = ec._SLSA_buildType(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "slsaPredicate":
 
-			out.Values[i] = ec._HasSLSA_slsaPredicate(ctx, field, obj)
+			out.Values[i] = ec._SLSA_slsaPredicate(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "slsaVersion":
 
-			out.Values[i] = ec._HasSLSA_slsaVersion(ctx, field, obj)
+			out.Values[i] = ec._SLSA_slsaVersion(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "startedOn":
 
-			out.Values[i] = ec._HasSLSA_startedOn(ctx, field, obj)
+			out.Values[i] = ec._SLSA_startedOn(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "finishedOn":
 
-			out.Values[i] = ec._HasSLSA_finishedOn(ctx, field, obj)
+			out.Values[i] = ec._SLSA_finishedOn(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "origin":
 
-			out.Values[i] = ec._HasSLSA_origin(ctx, field, obj)
+			out.Values[i] = ec._SLSA_origin(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "collector":
 
-			out.Values[i] = ec._HasSLSA_collector(ctx, field, obj)
+			out.Values[i] = ec._SLSA_collector(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -1084,6 +1170,13 @@ func (ec *executionContext) unmarshalOHasSLSASpec2ᚖgithubᚗcomᚋguacsecᚋgu
 	}
 	res, err := ec.unmarshalInputHasSLSASpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx context.Context, sel ast.SelectionSet, v *model.Slsa) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SLSA(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOSLSAPredicateSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpecᚄ(ctx context.Context, v interface{}) ([]*model.SLSAPredicateSpec, error) {

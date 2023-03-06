@@ -112,16 +112,8 @@ type ComplexityRoot struct {
 	}
 
 	HasSLSA struct {
-		BuildType     func(childComplexity int) int
-		BuiltBy       func(childComplexity int) int
-		BuiltFrom     func(childComplexity int) int
-		Collector     func(childComplexity int) int
-		FinishedOn    func(childComplexity int) int
-		Origin        func(childComplexity int) int
-		SlsaPredicate func(childComplexity int) int
-		SlsaVersion   func(childComplexity int) int
-		StartedOn     func(childComplexity int) int
-		Subject       func(childComplexity int) int
+		Slsa    func(childComplexity int) int
+		Subject func(childComplexity int) int
 	}
 
 	HasSourceAt struct {
@@ -232,6 +224,18 @@ type ComplexityRoot struct {
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
+	}
+
+	SLSA struct {
+		BuildType     func(childComplexity int) int
+		BuiltBy       func(childComplexity int) int
+		BuiltFrom     func(childComplexity int) int
+		Collector     func(childComplexity int) int
+		FinishedOn    func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		SlsaPredicate func(childComplexity int) int
+		SlsaVersion   func(childComplexity int) int
+		StartedOn     func(childComplexity int) int
 	}
 
 	SLSAPredicate struct {
@@ -545,68 +549,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasSBOM.URI(childComplexity), true
 
-	case "HasSLSA.buildType":
-		if e.complexity.HasSLSA.BuildType == nil {
+	case "HasSLSA.slsa":
+		if e.complexity.HasSLSA.Slsa == nil {
 			break
 		}
 
-		return e.complexity.HasSLSA.BuildType(childComplexity), true
-
-	case "HasSLSA.builtBy":
-		if e.complexity.HasSLSA.BuiltBy == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.BuiltBy(childComplexity), true
-
-	case "HasSLSA.builtFrom":
-		if e.complexity.HasSLSA.BuiltFrom == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.BuiltFrom(childComplexity), true
-
-	case "HasSLSA.collector":
-		if e.complexity.HasSLSA.Collector == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.Collector(childComplexity), true
-
-	case "HasSLSA.finishedOn":
-		if e.complexity.HasSLSA.FinishedOn == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.FinishedOn(childComplexity), true
-
-	case "HasSLSA.origin":
-		if e.complexity.HasSLSA.Origin == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.Origin(childComplexity), true
-
-	case "HasSLSA.slsaPredicate":
-		if e.complexity.HasSLSA.SlsaPredicate == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.SlsaPredicate(childComplexity), true
-
-	case "HasSLSA.slsaVersion":
-		if e.complexity.HasSLSA.SlsaVersion == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.SlsaVersion(childComplexity), true
-
-	case "HasSLSA.startedOn":
-		if e.complexity.HasSLSA.StartedOn == nil {
-			break
-		}
-
-		return e.complexity.HasSLSA.StartedOn(childComplexity), true
+		return e.complexity.HasSLSA.Slsa(childComplexity), true
 
 	case "HasSLSA.subject":
 		if e.complexity.HasSLSA.Subject == nil {
@@ -1235,6 +1183,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(*model.SourceSpec)), true
+
+	case "SLSA.buildType":
+		if e.complexity.SLSA.BuildType == nil {
+			break
+		}
+
+		return e.complexity.SLSA.BuildType(childComplexity), true
+
+	case "SLSA.builtBy":
+		if e.complexity.SLSA.BuiltBy == nil {
+			break
+		}
+
+		return e.complexity.SLSA.BuiltBy(childComplexity), true
+
+	case "SLSA.builtFrom":
+		if e.complexity.SLSA.BuiltFrom == nil {
+			break
+		}
+
+		return e.complexity.SLSA.BuiltFrom(childComplexity), true
+
+	case "SLSA.collector":
+		if e.complexity.SLSA.Collector == nil {
+			break
+		}
+
+		return e.complexity.SLSA.Collector(childComplexity), true
+
+	case "SLSA.finishedOn":
+		if e.complexity.SLSA.FinishedOn == nil {
+			break
+		}
+
+		return e.complexity.SLSA.FinishedOn(childComplexity), true
+
+	case "SLSA.origin":
+		if e.complexity.SLSA.Origin == nil {
+			break
+		}
+
+		return e.complexity.SLSA.Origin(childComplexity), true
+
+	case "SLSA.slsaPredicate":
+		if e.complexity.SLSA.SlsaPredicate == nil {
+			break
+		}
+
+		return e.complexity.SLSA.SlsaPredicate(childComplexity), true
+
+	case "SLSA.slsaVersion":
+		if e.complexity.SLSA.SlsaVersion == nil {
+			break
+		}
+
+		return e.complexity.SLSA.SlsaVersion(childComplexity), true
+
+	case "SLSA.startedOn":
+		if e.complexity.SLSA.StartedOn == nil {
+			break
+		}
+
+		return e.complexity.SLSA.StartedOn(childComplexity), true
 
 	case "SLSAPredicate.key":
 		if e.complexity.SLSAPredicate.Key == nil {
@@ -2180,79 +2191,83 @@ extend type Query {
 
 # Defines a GraphQL schema for specifiying SLSA provenance.
 
-"""
-PackageSourceOrArtifact is a union of Package, Source and Artifact.
-"""
+"PackageSourceOrArtifact is a union of Package, Source, and Artifact."
 union PackageSourceOrArtifact = Package | Source | Artifact
 
-# the HasSLSA. It contains the Subject which can be of type package, source or artifact,
-# buliltFrom which can also be of type package, source or artifact, builtby (builder object), build type,  predicate (key value pair of
-# the predicate values), slsa version, started on, finished on, origin and collector.
-"""
-HasSLSA is an attestation represents that the subject has a SLSA attestation associated with it.
-
-subject - an union type that consists of package, source or artifact
-builtFrom (object) - list of union types that consists of the package, source or artifact that the subject was build from
-builtBy (object) - represents the builder that was used to build the subject
-buildType (property) - individual scorecard check scores (Branch-Protection, Code-Review...etc)
-slsaPredicate (property) - a list of key value pair that consist of the keys and values of the SLSA predicate
-slsaVersion (property) - version of the SLSA predicate
-startedOn (property) - timestamp when the SLSA predicate was recorded during the build time of the subject (in RFC 3339 format)
-finishedOn (property) - timestamp when the SLSA predicate was completed during the build time of the subject (in RFC 3339 format)
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"HasSLSA records that a subject node has a SLSA attestation."
 type HasSLSA {
+  "The subject of SLSA attestation: package, source, or artifact."
   subject: PackageSourceOrArtifact!
+  "The SLSA attestation."
+  slsa: SLSA
+}
+
+"""
+SLSA contains all of the fields present in a SLSA attestation.
+
+The materials and builders are objects of the HasSLSA predicate, everything
+else are properties extracted from the attestation.
+
+We also include fields to specify under what conditions the check was performed
+(time of scan, version of scanners, etc.) as well as how this information got
+included into GUAC (origin document and the collector for that document).
+"""
+type SLSA {
+  "Sources of the build resulting in subject (materials)"
   builtFrom: [PackageSourceOrArtifact!]!
+  "Builder performing the build"
   builtBy: Builder!
+  "Type of the builder"
   buildType: String!
+  "Individual predicates found in the attestation"
   slsaPredicate: [SLSAPredicate!]!
+  "Version of the SLSA predicate"
   slsaVersion: String!
+  "Timestamp (RFC3339Nano format) of build start time"
   startedOn: Time!
+  "Timestamp (RFC3339Nano format) of build end time"
   finishedOn: Time!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
 SLSAPredicate are the values from the SLSA predicate in key-value pair form.
-// Predicate:
-"predicateType": "https://slsa.dev/provenance/v1",
-"predicate": {
-    "buildDefinition": {
-        "buildType": string,
-        "externalParameters": object,
-        "systemParameters": object,
-        "resolvedDependencies": [ ...#ArtifactReference ],
-    },
-    "runDetails": {
-        "builder": {
-            "id": string,
-            "version": string,
-            "builderDependencies": [ ...#ArtifactReference ],
-        },
-        "metadata": {
-            "invocationId": string,
-            "startedOn": #Timestamp,
-            "finishedOn": #Timestamp,
-        },
-        "byproducts": [ ...#ArtifactReference ],
-    }
-}
-where
-"externalParameters": {
-    "repository": "https://github.com/octocat/hello-world",
-    "ref": "refs/heads/main"
-},
 
-For example: key = "buildDefinition.externalParameters.repository" value = "https://github.com/octocat/hello-world"
+For example, given the following predicate
+
+` + "`" + `` + "`" + `` + "`" + `
+"predicate": {
+  "buildDefinition": {
+    "externalParameters": {
+      "repository": "https://github.com/octocat/hello-world",
+      ...
+    },
+    ...
+  },
+  ...
+}
+` + "`" + `` + "`" + `` + "`" + `
+
+we have
+
+` + "`" + `` + "`" + `` + "`" + `
+key   = "buildDefinition.externalParameters.repository"
+value = "https://github.com/octocat/hello-world"
+` + "`" + `` + "`" + `` + "`" + `
+
 This node cannot be directly referred by other parts of GUAC.
+
+TODO(mihaimaruseac): Can we define these directly?
 """
 type SLSAPredicate {
   key: String!
   value: String!
 }
+
+# TODO: clean from here down
 
 """
 HasSLSASpec allows filtering the list of HasSLSA to return.

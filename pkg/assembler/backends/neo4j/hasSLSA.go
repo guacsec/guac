@@ -36,6 +36,9 @@ const (
 )
 
 func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
 	err := checkHasSLSAInputs(hasSLSASpec)
 	if err != nil {
 		return nil, err
@@ -45,9 +48,6 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	if hasSLSASpec.Package == nil && hasSLSASpec.Source == nil && hasSLSASpec.Artifact == nil {
 		queryAll = true
 	}
-
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
 
 	aggregateHasSLSA := []*model.HasSlsa{}
 
@@ -207,7 +207,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				collectedHasSLSA := []*model.HasSlsa{}
 				for subject, hasSLSA := range resultHasSlsaMap {
 					if builtFrom, ok := resultBuiltFromMap[subject]; ok {
-						hasSLSA.BuiltFrom = builtFrom
+						hasSLSA.Slsa.BuiltFrom = builtFrom
 					}
 					collectedHasSLSA = append(collectedHasSLSA, hasSLSA)
 				}
@@ -341,7 +341,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				collectedHasSLSA := []*model.HasSlsa{}
 				for subject, hasSLSA := range resultHasSlsaMap {
 					if builtFrom, ok := resultBuiltFromMap[subject]; ok {
-						hasSLSA.BuiltFrom = builtFrom
+						hasSLSA.Slsa.BuiltFrom = builtFrom
 					}
 					collectedHasSLSA = append(collectedHasSLSA, hasSLSA)
 				}
@@ -471,7 +471,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				collectedHasSLSA := []*model.HasSlsa{}
 				for subject, hasSLSA := range resultHasSlsaMap {
 					if builtFrom, ok := resultBuiltFromMap[subject]; ok {
-						hasSLSA.BuiltFrom = builtFrom
+						hasSLSA.Slsa.BuiltFrom = builtFrom
 					}
 					collectedHasSLSA = append(collectedHasSLSA, hasSLSA)
 				}
@@ -578,10 +578,11 @@ func setHasSLSAValues(sb *strings.Builder, hasSLSASpec *model.HasSLSASpec, first
 	}
 }
 
-func generateModelHasSLSA(subject model.PackageSourceOrArtifact, builder *model.Builder, slsaPredicate []interface{}, buildType,
-	slsaVersion, origin, collector string, startedOn, finishedOn time.Time) *model.HasSlsa {
-	hasSLSA := model.HasSlsa{
-		Subject:       subject,
+func generateModelHasSLSA(subject model.PackageSourceOrArtifact,
+	builder *model.Builder, slsaPredicate []interface{}, buildType,
+	slsaVersion, origin, collector string,
+	startedOn, finishedOn time.Time) *model.HasSlsa {
+	slsa := &model.Slsa{
 		BuiltBy:       builder,
 		BuildType:     buildType,
 		SlsaPredicate: getCollectedPredicate(slsaPredicate),
@@ -590,6 +591,10 @@ func generateModelHasSLSA(subject model.PackageSourceOrArtifact, builder *model.
 		FinishedOn:    finishedOn,
 		Origin:        origin,
 		Collector:     collector,
+	}
+	hasSLSA := model.HasSlsa{
+		Subject: subject,
+		Slsa:    slsa,
 	}
 	return &hasSLSA
 }
