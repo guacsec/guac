@@ -30,7 +30,7 @@ const PurlTypeGuac = "guac"
 func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 	p, err := purl.FromString(purlUri)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse purl: %v", err)
+		return nil, fmt.Errorf("unable to parse purl %s: %v", purlUri, err)
 	}
 
 	return purlConvert(p)
@@ -45,7 +45,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 	// so that they can be referenced with higher specificity in GUAC
 	//
 	// PURL types not defined in purl library handled generically
-	case "alpm", "apk", "huggingface", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac:
+	case "alpine", "alpm", "apk", "huggingface", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac:
 		fallthrough
 	// PURL types defined in purl library handled generically
 	case purl.TypeBitbucket, purl.TypeCocoapods, purl.TypeCargo,
@@ -108,7 +108,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 	default:
 		// unhandled types should throw an error so we can make sure to review the
 		// implementation of newly introduced PURL types.
-		return nil, fmt.Errorf("unhandled PURL type")
+		return nil, fmt.Errorf("unhandled PURL type: %s", p.Type)
 	}
 }
 
@@ -135,11 +135,15 @@ func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]st
 
 func GuacPkgPurl(pkgName string, pkgVersion *string) string {
 	if pkgVersion == nil {
-		return fmt.Sprintf("guac:pkg/%s", pkgName)
+		return fmt.Sprintf("pkg:guac/%s", pkgName)
 	}
-	return fmt.Sprintf("guac:pkg/%s@%s", pkgName, *pkgVersion)
+	return fmt.Sprintf("pkg:guac/%s@%s", pkgName, *pkgVersion)
 }
 
-func GuacFilePurl(filename string) string {
-	return fmt.Sprintf("guac:files/%s", filename)
+func GuacFilePurl(alg string, digest string, filename *string) string {
+	s := fmt.Sprintf("pkg:guac/files/%s:%s", strings.ToLower(alg), digest)
+	if filename != nil {
+		s += fmt.Sprintf("#%s", *filename)
+	}
+	return s
 }

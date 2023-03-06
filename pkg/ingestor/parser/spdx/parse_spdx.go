@@ -121,16 +121,17 @@ func (s *spdxParser) getPackages() {
 
 func (s *spdxParser) getFiles() {
 	for _, file := range s.spdxDoc.Files {
-		// for each file create a package for each of them so they can be referenced as a dependency
-		purl := asmhelpers.GuacFilePurl(file.FileName)
-		pkg, err := asmhelpers.PurlToPkg(purl)
-		if err != nil {
-			panic(err)
-		}
-		s.filePackages[string(file.FileSPDXIdentifier)] = append(s.packagePackages[string(file.FileSPDXIdentifier)], *pkg)
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range file.Checksums {
+			// for each file create a package for each of them so they can be referenced as a dependency
+			purl := asmhelpers.GuacFilePurl(strings.ToLower(string(checksum.Algorithm)), checksum.Value, &file.FileName)
+			pkg, err := asmhelpers.PurlToPkg(purl)
+			if err != nil {
+				panic(err)
+			}
+			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.packagePackages[string(file.FileSPDXIdentifier)], *pkg)
+
 			artifact := model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
@@ -194,6 +195,15 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		preds.IsDependency = append(preds.IsDependency, createTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages)...)
 	}
 	for _, rel := range s.spdxDoc.Relationships {
+
+		fmt.Println(rel)
+		if !map[string]bool{
+			spdx_common.TypeRelationshipContains:  true,
+			spdx_common.TypeRelationshipDependsOn: true,
+		}[rel.Relationship] {
+			continue
+		}
+
 		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
 		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
 		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
