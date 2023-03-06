@@ -1,33 +1,41 @@
-fragment allHasSLSA on HasSLSA {
+fragment allPkgTree on Package {
+  type
+  namespaces {
+    namespace
+    names {
+      name
+      versions {
+        version
+        qualifiers {
+          key
+          value
+        }
+        subpath
+      }
+    }
+  }
+}
+
+fragment allSrcTree on Source {
+  type
+  namespaces {
+    namespace
+    names {
+      name
+      tag
+      commit
+    }
+  }
+}
+
+fragment allSLSATree on HasSLSA {
   subject {
     __typename
     ... on Package {
-      type
-      namespaces {
-        namespace
-        names {
-          name
-          versions {
-            version
-            qualifiers {
-              key
-              value
-            }
-            subpath
-          }
-        }
-      }
+      ...allPkgTree
     }
     ... on Source {
-      type
-      namespaces {
-        namespace
-        names {
-          name
-          tag
-          commit
-        }
-      }
+      ...allSrcTree
     }
     ... on Artifact {
       algorithm
@@ -35,34 +43,12 @@ fragment allHasSLSA on HasSLSA {
     }
   }
   builtFrom {
-       __typename
+    __typename
     ... on Package {
-      type
-      namespaces {
-        namespace
-        names {
-          name
-          versions {
-            version
-            qualifiers {
-              key
-              value
-            }
-            subpath
-          }
-        }
-      }
+      ...allPkgTree
     }
     ... on Source {
-      type
-      namespaces {
-        namespace
-        names {
-          name
-          tag
-          commit
-        }
-      }
+      ...allSrcTree
     }
     ... on Artifact {
       algorithm
@@ -73,7 +59,7 @@ fragment allHasSLSA on HasSLSA {
     uri
   }
   buildType
-  slsaPredicate{
+  slsaPredicate {
     key
     value
   }
@@ -84,20 +70,20 @@ fragment allHasSLSA on HasSLSA {
   collector
 }
 
-query Q1 {
+query SLSAQ1 {
   HasSLSA(hasSLSASpec: {}) {
-    ...allHasSLSA
+    ...allSLSATree
   }
 }
 
-query Q2 {
+query SLSAQ2 {
   HasSLSA(hasSLSASpec: {origin: "testing backend"}) {
-    ...allHasSLSA
+    ...allSLSATree
   }
 }
 
-query Q3 {
+query SLSAQ3 {
   HasSLSA(hasSLSASpec: {package: {name: "django"}}) {
-    ...allHasSLSA
+    ...allSLSATree
   }
 }
