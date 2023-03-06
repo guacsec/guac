@@ -70,12 +70,10 @@ func ingestScorecards(ctx context.Context, client graphql.Client) {
 		Origin:           "Demo ingestion",
 		Collector:        "Demo ingestion",
 	}
-	resp, err := model.Scorecard(context.Background(), client, source, scorecard)
+	_, err := model.Scorecard(context.Background(), client, source, scorecard)
 	if err != nil {
-		// TODO(mihaimaruseac): Panic or just error and continue?
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
-	fmt.Printf("Response is |%v|\n", resp)
 }
 
 func ingestDependency(ctx context.Context, client graphql.Client) {
