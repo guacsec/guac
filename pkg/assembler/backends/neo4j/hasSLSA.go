@@ -488,23 +488,20 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 }
 
-// TODO (pxp928): combine with testing backend in shared utility
+// TODO(pxp928): combine with testing backend in shared utility
 func checkHasSLSAInputs(hasSLSASpec *model.HasSLSASpec) error {
-	invalidSubject := false
-	if hasSLSASpec.Package != nil && hasSLSASpec.Source != nil && hasSLSASpec.Artifact != nil {
-		invalidSubject = true
+	subjectsDefined := 0
+	if hasSLSASpec.Package != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Package != nil && hasSLSASpec.Source != nil {
-		invalidSubject = true
+	if hasSLSASpec.Source != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Package != nil && hasSLSASpec.Artifact != nil {
-		invalidSubject = true
+	if hasSLSASpec.Artifact != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Source != nil && hasSLSASpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if invalidSubject {
-		return gqlerror.Errorf("cannot specify more than one subject for CertifyBad query")
+	if subjectsDefined > 1 {
+		return gqlerror.Errorf("Must specify at most one subject (package, source, or artifact)")
 	}
 	return nil
 }
