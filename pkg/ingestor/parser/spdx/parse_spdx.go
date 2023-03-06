@@ -18,29 +18,38 @@ package spdx
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/logging"
 	spdx_json "github.com/spdx/tools-golang/json"
 	spdx_common "github.com/spdx/tools-golang/spdx/common"
 	"github.com/spdx/tools-golang/spdx/v2_2"
 )
 
 type spdxParser struct {
-	doc      *processor.Document
-	packages map[string][]assembler.PackageNode
-	files    map[string][]assembler.ArtifactNode
-	spdxDoc  *v2_2.Document
+	// TODO: Add hasSBOMInputSpec when its created
+	doc              *processor.Document
+	packagePackages  map[string][]model.PkgInputSpec
+	packageArtifacts map[string][]model.ArtifactInputSpec
+	filePackages     map[string][]model.PkgInputSpec
+	fileArtifacts    map[string][]model.ArtifactInputSpec
+
+	spdxDoc *v2_2.Document
 }
 
 func NewSpdxParser() common.DocumentParser {
 	return &spdxParser{
-		packages: map[string][]assembler.PackageNode{},
-		files:    map[string][]assembler.ArtifactNode{},
+		packagePackages:  map[string][]model.PkgInputSpec{},
+		packageArtifacts: map[string][]model.ArtifactInputSpec{},
+		filePackages:     map[string][]model.PkgInputSpec{},
+		fileArtifacts:    map[string][]model.ArtifactInputSpec{},
 	}
 }
 
@@ -60,61 +69,73 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 func (s *spdxParser) getTopLevelPackage() {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	splitImage := strings.Split(s.spdxDoc.DocumentName, "/")
+	var purl string
 	if len(splitImage) == 3 {
-		topPackage := assembler.PackageNode{}
-		topPackage.Purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
-		topPackage.Name = s.spdxDoc.DocumentName
-		topPackage.Tags = []string{"container"}
-		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
-		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
+		purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
 	} else if len(splitImage) == 2 {
-		topPackage := assembler.PackageNode{}
-		topPackage.Purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0]
-		topPackage.Name = s.spdxDoc.DocumentName
-		topPackage.Tags = []string{"container"}
-		topPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
-		s.packages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
+		purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0]
+	}
+
+	if purl != "" {
+		topPackage, err := asmhelpers.PurlToPkg(purl)
+		if err != nil {
+			panic(err)
+		}
+		s.packagePackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packagePackages[string(s.spdxDoc.SPDXIdentifier)], *topPackage)
 	}
 }
 
 func (s *spdxParser) getPackages() {
 	s.getTopLevelPackage()
 	for _, pac := range s.spdxDoc.Packages {
-		currentPackage := assembler.PackageNode{}
-		currentPackage.Name = pac.PackageName
-		currentPackage.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
-		currentPackage.Version = pac.PackageVersion
+		// for each package create a package for each of them
+		purl := ""
 		for _, ext := range pac.PackageExternalReferences {
-			if strings.HasPrefix(ext.RefType, "cpe") {
-				currentPackage.CPEs = append(currentPackage.CPEs, ext.Locator)
-			} else if ext.RefType == spdx_common.TypePackageManagerPURL {
-				currentPackage.Purl = ext.Locator
+			if ext.RefType == spdx_common.TypePackageManagerPURL {
+				purl = ext.Locator
 			}
-		}
-		for _, checksum := range pac.PackageChecksums {
-			currentPackage.Digest = append(currentPackage.Digest, strings.ToLower(string(checksum.Algorithm))+":"+checksum.Value)
-		}
-		currentPackage.Tags = getPackageTags(currentPackage)
-		s.packages[string(pac.PackageSPDXIdentifier)] = append(s.packages[string(pac.PackageSPDXIdentifier)], currentPackage)
-	}
-}
 
-func getPackageTags(p assembler.PackageNode) []string {
-	if strings.HasPrefix(p.Purl, "pkg:oci/") {
-		return []string{"container"}
+		}
+
+		if purl == "" {
+			purl = asmhelpers.GuacPkgPurl(pac.PackageName, &pac.PackageVersion)
+		}
+
+		pkg, err := asmhelpers.PurlToPkg(purl)
+		if err != nil {
+			panic(err)
+		}
+		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], *pkg)
+
+		// if checksums exists create an artifact for each of them
+		for _, checksum := range pac.PackageChecksums {
+			artifact := model.ArtifactInputSpec{
+				Algorithm: strings.ToLower(string(checksum.Algorithm)),
+				Digest:    checksum.Value,
+			}
+			s.packageArtifacts[string(pac.PackageSPDXIdentifier)] = append(s.packageArtifacts[string(pac.PackageSPDXIdentifier)], artifact)
+		}
+
 	}
-	return nil
 }
 
 func (s *spdxParser) getFiles() {
 	for _, file := range s.spdxDoc.Files {
-		currentFile := assembler.ArtifactNode{}
+		// for each file create a package for each of them so they can be referenced as a dependency
+		purl := asmhelpers.GuacFilePurl(file.FileName)
+		pkg, err := asmhelpers.PurlToPkg(purl)
+		if err != nil {
+			panic(err)
+		}
+		s.filePackages[string(file.FileSPDXIdentifier)] = append(s.packagePackages[string(file.FileSPDXIdentifier)], *pkg)
+
+		// if checksums exists create an artifact for each of them
 		for _, checksum := range file.Checksums {
-			currentFile.Name = file.FileName
-			currentFile.Digest = strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-			currentFile.Tags = getTags(file)
-			currentFile.NodeData = *assembler.NewObjectMetadata(s.doc.SourceInformation)
-			s.files[string(file.FileSPDXIdentifier)] = append(s.files[string(file.FileSPDXIdentifier)], currentFile)
+			artifact := model.ArtifactInputSpec{
+				Algorithm: strings.ToLower(string(checksum.Algorithm)),
+				Digest:    checksum.Value,
+			}
+			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
 		}
 	}
 }
@@ -148,137 +169,129 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 // 	return nodes
 // }
 
-func (s *spdxParser) getPackageElement(elementID string) []assembler.PackageNode {
-	if packNode, ok := s.packages[string(elementID)]; ok {
+func (s *spdxParser) getPackageElement(elementID string) []model.PkgInputSpec {
+	if packNode, ok := s.packagePackages[string(elementID)]; ok {
 		return packNode
 	}
 	return nil
 }
 
-func (s *spdxParser) getFileElement(elementID string) []assembler.ArtifactNode {
-	if fileNode, ok := s.files[string(elementID)]; ok {
+func (s *spdxParser) getFileElement(elementID string) []model.PkgInputSpec {
+	if fileNode, ok := s.filePackages[string(elementID)]; ok {
 		return fileNode
 	}
 	return nil
 }
 
-// TODO(bulldozer): replace with GetPredicates
-// func (s *spdxParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
-// 	logger := logging.FromContext(ctx)
-// 	edges := []assembler.GuacEdge{}
-// 	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
-// 	// adding top level package edge manually for all depends on package
-// 	if toplevel != nil {
-// 		edges = append(edges, createTopLevelEdges(toplevel[0], s.packages, s.files)...)
-// 	}
-// 	for _, rel := range s.spdxDoc.Relationships {
-// 		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
-// 		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
-// 		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
-// 		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
-// 		for _, packNode := range foundPackNodes {
-// 			createdEdge, err := getEdge(packNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
-// 			if err != nil {
-// 				logger.Errorf("error generating spdx edge %v", err)
-// 				continue
-// 			}
-// 			if createdEdge != nil {
-// 				edges = append(edges, createdEdge)
-// 			}
-// 		}
-// 		for _, fileNode := range foundFileNodes {
-// 			createdEdge, err := getEdge(fileNode, rel.Relationship, relatedPackNodes, relatedFileNodes)
-// 			if err != nil {
-// 				logger.Errorf("error generating spdx edge %v", err)
-// 				continue
-// 			}
-// 			if createdEdge != nil {
-// 				edges = append(edges, createdEdge)
-// 			}
-// 		}
-// 	}
-// 	return edges
-// }
+func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
+	logger := logging.FromContext(ctx)
 
-func createTopLevelEdges(toplevel assembler.PackageNode, packages map[string][]assembler.PackageNode, files map[string][]assembler.ArtifactNode) []assembler.GuacEdge {
-	edges := []assembler.GuacEdge{}
+	preds := &assembler.IngestPredicates{}
+
+	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
+	// adding top level package edge manually for all depends on package
+	if toplevel != nil {
+		preds.IsDependency = append(preds.IsDependency, createTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages)...)
+	}
+	for _, rel := range s.spdxDoc.Relationships {
+		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
+		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
+		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
+		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
+		for _, packNode := range foundPackNodes {
+			p, err := getIsDep(packNode, relatedPackNodes, relatedFileNodes)
+			if err != nil {
+				logger.Errorf("error generating spdx edge %v", err)
+				continue
+			}
+			if p != nil {
+				preds.IsDependency = append(preds.IsDependency, *p)
+			}
+		}
+		for _, fileNode := range foundFileNodes {
+			p, err := getIsDep(fileNode, relatedPackNodes, relatedFileNodes)
+			if err != nil {
+				logger.Errorf("error generating spdx edge %v", err)
+				continue
+			}
+			if p != nil {
+				preds.IsDependency = append(preds.IsDependency, *p)
+			}
+		}
+	}
+
+	// Create predicates for IsOccurence for all artifacts found
+	for id := range s.fileArtifacts {
+		for _, pkg := range s.filePackages[id] {
+			for _, art := range s.fileArtifacts[id] {
+				preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
+					Pkg:      &pkg,
+					Artifact: &art,
+				})
+			}
+		}
+	}
+
+	for id := range s.packagePackages {
+		for _, pkg := range s.packagePackages[id] {
+			for _, art := range s.packageArtifacts[id] {
+				preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
+					Pkg:      &pkg,
+					Artifact: &art,
+				})
+			}
+		}
+	}
+
+	return preds
+}
+
+func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]model.PkgInputSpec, files map[string][]model.PkgInputSpec) []assembler.IsDependencyIngest {
+	isDeps := []assembler.IsDependencyIngest{}
 	for _, packNodes := range packages {
 		for _, packNode := range packNodes {
-			if packNode.Purl != toplevel.Purl {
-				e := assembler.DependsOnEdge{
-					PackageNode:       toplevel,
-					PackageDependency: packNode,
+			if !reflect.DeepEqual(packNode, toplevel) {
+				p := assembler.IsDependencyIngest{
+					Pkg:    &toplevel,
+					DepPkg: &packNode,
 				}
-				edges = append(edges, e)
+				isDeps = append(isDeps, p)
 			}
 		}
 	}
 
 	for _, fileNodes := range files {
 		for _, fileNode := range fileNodes {
-			e := assembler.DependsOnEdge{
-				PackageNode:        toplevel,
-				ArtifactDependency: fileNode,
+			p := assembler.IsDependencyIngest{
+				Pkg:    &toplevel,
+				DepPkg: &fileNode,
 			}
-			edges = append(edges, e)
+			isDeps = append(isDeps, p)
 		}
 	}
 
-	return edges
+	return isDeps
 }
 
-func getEdge(foundNode assembler.GuacNode, relationship string, relatedPackNodes []assembler.PackageNode, relatedFileNodes []assembler.ArtifactNode) (assembler.GuacEdge, error) {
+func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec) (*assembler.IsDependencyIngest, error) {
 	if len(relatedFileNodes) > 0 {
 		for _, rfileNode := range relatedFileNodes {
-			return getEdgeByType(relationship, foundNode, rfileNode)
+			// TODO: Check is this always just expected to be one?
+			return &assembler.IsDependencyIngest{
+				Pkg:    &foundNode,
+				DepPkg: &rfileNode,
+			}, nil
 		}
 	} else if len(relatedPackNodes) > 0 {
 		for _, rpackNode := range relatedPackNodes {
-			return getEdgeByType(relationship, foundNode, rpackNode)
+			return &assembler.IsDependencyIngest{
+				Pkg:    &foundNode,
+				DepPkg: &rpackNode,
+			}, nil
+
 		}
 	}
 	return nil, nil
-}
-
-func getEdgeByType(relationship string, foundNode assembler.GuacNode, relatedNode assembler.GuacNode) (assembler.GuacEdge, error) {
-	switch relationship {
-	case spdx_common.TypeRelationshipContains:
-		return getContainsEdge(foundNode, relatedNode)
-	case spdx_common.TypeRelationshipDependsOn:
-		return getDependsOnEdge(foundNode, relatedNode), nil
-	}
-	return nil, nil
-}
-
-func getContainsEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) (assembler.GuacEdge, error) {
-	e := assembler.ContainsEdge{}
-	if foundNode.Type() == "Package" {
-		e.PackageNode = foundNode.(assembler.PackageNode)
-	} else {
-		return nil, errors.New("node type mismatch during contains edge creation")
-	}
-	if relatedNode.Type() == "Artifact" {
-		e.ContainedArtifact = relatedNode.(assembler.ArtifactNode)
-	} else {
-		return nil, errors.New("node type mismatch during contains edge creation")
-	}
-	return e, nil
-}
-
-func getDependsOnEdge(foundNode assembler.GuacNode, relatedNode assembler.GuacNode) assembler.GuacEdge {
-	e := assembler.DependsOnEdge{}
-	if foundNode.Type() == "Package" {
-		e.PackageNode = foundNode.(assembler.PackageNode)
-	} else {
-		e.ArtifactNode = foundNode.(assembler.ArtifactNode)
-	}
-
-	if relatedNode.Type() == "Package" {
-		e.PackageDependency = relatedNode.(assembler.PackageNode)
-	} else {
-		e.ArtifactDependency = relatedNode.(assembler.ArtifactNode)
-	}
-	return e
 }
 
 func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformation {
@@ -287,8 +300,4 @@ func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 
 func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
-}
-
-func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
-	return nil
 }

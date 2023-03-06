@@ -20,15 +20,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	purl "github.com/package-url/packageurl-go"
-
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 const PurlTypeGuac = "guac"
 
 // PurlToPkg converts a purl URI string into a graphql package node
-func PurlToPkg(purlUri string) (*model.Package, error) {
+func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 	p, err := purl.FromString(purlUri)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse purl: %v", err)
@@ -37,7 +36,7 @@ func PurlToPkg(purlUri string) (*model.Package, error) {
 	return purlConvert(p)
 }
 
-func purlConvert(p purl.PackageURL) (*model.Package, error) {
+func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 	switch p.Type {
 
 	// Enumeration of https://github.com/package-url/purl-spec#known-purl-types
@@ -113,29 +112,34 @@ func purlConvert(p purl.PackageURL) (*model.Package, error) {
 	}
 }
 
-func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]string) *model.Package {
-	var pQualifiers []*model.PackageQualifier
+func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]string) *model.PkgInputSpec {
+	var pQualifiers []model.PackageQualifierInputSpec
 	for k, v := range qualifiers {
-		pQualifiers = append(pQualifiers, &model.PackageQualifier{
+		pQualifiers = append(pQualifiers, model.PackageQualifierInputSpec{
 			Key:   k,
 			Value: v,
 		})
 	}
 
-	p := &model.Package{
-		Type: typ,
-		Namespaces: []*model.PackageNamespace{{
-			Namespace: namespace,
-			Names: []*model.PackageName{{
-				Name: name,
-				Versions: []*model.PackageVersion{{
-					Version:    version,
-					Subpath:    subpath,
-					Qualifiers: pQualifiers,
-				}},
-			}},
-		}},
+	p := &model.PkgInputSpec{
+		Type:       typ,
+		Namespace:  &namespace,
+		Name:       name,
+		Version:    &version,
+		Subpath:    &subpath,
+		Qualifiers: pQualifiers,
 	}
 
 	return p
+}
+
+func GuacPkgPurl(pkgName string, pkgVersion *string) string {
+	if pkgVersion == nil {
+		return fmt.Sprintf("guac:pkg/%s", pkgName)
+	}
+	return fmt.Sprintf("guac:pkg/%s@%s", pkgName, *pkgVersion)
+}
+
+func GuacFilePurl(filename string) string {
+	return fmt.Sprintf("guac:files/%s", filename)
 }
