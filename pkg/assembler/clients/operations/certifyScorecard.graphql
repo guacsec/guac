@@ -17,38 +17,6 @@
 
 # Defines the GraphQL operations to ingest a Scorecard certification into GUAC
 
-# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
-
-fragment allSrcTree on Source {
-  type
-    namespaces {
-      namespace
-        names {
-          name
-            tag
-            commit
-        }
-    }
-}
-
-fragment allCertifyScorecard on CertifyScorecard {
-  source {
-    ...allSrcTree
-  }
-  scorecard {
-    timeScanned
-      aggregateScore
-      checks {
-        check
-          score
-      }
-    scorecardVersion
-      scorecardCommit
-      origin
-      collector
-  }
-}
-
 mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
   ingestSource(source: $source) {
     ...allSrcTree
