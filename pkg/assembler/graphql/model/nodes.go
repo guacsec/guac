@@ -734,6 +734,21 @@ type Slsa struct {
 	Collector string `json:"collector"`
 }
 
+// SLSAInputSpec is the same as SLSA but for mutation input.
+//
+// All fields are required.
+type SLSAInputSpec struct {
+	BuiltFrom     []*PackageSourceOrArtifactInput `json:"builtFrom"`
+	BuiltBy       *BuilderSpec                    `json:"builtBy"`
+	BuildType     string                          `json:"buildType"`
+	SlsaPredicate []*SLSAPredicateInputSpec       `json:"slsaPredicate"`
+	SlsaVersion   string                          `json:"slsaVersion"`
+	StartedOn     time.Time                       `json:"startedOn"`
+	FinishedOn    time.Time                       `json:"finishedOn"`
+	Origin        string                          `json:"origin"`
+	Collector     string                          `json:"collector"`
+}
+
 // SLSAPredicate are the values from the SLSA predicate in key-value pair form.
 //
 // # For example, given the following predicate
@@ -768,7 +783,14 @@ type SLSAPredicate struct {
 	Value string `json:"value"`
 }
 
-// SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query input.
+// SLSAPredicateInputSpec is the same as SLSAPredicateSpec, but for mutation
+// input.
+type SLSAPredicateInputSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input.
 type SLSAPredicateSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`

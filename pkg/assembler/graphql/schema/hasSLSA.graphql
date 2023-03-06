@@ -121,10 +121,34 @@ input HasSLSASpec {
   collector: String
 }
 
-"""
-SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query input.
-"""
+"SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input."
 input SLSAPredicateSpec {
+  key: String!
+  value: String!
+}
+
+"""
+SLSAInputSpec is the same as SLSA but for mutation input.
+
+All fields are required.
+"""
+input SLSAInputSpec {
+  builtFrom: [PackageSourceOrArtifactInput!]
+  builtBy: BuilderSpec!
+  buildType: String!
+  slsaPredicate: [SLSAPredicateInputSpec!]!
+  slsaVersion: String!
+  startedOn: Time!
+  finishedOn: Time!
+  origin: String!
+  collector: String!
+}
+
+"""
+SLSAPredicateInputSpec is the same as SLSAPredicateSpec, but for mutation
+input.
+"""
+input SLSAPredicateInputSpec {
   key: String!
   value: String!
 }
@@ -132,4 +156,9 @@ input SLSAPredicateSpec {
 extend type Query {
   "Returns all SLSA attestations matching the filter"
   HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
+}
+
+extend type Mutation {
+  "Ingests a SLSA attestation"
+  ingestSLSA(subject: PackageSourceOrArtifactInput!, slsa: SLSAInputSpec!): HasSLSA!
 }
