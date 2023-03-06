@@ -32,7 +32,13 @@ func registerAllHasSLSA(client *demoClient) error {
 	selectedName := "django"
 	selectedVersion := "1.11.1"
 	selectedSubpath := ""
-	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Subpath: &selectedSubpath}
+	selectedPkgSpec := &model.PkgSpec{
+		Type:      &selectedType,
+		Namespace: &selectedNameSpace,
+		Name:      &selectedName,
+		Version:   &selectedVersion,
+		Subpath:   &selectedSubpath,
+	}
 	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
 	if err != nil {
 		return err
@@ -43,14 +49,39 @@ func registerAllHasSLSA(client *demoClient) error {
 	selectedSourceNameSpace := "github"
 	selectedSourceName := "https://github.com/django/django"
 	selectedTag := "1.11.1"
-	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
+	selectedSourceSpec := &model.SourceSpec{
+		Type:      &selectedSourceType,
+		Namespace: &selectedSourceNameSpace,
+		Name:      &selectedSourceName,
+		Tag:       &selectedTag,
+	}
 	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
 	if err != nil {
 		return err
 	}
-	predicateValues := []*model.SLSAPredicate{{Key: "buildDefinition.externalParameters.repository", Value: "https://github.com/octocat/hello-world"}, {Key: "buildDefinition.externalParameters.ref", Value: "refs/heads/main"}, {Key: "buildDefinition.resolvedDependencies.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"}}
+	predicateValues := []*model.SLSAPredicate{
+		{
+			Key:   "buildDefinition.externalParameters.repository",
+			Value: "https://github.com/octocat/hello-world",
+		},
+		{
+			Key:   "buildDefinition.externalParameters.ref",
+			Value: "refs/heads/main",
+		},
+		{
+			Key:   "buildDefinition.resolvedDependencies.uri",
+			Value: "git+https://github.com/octocat/hello-world@refs/heads/main",
+		},
+	}
 
-	err = client.registerHasSLSA(selectedPackage[0], nil, nil, nil, selectedSource, nil, &model.Builder{URI: "https://github.com/Attestations/GitHubHostedActions@v1"}, "https://github.com/Attestations/GitHubActionsWorkflow@v1", predicateValues, "v1", time.Now(), time.Now())
+	builder := &model.Builder{
+		URI: "https://github.com/Attestations/GitHubHostedActions@v1",
+	}
+
+	err = client.registerHasSLSA(
+		selectedPackage[0], nil, nil, nil, selectedSource, nil, builder,
+		"https://github.com/Attestations/GitHubActionsWorkflow@v1",
+		predicateValues, "v1", time.Now(), time.Now())
 	if err != nil {
 		return err
 	}
@@ -59,11 +90,15 @@ func registerAllHasSLSA(client *demoClient) error {
 
 // Ingest HasSlsa
 
-func (c *demoClient) registerHasSLSA(selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact, builtFromPackages []*model.Package,
-	builtFromSouces []*model.Source, builtFromArtifacts []*model.Artifact, builtBy *model.Builder, buildType string, predicate []*model.SLSAPredicate, slsaVersion string, startOn time.Time, finishOn time.Time) error {
-
+func (c *demoClient) registerHasSLSA(
+	selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact,
+	builtFromPackages []*model.Package, builtFromSouces []*model.Source, builtFromArtifacts []*model.Artifact,
+	builtBy *model.Builder, buildType string,
+	predicate []*model.SLSAPredicate, slsaVersion string,
+	startOn time.Time, finishOn time.Time) error {
 	for _, h := range c.hasSLSA {
-		if h.BuildType == buildType && h.SlsaVersion == slsaVersion {
+		slsa := h.Slsa
+		if slsa.BuildType == buildType && slsa.SlsaVersion == slsaVersion {
 			if val, ok := h.Subject.(model.Package); ok {
 				if &val == selectedPackage {
 					return nil
@@ -80,7 +115,18 @@ func (c *demoClient) registerHasSLSA(selectedPackage *model.Package, selectedSou
 		}
 	}
 
-	newHasSlsa := &model.HasSlsa{
+	materials := []model.PackageSourceOrArtifact{}
+	for _, pack := range builtFromPackages {
+		materials = append(materials, pack)
+	}
+	for _, source := range builtFromSouces {
+		materials = append(materials, source)
+	}
+	for _, art := range builtFromArtifacts {
+		materials = append(materials, art)
+	}
+	newSlsa := &model.Slsa{
+		BuiltFrom:     materials,
 		BuiltBy:       builtBy,
 		BuildType:     buildType,
 		SlsaPredicate: predicate,
@@ -90,22 +136,14 @@ func (c *demoClient) registerHasSLSA(selectedPackage *model.Package, selectedSou
 		Origin:        "testing backend",
 		Collector:     "testing backend",
 	}
+
+	newHasSlsa := &model.HasSlsa{Slsa: newSlsa}
 	if selectedPackage != nil {
 		newHasSlsa.Subject = selectedPackage
 	} else if selectedSource != nil {
 		newHasSlsa.Subject = selectedSource
 	} else {
 		newHasSlsa.Subject = selectedArtifact
-	}
-
-	for _, pack := range builtFromPackages {
-		newHasSlsa.BuiltFrom = append(newHasSlsa.BuiltFrom, pack)
-	}
-	for _, source := range builtFromSouces {
-		newHasSlsa.BuiltFrom = append(newHasSlsa.BuiltFrom, source)
-	}
-	for _, art := range builtFromArtifacts {
-		newHasSlsa.BuiltFrom = append(newHasSlsa.BuiltFrom, art)
 	}
 
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
@@ -115,7 +153,7 @@ func (c *demoClient) registerHasSLSA(selectedPackage *model.Package, selectedSou
 // Query HasSlsa
 
 func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-
+	// TODO
 	if hasSLSASpec.Package != nil && hasSLSASpec.Source != nil && hasSLSASpec.Artifact != nil {
 		return nil, gqlerror.Errorf("cannot specify package, source and artifact together for hasSLSASpec")
 	}
@@ -134,21 +172,22 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 	for _, h := range c.hasSLSA {
 		matchOrSkip := true
 
-		if hasSLSASpec.BuildType != nil && h.BuildType != *hasSLSASpec.BuildType {
+		slsa := h.Slsa
+		if hasSLSASpec.BuildType != nil && slsa.BuildType != *hasSLSASpec.BuildType {
 			matchOrSkip = false
 		}
-		if hasSLSASpec.SlsaVersion != nil && h.SlsaVersion != *hasSLSASpec.SlsaVersion {
+		if hasSLSASpec.SlsaVersion != nil && slsa.SlsaVersion != *hasSLSASpec.SlsaVersion {
 			matchOrSkip = false
 		}
-		if hasSLSASpec.Collector != nil && h.Collector != *hasSLSASpec.Collector {
+		if hasSLSASpec.Collector != nil && slsa.Collector != *hasSLSASpec.Collector {
 			matchOrSkip = false
 		}
-		if hasSLSASpec.Origin != nil && h.Origin != *hasSLSASpec.Origin {
+		if hasSLSASpec.Origin != nil && slsa.Origin != *hasSLSASpec.Origin {
 			matchOrSkip = false
 		}
 
-		if hasSLSASpec.BuiltBy != nil && h.BuiltBy != nil {
-			if hasSLSASpec.BuiltBy.URI != nil && h.BuiltBy.URI != *hasSLSASpec.BuiltBy.URI {
+		if hasSLSASpec.BuiltBy != nil && slsa.BuiltBy != nil {
+			if hasSLSASpec.BuiltBy.URI != nil && slsa.BuiltBy.URI != *hasSLSASpec.BuiltBy.URI {
 				matchOrSkip = false
 			}
 		}
