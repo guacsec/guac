@@ -153,18 +153,18 @@ func (c *demoClient) registerHasSLSA(
 // Query HasSlsa
 
 func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	// TODO
-	if hasSLSASpec.Package != nil && hasSLSASpec.Source != nil && hasSLSASpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify package, source and artifact together for hasSLSASpec")
+	subjectsDefined := 0
+	if hasSLSASpec.Package != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Package != nil && hasSLSASpec.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify package and source together for hasSLSASpec")
+	if hasSLSASpec.Source != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Package != nil && hasSLSASpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify package and artifact together for hasSLSASpec")
+	if hasSLSASpec.Artifact != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Source != nil && hasSLSASpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify source and artifact together for hasSLSASpec")
+	if subjectsDefined > 1 {
+		return nil, gqlerror.Errorf("Must specify at most one subject (package, source, or artifact)")
 	}
 
 	var collectedHasSLSA []*model.HasSlsa
