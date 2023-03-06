@@ -1713,6 +1713,15 @@ extend type Query {
 # Defines a GraphQL schema to certify Scorecard for a source repository.
 
 """
+Define the Time scalar, to be used across GUAC. It follows RFC3339Nano format.
+
+This is implicit via https://gqlgen.com/reference/scalars/#time
+
+For GUAC, we assume that all times are stored in UTC format.
+"""
+scalar Time
+
+"""
 CertifyScorecard is an attestation which represents the scorecard of a
 particular source repository.
 """
@@ -1959,8 +1968,6 @@ extend type Query {
   "Returns all CertifyVuln"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
 }
-
-scalar Time
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.

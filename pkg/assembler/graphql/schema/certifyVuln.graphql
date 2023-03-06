@@ -71,5 +71,3 @@ extend type Query {
   "Returns all CertifyVuln"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
 }
-
-scalar Time
