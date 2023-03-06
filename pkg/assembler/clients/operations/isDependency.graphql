@@ -15,38 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest a IsDependency into GUAC
-
-fragment allPkgTree on Package {
-  type
-  namespaces {
-    namespace
-    names {
-      name
-      versions {
-        version
-        qualifiers {
-          key
-          value
-        }
-        subpath
-      }
-    }
-  }
-}
-
-fragment allIsDependencyTree on IsDependency {
-  justification
-  package {
-    ...allPkgTree
-  }
-  dependentPackage {
-    ...allPkgTree
-  }
-  versionRange
-  origin
-  collector
-}
+# Defines the GraphQL operations to ingest dependency information into GUAC
 
 mutation IsDependency($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
   pkg: ingestPackage(pkg: $pkg) {
