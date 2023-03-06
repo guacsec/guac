@@ -212,7 +212,7 @@ func (c *neo4jClient) CertifyScorecard(ctx context.Context, source model.SourceI
 		values["tag"] = ""
 	}
 
-	values[timeScanned] = scorecard.TimeScanned
+	values[timeScanned] = scorecard.TimeScanned.UTC()
 	values[aggregateScore] = scorecard.AggregateScore
 	values[scorecardVersion] = scorecard.ScorecardVersion
 	values[scorecardCommit] = scorecard.ScorecardCommit
