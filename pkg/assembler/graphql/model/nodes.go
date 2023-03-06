@@ -329,20 +329,18 @@ type HasSlsa struct {
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
-	Package           *PkgSpec             `json:"package"`
-	Source            *SourceSpec          `json:"source"`
-	Artifact          *ArtifactSpec        `json:"artifact"`
-	BuiltFromPackages []*PkgSpec           `json:"builtFromPackages"`
-	BuiltFromSource   []*SourceSpec        `json:"builtFromSource"`
-	BuiltFromArtifact []*ArtifactSpec      `json:"builtFromArtifact"`
-	BuiltBy           *BuilderSpec         `json:"builtBy"`
-	BuildType         *string              `json:"buildType"`
-	Predicate         []*SLSAPredicateSpec `json:"predicate"`
-	SlsaVersion       *string              `json:"slsaVersion"`
-	StartedOn         *time.Time           `json:"startedOn"`
-	FinishedOn        *time.Time           `json:"finishedOn"`
-	Origin            *string              `json:"origin"`
-	Collector         *string              `json:"collector"`
+	Package     *PkgSpec                        `json:"package"`
+	Source      *SourceSpec                     `json:"source"`
+	Artifact    *ArtifactSpec                   `json:"artifact"`
+	BuiltFrom   []*PackageSourceOrArtifactInput `json:"builtFrom"`
+	BuiltBy     *BuilderSpec                    `json:"builtBy"`
+	BuildType   *string                         `json:"buildType"`
+	Predicate   []*SLSAPredicateSpec            `json:"predicate"`
+	SlsaVersion *string                         `json:"slsaVersion"`
+	StartedOn   *time.Time                      `json:"startedOn"`
+	FinishedOn  *time.Time                      `json:"finishedOn"`
+	Origin      *string                         `json:"origin"`
+	Collector   *string                         `json:"collector"`
 }
 
 // HasSourceAt is an attestation represents that a package object has a source object since a timestamp
@@ -630,6 +628,16 @@ type PackageQualifierSpec struct {
 	Value *string `json:"value"`
 }
 
+// PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
+// input type.
+//
+// Exactly one of the value must be set to non-nil.
+type PackageSourceOrArtifactInput struct {
+	Package  *PkgSpec      `json:"package"`
+	Source   *SourceSpec   `json:"source"`
+	Artifact *ArtifactSpec `json:"artifact"`
+}
+
 // PackageVersion is a package version.
 //
 // In the pURL representation, each PackageName matches the
@@ -760,8 +768,7 @@ type SLSAPredicate struct {
 	Value string `json:"value"`
 }
 
-// SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query
-// input.
+// SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query input.
 type SLSAPredicateSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`

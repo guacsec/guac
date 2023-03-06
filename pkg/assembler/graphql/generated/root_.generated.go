@@ -1407,6 +1407,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
+		ec.unmarshalInputPackageSourceOrArtifactInput,
 		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
@@ -1783,9 +1784,7 @@ type ScorecardCheck {
   score: Int!
 }
 
-"""
-CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
-"""
+"CertifyScorecardSpec allows filtering the list of CertifyScorecard to return."
 input CertifyScorecardSpec {
   source: SourceSpec
   timeScanned: Time
@@ -1797,9 +1796,7 @@ input CertifyScorecardSpec {
   collector: String
 }
 
-"""
-ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input.
-"""
+"ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input."
 input ScorecardCheckSpec {
   check: String!
   score: Int!
@@ -2194,6 +2191,18 @@ extend type Query {
 "PackageSourceOrArtifact is a union of Package, Source, and Artifact."
 union PackageSourceOrArtifact = Package | Source | Artifact
 
+"""
+PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
+input type.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceOrArtifactInput {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+}
+
 "HasSLSA records that a subject node has a SLSA attestation."
 type HasSLSA {
   "The subject of SLSA attestation: package, source, or artifact."
@@ -2267,18 +2276,12 @@ type SLSAPredicate {
   value: String!
 }
 
-# TODO: clean from here down
-
-"""
-HasSLSASpec allows filtering the list of HasSLSA to return.
-"""
+"HasSLSASpec allows filtering the list of HasSLSA to return."
 input HasSLSASpec {
   package: PkgSpec
   source: SourceSpec
   artifact: ArtifactSpec
-  builtFromPackages: [PkgSpec]
-  builtFromSource: [SourceSpec]
-  builtFromArtifact: [ArtifactSpec]
+  builtFrom: [PackageSourceOrArtifactInput!]
   builtBy: BuilderSpec
   buildType: String
   predicate: [SLSAPredicateSpec!] = []
@@ -2290,8 +2293,7 @@ input HasSLSASpec {
 }
 
 """
-SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query
-input.
+SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query input.
 """
 input SLSAPredicateSpec {
   key: String!
@@ -2299,7 +2301,7 @@ input SLSAPredicateSpec {
 }
 
 extend type Query {
-  "Returns all HasSLSA"
+  "Returns all SLSA attestations matching the filter"
   HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
 }
 `, BuiltIn: false},

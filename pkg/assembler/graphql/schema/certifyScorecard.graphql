@@ -82,9 +82,7 @@ type ScorecardCheck {
   score: Int!
 }
 
-"""
-CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
-"""
+"CertifyScorecardSpec allows filtering the list of CertifyScorecard to return."
 input CertifyScorecardSpec {
   source: SourceSpec
   timeScanned: Time
@@ -96,9 +94,7 @@ input CertifyScorecardSpec {
   collector: String
 }
 
-"""
-ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input.
-"""
+"ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input."
 input ScorecardCheckSpec {
   check: String!
   score: Int!
