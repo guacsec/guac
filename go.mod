@@ -155,6 +155,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-git/go-git/v5 v5.6.0
 	github.com/gobwas/glob v0.2.3
+	github.com/golang/mock v1.6.0
 	github.com/google/osv-scanner v1.1.1-0.20230130043441-25bdc68617ff
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.14

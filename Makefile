@@ -20,6 +20,19 @@ test: generate
 integration-test: generate
 	go test -tags=integration ./...
 
+.PHONY: check-env
+ifndef GITHUB_AUTH_TOKEN
+	$(error GITHUB_AUTH_TOKEN is not set)
+endif
+
+# Run the end to end tests and requires GITHUB_AUTH_TOKEN to be set. If not the tests will fail.
+# Not included in integration tests because it requires a github token.
+# To run the tests locally, run `GITHUB_AUTH_TOKEN=<your token> make e2e-test`
+# https://github.com/ossf/scorecard#authentication
+.PHONY: e2e-test
+e2e-test: generate check-env
+	go test -tags=e2e ./...
+
 # Run all the tests and opens the coverage report
 .PHONY: cover
 cover: test
