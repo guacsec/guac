@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -597,4 +598,8 @@ func generateModelHasSLSA(subject model.PackageSourceOrArtifact,
 		Slsa:    slsa,
 	}
 	return &hasSLSA
+}
+
+func (c *neo4jClient) IngestSLSA(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
 }

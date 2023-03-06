@@ -6,14 +6,13 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IngestSlsa is the resolver for the ingestSLSA field.
 func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
+	return r.Backend.IngestSlsa(ctx, subject, slsa)
 }
 
 // HasSlsa is the resolver for the HasSLSA field.

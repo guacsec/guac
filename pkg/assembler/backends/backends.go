@@ -59,6 +59,7 @@ type Backend interface {
 
 	// Mutations for evidence trees (read-write queries, assume software trees ingested)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
+	IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
 	IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)

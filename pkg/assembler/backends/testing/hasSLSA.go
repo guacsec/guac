@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -244,4 +245,8 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 	}
 
 	return collectedHasSLSA, nil
+}
+
+func (c *demoClient) IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
 }
