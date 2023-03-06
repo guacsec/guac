@@ -38,12 +38,14 @@ func ingestData(port int) {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient(url, &httpClient)
 
+	start := time.Now()
 	logger.Infof("Ingesting test data into backend server")
 	ingestScorecards(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
 	IngestVulnerability(ctx, gqlclient)
-	logger.Infof("Finished ingesting test data into backend server")
+	time := time.Now().Sub(start)
+	logger.Infof("Ingesting test data into backend server took %v", time)
 }
 
 func ingestScorecards(ctx context.Context, client graphql.Client) {
