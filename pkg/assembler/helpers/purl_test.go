@@ -21,17 +21,17 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
 var cmpOpts = []cmp.Option{
-	cmpopts.SortSlices(func(a, b *model.PackageQualifier) bool { return a.Key < b.Key }),
+	cmpopts.SortSlices(func(a, b model.PackageQualifierInputSpec) bool { return a.Key < b.Key }),
 }
 
 func TestPurlConvert(t *testing.T) {
 	testCases := []struct {
 		purlUri  string
-		expected *model.Package
+		expected *model.PkgInputSpec
 	}{
 		{
 			// alpine
@@ -205,4 +205,69 @@ func TestPurlConvert(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGuacPkgPurl(t *testing.T) {
+	testCases := []struct {
+		pkgName    string
+		pkgVersion *string
+		expected   string
+	}{
+		{
+			pkgName:    "hello",
+			pkgVersion: strP("1.2"),
+			expected:   "pkg:guac/hello@1.2",
+		},
+		{
+			pkgName:    "hello",
+			pkgVersion: nil,
+			expected:   "pkg:guac/hello",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("processing %v@%v", tt.pkgName, tt.pkgVersion), func(t *testing.T) {
+			got := GuacPkgPurl(tt.pkgName, tt.pkgVersion)
+			if diff := cmp.Diff(tt.expected, got); diff != "" {
+				t.Errorf("model Package mismatch (-want +got):\n%s", diff)
+				return
+			}
+		})
+	}
+}
+
+func TestGuacFilePurl(t *testing.T) {
+	testCases := []struct {
+		alg      string
+		digest   string
+		filename *string
+		expected string
+	}{
+		{
+			alg:      "sha256",
+			digest:   "cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
+			filename: strP("/test/path"),
+			expected: "pkg:guac/files/sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec#/test/path",
+		},
+		{
+			alg:      "sha256",
+			digest:   "cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
+			filename: nil,
+			expected: "pkg:guac/files/sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("processing %v:%v (filename: %v)", tt.alg, tt.digest, tt.filename), func(t *testing.T) {
+			got := GuacFilePurl(tt.alg, tt.digest, tt.filename)
+			if diff := cmp.Diff(tt.expected, got); diff != "" {
+				t.Errorf("model Package mismatch (-want +got):\n%s", diff)
+				return
+			}
+		})
+	}
+}
+
+func strP(s string) *string {
+	return &s
 }

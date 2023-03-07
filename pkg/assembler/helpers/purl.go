@@ -20,24 +20,23 @@ import (
 	"path/filepath"
 	"strings"
 
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	purl "github.com/package-url/packageurl-go"
-
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 const PurlTypeGuac = "guac"
 
 // PurlToPkg converts a purl URI string into a graphql package node
-func PurlToPkg(purlUri string) (*model.Package, error) {
+func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 	p, err := purl.FromString(purlUri)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse purl: %v", err)
+		return nil, fmt.Errorf("unable to parse purl %s: %v", purlUri, err)
 	}
 
 	return purlConvert(p)
 }
 
-func purlConvert(p purl.PackageURL) (*model.Package, error) {
+func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 	switch p.Type {
 
 	// Enumeration of https://github.com/package-url/purl-spec#known-purl-types
@@ -46,7 +45,7 @@ func purlConvert(p purl.PackageURL) (*model.Package, error) {
 	// so that they can be referenced with higher specificity in GUAC
 	//
 	// PURL types not defined in purl library handled generically
-	case "alpm", "apk", "huggingface", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac:
+	case "alpine", "alpm", "apk", "huggingface", "mlflow", "qpkg", "pub", "swid", PurlTypeGuac:
 		fallthrough
 	// PURL types defined in purl library handled generically
 	case purl.TypeBitbucket, purl.TypeCocoapods, purl.TypeCargo,
@@ -109,33 +108,42 @@ func purlConvert(p purl.PackageURL) (*model.Package, error) {
 	default:
 		// unhandled types should throw an error so we can make sure to review the
 		// implementation of newly introduced PURL types.
-		return nil, fmt.Errorf("unhandled PURL type")
+		return nil, fmt.Errorf("unhandled PURL type: %s", p.Type)
 	}
 }
 
-func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]string) *model.Package {
-	var pQualifiers []*model.PackageQualifier
+func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]string) *model.PkgInputSpec {
+	var pQualifiers []model.PackageQualifierInputSpec
 	for k, v := range qualifiers {
-		pQualifiers = append(pQualifiers, &model.PackageQualifier{
+		pQualifiers = append(pQualifiers, model.PackageQualifierInputSpec{
 			Key:   k,
 			Value: v,
 		})
 	}
 
-	p := &model.Package{
-		Type: typ,
-		Namespaces: []*model.PackageNamespace{{
-			Namespace: namespace,
-			Names: []*model.PackageName{{
-				Name: name,
-				Versions: []*model.PackageVersion{{
-					Version:    version,
-					Subpath:    subpath,
-					Qualifiers: pQualifiers,
-				}},
-			}},
-		}},
+	p := &model.PkgInputSpec{
+		Type:       typ,
+		Namespace:  &namespace,
+		Name:       name,
+		Version:    &version,
+		Subpath:    &subpath,
+		Qualifiers: pQualifiers,
 	}
 
 	return p
+}
+
+func GuacPkgPurl(pkgName string, pkgVersion *string) string {
+	if pkgVersion == nil {
+		return fmt.Sprintf("pkg:guac/%s", pkgName)
+	}
+	return fmt.Sprintf("pkg:guac/%s@%s", pkgName, *pkgVersion)
+}
+
+func GuacFilePurl(alg string, digest string, filename *string) string {
+	s := fmt.Sprintf("pkg:guac/files/%s:%s", strings.ToLower(alg), digest)
+	if filename != nil {
+		s += fmt.Sprintf("#%s", *filename)
+	}
+	return s
 }

@@ -21,8 +21,13 @@ import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
@@ -273,164 +278,125 @@ var (
 
 	// SPDX Testdata
 
-	topLevelPack = assembler.PackageNode{
-		Name:   "gcr.io/google-containers/alpine-latest",
-		Digest: nil,
-		Purl:   "pkg:oci/alpine-latest?repository_url=gcr.io/google-containers",
-		CPEs:   nil,
-		Tags:   []string{"container"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	topLevelPack, _       = asmhelpers.PurlToPkg("pkg:oci/alpine-latest?repository_url=gcr.io/google-containers")
+	baselayoutPack, _     = asmhelpers.PurlToPkg("pkg:alpine/alpine-baselayout@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2")
+	keysPack, _           = asmhelpers.PurlToPkg("pkg:alpine/alpine-keys@2.4-r1?arch=x86_64&upstream=alpine-keys&distro=alpine-3.16.2")
+	baselayoutdataPack, _ = asmhelpers.PurlToPkg("pkg:alpine/alpine-baselayout-data@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2")
+
+	worldFilePack, _  = asmhelpers.PurlToPkg(asmhelpers.GuacFilePurl("sha256", "713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201", strP("/etc/apk/world")))
+	worldFileArtifact = &model.ArtifactInputSpec{
+		Algorithm: "sha256",
+		Digest:    "713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
 	}
 
-	baselayoutPack = assembler.PackageNode{
-		Name:    "alpine-baselayout",
-		Digest:  nil,
-		Purl:    "pkg:alpine/alpine-baselayout@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
-		Version: "3.2.0-r22",
-		CPEs: []string{
-			"cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
-			"cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
-		},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	rootFilePack, _  = asmhelpers.PurlToPkg(asmhelpers.GuacFilePurl("sha256", "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3", strP("/etc/crontabs/root")))
+	rootFileArtifact = &model.ArtifactInputSpec{
+		Algorithm: "sha256",
+		Digest:    "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
 	}
 
-	keysPack = assembler.PackageNode{
-		Name:    "alpine-keys",
-		Digest:  nil,
-		Purl:    "pkg:alpine/alpine-keys@2.4-r1?arch=x86_64&upstream=alpine-keys&distro=alpine-3.16.2",
-		Version: "2.4-r1",
-		CPEs: []string{
-			"cpe:2.3:a:alpine-keys:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
-			"cpe:2.3:a:alpine-keys:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
-			"cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
-			"cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
-		},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	triggersFilePack, _  = asmhelpers.PurlToPkg(asmhelpers.GuacFilePurl("sha256", "5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4", strP("/lib/apk/db/triggers")))
+	triggersFileArtifact = &model.ArtifactInputSpec{
+		Algorithm: "sha256",
+		Digest:    "5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4",
 	}
 
-	baselayoutdataPack = assembler.PackageNode{
-		Name:    "alpine-baselayout-data",
-		Digest:  nil,
-		Purl:    "pkg:alpine/alpine-baselayout-data@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2",
-		Version: "3.2.0-r22",
-		CPEs: []string{
-			"cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
-			"cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
-		},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	rsaPubFilePack, _  = asmhelpers.PurlToPkg(asmhelpers.GuacFilePurl("sha256", "9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97", strP("/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub")))
+	rsaPubFileArtifact = &model.ArtifactInputSpec{
+		Algorithm: "sha256",
+		Digest:    "9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 	}
 
-	worldFile = assembler.ArtifactNode{
-		Name:   "/etc/apk/world",
-		Digest: "sha256:713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
-		Tags:   []string{"TEXT"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	isDepJustifyTopPkg = &model.IsDependencyInputSpec{
+		Justification: "top-level package GUAC heuristic connecting to each file/package",
 	}
-	rootFile = assembler.ArtifactNode{
-		Name:   "/etc/crontabs/root",
-		Digest: "sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
-		Tags:   []string{"TEXT"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	isDepJustifyContains = &model.IsDependencyInputSpec{
+		Justification: "Derived from SPDX CONTAINS relationship",
 	}
-	triggersFile = assembler.ArtifactNode{
-		Name:   "/lib/apk/db/triggers",
-		Digest: "sha256:5415cfe5f88c0af38df3b7141a3f9bc6b8178e9cf72d700658091b8f5539c7b4",
-		Tags:   []string{"TEXT"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
-	rsaPubFile = assembler.ArtifactNode{
-		Name:   "/usr/share/apk/keys/alpine-devel@lists.alpinelinux.org-58cbb476.rsa.pub",
-		Digest: "sha256:9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
-		Tags:   []string{"TEXT"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	isDepJustifyDepends = &model.IsDependencyInputSpec{
+		Justification: "Derived from SPDX DEPENDS_ON relationship",
 	}
 
-	SpdxNodes = []assembler.GuacNode{topLevelPack, baselayoutPack, baselayoutdataPack, rsaPubFile, keysPack, worldFile, rootFile, triggersFile}
-	SpdxEdges = []assembler.GuacEdge{
-		assembler.DependsOnEdge{
-			PackageNode:       topLevelPack,
-			PackageDependency: baselayoutPack,
+	SpdxDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:          topLevelPack,
+			DepPkg:       baselayoutPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageNode:       topLevelPack,
-			PackageDependency: baselayoutdataPack,
+		{
+			Pkg:          topLevelPack,
+			DepPkg:       baselayoutdataPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageNode:       topLevelPack,
-			PackageDependency: keysPack,
+		{
+			Pkg:          topLevelPack,
+			DepPkg:       keysPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageNode:        topLevelPack,
-			ArtifactDependency: worldFile,
+		{
+			Pkg:          topLevelPack,
+			DepPkg:       worldFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageNode:        topLevelPack,
-			ArtifactDependency: rootFile,
+		{
+			Pkg:          topLevelPack,
+			DepPkg:       rootFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageNode:        topLevelPack,
-			ArtifactDependency: triggersFile,
+		{
+			Pkg:          topLevelPack,
+			DepPkg:       triggersFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageNode:        topLevelPack,
-			ArtifactDependency: rsaPubFile,
+		{
+			Pkg:          topLevelPack,
+			DepPkg:       rsaPubFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageNode:       baselayoutPack,
-			PackageDependency: keysPack,
+		{
+			Pkg:          baselayoutPack,
+			DepPkg:       keysPack,
+			IsDependency: isDepJustifyDepends,
 		},
-		assembler.DependsOnEdge{
-			ArtifactNode:       rootFile,
-			ArtifactDependency: rsaPubFile,
+		{
+			Pkg:          rootFilePack,
+			DepPkg:       rsaPubFilePack,
+			IsDependency: isDepJustifyDepends,
 		},
-		assembler.ContainsEdge{
-			PackageNode:       baselayoutPack,
-			ContainedArtifact: rootFile,
+		{
+			Pkg:          baselayoutPack,
+			DepPkg:       rootFilePack,
+			IsDependency: isDepJustifyContains,
 		},
-		assembler.ContainsEdge{
-			PackageNode:       keysPack,
-			ContainedArtifact: rsaPubFile,
+		{
+			Pkg:          keysPack,
+			DepPkg:       rsaPubFilePack,
+			IsDependency: isDepJustifyContains,
 		},
+	}
+
+	SpdxOccurences = []assembler.IsOccurenceIngest{
+		{
+			Pkg:      worldFilePack,
+			Artifact: worldFileArtifact,
+		},
+		{
+			Pkg:      rootFilePack,
+			Artifact: rootFileArtifact,
+		},
+		{
+			Pkg:      rsaPubFilePack,
+			Artifact: rsaPubFileArtifact,
+		},
+		{
+			Pkg:      triggersFilePack,
+			Artifact: triggersFileArtifact,
+		},
+	}
+
+	SpdxIngestionPredicates = assembler.IngestPredicates{
+		IsDependency: SpdxDeps,
+		IsOccurence:  SpdxOccurences,
 	}
 
 	// CycloneDX Testdata
@@ -1115,4 +1081,38 @@ func GuacEdgeSliceEqual(slice1, slice2 []assembler.GuacEdge) bool {
 		}
 	}
 	return result
+}
+
+var IngestPredicatesCmpOpts = []cmp.Option{
+	cmpopts.EquateEmpty(),
+	cmpopts.SortSlices(certifyScorecardLess),
+	cmpopts.SortSlices(isDependencyLess),
+	cmpopts.SortSlices(isOccurenceLess),
+	cmpopts.SortSlices(packageQualifierInputSpecLess),
+}
+
+func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
+	return gLess(e1, e2)
+}
+
+func isDependencyLess(e1, e2 assembler.IsDependencyIngest) bool {
+	return gLess(e1, e2)
+}
+
+func isOccurenceLess(e1, e2 assembler.IsOccurenceIngest) bool {
+	return gLess(e1, e2)
+}
+
+func packageQualifierInputSpecLess(e1, e2 generated.PackageQualifierInputSpec) bool {
+	return gLess(e1, e2)
+}
+
+func gLess(e1, e2 any) bool {
+	s1, _ := json.Marshal(e1)
+	s2, _ := json.Marshal(e2)
+	return string(s1) < string(s2)
+}
+
+func strP(s string) *string {
+	return &s
 }

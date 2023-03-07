@@ -15,12 +15,11 @@
 
 package spdx
 
-// TODO(bulldozer): freeze test until next implementation
-/*
 import (
 	"context"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -30,11 +29,10 @@ import (
 func Test_spdxParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name      string
-		doc       *processor.Document
-		wantNodes []assembler.GuacNode
-		wantEdges []assembler.GuacEdge
-		wantErr   bool
+		name           string
+		doc            *processor.Document
+		wantPredicates *assembler.IngestPredicates
+		wantErr        bool
 	}{{
 		name: "valid big SPDX document",
 		doc: &processor.Document{
@@ -46,9 +44,8 @@ func Test_spdxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.SpdxNodes,
-		wantEdges: testdata.SpdxEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.SpdxIngestionPredicates,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -61,13 +58,11 @@ func Test_spdxParser(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if nodes := s.CreateNodes(ctx); !testdata.GuacNodeSliceEqual(nodes, tt.wantNodes) {
-				t.Errorf("spdxParser.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
-			}
-			if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
-				t.Errorf("spdxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+
+			preds := s.GetPredicates(ctx)
+			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+				t.Errorf("scorecard.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
 }
-*/

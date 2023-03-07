@@ -81,7 +81,7 @@ func Test_scorecardParser(t *testing.T) {
 				t.Errorf("scorecard.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			preds := s.GetPredicates(ctx)
-			if d := cmp.Diff(tt.wantPredicates, preds); len(d) != 0 {
+			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
 				t.Errorf("scorecard.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})

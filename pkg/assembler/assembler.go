@@ -146,11 +146,28 @@ func (g *Graph) AppendGraph(gs ...Graph) {
 // client library.
 type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest
+	IsDependency     []IsDependencyIngest
+	IsOccurence      []IsOccurenceIngest
 }
 
 type CertifyScorecardIngest struct {
 	Source    *generated.SourceInputSpec
 	Scorecard *generated.ScorecardInputSpec
+}
+
+type IsDependencyIngest struct {
+	Pkg          *generated.PkgInputSpec
+	DepPkg       *generated.PkgInputSpec
+	IsDependency *generated.IsDependencyInputSpec
+}
+
+type IsOccurenceIngest struct {
+	// Occurence describes either pkg or src
+	Pkg *generated.PkgInputSpec
+	Src *generated.SourceInputSpec
+
+	// Artifact is the required object of the occurence
+	Artifact *generated.ArtifactInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph
