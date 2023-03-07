@@ -755,6 +755,273 @@ func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabil
 	return v.IngestVulnerability
 }
 
+// CertifyPkgDependentPkgPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type CertifyPkgDependentPkgPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns CertifyPkgDependentPkgPackage.Type, and is useful for accessing the field via an interface.
+func (v *CertifyPkgDependentPkgPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns CertifyPkgDependentPkgPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *CertifyPkgDependentPkgPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *CertifyPkgDependentPkgPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyPkgDependentPkgPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyPkgDependentPkgPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyPkgDependentPkgPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *CertifyPkgDependentPkgPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyPkgDependentPkgPackage) __premarshalJSON() (*__premarshalCertifyPkgDependentPkgPackage, error) {
+	var retval __premarshalCertifyPkgDependentPkgPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// CertifyPkgIngestCertifyPkg includes the requested fields of the GraphQL type CertifyPkg.
+// The GraphQL type's documentation follows.
+//
+// # CertifyPkg is an attestation that represents when a package objects are similar
+//
+// packages (subject) - list of package objects
+// justification (property) - string value representing why the packages are similar
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type CertifyPkgIngestCertifyPkg struct {
+	allCertifyPkg `json:"-"`
+}
+
+// GetJustification returns CertifyPkgIngestCertifyPkg.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyPkgIngestCertifyPkg) GetJustification() string { return v.allCertifyPkg.Justification }
+
+// GetPackages returns CertifyPkgIngestCertifyPkg.Packages, and is useful for accessing the field via an interface.
+func (v *CertifyPkgIngestCertifyPkg) GetPackages() []allCertifyPkgPackagesPackage {
+	return v.allCertifyPkg.Packages
+}
+
+// GetOrigin returns CertifyPkgIngestCertifyPkg.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyPkgIngestCertifyPkg) GetOrigin() string { return v.allCertifyPkg.Origin }
+
+// GetCollector returns CertifyPkgIngestCertifyPkg.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyPkgIngestCertifyPkg) GetCollector() string { return v.allCertifyPkg.Collector }
+
+func (v *CertifyPkgIngestCertifyPkg) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyPkgIngestCertifyPkg
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyPkgIngestCertifyPkg = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyPkg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyPkgIngestCertifyPkg struct {
+	Justification string `json:"justification"`
+
+	Packages []allCertifyPkgPackagesPackage `json:"packages"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyPkgIngestCertifyPkg) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyPkgIngestCertifyPkg) __premarshalJSON() (*__premarshalCertifyPkgIngestCertifyPkg, error) {
+	var retval __premarshalCertifyPkgIngestCertifyPkg
+
+	retval.Justification = v.allCertifyPkg.Justification
+	retval.Packages = v.allCertifyPkg.Packages
+	retval.Origin = v.allCertifyPkg.Origin
+	retval.Collector = v.allCertifyPkg.Collector
+	return &retval, nil
+}
+
+// CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
+//
+// All fields are required.
+type CertifyPkgInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
+// GetJustification returns CertifyPkgInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyPkgInputSpec) GetJustification() string { return v.Justification }
+
+// GetOrigin returns CertifyPkgInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyPkgInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns CertifyPkgInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyPkgInputSpec) GetCollector() string { return v.Collector }
+
+// CertifyPkgPkgPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type CertifyPkgPkgPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns CertifyPkgPkgPackage.Type, and is useful for accessing the field via an interface.
+func (v *CertifyPkgPkgPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns CertifyPkgPkgPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *CertifyPkgPkgPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *CertifyPkgPkgPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyPkgPkgPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyPkgPkgPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyPkgPkgPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *CertifyPkgPkgPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyPkgPkgPackage) __premarshalJSON() (*__premarshalCertifyPkgPkgPackage, error) {
+	var retval __premarshalCertifyPkgPkgPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// CertifyPkgResponse is returned by CertifyPkg on success.
+type CertifyPkgResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	Pkg CertifyPkgPkgPackage `json:"pkg"`
+	// Ingest a new package. Returns the ingested package trie
+	DependentPkg CertifyPkgDependentPkgPackage `json:"dependentPkg"`
+	// Adds a certification that two packages are similar
+	IngestCertifyPkg CertifyPkgIngestCertifyPkg `json:"ingestCertifyPkg"`
+}
+
+// GetPkg returns CertifyPkgResponse.Pkg, and is useful for accessing the field via an interface.
+func (v *CertifyPkgResponse) GetPkg() CertifyPkgPkgPackage { return v.Pkg }
+
+// GetDependentPkg returns CertifyPkgResponse.DependentPkg, and is useful for accessing the field via an interface.
+func (v *CertifyPkgResponse) GetDependentPkg() CertifyPkgDependentPkgPackage { return v.DependentPkg }
+
+// GetIngestCertifyPkg returns CertifyPkgResponse.IngestCertifyPkg, and is useful for accessing the field via an interface.
+func (v *CertifyPkgResponse) GetIngestCertifyPkg() CertifyPkgIngestCertifyPkg {
+	return v.IngestCertifyPkg
+}
+
 // GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
 type GHSAInputSpec struct {
 	GhsaId string `json:"ghsaId"`
@@ -2007,6 +2274,22 @@ func (v *__CertifyOSVInput) GetOsv() OSVInputSpec { return v.Osv }
 // GetCertifyVuln returns __CertifyOSVInput.CertifyVuln, and is useful for accessing the field via an interface.
 func (v *__CertifyOSVInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
+// __CertifyPkgInput is used internally by genqlient
+type __CertifyPkgInput struct {
+	Pkg        PkgInputSpec        `json:"pkg"`
+	DepPkg     PkgInputSpec        `json:"depPkg"`
+	CertifyPkg CertifyPkgInputSpec `json:"certifyPkg"`
+}
+
+// GetPkg returns __CertifyPkgInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__CertifyPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetDepPkg returns __CertifyPkgInput.DepPkg, and is useful for accessing the field via an interface.
+func (v *__CertifyPkgInput) GetDepPkg() PkgInputSpec { return v.DepPkg }
+
+// GetCertifyPkg returns __CertifyPkgInput.CertifyPkg, and is useful for accessing the field via an interface.
+func (v *__CertifyPkgInput) GetCertifyPkg() CertifyPkgInputSpec { return v.CertifyPkg }
+
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
 	Pkg        PkgInputSpec          `json:"pkg"`
@@ -2087,6 +2370,108 @@ func (v *allArtifactTree) GetAlgorithm() string { return v.Algorithm }
 
 // GetDigest returns allArtifactTree.Digest, and is useful for accessing the field via an interface.
 func (v *allArtifactTree) GetDigest() string { return v.Digest }
+
+// allCertifyPkg includes the GraphQL fields of CertifyPkg requested by the fragment allCertifyPkg.
+// The GraphQL type's documentation follows.
+//
+// # CertifyPkg is an attestation that represents when a package objects are similar
+//
+// packages (subject) - list of package objects
+// justification (property) - string value representing why the packages are similar
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type allCertifyPkg struct {
+	Justification string                         `json:"justification"`
+	Packages      []allCertifyPkgPackagesPackage `json:"packages"`
+	Origin        string                         `json:"origin"`
+	Collector     string                         `json:"collector"`
+}
+
+// GetJustification returns allCertifyPkg.Justification, and is useful for accessing the field via an interface.
+func (v *allCertifyPkg) GetJustification() string { return v.Justification }
+
+// GetPackages returns allCertifyPkg.Packages, and is useful for accessing the field via an interface.
+func (v *allCertifyPkg) GetPackages() []allCertifyPkgPackagesPackage { return v.Packages }
+
+// GetOrigin returns allCertifyPkg.Origin, and is useful for accessing the field via an interface.
+func (v *allCertifyPkg) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allCertifyPkg.Collector, and is useful for accessing the field via an interface.
+func (v *allCertifyPkg) GetCollector() string { return v.Collector }
+
+// allCertifyPkgPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type allCertifyPkgPackagesPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns allCertifyPkgPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *allCertifyPkgPackagesPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns allCertifyPkgPackagesPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allCertifyPkgPackagesPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *allCertifyPkgPackagesPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allCertifyPkgPackagesPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allCertifyPkgPackagesPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallCertifyPkgPackagesPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *allCertifyPkgPackagesPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allCertifyPkgPackagesPackage) __premarshalJSON() (*__premarshalallCertifyPkgPackagesPackage, error) {
+	var retval __premarshalallCertifyPkgPackagesPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
 
 // allCertifyScorecard includes the GraphQL fields of CertifyScorecard requested by the fragment allCertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -3986,6 +4371,73 @@ fragment allCertifyVuln on CertifyVuln {
 	var err error
 
 	var data CertifyOSVResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func CertifyPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	depPkg PkgInputSpec,
+	certifyPkg CertifyPkgInputSpec,
+) (*CertifyPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyPkg",
+		Query: `
+mutation CertifyPkg ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $certifyPkg: CertifyPkgInputSpec!) {
+	pkg: ingestPackage(pkg: $pkg) {
+		... allPkgTree
+	}
+	dependentPkg: ingestPackage(pkg: $depPkg) {
+		... allPkgTree
+	}
+	ingestCertifyPkg(pkg: $pkg, depPkg: $depPkg, certifyPkg: $certifyPkg) {
+		... allCertifyPkg
+	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allCertifyPkg on CertifyPkg {
+	justification
+	packages {
+		... allPkgTree
+	}
+	origin
+	collector
+}
+`,
+		Variables: &__CertifyPkgInput{
+			Pkg:        pkg,
+			DepPkg:     depPkg,
+			CertifyPkg: certifyPkg,
+		},
+	}
+	var err error
+
+	var data CertifyPkgResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

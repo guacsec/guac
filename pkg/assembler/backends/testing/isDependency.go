@@ -170,9 +170,9 @@ func (c *demoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	// to be made at the pkgVersion level. Version range for the dependent package is defined as a property
 	// on IsDependency.
 	depPkgSpec := model.PkgSpec{
-		Type:      &pkg.Type,
-		Namespace: pkg.Namespace,
-		Name:      &pkg.Name,
+		Type:      &depPkg.Type,
+		Namespace: depPkg.Namespace,
+		Name:      &depPkg.Name,
 	}
 	collectedDepPkg, err := c.Packages(ctx, &depPkgSpec)
 	if err != nil {

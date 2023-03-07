@@ -44,7 +44,24 @@ input CertifyPkgSpec {
   collector: String
 }
 
+"""
+CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
+
+All fields are required.
+"""
+input CertifyPkgInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
 extend type Query {
   "Returns all CertifyPkg"
   CertifyPkg(certifyPkgSpec: CertifyPkgSpec): [CertifyPkg!]!
 }
+
+extend type Mutation {
+  "Adds a certification that two packages are similar"
+  ingestCertifyPkg(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, certifyPkg: CertifyPkgInputSpec!): CertifyPkg!
+}
+

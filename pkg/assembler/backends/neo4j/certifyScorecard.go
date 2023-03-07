@@ -36,6 +36,8 @@ const (
 	scorecardCommit  string = "scorecardCommit"
 )
 
+// Query Scorecards
+
 func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
@@ -184,6 +186,8 @@ func setCertifyScorecardValues(sb *strings.Builder, certifyScorecardSpec *model.
 		queryValues["collector"] = certifyScorecardSpec.Collector
 	}
 }
+
+// Ingest Scorecards
 
 func (c *neo4jClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})

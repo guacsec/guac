@@ -155,6 +155,7 @@ type ComplexityRoot struct {
 		CertifyScorecard    func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
 		IngestArtifact      func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestBuilder       func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestCertifyPkg    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) int
 		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
@@ -743,6 +744,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.BuilderInputSpec)), true
+
+	case "Mutation.ingestCertifyPkg":
+		if e.complexity.Mutation.IngestCertifyPkg == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyPkg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyPkg(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["certifyPkg"].(model.CertifyPkgInputSpec)), true
 
 	case "Mutation.ingestCVE":
 		if e.complexity.Mutation.IngestCve == nil {
@@ -1412,6 +1425,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCVEInputSpec,
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadSpec,
+		ec.unmarshalInputCertifyPkgInputSpec,
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
@@ -1722,10 +1736,27 @@ input CertifyPkgSpec {
   collector: String
 }
 
+"""
+CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
+
+All fields are required.
+"""
+input CertifyPkgInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
 extend type Query {
   "Returns all CertifyPkg"
   CertifyPkg(certifyPkgSpec: CertifyPkgSpec): [CertifyPkg!]!
 }
+
+extend type Mutation {
+  "Adds a certification that two packages are similar"
+  ingestCertifyPkg(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, certifyPkg: CertifyPkgInputSpec!): CertifyPkg!
+}
+
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
