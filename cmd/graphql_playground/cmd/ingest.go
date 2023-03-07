@@ -41,6 +41,7 @@ func ingestData(port int) {
 	start := time.Now()
 	logger.Infof("Ingesting test data into backend server")
 	ingestScorecards(ctx, gqlclient)
+	ingestSLSA(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
 	time := time.Now().Sub(start)
@@ -76,6 +77,153 @@ func ingestScorecards(ctx context.Context, client graphql.Client) {
 	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
+}
+
+func ingestSLSA(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	tag := "v2.12.0"
+	version := "2.12.0"
+	initialSource := model.SourceInputSpec{
+		Type:      "git",
+		Namespace: "github",
+		Name:      "github.com/tensorflow/tensorflow",
+		Tag:       &tag,
+	}
+	initialSourceAsMaterial := model.PackageSourceOrArtifactInput{
+		Source: &initialSource,
+	}
+
+	// from source to package
+	materials := []model.PackageSourceOrArtifactInput{
+		initialSourceAsMaterial,
+	}
+	builder := model.BuilderInputSpec{
+		Uri: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
+	}
+	predicate := []model.SLSAPredicateInputSpec{
+		{
+			Key:   "buildDefinition.externalParameters.repository",
+			Value: "https://github.com/octocat/hello-world",
+		},
+		{
+			Key:   "buildDefinition.externalParameters.ref",
+			Value: "refs/heads/main",
+		},
+		{
+			Key:   "buildDefinition.resolvedDependencies.uri",
+			Value: "git+https://github.com/octocat/hello-world@refs/heads/main",
+		},
+	}
+	slsa := model.SLSAInputSpec{
+		BuiltFrom: materials,
+		BuiltBy: builder,
+		BuildType: "Test:Source->Package",
+		SlsaPredicate: predicate,
+		SlsaVersion: "v1",
+		StartedOn: time.Now(),
+		FinishedOn: time.Now().Add(10 * time.Second),
+		Origin:           "Demo ingestion",
+		Collector:        "Demo ingestion",
+	}
+	emptyNamespace := ""
+	pkg := model.PkgInputSpec{
+		Type:      "pypi",
+		Namespace: &emptyNamespace,
+		Name:      "tensorflow",
+		Version: &version,
+	}
+	r1, err := model.SLSAForPackage(context.Background(), client, pkg, slsa)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	logger.Infof("|%v|", r1)
+
+	// from source to artifact
+	slsa = model.SLSAInputSpec{
+		BuiltFrom: materials,
+		BuiltBy: builder,
+		BuildType: "Test:Source->Artifact",
+		SlsaPredicate: predicate,
+		SlsaVersion: "v1",
+		StartedOn: time.Now(),
+		FinishedOn: time.Now().Add(10 * time.Second),
+		Origin:           "Demo ingestion",
+		Collector:        "Demo ingestion",
+	}
+	artifact := model.ArtifactInputSpec{
+		Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+		Algorithm: "sha1",
+	}
+	r2, err := model.SLSAForArtifact(context.Background(), client, artifact, slsa)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	logger.Infof("|%v|", r2)
+
+	// from source to source
+	builder = model.BuilderInputSpec{
+		Uri: "https://github.com/CreateFork/HubHostedActions@v1",
+	}
+	slsa = model.SLSAInputSpec{
+		BuiltFrom: materials,
+		BuiltBy: builder,
+		BuildType: "Test:Source->Source",
+		SlsaPredicate: predicate,
+		SlsaVersion: "v1",
+		StartedOn: time.Now(),
+		FinishedOn: time.Now().Add(10 * time.Second),
+		Origin:           "Demo ingestion",
+		Collector:        "Demo ingestion",
+	}
+	finalSource := model.SourceInputSpec{
+		Type:      "git",
+		Namespace: "github",
+		Name:      "github.com/forked/tensorflow",
+		Tag:       &tag,
+	}
+	r3, err := model.SLSAForSource(context.Background(), client, finalSource, slsa)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	logger.Infof("|%v|", r3)
+
+	// multiple, mixed materials
+	pkgAsMaterial := model.PackageSourceOrArtifactInput{
+		Package: &pkg,
+	}
+	artifactAsMaterial := model.PackageSourceOrArtifactInput{
+		Artifact: &artifact,
+	}
+	finalSourceAsMaterial := model.PackageSourceOrArtifactInput{
+		Source: &finalSource,
+	}
+	materials = []model.PackageSourceOrArtifactInput{
+		pkgAsMaterial, artifactAsMaterial, finalSourceAsMaterial,
+	}
+	builder = model.BuilderInputSpec{
+		Uri: "https://github.com/MixedBuild/HubHostedActions@v1",
+	}
+	slsa = model.SLSAInputSpec{
+		BuiltFrom: materials,
+		BuiltBy: builder,
+		BuildType: "Test:Mixed-build",
+		SlsaPredicate: predicate,
+		SlsaVersion: "v1",
+		StartedOn: time.Now(),
+		FinishedOn: time.Now().Add(10 * time.Second),
+		Origin:           "Demo ingestion",
+		Collector:        "Demo ingestion",
+	}
+	artifact = model.ArtifactInputSpec{
+		Digest:    "0123456789abcdef0000000fedcba9876543210",
+		Algorithm: "sha1",
+	}
+	r4, err := model.SLSAForArtifact(context.Background(), client, artifact, slsa)
+	if err != nil {
+		logger.Errorf("Error in ingesting: %v\n", err)
+	}
+	logger.Infof("|%v|", r4)
 }
 
 func ingestDependency(ctx context.Context, client graphql.Client) {
