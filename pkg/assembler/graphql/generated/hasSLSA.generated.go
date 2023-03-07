@@ -678,7 +678,7 @@ func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFrom"))
-			it.BuiltFrom, err = ec.unmarshalOPackageSourceOrArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputᚄ(ctx, v)
+			it.BuiltFrom, err = ec.unmarshalOPackageSourceOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpecᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -754,6 +754,50 @@ func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj i
 
 func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactInput, error) {
 	var it model.PackageSourceOrArtifactInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"package", "source", "artifact"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "package":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
+			it.Package, err = ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "source":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
+			it.Source, err = ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "artifact":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+			it.Artifact, err = ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx context.Context, obj interface{}) (model.PackageSourceOrArtifactSpec, error) {
+	var it model.PackageSourceOrArtifactSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -1275,6 +1319,11 @@ func (ec *executionContext) unmarshalNPackageSourceOrArtifactInput2ᚖgithubᚗc
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageSourceOrArtifactSpec, error) {
+	res, err := ec.unmarshalInputPackageSourceOrArtifactSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v interface{}) (model.SLSAInputSpec, error) {
 	res, err := ec.unmarshalInputSLSAInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -1382,6 +1431,26 @@ func (ec *executionContext) unmarshalOPackageSourceOrArtifactInput2ᚕᚖgithub�
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
 		res[i], err = ec.unmarshalNPackageSourceOrArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOPackageSourceOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageSourceOrArtifactSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.PackageSourceOrArtifactSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}

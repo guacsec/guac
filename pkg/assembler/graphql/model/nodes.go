@@ -329,18 +329,18 @@ type HasSlsa struct {
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
-	Package     *PkgSpec                        `json:"package"`
-	Source      *SourceSpec                     `json:"source"`
-	Artifact    *ArtifactSpec                   `json:"artifact"`
-	BuiltFrom   []*PackageSourceOrArtifactInput `json:"builtFrom"`
-	BuiltBy     *BuilderSpec                    `json:"builtBy"`
-	BuildType   *string                         `json:"buildType"`
-	Predicate   []*SLSAPredicateSpec            `json:"predicate"`
-	SlsaVersion *string                         `json:"slsaVersion"`
-	StartedOn   *time.Time                      `json:"startedOn"`
-	FinishedOn  *time.Time                      `json:"finishedOn"`
-	Origin      *string                         `json:"origin"`
-	Collector   *string                         `json:"collector"`
+	Package     *PkgSpec                       `json:"package"`
+	Source      *SourceSpec                    `json:"source"`
+	Artifact    *ArtifactSpec                  `json:"artifact"`
+	BuiltFrom   []*PackageSourceOrArtifactSpec `json:"builtFrom"`
+	BuiltBy     *BuilderSpec                   `json:"builtBy"`
+	BuildType   *string                        `json:"buildType"`
+	Predicate   []*SLSAPredicateSpec           `json:"predicate"`
+	SlsaVersion *string                        `json:"slsaVersion"`
+	StartedOn   *time.Time                     `json:"startedOn"`
+	FinishedOn  *time.Time                     `json:"finishedOn"`
+	Origin      *string                        `json:"origin"`
+	Collector   *string                        `json:"collector"`
 }
 
 // HasSourceAt is an attestation represents that a package object has a source object since a timestamp
@@ -629,10 +629,20 @@ type PackageQualifierSpec struct {
 }
 
 // PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
-// input type.
+// input type to be used in mutations.
 //
 // Exactly one of the value must be set to non-nil.
 type PackageSourceOrArtifactInput struct {
+	Package  *PkgInputSpec      `json:"package"`
+	Source   *SourceInputSpec   `json:"source"`
+	Artifact *ArtifactInputSpec `json:"artifact"`
+}
+
+// PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
+// input type to be used in read queries.
+//
+// Exactly one of the value must be set to non-nil.
+type PackageSourceOrArtifactSpec struct {
 	Package  *PkgSpec      `json:"package"`
 	Source   *SourceSpec   `json:"source"`
 	Artifact *ArtifactSpec `json:"artifact"`

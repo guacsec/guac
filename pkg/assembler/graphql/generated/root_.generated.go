@@ -1421,6 +1421,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
+		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
@@ -2207,15 +2208,27 @@ extend type Query {
 union PackageSourceOrArtifact = Package | Source | Artifact
 
 """
+PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
+input type to be used in read queries.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceOrArtifactSpec {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+}
+
+"""
 PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
-input type.
+input type to be used in mutations.
 
 Exactly one of the value must be set to non-nil.
 """
 input PackageSourceOrArtifactInput {
-  package: PkgSpec
-  source: SourceSpec
-  artifact: ArtifactSpec
+  package: PkgInputSpec
+  source: SourceInputSpec
+  artifact: ArtifactInputSpec
 }
 
 "HasSLSA records that a subject node has a SLSA attestation."
@@ -2296,7 +2309,7 @@ input HasSLSASpec {
   package: PkgSpec
   source: SourceSpec
   artifact: ArtifactSpec
-  builtFrom: [PackageSourceOrArtifactInput!]
+  builtFrom: [PackageSourceOrArtifactSpec!]
   builtBy: BuilderSpec
   buildType: String
   predicate: [SLSAPredicateSpec!] = []
