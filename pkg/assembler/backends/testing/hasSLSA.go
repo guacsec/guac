@@ -425,13 +425,18 @@ func processMaterialInput(material *model.PackageSourceOrArtifactInput) (model.P
 
 		return &source, nil
 	} else if material.Artifact != nil {
-		artifact := model.Artifact{
-			Algorithm: material.Artifact.Algorithm,
-			Digest:    material.Artifact.Digest,
-		}
-
-		return &artifact, nil
+		artifact := generateModelArtifact(material.Artifact)
+		return artifact, nil
 	}
 
 	return nil, gqlerror.Errorf("Must specify exactly one package, source, or artifact for a specific material")
+}
+
+// TODO(mihaimaruseac): Merge with neo4j similar(ish) implementation.
+// In a separate PR, as this is already too large
+func generateModelArtifact(inputArtifact *model.ArtifactInputSpec) *model.Artifact {
+	return &model.Artifact{
+		Algorithm: inputArtifact.Algorithm,
+		Digest:    inputArtifact.Digest,
+	}
 }
