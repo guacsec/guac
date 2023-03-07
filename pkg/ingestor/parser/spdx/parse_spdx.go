@@ -233,6 +233,9 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 				preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
 					Pkg:      &pkg,
 					Artifact: &art,
+					IsOccurence: &model.IsOccurrenceSpecInputSpec{
+						Justification: "spdx file with checksum",
+					},
 				})
 			}
 		}
@@ -244,6 +247,9 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 				preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
 					Pkg:      &pkg,
 					Artifact: &art,
+					IsOccurence: &model.IsOccurrenceSpecInputSpec{
+						Justification: "spdx package with checksum",
+					},
 				})
 			}
 		}

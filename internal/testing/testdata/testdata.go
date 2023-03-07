@@ -317,6 +317,14 @@ var (
 		Justification: "Derived from SPDX DEPENDS_ON relationship",
 	}
 
+	isOccJustifyFile = &model.IsOccurrenceSpecInputSpec{
+		Justification: "spdx file with checksum",
+	}
+
+	isOccJustifyPkg = &model.IsOccurrenceSpecInputSpec{
+		Justification: "spdx package with checksum",
+	}
+
 	SpdxDeps = []assembler.IsDependencyIngest{
 		{
 			Pkg:          topLevelPack,
@@ -377,20 +385,24 @@ var (
 
 	SpdxOccurences = []assembler.IsOccurenceIngest{
 		{
-			Pkg:      worldFilePack,
-			Artifact: worldFileArtifact,
+			Pkg:         worldFilePack,
+			Artifact:    worldFileArtifact,
+			IsOccurence: isOccJustifyFile,
 		},
 		{
-			Pkg:      rootFilePack,
-			Artifact: rootFileArtifact,
+			Pkg:         rootFilePack,
+			Artifact:    rootFileArtifact,
+			IsOccurence: isOccJustifyFile,
 		},
 		{
-			Pkg:      rsaPubFilePack,
-			Artifact: rsaPubFileArtifact,
+			Pkg:         rsaPubFilePack,
+			Artifact:    rsaPubFileArtifact,
+			IsOccurence: isOccJustifyFile,
 		},
 		{
-			Pkg:      triggersFilePack,
-			Artifact: triggersFileArtifact,
+			Pkg:         triggersFilePack,
+			Artifact:    triggersFileArtifact,
+			IsOccurence: isOccJustifyFile,
 		},
 	}
 

@@ -168,6 +168,8 @@ type IsOccurenceIngest struct {
 
 	// Artifact is the required object of the occurence
 	Artifact *generated.ArtifactInputSpec
+
+	IsOccurence *generated.IsOccurrenceSpecInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph
