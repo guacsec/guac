@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -263,23 +262,397 @@ func (c *demoClient) IngestSLSA(ctx context.Context, subject model.PackageSource
 	}
 
 	if subject.Package != nil {
-		return c.ingestSLSAPackage(ctx, subject.Package, slsa)
+		return c.ingestSLSAPackage(ctx, subject.Package, &slsa)
 	} else if subject.Source != nil {
-		return c.ingestSLSASource(ctx, subject.Source, slsa)
+		return c.ingestSLSASource(ctx, subject.Source, &slsa)
 	} else if subject.Artifact != nil {
-		return c.ingestSLSAArtifact(ctx, subject.Artifact, slsa)
+		return c.ingestSLSAArtifact(ctx, subject.Artifact, &slsa)
 	}
 	return nil, gqlerror.Errorf("Must specify exactly one subject (package, source, or artifact)")
 }
 
-func (c *demoClient) ingestSLSAPackage(ctx context.Context, pkg *model.PkgInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAPackage"))
+func (c *demoClient) ingestSLSAPackage(ctx context.Context, pkg *model.PkgInputSpec, slsa *model.SLSAInputSpec) (*model.HasSlsa, error) {
+	for _, attestation := range c.hasSLSA {
+		if p, ok := attestation.Subject.(*model.Package); ok {
+			if packageMatch(p, pkg) && slsaMatch(attestation.Slsa, slsa) {
+				return attestation, nil
+			}
+		}
+	}
+
+	newSlsa, err := buildSLSA(slsa)
+	if err != nil {
+		return nil, err
+	}
+
+	newHasSlsa := &model.HasSlsa{
+		Subject: generateModelPackage(pkg),
+		Slsa: newSlsa,
+	}
+	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
+	return newHasSlsa, nil
 }
 
-func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSASource"))
+func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceInputSpec, slsa *model.SLSAInputSpec) (*model.HasSlsa, error) {
+	for _, attestation := range c.hasSLSA {
+		if s, ok := attestation.Subject.(*model.Source); ok {
+			if sourceMatch(s, source) && slsaMatch(attestation.Slsa, slsa) {
+				return attestation, nil
+			}
+		}
+	}
+
+	newSlsa, err := buildSLSA(slsa)
+	if err != nil {
+		return nil, err
+	}
+
+	newHasSlsa := &model.HasSlsa{
+		Subject: generateModelSource(source),
+		Slsa: newSlsa,
+	}
+	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
+	return newHasSlsa, nil
 }
 
-func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAArtifact"))
+func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, slsa *model.SLSAInputSpec) (*model.HasSlsa, error) {
+	for _, attestation := range c.hasSLSA {
+		if a, ok := attestation.Subject.(*model.Artifact); ok {
+			if artifactMatch(a, artifact) && slsaMatch(attestation.Slsa, slsa) {
+				return attestation, nil
+			}
+		}
+	}
+
+	newSlsa, err := buildSLSA(slsa)
+	if err != nil {
+		return nil, err
+	}
+
+	newHasSlsa := &model.HasSlsa{
+		Subject: generateModelArtifact(artifact),
+		Slsa: newSlsa,
+	}
+	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
+	return newHasSlsa, nil
+}
+
+func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
+	materials := []model.PackageSourceOrArtifact{}
+	for _, m:= range input.BuiltFrom {
+		material, err := processMaterialInput(m)
+		if err != nil {
+			return nil, err
+		}
+		materials = append(materials, material)
+	}
+
+	builder := model.Builder {URI: input.BuiltBy.URI}
+
+	predicates := []*model.SLSAPredicate{}
+	for _, p := range input.SlsaPredicate {
+		predicate := model.SLSAPredicate{
+			Key: p.Key,
+			Value: p.Value,
+		}
+		predicates = append(predicates, &predicate)
+	}
+
+	slsa := model.Slsa{
+		BuiltFrom:     materials,
+		BuiltBy:       &builder,
+		BuildType:     input.BuildType,
+		SlsaPredicate: predicates,
+		SlsaVersion:   input.SlsaVersion,
+		StartedOn:     input.StartedOn,
+		FinishedOn:    input.FinishedOn,
+		Origin:        input.Origin,
+		Collector:     input.Collector,
+	}
+	return &slsa, nil
+}
+
+func slsaMatch(slsa *model.Slsa, input *model.SLSAInputSpec) bool {
+	// Do fast checks first
+	if slsa.Collector != input.Collector {
+		return false
+	}
+	if slsa.Origin != input.Origin {
+		return false
+	}
+	if slsa.FinishedOn != input.FinishedOn {
+		return false
+	}
+	if slsa.StartedOn != input.StartedOn {
+		return false
+	}
+	if slsa.SlsaVersion != input.SlsaVersion {
+		return false
+	}
+	if slsa.BuildType != input.BuildType {
+		return false
+	}
+
+	// TODO(mihaimaruseac): O(n*m), could be made O(n+m)
+	for _, pred := range slsa.SlsaPredicate {
+		found := false
+		for _, inputPred := range input.SlsaPredicate {
+			if pred.Key == inputPred.Key && pred.Value == inputPred.Value {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	// TODO(mihaimaruseac): O(n*m), could be made O(n+m)
+	for _, mat := range slsa.BuiltFrom {
+		found := false
+		if a, ok := mat.(*model.Artifact); ok {
+			for _, inputMat := range input.BuiltFrom {
+				if artifactMatch(a, inputMat.Artifact) {
+					found = true
+					break
+				}
+			}
+		} else if s, ok := mat.(*model.Source); ok {
+			for _, inputMat := range input.BuiltFrom {
+				if sourceMatch(s, inputMat.Source) {
+					found = true
+					break
+				}
+			}
+		} else if p, ok := mat.(*model.Package); ok {
+			for _, inputMat := range input.BuiltFrom {
+				if packageMatch(p, inputMat.Package) {
+					found = true
+					break
+				}
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	return true;
+}
+
+// TODO(mihaimaruseac): Extract common utilities to common (separate PR!)
+// This is very large and surely can be split, but we need several refactors
+// before. Hence, separate PR!
+func processMaterialInput(material *model.PackageSourceOrArtifactInput) (model.PackageSourceOrArtifact, error) {
+	valuesDefined := 0
+	if material.Package != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if material.Source != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if material.Artifact != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined > 1 {
+		return nil, gqlerror.Errorf("Must specify at most one package, source, or artifact for a specific material")
+	}
+
+	if material.Package != nil {
+		return generateModelPackage(material.Package), nil
+	} else if material.Source != nil {
+		return generateModelSource(material.Source), nil
+	} else if material.Artifact != nil {
+		return generateModelArtifact(material.Artifact), nil
+	}
+
+	return nil, gqlerror.Errorf("Must specify exactly one package, source, or artifact for a specific material")
+}
+
+// TODO(mihaimaruseac): Merge with neo4j similar(ish) implementation.
+// In a separate PR, as this is already too large
+func generateModelArtifact(inputArtifact *model.ArtifactInputSpec) *model.Artifact {
+	return &model.Artifact{
+		Algorithm: inputArtifact.Algorithm,
+		Digest:    inputArtifact.Digest,
+	}
+}
+
+// TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
+func artifactMatch(artifact *model.Artifact, artifactInput *model.ArtifactInputSpec) bool {
+	if artifactInput == nil {
+		return false
+	}
+
+	if artifact.Algorithm != artifactInput.Algorithm {
+		return false
+	}
+	if artifact.Digest != artifactInput.Digest {
+		return false
+	}
+	return true
+}
+
+// TODO(mihaimaruseac): Merge with neo4j similar(ish) implementation.
+// In a separate PR, as this is already too large
+func generateModelSource(inputSource *model.SourceInputSpec) *model.Source {
+	var tag *string
+	tagValue := inputSource.Tag
+	if tagValue != nil {
+		tagStr := *tagValue
+		tag = &tagStr
+	}
+
+	var commit *string
+	commitValue := inputSource.Commit
+	if commitValue != nil {
+		commitStr := *commitValue
+		commit = &commitStr
+	}
+
+	name := &model.SourceName{
+		Name:   inputSource.Name,
+		Tag:    tag,
+		Commit: commit,
+	}
+
+	namespace := &model.SourceNamespace{
+		Namespace: inputSource.Namespace,
+		Names:     []*model.SourceName{name},
+	}
+
+	return &model.Source{
+		Type:       inputSource.Type,
+		Namespaces: []*model.SourceNamespace{namespace},
+	}
+}
+
+// TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
+func sourceMatch(source *model.Source, sourceInput *model.SourceInputSpec) bool {
+	if sourceInput == nil {
+		return false
+	}
+
+	if source.Type != sourceInput.Type {
+		return false
+	}
+	for _, ns := range source.Namespaces {
+		if ns.Namespace != sourceInput.Namespace {
+			continue
+		}
+		for _, n := range ns.Names {
+			if n.Name != sourceInput.Name {
+				continue
+			}
+			if !matchInputSpecWithDBField(sourceInput.Commit, n.Commit) {
+				continue
+			}
+			if !matchInputSpecWithDBField(sourceInput.Tag, n.Tag) {
+				continue
+			}
+			return true
+		}
+	}
+	return false
+}
+
+// TODO(mihaimaruseac): Merge with neo4j similar(ish) implementation.
+// In a separate PR, as this is already too large
+func generateModelPackage(inputPackage *model.PkgInputSpec) *model.Package {
+	var version *model.PackageVersion
+	if inputPackage.Version != nil ||
+	   inputPackage.Subpath != nil ||
+	   inputPackage.Qualifiers != nil {
+		version = &model.PackageVersion{}
+		if inputPackage.Version != nil {
+			version.Version = *inputPackage.Version
+		}
+		if inputPackage.Subpath != nil {
+			version.Subpath = *inputPackage.Subpath
+		}
+		if inputPackage.Qualifiers != nil {
+			var qualifiers []*model.PackageQualifier
+			for _, q := range inputPackage.Qualifiers {
+				qual := model.PackageQualifier{
+					Key: q.Key,
+					Value: q.Value,
+				}
+				qualifiers = append(qualifiers, &qual)
+			}
+			version.Qualifiers = qualifiers
+		}
+	}
+
+	var versions []*model.PackageVersion
+	if version != nil {
+		versions = append(versions, version)
+	}
+
+	name := &model.PackageName{
+		Name:     inputPackage.Name,
+		Versions: versions,
+	}
+
+	namespace := &model.PackageNamespace{
+		Namespace: *inputPackage.Namespace,
+		Names:     []*model.PackageName{name},
+	}
+
+	return &model.Package{
+		Type:       inputPackage.Type,
+		Namespaces: []*model.PackageNamespace{namespace},
+	}
+}
+
+// TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
+func packageMatch(pkg *model.Package, pkgInput *model.PkgInputSpec) bool {
+	if pkgInput == nil {
+		return false
+	}
+
+	if pkg.Type != pkgInput.Type {
+		return false
+	}
+	for _, ns := range pkg.Namespaces {
+		if !matchInputSpecWithDBField(pkgInput.Namespace, &ns.Namespace) {
+			continue
+		}
+		for _, n := range ns.Names {
+			if n.Name != pkgInput.Name {
+				continue
+			}
+			//TODO(mihaimaruseac): Test what happens here with version
+			if pkgInput.Version == nil {
+				return true
+			}
+			for _, v := range n.Versions {
+				if !matchInputSpecWithDBField(pkgInput.Version, &v.Version) {
+					continue
+				}
+				if !matchInputSpecWithDBField(pkgInput.Subpath, &v.Subpath) {
+					continue
+				}
+				// TODO(mihaimaruseac): Linearize, extract to generics
+				allQualifiersFound := true
+				for _, q := range v.Qualifiers {
+					qFound := false
+					for _, iq := range pkgInput.Qualifiers {
+						if q.Key == iq.Key && q.Value == iq.Value {
+							qFound = true
+							break
+						}
+					}
+					if !qFound {
+						allQualifiersFound = false
+						break
+					}
+				}
+				if allQualifiersFound {
+					return true
+				}
+			}
+			return false
+		}
+	}
+	return false
 }
