@@ -270,14 +270,26 @@ func (c *demoClient) IngestSLSA(ctx context.Context, subject model.PackageSource
 }
 
 func (c *demoClient) ingestSLSAPackage(ctx context.Context, pkg *model.PkgInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	_, err := buildSLSA(&slsa)
+	if err != nil {
+		return nil, err
+	}
 	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAPackage"))
 }
 
 func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	_, err := buildSLSA(&slsa)
+	if err != nil {
+		return nil, err
+	}
 	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSASource"))
 }
 
 func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	_, err := buildSLSA(&slsa)
+	if err != nil {
+		return nil, err
+	}
 	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAArtifact"))
 }
 
