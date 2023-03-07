@@ -60,13 +60,17 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("failed to parse SPDX document: %w", err)
 	}
 	s.spdxDoc = spdxDoc
-	s.getPackages()
-	s.getFiles()
+	if err := s.getPackages(); err != nil {
+		return err
+	}
+	if err := s.getFiles(); err != nil {
+		return err
+	}
 	return nil
 }
 
 // creating top level package manually until https://github.com/anchore/syft/issues/1241 is resolved
-func (s *spdxParser) getTopLevelPackage() {
+func (s *spdxParser) getTopLevelPackage() error {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	splitImage := strings.Split(s.spdxDoc.DocumentName, "/")
 	var purl string
@@ -79,14 +83,17 @@ func (s *spdxParser) getTopLevelPackage() {
 	if purl != "" {
 		topPackage, err := asmhelpers.PurlToPkg(purl)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		s.packagePackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packagePackages[string(s.spdxDoc.SPDXIdentifier)], *topPackage)
 	}
+	return nil
 }
 
-func (s *spdxParser) getPackages() {
-	s.getTopLevelPackage()
+func (s *spdxParser) getPackages() error {
+	if err := s.getTopLevelPackage(); err != nil {
+		return err
+	}
 	for _, pac := range s.spdxDoc.Packages {
 		// for each package create a package for each of them
 		purl := ""
@@ -103,7 +110,7 @@ func (s *spdxParser) getPackages() {
 
 		pkg, err := asmhelpers.PurlToPkg(purl)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], *pkg)
 
@@ -117,9 +124,10 @@ func (s *spdxParser) getPackages() {
 		}
 
 	}
+	return nil
 }
 
-func (s *spdxParser) getFiles() {
+func (s *spdxParser) getFiles() error {
 	for _, file := range s.spdxDoc.Files {
 
 		// if checksums exists create an artifact for each of them
@@ -128,7 +136,7 @@ func (s *spdxParser) getFiles() {
 			purl := asmhelpers.GuacFilePurl(strings.ToLower(string(checksum.Algorithm)), checksum.Value, &file.FileName)
 			pkg, err := asmhelpers.PurlToPkg(purl)
 			if err != nil {
-				panic(err)
+				return err
 			}
 			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], *pkg)
 
@@ -139,6 +147,7 @@ func (s *spdxParser) getFiles() {
 			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
 		}
 	}
+	return nil
 }
 
 func getTags(f *v2_2.File) []string {
