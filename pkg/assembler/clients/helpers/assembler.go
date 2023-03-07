@@ -30,17 +30,17 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
-			logger.Infof("assembling CertifyScorecard: %+v", p.CertifyScorecard)
+			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			if err := ingestCertifyScorecards(ctx, gqlclient, p.CertifyScorecard); err != nil {
 				return err
 			}
 
-			logger.Infof("assembling IsDependency: %+v", p.IsDependency)
+			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
 			if err := ingestIsDependency(ctx, gqlclient, p.IsDependency); err != nil {
 				return err
 			}
 
-			logger.Infof("assembling IsOccurence: %+v", p.IsOccurence)
+			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurence))
 			if err := ingestIsOccurence(ctx, gqlclient, p.IsOccurence); err != nil {
 				return err
 			}
