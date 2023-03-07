@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest SLSA attestations into GUAC
 
-mutation SlsaForPackage($pkg: PkgInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForPackage($pkg: PkgInputSpec!, $slsa: SLSAInputSpec!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
@@ -26,7 +26,7 @@ mutation SlsaForPackage($pkg: PkgInputSpec!, $slsa: SLSAInputSpec!) {
   }
 }
 
-mutation SlsaForSource($source: SourceInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForSource($source: SourceInputSpec!, $slsa: SLSAInputSpec!) {
   ingestSource(source: $source) {
     ...allSourceTree
   }
@@ -35,7 +35,7 @@ mutation SlsaForSource($source: SourceInputSpec!, $slsa: SLSAInputSpec!) {
   }
 }
 
-mutation SlsaForArtifact($artifact: ArtifactInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $slsa: SLSAInputSpec!) {
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree
   }
