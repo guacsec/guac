@@ -244,6 +244,39 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 	return collectedHasSLSA, nil
 }
 
-func (c *demoClient) IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
+func (c *demoClient) IngestSLSA(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	subjectsDefined := 0
+	if subject.Package != nil {
+		subjectsDefined = subjectsDefined + 1
+	}
+	if subject.Source != nil {
+		subjectsDefined = subjectsDefined + 1
+	}
+	if subject.Artifact != nil {
+		subjectsDefined = subjectsDefined + 1
+	}
+	if subjectsDefined > 1 {
+		return nil, gqlerror.Errorf("Must specify at most one subject (package, source, or artifact)")
+	}
+
+	if subject.Package != nil {
+		return c.ingestSLSAPackage(ctx, subject.Package, slsa)
+	} else if subject.Source != nil {
+		return c.ingestSLSASource(ctx, subject.Source, slsa)
+	} else if subject.Artifact != nil {
+		return c.ingestSLSAArtifact(ctx, subject.Artifact, slsa)
+	}
+	return nil, gqlerror.Errorf("Must specify exactly one subject (package, source, or artifact)")
+}
+
+func (c *demoClient) ingestSLSAPackage(ctx context.Context, pkg *model.PkgInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAPackage"))
+}
+
+func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSASource"))
+}
+
+func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAArtifact"))
 }
