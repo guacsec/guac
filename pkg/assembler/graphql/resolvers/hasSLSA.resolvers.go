@@ -12,7 +12,7 @@ import (
 
 // IngestSlsa is the resolver for the ingestSLSA field.
 func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	return r.Backend.IngestSlsa(ctx, subject, slsa)
+	return r.Backend.IngestSLSA(ctx, subject, slsa)
 }
 
 // HasSlsa is the resolver for the HasSLSA field.
