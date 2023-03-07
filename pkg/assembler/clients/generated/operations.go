@@ -25,13 +25,13 @@ func (v *ArtifactInputSpec) GetAlgorithm() string { return v.Algorithm }
 // GetDigest returns ArtifactInputSpec.Digest, and is useful for accessing the field via an interface.
 func (v *ArtifactInputSpec) GetDigest() string { return v.Digest }
 
-// BuilderSpec allows filtering the list of builders to return.
-type BuilderSpec struct {
-	Uri *string `json:"uri"`
+// BuilderInputSpec is the same as Builder, but used for mutation ingestion.
+type BuilderInputSpec struct {
+	Uri string `json:"uri"`
 }
 
-// GetUri returns BuilderSpec.Uri, and is useful for accessing the field via an interface.
-func (v *BuilderSpec) GetUri() *string { return v.Uri }
+// GetUri returns BuilderInputSpec.Uri, and is useful for accessing the field via an interface.
+func (v *BuilderInputSpec) GetUri() string { return v.Uri }
 
 // IsDependencyDependentPkgPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -1463,7 +1463,7 @@ func (v *SLSAForSourceResponse) GetIngestSLSA() SLSAForSourceIngestSLSAHasSLSA {
 // All fields are required.
 type SLSAInputSpec struct {
 	BuiltFrom     []PackageSourceOrArtifactInput `json:"builtFrom"`
-	BuiltBy       BuilderSpec                    `json:"builtBy"`
+	BuiltBy       BuilderInputSpec               `json:"builtBy"`
 	BuildType     string                         `json:"buildType"`
 	SlsaPredicate []SLSAPredicateInputSpec       `json:"slsaPredicate"`
 	SlsaVersion   string                         `json:"slsaVersion"`
@@ -1477,7 +1477,7 @@ type SLSAInputSpec struct {
 func (v *SLSAInputSpec) GetBuiltFrom() []PackageSourceOrArtifactInput { return v.BuiltFrom }
 
 // GetBuiltBy returns SLSAInputSpec.BuiltBy, and is useful for accessing the field via an interface.
-func (v *SLSAInputSpec) GetBuiltBy() BuilderSpec { return v.BuiltBy }
+func (v *SLSAInputSpec) GetBuiltBy() BuilderInputSpec { return v.BuiltBy }
 
 // GetBuildType returns SLSAInputSpec.BuildType, and is useful for accessing the field via an interface.
 func (v *SLSAInputSpec) GetBuildType() string { return v.BuildType }

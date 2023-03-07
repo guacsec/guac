@@ -2333,7 +2333,7 @@ All fields are required.
 """
 input SLSAInputSpec {
   builtFrom: [PackageSourceOrArtifactInput!]
-  builtBy: BuilderSpec!
+  builtBy: BuilderInputSpec!
   buildType: String!
   slsaPredicate: [SLSAPredicateInputSpec!]!
   slsaVersion: String!

@@ -749,7 +749,7 @@ type Slsa struct {
 // All fields are required.
 type SLSAInputSpec struct {
 	BuiltFrom     []*PackageSourceOrArtifactInput `json:"builtFrom"`
-	BuiltBy       *BuilderSpec                    `json:"builtBy"`
+	BuiltBy       *BuilderInputSpec               `json:"builtBy"`
 	BuildType     string                          `json:"buildType"`
 	SlsaPredicate []*SLSAPredicateInputSpec       `json:"slsaPredicate"`
 	SlsaVersion   string                          `json:"slsaVersion"`

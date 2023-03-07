@@ -229,8 +229,8 @@ func (ec *executionContext) marshalNBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 	return ec._Builder(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx context.Context, v interface{}) (*model.BuilderSpec, error) {
-	res, err := ec.unmarshalInputBuilderSpec(ctx, v)
+func (ec *executionContext) unmarshalNBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx context.Context, v interface{}) (*model.BuilderInputSpec, error) {
+	res, err := ec.unmarshalInputBuilderInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

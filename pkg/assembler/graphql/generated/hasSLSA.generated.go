@@ -866,7 +866,7 @@ func (ec *executionContext) unmarshalInputSLSAInputSpec(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtBy"))
-			it.BuiltBy, err = ec.unmarshalNBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, v)
+			it.BuiltBy, err = ec.unmarshalNBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
