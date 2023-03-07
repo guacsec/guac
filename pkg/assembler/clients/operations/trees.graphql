@@ -37,7 +37,7 @@ fragment allPkgTree on Package {
   }
 }
 
-fragment allSrcTree on Source {
+fragment allSourceTree on Source {
   type
     namespaces {
       namespace
@@ -56,7 +56,7 @@ fragment allArtifactTree on Artifact {
 
 fragment allCertifyScorecard on CertifyScorecard {
   source {
-    ...allSrcTree
+    ...allSourceTree
   }
   scorecard {
     timeScanned
@@ -79,7 +79,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
       ...allPkgTree
     }
    ...on Source {
-      ...allSrcTree
+      ...allSourceTree
     }
   }
   occurrenceArtifact {
@@ -101,4 +101,46 @@ fragment allIsDependencyTree on IsDependency {
   versionRange
   origin
   collector
+}
+
+fragment allSLSATree on HasSLSA {
+  subject {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Source {
+      ...allSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  slsa {
+    builtFrom {
+      __typename
+      ... on Package {
+        ...allPkgTree
+      }
+      ... on Source {
+        ...allSourceTree
+      }
+      ... on Artifact {
+        ...allArtifactTree
+      }
+    }
+    builtBy {
+      uri
+    }
+    buildType
+    slsaPredicate {
+      key
+      value
+    }
+    slsaVersion
+    startedOn
+    finishedOn
+    origin
+    collector
+  }
 }
