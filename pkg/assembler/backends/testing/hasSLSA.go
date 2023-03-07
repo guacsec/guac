@@ -286,11 +286,17 @@ func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceI
 }
 
 func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	_, err := buildSLSA(&slsa)
+	newSlsa, err := buildSLSA(&slsa)
 	if err != nil {
 		return nil, err
 	}
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAArtifact"))
+
+	newHasSlsa := &model.HasSlsa{
+		Subject: generateModelArtifact(artifact),
+		Slsa: newSlsa,
+	}
+	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
+	return newHasSlsa, nil
 }
 
 func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
