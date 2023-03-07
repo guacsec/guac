@@ -307,50 +307,71 @@ var (
 		Digest:    "9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 	}
 
+	isDepJustifyTopPkg = &model.IsDependencyInputSpec{
+		Justification: "top-level package GUAC heuristic connecting to each file/package",
+	}
+	isDepJustifyContains = &model.IsDependencyInputSpec{
+		Justification: "Derived from SPDX CONTAINS relationship",
+	}
+	isDepJustifyDepends = &model.IsDependencyInputSpec{
+		Justification: "Derived from SPDX DEPENDS_ON relationship",
+	}
+
 	SpdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:    topLevelPack,
-			DepPkg: baselayoutPack,
+			Pkg:          topLevelPack,
+			DepPkg:       baselayoutPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: baselayoutdataPack,
+			Pkg:          topLevelPack,
+			DepPkg:       baselayoutdataPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: keysPack,
+			Pkg:          topLevelPack,
+			DepPkg:       keysPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: worldFilePack,
+			Pkg:          topLevelPack,
+			DepPkg:       worldFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: rootFilePack,
+			Pkg:          topLevelPack,
+			DepPkg:       rootFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: triggersFilePack,
+			Pkg:          topLevelPack,
+			DepPkg:       triggersFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    topLevelPack,
-			DepPkg: rsaPubFilePack,
+			Pkg:          topLevelPack,
+			DepPkg:       rsaPubFilePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    baselayoutPack,
-			DepPkg: keysPack,
+			Pkg:          baselayoutPack,
+			DepPkg:       keysPack,
+			IsDependency: isDepJustifyDepends,
 		},
 		{
-			Pkg:    rootFilePack,
-			DepPkg: rsaPubFilePack,
+			Pkg:          rootFilePack,
+			DepPkg:       rsaPubFilePack,
+			IsDependency: isDepJustifyDepends,
 		},
 		{
-			Pkg:    baselayoutPack,
-			DepPkg: rootFilePack,
+			Pkg:          baselayoutPack,
+			DepPkg:       rootFilePack,
+			IsDependency: isDepJustifyContains,
 		},
 		{
-			Pkg:    keysPack,
-			DepPkg: rsaPubFilePack,
+			Pkg:          keysPack,
+			DepPkg:       rsaPubFilePack,
+			IsDependency: isDepJustifyContains,
 		},
 	}
 

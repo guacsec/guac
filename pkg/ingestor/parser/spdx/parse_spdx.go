@@ -155,12 +155,9 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 }
 
 func (s *spdxParser) getPackageElement(elementID string) []model.PkgInputSpec {
-	fmt.Printf("Calling with %v ", elementID)
 	if packNode, ok := s.packagePackages[string(elementID)]; ok {
-		fmt.Printf("FOUND\n")
 		return packNode
 	}
-	fmt.Printf("NOT FOUND\n")
 	return nil
 }
 
@@ -173,14 +170,6 @@ func (s *spdxParser) getFileElement(elementID string) []model.PkgInputSpec {
 
 func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
-
-	fmt.Println("PRINTING DICTS")
-	for k, v := range s.packagePackages {
-		fmt.Printf("%v:%v\n", k, v)
-	}
-	for k, v := range s.filePackages {
-		fmt.Printf("%v:%v\n", k, v)
-	}
 
 	preds := &assembler.IngestPredicates{}
 
@@ -261,6 +250,9 @@ func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]mod
 				p := assembler.IsDependencyIngest{
 					Pkg:    &toplevel,
 					DepPkg: &packNode,
+					IsDependency: &model.IsDependencyInputSpec{
+						Justification: justification,
+					},
 				}
 				isDeps = append(isDeps, p)
 			}
@@ -272,6 +264,9 @@ func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]mod
 			p := assembler.IsDependencyIngest{
 				Pkg:    &toplevel,
 				DepPkg: &fileNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
 			}
 			isDeps = append(isDeps, p)
 		}
@@ -287,6 +282,9 @@ func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpe
 			return &assembler.IsDependencyIngest{
 				Pkg:    &foundNode,
 				DepPkg: &rfileNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
 			}, nil
 		}
 	} else if len(relatedPackNodes) > 0 {
@@ -294,6 +292,9 @@ func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpe
 			return &assembler.IsDependencyIngest{
 				Pkg:    &foundNode,
 				DepPkg: &rpackNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
 			}, nil
 
 		}

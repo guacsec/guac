@@ -156,8 +156,9 @@ type CertifyScorecardIngest struct {
 }
 
 type IsDependencyIngest struct {
-	Pkg    *generated.PkgInputSpec
-	DepPkg *generated.PkgInputSpec
+	Pkg          *generated.PkgInputSpec
+	DepPkg       *generated.PkgInputSpec
+	IsDependency *generated.IsDependencyInputSpec
 }
 
 type IsOccurenceIngest struct {
