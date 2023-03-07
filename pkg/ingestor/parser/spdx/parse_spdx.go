@@ -130,7 +130,7 @@ func (s *spdxParser) getFiles() {
 			if err != nil {
 				panic(err)
 			}
-			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.packagePackages[string(file.FileSPDXIdentifier)], *pkg)
+			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], *pkg)
 
 			artifact := model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
@@ -154,26 +154,13 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	return spdx, nil
 }
 
-// TODO(bulldozer): replace with GetPredicates
-// func (s *spdxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-// 	nodes := []assembler.GuacNode{}
-// 	for _, packNodes := range s.packages {
-// 		for _, packNode := range packNodes {
-// 			nodes = append(nodes, packNode)
-// 		}
-// 	}
-// 	for _, fileNodes := range s.files {
-// 		for _, fileNode := range fileNodes {
-// 			nodes = append(nodes, fileNode)
-// 		}
-// 	}
-// 	return nodes
-// }
-
 func (s *spdxParser) getPackageElement(elementID string) []model.PkgInputSpec {
+	fmt.Printf("Calling with %v ", elementID)
 	if packNode, ok := s.packagePackages[string(elementID)]; ok {
+		fmt.Printf("FOUND\n")
 		return packNode
 	}
+	fmt.Printf("NOT FOUND\n")
 	return nil
 }
 
@@ -187,16 +174,23 @@ func (s *spdxParser) getFileElement(elementID string) []model.PkgInputSpec {
 func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 
+	fmt.Println("PRINTING DICTS")
+	for k, v := range s.packagePackages {
+		fmt.Printf("%v:%v\n", k, v)
+	}
+	for k, v := range s.filePackages {
+		fmt.Printf("%v:%v\n", k, v)
+	}
+
 	preds := &assembler.IngestPredicates{}
 
-	toplevel := s.getPackageElement("SPDXRef-DOCUMENT")
+	toplevel := s.getPackageElement("DOCUMENT")
 	// adding top level package edge manually for all depends on package
 	if toplevel != nil {
-		preds.IsDependency = append(preds.IsDependency, createTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages)...)
+		preds.IsDependency = append(preds.IsDependency, createTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages, "top-level package GUAC heuristic connecting to each file/package")...)
 	}
 	for _, rel := range s.spdxDoc.Relationships {
 
-		fmt.Println(rel)
 		if !map[string]bool{
 			spdx_common.TypeRelationshipContains:  true,
 			spdx_common.TypeRelationshipDependsOn: true,
@@ -204,12 +198,15 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			continue
 		}
 
-		foundPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefA.ElementRefID))
-		foundFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefA.ElementRefID))
-		relatedPackNodes := s.getPackageElement("SPDXRef-" + string(rel.RefB.ElementRefID))
-		relatedFileNodes := s.getFileElement("SPDXRef-" + string(rel.RefB.ElementRefID))
+		foundPackNodes := s.getPackageElement(string(rel.RefA.ElementRefID))
+		foundFileNodes := s.getFileElement(string(rel.RefA.ElementRefID))
+		relatedPackNodes := s.getPackageElement(string(rel.RefB.ElementRefID))
+		relatedFileNodes := s.getFileElement(string(rel.RefB.ElementRefID))
+
+		justification := getJustification(rel)
+
 		for _, packNode := range foundPackNodes {
-			p, err := getIsDep(packNode, relatedPackNodes, relatedFileNodes)
+			p, err := getIsDep(packNode, relatedPackNodes, relatedFileNodes, justification)
 			if err != nil {
 				logger.Errorf("error generating spdx edge %v", err)
 				continue
@@ -219,7 +216,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			}
 		}
 		for _, fileNode := range foundFileNodes {
-			p, err := getIsDep(fileNode, relatedPackNodes, relatedFileNodes)
+			p, err := getIsDep(fileNode, relatedPackNodes, relatedFileNodes, justification)
 			if err != nil {
 				logger.Errorf("error generating spdx edge %v", err)
 				continue
@@ -256,7 +253,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	return preds
 }
 
-func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]model.PkgInputSpec, files map[string][]model.PkgInputSpec) []assembler.IsDependencyIngest {
+func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]model.PkgInputSpec, files map[string][]model.PkgInputSpec, justification string) []assembler.IsDependencyIngest {
 	isDeps := []assembler.IsDependencyIngest{}
 	for _, packNodes := range packages {
 		for _, packNode := range packNodes {
@@ -283,7 +280,7 @@ func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]mod
 	return isDeps
 }
 
-func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec) (*assembler.IsDependencyIngest, error) {
+func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
 	if len(relatedFileNodes) > 0 {
 		for _, rfileNode := range relatedFileNodes {
 			// TODO: Check is this always just expected to be one?
@@ -310,4 +307,12 @@ func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 
 func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
+}
+
+func getJustification(r *v2_2.Relationship) string {
+	s := fmt.Sprintf("Derived from SPDX %s relationship", r.Relationship)
+	if len(r.RelationshipComment) > 0 {
+		s += fmt.Sprintf("with comment: %s", r.RelationshipComment)
+	}
+	return s
 }
