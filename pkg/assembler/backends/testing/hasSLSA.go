@@ -280,3 +280,146 @@ func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceI
 func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
 	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSAArtifact"))
 }
+
+func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
+	materials := []model.PackageSourceOrArtifact{}
+	for _, m:= range input.BuiltFrom {
+		material, err := processMaterialInput(m)
+		if err != nil {
+			return nil, err
+		}
+		materials = append(materials, material)
+	}
+
+	builder := model.Builder {URI: input.BuiltBy.URI}
+
+	predicates := []*model.SLSAPredicate{}
+	for _, p := range input.SlsaPredicate {
+		predicate := model.SLSAPredicate{
+			Key: p.Key,
+			Value: p.Value,
+		}
+		predicates = append(predicates, &predicate)
+	}
+
+	slsa := model.Slsa{
+		BuiltFrom:     materials,
+		BuiltBy:       &builder,
+		BuildType:     input.BuildType,
+		SlsaPredicate: predicates,
+		SlsaVersion:   input.SlsaVersion,
+		StartedOn:     input.StartedOn,
+		FinishedOn:    input.FinishedOn,
+		Origin:        input.Origin,
+		Collector:     input.Collector,
+	}
+	return &slsa, nil
+}
+
+// TODO(mihaimaruseac): Extract common utilities to common (separate PR!)
+// This is very large and surely can be split, but we need several refactors
+// before. Hence, separate PR!
+func processMaterialInput(material *model.PackageSourceOrArtifactInput) (model.PackageSourceOrArtifact, error) {
+	valuesDefined := 0
+	if material.Package != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if material.Source != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if material.Artifact != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined > 1 {
+		return nil, gqlerror.Errorf("Must specify at most one package, source, or artifact for a specific material")
+	}
+
+	if material.Package != nil {
+		var version *model.PackageVersion
+		if material.Package.Version != nil ||
+		   material.Package.Subpath != nil ||
+		   material.Package.Qualifiers != nil {
+			version = &model.PackageVersion{}
+			if material.Package.Version != nil {
+				version.Version = *material.Package.Version
+			}
+			if material.Package.Subpath != nil {
+				version.Subpath = *material.Package.Subpath
+			}
+			if material.Package.Qualifiers != nil {
+				var qualifiers []*model.PackageQualifier
+				for _, q := range material.Package.Qualifiers {
+					qual := model.PackageQualifier{
+						Key: q.Key,
+						Value: q.Value,
+					}
+					qualifiers = append(qualifiers, &qual)
+				}
+				version.Qualifiers = qualifiers
+			}
+		}
+
+		var versions []*model.PackageVersion
+		if version != nil {
+			versions = append(versions, version)
+		}
+
+		name := &model.PackageName{
+			Name:     material.Package.Name,
+			Versions: versions,
+		}
+
+		namespace := &model.PackageNamespace{
+			Namespace: *material.Package.Namespace,
+			Names:     []*model.PackageName{name},
+		}
+
+		pkg := model.Package{
+			Type:       material.Package.Type,
+			Namespaces: []*model.PackageNamespace{namespace},
+		}
+
+		return &pkg, nil
+	} else if material.Source != nil {
+		var tag *string
+		tagValue := material.Source.Tag
+		if tagValue != nil {
+			tagStr := *tagValue
+			tag = &tagStr
+		}
+
+		var commit *string
+		commitValue := material.Source.Commit
+		if commitValue != nil {
+			commitStr := *commitValue
+			commit = &commitStr
+		}
+
+		name := &model.SourceName{
+			Name:   material.Source.Name,
+			Tag:    tag,
+			Commit: commit,
+		}
+
+		namespace := &model.SourceNamespace{
+			Namespace: material.Source.Namespace,
+			Names:     []*model.SourceName{name},
+		}
+
+		source := model.Source{
+			Type:       material.Source.Type,
+			Namespaces: []*model.SourceNamespace{namespace},
+		}
+
+		return &source, nil
+	} else if material.Artifact != nil {
+		artifact := model.Artifact{
+			Algorithm: material.Artifact.Algorithm,
+			Digest:    material.Artifact.Digest,
+		}
+
+		return &artifact, nil
+	}
+
+	return nil, gqlerror.Errorf("Must specify exactly one package, source, or artifact for a specific material")
+}
