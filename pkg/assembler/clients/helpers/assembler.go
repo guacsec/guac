@@ -17,6 +17,7 @@ package helpers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -29,10 +30,21 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
-			logger.Infof("assembling CertifyScorecard: %+v", p.CertifyScorecard)
+			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			if err := ingestCertifyScorecards(ctx, gqlclient, p.CertifyScorecard); err != nil {
 				return err
 			}
+
+			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
+			if err := ingestIsDependency(ctx, gqlclient, p.IsDependency); err != nil {
+				return err
+			}
+
+			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurence))
+			if err := ingestIsOccurence(ctx, gqlclient, p.IsOccurence); err != nil {
+				return err
+			}
+
 		}
 		return nil
 	}
@@ -44,6 +56,43 @@ func ingestCertifyScorecards(ctx context.Context, client graphql.Client, vs []as
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func ingestIsDependency(ctx context.Context, client graphql.Client, vs []assembler.IsDependencyIngest) error {
+	for _, v := range vs {
+		_, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, *v.IsDependency)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ingestIsOccurence(ctx context.Context, client graphql.Client, vs []assembler.IsOccurenceIngest) error {
+	for _, v := range vs {
+		if v.Pkg != nil && v.Src != nil {
+			return fmt.Errorf("unable to create IsOccurence with both Src and Pkg subject specified")
+		}
+
+		if v.Pkg == nil && v.Src == nil {
+			return fmt.Errorf("unable to create IsOccurence without either Src and Pkg subject specified")
+		}
+
+		if v.Src != nil {
+			_, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurence)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurence)
+			if err != nil {
+				return err
+			}
+
+		}
+
 	}
 	return nil
 }
