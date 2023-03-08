@@ -262,7 +262,7 @@ func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSp
 	}
 }
 
-func generateModelCertifyBad(subject model.PkgSrcArtObject, justification, origin, collector string) *model.CertifyBad {
+func generateModelCertifyBad(subject model.PackageSourceOrArtifact, justification, origin, collector string) *model.CertifyBad {
 	certifyBad := model.CertifyBad{
 		Subject:       subject,
 		Justification: justification,

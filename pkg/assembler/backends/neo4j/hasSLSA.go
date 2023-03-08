@@ -36,22 +36,25 @@ const (
 )
 
 func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	err := checkHasSLSAInputs(hasSLSASpec)
-	if err != nil {
-		return nil, err
-	}
-
-	queryAll := false
-	if hasSLSASpec.Package == nil && hasSLSASpec.Source == nil && hasSLSASpec.Artifact == nil {
-		queryAll = true
-	}
-
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	queryAll := false
+	//TODO(mihaimaruseac): Review this in e2e
+	if hasSLSASpec.Subject == nil {
+		queryAll = true
+	} else if hasSLSASpec.Subject.Package == nil && hasSLSASpec.Subject.Source == nil && hasSLSASpec.Subject.Artifact == nil {
+		queryAll = true
+	} else {
+		err := checkHasSLSAInputs(hasSLSASpec)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	aggregateHasSLSA := []*model.HasSlsa{}
 
-	if hasSLSASpec.Package != nil || queryAll {
+	if queryAll || hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Package != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -83,12 +86,12 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 			"\nWITH *, hasSLSA, null AS objPkgVersion"
 
 		sb.WriteString(query)
-		setPkgMatchValues(&sb, hasSLSASpec.Package, false, &firstMatch, queryValues)
+		setPkgMatchValues(&sb, hasSLSASpec.Subject.Package, false, &firstMatch, queryValues)
 		setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		if hasSLSASpec.Package == nil || hasSLSASpec.Package != nil && hasSLSASpec.Package.Version == nil && hasSLSASpec.Package.Subpath == nil &&
-			len(hasSLSASpec.Package.Qualifiers) == 0 && !*hasSLSASpec.Package.MatchOnlyEmptyQualifiers {
+		if hasSLSASpec.Subject.Package == nil || hasSLSASpec.Subject.Package != nil && hasSLSASpec.Subject.Package.Version == nil && hasSLSASpec.Subject.Package.Subpath == nil &&
+			len(hasSLSASpec.Subject.Package.Qualifiers) == 0 && !*hasSLSASpec.Subject.Package.MatchOnlyEmptyQualifiers {
 
 			sb.WriteString("\nUNION")
 			// query without pkgVersion
@@ -114,7 +117,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 			sb.WriteString(query)
 			firstMatch = true
-			setPkgMatchValues(&sb, hasSLSASpec.Package, false, &firstMatch, queryValues)
+			setPkgMatchValues(&sb, hasSLSASpec.Subject.Package, false, &firstMatch, queryValues)
 			setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 			sb.WriteString(returnValue)
 		}
@@ -127,8 +130,8 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					return nil, err
 				}
 
-				resultBuiltFromMap := map[model.PkgSrcArtObject][]model.PkgSrcArtObject{}
-				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
+				resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
+				resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 				for result.Next() {
 					pkgQualifiers := result.Record().Values[5]
 					subPath := result.Record().Values[4]
@@ -156,7 +159,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if _, ok := resultBuiltFromMap[pkg]; !ok {
-						resultBuiltFromMap[pkg] = []model.PkgSrcArtObject{}
+						resultBuiltFromMap[pkg] = []model.PackageSourceOrArtifact{}
 					}
 
 					if result.Record().Values[8] != nil && result.Record().Values[9] != nil {
@@ -207,7 +210,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				collectedHasSLSA := []*model.HasSlsa{}
 				for subject, hasSLSA := range resultHasSlsaMap {
 					if builtFrom, ok := resultBuiltFromMap[subject]; ok {
-						hasSLSA.BuiltFrom = builtFrom
+						hasSLSA.Slsa.BuiltFrom = builtFrom
 					}
 					collectedHasSLSA = append(collectedHasSLSA, hasSLSA)
 				}
@@ -220,7 +223,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if hasSLSASpec.Source != nil || queryAll {
+	if queryAll || hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Source != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -252,7 +255,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 			"\nWITH *, hasSLSA, null AS objPkgVersion"
 
 		sb.WriteString(query)
-		setSrcMatchValues(&sb, hasSLSASpec.Source, false, &firstMatch, queryValues)
+		setSrcMatchValues(&sb, hasSLSASpec.Subject.Source, false, &firstMatch, queryValues)
 		setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -264,8 +267,8 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					return nil, err
 				}
 
-				resultBuiltFromMap := map[model.PkgSrcArtObject][]model.PkgSrcArtObject{}
-				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
+				resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
+				resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 
 				for result.Next() {
 					tag := result.Record().Values[3]
@@ -294,7 +297,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if _, ok := resultBuiltFromMap[src]; !ok {
-						resultBuiltFromMap[src] = []model.PkgSrcArtObject{}
+						resultBuiltFromMap[src] = []model.PackageSourceOrArtifact{}
 					}
 
 					if result.Record().Values[7] != nil && result.Record().Values[8] != nil {
@@ -341,7 +344,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				collectedHasSLSA := []*model.HasSlsa{}
 				for subject, hasSLSA := range resultHasSlsaMap {
 					if builtFrom, ok := resultBuiltFromMap[subject]; ok {
-						hasSLSA.BuiltFrom = builtFrom
+						hasSLSA.Slsa.BuiltFrom = builtFrom
 					}
 					collectedHasSLSA = append(collectedHasSLSA, hasSLSA)
 				}
@@ -354,7 +357,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if hasSLSASpec.Artifact != nil || queryAll {
+	if queryAll || hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Artifact != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -384,7 +387,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 			"\nWITH *, hasSLSA, null AS objPkgVersion"
 
 		sb.WriteString(query)
-		setArtifactMatchValues(&sb, hasSLSASpec.Artifact, false, &firstMatch, queryValues)
+		setArtifactMatchValues(&sb, hasSLSASpec.Subject.Artifact, false, &firstMatch, queryValues)
 		setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -396,8 +399,8 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					return nil, err
 				}
 
-				resultBuiltFromMap := map[model.PkgSrcArtObject][]model.PkgSrcArtObject{}
-				resultHasSlsaMap := map[model.PkgSrcArtObject]*model.HasSlsa{}
+				resultBuiltFromMap := map[model.PackageSourceOrArtifact][]model.PackageSourceOrArtifact{}
+				resultHasSlsaMap := map[model.PackageSourceOrArtifact]*model.HasSlsa{}
 
 				for result.Next() {
 					algorithm := result.Record().Values[0].(string)
@@ -422,7 +425,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 					}
 
 					if _, ok := resultBuiltFromMap[artifact]; !ok {
-						resultBuiltFromMap[artifact] = []model.PkgSrcArtObject{}
+						resultBuiltFromMap[artifact] = []model.PackageSourceOrArtifact{}
 					}
 
 					if result.Record().Values[4] != nil && result.Record().Values[5] != nil {
@@ -471,7 +474,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 				collectedHasSLSA := []*model.HasSlsa{}
 				for subject, hasSLSA := range resultHasSlsaMap {
 					if builtFrom, ok := resultBuiltFromMap[subject]; ok {
-						hasSLSA.BuiltFrom = builtFrom
+						hasSLSA.Slsa.BuiltFrom = builtFrom
 					}
 					collectedHasSLSA = append(collectedHasSLSA, hasSLSA)
 				}
@@ -488,23 +491,20 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 }
 
-// TODO (pxp928): combine with testing backend in shared utility
+// TODO(pxp928): combine with testing backend in shared utility
 func checkHasSLSAInputs(hasSLSASpec *model.HasSLSASpec) error {
-	invalidSubject := false
-	if hasSLSASpec.Package != nil && hasSLSASpec.Source != nil && hasSLSASpec.Artifact != nil {
-		invalidSubject = true
+	subjectsDefined := 0
+	if hasSLSASpec.Subject.Package != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Package != nil && hasSLSASpec.Source != nil {
-		invalidSubject = true
+	if hasSLSASpec.Subject.Source != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Package != nil && hasSLSASpec.Artifact != nil {
-		invalidSubject = true
+	if hasSLSASpec.Subject.Artifact != nil {
+		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Source != nil && hasSLSASpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if invalidSubject {
-		return gqlerror.Errorf("cannot specify more than one subject for CertifyBad query")
+	if subjectsDefined > 1 {
+		return gqlerror.Errorf("Must specify at most one subject (package, source, or artifact)")
 	}
 	return nil
 }
@@ -578,10 +578,11 @@ func setHasSLSAValues(sb *strings.Builder, hasSLSASpec *model.HasSLSASpec, first
 	}
 }
 
-func generateModelHasSLSA(subject model.PkgSrcArtObject, builder *model.Builder, slsaPredicate []interface{}, buildType,
-	slsaVersion, origin, collector string, startedOn, finishedOn time.Time) *model.HasSlsa {
-	hasSLSA := model.HasSlsa{
-		Subject:       subject,
+func generateModelHasSLSA(subject model.PackageSourceOrArtifact,
+	builder *model.Builder, slsaPredicate []interface{}, buildType,
+	slsaVersion, origin, collector string,
+	startedOn, finishedOn time.Time) *model.HasSlsa {
+	slsa := &model.Slsa{
 		BuiltBy:       builder,
 		BuildType:     buildType,
 		SlsaPredicate: getCollectedPredicate(slsaPredicate),
@@ -590,6 +591,10 @@ func generateModelHasSLSA(subject model.PkgSrcArtObject, builder *model.Builder,
 		FinishedOn:    finishedOn,
 		Origin:        origin,
 		Collector:     collector,
+	}
+	hasSLSA := model.HasSlsa{
+		Subject: subject,
+		Slsa:    slsa,
 	}
 	return &hasSLSA
 }

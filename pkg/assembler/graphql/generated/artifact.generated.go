@@ -2017,24 +2017,8 @@ func (ec *executionContext) fieldContext_Query_HasSLSA(ctx context.Context, fiel
 			switch field.Name {
 			case "subject":
 				return ec.fieldContext_HasSLSA_subject(ctx, field)
-			case "builtFrom":
-				return ec.fieldContext_HasSLSA_builtFrom(ctx, field)
-			case "builtBy":
-				return ec.fieldContext_HasSLSA_builtBy(ctx, field)
-			case "buildType":
-				return ec.fieldContext_HasSLSA_buildType(ctx, field)
-			case "slsaPredicate":
-				return ec.fieldContext_HasSLSA_slsaPredicate(ctx, field)
-			case "slsaVersion":
-				return ec.fieldContext_HasSLSA_slsaVersion(ctx, field)
-			case "startedOn":
-				return ec.fieldContext_HasSLSA_startedOn(ctx, field)
-			case "finishedOn":
-				return ec.fieldContext_HasSLSA_finishedOn(ctx, field)
-			case "origin":
-				return ec.fieldContext_HasSLSA_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_HasSLSA_collector(ctx, field)
+			case "slsa":
+				return ec.fieldContext_HasSLSA_slsa(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasSLSA", field.Name)
 		},
@@ -2774,7 +2758,7 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 
 // region    **************************** object.gotpl ****************************
 
-var artifactImplementors = []string{"Artifact", "PkgSrcArtObject", "PkgArtObject"}
+var artifactImplementors = []string{"Artifact", "PkgArtObject", "PackageSourceOrArtifact"}
 
 func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet, obj *model.Artifact) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, artifactImplementors)
