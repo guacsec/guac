@@ -38,12 +38,14 @@ func ingestData(port int) {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient(url, &httpClient)
 
+	start := time.Now()
 	logger.Infof("Ingesting test data into backend server")
 	ingestScorecards(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
 	IngestVulnerability(ctx, gqlclient)
-	logger.Infof("Finished ingesting test data into backend server")
+	time := time.Now().Sub(start)
+	logger.Infof("Ingesting test data into backend server took %v", time)
 }
 
 func ingestScorecards(ctx context.Context, client graphql.Client) {
@@ -71,12 +73,10 @@ func ingestScorecards(ctx context.Context, client graphql.Client) {
 		Origin:           "Demo ingestion",
 		Collector:        "Demo ingestion",
 	}
-	resp, err := model.Scorecard(context.Background(), client, source, scorecard)
+	_, err := model.Scorecard(context.Background(), client, source, scorecard)
 	if err != nil {
-		// TODO(mihaimaruseac): Panic or just error and continue?
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
-	fmt.Printf("Response is |%v|\n", resp)
 }
 
 func ingestDependency(ctx context.Context, client graphql.Client) {
@@ -95,11 +95,13 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 	}{{
 		name: "deb: part of SBOM - openssl",
 		pkg: model.PkgInputSpec{
-			Type:       "deb",
-			Namespace:  &ns,
-			Name:       "dpkg",
-			Version:    &version,
-			Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "amd64"}},
+			Type:      "deb",
+			Namespace: &ns,
+			Name:      "dpkg",
+			Version:   &version,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "arch", Value: "amd64"},
+			},
 		},
 		depPkg: model.PkgInputSpec{
 			Type:      "conan",
@@ -132,11 +134,10 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 		},
 	}}
 	for _, ingest := range ingestDependencies {
-		resp, err := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.dependency)
+		_, err := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.dependency)
 		if err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
-		fmt.Printf("Response is |%v|\n", resp)
 	}
 }
 
@@ -158,14 +159,20 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 	}{{
 		name: "this artifact is an occurrence of this openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
-			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "user", Value: "bincrafters"},
+				{Key: "channel", Value: "stable"},
+			},
 		},
 		src: nil,
-		art: model.ArtifactInputSpec{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"},
+		art: model.ArtifactInputSpec{
+			Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
+			Algorithm: "sha1",
+		},
 		occurrence: model.IsOccurrenceInputSpec{
 			Justification: "this artifact is an occurrence of this openssl",
 			Origin:        "Demo ingestion",
@@ -179,7 +186,10 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 			Name:      "debian",
 		},
 		src: nil,
-		art: model.ArtifactInputSpec{Digest: "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7", Algorithm: "sha512"},
+		art: model.ArtifactInputSpec{
+			Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
+			Algorithm: "sha512",
+		},
 		occurrence: model.IsOccurrenceInputSpec{
 			Justification: "this artifact is an occurrence of this debian",
 			Origin:        "Demo ingestion",
@@ -194,7 +204,10 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 			Name:      "github.com/guacsec/guac",
 			Tag:       &sourceTag,
 		},
-		art: model.ArtifactInputSpec{Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", Algorithm: "sha256"},
+		art: model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
 		occurrence: model.IsOccurrenceInputSpec{
 			Justification: "this artifact is an occurrence of this source",
 			Origin:        "Demo ingestion",
@@ -203,17 +216,15 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 	}}
 	for _, ingest := range ingestOccurrences {
 		if ingest.pkg != nil {
-			respPkg, err := model.IsOccurrencePkg(context.Background(), client, *ingest.pkg, ingest.art, ingest.occurrence)
+			_, err := model.IsOccurrencePkg(context.Background(), client, *ingest.pkg, ingest.art, ingest.occurrence)
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
-			fmt.Printf("Response is |%v|\n", respPkg)
 		} else if ingest.src != nil {
-			respSrc, err := model.IsOccurrenceSrc(context.Background(), client, *ingest.src, ingest.art, ingest.occurrence)
+			_, err := model.IsOccurrenceSrc(context.Background(), client, *ingest.src, ingest.art, ingest.occurrence)
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
-			fmt.Printf("Response is |%v|\n", respSrc)
 		} else {
 			fmt.Printf("input missing for pkg or src")
 		}
@@ -238,11 +249,14 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 	}{{
 		name: "cve openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
-			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "user", Value: "bincrafters"},
+				{Key: "channel", Value: "stable"},
+			},
 		},
 		cve: &model.CVEInputSpec{
 			Year:  "2019",
@@ -260,11 +274,14 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "osv openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
-			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "user", Value: "bincrafters"},
+				{Key: "channel", Value: "stable"},
+			},
 		},
 		osv: &model.OSVInputSpec{
 			OsvId: "CVE-2019-13110",
@@ -281,11 +298,14 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "ghsa openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
-			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "user", Value: "bincrafters"},
+				{Key: "channel", Value: "stable"},
+			},
 		},
 		ghsa: &model.GHSAInputSpec{
 			GhsaId: "GHSA-h45f-rjvw-2rv2",
@@ -360,24 +380,21 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 	}}
 	for _, ingest := range ingestVulnerabilities {
 		if ingest.cve != nil {
-			respPkg, err := model.CertifyCVE(context.Background(), client, *ingest.pkg, *ingest.cve, ingest.vulnerability)
+			_, err := model.CertifyCVE(context.Background(), client, *ingest.pkg, *ingest.cve, ingest.vulnerability)
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
-			fmt.Printf("Response is |%v|\n", respPkg)
 		} else if ingest.osv != nil {
-			respSrc, err := model.CertifyOSV(context.Background(), client, *ingest.pkg, *ingest.osv, ingest.vulnerability)
+			_, err := model.CertifyOSV(context.Background(), client, *ingest.pkg, *ingest.osv, ingest.vulnerability)
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
-			fmt.Printf("Response is |%v|\n", respSrc)
 
 		} else if ingest.ghsa != nil {
-			respSrc, err := model.CertifyGHSA(context.Background(), client, *ingest.pkg, *ingest.ghsa, ingest.vulnerability)
+			_, err := model.CertifyGHSA(context.Background(), client, *ingest.pkg, *ingest.ghsa, ingest.vulnerability)
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
-			fmt.Printf("Response is |%v|\n", respSrc)
 		} else {
 			fmt.Printf("input missing for cve, osv or ghsa")
 		}
