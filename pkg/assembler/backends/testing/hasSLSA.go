@@ -159,7 +159,7 @@ func (c *demoClient) ingestSLSAPackage(ctx context.Context, pkg *model.PkgInputS
 
 	newHasSlsa := &model.HasSlsa{
 		Subject: generateModelPackage(pkg),
-		Slsa: newSlsa,
+		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
 	return newHasSlsa, nil
@@ -181,7 +181,7 @@ func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceI
 
 	newHasSlsa := &model.HasSlsa{
 		Subject: generateModelSource(source),
-		Slsa: newSlsa,
+		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
 	return newHasSlsa, nil
@@ -203,7 +203,7 @@ func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.Art
 
 	newHasSlsa := &model.HasSlsa{
 		Subject: generateModelArtifact(artifact),
-		Slsa: newSlsa,
+		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
 	return newHasSlsa, nil
@@ -211,7 +211,7 @@ func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.Art
 
 func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
 	materials := []model.PackageSourceOrArtifact{}
-	for _, m:= range input.BuiltFrom {
+	for _, m := range input.BuiltFrom {
 		material, err := processMaterialInput(m)
 		if err != nil {
 			return nil, err
@@ -219,12 +219,12 @@ func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
 		materials = append(materials, material)
 	}
 
-	builder := model.Builder {URI: input.BuiltBy.URI}
+	builder := model.Builder{URI: input.BuiltBy.URI}
 
 	predicates := []*model.SLSAPredicate{}
 	for _, p := range input.SlsaPredicate {
 		predicate := model.SLSAPredicate{
-			Key: p.Key,
+			Key:   p.Key,
 			Value: p.Value,
 		}
 		predicates = append(predicates, &predicate)
@@ -309,7 +309,7 @@ func slsaMatch(slsa *model.Slsa, input *model.SLSAInputSpec) bool {
 		}
 	}
 
-	return true;
+	return true
 }
 
 // TODO(mihaimaruseac): Extract common utilities to common (separate PR!)
@@ -433,8 +433,8 @@ func sourceMatch(source *model.Source, sourceInput *model.SourceInputSpec) bool 
 func generateModelPackage(inputPackage *model.PkgInputSpec) *model.Package {
 	var version *model.PackageVersion
 	if inputPackage.Version != nil ||
-	   inputPackage.Subpath != nil ||
-	   inputPackage.Qualifiers != nil {
+		inputPackage.Subpath != nil ||
+		inputPackage.Qualifiers != nil {
 		version = &model.PackageVersion{}
 		if inputPackage.Version != nil {
 			version.Version = *inputPackage.Version
@@ -446,7 +446,7 @@ func generateModelPackage(inputPackage *model.PkgInputSpec) *model.Package {
 			var qualifiers []*model.PackageQualifier
 			for _, q := range inputPackage.Qualifiers {
 				qual := model.PackageQualifier{
-					Key: q.Key,
+					Key:   q.Key,
 					Value: q.Value,
 				}
 				qualifiers = append(qualifiers, &qual)
