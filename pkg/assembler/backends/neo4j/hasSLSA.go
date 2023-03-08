@@ -54,7 +54,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 	aggregateHasSLSA := []*model.HasSlsa{}
 
-	if queryAll || hasSLSASpec.Subject.Package != nil {
+	if queryAll || hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Package != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -223,7 +223,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if queryAll || hasSLSASpec.Subject.Source != nil {
+	if queryAll || hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Source != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -357,7 +357,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if queryAll || hasSLSASpec.Subject.Artifact != nil {
+	if queryAll || hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Artifact != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
