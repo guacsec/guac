@@ -114,10 +114,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = registerAllHasSLSA(client)
-	if err != nil {
-		return nil, err
-	}
 	return client, nil
 }
 

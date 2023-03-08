@@ -18,137 +18,10 @@ package testing
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
-
-func registerAllHasSLSA(client *demoClient) error {
-	// pkg:pypi/django@1.11.1
-	// client.registerPackage("pypi", "", "django", "1.11.1", "")
-	selectedType := "pypi"
-	selectedNameSpace := ""
-	selectedName := "django"
-	selectedVersion := "1.11.1"
-	selectedSubpath := ""
-	selectedPkgSpec := &model.PkgSpec{
-		Type:      &selectedType,
-		Namespace: &selectedNameSpace,
-		Name:      &selectedName,
-		Version:   &selectedVersion,
-		Subpath:   &selectedSubpath,
-	}
-	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
-	if err != nil {
-		return err
-	}
-
-	// "git", "github", "https://github.com/django/django", "tag=1.11.1"
-	selectedSourceType := "git"
-	selectedSourceNameSpace := "github"
-	selectedSourceName := "https://github.com/django/django"
-	selectedTag := "1.11.1"
-	selectedSourceSpec := &model.SourceSpec{
-		Type:      &selectedSourceType,
-		Namespace: &selectedSourceNameSpace,
-		Name:      &selectedSourceName,
-		Tag:       &selectedTag,
-	}
-	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
-	if err != nil {
-		return err
-	}
-	predicateValues := []*model.SLSAPredicate{
-		{
-			Key:   "buildDefinition.externalParameters.repository",
-			Value: "https://github.com/octocat/hello-world",
-		},
-		{
-			Key:   "buildDefinition.externalParameters.ref",
-			Value: "refs/heads/main",
-		},
-		{
-			Key:   "buildDefinition.resolvedDependencies.uri",
-			Value: "git+https://github.com/octocat/hello-world@refs/heads/main",
-		},
-	}
-
-	builder := &model.Builder{
-		URI: "https://github.com/Attestations/GitHubHostedActions@v1",
-	}
-
-	err = client.registerHasSLSA(
-		selectedPackage[0], nil, nil, nil, selectedSource, nil, builder,
-		"https://github.com/Attestations/GitHubActionsWorkflow@v1",
-		predicateValues, "v1", time.Now(), time.Now())
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Ingest HasSlsa
-
-func (c *demoClient) registerHasSLSA(
-	selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact,
-	builtFromPackages []*model.Package, builtFromSouces []*model.Source, builtFromArtifacts []*model.Artifact,
-	builtBy *model.Builder, buildType string,
-	predicate []*model.SLSAPredicate, slsaVersion string,
-	startOn time.Time, finishOn time.Time) error {
-	for _, h := range c.hasSLSA {
-		slsa := h.Slsa
-		if slsa.BuildType == buildType && slsa.SlsaVersion == slsaVersion {
-			if val, ok := h.Subject.(model.Package); ok {
-				if &val == selectedPackage {
-					return nil
-				}
-			} else if val, ok := h.Subject.(model.Source); ok {
-				if &val == selectedSource {
-					return nil
-				}
-			} else if val, ok := h.Subject.(model.Artifact); ok {
-				if &val == selectedArtifact {
-					return nil
-				}
-			}
-		}
-	}
-
-	materials := []model.PackageSourceOrArtifact{}
-	for _, pack := range builtFromPackages {
-		materials = append(materials, pack)
-	}
-	for _, source := range builtFromSouces {
-		materials = append(materials, source)
-	}
-	for _, art := range builtFromArtifacts {
-		materials = append(materials, art)
-	}
-	newSlsa := &model.Slsa{
-		BuiltFrom:     materials,
-		BuiltBy:       builtBy,
-		BuildType:     buildType,
-		SlsaPredicate: predicate,
-		SlsaVersion:   slsaVersion,
-		StartedOn:     startOn,
-		FinishedOn:    finishOn,
-		Origin:        "testing backend",
-		Collector:     "testing backend",
-	}
-
-	newHasSlsa := &model.HasSlsa{Slsa: newSlsa}
-	if selectedPackage != nil {
-		newHasSlsa.Subject = selectedPackage
-	} else if selectedSource != nil {
-		newHasSlsa.Subject = selectedSource
-	} else {
-		newHasSlsa.Subject = selectedArtifact
-	}
-
-	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
-	return nil
-}
 
 // Query HasSlsa
 
@@ -245,6 +118,8 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 
 	return collectedHasSLSA, nil
 }
+
+// Ingest HasSlsa
 
 func (c *demoClient) IngestSLSA(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
 	subjectsDefined := 0
