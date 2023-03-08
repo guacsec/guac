@@ -1,0 +1,121 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines the GraphQL operations to ingest a CertifyVuln into GUAC
+
+fragment allCveTree on CVE {
+  year
+  cveId {
+    id
+  }
+}
+
+fragment allGHSATree on GHSA {
+  ghsaId {
+    id
+  }
+}
+
+fragment allOSVTree on OSV {
+  osvId {
+    id
+  }
+}
+
+fragment allCertifyVuln on CertifyVuln {
+  package {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          versions {
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+  vulnerability {
+    __typename
+    ... on CVE {
+      year
+     cveId{
+      id
+    }
+    }
+    ... on OSV {
+     osvId{
+      id
+    }
+    }
+    ... on GHSA {
+      ghsaId{
+        id
+      }
+    }
+  }
+  metadata {
+    dbUri
+    dbVersion
+    scannerUri
+    scannerVersion
+    timeScanned
+    origin
+    collector
+  }
+}
+
+mutation CertifyOSV($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
+  ingestPackage(pkg: $pkg) {
+    ...allPkgTree
+  }
+   ingestOSV(osv: $osv) {
+    ...allOSVTree
+  }
+  ingestVulnerability(pkg: $pkg, vulnerability: {osv: $osv}, certifyVuln: $certifyVuln) {
+    ...allCertifyVuln
+  }
+}
+
+mutation CertifyCVE($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
+  ingestPackage(pkg: $pkg) {
+    ...allPkgTree
+  }
+  ingestCVE(cve: $cve) {
+    ...allCveTree
+  }
+  ingestVulnerability(pkg: $pkg, vulnerability: {cve: $cve}, certifyVuln: $certifyVuln) {
+    ...allCertifyVuln
+  }
+}
+
+mutation CertifyGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
+  ingestPackage(pkg: $pkg) {
+    ...allPkgTree
+  }
+  ingestGHSA(ghsa: $ghsa) {
+    ...allGHSATree
+  }
+  ingestVulnerability(pkg: $pkg, vulnerability: {ghsa: $ghsa}, certifyVuln: $certifyVuln) {
+    ...allCertifyVuln
+  }
+}

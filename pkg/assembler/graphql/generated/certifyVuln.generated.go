@@ -105,9 +105,9 @@ func (ec *executionContext) _CertifyVuln_vulnerability(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.OsvCveGhsaObject)
+	res := resTmp.(model.OsvCveOrGhsa)
 	fc.Result = res
-	return ec.marshalNOsvCveGhsaObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveGhsaObject(ctx, field.Selections, res)
+	return ec.marshalNOsvCveOrGhsa2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsa(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyVuln_vulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -117,14 +117,74 @@ func (ec *executionContext) fieldContext_CertifyVuln_vulnerability(ctx context.C
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type OsvCveGhsaObject does not have child fields")
+			return nil, errors.New("field of type OsvCveOrGhsa does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVuln_timeScanned(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVuln_timeScanned(ctx, field)
+func (ec *executionContext) _CertifyVuln_metadata(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVuln_metadata(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Metadata, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.VulnerabilityMetaData)
+	fc.Result = res
+	return ec.marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVuln",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "timeScanned":
+				return ec.fieldContext_VulnerabilityMetaData_timeScanned(ctx, field)
+			case "dbUri":
+				return ec.fieldContext_VulnerabilityMetaData_dbUri(ctx, field)
+			case "dbVersion":
+				return ec.fieldContext_VulnerabilityMetaData_dbVersion(ctx, field)
+			case "scannerUri":
+				return ec.fieldContext_VulnerabilityMetaData_scannerUri(ctx, field)
+			case "scannerVersion":
+				return ec.fieldContext_VulnerabilityMetaData_scannerVersion(ctx, field)
+			case "origin":
+				return ec.fieldContext_VulnerabilityMetaData_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_VulnerabilityMetaData_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetaData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VulnerabilityMetaData_timeScanned(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_timeScanned(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -154,9 +214,9 @@ func (ec *executionContext) _CertifyVuln_timeScanned(ctx context.Context, field 
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVuln_timeScanned(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_timeScanned(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyVuln",
+		Object:     "VulnerabilityMetaData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -167,8 +227,8 @@ func (ec *executionContext) fieldContext_CertifyVuln_timeScanned(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVuln_dbUri(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVuln_dbUri(ctx, field)
+func (ec *executionContext) _VulnerabilityMetaData_dbUri(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_dbUri(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -198,9 +258,9 @@ func (ec *executionContext) _CertifyVuln_dbUri(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVuln_dbUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_dbUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyVuln",
+		Object:     "VulnerabilityMetaData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -211,8 +271,8 @@ func (ec *executionContext) fieldContext_CertifyVuln_dbUri(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVuln_dbVersion(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVuln_dbVersion(ctx, field)
+func (ec *executionContext) _VulnerabilityMetaData_dbVersion(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_dbVersion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -242,9 +302,9 @@ func (ec *executionContext) _CertifyVuln_dbVersion(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVuln_dbVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_dbVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyVuln",
+		Object:     "VulnerabilityMetaData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -255,8 +315,8 @@ func (ec *executionContext) fieldContext_CertifyVuln_dbVersion(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVuln_scannerUri(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVuln_scannerUri(ctx, field)
+func (ec *executionContext) _VulnerabilityMetaData_scannerUri(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_scannerUri(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -286,9 +346,9 @@ func (ec *executionContext) _CertifyVuln_scannerUri(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVuln_scannerUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_scannerUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyVuln",
+		Object:     "VulnerabilityMetaData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -299,8 +359,8 @@ func (ec *executionContext) fieldContext_CertifyVuln_scannerUri(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVuln_scannerVersion(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVuln_scannerVersion(ctx, field)
+func (ec *executionContext) _VulnerabilityMetaData_scannerVersion(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_scannerVersion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -330,9 +390,9 @@ func (ec *executionContext) _CertifyVuln_scannerVersion(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVuln_scannerVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_scannerVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyVuln",
+		Object:     "VulnerabilityMetaData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -343,8 +403,8 @@ func (ec *executionContext) fieldContext_CertifyVuln_scannerVersion(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVuln_origin(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVuln_origin(ctx, field)
+func (ec *executionContext) _VulnerabilityMetaData_origin(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_origin(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -374,9 +434,9 @@ func (ec *executionContext) _CertifyVuln_origin(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVuln_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyVuln",
+		Object:     "VulnerabilityMetaData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -387,8 +447,8 @@ func (ec *executionContext) fieldContext_CertifyVuln_origin(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVuln_collector(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVuln) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVuln_collector(ctx, field)
+func (ec *executionContext) _VulnerabilityMetaData_collector(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetaData_collector(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -418,9 +478,9 @@ func (ec *executionContext) _CertifyVuln_collector(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVuln_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VulnerabilityMetaData_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyVuln",
+		Object:     "VulnerabilityMetaData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -442,7 +502,7 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"package", "osv", "cve", "ghsa", "timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	fieldsInOrder := [...]string{"package", "vulnerability", "timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -457,27 +517,11 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
-		case "osv":
+		case "vulnerability":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-			it.Osv, err = ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "cve":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-			it.Cve, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "ghsa":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-			it.Ghsa, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+			it.Vulnerability, err = ec.unmarshalOOsvCveOrGhsaSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -543,11 +587,175 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputOsvCveOrGhsaInput(ctx context.Context, obj interface{}) (model.OsvCveOrGhsaInput, error) {
+	var it model.OsvCveOrGhsaInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"osv", "cve", "ghsa"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "osv":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
+			it.Osv, err = ec.unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "cve":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
+			it.Cve, err = ec.unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ghsa":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
+			it.Ghsa, err = ec.unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputOsvCveOrGhsaSpec(ctx context.Context, obj interface{}) (model.OsvCveOrGhsaSpec, error) {
+	var it model.OsvCveOrGhsaSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"osv", "cve", "ghsa"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "osv":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
+			it.Osv, err = ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "cve":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
+			it.Cve, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ghsa":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
+			it.Ghsa, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputVulnerabilityMetaDataInput(ctx context.Context, obj interface{}) (model.VulnerabilityMetaDataInput, error) {
+	var it model.VulnerabilityMetaDataInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "timeScanned":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
+			it.TimeScanned, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dbUri":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbUri"))
+			it.DbURI, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dbVersion":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbVersion"))
+			it.DbVersion, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scannerUri":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerUri"))
+			it.ScannerURI, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scannerVersion":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerVersion"))
+			it.ScannerVersion, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _OsvCveGhsaObject(ctx context.Context, sel ast.SelectionSet, obj model.OsvCveGhsaObject) graphql.Marshaler {
+func (ec *executionContext) _OsvCveOrGhsa(ctx context.Context, sel ast.SelectionSet, obj model.OsvCveOrGhsa) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -605,51 +813,79 @@ func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "metadata":
+
+			out.Values[i] = ec._CertifyVuln_metadata(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vulnerabilityMetaDataImplementors = []string{"VulnerabilityMetaData"}
+
+func (ec *executionContext) _VulnerabilityMetaData(ctx context.Context, sel ast.SelectionSet, obj *model.VulnerabilityMetaData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vulnerabilityMetaDataImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VulnerabilityMetaData")
 		case "timeScanned":
 
-			out.Values[i] = ec._CertifyVuln_timeScanned(ctx, field, obj)
+			out.Values[i] = ec._VulnerabilityMetaData_timeScanned(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "dbUri":
 
-			out.Values[i] = ec._CertifyVuln_dbUri(ctx, field, obj)
+			out.Values[i] = ec._VulnerabilityMetaData_dbUri(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "dbVersion":
 
-			out.Values[i] = ec._CertifyVuln_dbVersion(ctx, field, obj)
+			out.Values[i] = ec._VulnerabilityMetaData_dbVersion(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "scannerUri":
 
-			out.Values[i] = ec._CertifyVuln_scannerUri(ctx, field, obj)
+			out.Values[i] = ec._VulnerabilityMetaData_scannerUri(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "scannerVersion":
 
-			out.Values[i] = ec._CertifyVuln_scannerVersion(ctx, field, obj)
+			out.Values[i] = ec._VulnerabilityMetaData_scannerVersion(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "origin":
 
-			out.Values[i] = ec._CertifyVuln_origin(ctx, field, obj)
+			out.Values[i] = ec._VulnerabilityMetaData_origin(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "collector":
 
-			out.Values[i] = ec._CertifyVuln_collector(ctx, field, obj)
+			out.Values[i] = ec._VulnerabilityMetaData_collector(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -668,6 +904,10 @@ func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionS
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNCertifyVuln2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx context.Context, sel ast.SelectionSet, v model.CertifyVuln) graphql.Marshaler {
+	return ec._CertifyVuln(ctx, sel, &v)
+}
 
 func (ec *executionContext) marshalNCertifyVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyVuln) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
@@ -723,14 +963,29 @@ func (ec *executionContext) marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._CertifyVuln(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNOsvCveGhsaObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveGhsaObject(ctx context.Context, sel ast.SelectionSet, v model.OsvCveGhsaObject) graphql.Marshaler {
+func (ec *executionContext) marshalNOsvCveOrGhsa2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsa(ctx context.Context, sel ast.SelectionSet, v model.OsvCveOrGhsa) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._OsvCveGhsaObject(ctx, sel, v)
+	return ec._OsvCveOrGhsa(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaData(ctx context.Context, sel ast.SelectionSet, v *model.VulnerabilityMetaData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._VulnerabilityMetaData(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNVulnerabilityMetaDataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaDataInput(ctx context.Context, v interface{}) (model.VulnerabilityMetaDataInput, error) {
+	res, err := ec.unmarshalInputVulnerabilityMetaDataInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOCertifyVulnSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx context.Context, v interface{}) (*model.CertifyVulnSpec, error) {
@@ -738,6 +993,22 @@ func (ec *executionContext) unmarshalOCertifyVulnSpec2ᚖgithubᚗcomᚋguacsec�
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputCertifyVulnSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOOsvCveOrGhsaInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx context.Context, v interface{}) (*model.OsvCveOrGhsaInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputOsvCveOrGhsaInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOOsvCveOrGhsaSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaSpec(ctx context.Context, v interface{}) (*model.OsvCveOrGhsaSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputOsvCveOrGhsaSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -12,8 +12,8 @@ type CveGhsaObject interface {
 }
 
 // OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
-type OsvCveGhsaObject interface {
-	IsOsvCveGhsaObject()
+type OsvCveOrGhsa interface {
+	IsOsvCveOrGhsa()
 }
 
 // PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
@@ -92,7 +92,7 @@ type Cve struct {
 	CveID []*CVEId `json:"cveId"`
 }
 
-func (Cve) IsOsvCveGhsaObject() {}
+func (Cve) IsOsvCveOrGhsa() {}
 
 func (Cve) IsCveGhsaObject() {}
 
@@ -220,26 +220,13 @@ type CertifyVEXStatementSpec struct {
 }
 
 // CertifyVuln is an attestation that represents when a package has a vulnerability
-//
-// package (subject) - the package object type that represents the package
-// vulnerability (object) - union type that consists of osv, cve or ghsa
-// timeScanned (property) - timestamp of when the package was last scanned
-// dbUri (property) - scanner vulnerability database uri
-// dbVersion (property) - scanner vulnerability database version
-// scannerUri (property) - vulnerability scanner's uri
-// scannerVersion (property) - vulnerability scanner version
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
 type CertifyVuln struct {
-	Package        *Package         `json:"package"`
-	Vulnerability  OsvCveGhsaObject `json:"vulnerability"`
-	TimeScanned    time.Time        `json:"timeScanned"`
-	DbURI          string           `json:"dbUri"`
-	DbVersion      string           `json:"dbVersion"`
-	ScannerURI     string           `json:"scannerUri"`
-	ScannerVersion string           `json:"scannerVersion"`
-	Origin         string           `json:"origin"`
-	Collector      string           `json:"collector"`
+	// package (subject) - the package object type that represents the package
+	Package *Package `json:"package"`
+	// vulnerability (object) - union type that consists of osv, cve or ghsa
+	Vulnerability OsvCveOrGhsa `json:"vulnerability"`
+	// metadata (property) - contains all the vulnerability metadata
+	Metadata *VulnerabilityMetaData `json:"metadata"`
 }
 
 // CertifyVulnSpec allows filtering the list of CertifyVuln to return.
@@ -247,17 +234,15 @@ type CertifyVuln struct {
 // Specifying just the package allows to query for all vulnerabilities associated with the package.
 // Only OSV, CVE or GHSA can be specified at once
 type CertifyVulnSpec struct {
-	Package        *PkgSpec   `json:"package"`
-	Osv            *OSVSpec   `json:"osv"`
-	Cve            *CVESpec   `json:"cve"`
-	Ghsa           *GHSASpec  `json:"ghsa"`
-	TimeScanned    *time.Time `json:"timeScanned"`
-	DbURI          *string    `json:"dbUri"`
-	DbVersion      *string    `json:"dbVersion"`
-	ScannerURI     *string    `json:"scannerUri"`
-	ScannerVersion *string    `json:"scannerVersion"`
-	Origin         *string    `json:"origin"`
-	Collector      *string    `json:"collector"`
+	Package        *PkgSpec          `json:"package"`
+	Vulnerability  *OsvCveOrGhsaSpec `json:"vulnerability"`
+	TimeScanned    *time.Time        `json:"timeScanned"`
+	DbURI          *string           `json:"dbUri"`
+	DbVersion      *string           `json:"dbVersion"`
+	ScannerURI     *string           `json:"scannerUri"`
+	ScannerVersion *string           `json:"scannerVersion"`
+	Origin         *string           `json:"origin"`
+	Collector      *string           `json:"collector"`
 }
 
 // GHSA represents GitHub security advisories.
@@ -267,7 +252,7 @@ type Ghsa struct {
 	GhsaID []*GHSAId `json:"ghsaId"`
 }
 
-func (Ghsa) IsOsvCveGhsaObject() {}
+func (Ghsa) IsOsvCveOrGhsa() {}
 
 func (Ghsa) IsCveGhsaObject() {}
 
@@ -476,6 +461,15 @@ type IsOccurrence struct {
 	Collector          string       `json:"collector"`
 }
 
+// IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
+//
+// All fields are required.
+type IsOccurrenceInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
 // IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 // Note: Package or Source must be specified but not both at the same time
 // For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
@@ -487,15 +481,6 @@ type IsOccurrenceSpec struct {
 	Justification *string       `json:"justification"`
 	Origin        *string       `json:"origin"`
 	Collector     *string       `json:"collector"`
-}
-
-// IsOccurrenceSpecInputSpec is the same as IsOccurrence but for mutation input.
-//
-// All fields are required.
-type IsOccurrenceSpecInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
 }
 
 // IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
@@ -531,7 +516,7 @@ type Osv struct {
 	OsvID []*OSVId `json:"osvId"`
 }
 
-func (Osv) IsOsvCveGhsaObject() {}
+func (Osv) IsOsvCveOrGhsa() {}
 
 // OSVId is the actual ID that is given to a specific vulnerability.
 //
@@ -553,6 +538,24 @@ type OSVInputSpec struct {
 // OSVSpec allows filtering the list of OSV to return.
 type OSVSpec struct {
 	OsvID *string `json:"osvId"`
+}
+
+// OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
+// input type to be used in mutations.
+// Exactly one of the value must be set to non-nil.
+type OsvCveOrGhsaInput struct {
+	Osv  *OSVInputSpec  `json:"osv"`
+	Cve  *CVEInputSpec  `json:"cve"`
+	Ghsa *GHSAInputSpec `json:"ghsa"`
+}
+
+// OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
+// input type to be used in read queries.
+// Exactly one of the value must be set to non-nil.
+type OsvCveOrGhsaSpec struct {
+	Osv  *OSVSpec  `json:"osv"`
+	Cve  *CVESpec  `json:"cve"`
+	Ghsa *GHSASpec `json:"ghsa"`
 }
 
 // Package represents a package.
@@ -900,4 +903,34 @@ type SourceSpec struct {
 	Name      *string `json:"name"`
 	Tag       *string `json:"tag"`
 	Commit    *string `json:"commit"`
+}
+
+type VulnerabilityMetaData struct {
+	// timeScanned (property) - timestamp of when the package was last scanned
+	TimeScanned time.Time `json:"timeScanned"`
+	// dbUri (property) - scanner vulnerability database uri
+	DbURI string `json:"dbUri"`
+	// dbVersion (property) - scanner vulnerability database version
+	DbVersion string `json:"dbVersion"`
+	// scannerUri (property) - vulnerability scanner's uri
+	ScannerURI string `json:"scannerUri"`
+	// scannerVersion (property) - vulnerability scanner version
+	ScannerVersion string `json:"scannerVersion"`
+	// origin (property) - where this attestation was generated from (based on which document)
+	Origin string `json:"origin"`
+	// collector (property) - the GUAC collector that collected the document that generated this attestation
+	Collector string `json:"collector"`
+}
+
+// VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
+//
+// All fields are required.
+type VulnerabilityMetaDataInput struct {
+	TimeScanned    time.Time `json:"timeScanned"`
+	DbURI          string    `json:"dbUri"`
+	DbVersion      string    `json:"dbVersion"`
+	ScannerURI     string    `json:"scannerUri"`
+	ScannerVersion string    `json:"scannerVersion"`
+	Origin         string    `json:"origin"`
+	Collector      string    `json:"collector"`
 }

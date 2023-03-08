@@ -35,13 +35,15 @@ fragment allCertifyVuln on CertifyVuln {
       }
     }
   }
-  dbUri
-  dbVersion
-  scannerUri
-  scannerVersion
-  timeScanned
-  origin
-  collector
+  metadata {
+    dbUri
+    dbVersion
+    scannerUri
+    scannerVersion
+    timeScanned
+    origin
+    collector
+  }
 }
 
 query Q1 {
@@ -69,20 +71,20 @@ query Q4 {
 }
 
 query Q5 {
-  CertifyVuln(certifyVulnSpec: {cve: {cveId: "CVE-2019-13110"}}) {
+  CertifyVuln(certifyVulnSpec: {vulnerability: {cve: {cveId: "CVE-2019-13110"}}}) {
     ...allCertifyVuln
   }
 }
 
 
 query Q6 {
-  CertifyVuln(certifyVulnSpec: {ghsa: {ghsaId: "GHSA-h45f-rjvw-2rv2"}}) {
+  CertifyVuln(certifyVulnSpec: {vulnerability: {ghsa: {ghsaId: "GHSA-h45f-rjvw-2rv2"}}}) {
     ...allCertifyVuln
   }
 }
 
 query Q7 {
-  CertifyVuln(certifyVulnSpec: {osv: {osvId: "CVE-2019-13110"}}) {
+  CertifyVuln(certifyVulnSpec: {vulnerability: {osv: {osvId: "CVE-2019-13110"}}}) {
     ...allCertifyVuln
   }
 }

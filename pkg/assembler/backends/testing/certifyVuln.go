@@ -48,7 +48,7 @@ func registerAllCertifyVuln(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	client.registerCertifyVuln(selectedPackage1[0], nil, selectedCve[0], nil, time.Now(), "MITRE", "v1.0.0", "osv.dev", "0.0.14")
+	client.registerCertifyVuln(selectedPackage1[0], nil, selectedCve[0], nil, time.Now(), "MITRE", "v1.0.0", "osv.dev", "0.0.14", "testing backend", "testing backend")
 
 	// pkg:pypi/django@1.11.1
 	// client.registerPackage("pypi", "", "django", "1.11.1", "")
@@ -69,7 +69,7 @@ func registerAllCertifyVuln(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	client.registerCertifyVuln(selectedPackage2[0], selectedOsv[0], nil, nil, time.Now(), "MITRE", "v1.0.0", "osv.dev", "0.0.14")
+	client.registerCertifyVuln(selectedPackage2[0], selectedOsv[0], nil, nil, time.Now(), "MITRE", "v1.0.0", "osv.dev", "0.0.14", "testing backend", "testing backend")
 
 	selectedGhsaID := "GHSA-h45f-rjvw-2rv2"
 	selectedGhsaSpec := &model.GHSASpec{GhsaID: &selectedGhsaID}
@@ -77,44 +77,48 @@ func registerAllCertifyVuln(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	client.registerCertifyVuln(selectedPackage1[0], nil, nil, selectedGhsa[0], time.Now(), "MITRE", "v1.0.0", "osv.dev", "0.0.14")
+	client.registerCertifyVuln(selectedPackage1[0], nil, nil, selectedGhsa[0], time.Now(), "MITRE", "v1.0.0", "osv.dev", "0.0.14", "testing backend", "testing backend")
 
 	return nil
 }
 
-// Ingest CertifyPkg
+// Ingest CertifyVuln
 
 func (c *demoClient) registerCertifyVuln(selectedPackage *model.Package, selectedOsv *model.Osv, selectedCve *model.Cve, selectedGhsa *model.Ghsa, timeScanned time.Time,
-	dbUri string, dbVersion string, scannerUri string, scannerVersion string) {
+	dbUri, dbVersion, scannerUri, scannerVersion, origin, collector string) *model.CertifyVuln {
 
 	for _, vuln := range c.certifyVuln {
-		if vuln.Package == selectedPackage && vuln.DbURI == dbUri && vuln.DbVersion == dbVersion &&
-			vuln.ScannerURI == scannerUri && vuln.ScannerVersion == scannerVersion {
+		if vuln.Package == selectedPackage && vuln.Metadata.DbURI == dbUri && vuln.Metadata.DbVersion == dbVersion &&
+			vuln.Metadata.ScannerURI == scannerUri && vuln.Metadata.ScannerVersion == scannerVersion {
 			if val, ok := vuln.Vulnerability.(model.Osv); ok {
 				if &val == selectedOsv {
-					return
+					return vuln
 				}
 			} else if val, ok := vuln.Vulnerability.(model.Cve); ok {
 				if &val == selectedCve {
-					return
+					return vuln
 				}
 			} else if val, ok := vuln.Vulnerability.(model.Ghsa); ok {
 				if &val == selectedGhsa {
-					return
+					return vuln
 				}
 			}
 		}
 	}
 
-	newCertifyVuln := &model.CertifyVuln{
-		Package:        selectedPackage,
+	metadata := &model.VulnerabilityMetaData{
 		TimeScanned:    timeScanned,
 		DbURI:          dbUri,
 		DbVersion:      dbVersion,
 		ScannerURI:     scannerUri,
 		ScannerVersion: scannerVersion,
-		Origin:         "testing backend",
-		Collector:      "testing backend",
+		Origin:         origin,
+		Collector:      collector,
+	}
+
+	newCertifyVuln := &model.CertifyVuln{
+		Package:  selectedPackage,
+		Metadata: metadata,
 	}
 	if selectedOsv != nil {
 		newCertifyVuln.Vulnerability = selectedOsv
@@ -125,22 +129,151 @@ func (c *demoClient) registerCertifyVuln(selectedPackage *model.Package, selecte
 	}
 
 	c.certifyVuln = append(c.certifyVuln, newCertifyVuln)
+	return newCertifyVuln
 }
 
-// Query CertifyPkg
+func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+
+	vulnDefined := 0
+	if vulnerability.Osv != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnerability.Ghsa != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnerability.Cve != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnDefined > 1 {
+		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+	}
+
+	pkgQualifiers := []*model.PackageQualifierSpec{}
+	for _, quali := range pkg.Qualifiers {
+		pkgQualifier := &model.PackageQualifierSpec{
+			Key:   quali.Key,
+			Value: &quali.Value,
+		}
+		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+	}
+
+	pkgSpec := model.PkgSpec{
+		Type:       &pkg.Type,
+		Namespace:  pkg.Namespace,
+		Name:       &pkg.Name,
+		Version:    pkg.Version,
+		Qualifiers: pkgQualifiers,
+		Subpath:    pkg.Subpath,
+	}
+	collectedPkg, err := c.Packages(ctx, &pkgSpec)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(collectedPkg) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestOccurrence :: multiple packages found")
+	}
+
+	if vulnerability.Osv != nil {
+		osvSpec := model.OSVSpec{
+			OsvID: &vulnerability.Osv.OsvID,
+		}
+		collectedOsv, err := c.Osv(ctx, &osvSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(collectedOsv) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestVulnerability :: osv argument must match one, found %d",
+				len(collectedOsv))
+		}
+		return c.registerCertifyVuln(
+			collectedPkg[0],
+			collectedOsv[0],
+			nil,
+			nil,
+			certifyVuln.TimeScanned,
+			certifyVuln.DbURI,
+			certifyVuln.DbVersion,
+			certifyVuln.ScannerURI,
+			certifyVuln.ScannerVersion,
+			certifyVuln.Origin,
+			certifyVuln.Collector), nil
+	}
+
+	if vulnerability.Cve != nil {
+		cveSpec := model.CVESpec{
+			Year:  &vulnerability.Cve.Year,
+			CveID: &vulnerability.Cve.CveID,
+		}
+		collectedCve, err := c.Cve(ctx, &cveSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(collectedCve) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestVulnerability :: cve argument must match one, found %d",
+				len(collectedCve))
+		}
+		return c.registerCertifyVuln(
+			collectedPkg[0],
+			nil,
+			collectedCve[0],
+			nil,
+			certifyVuln.TimeScanned,
+			certifyVuln.DbURI,
+			certifyVuln.DbVersion,
+			certifyVuln.ScannerURI,
+			certifyVuln.ScannerVersion,
+			certifyVuln.Origin,
+			certifyVuln.Collector), nil
+	}
+
+	if vulnerability.Ghsa != nil {
+		ghsaSpec := model.GHSASpec{
+			GhsaID: &vulnerability.Ghsa.GhsaID,
+		}
+		collectedGhsa, err := c.Ghsa(ctx, &ghsaSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(collectedGhsa) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestVulnerability :: ghsa argument must match one, found %d",
+				len(collectedGhsa))
+		}
+		return c.registerCertifyVuln(
+			collectedPkg[0],
+			nil,
+			nil,
+			collectedGhsa[0],
+			certifyVuln.TimeScanned,
+			certifyVuln.DbURI,
+			certifyVuln.DbVersion,
+			certifyVuln.ScannerURI,
+			certifyVuln.ScannerVersion,
+			certifyVuln.Origin,
+			certifyVuln.Collector), nil
+	}
+	return nil, nil
+}
+
+// Query CertifyVuln
 
 func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	if certifyVulnSpec.Cve != nil && certifyVulnSpec.Osv != nil && certifyVulnSpec.Ghsa != nil {
-		return nil, gqlerror.Errorf("cannot specify cve, osv and ghsa together for CertifyVuln")
+	vulnDefined := 0
+	if certifyVulnSpec.Vulnerability.Osv != nil {
+		vulnDefined = vulnDefined + 1
 	}
-	if certifyVulnSpec.Cve != nil && certifyVulnSpec.Osv != nil {
-		return nil, gqlerror.Errorf("cannot specify cve and osv together for CertifyVuln")
+	if certifyVulnSpec.Vulnerability.Ghsa != nil {
+		vulnDefined = vulnDefined + 1
 	}
-	if certifyVulnSpec.Cve != nil && certifyVulnSpec.Ghsa != nil {
-		return nil, gqlerror.Errorf("cannot specify cve and ghsa together for CertifyVuln")
+	if certifyVulnSpec.Vulnerability.Cve != nil {
+		vulnDefined = vulnDefined + 1
 	}
-	if certifyVulnSpec.Osv != nil && certifyVulnSpec.Ghsa != nil {
-		return nil, gqlerror.Errorf("cannot specify cve and ghsa together for CertifyVuln")
+	if vulnDefined > 1 {
+		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
 	}
 
 	var foundCertifyBad []*model.CertifyVuln
@@ -148,22 +281,22 @@ func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Cer
 	for _, h := range c.certifyVuln {
 		matchOrSkip := true
 
-		if certifyVulnSpec.DbURI != nil && h.DbURI != *certifyVulnSpec.DbURI {
+		if certifyVulnSpec.DbURI != nil && h.Metadata.DbURI != *certifyVulnSpec.DbURI {
 			matchOrSkip = false
 		}
-		if certifyVulnSpec.DbVersion != nil && h.DbVersion != *certifyVulnSpec.DbVersion {
+		if certifyVulnSpec.DbVersion != nil && h.Metadata.DbVersion != *certifyVulnSpec.DbVersion {
 			matchOrSkip = false
 		}
-		if certifyVulnSpec.ScannerURI != nil && h.ScannerURI != *certifyVulnSpec.ScannerURI {
+		if certifyVulnSpec.ScannerURI != nil && h.Metadata.ScannerURI != *certifyVulnSpec.ScannerURI {
 			matchOrSkip = false
 		}
-		if certifyVulnSpec.ScannerVersion != nil && h.ScannerVersion != *certifyVulnSpec.ScannerVersion {
+		if certifyVulnSpec.ScannerVersion != nil && h.Metadata.ScannerVersion != *certifyVulnSpec.ScannerVersion {
 			matchOrSkip = false
 		}
-		if certifyVulnSpec.Collector != nil && h.Collector != *certifyVulnSpec.Collector {
+		if certifyVulnSpec.Collector != nil && h.Metadata.Collector != *certifyVulnSpec.Collector {
 			matchOrSkip = false
 		}
-		if certifyVulnSpec.Origin != nil && h.Origin != *certifyVulnSpec.Origin {
+		if certifyVulnSpec.Origin != nil && h.Metadata.Origin != *certifyVulnSpec.Origin {
 			matchOrSkip = false
 		}
 
@@ -178,10 +311,10 @@ func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Cer
 			}
 		}
 
-		if certifyVulnSpec.Cve != nil {
+		if certifyVulnSpec.Vulnerability.Cve != nil {
 			if val, ok := h.Vulnerability.(*model.Cve); ok {
-				if certifyVulnSpec.Cve.Year == nil || val.Year == *certifyVulnSpec.Cve.Year {
-					newCve, err := filterCVEID(val, certifyVulnSpec.Cve)
+				if certifyVulnSpec.Vulnerability.Cve.Year == nil || val.Year == *certifyVulnSpec.Vulnerability.Cve.Year {
+					newCve, err := filterCVEID(val, certifyVulnSpec.Vulnerability.Cve)
 					if err != nil {
 						return nil, err
 					}
@@ -195,9 +328,9 @@ func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Cer
 			}
 		}
 
-		if certifyVulnSpec.Osv != nil {
+		if certifyVulnSpec.Vulnerability.Osv != nil {
 			if val, ok := h.Vulnerability.(*model.Osv); ok {
-				newOSV, err := filterOSVID(val, certifyVulnSpec.Osv)
+				newOSV, err := filterOSVID(val, certifyVulnSpec.Vulnerability.Osv)
 				if err != nil {
 					return nil, err
 				}
@@ -209,9 +342,9 @@ func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Cer
 			}
 		}
 
-		if certifyVulnSpec.Ghsa != nil {
+		if certifyVulnSpec.Vulnerability.Ghsa != nil {
 			if val, ok := h.Vulnerability.(*model.Ghsa); ok {
-				newGhsa, err := filterGHSAID(val, certifyVulnSpec.Ghsa)
+				newGhsa, err := filterGHSAID(val, certifyVulnSpec.Vulnerability.Ghsa)
 				if err != nil {
 					return nil, err
 				}
