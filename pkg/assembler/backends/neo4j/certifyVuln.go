@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -62,7 +63,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 			"version.qualifier_list, certifyVuln, cveYear.year, cveID.id"
 
 		// query with pkgVersion
-		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		query := "MATCH (rootPkg:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
 			"-[:subject]-(certifyVuln:CertifyVuln)-[:is_vuln_to]-(cveID:CveID)<-[:CveHasID]" +
 			"-(cveYear:CveYear)<-[:CveIsYear]-(rootCve:Cve)"
@@ -72,26 +73,6 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		setCveMatchValues(&sb, certifyVulnSpec.Cve, &firstMatch, queryValues)
 		setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
-
-		if certifyVulnSpec.Package == nil || certifyVulnSpec.Package != nil && certifyVulnSpec.Package.Version == nil &&
-			certifyVulnSpec.Package.Subpath == nil && len(certifyVulnSpec.Package.Qualifiers) == 0 &&
-			!*certifyVulnSpec.Package.MatchOnlyEmptyQualifiers {
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[:subject]-(certifyVuln:CertifyVuln)-[:is_vuln_to]-(cveID:CveID)<-[:CveHasID]" +
-				"-(cveYear:CveYear)<-[:CveIsYear]-(rootCve:Cve)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setPkgMatchValues(&sb, certifyVulnSpec.Package, false, &firstMatch, queryValues)
-			setCveMatchValues(&sb, certifyVulnSpec.Cve, &firstMatch, queryValues)
-			setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
-			sb.WriteString(returnValue)
-		}
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -153,7 +134,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 			"version.qualifier_list, certifyVuln, ghsaID.id"
 
 		// query with pkgVersion
-		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		query := "MATCH (rootPkg:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
 			"-[:subject]-(certifyVuln:CertifyVuln)-[:is_vuln_to]-(ghsaID:GhsaID)<-[:GhsaHasID]" +
 			"-(rootGhsa:Ghsa)"
@@ -163,26 +144,6 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		setGhsaMatchValues(&sb, certifyVulnSpec.Ghsa, &firstMatch, queryValues)
 		setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
-
-		if certifyVulnSpec.Package == nil || certifyVulnSpec.Package != nil && certifyVulnSpec.Package.Version == nil &&
-			certifyVulnSpec.Package.Subpath == nil && len(certifyVulnSpec.Package.Qualifiers) == 0 &&
-			!*certifyVulnSpec.Package.MatchOnlyEmptyQualifiers {
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[:subject]-(certifyVuln:CertifyVuln)-[:is_vuln_to]-(ghsaID:GhsaID)<-[:GhsaHasID]" +
-				"-(rootGhsa:Ghsa)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setPkgMatchValues(&sb, certifyVulnSpec.Package, false, &firstMatch, queryValues)
-			setGhsaMatchValues(&sb, certifyVulnSpec.Ghsa, &firstMatch, queryValues)
-			setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
-			sb.WriteString(returnValue)
-		}
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -244,7 +205,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 
 		// query with pkgVersion
 		//(root:Osv)-[:OsvHasID]->(osvID:OsvID)
-		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		query := "MATCH (rootPkg:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
 			"-[:subject]-(certifyVuln:CertifyVuln)-[:is_vuln_to]-(osvID:OsvID)<-[:OsvHasID]" +
 			"-(rootOsv:Osv)"
@@ -254,26 +215,6 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		setOSVMatchValues(&sb, certifyVulnSpec.Osv, &firstMatch, queryValues)
 		setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
-
-		if certifyVulnSpec.Package == nil || certifyVulnSpec.Package != nil && certifyVulnSpec.Package.Version == nil &&
-			certifyVulnSpec.Package.Subpath == nil && len(certifyVulnSpec.Package.Qualifiers) == 0 &&
-			!*certifyVulnSpec.Package.MatchOnlyEmptyQualifiers {
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[:subject]-(certifyVuln:CertifyVuln)-[:is_vuln_to]-(osvID:OsvID)<-[:OsvHasID]" +
-				"-(rootOsv:Osv)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setPkgMatchValues(&sb, certifyVulnSpec.Package, false, &firstMatch, queryValues)
-			setOSVMatchValues(&sb, certifyVulnSpec.Osv, &firstMatch, queryValues)
-			setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
-			sb.WriteString(returnValue)
-		}
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -329,7 +270,7 @@ func setCertifyVulnValues(sb *strings.Builder, certifyVulnSpec *model.CertifyVul
 	if certifyVulnSpec.TimeScanned != nil {
 		matchProperties(sb, *firstMatch, "certifyVuln", timeScanned, "$"+timeScanned)
 		*firstMatch = false
-		queryValues[timeScanned] = certifyVulnSpec.TimeScanned
+		queryValues[timeScanned] = certifyVulnSpec.TimeScanned.UTC()
 	}
 	if certifyVulnSpec.DbURI != nil {
 		matchProperties(sb, *firstMatch, "certifyVuln", dbUri, "$"+dbUri)
@@ -396,7 +337,7 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 	var firstMatch bool = true
 	queryValues := map[string]any{}
 
-	queryValues[timeScanned] = certifyVuln.TimeScanned
+	queryValues[timeScanned] = certifyVuln.TimeScanned.UTC()
 	queryValues[dbUri] = certifyVuln.DbURI
 	queryValues[dbVersion] = certifyVuln.DbVersion
 	queryValues[scannerUri] = certifyVuln.ScannerURI
@@ -413,37 +354,24 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, osvID.id"
 
-		if selectedPkgSpec.Version == nil && selectedPkgSpec.Subpath == nil &&
-			len(selectedPkgSpec.Qualifiers) == 0 && !*selectedPkgSpec.MatchOnlyEmptyQualifiers {
+		query := "MATCH (rootPkg:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)"
 
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName), (rootOsv:Osv)-[:OsvHasID]->(osvID:OsvID)" +
-				"\nWITH *, null AS version"
+		sb.WriteString(query)
+		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
 
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setOSVMatchValues(&sb, selectedOsvSepc, &firstMatch, queryValues)
+		query = "\nMATCH (rootOsv:Osv)-[:OsvHasID]->(osvID:OsvID)"
+		sb.WriteString(query)
+		firstMatch = true
+		setOSVMatchValues(&sb, selectedOsvSepc, &firstMatch, queryValues)
 
-			merge := "\nMERGE (name)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
-				"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
-				"-[:is_vuln_to]->(osvID)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		} else {
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (rootOsv:Osv)-[:OsvHasID]->(osvID:OsvID)"
+		merge := "\nMERGE (version)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
+			"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
+			"-[:is_vuln_to]->(osvID)"
+		sb.WriteString(merge)
+		sb.WriteString(returnValue)
 
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setOSVMatchValues(&sb, selectedOsvSepc, &firstMatch, queryValues)
-
-			merge := "\nMERGE (version)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
-				"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
-				"-[:is_vuln_to]->(osvID)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		}
-
+		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)
@@ -493,37 +421,24 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, cveYear.year, cveID.id"
 
-		if selectedPkgSpec.Version == nil && selectedPkgSpec.Subpath == nil &&
-			len(selectedPkgSpec.Qualifiers) == 0 && !*selectedPkgSpec.MatchOnlyEmptyQualifiers {
+		query := "MATCH (rootPkg:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)"
 
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName), (root:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)" +
-				"\nWITH *, null AS version"
+		sb.WriteString(query)
+		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
 
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setCveMatchValues(&sb, selectedCveSepc, &firstMatch, queryValues)
+		query = "\nMATCH (rootCve:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)"
+		sb.WriteString(query)
+		firstMatch = true
+		setCveMatchValues(&sb, selectedCveSepc, &firstMatch, queryValues)
 
-			merge := "\nMERGE (name)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
-				"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
-				"-[:is_vuln_to]->(cveID)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		} else {
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (root:Cve)-[:CveIsYear]->(cveYear:CveYear)-[:CveHasID]->(cveID:CveID)"
+		merge := "\nMERGE (version)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
+			"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
+			"-[:is_vuln_to]->(cveID)"
+		sb.WriteString(merge)
+		sb.WriteString(returnValue)
 
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setCveMatchValues(&sb, selectedCveSepc, &firstMatch, queryValues)
-
-			merge := "\nMERGE (version)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
-				"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
-				"-[:is_vuln_to]->(cveID)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		}
-
+		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)
@@ -574,37 +489,24 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, ghsaID.id"
 
-		if selectedPkgSpec.Version == nil && selectedPkgSpec.Subpath == nil &&
-			len(selectedPkgSpec.Qualifiers) == 0 && !*selectedPkgSpec.MatchOnlyEmptyQualifiers {
+		query := "MATCH (rootPkg:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)"
 
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName), (root:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)" +
-				"\nWITH *, null AS version"
+		sb.WriteString(query)
+		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
 
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setGhsaMatchValues(&sb, selectedGhsaSepc, &firstMatch, queryValues)
+		query = "\nMATCH (rootGhsa:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)"
+		sb.WriteString(query)
+		firstMatch = true
+		setGhsaMatchValues(&sb, selectedGhsaSepc, &firstMatch, queryValues)
 
-			merge := "\nMERGE (name)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
-				"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
-				"-[:is_vuln_to]->(ghsaID)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		} else {
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (root:Ghsa)-[:GhsaHasID]->(ghsaID:GhsaID)"
+		merge := "\nMERGE (version)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
+			"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
+			"-[:is_vuln_to]->(ghsaID)"
+		sb.WriteString(merge)
+		sb.WriteString(returnValue)
 
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setGhsaMatchValues(&sb, selectedGhsaSepc, &firstMatch, queryValues)
-
-			merge := "\nMERGE (version)<-[:subject]-(certifyVuln:CertifyVuln{timeScanned:$timeScanned,dbUri:$dbUri," +
-				"dbVersion:$dbVersion,scannerUri:$scannerUri,scannerVersion:$scannerVersion,origin:$origin,collector:$collector})" +
-				"-[:is_vuln_to]->(ghsaID)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		}
-
+		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)

@@ -148,7 +148,7 @@ func setCertifyScorecardValues(sb *strings.Builder, certifyScorecardSpec *model.
 	if certifyScorecardSpec.TimeScanned != nil {
 		matchProperties(sb, *firstMatch, "certifyScorecard", timeScanned, "$"+timeScanned)
 		*firstMatch = false
-		queryValues[timeScanned] = certifyScorecardSpec.TimeScanned
+		queryValues[timeScanned] = certifyScorecardSpec.TimeScanned.UTC()
 	}
 	if certifyScorecardSpec.AggregateScore != nil {
 		matchProperties(sb, *firstMatch, "certifyScorecard", aggregateScore, "$"+aggregateScore)

@@ -221,76 +221,165 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 }
 
 func IngestVulnerability(ctx context.Context, client graphql.Client) {
+
 	logger := logging.FromContext(ctx)
 
-	// test with pkgVersion
-	ns := "openssl.org"
-	version := "3.0.3"
-	pkg := model.PkgInputSpec{
-		Type:       "conan",
-		Namespace:  &ns,
-		Name:       "openssl",
-		Version:    &version,
-		Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
-	}
-	certifyVuln := model.CertifyVulnInputSpec{
-		TimeScanned:    time.Now(),
-		DbUri:          "MITRE",
-		DbVersion:      "v1.0.0",
-		ScannerUri:     "osv.dev",
-		ScannerVersion: "0.0.14",
-		Origin:         "Demo ingestion",
-		Collector:      "Demo ingestion",
-	}
-	selectedCVESpec := model.CVEInputSpec{
-		Year:  "2019",
-		CveId: "CVE-2019-13110",
-	}
-	selectedOsvSpec := model.OSVInputSpec{
-		OsvId: "CVE-2019-13110",
-	}
-	selectedGhsaSpec := model.GHSAInputSpec{
-		GhsaId: "GHSA-h45f-rjvw-2rv2",
-	}
+	opensslNs := "openssl.org"
+	opensslVersion := "3.0.3"
+	djangoNs := ""
 
-	respCve, err := model.CertifyCVE(context.Background(), client, pkg, selectedCVESpec, certifyVuln)
-	if err != nil {
-		logger.Errorf("Error in ingesting: %v\n", err)
-	}
-	fmt.Printf("Response is |%v|\n", respCve)
-	respOsv, err := model.CertifyOSV(context.Background(), client, pkg, selectedOsvSpec, certifyVuln)
-	if err != nil {
-		logger.Errorf("Error in ingesting: %v\n", err)
-	}
-	fmt.Printf("Response is |%v|\n", respOsv)
-	respGhsa, err := model.CertifyGHSA(context.Background(), client, pkg, selectedGhsaSpec, certifyVuln)
-	if err != nil {
-		logger.Errorf("Error in ingesting: %v\n", err)
-	}
-	fmt.Printf("Response is |%v|\n", respGhsa)
+	ingestVulnerabilities := []struct {
+		name          string
+		pkg           *model.PkgInputSpec
+		cve           *model.CVEInputSpec
+		osv           *model.OSVInputSpec
+		ghsa          *model.GHSAInputSpec
+		vulnerability model.CertifyVulnInputSpec
+	}{{
+		name: "cve openssl",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		cve: &model.CVEInputSpec{
+			Year:  "2019",
+			CveId: "CVE-2019-13110",
+		},
+		vulnerability: model.CertifyVulnInputSpec{
+			TimeScanned:    time.Now(),
+			DbUri:          "MITRE",
+			DbVersion:      "v1.0.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "osv openssl",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2019-13110",
+		},
+		vulnerability: model.CertifyVulnInputSpec{
+			TimeScanned:    time.Now(),
+			DbUri:          "MITRE",
+			DbVersion:      "v1.0.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "ghsa openssl",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-h45f-rjvw-2rv2",
+		},
+		vulnerability: model.CertifyVulnInputSpec{
+			TimeScanned:    time.Now(),
+			DbUri:          "MITRE",
+			DbVersion:      "v1.0.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "cve django",
+		pkg: &model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNs,
+			Name:      "django",
+		},
+		cve: &model.CVEInputSpec{
+			Year:  "2018",
+			CveId: "CVE-2018-12310",
+		},
+		vulnerability: model.CertifyVulnInputSpec{
+			TimeScanned:    time.Now(),
+			DbUri:          "MITRE",
+			DbVersion:      "v1.2.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "osv django",
+		pkg: &model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNs,
+			Name:      "django",
+		},
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2018-12310",
+		},
+		vulnerability: model.CertifyVulnInputSpec{
+			TimeScanned:    time.Now(),
+			DbUri:          "MITRE",
+			DbVersion:      "v1.2.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "ghsa django",
+		pkg: &model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNs,
+			Name:      "django",
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-f45f-jj4w-2rv2",
+		},
+		vulnerability: model.CertifyVulnInputSpec{
+			TimeScanned:    time.Now(),
+			DbUri:          "MITRE",
+			DbVersion:      "v1.2.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestVulnerabilities {
+		if ingest.cve != nil {
+			respPkg, err := model.CertifyCVE(context.Background(), client, *ingest.pkg, *ingest.cve, ingest.vulnerability)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+			fmt.Printf("Response is |%v|\n", respPkg)
+		} else if ingest.osv != nil {
+			respSrc, err := model.CertifyOSV(context.Background(), client, *ingest.pkg, *ingest.osv, ingest.vulnerability)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+			fmt.Printf("Response is |%v|\n", respSrc)
 
-	// test with pkgName
-	ns = ""
-	pkg = model.PkgInputSpec{
-		Type:      "pypi",
-		Namespace: &ns,
-		Name:      "django",
+		} else if ingest.ghsa != nil {
+			respSrc, err := model.CertifyGHSA(context.Background(), client, *ingest.pkg, *ingest.ghsa, ingest.vulnerability)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+			fmt.Printf("Response is |%v|\n", respSrc)
+		} else {
+			fmt.Printf("input missing for cve, osv or ghsa")
+		}
 	}
-
-	respCve, err = model.CertifyCVE(context.Background(), client, pkg, selectedCVESpec, certifyVuln)
-	if err != nil {
-		logger.Errorf("Error in ingesting: %v\n", err)
-	}
-	fmt.Printf("Response is |%v|\n", respCve)
-	respOsv, err = model.CertifyOSV(context.Background(), client, pkg, selectedOsvSpec, certifyVuln)
-	if err != nil {
-		logger.Errorf("Error in ingesting: %v\n", err)
-	}
-	fmt.Printf("Response is |%v|\n", respOsv)
-
-	respGhsa, err = model.CertifyGHSA(context.Background(), client, pkg, selectedGhsaSpec, certifyVuln)
-	if err != nil {
-		logger.Errorf("Error in ingesting: %v\n", err)
-	}
-	fmt.Printf("Response is |%v|\n", respGhsa)
 }
