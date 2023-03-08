@@ -39,19 +39,22 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	err := checkHasSLSAInputs(hasSLSASpec)
-	if err != nil {
-		return nil, err
-	}
-
 	queryAll := false
-	if hasSLSASpec.Subject.Package == nil && hasSLSASpec.Subject.Source == nil && hasSLSASpec.Subject.Artifact == nil {
+	//TODO(mihaimaruseac): Review this in e2e
+	if hasSLSASpec.Subject == nil {
 		queryAll = true
+	} else if hasSLSASpec.Subject.Package == nil && hasSLSASpec.Subject.Source == nil && hasSLSASpec.Subject.Artifact == nil {
+		queryAll = true
+	} else {
+		err := checkHasSLSAInputs(hasSLSASpec)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	aggregateHasSLSA := []*model.HasSlsa{}
 
-	if hasSLSASpec.Subject.Package != nil || queryAll {
+	if queryAll || hasSLSASpec.Subject.Package != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -220,7 +223,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if hasSLSASpec.Subject.Source != nil || queryAll {
+	if queryAll || hasSLSASpec.Subject.Source != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -354,7 +357,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if hasSLSASpec.Subject.Artifact != nil || queryAll {
+	if queryAll || hasSLSASpec.Subject.Artifact != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
