@@ -76,9 +76,9 @@ func (s *spdxParser) getTopLevelPackage() error {
 	splitImage := strings.Split(s.spdxDoc.DocumentName, "/")
 	var purl string
 	if len(splitImage) == 3 {
-		purl = "pkg:oci/" + splitImage[2] + "?repository_url=" + splitImage[0] + "/" + splitImage[1]
+		purl = "pkg:guac/oci/" + s.spdxDoc.DocumentName
 	} else if len(splitImage) == 2 {
-		purl = "pkg:oci/" + splitImage[1] + "?repository_url=" + splitImage[0]
+		purl = "pkg:guac/oci/" + s.spdxDoc.DocumentName
 	}
 
 	if purl != "" {
