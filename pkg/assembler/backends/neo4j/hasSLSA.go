@@ -45,13 +45,13 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 	}
 
 	queryAll := false
-	if hasSLSASpec.Package == nil && hasSLSASpec.Source == nil && hasSLSASpec.Artifact == nil {
+	if hasSLSASpec.Subject.Package == nil && hasSLSASpec.Subject.Source == nil && hasSLSASpec.Subject.Artifact == nil {
 		queryAll = true
 	}
 
 	aggregateHasSLSA := []*model.HasSlsa{}
 
-	if hasSLSASpec.Package != nil || queryAll {
+	if hasSLSASpec.Subject.Package != nil || queryAll {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -83,12 +83,12 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 			"\nWITH *, hasSLSA, null AS objPkgVersion"
 
 		sb.WriteString(query)
-		setPkgMatchValues(&sb, hasSLSASpec.Package, false, &firstMatch, queryValues)
+		setPkgMatchValues(&sb, hasSLSASpec.Subject.Package, false, &firstMatch, queryValues)
 		setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		if hasSLSASpec.Package == nil || hasSLSASpec.Package != nil && hasSLSASpec.Package.Version == nil && hasSLSASpec.Package.Subpath == nil &&
-			len(hasSLSASpec.Package.Qualifiers) == 0 && !*hasSLSASpec.Package.MatchOnlyEmptyQualifiers {
+		if hasSLSASpec.Subject.Package == nil || hasSLSASpec.Subject.Package != nil && hasSLSASpec.Subject.Package.Version == nil && hasSLSASpec.Subject.Package.Subpath == nil &&
+			len(hasSLSASpec.Subject.Package.Qualifiers) == 0 && !*hasSLSASpec.Subject.Package.MatchOnlyEmptyQualifiers {
 
 			sb.WriteString("\nUNION")
 			// query without pkgVersion
@@ -114,7 +114,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 
 			sb.WriteString(query)
 			firstMatch = true
-			setPkgMatchValues(&sb, hasSLSASpec.Package, false, &firstMatch, queryValues)
+			setPkgMatchValues(&sb, hasSLSASpec.Subject.Package, false, &firstMatch, queryValues)
 			setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 			sb.WriteString(returnValue)
 		}
@@ -220,7 +220,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if hasSLSASpec.Source != nil || queryAll {
+	if hasSLSASpec.Subject.Source != nil || queryAll {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -252,7 +252,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 			"\nWITH *, hasSLSA, null AS objPkgVersion"
 
 		sb.WriteString(query)
-		setSrcMatchValues(&sb, hasSLSASpec.Source, false, &firstMatch, queryValues)
+		setSrcMatchValues(&sb, hasSLSASpec.Subject.Source, false, &firstMatch, queryValues)
 		setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -354,7 +354,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 		aggregateHasSLSA = append(aggregateHasSLSA, result.([]*model.HasSlsa)...)
 	}
 
-	if hasSLSASpec.Artifact != nil || queryAll {
+	if hasSLSASpec.Subject.Artifact != nil || queryAll {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -384,7 +384,7 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 			"\nWITH *, hasSLSA, null AS objPkgVersion"
 
 		sb.WriteString(query)
-		setArtifactMatchValues(&sb, hasSLSASpec.Artifact, false, &firstMatch, queryValues)
+		setArtifactMatchValues(&sb, hasSLSASpec.Subject.Artifact, false, &firstMatch, queryValues)
 		setHasSLSAValues(&sb, hasSLSASpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -491,13 +491,13 @@ func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpe
 // TODO(pxp928): combine with testing backend in shared utility
 func checkHasSLSAInputs(hasSLSASpec *model.HasSLSASpec) error {
 	subjectsDefined := 0
-	if hasSLSASpec.Package != nil {
+	if hasSLSASpec.Subject.Package != nil {
 		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Source != nil {
+	if hasSLSASpec.Subject.Source != nil {
 		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Artifact != nil {
+	if hasSLSASpec.Subject.Artifact != nil {
 		subjectsDefined = subjectsDefined + 1
 	}
 	if subjectsDefined > 1 {

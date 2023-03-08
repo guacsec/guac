@@ -154,13 +154,13 @@ func (c *demoClient) registerHasSLSA(
 
 func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	subjectsDefined := 0
-	if hasSLSASpec.Package != nil {
+	if hasSLSASpec.Subject.Package != nil {
 		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Source != nil {
+	if hasSLSASpec.Subject.Source != nil {
 		subjectsDefined = subjectsDefined + 1
 	}
-	if hasSLSASpec.Artifact != nil {
+	if hasSLSASpec.Subject.Artifact != nil {
 		subjectsDefined = subjectsDefined + 1
 	}
 	if subjectsDefined > 1 {
@@ -192,10 +192,10 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 			}
 		}
 
-		if hasSLSASpec.Package != nil && h.Subject != nil {
+		if hasSLSASpec.Subject.Package != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Package); ok {
-				if hasSLSASpec.Package.Type == nil || val.Type == *hasSLSASpec.Package.Type {
-					newPkg := filterPackageNamespace(val, hasSLSASpec.Package)
+				if hasSLSASpec.Subject.Package.Type == nil || val.Type == *hasSLSASpec.Subject.Package.Type {
+					newPkg := filterPackageNamespace(val, hasSLSASpec.Subject.Package)
 					if newPkg == nil {
 						matchOrSkip = false
 					}
@@ -205,10 +205,10 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 			}
 		}
 
-		if hasSLSASpec.Source != nil && h.Subject != nil {
+		if hasSLSASpec.Subject.Source != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Source); ok {
-				if hasSLSASpec.Source.Type == nil || val.Type == *hasSLSASpec.Source.Type {
-					newSource, err := filterSourceNamespace(val, hasSLSASpec.Source)
+				if hasSLSASpec.Subject.Source.Type == nil || val.Type == *hasSLSASpec.Subject.Source.Type {
+					newSource, err := filterSourceNamespace(val, hasSLSASpec.Subject.Source)
 					if err != nil {
 						return nil, err
 					}
@@ -221,11 +221,11 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 			}
 		}
 
-		if hasSLSASpec.Artifact != nil && h.Subject != nil {
+		if hasSLSASpec.Subject.Artifact != nil && h.Subject != nil {
 			if val, ok := h.Subject.(*model.Artifact); ok {
 				queryArt := &model.Artifact{
-					Algorithm: strings.ToLower(*hasSLSASpec.Artifact.Algorithm),
-					Digest:    strings.ToLower(*hasSLSASpec.Artifact.Digest),
+					Algorithm: strings.ToLower(*hasSLSASpec.Subject.Artifact.Algorithm),
+					Digest:    strings.ToLower(*hasSLSASpec.Subject.Artifact.Digest),
 				}
 				if *queryArt != *val {
 					matchOrSkip = false
