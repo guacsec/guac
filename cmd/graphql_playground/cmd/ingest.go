@@ -495,10 +495,9 @@ func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
 		},
 	}}
 	for _, ingest := range ingestCertifyPkg {
-		resp, err := model.CertifyPkg(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.certifyPkg)
+		_, err := model.CertifyPkg(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.certifyPkg)
 		if err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
-		fmt.Printf("Response is |%v|\n", resp)
 	}
 }
