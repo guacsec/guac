@@ -50,14 +50,13 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 	}
 
 	queryValues := map[string]any{}
-	includePkgVersion, includeDepPkgVersion := checkVersionInputs(selectedPkg, dependentPkg)
 
 	// query with for subject and object package
-	queryCertifyPkg(&sb, selectedPkg, dependentPkg, certifyPkgSpec, false, includePkgVersion, includeDepPkgVersion, queryValues)
+	queryCertifyPkg(&sb, selectedPkg, dependentPkg, certifyPkgSpec, false, queryValues)
 
 	if len(certifyPkgSpec.Packages) > 0 {
 		// query with reverse order for subject and object package
-		queryCertifyPkg(&sb, dependentPkg, selectedPkg, certifyPkgSpec, true, includePkgVersion, includeDepPkgVersion, queryValues)
+		queryCertifyPkg(&sb, dependentPkg, selectedPkg, certifyPkgSpec, true, queryValues)
 	}
 
 	result, err := session.ReadTransaction(
@@ -117,8 +116,8 @@ func (c *neo4jClient) CertifyPkg(ctx context.Context, certifyPkgSpec *model.Cert
 	return result.([]*model.CertifyPkg), nil
 }
 
-func queryCertifyPkg(sb *strings.Builder, selectedPkg *model.PkgSpec, dependentPkg *model.PkgSpec, certifyPkgSpec *model.CertifyPkgSpec, addInitialUnion,
-	includePkgVersion, includeDepPkgVersion bool, queryValues map[string]any) {
+func queryCertifyPkg(sb *strings.Builder, selectedPkg *model.PkgSpec, dependentPkg *model.PkgSpec, certifyPkgSpec *model.CertifyPkgSpec, addInitialUnion bool,
+	queryValues map[string]any) {
 
 	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 		"version.qualifier_list, certifyPkg, objPkgType.type, objPkgNamespace.namespace, objPkgName.name, " +
@@ -129,9 +128,11 @@ func queryCertifyPkg(sb *strings.Builder, selectedPkg *model.PkgSpec, dependentP
 		sb.WriteString("\n")
 	}
 	// query with selectedPkg at pkgVersion and dependentPkg at pkgVersion
-	query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+	query := "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-		"-[:subject]-(certifyPkg:CertifyPkg)-[:pkg_certification]-(objPkgVersion:PkgVersion)<-[:PkgHasVersion]-(objPkgName:PkgName)<-[:PkgHasName]" +
+		"-[:subject]-(certifyPkg:CertifyPkg)-[:pkg_certification]-(objPkgVersion:PkgVersion)" +
+		"\nWITH *" +
+		"\nMATCH (objPkgVersion)<-[:PkgHasVersion]-(objPkgName:PkgName)<-[:PkgHasName]" +
 		"-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
 		"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)"
 	sb.WriteString(query)
@@ -142,100 +143,27 @@ func queryCertifyPkg(sb *strings.Builder, selectedPkg *model.PkgSpec, dependentP
 	setCertifyPkgValues(sb, certifyPkgSpec, &firstMatch, queryValues)
 
 	sb.WriteString(returnValue)
-
-	if !includeDepPkgVersion {
-
-		sb.WriteString("\nUNION")
-		// query with selectedPkg at pkgVersion and dependentPkg at pkgName
-		query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
-			"-[:subject]-(certifyPkg:CertifyPkg)-[:pkg_certification]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-			"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
-			"\nWITH *, null AS objPkgVersion"
-		sb.WriteString(query)
-
-		firstMatch = true
-		setPkgMatchValues(sb, selectedPkg, false, &firstMatch, queryValues)
-		setPkgMatchValues(sb, dependentPkg, true, &firstMatch, queryValues)
-		setCertifyPkgValues(sb, certifyPkgSpec, &firstMatch, queryValues)
-
-		sb.WriteString(returnValue)
-
-	}
-
-	if !includePkgVersion && !includeDepPkgVersion {
-
-		sb.WriteString("\nUNION")
-		// query with selectedPkg at pkgName and dependentPkg at pkgName
-		query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-			"-[:PkgHasName]->(name:PkgName)" +
-			"-[:subject]-(certifyPkg:CertifyPkg)-[:pkg_certification]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-			"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
-			"\nWITH *, null AS version, null AS objPkgVersion"
-		sb.WriteString(query)
-
-		firstMatch = true
-		setPkgMatchValues(sb, selectedPkg, false, &firstMatch, queryValues)
-		setPkgMatchValues(sb, dependentPkg, true, &firstMatch, queryValues)
-		setCertifyPkgValues(sb, certifyPkgSpec, &firstMatch, queryValues)
-
-		sb.WriteString(returnValue)
-	}
-
-	if !includePkgVersion {
-
-		sb.WriteString("\nUNION")
-		// query with selectedPkg at pkgName and dependentPkg at pkgVersion
-		query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-			"-[:PkgHasName]->(name:PkgName)" +
-			"-[:subject]-(certifyPkg:CertifyPkg)-[:pkg_certification]-(objPkgVersion:PkgVersion)<-[:PkgHasVersion]-(objPkgName:PkgName)<-[:PkgHasName]" +
-			"-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-			"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
-			"\nWITH *, null AS version"
-		sb.WriteString(query)
-
-		firstMatch = true
-		setPkgMatchValues(sb, selectedPkg, false, &firstMatch, queryValues)
-		setPkgMatchValues(sb, dependentPkg, true, &firstMatch, queryValues)
-		setCertifyPkgValues(sb, certifyPkgSpec, &firstMatch, queryValues)
-
-		sb.WriteString(returnValue)
-	}
 }
 
 func setCertifyPkgValues(sb *strings.Builder, certifyPkgSpec *model.CertifyPkgSpec, firstMatch *bool, queryValues map[string]any) {
 	if certifyPkgSpec.Justification != nil {
 
-		matchProperties(sb, *firstMatch, "certifyPkg", "justification", "$justification")
+		matchProperties(sb, *firstMatch, "certifyPkg", justification, "$"+justification)
 		*firstMatch = false
-		queryValues["justification"] = certifyPkgSpec.Justification
+		queryValues[justification] = certifyPkgSpec.Justification
 	}
 	if certifyPkgSpec.Origin != nil {
 
-		matchProperties(sb, *firstMatch, "certifyPkg", "origin", "$origin")
+		matchProperties(sb, *firstMatch, "certifyPkg", origin, "$"+origin)
 		*firstMatch = false
-		queryValues["origin"] = certifyPkgSpec.Origin
+		queryValues[origin] = certifyPkgSpec.Origin
 	}
 	if certifyPkgSpec.Collector != nil {
 
-		matchProperties(sb, *firstMatch, "certifyPkg", "collector", "$collector")
+		matchProperties(sb, *firstMatch, "certifyPkg", collector, "$"+collector)
 		*firstMatch = false
-		queryValues["collector"] = certifyPkgSpec.Collector
+		queryValues[collector] = certifyPkgSpec.Collector
 	}
-}
-
-func checkVersionInputs(selectedPkg *model.PkgSpec, dependentPkg *model.PkgSpec) (bool, bool) {
-	includePkgVersion := true
-	includeDepPkgVersion := true
-	if selectedPkg == nil || selectedPkg != nil && selectedPkg.Version == nil && selectedPkg.Subpath == nil &&
-		len(selectedPkg.Qualifiers) == 0 && !*selectedPkg.MatchOnlyEmptyQualifiers {
-		includePkgVersion = false
-	}
-	if dependentPkg == nil || dependentPkg != nil && dependentPkg.Version == nil && dependentPkg.Subpath == nil &&
-		len(dependentPkg.Qualifiers) == 0 && !*dependentPkg.MatchOnlyEmptyQualifiers {
-		includeDepPkgVersion = false
-	}
-	return includePkgVersion, includeDepPkgVersion
 }
 
 // Ingest CertifyPkg
@@ -255,15 +183,29 @@ func (c *neo4jClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSp
 	queryValues[origin] = certifyPkg.Origin
 	queryValues[collector] = certifyPkg.Collector
 
+	query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)"
+
+	firstMatch := true
+	sb.WriteString(query)
+	setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
+
+	query = "\nMATCH (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
+		"-[:PkgHasName]->(objPkgName:PkgName)-[:PkgHasVersion]->(objPkgVersion:PkgVersion)"
+
+	firstMatch = true
+	sb.WriteString(query)
+	setPkgMatchValues(&sb, depPkgSpec, true, &firstMatch, queryValues)
+
+	merge := "\nMERGE (version)<-[:subject]-(certifyPkg:CertifyPkg{justification:$justification,origin:$origin,collector:$collector})" +
+		"-[:pkg_certification]->(objPkgVersion)"
+
+	sb.WriteString(merge)
+
 	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 		"version.qualifier_list, certifyPkg, objPkgType.type, objPkgNamespace.namespace, objPkgName.name, " +
 		"objPkgVersion.version, objPkgVersion.subpath, objPkgVersion.qualifier_list"
 
-	matchPkgWithVersion(&sb, selectedPkgSpec, queryValues)
-	matchDepPkgWithVersion(&sb, depPkgSpec, queryValues)
-	merge := "\nMERGE (version)<-[:subject]-(certifyPkg:CertifyPkg{justification:$justification,origin:$origin,collector:$collector})" +
-		"-[:pkg_certification]->(objPkgVersion)"
-	sb.WriteString(merge)
 	sb.WriteString(returnValue)
 
 	fmt.Println(sb.String())
@@ -317,24 +259,5 @@ func (c *neo4jClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSp
 	if err != nil {
 		return nil, err
 	}
-
 	return result.(*model.CertifyPkg), nil
-}
-
-func matchPkgWithVersion(sb *strings.Builder, selectedPkgSpec *model.PkgSpec, queryValues map[string]any) {
-	query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)"
-
-	firstMatch := true
-	sb.WriteString(query)
-	setPkgMatchValues(sb, selectedPkgSpec, false, &firstMatch, queryValues)
-}
-
-func matchDepPkgWithVersion(sb *strings.Builder, selectedPkgSpec *model.PkgSpec, queryValues map[string]any) {
-	query := "\nMATCH (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
-		"-[:PkgHasName]->(objPkgName:PkgName)-[:PkgHasVersion]->(objPkgVersion:PkgVersion)"
-
-	firstMatch := true
-	sb.WriteString(query)
-	setPkgMatchValues(sb, selectedPkgSpec, true, &firstMatch, queryValues)
 }
