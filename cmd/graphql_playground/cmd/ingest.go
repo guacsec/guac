@@ -95,10 +95,10 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 	}{{
 		name: "deb: part of SBOM - openssl",
 		pkg: model.PkgInputSpec{
-			Type:       "deb",
-			Namespace:  &ns,
-			Name:       "dpkg",
-			Version:    &version,
+			Type:      "deb",
+			Namespace: &ns,
+			Name:      "dpkg",
+			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "arch", Value: "amd64"},
 			},
@@ -159,10 +159,10 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 	}{{
 		name: "this artifact is an occurrence of this openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "user", Value: "bincrafters"},
 				{Key: "channel", Value: "stable"},
@@ -170,7 +170,7 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 		},
 		src: nil,
 		art: model.ArtifactInputSpec{
-			Digest: "5a787865sd676dacb0142afa0b83029cd7befd9",
+			Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
 			Algorithm: "sha1",
 		},
 		occurrence: model.IsOccurrenceInputSpec{
@@ -187,7 +187,7 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 		},
 		src: nil,
 		art: model.ArtifactInputSpec{
-			Digest: "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
+			Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
 			Algorithm: "sha512",
 		},
 		occurrence: model.IsOccurrenceInputSpec{
@@ -205,7 +205,7 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 			Tag:       &sourceTag,
 		},
 		art: model.ArtifactInputSpec{
-			Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 			Algorithm: "sha256",
 		},
 		occurrence: model.IsOccurrenceInputSpec{
@@ -249,10 +249,10 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 	}{{
 		name: "cve openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "user", Value: "bincrafters"},
 				{Key: "channel", Value: "stable"},
@@ -274,10 +274,10 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "osv openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "user", Value: "bincrafters"},
 				{Key: "channel", Value: "stable"},
@@ -298,10 +298,10 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "ghsa openssl",
 		pkg: &model.PkgInputSpec{
-			Type:       "conan",
-			Namespace:  &opensslNs,
-			Name:       "openssl",
-			Version:    &opensslVersion,
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "user", Value: "bincrafters"},
 				{Key: "channel", Value: "stable"},
