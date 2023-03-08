@@ -17,10 +17,10 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -375,10 +375,10 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 	queryValues[collector] = certifyVuln.Collector
 
 	// TODO: use generics here between PkgInputSpec and PkgSpecs?
-	selectedPkgSpec := convertPkgInputSpecToPkgSpec(&pkg)
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
 
 	if vulnerability.Osv != nil {
-		selectedOsvSepc := convertOsvInputSpecToOsvSpec(vulnerability.Osv)
+		selectedOsvSepc := helper.ConvertOsvInputSpecToOsvSpec(vulnerability.Osv)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, osvID.id"
@@ -400,7 +400,6 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 
-		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)
@@ -445,7 +444,7 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 
 		return result.(*model.CertifyVuln), nil
 	} else if vulnerability.Cve != nil {
-		selectedCveSepc := convertCveInputSpecToCveSpec(vulnerability.Cve)
+		selectedCveSepc := helper.ConvertCveInputSpecToCveSpec(vulnerability.Cve)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, cveYear.year, cveID.id"
@@ -467,7 +466,6 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 
-		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)
@@ -513,7 +511,7 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 
 		return result.(*model.CertifyVuln), nil
 	} else if vulnerability.Ghsa != nil {
-		selectedGhsaSepc := convertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
+		selectedGhsaSepc := helper.ConvertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, ghsaID.id"
@@ -535,7 +533,6 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 
-		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)

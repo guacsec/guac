@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -112,24 +113,9 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject *model.Packag
 	}
 
 	if subject.Package != nil {
-		pkgQualifiers := []*model.PackageQualifierSpec{}
-		for _, quali := range subject.Package.Qualifiers {
-			pkgQualifier := &model.PackageQualifierSpec{
-				Key:   quali.Key,
-				Value: &quali.Value,
-			}
-			pkgQualifiers = append(pkgQualifiers, pkgQualifier)
-		}
+		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
 
-		pkgSpec := model.PkgSpec{
-			Type:       &pkg.Type,
-			Namespace:  pkg.Namespace,
-			Name:       &pkg.Name,
-			Version:    pkg.Version,
-			Qualifiers: pkgQualifiers,
-			Subpath:    pkg.Subpath,
-		}
-		collectedPkg, err := c.Packages(ctx, &pkgSpec)
+		collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
 		if err != nil {
 			return nil, err
 		}
@@ -148,14 +134,9 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject *model.Packag
 	}
 
 	if subject.Source != nil {
-		sourceSpec := model.SourceSpec{
-			Type:      &source.Type,
-			Namespace: &source.Namespace,
-			Name:      &source.Name,
-			Tag:       source.Tag,
-			Commit:    source.Commit,
-		}
-		sources, err := c.Sources(ctx, &sourceSpec)
+		sourceSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
+
+		sources, err := c.Sources(ctx, sourceSpec)
 		if err != nil {
 			return nil, err
 		}

@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -220,7 +221,7 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject *model.Packa
 	var firstMatch bool = true
 	queryValues := map[string]any{}
 
-	occurrenceArt := convertArtInputSpecToArtSpec(&artifact)
+	occurrenceArt := helper.ConvertArtInputSpecToArtSpec(&artifact)
 
 	queryValues[justification] = occurrence.Justification
 	queryValues[origin] = occurrence.Origin
@@ -228,7 +229,7 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject *model.Packa
 
 	if subject.Package != nil {
 		// TODO: use generics here between PkgInputSpec and PkgSpecs?
-		selectedPkgSpec := convertPkgInputSpecToPkgSpec(subject.Package)
+		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
 
 		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objArt:Artifact)"
@@ -289,7 +290,7 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject *model.Packa
 		return result.(*model.IsOccurrence), nil
 	} else if subject.Source != nil {
 		// TODO: use generics here between SourceInputSpec and SourceSpec?
-		selectedSrcSpec := convertSrcInputSpecToSrcSpec(subject.Source)
+		selectedSrcSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, isOccurrence, objArt.algorithm, objArt.digest"
 

@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -148,24 +149,9 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
 	}
 
-	pkgQualifiers := []*model.PackageQualifierSpec{}
-	for _, quali := range pkg.Qualifiers {
-		pkgQualifier := &model.PackageQualifierSpec{
-			Key:   quali.Key,
-			Value: &quali.Value,
-		}
-		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
-	}
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
 
-	pkgSpec := model.PkgSpec{
-		Type:       &pkg.Type,
-		Namespace:  pkg.Namespace,
-		Name:       &pkg.Name,
-		Version:    pkg.Version,
-		Qualifiers: pkgQualifiers,
-		Subpath:    pkg.Subpath,
-	}
-	collectedPkg, err := c.Packages(ctx, &pkgSpec)
+	collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
 	if err != nil {
 		return nil, err
 	}
@@ -176,10 +162,9 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 	}
 
 	if vulnerability.Osv != nil {
-		osvSpec := model.OSVSpec{
-			OsvID: &vulnerability.Osv.OsvID,
-		}
-		collectedOsv, err := c.Osv(ctx, &osvSpec)
+		osvSpec := helper.ConvertOsvInputSpecToOsvSpec(vulnerability.Osv)
+
+		collectedOsv, err := c.Osv(ctx, osvSpec)
 		if err != nil {
 			return nil, err
 		}
@@ -203,11 +188,9 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 	}
 
 	if vulnerability.Cve != nil {
-		cveSpec := model.CVESpec{
-			Year:  &vulnerability.Cve.Year,
-			CveID: &vulnerability.Cve.CveID,
-		}
-		collectedCve, err := c.Cve(ctx, &cveSpec)
+
+		cveSpec := helper.ConvertCveInputSpecToCveSpec(vulnerability.Cve)
+		collectedCve, err := c.Cve(ctx, cveSpec)
 		if err != nil {
 			return nil, err
 		}
@@ -231,10 +214,9 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 	}
 
 	if vulnerability.Ghsa != nil {
-		ghsaSpec := model.GHSASpec{
-			GhsaID: &vulnerability.Ghsa.GhsaID,
-		}
-		collectedGhsa, err := c.Ghsa(ctx, &ghsaSpec)
+		ghsaSpec := helper.ConvertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
+
+		collectedGhsa, err := c.Ghsa(ctx, ghsaSpec)
 		if err != nil {
 			return nil, err
 		}

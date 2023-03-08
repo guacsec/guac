@@ -52,26 +52,26 @@ query Q2 {
 }
 
 query Q3 {
-  IsOccurrence(isOccurrenceSpec: {package: {name: "openssl"}}) {
+  IsOccurrence(isOccurrenceSpec: {subject: {package: {name: "openssl"}}}) {
     ...allIsOccurrencesTree
   }
 }
 
 query Q4 {
-  IsOccurrence(isOccurrenceSpec: {package: {name: "openssl", version: "3.0.3"}}) {
+  IsOccurrence(isOccurrenceSpec: {subject: {package: {name: "openssl", version: "3.0.3"}}}) {
     ...allIsOccurrencesTree
   }
 }
 
 query Q5 {
-  IsOccurrence(isOccurrenceSpec: {source: {name: "github.com/guacsec/guac"}}) {
+  IsOccurrence(isOccurrenceSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
     ...allIsOccurrencesTree
   }
 }
 
 query Q6 {
   IsOccurrence(
-    isOccurrenceSpec: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}
+    isOccurrenceSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
   ) {
     ...allIsOccurrencesTree
   }

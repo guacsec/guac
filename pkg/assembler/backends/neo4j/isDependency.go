@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -69,26 +70,6 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 	setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
 
 	sb.WriteString(returnValue)
-
-	if selectedPkg == nil || selectedPkg != nil && selectedPkg.Version == nil && selectedPkg.Subpath == nil &&
-		len(selectedPkg.Qualifiers) == 0 && !*selectedPkg.MatchOnlyEmptyQualifiers {
-
-		sb.WriteString("\nUNION")
-		// query without pkgVersion
-		query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-			"-[:PkgHasName]->(name:PkgName)" +
-			"-[:subject]-(isDependency:IsDependency)-[:dependency]-(objPkgName:PkgName)<-[:PkgHasName]-(objPkgNamespace:PkgNamespace)<-[:PkgHasNamespace]" +
-			"-(objPkgType:PkgType)<-[:PkgHasType]-(objPkgRoot:Pkg)" +
-			"\nWITH *, null AS version"
-		sb.WriteString(query)
-
-		firstMatch = true
-		setPkgMatchValues(&sb, selectedPkg, false, &firstMatch, queryValues)
-		setPkgMatchValues(&sb, dependentPkg, true, &firstMatch, queryValues)
-		setIsDependencyValues(&sb, isDependencySpec, &firstMatch, queryValues)
-
-		sb.WriteString(returnValue)
-	}
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
@@ -177,7 +158,7 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 	queryValues := map[string]any{}
 
 	// TODO: use generics here between PkgInputSpec and PkgSpec?
-	selectedPkgSpec := convertPkgInputSpecToPkgSpec(&pkg)
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
 	// Note: depPkgSpec only takes up to the pkgName as IsDependency does not allow for the attestation
 	// to be made at the pkgVersion level. Version range for the dependent package is defined as a property
 	// on IsDependency.
@@ -200,36 +181,18 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 	returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 		"version.qualifier_list, isDependency, objPkgType.type, objPkgNamespace.namespace, objPkgName.name"
 
-	if selectedPkgSpec.Version == nil && selectedPkgSpec.Subpath == nil &&
-		len(selectedPkgSpec.Qualifiers) == 0 && !*selectedPkgSpec.MatchOnlyEmptyQualifiers {
+	query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+		"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
+		"-[:PkgHasName]->(objPkgName:PkgName)"
 
-		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-			"-[:PkgHasName]->(name:PkgName), (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
-			"-[:PkgHasName]->(objPkgName:PkgName)" +
-			"\nWITH *, null AS version"
+	sb.WriteString(query)
+	setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
+	setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
 
-		sb.WriteString(query)
-		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-		setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
-
-		merge := "\nMERGE (name)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,justification:$justification,origin:$origin,collector:$collector})" +
-			"-[:dependency]->(objPkgName)"
-		sb.WriteString(merge)
-		sb.WriteString(returnValue)
-	} else {
-		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objPkgRoot:Pkg)-[:PkgHasType]->(objPkgType:PkgType)-[:PkgHasNamespace]->(objPkgNamespace:PkgNamespace)" +
-			"-[:PkgHasName]->(objPkgName:PkgName)"
-
-		sb.WriteString(query)
-		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-		setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
-
-		merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,justification:$justification,origin:$origin,collector:$collector})" +
-			"-[:dependency]->(objPkgName)"
-		sb.WriteString(merge)
-		sb.WriteString(returnValue)
-	}
+	merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,justification:$justification,origin:$origin,collector:$collector})" +
+		"-[:dependency]->(objPkgName)"
+	sb.WriteString(merge)
+	sb.WriteString(returnValue)
 
 	result, err := session.WriteTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
