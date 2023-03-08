@@ -81,12 +81,12 @@ func ingestIsOccurence(ctx context.Context, client graphql.Client, vs []assemble
 		}
 
 		if v.Src != nil {
-			_, err := model.IsOccurrenceSrc(ctx, client, v.Src, *v.Artifact, *v.IsOccurence)
+			_, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurence)
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err := model.IsOccurrencePkg(ctx, client, v.Pkg, *v.Artifact, *v.IsOccurence)
+			_, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurence)
 			if err != nil {
 				return err
 			}

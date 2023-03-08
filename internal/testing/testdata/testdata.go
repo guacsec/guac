@@ -317,11 +317,11 @@ var (
 		Justification: "Derived from SPDX DEPENDS_ON relationship",
 	}
 
-	isOccJustifyFile = &model.IsOccurrenceSpecInputSpec{
+	isOccJustifyFile = &model.IsOccurrenceInputSpec{
 		Justification: "spdx file with checksum",
 	}
 
-	isOccJustifyPkg = &model.IsOccurrenceSpecInputSpec{
+	isOccJustifyPkg = &model.IsOccurrenceInputSpec{
 		Justification: "spdx package with checksum",
 	}
 
