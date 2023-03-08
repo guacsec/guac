@@ -142,7 +142,7 @@ func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 			Key:   quali.Key,
 			Value: &quali.Value,
 		}
-		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+		depPkgQualifiers = append(depPkgQualifiers, pkgQualifier)
 	}
 
 	depPkgSpec := model.PkgSpec{
