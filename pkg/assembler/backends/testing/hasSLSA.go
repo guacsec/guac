@@ -352,6 +352,10 @@ func generateModelArtifact(inputArtifact *model.ArtifactInputSpec) *model.Artifa
 
 // TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
 func artifactMatch(artifact *model.Artifact, artifactInput *model.ArtifactInputSpec) bool {
+	if artifactInput == nil {
+		return false
+	}
+
 	if artifact.Algorithm != artifactInput.Algorithm {
 		return false
 	}
@@ -397,6 +401,10 @@ func generateModelSource(inputSource *model.SourceInputSpec) *model.Source {
 
 // TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
 func sourceMatch(source *model.Source, sourceInput *model.SourceInputSpec) bool {
+	if sourceInput == nil {
+		return false
+	}
+
 	if source.Type != sourceInput.Type {
 		return false
 	}
@@ -470,6 +478,10 @@ func generateModelPackage(inputPackage *model.PkgInputSpec) *model.Package {
 
 // TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
 func packageMatch(pkg *model.Package, pkgInput *model.PkgInputSpec) bool {
+	if pkgInput == nil {
+		return false
+	}
+
 	if pkg.Type != pkgInput.Type {
 		return false
 	}
