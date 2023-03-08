@@ -314,9 +314,7 @@ type HasSlsa struct {
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
-	Package     *PkgSpec                        `json:"package"`
-	Source      *SourceSpec                     `json:"source"`
-	Artifact    *ArtifactSpec                   `json:"artifact"`
+	Subject     *PackageSourceOrArtifactInput   `json:"subject"`
 	BuiltFrom   []*PackageSourceOrArtifactInput `json:"builtFrom"`
 	BuiltBy     *BuilderSpec                    `json:"builtBy"`
 	BuildType   *string                         `json:"buildType"`

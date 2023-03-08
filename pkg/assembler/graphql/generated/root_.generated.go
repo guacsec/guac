@@ -2350,9 +2350,7 @@ type SLSAPredicate {
 
 "HasSLSASpec allows filtering the list of HasSLSA to return."
 input HasSLSASpec {
-  package: PkgSpec
-  source: SourceSpec
-  artifact: ArtifactSpec
+  subject: PackageSourceOrArtifactInput
   builtFrom: [PackageSourceOrArtifactInput!]
   builtBy: BuilderSpec
   buildType: String
