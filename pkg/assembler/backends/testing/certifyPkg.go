@@ -20,6 +20,7 @@ import (
 	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllCertifyPkg(client *demoClient) error {
@@ -53,7 +54,7 @@ func registerAllCertifyPkg(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	client.registerCertifyPkg([]*model.Package{selectedPackage1[0], selectedPackage2[0]}, "these two opnessl packages are the same")
+	client.registerCertifyPkg([]*model.Package{selectedPackage1[0], selectedPackage2[0]}, "these two opnessl packages are the same", "testing backend", "testing backend")
 
 	// pkg:pypi/django@1.11.1
 	// client.registerPackage("pypi", "", "django", "1.11.1", "")
@@ -82,28 +83,90 @@ func registerAllCertifyPkg(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	client.registerCertifyPkg([]*model.Package{selectedPackage3[0], selectedPackage4[0]}, "these two pypi packages are the same")
+	client.registerCertifyPkg([]*model.Package{selectedPackage3[0], selectedPackage4[0]}, "these two pypi packages are the same", "testing backend", "testing backend")
 
 	return nil
 }
 
 // Ingest CertifyPkg
 
-func (c *demoClient) registerCertifyPkg(selectedPackages []*model.Package, justification string) {
+func (c *demoClient) registerCertifyPkg(selectedPackages []*model.Package, justification, origin, collector string) (*model.CertifyPkg, error) {
 
-	for _, a := range c.certifyPkg {
-		if reflect.DeepEqual(a.Packages, selectedPackages) && a.Justification == justification {
-			return
+	for _, certPkg := range c.certifyPkg {
+		if reflect.DeepEqual(certPkg.Packages, selectedPackages) && certPkg.Justification == justification {
+			return certPkg, nil
 		}
 	}
 
 	newCertifyPkg := &model.CertifyPkg{
 		Packages:      selectedPackages,
 		Justification: justification,
-		Origin:        "testing backend",
-		Collector:     "testing backend",
+		Origin:        origin,
+		Collector:     collector,
 	}
 	c.certifyPkg = append(c.certifyPkg, newCertifyPkg)
+	return newCertifyPkg, nil
+}
+
+func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error) {
+
+	pkgQualifiers := []*model.PackageQualifierSpec{}
+	for _, quali := range pkg.Qualifiers {
+		pkgQualifier := &model.PackageQualifierSpec{
+			Key:   quali.Key,
+			Value: &quali.Value,
+		}
+		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
+	}
+
+	pkgSpec := model.PkgSpec{
+		Type:       &pkg.Type,
+		Namespace:  pkg.Namespace,
+		Name:       &pkg.Name,
+		Version:    pkg.Version,
+		Qualifiers: pkgQualifiers,
+		Subpath:    pkg.Subpath,
+	}
+	collectedPkg, err := c.Packages(ctx, &pkgSpec)
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedPkg) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestCertifyPkg :: multiple package found")
+	}
+
+	depPkgQualifiers := []*model.PackageQualifierSpec{}
+	for _, quali := range pkg.Qualifiers {
+		pkgQualifier := &model.PackageQualifierSpec{
+			Key:   quali.Key,
+			Value: &quali.Value,
+		}
+		depPkgQualifiers = append(depPkgQualifiers, pkgQualifier)
+	}
+
+	depPkgSpec := model.PkgSpec{
+		Type:       &depPkg.Type,
+		Namespace:  depPkg.Namespace,
+		Name:       &depPkg.Name,
+		Version:    depPkg.Version,
+		Qualifiers: depPkgQualifiers,
+		Subpath:    depPkg.Subpath,
+	}
+	collectedDepPkg, err := c.Packages(ctx, &depPkgSpec)
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedDepPkg) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestCertifyPkg :: multiple secondary package found")
+	}
+
+	return c.registerCertifyPkg(
+		[]*model.Package{collectedPkg[0], collectedDepPkg[0]},
+		certifyPkg.Justification,
+		certifyPkg.Origin,
+		certifyPkg.Collector)
 }
 
 // Query CertifyPkg

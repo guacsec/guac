@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestCertifyPkg is the resolver for the ingestCertifyPkg field.
+func (r *mutationResolver) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error) {
+	return r.Backend.IngestCertifyPkg(ctx, pkg, depPkg, certifyPkg)
+}
+
 // CertifyPkg is the resolver for the CertifyPkg field.
 func (r *queryResolver) CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
 	return r.Backend.CertifyPkg(ctx, certifyPkgSpec)

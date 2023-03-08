@@ -214,6 +214,50 @@ func (ec *executionContext) fieldContext_CertifyPkg_collector(ctx context.Contex
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCertifyPkgInputSpec(ctx context.Context, obj interface{}) (model.CertifyPkgInputSpec, error) {
+	var it model.CertifyPkgInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"justification", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCertifyPkgSpec(ctx context.Context, obj interface{}) (model.CertifyPkgSpec, error) {
 	var it model.CertifyPkgSpec
 	asMap := map[string]interface{}{}
@@ -327,6 +371,10 @@ func (ec *executionContext) _CertifyPkg(ctx context.Context, sel ast.SelectionSe
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNCertifyPkg2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkg(ctx context.Context, sel ast.SelectionSet, v model.CertifyPkg) graphql.Marshaler {
+	return ec._CertifyPkg(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNCertifyPkg2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyPkg) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -379,6 +427,11 @@ func (ec *executionContext) marshalNCertifyPkg2ᚖgithubᚗcomᚋguacsecᚋguac�
 		return graphql.Null
 	}
 	return ec._CertifyPkg(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCertifyPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgInputSpec(ctx context.Context, v interface{}) (model.CertifyPkgInputSpec, error) {
+	res, err := ec.unmarshalInputCertifyPkgInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOCertifyPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgSpec(ctx context.Context, v interface{}) (*model.CertifyPkgSpec, error) {

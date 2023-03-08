@@ -43,7 +43,8 @@ func ingestData(port int) {
 	ingestScorecards(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
-	IngestVulnerability(ctx, gqlclient)
+	ingestVulnerability(ctx, gqlclient)
+	ingestCertifyPkg(ctx, gqlclient)
 	time := time.Now().Sub(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }
@@ -231,7 +232,7 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 	}
 }
 
-func IngestVulnerability(ctx context.Context, client graphql.Client) {
+func ingestVulnerability(ctx context.Context, client graphql.Client) {
 
 	logger := logging.FromContext(ctx)
 
@@ -397,6 +398,106 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 			}
 		} else {
 			fmt.Printf("input missing for cve, osv or ghsa")
+		}
+	}
+}
+
+func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	opensslNs := "openssl.org"
+	opensslVersion := "3.0.3"
+	djangoNameSpace := ""
+	djangoVersion := "1.11.1"
+	djangoSubPath := "subpath"
+	debianNs := "debian"
+	ubuntuNs := "ubuntu"
+	attrVersion := "1:2.4.47-2"
+
+	ingestCertifyPkg := []struct {
+		name       string
+		pkg        model.PkgInputSpec
+		depPkg     model.PkgInputSpec
+		certifyPkg model.CertifyPkgInputSpec
+	}{{
+		name: "these two openssl packages are the same",
+		pkg: model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		depPkg: model.PkgInputSpec{
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+		},
+		certifyPkg: model.CertifyPkgInputSpec{
+			Justification: "these two openssl packages are the same",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "these two pypi packages are the same",
+		pkg: model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNameSpace,
+			Name:      "django",
+		},
+		depPkg: model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNameSpace,
+			Name:      "django",
+			Version:   &djangoVersion,
+			Subpath:   &djangoSubPath,
+		},
+		certifyPkg: model.CertifyPkgInputSpec{
+			Justification: "these two pypi packages are the same",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "these two debian packages are the same",
+		pkg: model.PkgInputSpec{
+			Type:      "deb",
+			Namespace: &debianNs,
+			Name:      "attr",
+			Version:   &attrVersion,
+		},
+		depPkg: model.PkgInputSpec{
+			Type:      "deb",
+			Namespace: &debianNs,
+			Name:      "attr",
+		},
+		certifyPkg: model.CertifyPkgInputSpec{
+			Justification: "these two debian packages are the same",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "these two dpkg packages are the same",
+		pkg: model.PkgInputSpec{
+			Type:      "deb",
+			Namespace: &debianNs,
+			Name:      "dpkg",
+		},
+		depPkg: model.PkgInputSpec{
+			Type:      "deb",
+			Namespace: &ubuntuNs,
+			Name:      "attr",
+		},
+		certifyPkg: model.CertifyPkgInputSpec{
+			Justification: "these two dpkg packages are the same",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestCertifyPkg {
+		_, err := model.CertifyPkg(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.certifyPkg)
+		if err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
 }

@@ -158,6 +158,15 @@ type CertifyPkg struct {
 	Collector     string     `json:"collector"`
 }
 
+// CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
+//
+// All fields are required.
+type CertifyPkgInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
 // CertifyPkgSpec allows filtering the list of CertifyPkg to return.
 //
 // Specifying just the package allows to query for all similar packages (if they exist)

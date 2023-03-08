@@ -20,6 +20,7 @@ import (
 type MutationResolver interface {
 	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error)
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
+	IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
@@ -122,6 +123,39 @@ func (ec *executionContext) field_Mutation_ingestCVE_args(ctx context.Context, r
 		}
 	}
 	args["cve"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestCertifyPkg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PkgInputSpec
+	if tmp, ok := rawArgs["pkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkg"] = arg0
+	var arg1 model.PkgInputSpec
+	if tmp, ok := rawArgs["depPkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
+		arg1, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["depPkg"] = arg1
+	var arg2 model.CertifyPkgInputSpec
+	if tmp, ok := rawArgs["certifyPkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyPkg"))
+		arg2, err = ec.unmarshalNCertifyPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyPkg"] = arg2
 	return args, nil
 }
 
@@ -801,6 +835,70 @@ func (ec *executionContext) fieldContext_Mutation_ingestBuilder(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestBuilder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestCertifyPkg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestCertifyPkg(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestCertifyPkg(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["depPkg"].(model.PkgInputSpec), fc.Args["certifyPkg"].(model.CertifyPkgInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyPkg)
+	fc.Result = res
+	return ec.marshalNCertifyPkg2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkg(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestCertifyPkg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "packages":
+				return ec.fieldContext_CertifyPkg_packages(ctx, field)
+			case "justification":
+				return ec.fieldContext_CertifyPkg_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_CertifyPkg_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_CertifyPkg_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyPkg", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestCertifyPkg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2821,6 +2919,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestBuilder(ctx, field)
+			})
+
+		case "ingestCertifyPkg":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestCertifyPkg(ctx, field)
 			})
 
 		case "certifyScorecard":

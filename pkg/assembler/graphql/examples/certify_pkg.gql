@@ -3,7 +3,7 @@ fragment allCertifyPkg on CertifyPkg {
   packages {
     type
     namespaces {
-      namespace 
+      namespace
       names {
         name
         versions {
@@ -28,19 +28,31 @@ query Q1 {
 }
 
 query Q2 {
-  CertifyPkg(certifyPkgSpec: {origin: "testing backend"}) {
+  CertifyPkg(certifyPkgSpec: {origin: "Demo ingestion"}) {
     ...allCertifyPkg
   }
 }
 
 query Q3 {
-  CertifyPkg(certifyPkgSpec: {packages: {type: "conan", namespace: "", name: "openssl", version: "3.0.3", subpath: ""}}) {
+  CertifyPkg(
+    certifyPkgSpec: {packages: {type: "conan", namespace: "openssl.org", name: "openssl", version: "3.0.3", subpath: ""}}
+  ) {
     ...allCertifyPkg
   }
 }
 
 query Q4 {
-  CertifyPkg(certifyPkgSpec: {packages: {type: "pypi", namespace: "", name: "django", version: "1.11.1", subpath: ""}}) {
+  CertifyPkg(
+    certifyPkgSpec: {packages: {type: "pypi", namespace: "", name: "django", version: "1.11.1", subpath: "subpath"}}
+  ) {
+    ...allCertifyPkg
+  }
+}
+
+query Q5 {
+  CertifyPkg(
+    certifyPkgSpec: {packages: {type: "deb", namespace: "debian"}}
+  ) {
     ...allCertifyPkg
   }
 }
