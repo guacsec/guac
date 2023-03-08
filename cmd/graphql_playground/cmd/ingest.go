@@ -118,22 +118,22 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		},
 	}
 	slsa := model.SLSAInputSpec{
-		BuiltFrom: materials,
-		BuiltBy: builder,
-		BuildType: "Test:Source->Package",
+		BuiltFrom:     materials,
+		BuiltBy:       builder,
+		BuildType:     "Test:Source->Package",
 		SlsaPredicate: predicate,
-		SlsaVersion: "v1",
-		StartedOn: time.Now(),
-		FinishedOn: time.Now().Add(10 * time.Second),
-		Origin:           "Demo ingestion",
-		Collector:        "Demo ingestion",
+		SlsaVersion:   "v1",
+		StartedOn:     time.Now(),
+		FinishedOn:    time.Now().Add(10 * time.Second),
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
 	}
 	emptyNamespace := ""
 	pkg := model.PkgInputSpec{
 		Type:      "pypi",
 		Namespace: &emptyNamespace,
 		Name:      "tensorflow",
-		Version: &version,
+		Version:   &version,
 	}
 	_, err := model.SLSAForPackage(context.Background(), client, pkg, slsa)
 	if err != nil {
@@ -142,15 +142,15 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 
 	// from source to artifact
 	slsa = model.SLSAInputSpec{
-		BuiltFrom: materials,
-		BuiltBy: builder,
-		BuildType: "Test:Source->Artifact",
+		BuiltFrom:     materials,
+		BuiltBy:       builder,
+		BuildType:     "Test:Source->Artifact",
 		SlsaPredicate: predicate,
-		SlsaVersion: "v1",
-		StartedOn: time.Now(),
-		FinishedOn: time.Now().Add(10 * time.Second),
-		Origin:           "Demo ingestion",
-		Collector:        "Demo ingestion",
+		SlsaVersion:   "v1",
+		StartedOn:     time.Now(),
+		FinishedOn:    time.Now().Add(10 * time.Second),
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
 	}
 	artifact := model.ArtifactInputSpec{
 		Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
@@ -166,15 +166,15 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Uri: "https://github.com/CreateFork/HubHostedActions@v1",
 	}
 	slsa = model.SLSAInputSpec{
-		BuiltFrom: materials,
-		BuiltBy: builder,
-		BuildType: "Test:Source->Source",
+		BuiltFrom:     materials,
+		BuiltBy:       builder,
+		BuildType:     "Test:Source->Source",
 		SlsaPredicate: predicate,
-		SlsaVersion: "v1",
-		StartedOn: time.Now(),
-		FinishedOn: time.Now().Add(10 * time.Second),
-		Origin:           "Demo ingestion",
-		Collector:        "Demo ingestion",
+		SlsaVersion:   "v1",
+		StartedOn:     time.Now(),
+		FinishedOn:    time.Now().Add(10 * time.Second),
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
 	}
 	finalSource := model.SourceInputSpec{
 		Type:      "git",
@@ -204,15 +204,15 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Uri: "https://github.com/MixedBuild/HubHostedActions@v1",
 	}
 	slsa = model.SLSAInputSpec{
-		BuiltFrom: materials,
-		BuiltBy: builder,
-		BuildType: "Test:Mixed-build",
+		BuiltFrom:     materials,
+		BuiltBy:       builder,
+		BuildType:     "Test:Mixed-build",
 		SlsaPredicate: predicate,
-		SlsaVersion: "v1",
-		StartedOn: time.Now(),
-		FinishedOn: time.Now().Add(10 * time.Second),
-		Origin:           "Demo ingestion",
-		Collector:        "Demo ingestion",
+		SlsaVersion:   "v1",
+		StartedOn:     time.Now(),
+		FinishedOn:    time.Now().Add(10 * time.Second),
+		Origin:        "Demo ingestion",
+		Collector:     "Demo ingestion",
 	}
 	artifact = model.ArtifactInputSpec{
 		Digest:    "0123456789abcdef0000000fedcba9876543210",
