@@ -30,7 +30,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
       }
     }
   }
-  occurrenceArtifact {
+  artifact {
     algorithm
     digest
   }

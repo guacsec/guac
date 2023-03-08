@@ -32,7 +32,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
       ...allSrcTree
     }
   }
-  occurrenceArtifact {
+  artifact {
     ...allArtifactTree
   }
   justification
@@ -47,7 +47,7 @@ mutation IsOccurrencePkg($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $oc
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree
   }
-  ingestOccurrence(pkg: $pkg, artifact: $artifact, occurrence: $occurrence) {
+  ingestOccurrence(subject: {package: $pkg}, artifact: $artifact, occurrence: $occurrence) {
     ...allIsOccurrencesTree
   }
 }
@@ -59,7 +59,7 @@ mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree
   }
-  ingestOccurrence(source: $source, artifact: $artifact, occurrence: $occurrence) {
+  ingestOccurrence(subject: {source: $source}, artifact: $artifact, occurrence: $occurrence) {
     ...allIsOccurrencesTree
   }
 }

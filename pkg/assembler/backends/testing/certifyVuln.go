@@ -262,18 +262,23 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 // Query CertifyVuln
 
 func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	vulnDefined := 0
-	if certifyVulnSpec.Vulnerability.Osv != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if certifyVulnSpec.Vulnerability.Ghsa != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if certifyVulnSpec.Vulnerability.Cve != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnDefined > 1 {
-		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+	queryAll := false
+	if certifyVulnSpec.Vulnerability == nil {
+		queryAll = true
+	} else {
+		vulnDefined := 0
+		if certifyVulnSpec.Vulnerability.Osv != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if certifyVulnSpec.Vulnerability.Ghsa != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if certifyVulnSpec.Vulnerability.Cve != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if vulnDefined > 1 {
+			return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+		}
 	}
 
 	var foundCertifyBad []*model.CertifyVuln
@@ -310,49 +315,49 @@ func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Cer
 				matchOrSkip = false
 			}
 		}
+		if !queryAll {
+			if certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Cve != nil {
+				if val, ok := h.Vulnerability.(*model.Cve); ok {
+					if certifyVulnSpec.Vulnerability.Cve.Year == nil || val.Year == *certifyVulnSpec.Vulnerability.Cve.Year {
+						newCve, err := filterCVEID(val, certifyVulnSpec.Vulnerability.Cve)
+						if err != nil {
+							return nil, err
+						}
+						if newCve == nil {
+							matchOrSkip = false
+						}
+					}
+				} else {
+					matchOrSkip = false
+				}
+			}
 
-		if certifyVulnSpec.Vulnerability.Cve != nil {
-			if val, ok := h.Vulnerability.(*model.Cve); ok {
-				if certifyVulnSpec.Vulnerability.Cve.Year == nil || val.Year == *certifyVulnSpec.Vulnerability.Cve.Year {
-					newCve, err := filterCVEID(val, certifyVulnSpec.Vulnerability.Cve)
+			if certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Osv != nil {
+				if val, ok := h.Vulnerability.(*model.Osv); ok {
+					newOSV, err := filterOSVID(val, certifyVulnSpec.Vulnerability.Osv)
 					if err != nil {
 						return nil, err
 					}
-					if newCve == nil {
+					if newOSV == nil {
 						matchOrSkip = false
 					}
-				}
-			} else {
-				matchOrSkip = false
-
-			}
-		}
-
-		if certifyVulnSpec.Vulnerability.Osv != nil {
-			if val, ok := h.Vulnerability.(*model.Osv); ok {
-				newOSV, err := filterOSVID(val, certifyVulnSpec.Vulnerability.Osv)
-				if err != nil {
-					return nil, err
-				}
-				if newOSV == nil {
+				} else {
 					matchOrSkip = false
 				}
-			} else {
-				matchOrSkip = false
 			}
-		}
 
-		if certifyVulnSpec.Vulnerability.Ghsa != nil {
-			if val, ok := h.Vulnerability.(*model.Ghsa); ok {
-				newGhsa, err := filterGHSAID(val, certifyVulnSpec.Vulnerability.Ghsa)
-				if err != nil {
-					return nil, err
-				}
-				if newGhsa == nil {
+			if certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Ghsa != nil {
+				if val, ok := h.Vulnerability.(*model.Ghsa); ok {
+					newGhsa, err := filterGHSAID(val, certifyVulnSpec.Vulnerability.Ghsa)
+					if err != nil {
+						return nil, err
+					}
+					if newGhsa == nil {
+						matchOrSkip = false
+					}
+				} else {
 					matchOrSkip = false
 				}
-			} else {
-				matchOrSkip = false
 			}
 		}
 

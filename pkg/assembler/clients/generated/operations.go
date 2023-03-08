@@ -1417,32 +1417,20 @@ func (v *IsOccurrencePkgIngestArtifact) __premarshalJSON() (*__premarshalIsOccur
 //
 // # IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 //
-// subject - union type that can be either a package or source object type
-// occurrenceArtifact (object) - artifact that represent the the package or source
-// justification (property) - string value representing why the package or source is represented by the specified artifact
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
-//
 // Note: Package or Source must be specified but not both at the same time.
-// Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
-//
-// HashEqual will be used to connect together two artifacts if a package or source
-// is represented by more than one artifact.
-//
-// IsOccurrence does not connect a package with a source.
-// HasSourceAt attestation will be used to connect a package with a source
+// Attestation must occur at the PackageVersion or at the SourceName.
 type IsOccurrencePkgIngestOccurrenceIsOccurrence struct {
 	allIsOccurrencesTree `json:"-"`
 }
 
 // GetSubject returns IsOccurrencePkgIngestOccurrenceIsOccurrence.Subject, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) GetSubject() allIsOccurrencesTreeSubjectPkgSrcObject {
+func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) GetSubject() allIsOccurrencesTreeSubjectPackageOrSource {
 	return v.allIsOccurrencesTree.Subject
 }
 
-// GetOccurrenceArtifact returns IsOccurrencePkgIngestOccurrenceIsOccurrence.OccurrenceArtifact, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) GetOccurrenceArtifact() allIsOccurrencesTreeOccurrenceArtifact {
-	return v.allIsOccurrencesTree.OccurrenceArtifact
+// GetArtifact returns IsOccurrencePkgIngestOccurrenceIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) GetArtifact() allIsOccurrencesTreeArtifact {
+	return v.allIsOccurrencesTree.Artifact
 }
 
 // GetJustification returns IsOccurrencePkgIngestOccurrenceIsOccurrence.Justification, and is useful for accessing the field via an interface.
@@ -1488,7 +1476,7 @@ func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) UnmarshalJSON(b []byte) er
 type __premarshalIsOccurrencePkgIngestOccurrenceIsOccurrence struct {
 	Subject json.RawMessage `json:"subject"`
 
-	OccurrenceArtifact allIsOccurrencesTreeOccurrenceArtifact `json:"occurrenceArtifact"`
+	Artifact allIsOccurrencesTreeArtifact `json:"artifact"`
 
 	Justification string `json:"justification"`
 
@@ -1513,14 +1501,14 @@ func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) __premarshalJSON() (*__pre
 		dst := &retval.Subject
 		src := v.allIsOccurrencesTree.Subject
 		var err error
-		*dst, err = __marshalallIsOccurrencesTreeSubjectPkgSrcObject(
+		*dst, err = __marshalallIsOccurrencesTreeSubjectPackageOrSource(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Unable to marshal IsOccurrencePkgIngestOccurrenceIsOccurrence.allIsOccurrencesTree.Subject: %w", err)
 		}
 	}
-	retval.OccurrenceArtifact = v.allIsOccurrencesTree.OccurrenceArtifact
+	retval.Artifact = v.allIsOccurrencesTree.Artifact
 	retval.Justification = v.allIsOccurrencesTree.Justification
 	retval.Origin = v.allIsOccurrencesTree.Origin
 	retval.Collector = v.allIsOccurrencesTree.Collector
@@ -1698,32 +1686,20 @@ func (v *IsOccurrenceSrcIngestArtifact) __premarshalJSON() (*__premarshalIsOccur
 //
 // # IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 //
-// subject - union type that can be either a package or source object type
-// occurrenceArtifact (object) - artifact that represent the the package or source
-// justification (property) - string value representing why the package or source is represented by the specified artifact
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
-//
 // Note: Package or Source must be specified but not both at the same time.
-// Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
-//
-// HashEqual will be used to connect together two artifacts if a package or source
-// is represented by more than one artifact.
-//
-// IsOccurrence does not connect a package with a source.
-// HasSourceAt attestation will be used to connect a package with a source
+// Attestation must occur at the PackageVersion or at the SourceName.
 type IsOccurrenceSrcIngestOccurrenceIsOccurrence struct {
 	allIsOccurrencesTree `json:"-"`
 }
 
 // GetSubject returns IsOccurrenceSrcIngestOccurrenceIsOccurrence.Subject, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) GetSubject() allIsOccurrencesTreeSubjectPkgSrcObject {
+func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) GetSubject() allIsOccurrencesTreeSubjectPackageOrSource {
 	return v.allIsOccurrencesTree.Subject
 }
 
-// GetOccurrenceArtifact returns IsOccurrenceSrcIngestOccurrenceIsOccurrence.OccurrenceArtifact, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) GetOccurrenceArtifact() allIsOccurrencesTreeOccurrenceArtifact {
-	return v.allIsOccurrencesTree.OccurrenceArtifact
+// GetArtifact returns IsOccurrenceSrcIngestOccurrenceIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) GetArtifact() allIsOccurrencesTreeArtifact {
+	return v.allIsOccurrencesTree.Artifact
 }
 
 // GetJustification returns IsOccurrenceSrcIngestOccurrenceIsOccurrence.Justification, and is useful for accessing the field via an interface.
@@ -1769,7 +1745,7 @@ func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) UnmarshalJSON(b []byte) er
 type __premarshalIsOccurrenceSrcIngestOccurrenceIsOccurrence struct {
 	Subject json.RawMessage `json:"subject"`
 
-	OccurrenceArtifact allIsOccurrencesTreeOccurrenceArtifact `json:"occurrenceArtifact"`
+	Artifact allIsOccurrencesTreeArtifact `json:"artifact"`
 
 	Justification string `json:"justification"`
 
@@ -1794,14 +1770,14 @@ func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) __premarshalJSON() (*__pre
 		dst := &retval.Subject
 		src := v.allIsOccurrencesTree.Subject
 		var err error
-		*dst, err = __marshalallIsOccurrencesTreeSubjectPkgSrcObject(
+		*dst, err = __marshalallIsOccurrencesTreeSubjectPackageOrSource(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Unable to marshal IsOccurrenceSrcIngestOccurrenceIsOccurrence.allIsOccurrencesTree.Subject: %w", err)
 		}
 	}
-	retval.OccurrenceArtifact = v.allIsOccurrencesTree.OccurrenceArtifact
+	retval.Artifact = v.allIsOccurrencesTree.Artifact
 	retval.Justification = v.allIsOccurrencesTree.Justification
 	retval.Origin = v.allIsOccurrencesTree.Origin
 	retval.Collector = v.allIsOccurrencesTree.Collector
@@ -3380,35 +3356,28 @@ func (v *allIsDependencyTreePackage) __premarshalJSON() (*__premarshalallIsDepen
 //
 // # IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 //
-// subject - union type that can be either a package or source object type
-// occurrenceArtifact (object) - artifact that represent the the package or source
-// justification (property) - string value representing why the package or source is represented by the specified artifact
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
-//
 // Note: Package or Source must be specified but not both at the same time.
-// Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
-//
-// HashEqual will be used to connect together two artifacts if a package or source
-// is represented by more than one artifact.
-//
-// IsOccurrence does not connect a package with a source.
-// HasSourceAt attestation will be used to connect a package with a source
+// Attestation must occur at the PackageVersion or at the SourceName.
 type allIsOccurrencesTree struct {
-	Subject            allIsOccurrencesTreeSubjectPkgSrcObject `json:"-"`
-	OccurrenceArtifact allIsOccurrencesTreeOccurrenceArtifact  `json:"occurrenceArtifact"`
-	Justification      string                                  `json:"justification"`
-	Origin             string                                  `json:"origin"`
-	Collector          string                                  `json:"collector"`
+	// subject - union type that can be either a package or source object type
+	Subject allIsOccurrencesTreeSubjectPackageOrSource `json:"-"`
+	// artifact (object) - artifact that represent the the package or source
+	Artifact allIsOccurrencesTreeArtifact `json:"artifact"`
+	// justification (property) - string value representing why the package or source is represented by the specified artifact
+	Justification string `json:"justification"`
+	// origin (property) - where this attestation was generated from (based on which document)
+	Origin string `json:"origin"`
+	// collector (property) - the GUAC collector that collected the document that generated this attestation
+	Collector string `json:"collector"`
 }
 
 // GetSubject returns allIsOccurrencesTree.Subject, and is useful for accessing the field via an interface.
-func (v *allIsOccurrencesTree) GetSubject() allIsOccurrencesTreeSubjectPkgSrcObject { return v.Subject }
-
-// GetOccurrenceArtifact returns allIsOccurrencesTree.OccurrenceArtifact, and is useful for accessing the field via an interface.
-func (v *allIsOccurrencesTree) GetOccurrenceArtifact() allIsOccurrencesTreeOccurrenceArtifact {
-	return v.OccurrenceArtifact
+func (v *allIsOccurrencesTree) GetSubject() allIsOccurrencesTreeSubjectPackageOrSource {
+	return v.Subject
 }
+
+// GetArtifact returns allIsOccurrencesTree.Artifact, and is useful for accessing the field via an interface.
+func (v *allIsOccurrencesTree) GetArtifact() allIsOccurrencesTreeArtifact { return v.Artifact }
 
 // GetJustification returns allIsOccurrencesTree.Justification, and is useful for accessing the field via an interface.
 func (v *allIsOccurrencesTree) GetJustification() string { return v.Justification }
@@ -3441,7 +3410,7 @@ func (v *allIsOccurrencesTree) UnmarshalJSON(b []byte) error {
 		dst := &v.Subject
 		src := firstPass.Subject
 		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalallIsOccurrencesTreeSubjectPkgSrcObject(
+			err = __unmarshalallIsOccurrencesTreeSubjectPackageOrSource(
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
@@ -3455,7 +3424,7 @@ func (v *allIsOccurrencesTree) UnmarshalJSON(b []byte) error {
 type __premarshalallIsOccurrencesTree struct {
 	Subject json.RawMessage `json:"subject"`
 
-	OccurrenceArtifact allIsOccurrencesTreeOccurrenceArtifact `json:"occurrenceArtifact"`
+	Artifact allIsOccurrencesTreeArtifact `json:"artifact"`
 
 	Justification string `json:"justification"`
 
@@ -3480,21 +3449,21 @@ func (v *allIsOccurrencesTree) __premarshalJSON() (*__premarshalallIsOccurrences
 		dst := &retval.Subject
 		src := v.Subject
 		var err error
-		*dst, err = __marshalallIsOccurrencesTreeSubjectPkgSrcObject(
+		*dst, err = __marshalallIsOccurrencesTreeSubjectPackageOrSource(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Unable to marshal allIsOccurrencesTree.Subject: %w", err)
 		}
 	}
-	retval.OccurrenceArtifact = v.OccurrenceArtifact
+	retval.Artifact = v.Artifact
 	retval.Justification = v.Justification
 	retval.Origin = v.Origin
 	retval.Collector = v.Collector
 	return &retval, nil
 }
 
-// allIsOccurrencesTreeOccurrenceArtifact includes the requested fields of the GraphQL type Artifact.
+// allIsOccurrencesTreeArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
 //
 // # Artifact represents the artifact and contains a digest field
@@ -3504,29 +3473,27 @@ func (v *allIsOccurrencesTree) __premarshalJSON() (*__premarshalallIsOccurrences
 // If having a `checksum` Go object, `algorithm` can be
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
-type allIsOccurrencesTreeOccurrenceArtifact struct {
+type allIsOccurrencesTreeArtifact struct {
 	allArtifactTree `json:"-"`
 }
 
-// GetAlgorithm returns allIsOccurrencesTreeOccurrenceArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *allIsOccurrencesTreeOccurrenceArtifact) GetAlgorithm() string {
-	return v.allArtifactTree.Algorithm
-}
+// GetAlgorithm returns allIsOccurrencesTreeArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *allIsOccurrencesTreeArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
-// GetDigest returns allIsOccurrencesTreeOccurrenceArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *allIsOccurrencesTreeOccurrenceArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+// GetDigest returns allIsOccurrencesTreeArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *allIsOccurrencesTreeArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
-func (v *allIsOccurrencesTreeOccurrenceArtifact) UnmarshalJSON(b []byte) error {
+func (v *allIsOccurrencesTreeArtifact) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
 		return nil
 	}
 
 	var firstPass struct {
-		*allIsOccurrencesTreeOccurrenceArtifact
+		*allIsOccurrencesTreeArtifact
 		graphql.NoUnmarshalJSON
 	}
-	firstPass.allIsOccurrencesTreeOccurrenceArtifact = v
+	firstPass.allIsOccurrencesTreeArtifact = v
 
 	err := json.Unmarshal(b, &firstPass)
 	if err != nil {
@@ -3541,13 +3508,13 @@ func (v *allIsOccurrencesTreeOccurrenceArtifact) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type __premarshalallIsOccurrencesTreeOccurrenceArtifact struct {
+type __premarshalallIsOccurrencesTreeArtifact struct {
 	Algorithm string `json:"algorithm"`
 
 	Digest string `json:"digest"`
 }
 
-func (v *allIsOccurrencesTreeOccurrenceArtifact) MarshalJSON() ([]byte, error) {
+func (v *allIsOccurrencesTreeArtifact) MarshalJSON() ([]byte, error) {
 	premarshaled, err := v.__premarshalJSON()
 	if err != nil {
 		return nil, err
@@ -3555,8 +3522,8 @@ func (v *allIsOccurrencesTreeOccurrenceArtifact) MarshalJSON() ([]byte, error) {
 	return json.Marshal(premarshaled)
 }
 
-func (v *allIsOccurrencesTreeOccurrenceArtifact) __premarshalJSON() (*__premarshalallIsOccurrencesTreeOccurrenceArtifact, error) {
-	var retval __premarshalallIsOccurrencesTreeOccurrenceArtifact
+func (v *allIsOccurrencesTreeArtifact) __premarshalJSON() (*__premarshalallIsOccurrencesTreeArtifact, error) {
+	var retval __premarshalallIsOccurrencesTreeArtifact
 
 	retval.Algorithm = v.allArtifactTree.Algorithm
 	retval.Digest = v.allArtifactTree.Digest
@@ -3644,26 +3611,26 @@ func (v *allIsOccurrencesTreeSubjectPackage) __premarshalJSON() (*__premarshalal
 	return &retval, nil
 }
 
-// allIsOccurrencesTreeSubjectPkgSrcObject includes the requested fields of the GraphQL interface PkgSrcObject.
+// allIsOccurrencesTreeSubjectPackageOrSource includes the requested fields of the GraphQL interface PackageOrSource.
 //
-// allIsOccurrencesTreeSubjectPkgSrcObject is implemented by the following types:
+// allIsOccurrencesTreeSubjectPackageOrSource is implemented by the following types:
 // allIsOccurrencesTreeSubjectPackage
 // allIsOccurrencesTreeSubjectSource
 // The GraphQL type's documentation follows.
 //
-// PkgSrcObject is a union of Package and Source. Any of these objects can be specified
-type allIsOccurrencesTreeSubjectPkgSrcObject interface {
-	implementsGraphQLInterfaceallIsOccurrencesTreeSubjectPkgSrcObject()
+// PackageOrSource is a union of Package and Source. Any of these objects can be specified
+type allIsOccurrencesTreeSubjectPackageOrSource interface {
+	implementsGraphQLInterfaceallIsOccurrencesTreeSubjectPackageOrSource()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
 	GetTypename() *string
 }
 
-func (v *allIsOccurrencesTreeSubjectPackage) implementsGraphQLInterfaceallIsOccurrencesTreeSubjectPkgSrcObject() {
+func (v *allIsOccurrencesTreeSubjectPackage) implementsGraphQLInterfaceallIsOccurrencesTreeSubjectPackageOrSource() {
 }
-func (v *allIsOccurrencesTreeSubjectSource) implementsGraphQLInterfaceallIsOccurrencesTreeSubjectPkgSrcObject() {
+func (v *allIsOccurrencesTreeSubjectSource) implementsGraphQLInterfaceallIsOccurrencesTreeSubjectPackageOrSource() {
 }
 
-func __unmarshalallIsOccurrencesTreeSubjectPkgSrcObject(b []byte, v *allIsOccurrencesTreeSubjectPkgSrcObject) error {
+func __unmarshalallIsOccurrencesTreeSubjectPackageOrSource(b []byte, v *allIsOccurrencesTreeSubjectPackageOrSource) error {
 	if string(b) == "null" {
 		return nil
 	}
@@ -3685,14 +3652,14 @@ func __unmarshalallIsOccurrencesTreeSubjectPkgSrcObject(b []byte, v *allIsOccurr
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
-			"response was missing PkgSrcObject.__typename")
+			"response was missing PackageOrSource.__typename")
 	default:
 		return fmt.Errorf(
-			`unexpected concrete type for allIsOccurrencesTreeSubjectPkgSrcObject: "%v"`, tn.TypeName)
+			`unexpected concrete type for allIsOccurrencesTreeSubjectPackageOrSource: "%v"`, tn.TypeName)
 	}
 }
 
-func __marshalallIsOccurrencesTreeSubjectPkgSrcObject(v *allIsOccurrencesTreeSubjectPkgSrcObject) ([]byte, error) {
+func __marshalallIsOccurrencesTreeSubjectPackageOrSource(v *allIsOccurrencesTreeSubjectPackageOrSource) ([]byte, error) {
 
 	var typename string
 	switch v := (*v).(type) {
@@ -3724,7 +3691,7 @@ func __marshalallIsOccurrencesTreeSubjectPkgSrcObject(v *allIsOccurrencesTreeSub
 		return []byte("null"), nil
 	default:
 		return nil, fmt.Errorf(
-			`unexpected concrete type for allIsOccurrencesTreeSubjectPkgSrcObject: "%T"`, v)
+			`unexpected concrete type for allIsOccurrencesTreeSubjectPackageOrSource: "%T"`, v)
 	}
 }
 
@@ -4537,7 +4504,7 @@ mutation IsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $o
 	ingestArtifact(artifact: $artifact) {
 		... allArtifactTree
 	}
-	ingestOccurrence(pkg: $pkg, artifact: $artifact, occurrence: $occurrence) {
+	ingestOccurrence(subject: {package:$pkg}, artifact: $artifact, occurrence: $occurrence) {
 		... allIsOccurrencesTree
 	}
 }
@@ -4572,7 +4539,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
 			... allSrcTree
 		}
 	}
-	occurrenceArtifact {
+	artifact {
 		... allArtifactTree
 	}
 	justification
@@ -4628,7 +4595,7 @@ mutation IsOccurrenceSrc ($source: SourceInputSpec!, $artifact: ArtifactInputSpe
 	ingestArtifact(artifact: $artifact) {
 		... allArtifactTree
 	}
-	ingestOccurrence(source: $source, artifact: $artifact, occurrence: $occurrence) {
+	ingestOccurrence(subject: {source:$source}, artifact: $artifact, occurrence: $occurrence) {
 		... allIsOccurrencesTree
 	}
 }
@@ -4657,7 +4624,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
 			... allSrcTree
 		}
 	}
-	occurrenceArtifact {
+	artifact {
 		... allArtifactTree
 	}
 	justification

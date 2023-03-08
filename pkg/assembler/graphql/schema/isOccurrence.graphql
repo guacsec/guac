@@ -17,46 +17,66 @@
 
 # Defines a GraphQL schema for the IsOccurrence. It contains the subject (which can be either a package or source),
 #  occurrenceArtifact, justification,  origin of the attestation, and collector
+
+"""
+PackageOrSource is a union of Package and Source. Any of these objects can be specified
+"""
+union PackageOrSource = Package | Source
+
 """
 IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 
-subject - union type that can be either a package or source object type
-occurrenceArtifact (object) - artifact that represent the the package or source
-justification (property) - string value representing why the package or source is represented by the specified artifact
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-
 Note: Package or Source must be specified but not both at the same time.
-Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
-
-HashEqual will be used to connect together two artifacts if a package or source 
-is represented by more than one artifact.
-
-IsOccurrence does not connect a package with a source. 
-HasSourceAt attestation will be used to connect a package with a source
+Attestation must occur at the PackageVersion or at the SourceName.
 """
 type IsOccurrence {
-  subject: PkgSrcObject!
-  occurrenceArtifact: Artifact!
+  "subject - union type that can be either a package or source object type"
+  subject: PackageOrSource!
+  "artifact (object) - artifact that represent the the package or source"
+  artifact: Artifact!
+  "justification (property) - string value representing why the package or source is represented by the specified artifact"
   justification: String!
+  "origin (property) - where this attestation was generated from (based on which document)"
   origin: String!
+  "collector (property) - the GUAC collector that collected the document that generated this attestation"
   collector: String!
 }
 
 """
 IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 Note: Package or Source must be specified but not both at the same time
-For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+For package - PackageVersion must be specified (version, qualifiers and subpath) 
+or it defaults to empty string for version, subpath and empty list for qualifiers
 For source - a SourceName must be specified (name, tag or commit)
 """
 input IsOccurrenceSpec {
-  package: PkgSpec
-  source: SourceSpec
+  subject: PackageOrSourceSpec
   artifact: ArtifactSpec
   justification: String
   origin: String
   collector: String
 }
+
+"""
+PackageOrSourceSpec allows using PackageOrSource union as
+input type to be used in read queries.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrSourceSpec {
+  package: PkgSpec
+  source: SourceSpec
+}
+
+"""
+PackageOrSourceInput allows using PackageOrSource union as
+input type to be used in mutations.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrSourceInput {
+  package: PkgInputSpec
+  source: SourceInputSpec
+}
+
 
 """
 IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
@@ -76,5 +96,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds an artifact as an occurrence for either a package or a source"
-  ingestOccurrence(pkg: PkgInputSpec, source: SourceInputSpec, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  ingestOccurrence(subject: PackageOrSourceInput, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
 }

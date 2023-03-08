@@ -38,7 +38,10 @@ const (
 
 func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
-	if certifyVulnSpec.Vulnerability != nil {
+	queryAll := false
+	if certifyVulnSpec.Vulnerability == nil {
+		queryAll = true
+	} else {
 		vulnDefined := 0
 		if certifyVulnSpec.Vulnerability.Osv != nil {
 			vulnDefined = vulnDefined + 1
@@ -54,10 +57,6 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		}
 	}
 
-	queryAll := false
-	if certifyVulnSpec.Vulnerability == nil {
-		queryAll = true
-	}
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 

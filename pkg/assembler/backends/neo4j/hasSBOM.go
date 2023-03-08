@@ -196,7 +196,7 @@ func setHasSBOMValues(sb *strings.Builder, hasSBOMSpec *model.HasSBOMSpec, first
 	}
 }
 
-func generateModelHasSBOM(subject model.PkgSrcObject, uri, origin, collector string) *model.HasSbom {
+func generateModelHasSBOM(subject model.PackageOrSource, uri, origin, collector string) *model.HasSbom {
 	hasSBOM := model.HasSbom{
 		Subject:   subject,
 		URI:       uri,

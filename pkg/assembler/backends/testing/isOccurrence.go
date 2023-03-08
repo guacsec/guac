@@ -68,7 +68,7 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	}
 
 	for _, occurrence := range c.isOccurrence {
-		if occurrence.OccurrenceArtifact == artifact && occurrence.Justification == justification {
+		if occurrence.Artifact == artifact && occurrence.Justification == justification {
 			if val, ok := occurrence.Subject.(model.Package); ok {
 				if &val == selectedPackage {
 					return occurrence, nil
@@ -82,10 +82,10 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	}
 
 	newIsOccurrence := &model.IsOccurrence{
-		Justification:      justification,
-		OccurrenceArtifact: artifact,
-		Origin:             origin,
-		Collector:          collector,
+		Justification: justification,
+		Artifact:      artifact,
+		Origin:        origin,
+		Collector:     collector,
 	}
 	if selectedPackage != nil {
 		newIsOccurrence.Subject = selectedPackage
@@ -97,9 +97,8 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	return newIsOccurrence, nil
 }
 
-func (c *demoClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
-
-	if pkg != nil && source != nil {
+func (c *demoClient) IngestOccurrence(ctx context.Context, subject *model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+	if subject.Package != nil && subject.Source != nil {
 		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
 	}
 
@@ -112,9 +111,9 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSp
 			"IngestOccurrence :: multiple artifacts found")
 	}
 
-	if pkg != nil {
+	if subject.Package != nil {
 		pkgQualifiers := []*model.PackageQualifierSpec{}
-		for _, quali := range pkg.Qualifiers {
+		for _, quali := range subject.Package.Qualifiers {
 			pkgQualifier := &model.PackageQualifierSpec{
 				Key:   quali.Key,
 				Value: &quali.Value,
@@ -148,7 +147,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSp
 			occurrence.Collector)
 	}
 
-	if source != nil {
+	if subject.Source != nil {
 		sourceSpec := model.SourceSpec{
 			Type:      &source.Type,
 			Namespace: &source.Namespace,
@@ -181,8 +180,13 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSp
 
 func (c *demoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
-	if isOccurrenceSpec.Package != nil && isOccurrenceSpec.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
+	queryAll := false
+	if isOccurrenceSpec.Subject == nil {
+		queryAll = true
+	} else {
+		if isOccurrenceSpec.Subject.Package != nil && isOccurrenceSpec.Subject.Source != nil {
+			return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
+		}
 	}
 
 	var isOccurrences []*model.IsOccurrence
@@ -200,32 +204,34 @@ func (c *demoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.I
 			matchOrSkip = false
 		}
 
-		if isOccurrenceSpec.Package != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Package); ok {
-				if isOccurrenceSpec.Package.Type == nil || val.Type == *isOccurrenceSpec.Package.Type {
-					newPkg := filterPackageNamespace(val, isOccurrenceSpec.Package)
-					if newPkg == nil {
-						matchOrSkip = false
+		if !queryAll {
+			if isOccurrenceSpec.Subject.Package != nil && h.Subject != nil {
+				if val, ok := h.Subject.(*model.Package); ok {
+					if isOccurrenceSpec.Subject.Package.Type == nil || val.Type == *isOccurrenceSpec.Subject.Package.Type {
+						newPkg := filterPackageNamespace(val, isOccurrenceSpec.Subject.Package)
+						if newPkg == nil {
+							matchOrSkip = false
+						}
 					}
+				} else {
+					matchOrSkip = false
 				}
-			} else {
-				matchOrSkip = false
 			}
-		}
 
-		if isOccurrenceSpec.Source != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Source); ok {
-				if isOccurrenceSpec.Source.Type == nil || val.Type == *isOccurrenceSpec.Source.Type {
-					newSource, err := filterSourceNamespace(val, isOccurrenceSpec.Source)
-					if err != nil {
-						return nil, err
+			if isOccurrenceSpec.Subject.Source != nil && h.Subject != nil {
+				if val, ok := h.Subject.(*model.Source); ok {
+					if isOccurrenceSpec.Subject.Source.Type == nil || val.Type == *isOccurrenceSpec.Subject.Source.Type {
+						newSource, err := filterSourceNamespace(val, isOccurrenceSpec.Subject.Source)
+						if err != nil {
+							return nil, err
+						}
+						if newSource == nil {
+							matchOrSkip = false
+						}
 					}
-					if newSource == nil {
-						matchOrSkip = false
-					}
+				} else {
+					matchOrSkip = false
 				}
-			} else {
-				matchOrSkip = false
 			}
 		}
 
