@@ -234,7 +234,7 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 		cve           *model.CVEInputSpec
 		osv           *model.OSVInputSpec
 		ghsa          *model.GHSAInputSpec
-		vulnerability model.CertifyVulnInputSpec
+		vulnerability model.VulnerabilityMetaDataInput
 	}{{
 		name: "cve openssl",
 		pkg: &model.PkgInputSpec{
@@ -248,7 +248,7 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 			Year:  "2019",
 			CveId: "CVE-2019-13110",
 		},
-		vulnerability: model.CertifyVulnInputSpec{
+		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    time.Now(),
 			DbUri:          "MITRE",
 			DbVersion:      "v1.0.0",
@@ -269,7 +269,7 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 		osv: &model.OSVInputSpec{
 			OsvId: "CVE-2019-13110",
 		},
-		vulnerability: model.CertifyVulnInputSpec{
+		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    time.Now(),
 			DbUri:          "MITRE",
 			DbVersion:      "v1.0.0",
@@ -290,7 +290,7 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 		ghsa: &model.GHSAInputSpec{
 			GhsaId: "GHSA-h45f-rjvw-2rv2",
 		},
-		vulnerability: model.CertifyVulnInputSpec{
+		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    time.Now(),
 			DbUri:          "MITRE",
 			DbVersion:      "v1.0.0",
@@ -310,7 +310,7 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 			Year:  "2018",
 			CveId: "CVE-2018-12310",
 		},
-		vulnerability: model.CertifyVulnInputSpec{
+		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    time.Now(),
 			DbUri:          "MITRE",
 			DbVersion:      "v1.2.0",
@@ -329,7 +329,7 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 		osv: &model.OSVInputSpec{
 			OsvId: "CVE-2018-12310",
 		},
-		vulnerability: model.CertifyVulnInputSpec{
+		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    time.Now(),
 			DbUri:          "MITRE",
 			DbVersion:      "v1.2.0",
@@ -348,7 +348,7 @@ func IngestVulnerability(ctx context.Context, client graphql.Client) {
 		ghsa: &model.GHSAInputSpec{
 			GhsaId: "GHSA-f45f-jj4w-2rv2",
 		},
-		vulnerability: model.CertifyVulnInputSpec{
+		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    time.Now(),
 			DbUri:          "MITRE",
 			DbVersion:      "v1.2.0",

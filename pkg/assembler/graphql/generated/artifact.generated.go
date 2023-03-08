@@ -21,7 +21,7 @@ type MutationResolver interface {
 	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error)
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
-	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, osv *model.OSVInputSpec, cve *model.CVEInputSpec, ghsa *model.GHSAInputSpec, certifyVuln model.CertifyVulnInputSpec) (*model.CertifyVuln, error)
+	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
@@ -272,42 +272,24 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 		}
 	}
 	args["pkg"] = arg0
-	var arg1 *model.OSVInputSpec
-	if tmp, ok := rawArgs["osv"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-		arg1, err = ec.unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx, tmp)
+	var arg1 *model.OsvCveOrGhsaInput
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+		arg1, err = ec.unmarshalOOsvCveOrGhsaInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["osv"] = arg1
-	var arg2 *model.CVEInputSpec
-	if tmp, ok := rawArgs["cve"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-		arg2, err = ec.unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["cve"] = arg2
-	var arg3 *model.GHSAInputSpec
-	if tmp, ok := rawArgs["ghsa"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-		arg3, err = ec.unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["ghsa"] = arg3
-	var arg4 model.CertifyVulnInputSpec
+	args["vulnerability"] = arg1
+	var arg2 model.VulnerabilityMetaDataInput
 	if tmp, ok := rawArgs["certifyVuln"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVuln"))
-		arg4, err = ec.unmarshalNCertifyVulnInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnInputSpec(ctx, tmp)
+		arg2, err = ec.unmarshalNVulnerabilityMetaDataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaDataInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["certifyVuln"] = arg4
+	args["certifyVuln"] = arg2
 	return args, nil
 }
 
@@ -899,7 +881,7 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["osv"].(*model.OSVInputSpec), fc.Args["cve"].(*model.CVEInputSpec), fc.Args["ghsa"].(*model.GHSAInputSpec), fc.Args["certifyVuln"].(model.CertifyVulnInputSpec))
+		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(*model.OsvCveOrGhsaInput), fc.Args["certifyVuln"].(model.VulnerabilityMetaDataInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -927,20 +909,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx contex
 				return ec.fieldContext_CertifyVuln_package(ctx, field)
 			case "vulnerability":
 				return ec.fieldContext_CertifyVuln_vulnerability(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyVuln_timeScanned(ctx, field)
-			case "dbUri":
-				return ec.fieldContext_CertifyVuln_dbUri(ctx, field)
-			case "dbVersion":
-				return ec.fieldContext_CertifyVuln_dbVersion(ctx, field)
-			case "scannerUri":
-				return ec.fieldContext_CertifyVuln_scannerUri(ctx, field)
-			case "scannerVersion":
-				return ec.fieldContext_CertifyVuln_scannerVersion(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyVuln_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyVuln_collector(ctx, field)
+			case "metadata":
+				return ec.fieldContext_CertifyVuln_metadata(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyVuln", field.Name)
 		},
@@ -1805,20 +1775,8 @@ func (ec *executionContext) fieldContext_Query_CertifyVuln(ctx context.Context, 
 				return ec.fieldContext_CertifyVuln_package(ctx, field)
 			case "vulnerability":
 				return ec.fieldContext_CertifyVuln_vulnerability(ctx, field)
-			case "timeScanned":
-				return ec.fieldContext_CertifyVuln_timeScanned(ctx, field)
-			case "dbUri":
-				return ec.fieldContext_CertifyVuln_dbUri(ctx, field)
-			case "dbVersion":
-				return ec.fieldContext_CertifyVuln_dbVersion(ctx, field)
-			case "scannerUri":
-				return ec.fieldContext_CertifyVuln_scannerUri(ctx, field)
-			case "scannerVersion":
-				return ec.fieldContext_CertifyVuln_scannerVersion(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyVuln_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyVuln_collector(ctx, field)
+			case "metadata":
+				return ec.fieldContext_CertifyVuln_metadata(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyVuln", field.Name)
 		},

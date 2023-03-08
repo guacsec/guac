@@ -73,47 +73,49 @@ fragment allCertifyVuln on CertifyVuln {
       }
     }
   }
-  dbUri
-  dbVersion
-  scannerUri
-  scannerVersion
-  timeScanned
-  origin
-  collector
+  metadata {
+    dbUri
+    dbVersion
+    scannerUri
+    scannerVersion
+    timeScanned
+    origin
+    collector
+  }
 }
 
-mutation CertifyOSV($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: CertifyVulnInputSpec!) {
+mutation CertifyOSV($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
    ingestOSV(osv: $osv) {
     ...allOSVTree
   }
-  ingestVulnerability(pkg: $pkg, osv: $osv, certifyVuln: $certifyVuln) {
+  ingestVulnerability(pkg: $pkg, vulnerability: {osv: $osv}, certifyVuln: $certifyVuln) {
     ...allCertifyVuln
   }
 }
 
-mutation CertifyCVE($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: CertifyVulnInputSpec!) {
+mutation CertifyCVE($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
   ingestCVE(cve: $cve) {
     ...allCveTree
   }
-  ingestVulnerability(pkg: $pkg, cve: $cve, certifyVuln: $certifyVuln) {
+  ingestVulnerability(pkg: $pkg, vulnerability: {cve: $cve}, certifyVuln: $certifyVuln) {
     ...allCertifyVuln
   }
 }
 
-mutation CertifyGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: CertifyVulnInputSpec!) {
+mutation CertifyGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
   ingestGHSA(ghsa: $ghsa) {
     ...allGHSATree
   }
-  ingestVulnerability(pkg: $pkg, ghsa: $ghsa, certifyVuln: $certifyVuln) {
+  ingestVulnerability(pkg: $pkg, vulnerability: {ghsa: $ghsa}, certifyVuln: $certifyVuln) {
     ...allCertifyVuln
   }
 }

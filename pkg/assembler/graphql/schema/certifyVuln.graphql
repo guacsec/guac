@@ -20,26 +20,47 @@
 """
 CertifyVuln is an attestation that represents when a package has a vulnerability
 
-package (subject) - the package object type that represents the package
-vulnerability (object) - union type that consists of osv, cve or ghsa
-timeScanned (property) - timestamp of when the package was last scanned
-dbUri (property) - scanner vulnerability database uri
-dbVersion (property) - scanner vulnerability database version
-scannerUri (property) - vulnerability scanner's uri 
-scannerVersion (property) - vulnerability scanner version
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVuln {
+  "package (subject) - the package object type that represents the package"
   package: Package!
-  vulnerability: OsvCveGhsaObject!
+  "vulnerability (object) - union type that consists of osv, cve or ghsa"
+  vulnerability: OsvCveOrGhsa!
+  "metadata (property) - contains all the vulnerability metadata "
+  metadata: VulnerabilityMetaData!
+}
+
+type VulnerabilityMetaData {
+  "timeScanned (property) - timestamp of when the package was last scanned"
   timeScanned: Time!
+  "dbUri (property) - scanner vulnerability database uri"
   dbUri: String!
+  "dbVersion (property) - scanner vulnerability database version"
   dbVersion: String!
+  "scannerUri (property) - vulnerability scanner's uri"
   scannerUri: String!
+  "scannerVersion (property) - vulnerability scanner version"
   scannerVersion: String!
+  "origin (property) - where this attestation was generated from (based on which document)"
   origin: String!
+  "collector (property) - the GUAC collector that collected the document that generated this attestation"
   collector: String!
+}
+
+"""
+OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+"""
+union OsvCveOrGhsa = OSV | CVE | GHSA
+
+"""
+OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
+input type to be used in read queries.
+Exactly one of the value must be set to non-nil.
+"""
+input OsvCveOrGhsaSpec {
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
 }
 
 """
@@ -50,9 +71,7 @@ Only OSV, CVE or GHSA can be specified at once
 """
 input CertifyVulnSpec {
   package: PkgSpec
-  osv: OSVSpec
-  cve: CVESpec
-  ghsa: GHSASpec
+  vulnerability: OsvCveOrGhsaSpec
   timeScanned: Time
   dbUri: String
   dbVersion: String
@@ -63,11 +82,11 @@ input CertifyVulnSpec {
 }
 
 """
-CertifyVulnInputSpec is the same as CertifyVuln but for mutation input.
+VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
 
 All fields are required.
 """
-input CertifyVulnInputSpec {
+input VulnerabilityMetaDataInput {
   timeScanned: Time!
   dbUri: String!
   dbVersion: String!
@@ -78,9 +97,15 @@ input CertifyVulnInputSpec {
 }
 
 """
-OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
+input type to be used in mutations.
+Exactly one of the value must be set to non-nil.
 """
-union OsvCveGhsaObject = OSV | CVE | GHSA
+input OsvCveOrGhsaInput {
+  osv: OSVInputSpec
+  cve: CVEInputSpec
+  ghsa: GHSAInputSpec
+}
 
 extend type Query {
   "Returns all CertifyVuln"
@@ -89,5 +114,5 @@ extend type Query {
 
 extend type Mutation {
   "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
-  ingestVulnerability(pkg: PkgInputSpec!, osv: OSVInputSpec, cve: CVEInputSpec, ghsa: GHSAInputSpec, certifyVuln: CertifyVulnInputSpec!): CertifyVuln!
+  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }

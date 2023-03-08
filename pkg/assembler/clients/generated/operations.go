@@ -181,17 +181,7 @@ func (v *CertifyCVEIngestPackage) __premarshalJSON() (*__premarshalCertifyCVEIng
 // CertifyCVEIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
 // The GraphQL type's documentation follows.
 //
-// # CertifyVuln is an attestation that represents when a package has a vulnerability
-//
-// package (subject) - the package object type that represents the package
-// vulnerability (object) - union type that consists of osv, cve or ghsa
-// timeScanned (property) - timestamp of when the package was last scanned
-// dbUri (property) - scanner vulnerability database uri
-// dbVersion (property) - scanner vulnerability database version
-// scannerUri (property) - vulnerability scanner's uri
-// scannerVersion (property) - vulnerability scanner version
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVuln is an attestation that represents when a package has a vulnerability
 type CertifyCVEIngestVulnerabilityCertifyVuln struct {
 	allCertifyVuln `json:"-"`
 }
@@ -202,39 +192,13 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetPackage() allCertifyVulnPa
 }
 
 // GetVulnerability returns CertifyCVEIngestVulnerabilityCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveGhsaObject {
+func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveOrGhsa {
 	return v.allCertifyVuln.Vulnerability
 }
 
-// GetDbUri returns CertifyCVEIngestVulnerabilityCertifyVuln.DbUri, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetDbUri() string { return v.allCertifyVuln.DbUri }
-
-// GetDbVersion returns CertifyCVEIngestVulnerabilityCertifyVuln.DbVersion, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetDbVersion() string {
-	return v.allCertifyVuln.DbVersion
-}
-
-// GetScannerUri returns CertifyCVEIngestVulnerabilityCertifyVuln.ScannerUri, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetScannerUri() string {
-	return v.allCertifyVuln.ScannerUri
-}
-
-// GetScannerVersion returns CertifyCVEIngestVulnerabilityCertifyVuln.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetScannerVersion() string {
-	return v.allCertifyVuln.ScannerVersion
-}
-
-// GetTimeScanned returns CertifyCVEIngestVulnerabilityCertifyVuln.TimeScanned, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetTimeScanned() time.Time {
-	return v.allCertifyVuln.TimeScanned
-}
-
-// GetOrigin returns CertifyCVEIngestVulnerabilityCertifyVuln.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetOrigin() string { return v.allCertifyVuln.Origin }
-
-// GetCollector returns CertifyCVEIngestVulnerabilityCertifyVuln.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetCollector() string {
-	return v.allCertifyVuln.Collector
+// GetMetadata returns CertifyCVEIngestVulnerabilityCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetMetadata() allCertifyVulnMetadataVulnerabilityMetaData {
+	return v.allCertifyVuln.Metadata
 }
 
 func (v *CertifyCVEIngestVulnerabilityCertifyVuln) UnmarshalJSON(b []byte) error {
@@ -267,19 +231,7 @@ type __premarshalCertifyCVEIngestVulnerabilityCertifyVuln struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	DbUri string `json:"dbUri"`
-
-	DbVersion string `json:"dbVersion"`
-
-	ScannerUri string `json:"scannerUri"`
-
-	ScannerVersion string `json:"scannerVersion"`
-
-	TimeScanned time.Time `json:"timeScanned"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
+	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
 
 func (v *CertifyCVEIngestVulnerabilityCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -299,20 +251,14 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 		dst := &retval.Vulnerability
 		src := v.allCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveGhsaObject(
+		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Unable to marshal CertifyCVEIngestVulnerabilityCertifyVuln.allCertifyVuln.Vulnerability: %w", err)
 		}
 	}
-	retval.DbUri = v.allCertifyVuln.DbUri
-	retval.DbVersion = v.allCertifyVuln.DbVersion
-	retval.ScannerUri = v.allCertifyVuln.ScannerUri
-	retval.ScannerVersion = v.allCertifyVuln.ScannerVersion
-	retval.TimeScanned = v.allCertifyVuln.TimeScanned
-	retval.Origin = v.allCertifyVuln.Origin
-	retval.Collector = v.allCertifyVuln.Collector
+	retval.Metadata = v.allCertifyVuln.Metadata
 	return &retval, nil
 }
 
@@ -471,17 +417,7 @@ func (v *CertifyGHSAIngestPackage) __premarshalJSON() (*__premarshalCertifyGHSAI
 // CertifyGHSAIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
 // The GraphQL type's documentation follows.
 //
-// # CertifyVuln is an attestation that represents when a package has a vulnerability
-//
-// package (subject) - the package object type that represents the package
-// vulnerability (object) - union type that consists of osv, cve or ghsa
-// timeScanned (property) - timestamp of when the package was last scanned
-// dbUri (property) - scanner vulnerability database uri
-// dbVersion (property) - scanner vulnerability database version
-// scannerUri (property) - vulnerability scanner's uri
-// scannerVersion (property) - vulnerability scanner version
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVuln is an attestation that represents when a package has a vulnerability
 type CertifyGHSAIngestVulnerabilityCertifyVuln struct {
 	allCertifyVuln `json:"-"`
 }
@@ -492,41 +428,13 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetPackage() allCertifyVulnP
 }
 
 // GetVulnerability returns CertifyGHSAIngestVulnerabilityCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveGhsaObject {
+func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveOrGhsa {
 	return v.allCertifyVuln.Vulnerability
 }
 
-// GetDbUri returns CertifyGHSAIngestVulnerabilityCertifyVuln.DbUri, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetDbUri() string { return v.allCertifyVuln.DbUri }
-
-// GetDbVersion returns CertifyGHSAIngestVulnerabilityCertifyVuln.DbVersion, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetDbVersion() string {
-	return v.allCertifyVuln.DbVersion
-}
-
-// GetScannerUri returns CertifyGHSAIngestVulnerabilityCertifyVuln.ScannerUri, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetScannerUri() string {
-	return v.allCertifyVuln.ScannerUri
-}
-
-// GetScannerVersion returns CertifyGHSAIngestVulnerabilityCertifyVuln.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetScannerVersion() string {
-	return v.allCertifyVuln.ScannerVersion
-}
-
-// GetTimeScanned returns CertifyGHSAIngestVulnerabilityCertifyVuln.TimeScanned, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetTimeScanned() time.Time {
-	return v.allCertifyVuln.TimeScanned
-}
-
-// GetOrigin returns CertifyGHSAIngestVulnerabilityCertifyVuln.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetOrigin() string {
-	return v.allCertifyVuln.Origin
-}
-
-// GetCollector returns CertifyGHSAIngestVulnerabilityCertifyVuln.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetCollector() string {
-	return v.allCertifyVuln.Collector
+// GetMetadata returns CertifyGHSAIngestVulnerabilityCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetMetadata() allCertifyVulnMetadataVulnerabilityMetaData {
+	return v.allCertifyVuln.Metadata
 }
 
 func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) UnmarshalJSON(b []byte) error {
@@ -559,19 +467,7 @@ type __premarshalCertifyGHSAIngestVulnerabilityCertifyVuln struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	DbUri string `json:"dbUri"`
-
-	DbVersion string `json:"dbVersion"`
-
-	ScannerUri string `json:"scannerUri"`
-
-	ScannerVersion string `json:"scannerVersion"`
-
-	TimeScanned time.Time `json:"timeScanned"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
+	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
 
 func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -591,20 +487,14 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__prema
 		dst := &retval.Vulnerability
 		src := v.allCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveGhsaObject(
+		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Unable to marshal CertifyGHSAIngestVulnerabilityCertifyVuln.allCertifyVuln.Vulnerability: %w", err)
 		}
 	}
-	retval.DbUri = v.allCertifyVuln.DbUri
-	retval.DbVersion = v.allCertifyVuln.DbVersion
-	retval.ScannerUri = v.allCertifyVuln.ScannerUri
-	retval.ScannerVersion = v.allCertifyVuln.ScannerVersion
-	retval.TimeScanned = v.allCertifyVuln.TimeScanned
-	retval.Origin = v.allCertifyVuln.Origin
-	retval.Collector = v.allCertifyVuln.Collector
+	retval.Metadata = v.allCertifyVuln.Metadata
 	return &retval, nil
 }
 
@@ -763,17 +653,7 @@ func (v *CertifyOSVIngestPackage) __premarshalJSON() (*__premarshalCertifyOSVIng
 // CertifyOSVIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
 // The GraphQL type's documentation follows.
 //
-// # CertifyVuln is an attestation that represents when a package has a vulnerability
-//
-// package (subject) - the package object type that represents the package
-// vulnerability (object) - union type that consists of osv, cve or ghsa
-// timeScanned (property) - timestamp of when the package was last scanned
-// dbUri (property) - scanner vulnerability database uri
-// dbVersion (property) - scanner vulnerability database version
-// scannerUri (property) - vulnerability scanner's uri
-// scannerVersion (property) - vulnerability scanner version
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVuln is an attestation that represents when a package has a vulnerability
 type CertifyOSVIngestVulnerabilityCertifyVuln struct {
 	allCertifyVuln `json:"-"`
 }
@@ -784,39 +664,13 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetPackage() allCertifyVulnPa
 }
 
 // GetVulnerability returns CertifyOSVIngestVulnerabilityCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveGhsaObject {
+func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveOrGhsa {
 	return v.allCertifyVuln.Vulnerability
 }
 
-// GetDbUri returns CertifyOSVIngestVulnerabilityCertifyVuln.DbUri, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetDbUri() string { return v.allCertifyVuln.DbUri }
-
-// GetDbVersion returns CertifyOSVIngestVulnerabilityCertifyVuln.DbVersion, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetDbVersion() string {
-	return v.allCertifyVuln.DbVersion
-}
-
-// GetScannerUri returns CertifyOSVIngestVulnerabilityCertifyVuln.ScannerUri, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetScannerUri() string {
-	return v.allCertifyVuln.ScannerUri
-}
-
-// GetScannerVersion returns CertifyOSVIngestVulnerabilityCertifyVuln.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetScannerVersion() string {
-	return v.allCertifyVuln.ScannerVersion
-}
-
-// GetTimeScanned returns CertifyOSVIngestVulnerabilityCertifyVuln.TimeScanned, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetTimeScanned() time.Time {
-	return v.allCertifyVuln.TimeScanned
-}
-
-// GetOrigin returns CertifyOSVIngestVulnerabilityCertifyVuln.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetOrigin() string { return v.allCertifyVuln.Origin }
-
-// GetCollector returns CertifyOSVIngestVulnerabilityCertifyVuln.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetCollector() string {
-	return v.allCertifyVuln.Collector
+// GetMetadata returns CertifyOSVIngestVulnerabilityCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetMetadata() allCertifyVulnMetadataVulnerabilityMetaData {
+	return v.allCertifyVuln.Metadata
 }
 
 func (v *CertifyOSVIngestVulnerabilityCertifyVuln) UnmarshalJSON(b []byte) error {
@@ -849,19 +703,7 @@ type __premarshalCertifyOSVIngestVulnerabilityCertifyVuln struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	DbUri string `json:"dbUri"`
-
-	DbVersion string `json:"dbVersion"`
-
-	ScannerUri string `json:"scannerUri"`
-
-	ScannerVersion string `json:"scannerVersion"`
-
-	TimeScanned time.Time `json:"timeScanned"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
+	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
 
 func (v *CertifyOSVIngestVulnerabilityCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -881,20 +723,14 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 		dst := &retval.Vulnerability
 		src := v.allCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveGhsaObject(
+		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Unable to marshal CertifyOSVIngestVulnerabilityCertifyVuln.allCertifyVuln.Vulnerability: %w", err)
 		}
 	}
-	retval.DbUri = v.allCertifyVuln.DbUri
-	retval.DbVersion = v.allCertifyVuln.DbVersion
-	retval.ScannerUri = v.allCertifyVuln.ScannerUri
-	retval.ScannerVersion = v.allCertifyVuln.ScannerVersion
-	retval.TimeScanned = v.allCertifyVuln.TimeScanned
-	retval.Origin = v.allCertifyVuln.Origin
-	retval.Collector = v.allCertifyVuln.Collector
+	retval.Metadata = v.allCertifyVuln.Metadata
 	return &retval, nil
 }
 
@@ -918,40 +754,6 @@ func (v *CertifyOSVResponse) GetIngestOSV() CertifyOSVIngestOSV { return v.Inges
 func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabilityCertifyVuln {
 	return v.IngestVulnerability
 }
-
-// CertifyVulnInputSpec is the same as CertifyVuln but for mutation input.
-//
-// All fields are required.
-type CertifyVulnInputSpec struct {
-	TimeScanned    time.Time `json:"timeScanned"`
-	DbUri          string    `json:"dbUri"`
-	DbVersion      string    `json:"dbVersion"`
-	ScannerUri     string    `json:"scannerUri"`
-	ScannerVersion string    `json:"scannerVersion"`
-	Origin         string    `json:"origin"`
-	Collector      string    `json:"collector"`
-}
-
-// GetTimeScanned returns CertifyVulnInputSpec.TimeScanned, and is useful for accessing the field via an interface.
-func (v *CertifyVulnInputSpec) GetTimeScanned() time.Time { return v.TimeScanned }
-
-// GetDbUri returns CertifyVulnInputSpec.DbUri, and is useful for accessing the field via an interface.
-func (v *CertifyVulnInputSpec) GetDbUri() string { return v.DbUri }
-
-// GetDbVersion returns CertifyVulnInputSpec.DbVersion, and is useful for accessing the field via an interface.
-func (v *CertifyVulnInputSpec) GetDbVersion() string { return v.DbVersion }
-
-// GetScannerUri returns CertifyVulnInputSpec.ScannerUri, and is useful for accessing the field via an interface.
-func (v *CertifyVulnInputSpec) GetScannerUri() string { return v.ScannerUri }
-
-// GetScannerVersion returns CertifyVulnInputSpec.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *CertifyVulnInputSpec) GetScannerVersion() string { return v.ScannerVersion }
-
-// GetOrigin returns CertifyVulnInputSpec.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyVulnInputSpec) GetOrigin() string { return v.Origin }
-
-// GetCollector returns CertifyVulnInputSpec.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyVulnInputSpec) GetCollector() string { return v.Collector }
 
 // GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
 type GHSAInputSpec struct {
@@ -2123,11 +1925,45 @@ func (v *SourceInputSpec) GetTag() *string { return v.Tag }
 // GetCommit returns SourceInputSpec.Commit, and is useful for accessing the field via an interface.
 func (v *SourceInputSpec) GetCommit() *string { return v.Commit }
 
+// VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
+//
+// All fields are required.
+type VulnerabilityMetaDataInput struct {
+	TimeScanned    time.Time `json:"timeScanned"`
+	DbUri          string    `json:"dbUri"`
+	DbVersion      string    `json:"dbVersion"`
+	ScannerUri     string    `json:"scannerUri"`
+	ScannerVersion string    `json:"scannerVersion"`
+	Origin         string    `json:"origin"`
+	Collector      string    `json:"collector"`
+}
+
+// GetTimeScanned returns VulnerabilityMetaDataInput.TimeScanned, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetTimeScanned() time.Time { return v.TimeScanned }
+
+// GetDbUri returns VulnerabilityMetaDataInput.DbUri, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetDbUri() string { return v.DbUri }
+
+// GetDbVersion returns VulnerabilityMetaDataInput.DbVersion, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetDbVersion() string { return v.DbVersion }
+
+// GetScannerUri returns VulnerabilityMetaDataInput.ScannerUri, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetScannerUri() string { return v.ScannerUri }
+
+// GetScannerVersion returns VulnerabilityMetaDataInput.ScannerVersion, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetScannerVersion() string { return v.ScannerVersion }
+
+// GetOrigin returns VulnerabilityMetaDataInput.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetOrigin() string { return v.Origin }
+
+// GetCollector returns VulnerabilityMetaDataInput.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetaDataInput) GetCollector() string { return v.Collector }
+
 // __CertifyCVEInput is used internally by genqlient
 type __CertifyCVEInput struct {
-	Pkg         PkgInputSpec         `json:"pkg"`
-	Cve         CVEInputSpec         `json:"cve"`
-	CertifyVuln CertifyVulnInputSpec `json:"certifyVuln"`
+	Pkg         PkgInputSpec               `json:"pkg"`
+	Cve         CVEInputSpec               `json:"cve"`
+	CertifyVuln VulnerabilityMetaDataInput `json:"certifyVuln"`
 }
 
 // GetPkg returns __CertifyCVEInput.Pkg, and is useful for accessing the field via an interface.
@@ -2137,13 +1973,13 @@ func (v *__CertifyCVEInput) GetPkg() PkgInputSpec { return v.Pkg }
 func (v *__CertifyCVEInput) GetCve() CVEInputSpec { return v.Cve }
 
 // GetCertifyVuln returns __CertifyCVEInput.CertifyVuln, and is useful for accessing the field via an interface.
-func (v *__CertifyCVEInput) GetCertifyVuln() CertifyVulnInputSpec { return v.CertifyVuln }
+func (v *__CertifyCVEInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
 // __CertifyGHSAInput is used internally by genqlient
 type __CertifyGHSAInput struct {
-	Pkg         PkgInputSpec         `json:"pkg"`
-	Ghsa        GHSAInputSpec        `json:"ghsa"`
-	CertifyVuln CertifyVulnInputSpec `json:"certifyVuln"`
+	Pkg         PkgInputSpec               `json:"pkg"`
+	Ghsa        GHSAInputSpec              `json:"ghsa"`
+	CertifyVuln VulnerabilityMetaDataInput `json:"certifyVuln"`
 }
 
 // GetPkg returns __CertifyGHSAInput.Pkg, and is useful for accessing the field via an interface.
@@ -2153,13 +1989,13 @@ func (v *__CertifyGHSAInput) GetPkg() PkgInputSpec { return v.Pkg }
 func (v *__CertifyGHSAInput) GetGhsa() GHSAInputSpec { return v.Ghsa }
 
 // GetCertifyVuln returns __CertifyGHSAInput.CertifyVuln, and is useful for accessing the field via an interface.
-func (v *__CertifyGHSAInput) GetCertifyVuln() CertifyVulnInputSpec { return v.CertifyVuln }
+func (v *__CertifyGHSAInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
 // __CertifyOSVInput is used internally by genqlient
 type __CertifyOSVInput struct {
-	Pkg         PkgInputSpec         `json:"pkg"`
-	Osv         OSVInputSpec         `json:"osv"`
-	CertifyVuln CertifyVulnInputSpec `json:"certifyVuln"`
+	Pkg         PkgInputSpec               `json:"pkg"`
+	Osv         OSVInputSpec               `json:"osv"`
+	CertifyVuln VulnerabilityMetaDataInput `json:"certifyVuln"`
 }
 
 // GetPkg returns __CertifyOSVInput.Pkg, and is useful for accessing the field via an interface.
@@ -2169,7 +2005,7 @@ func (v *__CertifyOSVInput) GetPkg() PkgInputSpec { return v.Pkg }
 func (v *__CertifyOSVInput) GetOsv() OSVInputSpec { return v.Osv }
 
 // GetCertifyVuln returns __CertifyOSVInput.CertifyVuln, and is useful for accessing the field via an interface.
-func (v *__CertifyOSVInput) GetCertifyVuln() CertifyVulnInputSpec { return v.CertifyVuln }
+func (v *__CertifyOSVInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
@@ -2420,57 +2256,26 @@ func (v *allCertifyScorecardSource) __premarshalJSON() (*__premarshalallCertifyS
 // allCertifyVuln includes the GraphQL fields of CertifyVuln requested by the fragment allCertifyVuln.
 // The GraphQL type's documentation follows.
 //
-// # CertifyVuln is an attestation that represents when a package has a vulnerability
-//
-// package (subject) - the package object type that represents the package
-// vulnerability (object) - union type that consists of osv, cve or ghsa
-// timeScanned (property) - timestamp of when the package was last scanned
-// dbUri (property) - scanner vulnerability database uri
-// dbVersion (property) - scanner vulnerability database version
-// scannerUri (property) - vulnerability scanner's uri
-// scannerVersion (property) - vulnerability scanner version
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVuln is an attestation that represents when a package has a vulnerability
 type allCertifyVuln struct {
-	Package        allCertifyVulnPackage                       `json:"package"`
-	Vulnerability  allCertifyVulnVulnerabilityOsvCveGhsaObject `json:"-"`
-	DbUri          string                                      `json:"dbUri"`
-	DbVersion      string                                      `json:"dbVersion"`
-	ScannerUri     string                                      `json:"scannerUri"`
-	ScannerVersion string                                      `json:"scannerVersion"`
-	TimeScanned    time.Time                                   `json:"timeScanned"`
-	Origin         string                                      `json:"origin"`
-	Collector      string                                      `json:"collector"`
+	// package (subject) - the package object type that represents the package
+	Package allCertifyVulnPackage `json:"package"`
+	// vulnerability (object) - union type that consists of osv, cve or ghsa
+	Vulnerability allCertifyVulnVulnerabilityOsvCveOrGhsa `json:"-"`
+	// metadata (property) - contains all the vulnerability metadata
+	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
 
 // GetPackage returns allCertifyVuln.Package, and is useful for accessing the field via an interface.
 func (v *allCertifyVuln) GetPackage() allCertifyVulnPackage { return v.Package }
 
 // GetVulnerability returns allCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveGhsaObject {
+func (v *allCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveOrGhsa {
 	return v.Vulnerability
 }
 
-// GetDbUri returns allCertifyVuln.DbUri, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetDbUri() string { return v.DbUri }
-
-// GetDbVersion returns allCertifyVuln.DbVersion, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetDbVersion() string { return v.DbVersion }
-
-// GetScannerUri returns allCertifyVuln.ScannerUri, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetScannerUri() string { return v.ScannerUri }
-
-// GetScannerVersion returns allCertifyVuln.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetScannerVersion() string { return v.ScannerVersion }
-
-// GetTimeScanned returns allCertifyVuln.TimeScanned, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetTimeScanned() time.Time { return v.TimeScanned }
-
-// GetOrigin returns allCertifyVuln.Origin, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetOrigin() string { return v.Origin }
-
-// GetCollector returns allCertifyVuln.Collector, and is useful for accessing the field via an interface.
-func (v *allCertifyVuln) GetCollector() string { return v.Collector }
+// GetMetadata returns allCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *allCertifyVuln) GetMetadata() allCertifyVulnMetadataVulnerabilityMetaData { return v.Metadata }
 
 func (v *allCertifyVuln) UnmarshalJSON(b []byte) error {
 
@@ -2494,7 +2299,7 @@ func (v *allCertifyVuln) UnmarshalJSON(b []byte) error {
 		dst := &v.Vulnerability
 		src := firstPass.Vulnerability
 		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalallCertifyVulnVulnerabilityOsvCveGhsaObject(
+			err = __unmarshalallCertifyVulnVulnerabilityOsvCveOrGhsa(
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
@@ -2510,19 +2315,7 @@ type __premarshalallCertifyVuln struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	DbUri string `json:"dbUri"`
-
-	DbVersion string `json:"dbVersion"`
-
-	ScannerUri string `json:"scannerUri"`
-
-	ScannerVersion string `json:"scannerVersion"`
-
-	TimeScanned time.Time `json:"timeScanned"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
+	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
 
 func (v *allCertifyVuln) MarshalJSON() ([]byte, error) {
@@ -2542,22 +2335,59 @@ func (v *allCertifyVuln) __premarshalJSON() (*__premarshalallCertifyVuln, error)
 		dst := &retval.Vulnerability
 		src := v.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveGhsaObject(
+		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Unable to marshal allCertifyVuln.Vulnerability: %w", err)
 		}
 	}
-	retval.DbUri = v.DbUri
-	retval.DbVersion = v.DbVersion
-	retval.ScannerUri = v.ScannerUri
-	retval.ScannerVersion = v.ScannerVersion
-	retval.TimeScanned = v.TimeScanned
-	retval.Origin = v.Origin
-	retval.Collector = v.Collector
+	retval.Metadata = v.Metadata
 	return &retval, nil
 }
+
+// allCertifyVulnMetadataVulnerabilityMetaData includes the requested fields of the GraphQL type VulnerabilityMetaData.
+type allCertifyVulnMetadataVulnerabilityMetaData struct {
+	// dbUri (property) - scanner vulnerability database uri
+	DbUri string `json:"dbUri"`
+	// dbVersion (property) - scanner vulnerability database version
+	DbVersion string `json:"dbVersion"`
+	// scannerUri (property) - vulnerability scanner's uri
+	ScannerUri string `json:"scannerUri"`
+	// scannerVersion (property) - vulnerability scanner version
+	ScannerVersion string `json:"scannerVersion"`
+	// timeScanned (property) - timestamp of when the package was last scanned
+	TimeScanned time.Time `json:"timeScanned"`
+	// origin (property) - where this attestation was generated from (based on which document)
+	Origin string `json:"origin"`
+	// collector (property) - the GUAC collector that collected the document that generated this attestation
+	Collector string `json:"collector"`
+}
+
+// GetDbUri returns allCertifyVulnMetadataVulnerabilityMetaData.DbUri, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnMetadataVulnerabilityMetaData) GetDbUri() string { return v.DbUri }
+
+// GetDbVersion returns allCertifyVulnMetadataVulnerabilityMetaData.DbVersion, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnMetadataVulnerabilityMetaData) GetDbVersion() string { return v.DbVersion }
+
+// GetScannerUri returns allCertifyVulnMetadataVulnerabilityMetaData.ScannerUri, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnMetadataVulnerabilityMetaData) GetScannerUri() string { return v.ScannerUri }
+
+// GetScannerVersion returns allCertifyVulnMetadataVulnerabilityMetaData.ScannerVersion, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnMetadataVulnerabilityMetaData) GetScannerVersion() string {
+	return v.ScannerVersion
+}
+
+// GetTimeScanned returns allCertifyVulnMetadataVulnerabilityMetaData.TimeScanned, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnMetadataVulnerabilityMetaData) GetTimeScanned() time.Time {
+	return v.TimeScanned
+}
+
+// GetOrigin returns allCertifyVulnMetadataVulnerabilityMetaData.Origin, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnMetadataVulnerabilityMetaData) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allCertifyVulnMetadataVulnerabilityMetaData.Collector, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnMetadataVulnerabilityMetaData) GetCollector() string { return v.Collector }
 
 // allCertifyVulnPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -2818,29 +2648,29 @@ type allCertifyVulnVulnerabilityOSVOsvIdOSVId struct {
 // GetId returns allCertifyVulnVulnerabilityOSVOsvIdOSVId.Id, and is useful for accessing the field via an interface.
 func (v *allCertifyVulnVulnerabilityOSVOsvIdOSVId) GetId() string { return v.Id }
 
-// allCertifyVulnVulnerabilityOsvCveGhsaObject includes the requested fields of the GraphQL interface OsvCveGhsaObject.
+// allCertifyVulnVulnerabilityOsvCveOrGhsa includes the requested fields of the GraphQL interface OsvCveOrGhsa.
 //
-// allCertifyVulnVulnerabilityOsvCveGhsaObject is implemented by the following types:
+// allCertifyVulnVulnerabilityOsvCveOrGhsa is implemented by the following types:
 // allCertifyVulnVulnerabilityOSV
 // allCertifyVulnVulnerabilityCVE
 // allCertifyVulnVulnerabilityGHSA
 // The GraphQL type's documentation follows.
 //
 // OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
-type allCertifyVulnVulnerabilityOsvCveGhsaObject interface {
-	implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveGhsaObject()
+type allCertifyVulnVulnerabilityOsvCveOrGhsa interface {
+	implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveOrGhsa()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
 	GetTypename() *string
 }
 
-func (v *allCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveGhsaObject() {
+func (v *allCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveOrGhsa() {
 }
-func (v *allCertifyVulnVulnerabilityCVE) implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveGhsaObject() {
+func (v *allCertifyVulnVulnerabilityCVE) implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveOrGhsa() {
 }
-func (v *allCertifyVulnVulnerabilityGHSA) implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveGhsaObject() {
+func (v *allCertifyVulnVulnerabilityGHSA) implementsGraphQLInterfaceallCertifyVulnVulnerabilityOsvCveOrGhsa() {
 }
 
-func __unmarshalallCertifyVulnVulnerabilityOsvCveGhsaObject(b []byte, v *allCertifyVulnVulnerabilityOsvCveGhsaObject) error {
+func __unmarshalallCertifyVulnVulnerabilityOsvCveOrGhsa(b []byte, v *allCertifyVulnVulnerabilityOsvCveOrGhsa) error {
 	if string(b) == "null" {
 		return nil
 	}
@@ -2865,14 +2695,14 @@ func __unmarshalallCertifyVulnVulnerabilityOsvCveGhsaObject(b []byte, v *allCert
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
-			"response was missing OsvCveGhsaObject.__typename")
+			"response was missing OsvCveOrGhsa.__typename")
 	default:
 		return fmt.Errorf(
-			`unexpected concrete type for allCertifyVulnVulnerabilityOsvCveGhsaObject: "%v"`, tn.TypeName)
+			`unexpected concrete type for allCertifyVulnVulnerabilityOsvCveOrGhsa: "%v"`, tn.TypeName)
 	}
 }
 
-func __marshalallCertifyVulnVulnerabilityOsvCveGhsaObject(v *allCertifyVulnVulnerabilityOsvCveGhsaObject) ([]byte, error) {
+func __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(v *allCertifyVulnVulnerabilityOsvCveOrGhsa) ([]byte, error) {
 
 	var typename string
 	switch v := (*v).(type) {
@@ -2904,7 +2734,7 @@ func __marshalallCertifyVulnVulnerabilityOsvCveGhsaObject(v *allCertifyVulnVulne
 		return []byte("null"), nil
 	default:
 		return nil, fmt.Errorf(
-			`unexpected concrete type for allCertifyVulnVulnerabilityOsvCveGhsaObject: "%T"`, v)
+			`unexpected concrete type for allCertifyVulnVulnerabilityOsvCveOrGhsa: "%T"`, v)
 	}
 }
 
@@ -3838,19 +3668,19 @@ func CertifyCVE(
 	client graphql.Client,
 	pkg PkgInputSpec,
 	cve CVEInputSpec,
-	certifyVuln CertifyVulnInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
 ) (*CertifyCVEResponse, error) {
 	req := &graphql.Request{
 		OpName: "CertifyCVE",
 		Query: `
-mutation CertifyCVE ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: CertifyVulnInputSpec!) {
+mutation CertifyCVE ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestPackage(pkg: $pkg) {
 		... allPkgTree
 	}
 	ingestCVE(cve: $cve) {
 		... allCveTree
 	}
-	ingestVulnerability(pkg: $pkg, cve: $cve, certifyVuln: $certifyVuln) {
+	ingestVulnerability(pkg: $pkg, vulnerability: {cve:$cve}, certifyVuln: $certifyVuln) {
 		... allCertifyVuln
 	}
 }
@@ -3914,13 +3744,15 @@ fragment allCertifyVuln on CertifyVuln {
 			}
 		}
 	}
-	dbUri
-	dbVersion
-	scannerUri
-	scannerVersion
-	timeScanned
-	origin
-	collector
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
 }
 `,
 		Variables: &__CertifyCVEInput{
@@ -3948,19 +3780,19 @@ func CertifyGHSA(
 	client graphql.Client,
 	pkg PkgInputSpec,
 	ghsa GHSAInputSpec,
-	certifyVuln CertifyVulnInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
 ) (*CertifyGHSAResponse, error) {
 	req := &graphql.Request{
 		OpName: "CertifyGHSA",
 		Query: `
-mutation CertifyGHSA ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: CertifyVulnInputSpec!) {
+mutation CertifyGHSA ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestPackage(pkg: $pkg) {
 		... allPkgTree
 	}
 	ingestGHSA(ghsa: $ghsa) {
 		... allGHSATree
 	}
-	ingestVulnerability(pkg: $pkg, ghsa: $ghsa, certifyVuln: $certifyVuln) {
+	ingestVulnerability(pkg: $pkg, vulnerability: {ghsa:$ghsa}, certifyVuln: $certifyVuln) {
 		... allCertifyVuln
 	}
 }
@@ -4023,13 +3855,15 @@ fragment allCertifyVuln on CertifyVuln {
 			}
 		}
 	}
-	dbUri
-	dbVersion
-	scannerUri
-	scannerVersion
-	timeScanned
-	origin
-	collector
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
 }
 `,
 		Variables: &__CertifyGHSAInput{
@@ -4057,19 +3891,19 @@ func CertifyOSV(
 	client graphql.Client,
 	pkg PkgInputSpec,
 	osv OSVInputSpec,
-	certifyVuln CertifyVulnInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
 ) (*CertifyOSVResponse, error) {
 	req := &graphql.Request{
 		OpName: "CertifyOSV",
 		Query: `
-mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: CertifyVulnInputSpec!) {
+mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestPackage(pkg: $pkg) {
 		... allPkgTree
 	}
 	ingestOSV(osv: $osv) {
 		... allOSVTree
 	}
-	ingestVulnerability(pkg: $pkg, osv: $osv, certifyVuln: $certifyVuln) {
+	ingestVulnerability(pkg: $pkg, vulnerability: {osv:$osv}, certifyVuln: $certifyVuln) {
 		... allCertifyVuln
 	}
 }
@@ -4132,13 +3966,15 @@ fragment allCertifyVuln on CertifyVuln {
 			}
 		}
 	}
-	dbUri
-	dbVersion
-	scannerUri
-	scannerVersion
-	timeScanned
-	origin
-	collector
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
 }
 `,
 		Variables: &__CertifyOSVInput{

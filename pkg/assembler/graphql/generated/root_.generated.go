@@ -85,15 +85,9 @@ type ComplexityRoot struct {
 	}
 
 	CertifyVuln struct {
-		Collector      func(childComplexity int) int
-		DbURI          func(childComplexity int) int
-		DbVersion      func(childComplexity int) int
-		Origin         func(childComplexity int) int
-		Package        func(childComplexity int) int
-		ScannerURI     func(childComplexity int) int
-		ScannerVersion func(childComplexity int) int
-		TimeScanned    func(childComplexity int) int
-		Vulnerability  func(childComplexity int) int
+		Metadata      func(childComplexity int) int
+		Package       func(childComplexity int) int
+		Vulnerability func(childComplexity int) int
 	}
 
 	GHSA struct {
@@ -176,7 +170,7 @@ type ComplexityRoot struct {
 		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSource        func(childComplexity int, source *model.SourceInputSpec) int
-		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, osv *model.OSVInputSpec, cve *model.CVEInputSpec, ghsa *model.GHSAInputSpec, certifyVuln model.CertifyVulnInputSpec) int
+		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
 
 	OSV struct {
@@ -269,6 +263,16 @@ type ComplexityRoot struct {
 	SourceNamespace struct {
 		Names     func(childComplexity int) int
 		Namespace func(childComplexity int) int
+	}
+
+	VulnerabilityMetaData struct {
+		Collector      func(childComplexity int) int
+		DbURI          func(childComplexity int) int
+		DbVersion      func(childComplexity int) int
+		Origin         func(childComplexity int) int
+		ScannerURI     func(childComplexity int) int
+		ScannerVersion func(childComplexity int) int
+		TimeScanned    func(childComplexity int) int
 	}
 }
 
@@ -441,33 +445,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyVEXStatement.Vulnerability(childComplexity), true
 
-	case "CertifyVuln.collector":
-		if e.complexity.CertifyVuln.Collector == nil {
+	case "CertifyVuln.metadata":
+		if e.complexity.CertifyVuln.Metadata == nil {
 			break
 		}
 
-		return e.complexity.CertifyVuln.Collector(childComplexity), true
-
-	case "CertifyVuln.dbUri":
-		if e.complexity.CertifyVuln.DbURI == nil {
-			break
-		}
-
-		return e.complexity.CertifyVuln.DbURI(childComplexity), true
-
-	case "CertifyVuln.dbVersion":
-		if e.complexity.CertifyVuln.DbVersion == nil {
-			break
-		}
-
-		return e.complexity.CertifyVuln.DbVersion(childComplexity), true
-
-	case "CertifyVuln.origin":
-		if e.complexity.CertifyVuln.Origin == nil {
-			break
-		}
-
-		return e.complexity.CertifyVuln.Origin(childComplexity), true
+		return e.complexity.CertifyVuln.Metadata(childComplexity), true
 
 	case "CertifyVuln.package":
 		if e.complexity.CertifyVuln.Package == nil {
@@ -475,27 +458,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVuln.Package(childComplexity), true
-
-	case "CertifyVuln.scannerUri":
-		if e.complexity.CertifyVuln.ScannerURI == nil {
-			break
-		}
-
-		return e.complexity.CertifyVuln.ScannerURI(childComplexity), true
-
-	case "CertifyVuln.scannerVersion":
-		if e.complexity.CertifyVuln.ScannerVersion == nil {
-			break
-		}
-
-		return e.complexity.CertifyVuln.ScannerVersion(childComplexity), true
-
-	case "CertifyVuln.timeScanned":
-		if e.complexity.CertifyVuln.TimeScanned == nil {
-			break
-		}
-
-		return e.complexity.CertifyVuln.TimeScanned(childComplexity), true
 
 	case "CertifyVuln.vulnerability":
 		if e.complexity.CertifyVuln.Vulnerability == nil {
@@ -928,7 +890,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["osv"].(*model.OSVInputSpec), args["cve"].(*model.CVEInputSpec), args["ghsa"].(*model.GHSAInputSpec), args["certifyVuln"].(model.CertifyVulnInputSpec)), true
+		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(*model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
 
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
@@ -1375,6 +1337,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SourceNamespace.Namespace(childComplexity), true
 
+	case "VulnerabilityMetaData.collector":
+		if e.complexity.VulnerabilityMetaData.Collector == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.Collector(childComplexity), true
+
+	case "VulnerabilityMetaData.dbUri":
+		if e.complexity.VulnerabilityMetaData.DbURI == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.DbURI(childComplexity), true
+
+	case "VulnerabilityMetaData.dbVersion":
+		if e.complexity.VulnerabilityMetaData.DbVersion == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.DbVersion(childComplexity), true
+
+	case "VulnerabilityMetaData.origin":
+		if e.complexity.VulnerabilityMetaData.Origin == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.Origin(childComplexity), true
+
+	case "VulnerabilityMetaData.scannerUri":
+		if e.complexity.VulnerabilityMetaData.ScannerURI == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.ScannerURI(childComplexity), true
+
+	case "VulnerabilityMetaData.scannerVersion":
+		if e.complexity.VulnerabilityMetaData.ScannerVersion == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.ScannerVersion(childComplexity), true
+
+	case "VulnerabilityMetaData.timeScanned":
+		if e.complexity.VulnerabilityMetaData.TimeScanned == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetaData.TimeScanned(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -1393,7 +1404,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
-		ec.unmarshalInputCertifyVulnInputSpec,
 		ec.unmarshalInputCertifyVulnSpec,
 		ec.unmarshalInputGHSAInputSpec,
 		ec.unmarshalInputGHSASpec,
@@ -1408,6 +1418,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsVulnerabilitySpec,
 		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
+		ec.unmarshalInputOsvCveOrGhsaInput,
+		ec.unmarshalInputOsvCveOrGhsaSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPkgInputSpec,
@@ -1419,6 +1431,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputScorecardInputSpec,
 		ec.unmarshalInputSourceInputSpec,
 		ec.unmarshalInputSourceSpec,
+		ec.unmarshalInputVulnerabilityMetaDataInput,
 	)
 	first := true
 
@@ -1931,26 +1944,47 @@ extend type Query {
 """
 CertifyVuln is an attestation that represents when a package has a vulnerability
 
-package (subject) - the package object type that represents the package
-vulnerability (object) - union type that consists of osv, cve or ghsa
-timeScanned (property) - timestamp of when the package was last scanned
-dbUri (property) - scanner vulnerability database uri
-dbVersion (property) - scanner vulnerability database version
-scannerUri (property) - vulnerability scanner's uri 
-scannerVersion (property) - vulnerability scanner version
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVuln {
+  "package (subject) - the package object type that represents the package"
   package: Package!
-  vulnerability: OsvCveGhsaObject!
+  "vulnerability (object) - union type that consists of osv, cve or ghsa"
+  vulnerability: OsvCveOrGhsa!
+  "metadata (property) - contains all the vulnerability metadata "
+  metadata: VulnerabilityMetaData!
+}
+
+type VulnerabilityMetaData {
+  "timeScanned (property) - timestamp of when the package was last scanned"
   timeScanned: Time!
+  "dbUri (property) - scanner vulnerability database uri"
   dbUri: String!
+  "dbVersion (property) - scanner vulnerability database version"
   dbVersion: String!
+  "scannerUri (property) - vulnerability scanner's uri"
   scannerUri: String!
+  "scannerVersion (property) - vulnerability scanner version"
   scannerVersion: String!
+  "origin (property) - where this attestation was generated from (based on which document)"
   origin: String!
+  "collector (property) - the GUAC collector that collected the document that generated this attestation"
   collector: String!
+}
+
+"""
+OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+"""
+union OsvCveOrGhsa = OSV | CVE | GHSA
+
+"""
+OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
+input type to be used in read queries.
+Exactly one of the value must be set to non-nil.
+"""
+input OsvCveOrGhsaSpec {
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
 }
 
 """
@@ -1961,9 +1995,7 @@ Only OSV, CVE or GHSA can be specified at once
 """
 input CertifyVulnSpec {
   package: PkgSpec
-  osv: OSVSpec
-  cve: CVESpec
-  ghsa: GHSASpec
+  vulnerability: OsvCveOrGhsaSpec
   timeScanned: Time
   dbUri: String
   dbVersion: String
@@ -1974,11 +2006,11 @@ input CertifyVulnSpec {
 }
 
 """
-CertifyVulnInputSpec is the same as CertifyVuln but for mutation input.
+VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
 
 All fields are required.
 """
-input CertifyVulnInputSpec {
+input VulnerabilityMetaDataInput {
   timeScanned: Time!
   dbUri: String!
   dbVersion: String!
@@ -1989,9 +2021,15 @@ input CertifyVulnInputSpec {
 }
 
 """
-OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
+input type to be used in mutations.
+Exactly one of the value must be set to non-nil.
 """
-union OsvCveGhsaObject = OSV | CVE | GHSA
+input OsvCveOrGhsaInput {
+  osv: OSVInputSpec
+  cve: CVEInputSpec
+  ghsa: GHSAInputSpec
+}
 
 extend type Query {
   "Returns all CertifyVuln"
@@ -2000,7 +2038,7 @@ extend type Query {
 
 extend type Mutation {
   "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
-  ingestVulnerability(pkg: PkgInputSpec!, osv: OSVInputSpec, cve: CVEInputSpec, ghsa: GHSAInputSpec, certifyVuln: CertifyVulnInputSpec!): CertifyVuln!
+  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#

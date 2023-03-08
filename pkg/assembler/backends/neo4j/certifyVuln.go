@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -38,13 +37,25 @@ const (
 // Query CertifyVuln
 
 func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	err := helper.CheckCertifyVulnInputs(certifyVulnSpec)
-	if err != nil {
-		return nil, err
+
+	if certifyVulnSpec.Vulnerability != nil {
+		vulnDefined := 0
+		if certifyVulnSpec.Vulnerability.Osv != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if certifyVulnSpec.Vulnerability.Ghsa != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if certifyVulnSpec.Vulnerability.Cve != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if vulnDefined > 1 {
+			return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+		}
 	}
 
 	queryAll := false
-	if certifyVulnSpec.Osv == nil && certifyVulnSpec.Cve == nil && certifyVulnSpec.Ghsa == nil {
+	if certifyVulnSpec.Vulnerability == nil {
 		queryAll = true
 	}
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
@@ -52,7 +63,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 
 	aggregateCertifyVuln := []*model.CertifyVuln{}
 
-	if queryAll || certifyVulnSpec.Cve != nil {
+	if queryAll || certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Cve != nil {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -70,7 +81,9 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		sb.WriteString(query)
 
 		setPkgMatchValues(&sb, certifyVulnSpec.Package, false, &firstMatch, queryValues)
-		setCveMatchValues(&sb, certifyVulnSpec.Cve, &firstMatch, queryValues)
+		if certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Cve != nil {
+			setCveMatchValues(&sb, certifyVulnSpec.Vulnerability.Cve, &firstMatch, queryValues)
+		}
 		setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -123,7 +136,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		aggregateCertifyVuln = append(aggregateCertifyVuln, result.([]*model.CertifyVuln)...)
 	}
 
-	if queryAll || certifyVulnSpec.Ghsa != nil {
+	if queryAll || certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Ghsa != nil {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -141,7 +154,9 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		sb.WriteString(query)
 
 		setPkgMatchValues(&sb, certifyVulnSpec.Package, false, &firstMatch, queryValues)
-		setGhsaMatchValues(&sb, certifyVulnSpec.Ghsa, &firstMatch, queryValues)
+		if certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Ghsa != nil {
+			setGhsaMatchValues(&sb, certifyVulnSpec.Vulnerability.Ghsa, &firstMatch, queryValues)
+		}
 		setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -193,7 +208,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		aggregateCertifyVuln = append(aggregateCertifyVuln, result.([]*model.CertifyVuln)...)
 	}
 
-	if queryAll || certifyVulnSpec.Osv != nil {
+	if queryAll || certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Osv != nil {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -212,7 +227,9 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		sb.WriteString(query)
 
 		setPkgMatchValues(&sb, certifyVulnSpec.Package, false, &firstMatch, queryValues)
-		setOSVMatchValues(&sb, certifyVulnSpec.Osv, &firstMatch, queryValues)
+		if certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Osv != nil {
+			setOSVMatchValues(&sb, certifyVulnSpec.Vulnerability.Osv, &firstMatch, queryValues)
+		}
 		setCertifyVulnValues(&sb, certifyVulnSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -304,12 +321,10 @@ func setCertifyVulnValues(sb *strings.Builder, certifyVulnSpec *model.CertifyVul
 	}
 }
 
-func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveGhsaObject, timeScanned time.Time, dbUri, dbVersion, scannerUri,
+func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveOrGhsa, timeScanned time.Time, dbUri, dbVersion, scannerUri,
 	scannerVersion, origin, collector string) *model.CertifyVuln {
 
-	certifyVuln := model.CertifyVuln{
-		Package:        pkg,
-		Vulnerability:  vuln,
+	metadata := &model.VulnerabilityMetaData{
 		TimeScanned:    timeScanned,
 		DbURI:          dbUri,
 		DbVersion:      dbVersion,
@@ -318,16 +333,31 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveGhsaObject, t
 		Origin:         origin,
 		Collector:      collector,
 	}
+
+	certifyVuln := model.CertifyVuln{
+		Package:       pkg,
+		Vulnerability: vuln,
+		Metadata:      metadata,
+	}
 	return &certifyVuln
 }
 
 //  Ingest Vulnerability
 
-func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, osv *model.OSVInputSpec, cve *model.CVEInputSpec, ghsa *model.GHSAInputSpec, certifyVuln model.CertifyVulnInputSpec) (*model.CertifyVuln, error) {
+func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	err := helper.CheckIngestVulnInputs(osv, cve, ghsa)
-	if err != nil {
-		return nil, err
+	vulnDefined := 0
+	if vulnerability.Osv != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnerability.Ghsa != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnerability.Cve != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnDefined > 1 {
+		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -348,8 +378,8 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 	// TODO: use generics here between PkgInputSpec and PkgSpecs?
 	selectedPkgSpec := convertPkgInputSpecToPkgSpec(&pkg)
 
-	if osv != nil {
-		selectedOsvSepc := convertOsvInputSpecToOsvSpec(osv)
+	if vulnerability.Osv != nil {
+		selectedOsvSepc := convertOsvInputSpecToOsvSpec(vulnerability.Osv)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, osvID.id"
@@ -415,8 +445,8 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		}
 
 		return result.(*model.CertifyVuln), nil
-	} else if cve != nil {
-		selectedCveSepc := convertCveInputSpecToCveSpec(cve)
+	} else if vulnerability.Cve != nil {
+		selectedCveSepc := convertCveInputSpecToCveSpec(vulnerability.Cve)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, cveYear.year, cveID.id"
@@ -483,8 +513,8 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		}
 
 		return result.(*model.CertifyVuln), nil
-	} else if ghsa != nil {
-		selectedGhsaSepc := convertGhsaInputSpecToGhsaSpec(ghsa)
+	} else if vulnerability.Ghsa != nil {
+		selectedGhsaSepc := convertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, ghsaID.id"
