@@ -31,7 +31,7 @@ func CheckVulnerabilityIngestionInput(vulnerability model.OsvCveOrGhsaInput) err
 	if vulnerability.Cve != nil {
 		vulnDefined = vulnDefined + 1
 	}
-	if vulnDefined == 0 || vulnDefined > 1 {
+	if vulnDefined != 1 {
 		return gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
 	}
 	return nil
@@ -51,7 +51,7 @@ func CheckVulnerabilityQueryInput(vulnerability *model.OsvCveOrGhsaSpec) (bool, 
 		if vulnerability.Cve != nil {
 			vulnDefined = vulnDefined + 1
 		}
-		if vulnDefined == 0 || vulnDefined > 1 {
+		if vulnDefined != 1 {
 			return false, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
 		}
 	}
