@@ -323,16 +323,16 @@ type HasSlsa struct {
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
-	Subject     *PackageSourceOrArtifactInput   `json:"subject"`
-	BuiltFrom   []*PackageSourceOrArtifactInput `json:"builtFrom"`
-	BuiltBy     *BuilderSpec                    `json:"builtBy"`
-	BuildType   *string                         `json:"buildType"`
-	Predicate   []*SLSAPredicateSpec            `json:"predicate"`
-	SlsaVersion *string                         `json:"slsaVersion"`
-	StartedOn   *time.Time                      `json:"startedOn"`
-	FinishedOn  *time.Time                      `json:"finishedOn"`
-	Origin      *string                         `json:"origin"`
-	Collector   *string                         `json:"collector"`
+	Subject     *PackageSourceOrArtifactSpec   `json:"subject"`
+	BuiltFrom   []*PackageSourceOrArtifactSpec `json:"builtFrom"`
+	BuiltBy     *BuilderSpec                   `json:"builtBy"`
+	BuildType   *string                        `json:"buildType"`
+	Predicate   []*SLSAPredicateSpec           `json:"predicate"`
+	SlsaVersion *string                        `json:"slsaVersion"`
+	StartedOn   *time.Time                     `json:"startedOn"`
+	FinishedOn  *time.Time                     `json:"finishedOn"`
+	Origin      *string                        `json:"origin"`
+	Collector   *string                        `json:"collector"`
 }
 
 // HasSourceAt is an attestation represents that a package object has a source object since a timestamp
@@ -639,10 +639,20 @@ type PackageQualifierSpec struct {
 }
 
 // PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
-// input type.
+// input type to be used in mutations.
 //
 // Exactly one of the value must be set to non-nil.
 type PackageSourceOrArtifactInput struct {
+	Package  *PkgInputSpec      `json:"package"`
+	Source   *SourceInputSpec   `json:"source"`
+	Artifact *ArtifactInputSpec `json:"artifact"`
+}
+
+// PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
+// input type to be used in read queries.
+//
+// Exactly one of the value must be set to non-nil.
+type PackageSourceOrArtifactSpec struct {
 	Package  *PkgSpec      `json:"package"`
 	Source   *SourceSpec   `json:"source"`
 	Artifact *ArtifactSpec `json:"artifact"`
@@ -744,6 +754,21 @@ type Slsa struct {
 	Collector string `json:"collector"`
 }
 
+// SLSAInputSpec is the same as SLSA but for mutation input.
+//
+// All fields are required.
+type SLSAInputSpec struct {
+	BuiltFrom     []*PackageSourceOrArtifactInput `json:"builtFrom"`
+	BuiltBy       *BuilderInputSpec               `json:"builtBy"`
+	BuildType     string                          `json:"buildType"`
+	SlsaPredicate []*SLSAPredicateInputSpec       `json:"slsaPredicate"`
+	SlsaVersion   string                          `json:"slsaVersion"`
+	StartedOn     time.Time                       `json:"startedOn"`
+	FinishedOn    time.Time                       `json:"finishedOn"`
+	Origin        string                          `json:"origin"`
+	Collector     string                          `json:"collector"`
+}
+
 // SLSAPredicate are the values from the SLSA predicate in key-value pair form.
 //
 // # For example, given the following predicate
@@ -778,7 +803,14 @@ type SLSAPredicate struct {
 	Value string `json:"value"`
 }
 
-// SLSAPredicateSpec is the same as SLSAPredicateSpec, but usable as query input.
+// SLSAPredicateInputSpec is the same as SLSAPredicateSpec, but for mutation
+// input.
+type SLSAPredicateInputSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input.
 type SLSAPredicateSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
