@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -175,8 +176,8 @@ func (c *neo4jClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSp
 	queryValues := map[string]any{}
 
 	// TODO: use generics here between PkgInputSpec and PkgSpec?
-	selectedPkgSpec := convertPkgInputSpecToPkgSpec(&pkg)
-	depPkgSpec := convertPkgInputSpecToPkgSpec(&depPkg)
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
+	depPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&depPkg)
 
 	queryValues[justification] = certifyPkg.Justification
 	queryValues[origin] = certifyPkg.Origin

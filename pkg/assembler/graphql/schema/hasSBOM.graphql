@@ -27,7 +27,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Only package object or source object can be defined. Not both.
 """
 type HasSBOM {
-  subject: PkgSrcObject!
+  subject: PackageOrSource!
   uri: String!
   origin: String!
   collector: String!
@@ -46,11 +46,6 @@ input HasSBOMSpec {
   origin: String
   collector: String
 }
-
-"""
-PkgSrcObject is a union of Package and Source. Any of these objects can be specified
-"""
-union PkgSrcObject = Package | Source
 
 extend type Query {
   "Returns all HasSBOM"

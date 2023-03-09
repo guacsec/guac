@@ -5,7 +5,6 @@ package generated
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"sync"
 
@@ -54,9 +53,9 @@ func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.PkgSrcObject)
+	res := resTmp.(model.PackageOrSource)
 	fc.Result = res
-	return ec.marshalNPkgSrcObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcObject(ctx, field.Selections, res)
+	return ec.marshalNPackageOrSource2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSource(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HasSBOM_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -66,7 +65,7 @@ func (ec *executionContext) fieldContext_HasSBOM_subject(ctx context.Context, fi
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type PkgSrcObject does not have child fields")
+			return nil, errors.New("field of type PackageOrSource does not have child fields")
 		},
 	}
 	return fc, nil
@@ -272,29 +271,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _PkgSrcObject(ctx context.Context, sel ast.SelectionSet, obj model.PkgSrcObject) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.Package:
-		return ec._Package(ctx, sel, &obj)
-	case *model.Package:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Package(ctx, sel, obj)
-	case model.Source:
-		return ec._Source(ctx, sel, &obj)
-	case *model.Source:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Source(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -404,16 +380,6 @@ func (ec *executionContext) marshalNHasSBOM2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 		return graphql.Null
 	}
 	return ec._HasSBOM(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNPkgSrcObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSrcObject(ctx context.Context, sel ast.SelectionSet, v model.PkgSrcObject) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._PkgSrcObject(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOHasSBOMSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v interface{}) (*model.HasSBOMSpec, error) {

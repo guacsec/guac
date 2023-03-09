@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -28,21 +29,18 @@ import (
 // Query IsOccurrence
 
 func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	queryAll := false
-	if isOccurrenceSpec.Package != nil && isOccurrenceSpec.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
-	}
-
-	if isOccurrenceSpec.Package == nil && isOccurrenceSpec.Source == nil {
-		queryAll = true
-	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
+	queryAll, err := helper.CheckOccurrenceQueryInput(isOccurrenceSpec.Subject)
+	if err != nil {
+		return nil, err
+	}
+
 	aggregateIsOccurrence := []*model.IsOccurrence{}
 
-	if queryAll || isOccurrenceSpec.Package != nil {
+	if queryAll || isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Package != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -56,28 +54,12 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 			"-[:subject]-(isOccurrence:IsOccurrence)-[:has_occurrence]-(objArt:Artifact)"
 		sb.WriteString(query)
 
-		setPkgMatchValues(&sb, isOccurrenceSpec.Package, false, &firstMatch, queryValues)
+		if isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Package != nil {
+			setPkgMatchValues(&sb, isOccurrenceSpec.Subject.Package, false, &firstMatch, queryValues)
+		}
 		setArtifactMatchValues(&sb, isOccurrenceSpec.Artifact, true, &firstMatch, queryValues)
 		setIsOccurrenceValues(&sb, isOccurrenceSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
-
-		if isOccurrenceSpec.Package == nil || isOccurrenceSpec.Package != nil && isOccurrenceSpec.Package.Version == nil && isOccurrenceSpec.Package.Subpath == nil &&
-			len(isOccurrenceSpec.Package.Qualifiers) == 0 && !*isOccurrenceSpec.Package.MatchOnlyEmptyQualifiers {
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[:subject]-(isOccurrence:IsOccurrence)-[:has_occurrence]-(objArt:Artifact)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setPkgMatchValues(&sb, isOccurrenceSpec.Package, false, &firstMatch, queryValues)
-			setArtifactMatchValues(&sb, isOccurrenceSpec.Artifact, true, &firstMatch, queryValues)
-			setIsOccurrenceValues(&sb, isOccurrenceSpec, &firstMatch, queryValues)
-			sb.WriteString(returnValue)
-		}
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -127,7 +109,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		aggregateIsOccurrence = append(aggregateIsOccurrence, result.([]*model.IsOccurrence)...)
 	}
 
-	if queryAll || isOccurrenceSpec.Source != nil {
+	if queryAll || isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Source != nil {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -136,7 +118,9 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 			"-[:SrcHasName]->(name:SrcName)-[:subject]-(isOccurrence:IsOccurrence)-[:has_occurrence]-(objArt:Artifact)"
 		sb.WriteString(query)
 
-		setSrcMatchValues(&sb, isOccurrenceSpec.Source, false, &firstMatch, queryValues)
+		if isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Source != nil {
+			setSrcMatchValues(&sb, isOccurrenceSpec.Subject.Source, false, &firstMatch, queryValues)
+		}
 		setArtifactMatchValues(&sb, isOccurrenceSpec.Artifact, true, &firstMatch, queryValues)
 		setIsOccurrenceValues(&sb, isOccurrenceSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, isOccurrence, objArt.algorithm, objArt.digest")
@@ -191,89 +175,72 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 
 func setIsOccurrenceValues(sb *strings.Builder, isOccurrenceSpec *model.IsOccurrenceSpec, firstMatch *bool, queryValues map[string]any) {
 	if isOccurrenceSpec.Justification != nil {
-		matchProperties(sb, *firstMatch, "isOccurrence", "justification", "$justification")
+		matchProperties(sb, *firstMatch, "isOccurrence", justification, "$"+justification)
 		*firstMatch = false
-		queryValues["justification"] = isOccurrenceSpec.Justification
+		queryValues[justification] = isOccurrenceSpec.Justification
 	}
 	if isOccurrenceSpec.Origin != nil {
-		matchProperties(sb, *firstMatch, "isOccurrence", "origin", "$origin")
+		matchProperties(sb, *firstMatch, "isOccurrence", origin, "$"+origin)
 		*firstMatch = false
-		queryValues["origin"] = isOccurrenceSpec.Origin
+		queryValues[origin] = isOccurrenceSpec.Origin
 	}
 	if isOccurrenceSpec.Collector != nil {
-		matchProperties(sb, *firstMatch, "isOccurrence", "collector", "$collector")
+		matchProperties(sb, *firstMatch, "isOccurrence", collector, "$"+collector)
 		*firstMatch = false
-		queryValues["collector"] = isOccurrenceSpec.Collector
+		queryValues[collector] = isOccurrenceSpec.Collector
 	}
 }
 
-func generateModelIsOccurrence(subject model.PkgSrcObject, artifact *model.Artifact, justification, origin, collector string) *model.IsOccurrence {
+func generateModelIsOccurrence(subject model.PackageOrSource, artifact *model.Artifact, justification, origin, collector string) *model.IsOccurrence {
 	isOccurrence := model.IsOccurrence{
-		Subject:            subject,
-		OccurrenceArtifact: artifact,
-		Justification:      justification,
-		Origin:             origin,
-		Collector:          collector,
+		Subject:       subject,
+		Artifact:      artifact,
+		Justification: justification,
+		Origin:        origin,
+		Collector:     collector,
 	}
 	return &isOccurrence
 }
 
 // Ingest IngestOccurrence
 
-func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
-
-	if pkg != nil && source != nil {
-		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
-	}
+func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
+
+	err := helper.CheckOccurrenceIngestionInput(subject)
+	if err != nil {
+		return nil, err
+	}
 
 	var sb strings.Builder
 	var firstMatch bool = true
 	queryValues := map[string]any{}
 
-	occurrenceArt := convertArtInputSpecToArtSpec(&artifact)
+	occurrenceArt := helper.ConvertArtInputSpecToArtSpec(&artifact)
 
 	queryValues[justification] = occurrence.Justification
 	queryValues[origin] = occurrence.Origin
 	queryValues[collector] = occurrence.Collector
 
-	if pkg != nil {
+	if subject.Package != nil {
 		// TODO: use generics here between PkgInputSpec and PkgSpecs?
-		selectedPkgSpec := convertPkgInputSpecToPkgSpec(pkg)
+		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
 
+		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objArt:Artifact)"
+
+		sb.WriteString(query)
+		setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
+		setArtifactMatchValues(&sb, occurrenceArt, true, &firstMatch, queryValues)
+
+		merge := "\nMERGE (version)<-[:subject]-(isOccurrence:IsOccurrence{justification:$justification,origin:$origin,collector:$collector})" +
+			"-[:has_occurrence]->(objArt)"
+		sb.WriteString(merge)
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, isOccurrence, objArt.algorithm, objArt.digest"
-
-		if selectedPkgSpec.Version == nil && selectedPkgSpec.Subpath == nil &&
-			len(selectedPkgSpec.Qualifiers) == 0 && !*selectedPkgSpec.MatchOnlyEmptyQualifiers {
-
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName), (objArt:Artifact)" +
-				"\nWITH *, null AS version"
-
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setArtifactMatchValues(&sb, occurrenceArt, true, &firstMatch, queryValues)
-
-			merge := "\nMERGE (name)<-[:subject]-(isOccurrence:IsOccurrence{justification:$justification,origin:$origin,collector:$collector})" +
-				"-[:has_occurrence]->(objArt)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		} else {
-			query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objArt:Artifact)"
-
-			sb.WriteString(query)
-			setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
-			setArtifactMatchValues(&sb, occurrenceArt, true, &firstMatch, queryValues)
-
-			merge := "\nMERGE (version)<-[:subject]-(isOccurrence:IsOccurrence{justification:$justification,origin:$origin,collector:$collector})" +
-				"-[:has_occurrence]->(objArt)"
-			sb.WriteString(merge)
-			sb.WriteString(returnValue)
-		}
+		sb.WriteString(returnValue)
 
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -318,9 +285,9 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, pkg *model.PkgInputS
 		}
 
 		return result.(*model.IsOccurrence), nil
-	} else if source != nil {
+	} else if subject.Source != nil {
 		// TODO: use generics here between SourceInputSpec and SourceSpec?
-		selectedSrcSpec := convertSrcInputSpecToSrcSpec(source)
+		selectedSrcSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, isOccurrence, objArt.algorithm, objArt.digest"
 

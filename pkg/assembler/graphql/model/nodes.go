@@ -16,6 +16,11 @@ type OsvCveOrGhsa interface {
 	IsOsvCveOrGhsa()
 }
 
+// PackageOrSource is a union of Package and Source. Any of these objects can be specified
+type PackageOrSource interface {
+	IsPackageOrSource()
+}
+
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
 type PackageSourceOrArtifact interface {
 	IsPackageSourceOrArtifact()
@@ -24,11 +29,6 @@ type PackageSourceOrArtifact interface {
 // PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
 type PkgArtObject interface {
 	IsPkgArtObject()
-}
-
-// PkgSrcObject is a union of Package and Source. Any of these objects can be specified
-type PkgSrcObject interface {
-	IsPkgSrcObject()
 }
 
 // Artifact represents the artifact and contains a digest field
@@ -295,10 +295,10 @@ type GHSASpec struct {
 //
 // Note: Only package object or source object can be defined. Not both.
 type HasSbom struct {
-	Subject   PkgSrcObject `json:"subject"`
-	URI       string       `json:"uri"`
-	Origin    string       `json:"origin"`
-	Collector string       `json:"collector"`
+	Subject   PackageOrSource `json:"subject"`
+	URI       string          `json:"uri"`
+	Origin    string          `json:"origin"`
+	Collector string          `json:"collector"`
 }
 
 // HashEqualSpec allows filtering the list of HasSBOM to return.
@@ -427,26 +427,19 @@ type IsDependencySpec struct {
 
 // IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 //
-// subject - union type that can be either a package or source object type
-// occurrenceArtifact (object) - artifact that represent the the package or source
-// justification (property) - string value representing why the package or source is represented by the specified artifact
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
-//
 // Note: Package or Source must be specified but not both at the same time.
-// Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
-//
-// HashEqual will be used to connect together two artifacts if a package or source
-// is represented by more than one artifact.
-//
-// IsOccurrence does not connect a package with a source.
-// HasSourceAt attestation will be used to connect a package with a source
+// Attestation must occur at the PackageVersion or at the SourceName.
 type IsOccurrence struct {
-	Subject            PkgSrcObject `json:"subject"`
-	OccurrenceArtifact *Artifact    `json:"occurrenceArtifact"`
-	Justification      string       `json:"justification"`
-	Origin             string       `json:"origin"`
-	Collector          string       `json:"collector"`
+	// subject - union type that can be either a package or source object type
+	Subject PackageOrSource `json:"subject"`
+	// artifact (object) - artifact that represent the the package or source
+	Artifact *Artifact `json:"artifact"`
+	// justification (property) - string value representing why the package or source is represented by the specified artifact
+	Justification string `json:"justification"`
+	// origin (property) - where this attestation was generated from (based on which document)
+	Origin string `json:"origin"`
+	// collector (property) - the GUAC collector that collected the document that generated this attestation
+	Collector string `json:"collector"`
 }
 
 // IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
@@ -460,15 +453,15 @@ type IsOccurrenceInputSpec struct {
 
 // IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 // Note: Package or Source must be specified but not both at the same time
-// For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+// For package - PackageVersion must be specified (version, qualifiers and subpath)
+// or it defaults to empty string for version, subpath and empty list for qualifiers
 // For source - a SourceName must be specified (name, tag or commit)
 type IsOccurrenceSpec struct {
-	Package       *PkgSpec      `json:"package"`
-	Source        *SourceSpec   `json:"source"`
-	Artifact      *ArtifactSpec `json:"artifact"`
-	Justification *string       `json:"justification"`
-	Origin        *string       `json:"origin"`
-	Collector     *string       `json:"collector"`
+	Subject       *PackageOrSourceSpec `json:"subject"`
+	Artifact      *ArtifactSpec        `json:"artifact"`
+	Justification *string              `json:"justification"`
+	Origin        *string              `json:"origin"`
+	Collector     *string              `json:"collector"`
 }
 
 // IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
@@ -565,9 +558,9 @@ type Package struct {
 
 func (Package) IsPkgArtObject() {}
 
-func (Package) IsPkgSrcObject() {}
-
 func (Package) IsPackageSourceOrArtifact() {}
+
+func (Package) IsPackageOrSource() {}
 
 // PackageName is a name for packages.
 //
@@ -593,6 +586,22 @@ type PackageName struct {
 type PackageNamespace struct {
 	Namespace string         `json:"namespace"`
 	Names     []*PackageName `json:"names"`
+}
+
+// PackageOrSourceInput allows using PackageOrSource union as
+// input type to be used in mutations.
+// Exactly one of the value must be set to non-nil.
+type PackageOrSourceInput struct {
+	Package *PkgInputSpec    `json:"package"`
+	Source  *SourceInputSpec `json:"source"`
+}
+
+// PackageOrSourceSpec allows using PackageOrSource union as
+// input type to be used in read queries.
+// Exactly one of the value must be set to non-nil.
+type PackageOrSourceSpec struct {
+	Package *PkgSpec    `json:"package"`
+	Source  *SourceSpec `json:"source"`
 }
 
 // PackageQualifier is a qualifier for a package, a key-value pair.
@@ -898,9 +907,9 @@ type Source struct {
 	Namespaces []*SourceNamespace `json:"namespaces"`
 }
 
-func (Source) IsPkgSrcObject() {}
-
 func (Source) IsPackageSourceOrArtifact() {}
+
+func (Source) IsPackageOrSource() {}
 
 // SourceInputSpec specifies a source for a mutation.
 //

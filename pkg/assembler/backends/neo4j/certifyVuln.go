@@ -17,10 +17,10 @@ package neo4jBackend
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -38,28 +38,13 @@ const (
 
 func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
-	if certifyVulnSpec.Vulnerability != nil {
-		vulnDefined := 0
-		if certifyVulnSpec.Vulnerability.Osv != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if certifyVulnSpec.Vulnerability.Ghsa != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if certifyVulnSpec.Vulnerability.Cve != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if vulnDefined > 1 {
-			return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
-		}
-	}
-
-	queryAll := false
-	if certifyVulnSpec.Vulnerability == nil {
-		queryAll = true
-	}
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
+
+	queryAll, err := helper.CheckVulnerabilityQueryInput(certifyVulnSpec.Vulnerability)
+	if err != nil {
+		return nil, err
+	}
 
 	aggregateCertifyVuln := []*model.CertifyVuln{}
 
@@ -344,20 +329,11 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveOrGhsa, timeS
 
 //  Ingest Vulnerability
 
-func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	vulnDefined := 0
-	if vulnerability.Osv != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnerability.Ghsa != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnerability.Cve != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnDefined > 1 {
-		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+	err := helper.CheckVulnerabilityIngestionInput(vulnerability)
+	if err != nil {
+		return nil, err
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -376,10 +352,10 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 	queryValues[collector] = certifyVuln.Collector
 
 	// TODO: use generics here between PkgInputSpec and PkgSpecs?
-	selectedPkgSpec := convertPkgInputSpecToPkgSpec(&pkg)
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
 
 	if vulnerability.Osv != nil {
-		selectedOsvSepc := convertOsvInputSpecToOsvSpec(vulnerability.Osv)
+		selectedOsvSepc := helper.ConvertOsvInputSpecToOsvSpec(vulnerability.Osv)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, osvID.id"
@@ -401,7 +377,6 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 
-		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)
@@ -446,7 +421,7 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 
 		return result.(*model.CertifyVuln), nil
 	} else if vulnerability.Cve != nil {
-		selectedCveSepc := convertCveInputSpecToCveSpec(vulnerability.Cve)
+		selectedCveSepc := helper.ConvertCveInputSpecToCveSpec(vulnerability.Cve)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, cveYear.year, cveID.id"
@@ -468,7 +443,6 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 
-		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)
@@ -514,7 +488,7 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 
 		return result.(*model.CertifyVuln), nil
 	} else if vulnerability.Ghsa != nil {
-		selectedGhsaSepc := convertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
+		selectedGhsaSepc := helper.ConvertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
 			"version.qualifier_list, certifyVuln, ghsaID.id"
@@ -536,7 +510,6 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 		sb.WriteString(merge)
 		sb.WriteString(returnValue)
 
-		fmt.Println(sb.String())
 		result, err := session.WriteTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
 				result, err := tx.Run(sb.String(), queryValues)

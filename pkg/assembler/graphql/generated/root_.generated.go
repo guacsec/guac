@@ -136,11 +136,11 @@ type ComplexityRoot struct {
 	}
 
 	IsOccurrence struct {
-		Collector          func(childComplexity int) int
-		Justification      func(childComplexity int) int
-		OccurrenceArtifact func(childComplexity int) int
-		Origin             func(childComplexity int) int
-		Subject            func(childComplexity int) int
+		Artifact      func(childComplexity int) int
+		Collector     func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Subject       func(childComplexity int) int
 	}
 
 	IsVulnerability struct {
@@ -159,12 +159,12 @@ type ComplexityRoot struct {
 		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestOccurrence    func(childComplexity int, pkg *model.PkgInputSpec, source *model.SourceInputSpec, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
+		IngestOccurrence    func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSlsa          func(childComplexity int, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) int
 		IngestSource        func(childComplexity int, source *model.SourceInputSpec) int
-		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
+		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
 
 	OSV struct {
@@ -640,6 +640,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsDependency.VersionRange(childComplexity), true
 
+	case "IsOccurrence.artifact":
+		if e.complexity.IsOccurrence.Artifact == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.Artifact(childComplexity), true
+
 	case "IsOccurrence.collector":
 		if e.complexity.IsOccurrence.Collector == nil {
 			break
@@ -653,13 +660,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsOccurrence.Justification(childComplexity), true
-
-	case "IsOccurrence.occurrenceArtifact":
-		if e.complexity.IsOccurrence.OccurrenceArtifact == nil {
-			break
-		}
-
-		return e.complexity.IsOccurrence.OccurrenceArtifact(childComplexity), true
 
 	case "IsOccurrence.origin":
 		if e.complexity.IsOccurrence.Origin == nil {
@@ -804,7 +804,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["pkg"].(*model.PkgInputSpec), args["source"].(*model.SourceInputSpec), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceInputSpec)), true
+		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["subject"].(model.PackageOrSourceInput), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceInputSpec)), true
 
 	case "Mutation.ingestOSV":
 		if e.complexity.Mutation.IngestOsv == nil {
@@ -864,7 +864,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(*model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
+		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
 
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
@@ -1458,6 +1458,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputOsvCveOrGhsaInput,
 		ec.unmarshalInputOsvCveOrGhsaSpec,
+		ec.unmarshalInputPackageOrSourceInput,
+		ec.unmarshalInputPackageOrSourceSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
@@ -2088,7 +2090,7 @@ extend type Query {
 
 extend type Mutation {
   "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
-  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
@@ -2258,7 +2260,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Only package object or source object can be defined. Not both.
 """
 type HasSBOM {
-  subject: PkgSrcObject!
+  subject: PackageOrSource!
   uri: String!
   origin: String!
   collector: String!
@@ -2277,11 +2279,6 @@ input HasSBOMSpec {
   origin: String
   collector: String
 }
-
-"""
-PkgSrcObject is a union of Package and Source. Any of these objects can be specified
-"""
-union PkgSrcObject = Package | Source
 
 extend type Query {
   "Returns all HasSBOM"
@@ -2675,46 +2672,66 @@ extend type Mutation {
 
 # Defines a GraphQL schema for the IsOccurrence. It contains the subject (which can be either a package or source),
 #  occurrenceArtifact, justification,  origin of the attestation, and collector
+
+"""
+PackageOrSource is a union of Package and Source. Any of these objects can be specified
+"""
+union PackageOrSource = Package | Source
+
 """
 IsOccurrence is an attestation represents when either a package or source is represented by an artifact
 
-subject - union type that can be either a package or source object type
-occurrenceArtifact (object) - artifact that represent the the package or source
-justification (property) - string value representing why the package or source is represented by the specified artifact
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-
 Note: Package or Source must be specified but not both at the same time.
-Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
-
-HashEqual will be used to connect together two artifacts if a package or source 
-is represented by more than one artifact.
-
-IsOccurrence does not connect a package with a source. 
-HasSourceAt attestation will be used to connect a package with a source
+Attestation must occur at the PackageVersion or at the SourceName.
 """
 type IsOccurrence {
-  subject: PkgSrcObject!
-  occurrenceArtifact: Artifact!
+  "subject - union type that can be either a package or source object type"
+  subject: PackageOrSource!
+  "artifact (object) - artifact that represent the the package or source"
+  artifact: Artifact!
+  "justification (property) - string value representing why the package or source is represented by the specified artifact"
   justification: String!
+  "origin (property) - where this attestation was generated from (based on which document)"
   origin: String!
+  "collector (property) - the GUAC collector that collected the document that generated this attestation"
   collector: String!
 }
 
 """
 IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 Note: Package or Source must be specified but not both at the same time
-For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+For package - PackageVersion must be specified (version, qualifiers and subpath) 
+or it defaults to empty string for version, subpath and empty list for qualifiers
 For source - a SourceName must be specified (name, tag or commit)
 """
 input IsOccurrenceSpec {
-  package: PkgSpec
-  source: SourceSpec
+  subject: PackageOrSourceSpec
   artifact: ArtifactSpec
   justification: String
   origin: String
   collector: String
 }
+
+"""
+PackageOrSourceSpec allows using PackageOrSource union as
+input type to be used in read queries.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrSourceSpec {
+  package: PkgSpec
+  source: SourceSpec
+}
+
+"""
+PackageOrSourceInput allows using PackageOrSource union as
+input type to be used in mutations.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrSourceInput {
+  package: PkgInputSpec
+  source: SourceInputSpec
+}
+
 
 """
 IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
@@ -2734,7 +2751,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds an artifact as an occurrence for either a package or a source"
-  ingestOccurrence(pkg: PkgInputSpec, source: SourceInputSpec, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#

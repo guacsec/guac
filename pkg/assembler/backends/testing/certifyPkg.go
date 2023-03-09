@@ -19,6 +19,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -110,24 +111,8 @@ func (c *demoClient) registerCertifyPkg(selectedPackages []*model.Package, justi
 
 func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error) {
 
-	pkgQualifiers := []*model.PackageQualifierSpec{}
-	for _, quali := range pkg.Qualifiers {
-		pkgQualifier := &model.PackageQualifierSpec{
-			Key:   quali.Key,
-			Value: &quali.Value,
-		}
-		pkgQualifiers = append(pkgQualifiers, pkgQualifier)
-	}
-
-	pkgSpec := model.PkgSpec{
-		Type:       &pkg.Type,
-		Namespace:  pkg.Namespace,
-		Name:       &pkg.Name,
-		Version:    pkg.Version,
-		Qualifiers: pkgQualifiers,
-		Subpath:    pkg.Subpath,
-	}
-	collectedPkg, err := c.Packages(ctx, &pkgSpec)
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
+	collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
 	if err != nil {
 		return nil, err
 	}
@@ -136,24 +121,9 @@ func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 			"IngestCertifyPkg :: multiple package found")
 	}
 
-	depPkgQualifiers := []*model.PackageQualifierSpec{}
-	for _, quali := range pkg.Qualifiers {
-		pkgQualifier := &model.PackageQualifierSpec{
-			Key:   quali.Key,
-			Value: &quali.Value,
-		}
-		depPkgQualifiers = append(depPkgQualifiers, pkgQualifier)
-	}
+	depPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&depPkg)
 
-	depPkgSpec := model.PkgSpec{
-		Type:       &depPkg.Type,
-		Namespace:  depPkg.Namespace,
-		Name:       &depPkg.Name,
-		Version:    depPkg.Version,
-		Qualifiers: depPkgQualifiers,
-		Subpath:    depPkg.Subpath,
-	}
-	collectedDepPkg, err := c.Packages(ctx, &depPkgSpec)
+	collectedDepPkg, err := c.Packages(ctx, depPkgSpec)
 	if err != nil {
 		return nil, err
 	}

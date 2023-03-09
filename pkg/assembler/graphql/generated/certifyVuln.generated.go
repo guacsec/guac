@@ -973,6 +973,11 @@ func (ec *executionContext) marshalNOsvCveOrGhsa2githubᚗcomᚋguacsecᚋguac�
 	return ec._OsvCveOrGhsa(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNOsvCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx context.Context, v interface{}) (model.OsvCveOrGhsaInput, error) {
+	res, err := ec.unmarshalInputOsvCveOrGhsaInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaData(ctx context.Context, sel ast.SelectionSet, v *model.VulnerabilityMetaData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -993,14 +998,6 @@ func (ec *executionContext) unmarshalOCertifyVulnSpec2ᚖgithubᚗcomᚋguacsec�
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputCertifyVulnSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOOsvCveOrGhsaInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx context.Context, v interface{}) (*model.OsvCveOrGhsaInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputOsvCveOrGhsaInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
