@@ -137,12 +137,6 @@ func (v *CertifyBadArtifactIngestCertifyBad) GetSubject() allCertifyBadSubjectPa
 	return v.allCertifyBad.Subject
 }
 
-// GetOrigin returns CertifyBadArtifactIngestCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestCertifyBad) GetOrigin() string { return v.allCertifyBad.Origin }
-
-// GetCollector returns CertifyBadArtifactIngestCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestCertifyBad) GetCollector() string { return v.allCertifyBad.Collector }
-
 func (v *CertifyBadArtifactIngestCertifyBad) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -172,10 +166,6 @@ type __premarshalCertifyBadArtifactIngestCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *CertifyBadArtifactIngestCertifyBad) MarshalJSON() ([]byte, error) {
@@ -202,8 +192,6 @@ func (v *CertifyBadArtifactIngestCertifyBad) __premarshalJSON() (*__premarshalCe
 				"Unable to marshal CertifyBadArtifactIngestCertifyBad.allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.allCertifyBad.Origin
-	retval.Collector = v.allCertifyBad.Collector
 	return &retval, nil
 }
 
@@ -268,12 +256,6 @@ func (v *CertifyBadPkgIngestCertifyBad) GetSubject() allCertifyBadSubjectPackage
 	return v.allCertifyBad.Subject
 }
 
-// GetOrigin returns CertifyBadPkgIngestCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgIngestCertifyBad) GetOrigin() string { return v.allCertifyBad.Origin }
-
-// GetCollector returns CertifyBadPkgIngestCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgIngestCertifyBad) GetCollector() string { return v.allCertifyBad.Collector }
-
 func (v *CertifyBadPkgIngestCertifyBad) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -303,10 +285,6 @@ type __premarshalCertifyBadPkgIngestCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *CertifyBadPkgIngestCertifyBad) MarshalJSON() ([]byte, error) {
@@ -333,8 +311,6 @@ func (v *CertifyBadPkgIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 				"Unable to marshal CertifyBadPkgIngestCertifyBad.allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.allCertifyBad.Origin
-	retval.Collector = v.allCertifyBad.Collector
 	return &retval, nil
 }
 
@@ -453,12 +429,6 @@ func (v *CertifyBadSrcIngestCertifyBad) GetSubject() allCertifyBadSubjectPackage
 	return v.allCertifyBad.Subject
 }
 
-// GetOrigin returns CertifyBadSrcIngestCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestCertifyBad) GetOrigin() string { return v.allCertifyBad.Origin }
-
-// GetCollector returns CertifyBadSrcIngestCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestCertifyBad) GetCollector() string { return v.allCertifyBad.Collector }
-
 func (v *CertifyBadSrcIngestCertifyBad) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -488,10 +458,6 @@ type __premarshalCertifyBadSrcIngestCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *CertifyBadSrcIngestCertifyBad) MarshalJSON() ([]byte, error) {
@@ -518,8 +484,6 @@ func (v *CertifyBadSrcIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 				"Unable to marshal CertifyBadSrcIngestCertifyBad.allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.allCertifyBad.Origin
-	retval.Collector = v.allCertifyBad.Collector
 	return &retval, nil
 }
 
@@ -2704,6 +2668,7 @@ func (v *IsOccurrenceSrcResponse) GetIngestOccurrence() IsOccurrenceSrcIngestOcc
 	return v.IngestOccurrence
 }
 
+// MatchFlags is used to input the PkgMatchType enum
 type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
@@ -2788,6 +2753,8 @@ func (v *PkgInputSpec) GetQualifiers() []PackageQualifierInputSpec { return v.Qu
 // GetSubpath returns PkgInputSpec.Subpath, and is useful for accessing the field via an interface.
 func (v *PkgInputSpec) GetSubpath() *string { return v.Subpath }
 
+// PkgMatchType is an enum to determine if the attestation should be done at the
+// specific version or package name
 type PkgMatchType string
 
 const (
@@ -3847,8 +3814,6 @@ func (v *allArtifactTree) GetDigest() string { return v.Digest }
 type allCertifyBad struct {
 	Justification string                                      `json:"justification"`
 	Subject       allCertifyBadSubjectPackageSourceOrArtifact `json:"-"`
-	Origin        string                                      `json:"origin"`
-	Collector     string                                      `json:"collector"`
 }
 
 // GetJustification returns allCertifyBad.Justification, and is useful for accessing the field via an interface.
@@ -3856,12 +3821,6 @@ func (v *allCertifyBad) GetJustification() string { return v.Justification }
 
 // GetSubject returns allCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *allCertifyBad) GetSubject() allCertifyBadSubjectPackageSourceOrArtifact { return v.Subject }
-
-// GetOrigin returns allCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *allCertifyBad) GetOrigin() string { return v.Origin }
-
-// GetCollector returns allCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *allCertifyBad) GetCollector() string { return v.Collector }
 
 func (v *allCertifyBad) UnmarshalJSON(b []byte) error {
 
@@ -3900,10 +3859,6 @@ type __premarshalallCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *allCertifyBad) MarshalJSON() ([]byte, error) {
@@ -3930,8 +3885,6 @@ func (v *allCertifyBad) __premarshalJSON() (*__premarshalallCertifyBad, error) {
 				"Unable to marshal allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.Origin
-	retval.Collector = v.Collector
 	return &retval, nil
 }
 
@@ -6993,8 +6946,6 @@ fragment allCertifyBad on CertifyBad {
 			... allArtifactTree
 		}
 	}
-	origin
-	collector
 }
 fragment allPkgTree on Package {
 	type
@@ -7093,8 +7044,6 @@ fragment allCertifyBad on CertifyBad {
 			... allArtifactTree
 		}
 	}
-	origin
-	collector
 }
 fragment allSourceTree on Source {
 	type
@@ -7174,8 +7123,6 @@ fragment allCertifyBad on CertifyBad {
 			... allArtifactTree
 		}
 	}
-	origin
-	collector
 }
 fragment allPkgTree on Package {
 	type

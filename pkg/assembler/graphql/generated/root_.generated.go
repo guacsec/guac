@@ -1741,12 +1741,18 @@ input CertifyBadInputSpec {
   collector: String!
 }
 
-# TODO: use this for ingestion for CertifyBad and HasSourceAt
+"""
+PkgMatchType is an enum to determine if the attestation should be done at the
+specific version or package name
+"""
 enum PkgMatchType {
   ALL_VERSIONS
   SPECIFIC_VERSION
 }
 
+"""
+MatchFlags is used to input the PkgMatchType enum
+"""
 input MatchFlags {
   pkg: PkgMatchType!
 } 
