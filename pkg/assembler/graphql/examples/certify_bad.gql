@@ -52,26 +52,26 @@ query Q2 {
 }
 
 query Q3 {
-  CertifyBad(certifyBadSpec: {package: {name: "openssl"}}) {
+  CertifyBad(certifyBadSpec: {subject: {package: {name: "openssl"}}}) {
     ...allCertifyBad
   }
 }
 
 query Q4 {
-  CertifyBad(certifyBadSpec: {source: {name: "github.com/guacsec/guac"}}) {
+  CertifyBad(certifyBadSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
     ...allCertifyBad
   }
 }
 
 query Q5 {
-  CertifyBad(certifyBadSpec: {artifact: {digest: "5a787865sd676dacb0142afa0b83029cd7befd9", algorithm: "sha1"}}) {
+  CertifyBad(certifyBadSpec: {subject: {artifact: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", algorithm: "sha256"}}}) {
     ...allCertifyBad
   }
 }
 
 query Q6 {
   CertifyBad(
-    certifyBadSpec: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}
+    certifyBadSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
   ) {
     ...allCertifyBad
   }
