@@ -82,7 +82,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
       ...allSourceTree
     }
   }
-  occurrenceArtifact {
+  artifact {
     ...allArtifactTree
   }
   justification
