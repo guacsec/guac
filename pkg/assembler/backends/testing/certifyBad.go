@@ -113,7 +113,7 @@ func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selected
 
 func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 
-	err := helper.CheckCertifyBadIngestionInput(subject)
+	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject")
 	if err != nil {
 		return nil, err
 	}

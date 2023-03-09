@@ -19,6 +19,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -129,7 +130,7 @@ func (c *demoClient) IngestMaterials(
 	// For this backend, there's no optimization we can do, we need to
 	// ingest everything sequentially
 	for _, material := range materials {
-		err := validateExactlyOne(material, "each SLSA material")
+		err := helper.ValidatePackageSourceOrArtifactInput(material, "each SLSA material")
 		if err != nil {
 			return nil, err
 		}
@@ -165,12 +166,12 @@ func (c *demoClient) IngestSLSA(
 ) (*model.HasSlsa, error) {
 	// Since each mutation can also be called independently, we need to
 	// validate again subject and materials
-	err := validateExactlyOne(&subject, "SLSA subject")
+	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "SLSA subject")
 	if err != nil {
 		return nil, err
 	}
 	for _, material := range builtFrom {
-		err := validateExactlyOne(material, "each SLSA material")
+		err := helper.ValidatePackageSourceOrArtifactInput(material, "each SLSA material")
 		if err != nil {
 			return nil, err
 		}
@@ -184,24 +185,6 @@ func (c *demoClient) IngestSLSA(
 		return c.ingestSLSAArtifact(ctx, subject.Artifact, builtFrom, &builtBy, &slsa)
 	}
 	return nil, gqlerror.Errorf("Impossible configuration for IngestSLSA")
-}
-
-func validateExactlyOne(item *model.PackageSourceOrArtifactInput, path string) error {
-	valuesDefined := 0
-	if item.Package != nil {
-		valuesDefined = valuesDefined + 1
-	}
-	if item.Source != nil {
-		valuesDefined = valuesDefined + 1
-	}
-	if item.Artifact != nil {
-		valuesDefined = valuesDefined + 1
-	}
-	if valuesDefined != 1 {
-		return gqlerror.Errorf("Must specify at most one package, source, or artifact for %v", path)
-	}
-
-	return nil
 }
 
 func (c *demoClient) ingestSLSAPackage(
