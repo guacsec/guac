@@ -26,7 +26,8 @@ type MutationResolver interface {
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
-	IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error)
+	IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error)
+	IngestMaterials(ctx context.Context, materials []*model.PackageSourceOrArtifactInput) ([]model.PackageSourceOrArtifact, error)
 	IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
@@ -276,6 +277,21 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_ingestMaterials_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.PackageSourceOrArtifactInput
+	if tmp, ok := rawArgs["materials"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("materials"))
+		arg0, err = ec.unmarshalNPackageSourceOrArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["materials"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_ingestOSV_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -351,15 +367,33 @@ func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, 
 		}
 	}
 	args["subject"] = arg0
-	var arg1 model.SLSAInputSpec
-	if tmp, ok := rawArgs["slsa"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slsa"))
-		arg1, err = ec.unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx, tmp)
+	var arg1 []*model.PackageSourceOrArtifactInput
+	if tmp, ok := rawArgs["builtFrom"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFrom"))
+		arg1, err = ec.unmarshalNPackageSourceOrArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["slsa"] = arg1
+	args["builtFrom"] = arg1
+	var arg2 model.BuilderInputSpec
+	if tmp, ok := rawArgs["builtBy"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtBy"))
+		arg2, err = ec.unmarshalNBuilderInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["builtBy"] = arg2
+	var arg3 model.SLSAInputSpec
+	if tmp, ok := rawArgs["slsa"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slsa"))
+		arg3, err = ec.unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["slsa"] = arg3
 	return args, nil
 }
 
@@ -1307,7 +1341,7 @@ func (ec *executionContext) _Mutation_ingestSLSA(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestSlsa(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["slsa"].(model.SLSAInputSpec))
+		return ec.resolvers.Mutation().IngestSlsa(rctx, fc.Args["subject"].(model.PackageSourceOrArtifactInput), fc.Args["builtFrom"].([]*model.PackageSourceOrArtifactInput), fc.Args["builtBy"].(model.BuilderInputSpec), fc.Args["slsa"].(model.SLSAInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1347,6 +1381,60 @@ func (ec *executionContext) fieldContext_Mutation_ingestSLSA(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestSLSA_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestMaterials(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestMaterials(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestMaterials(rctx, fc.Args["materials"].([]*model.PackageSourceOrArtifactInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]model.PackageSourceOrArtifact)
+	fc.Result = res
+	return ec.marshalNPackageSourceOrArtifact2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestMaterials(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type PackageSourceOrArtifact does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestMaterials_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3233,6 +3321,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestSLSA(ctx, field)
+			})
+
+		case "ingestMaterials":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestMaterials(ctx, field)
 			})
 
 		case "ingestHashEqual":

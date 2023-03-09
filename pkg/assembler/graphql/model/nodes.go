@@ -791,15 +791,13 @@ type Slsa struct {
 //
 // All fields are required.
 type SLSAInputSpec struct {
-	BuiltFrom     []*PackageSourceOrArtifactInput `json:"builtFrom"`
-	BuiltBy       *BuilderInputSpec               `json:"builtBy"`
-	BuildType     string                          `json:"buildType"`
-	SlsaPredicate []*SLSAPredicateInputSpec       `json:"slsaPredicate"`
-	SlsaVersion   string                          `json:"slsaVersion"`
-	StartedOn     time.Time                       `json:"startedOn"`
-	FinishedOn    time.Time                       `json:"finishedOn"`
-	Origin        string                          `json:"origin"`
-	Collector     string                          `json:"collector"`
+	BuildType     string                    `json:"buildType"`
+	SlsaPredicate []*SLSAPredicateInputSpec `json:"slsaPredicate"`
+	SlsaVersion   string                    `json:"slsaVersion"`
+	StartedOn     time.Time                 `json:"startedOn"`
+	FinishedOn    time.Time                 `json:"finishedOn"`
+	Origin        string                    `json:"origin"`
+	Collector     string                    `json:"collector"`
 }
 
 // SLSAPredicate are the values from the SLSA predicate in key-value pair form.

@@ -120,8 +120,6 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		},
 	}
 	slsa := model.SLSAInputSpec{
-		BuiltFrom:     materials,
-		BuiltBy:       builder,
 		BuildType:     "Test:Source->Package",
 		SlsaPredicate: predicate,
 		SlsaVersion:   "v1",
@@ -137,15 +135,13 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Name:      "tensorflow",
 		Version:   &version,
 	}
-	_, err := model.SLSAForPackage(context.Background(), client, pkg, slsa)
+	_, err := model.SLSAForPackage(context.Background(), client, pkg, materials, builder, slsa)
 	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
 
 	// from source to artifact
 	slsa = model.SLSAInputSpec{
-		BuiltFrom:     materials,
-		BuiltBy:       builder,
 		BuildType:     "Test:Source->Artifact",
 		SlsaPredicate: predicate,
 		SlsaVersion:   "v1",
@@ -158,7 +154,7 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
 		Algorithm: "sha1",
 	}
-	_, err = model.SLSAForArtifact(context.Background(), client, artifact, slsa)
+	_, err = model.SLSAForArtifact(context.Background(), client, artifact, materials, builder, slsa)
 	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
@@ -168,8 +164,6 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Uri: "https://github.com/CreateFork/HubHostedActions@v1",
 	}
 	slsa = model.SLSAInputSpec{
-		BuiltFrom:     materials,
-		BuiltBy:       builder,
 		BuildType:     "Test:Source->Source",
 		SlsaPredicate: predicate,
 		SlsaVersion:   "v1",
@@ -184,7 +178,7 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Name:      "github.com/forked/tensorflow",
 		Tag:       &tag,
 	}
-	_, err = model.SLSAForSource(context.Background(), client, finalSource, slsa)
+	_, err = model.SLSAForSource(context.Background(), client, finalSource, materials, builder, slsa)
 	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}
@@ -206,8 +200,6 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Uri: "https://github.com/MixedBuild/HubHostedActions@v1",
 	}
 	slsa = model.SLSAInputSpec{
-		BuiltFrom:     materials,
-		BuiltBy:       builder,
 		BuildType:     "Test:Mixed-build",
 		SlsaPredicate: predicate,
 		SlsaVersion:   "v1",
@@ -220,7 +212,7 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Digest:    "0123456789abcdef0000000fedcba9876543210",
 		Algorithm: "sha1",
 	}
-	_, err = model.SLSAForArtifact(context.Background(), client, artifact, slsa)
+	_, err = model.SLSAForArtifact(context.Background(), client, artifact, materials, builder, slsa)
 	if err != nil {
 		logger.Errorf("Error in ingesting: %v\n", err)
 	}

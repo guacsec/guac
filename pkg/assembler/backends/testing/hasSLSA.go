@@ -121,41 +121,104 @@ func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec
 
 // Ingest HasSlsa
 
-func (c *demoClient) IngestSLSA(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	subjectsDefined := 0
-	if subject.Package != nil {
-		subjectsDefined = subjectsDefined + 1
-	}
-	if subject.Source != nil {
-		subjectsDefined = subjectsDefined + 1
-	}
-	if subject.Artifact != nil {
-		subjectsDefined = subjectsDefined + 1
-	}
-	if subjectsDefined > 1 {
-		return nil, gqlerror.Errorf("Must specify at most one subject (package, source, or artifact)")
+func (c *demoClient) IngestMaterials(
+	ctx context.Context, materials []*model.PackageSourceOrArtifactInput,
+) ([]model.PackageSourceOrArtifact, error) {
+	output := []model.PackageSourceOrArtifact{}
+
+	// For this backend, there's no optimization we can do, we need to
+	// ingest everything sequentially
+	for _, material := range materials {
+		err := validateExactlyOne(material, "each SLSA material")
+		if err != nil {
+			return nil, err
+		}
+
+		if material.Package != nil {
+			pkg, err := c.IngestPackage(ctx, material.Package)
+			if err != nil {
+				return nil, err
+			}
+			output = append(output, pkg)
+		} else if material.Source != nil {
+			source, err := c.IngestSource(ctx, material.Source)
+			if err != nil {
+				return nil, err
+			}
+			output = append(output, source)
+		} else if material.Artifact != nil {
+			artifact, err := c.IngestArtifact(ctx, material.Artifact)
+			if err != nil {
+				return nil, err
+			}
+			output = append(output, artifact)
+		}
 	}
 
-	if subject.Package != nil {
-		return c.ingestSLSAPackage(ctx, subject.Package, &slsa)
-	} else if subject.Source != nil {
-		return c.ingestSLSASource(ctx, subject.Source, &slsa)
-	} else if subject.Artifact != nil {
-		return c.ingestSLSAArtifact(ctx, subject.Artifact, &slsa)
-	}
-	return nil, gqlerror.Errorf("Must specify exactly one subject (package, source, or artifact)")
+	return output, nil
 }
 
-func (c *demoClient) ingestSLSAPackage(ctx context.Context, pkg *model.PkgInputSpec, slsa *model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (c *demoClient) IngestSLSA(
+	ctx context.Context, subject model.PackageSourceOrArtifactInput,
+	builtFrom []*model.PackageSourceOrArtifactInput,
+	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec,
+) (*model.HasSlsa, error) {
+	// Since each mutation can also be called independently, we need to
+	// validate again subject and materials
+	err := validateExactlyOne(&subject, "SLSA subject")
+	if err != nil {
+		return nil, err
+	}
+	for _, material := range builtFrom {
+		err := validateExactlyOne(material, "each SLSA material")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if subject.Package != nil {
+		return c.ingestSLSAPackage(ctx, subject.Package, builtFrom, &builtBy, &slsa)
+	} else if subject.Source != nil {
+		return c.ingestSLSASource(ctx, subject.Source, builtFrom, &builtBy, &slsa)
+	} else if subject.Artifact != nil {
+		return c.ingestSLSAArtifact(ctx, subject.Artifact, builtFrom, &builtBy, &slsa)
+	}
+	return nil, gqlerror.Errorf("Impossible configuration for IngestSLSA")
+}
+
+func validateExactlyOne(item *model.PackageSourceOrArtifactInput, path string) error {
+	valuesDefined := 0
+	if item.Package != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if item.Source != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if item.Artifact != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return gqlerror.Errorf("Must specify at most one package, source, or artifact for %v", path)
+	}
+
+	return nil
+}
+
+func (c *demoClient) ingestSLSAPackage(
+	ctx context.Context, pkg *model.PkgInputSpec,
+	builtFrom []*model.PackageSourceOrArtifactInput,
+	builtBy *model.BuilderInputSpec, slsa *model.SLSAInputSpec,
+) (*model.HasSlsa, error) {
 	for _, attestation := range c.hasSLSA {
 		if p, ok := attestation.Subject.(*model.Package); ok {
-			if packageMatch(p, pkg) && slsaMatch(attestation.Slsa, slsa) {
+			if packageMatch(p, pkg) &&
+				slsaMatch(attestation.Slsa, builtFrom, builtBy, slsa) {
 				return attestation, nil
 			}
 		}
 	}
 
-	newSlsa, err := buildSLSA(slsa)
+	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
@@ -168,16 +231,21 @@ func (c *demoClient) ingestSLSAPackage(ctx context.Context, pkg *model.PkgInputS
 	return newHasSlsa, nil
 }
 
-func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceInputSpec, slsa *model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (c *demoClient) ingestSLSASource(
+	ctx context.Context, source *model.SourceInputSpec,
+	builtFrom []*model.PackageSourceOrArtifactInput,
+	builtBy *model.BuilderInputSpec, slsa *model.SLSAInputSpec,
+) (*model.HasSlsa, error) {
 	for _, attestation := range c.hasSLSA {
 		if s, ok := attestation.Subject.(*model.Source); ok {
-			if sourceMatch(s, source) && slsaMatch(attestation.Slsa, slsa) {
+			if sourceMatch(s, source) &&
+				slsaMatch(attestation.Slsa, builtFrom, builtBy, slsa) {
 				return attestation, nil
 			}
 		}
 	}
 
-	newSlsa, err := buildSLSA(slsa)
+	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
@@ -190,16 +258,21 @@ func (c *demoClient) ingestSLSASource(ctx context.Context, source *model.SourceI
 	return newHasSlsa, nil
 }
 
-func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, slsa *model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (c *demoClient) ingestSLSAArtifact(
+	ctx context.Context, artifact *model.ArtifactInputSpec,
+	builtFrom []*model.PackageSourceOrArtifactInput,
+	builtBy *model.BuilderInputSpec, slsa *model.SLSAInputSpec,
+) (*model.HasSlsa, error) {
 	for _, attestation := range c.hasSLSA {
 		if a, ok := attestation.Subject.(*model.Artifact); ok {
-			if artifactMatch(a, artifact) && slsaMatch(attestation.Slsa, slsa) {
+			if artifactMatch(a, artifact) &&
+				slsaMatch(attestation.Slsa, builtFrom, builtBy, slsa) {
 				return attestation, nil
 			}
 		}
 	}
 
-	newSlsa, err := buildSLSA(slsa)
+	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
@@ -212,9 +285,12 @@ func (c *demoClient) ingestSLSAArtifact(ctx context.Context, artifact *model.Art
 	return newHasSlsa, nil
 }
 
-func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
+func buildSLSA(
+	builtFrom []*model.PackageSourceOrArtifactInput,
+	builtBy *model.BuilderInputSpec, input *model.SLSAInputSpec,
+) (*model.Slsa, error) {
 	materials := []model.PackageSourceOrArtifact{}
-	for _, m := range input.BuiltFrom {
+	for _, m := range builtFrom {
 		material, err := processMaterialInput(m)
 		if err != nil {
 			return nil, err
@@ -222,7 +298,7 @@ func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
 		materials = append(materials, material)
 	}
 
-	builder := model.Builder{URI: input.BuiltBy.URI}
+	builder := model.Builder{URI: builtBy.URI}
 
 	predicates := []*model.SLSAPredicate{}
 	for _, p := range input.SlsaPredicate {
@@ -247,7 +323,11 @@ func buildSLSA(input *model.SLSAInputSpec) (*model.Slsa, error) {
 	return &slsa, nil
 }
 
-func slsaMatch(slsa *model.Slsa, input *model.SLSAInputSpec) bool {
+func slsaMatch(
+	slsa *model.Slsa,
+	builtFrom []*model.PackageSourceOrArtifactInput,
+	builtBy *model.BuilderInputSpec, input *model.SLSAInputSpec,
+) bool {
 	// Do fast checks first
 	if slsa.Collector != input.Collector {
 		return false
@@ -265,6 +345,9 @@ func slsaMatch(slsa *model.Slsa, input *model.SLSAInputSpec) bool {
 		return false
 	}
 	if slsa.BuildType != input.BuildType {
+		return false
+	}
+	if slsa.BuiltBy.URI != builtBy.URI {
 		return false
 	}
 
@@ -286,21 +369,21 @@ func slsaMatch(slsa *model.Slsa, input *model.SLSAInputSpec) bool {
 	for _, mat := range slsa.BuiltFrom {
 		found := false
 		if a, ok := mat.(*model.Artifact); ok {
-			for _, inputMat := range input.BuiltFrom {
+			for _, inputMat := range builtFrom {
 				if artifactMatch(a, inputMat.Artifact) {
 					found = true
 					break
 				}
 			}
 		} else if s, ok := mat.(*model.Source); ok {
-			for _, inputMat := range input.BuiltFrom {
+			for _, inputMat := range builtFrom {
 				if sourceMatch(s, inputMat.Source) {
 					found = true
 					break
 				}
 			}
 		} else if p, ok := mat.(*model.Package); ok {
-			for _, inputMat := range input.BuiltFrom {
+			for _, inputMat := range builtFrom {
 				if packageMatch(p, inputMat.Package) {
 					found = true
 					break

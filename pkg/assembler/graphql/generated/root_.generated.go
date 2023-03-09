@@ -161,10 +161,11 @@ type ComplexityRoot struct {
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHashEqual     func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
+		IngestMaterials     func(childComplexity int, materials []*model.PackageSourceOrArtifactInput) int
 		IngestOccurrence    func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
-		IngestSlsa          func(childComplexity int, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) int
+		IngestSlsa          func(childComplexity int, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource        func(childComplexity int, source *model.SourceInputSpec) int
 		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
@@ -820,6 +821,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.ArtifactInputSpec), args["equalArtifact"].(model.ArtifactInputSpec), args["hashEqual"].(model.HashEqualInputSpec)), true
 
+	case "Mutation.ingestMaterials":
+		if e.complexity.Mutation.IngestMaterials == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestMaterials_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestMaterials(childComplexity, args["materials"].([]*model.PackageSourceOrArtifactInput)), true
+
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
 			break
@@ -866,7 +879,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestSlsa(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["slsa"].(model.SLSAInputSpec)), true
+		return e.complexity.Mutation.IngestSlsa(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["builtFrom"].([]*model.PackageSourceOrArtifactInput), args["builtBy"].(model.BuilderInputSpec), args["slsa"].(model.SLSAInputSpec)), true
 
 	case "Mutation.ingestSource":
 		if e.complexity.Mutation.IngestSource == nil {
@@ -2489,8 +2502,6 @@ SLSAInputSpec is the same as SLSA but for mutation input.
 All fields are required.
 """
 input SLSAInputSpec {
-  builtFrom: [PackageSourceOrArtifactInput!]
-  builtBy: BuilderInputSpec!
   buildType: String!
   slsaPredicate: [SLSAPredicateInputSpec!]!
   slsaVersion: String!
@@ -2515,8 +2526,23 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a SLSA attestation"
-  ingestSLSA(subject: PackageSourceOrArtifactInput!, slsa: SLSAInputSpec!): HasSLSA!
+  """
+  Ingests a SLSA attestation.
+
+  Note that materials and builder are extracted as separate arguments. This is
+  because this ingestion method assumes that the subject and the materials are
+  already ingested and only creates the SLSA node.
+  """
+  ingestSLSA(subject: PackageSourceOrArtifactInput!, builtFrom: [PackageSourceOrArtifactInput!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
+
+  """
+  Ingests a set of packages, sources, and artifacts.
+
+  This is a helper mutation for ingesting SLSA nodes. It should be more
+  efficient to call this method to ingest a set materials instead of ingesting
+  them one by one.
+  """
+  ingestMaterials(materials: [PackageSourceOrArtifactInput!]!): [PackageSourceOrArtifact!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSourceAt.graphql", Input: `#
