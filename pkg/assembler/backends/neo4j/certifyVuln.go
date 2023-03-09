@@ -38,27 +38,13 @@ const (
 
 func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
-	queryAll := false
-	if certifyVulnSpec.Vulnerability == nil {
-		queryAll = true
-	} else {
-		vulnDefined := 0
-		if certifyVulnSpec.Vulnerability.Osv != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if certifyVulnSpec.Vulnerability.Ghsa != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if certifyVulnSpec.Vulnerability.Cve != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if vulnDefined > 1 {
-			return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
-		}
-	}
-
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
+
+	queryAll, err := helper.CheckVulnerabilityQueryInput(certifyVulnSpec.Vulnerability)
+	if err != nil {
+		return nil, err
+	}
 
 	aggregateCertifyVuln := []*model.CertifyVuln{}
 
@@ -345,18 +331,9 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveOrGhsa, timeS
 
 func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	vulnDefined := 0
-	if vulnerability.Osv != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnerability.Ghsa != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnerability.Cve != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnDefined > 1 {
-		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+	err := helper.CheckVulnerabilityIngestionInput(vulnerability)
+	if err != nil {
+		return nil, err
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})

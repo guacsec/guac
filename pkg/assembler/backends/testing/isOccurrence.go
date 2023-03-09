@@ -99,8 +99,10 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 }
 
 func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
-	if subject.Package != nil && subject.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
+
+	err := helper.CheckOccurrenceIngestionInput(subject)
+	if err != nil {
+		return nil, err
 	}
 
 	collectedArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &artifact.Algorithm, Digest: &artifact.Digest})
@@ -161,13 +163,9 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 
 func (c *demoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
-	queryAll := false
-	if isOccurrenceSpec.Subject == nil {
-		queryAll = true
-	} else {
-		if isOccurrenceSpec.Subject.Package != nil && isOccurrenceSpec.Subject.Source != nil {
-			return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
-		}
+	queryAll, err := helper.CheckOccurrenceQueryInput(isOccurrenceSpec.Subject)
+	if err != nil {
+		return nil, err
 	}
 
 	var isOccurrences []*model.IsOccurrence

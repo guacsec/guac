@@ -135,18 +135,9 @@ func (c *demoClient) registerCertifyVuln(selectedPackage *model.Package, selecte
 
 func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	vulnDefined := 0
-	if vulnerability.Osv != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnerability.Ghsa != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnerability.Cve != nil {
-		vulnDefined = vulnDefined + 1
-	}
-	if vulnDefined > 1 {
-		return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+	err := helper.CheckVulnerabilityIngestionInput(vulnerability)
+	if err != nil {
+		return nil, err
 	}
 
 	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
@@ -244,25 +235,11 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 // Query CertifyVuln
 
 func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	queryAll := false
-	if certifyVulnSpec.Vulnerability == nil {
-		queryAll = true
-	} else {
-		vulnDefined := 0
-		if certifyVulnSpec.Vulnerability.Osv != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if certifyVulnSpec.Vulnerability.Ghsa != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if certifyVulnSpec.Vulnerability.Cve != nil {
-			vulnDefined = vulnDefined + 1
-		}
-		if vulnDefined > 1 {
-			return nil, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
-		}
-	}
 
+	queryAll, err := helper.CheckVulnerabilityQueryInput(certifyVulnSpec.Vulnerability)
+	if err != nil {
+		return nil, err
+	}
 	var foundCertifyBad []*model.CertifyVuln
 
 	for _, h := range c.certifyVuln {

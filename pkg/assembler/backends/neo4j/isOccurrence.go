@@ -33,13 +33,9 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	queryAll := false
-	if isOccurrenceSpec.Subject == nil {
-		queryAll = true
-	} else {
-		if isOccurrenceSpec.Subject.Package != nil && isOccurrenceSpec.Subject.Source != nil {
-			return nil, gqlerror.Errorf("cannot specify both package and source for IsOccurrence")
-		}
+	queryAll, err := helper.CheckOccurrenceQueryInput(isOccurrenceSpec.Subject)
+	if err != nil {
+		return nil, err
 	}
 
 	aggregateIsOccurrence := []*model.IsOccurrence{}
@@ -210,12 +206,13 @@ func generateModelIsOccurrence(subject model.PackageOrSource, artifact *model.Ar
 
 func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 
-	if subject.Package != nil && subject.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
-	}
-
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
+
+	err := helper.CheckOccurrenceIngestionInput(subject)
+	if err != nil {
+		return nil, err
+	}
 
 	var sb strings.Builder
 	var firstMatch bool = true
