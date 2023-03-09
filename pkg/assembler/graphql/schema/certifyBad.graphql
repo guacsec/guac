@@ -41,15 +41,45 @@ For package - a PackageName or PackageVersion must be specified (name or name, v
 For source - a SourceName must be specified (name, tag or commit)
 """
 input CertifyBadSpec {
-  package: PkgSpec
-  source: SourceSpec
-  artifact: ArtifactSpec
+  subject: PackageSourceOrArtifactSpec
   justification: String
   origin: String
   collector: String
 }
 
+"""
+CertifyBadInputSpec is the same as CertifyBad but for mutation input.
+
+All fields are required.
+"""
+input CertifyBadInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+PkgMatchType is an enum to determine if the attestation should be done at the
+specific version or package name
+"""
+enum PkgMatchType {
+  ALL_VERSIONS
+  SPECIFIC_VERSION
+}
+
+"""
+MatchFlags is used to input the PkgMatchType enum
+"""
+input MatchFlags {
+  pkg: PkgMatchType!
+} 
+
 extend type Query {
   "Returns all CertifyBad"
   CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
+}
+
+extend type Mutation {
+  "Adds a certification that two packages are similar"
+  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
 }

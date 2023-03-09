@@ -40,7 +40,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 
 	aggregateIsOccurrence := []*model.IsOccurrence{}
 
-	if queryAll || isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Package != nil {
+	if queryAll || (isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Package != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -109,7 +109,7 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 		aggregateIsOccurrence = append(aggregateIsOccurrence, result.([]*model.IsOccurrence)...)
 	}
 
-	if queryAll || isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Source != nil {
+	if queryAll || (isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Source != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}

@@ -50,8 +50,8 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 
 	aggregateCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	if queryAll || querySubjectAll && certifyVEXStatementSpec.Cve != nil || queryVulnAll && certifyVEXStatementSpec.Package != nil ||
-		certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Cve != nil {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Cve != nil) || (queryVulnAll && certifyVEXStatementSpec.Package != nil) ||
+		(certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Cve != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -142,8 +142,8 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
 
-	if queryAll || querySubjectAll && certifyVEXStatementSpec.Ghsa != nil || queryVulnAll && certifyVEXStatementSpec.Package != nil ||
-		certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Ghsa != nil {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Ghsa != nil) || (queryVulnAll && certifyVEXStatementSpec.Package != nil) ||
+		(certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Ghsa != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -231,8 +231,8 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		}
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
-	if queryAll || querySubjectAll && certifyVEXStatementSpec.Cve != nil || queryVulnAll && certifyVEXStatementSpec.Artifact != nil ||
-		certifyVEXStatementSpec.Artifact != nil && certifyVEXStatementSpec.Cve != nil {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Cve != nil) || (queryVulnAll && certifyVEXStatementSpec.Artifact != nil) ||
+		(certifyVEXStatementSpec.Artifact != nil && certifyVEXStatementSpec.Cve != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -295,8 +295,8 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
 
-	if queryAll || querySubjectAll && certifyVEXStatementSpec.Ghsa != nil || queryVulnAll && certifyVEXStatementSpec.Artifact != nil ||
-		certifyVEXStatementSpec.Artifact != nil && certifyVEXStatementSpec.Ghsa != nil {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Ghsa != nil) || (queryVulnAll && certifyVEXStatementSpec.Artifact != nil) ||
+		(certifyVEXStatementSpec.Artifact != nil && certifyVEXStatementSpec.Ghsa != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true

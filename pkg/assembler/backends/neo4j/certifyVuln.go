@@ -48,7 +48,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 
 	aggregateCertifyVuln := []*model.CertifyVuln{}
 
-	if queryAll || certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Cve != nil {
+	if queryAll || (certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Cve != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -121,7 +121,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		aggregateCertifyVuln = append(aggregateCertifyVuln, result.([]*model.CertifyVuln)...)
 	}
 
-	if queryAll || certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Ghsa != nil {
+	if queryAll || (certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Ghsa != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -193,7 +193,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 		aggregateCertifyVuln = append(aggregateCertifyVuln, result.([]*model.CertifyVuln)...)
 	}
 
-	if queryAll || certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Osv != nil {
+	if queryAll || (certifyVulnSpec.Vulnerability != nil && certifyVulnSpec.Vulnerability.Osv != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -39,7 +40,7 @@ func registerAllCertifyBad(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerCertifyBad(selectedPackage[0], nil, nil, "this openssl package is a typosquatting")
+	_, err = client.registerCertifyBad(selectedPackage[0], nil, nil, "this openssl package is a typosquatting", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -53,12 +54,12 @@ func registerAllCertifyBad(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerCertifyBad(nil, selectedSource[0], nil, "this source is associated with a bad author")
+	_, err = client.registerCertifyBad(nil, selectedSource[0], nil, "this source is associated with a bad author", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
 
-	err = client.registerCertifyBad(nil, nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is associated with a bad package")
+	_, err = client.registerCertifyBad(nil, nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is associated with a bad package", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -68,25 +69,25 @@ func registerAllCertifyBad(client *demoClient) error {
 
 // Ingest CertifyBad
 
-func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact, justification string) error {
+func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact, justification, origin, collector string) (*model.CertifyBad, error) {
 
 	if selectedPackage != nil && selectedSource != nil && selectedArtifact != nil {
-		return fmt.Errorf("cannot specify package, source or artifact together for CertifyBad")
+		return nil, fmt.Errorf("cannot specify package, source or artifact together for CertifyBad")
 	}
 
-	for _, occurrence := range c.certifyBad {
-		if occurrence.Justification == justification {
-			if val, ok := occurrence.Subject.(model.Package); ok {
+	for _, bad := range c.certifyBad {
+		if bad.Justification == justification {
+			if val, ok := bad.Subject.(model.Package); ok {
 				if &val == selectedPackage {
-					return nil
+					return bad, nil
 				}
-			} else if val, ok := occurrence.Subject.(model.Source); ok {
+			} else if val, ok := bad.Subject.(model.Source); ok {
 				if &val == selectedSource {
-					return nil
+					return bad, nil
 				}
-			} else if val, ok := occurrence.Subject.(model.Artifact); ok {
+			} else if val, ok := bad.Subject.(model.Artifact); ok {
 				if &val == selectedArtifact {
-					return nil
+					return bad, nil
 				}
 			}
 		}
@@ -94,8 +95,8 @@ func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selected
 
 	newCertifyBad := &model.CertifyBad{
 		Justification: justification,
-		Origin:        "testing backend",
-		Collector:     "testing backend",
+		Origin:        origin,
+		Collector:     collector,
 	}
 	if selectedPackage != nil {
 		newCertifyBad.Subject = selectedPackage
@@ -106,13 +107,92 @@ func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selected
 	}
 
 	c.certifyBad = append(c.certifyBad, newCertifyBad)
-	return nil
+	return newCertifyBad, nil
+}
+
+func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
+
+	err := helper.CheckCertifyBadIngestionInput(subject)
+	if err != nil {
+		return nil, err
+	}
+
+	if subject.Package != nil {
+		var selectedPkgSpec *model.PkgSpec
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			selectedPkgSpec = helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
+
+		} else {
+			selectedPkgSpec = &model.PkgSpec{
+				Type:      &subject.Package.Type,
+				Namespace: subject.Package.Namespace,
+				Name:      &subject.Package.Name,
+			}
+		}
+		collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(collectedPkg) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestCertifyBad :: multiple packages found")
+		}
+		return c.registerCertifyBad(
+			collectedPkg[0],
+			nil,
+			nil,
+			certifyBad.Justification,
+			certifyBad.Origin,
+			certifyBad.Collector)
+	}
+
+	if subject.Source != nil {
+		sourceSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
+
+		sources, err := c.Sources(ctx, sourceSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(sources) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestCertifyBad :: source argument must match one"+
+					" single source repository, found %d",
+				len(sources))
+		}
+		return c.registerCertifyBad(
+			nil,
+			sources[0],
+			nil,
+			certifyBad.Justification,
+			certifyBad.Origin,
+			certifyBad.Collector)
+	}
+
+	if subject.Artifact != nil {
+		collectedArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &subject.Artifact.Algorithm, Digest: &subject.Artifact.Digest})
+		if err != nil {
+			return nil, err
+		}
+		if len(collectedArt) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestCertifyBad :: multiple artifacts found")
+		}
+		return c.registerCertifyBad(
+			nil,
+			nil,
+			collectedArt[0],
+			certifyBad.Justification,
+			certifyBad.Origin,
+			certifyBad.Collector)
+	}
+	return nil, nil
 }
 
 // Query CertifyBad
 
 func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	err := checkCertifyBadInputs(certifyBadSpec)
+
+	queryAll, err := helper.CheckCertifyBadQueryInput(certifyBadSpec.Subject)
 	if err != nil {
 		return nil, err
 	}
@@ -132,46 +212,48 @@ func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Certi
 			matchOrSkip = false
 		}
 
-		if certifyBadSpec.Package != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Package); ok {
-				if certifyBadSpec.Package.Type == nil || val.Type == *certifyBadSpec.Package.Type {
-					newPkg := filterPackageNamespace(val, certifyBadSpec.Package)
-					if newPkg == nil {
-						matchOrSkip = false
+		if !queryAll {
+			if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Package != nil && h.Subject != nil {
+				if val, ok := h.Subject.(*model.Package); ok {
+					if certifyBadSpec.Subject.Package.Type == nil || val.Type == *certifyBadSpec.Subject.Package.Type {
+						newPkg := filterPackageNamespace(val, certifyBadSpec.Subject.Package)
+						if newPkg == nil {
+							matchOrSkip = false
+						}
 					}
-				}
-			} else {
-				matchOrSkip = false
-			}
-		}
-
-		if certifyBadSpec.Source != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Source); ok {
-				if certifyBadSpec.Source.Type == nil || val.Type == *certifyBadSpec.Source.Type {
-					newSource, err := filterSourceNamespace(val, certifyBadSpec.Source)
-					if err != nil {
-						return nil, err
-					}
-					if newSource == nil {
-						matchOrSkip = false
-					}
-				}
-			} else {
-				matchOrSkip = false
-			}
-		}
-
-		if certifyBadSpec.Artifact != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Artifact); ok {
-				queryArt := &model.Artifact{
-					Algorithm: strings.ToLower(*certifyBadSpec.Artifact.Algorithm),
-					Digest:    strings.ToLower(*certifyBadSpec.Artifact.Digest),
-				}
-				if *queryArt != *val {
+				} else {
 					matchOrSkip = false
 				}
-			} else {
-				matchOrSkip = false
+			}
+
+			if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Source != nil && h.Subject != nil {
+				if val, ok := h.Subject.(*model.Source); ok {
+					if certifyBadSpec.Subject.Source.Type == nil || val.Type == *certifyBadSpec.Subject.Source.Type {
+						newSource, err := filterSourceNamespace(val, certifyBadSpec.Subject.Source)
+						if err != nil {
+							return nil, err
+						}
+						if newSource == nil {
+							matchOrSkip = false
+						}
+					}
+				} else {
+					matchOrSkip = false
+				}
+			}
+
+			if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Artifact != nil && h.Subject != nil {
+				if val, ok := h.Subject.(*model.Artifact); ok {
+					queryArt := &model.Artifact{
+						Algorithm: strings.ToLower(*certifyBadSpec.Subject.Artifact.Algorithm),
+						Digest:    strings.ToLower(*certifyBadSpec.Subject.Artifact.Digest),
+					}
+					if *queryArt != *val {
+						matchOrSkip = false
+					}
+				} else {
+					matchOrSkip = false
+				}
 			}
 		}
 
@@ -181,25 +263,4 @@ func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Certi
 	}
 
 	return foundCertifyBad, nil
-}
-
-// TODO (pxp928): combine with neo4j backend in shared utility
-func checkCertifyBadInputs(certifyBadSpec *model.CertifyBadSpec) error {
-	invalidSubject := false
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil {
-		invalidSubject = true
-	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if invalidSubject {
-		return gqlerror.Errorf("cannot specify more than one subject for CertifyBad query")
-	}
-	return nil
 }

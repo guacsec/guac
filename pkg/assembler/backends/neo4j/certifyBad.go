@@ -17,31 +17,30 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+// query certifyBad
+
 func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	err := checkCertifyBadInputs(certifyBadSpec)
+	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	queryAll, err := helper.CheckCertifyBadQueryInput(certifyBadSpec.Subject)
 	if err != nil {
 		return nil, err
 	}
 
-	queryAll := false
-	if certifyBadSpec.Package == nil && certifyBadSpec.Source == nil && certifyBadSpec.Artifact == nil {
-		queryAll = true
-	}
-
-	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	defer session.Close()
-
 	aggregateCertifyBad := []*model.CertifyBad{}
 
-	if certifyBadSpec.Package != nil || queryAll {
+	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Package != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -54,12 +53,15 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 			"-[:subject]-(certifyBad:CertifyBad)"
 		sb.WriteString(query)
 
-		setPkgMatchValues(&sb, certifyBadSpec.Package, false, &firstMatch, queryValues)
+		if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Package != nil {
+			setPkgMatchValues(&sb, certifyBadSpec.Subject.Package, false, &firstMatch, queryValues)
+		}
 		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
-		if certifyBadSpec.Package == nil || certifyBadSpec.Package != nil && certifyBadSpec.Package.Version == nil && certifyBadSpec.Package.Subpath == nil &&
-			len(certifyBadSpec.Package.Qualifiers) == 0 && !*certifyBadSpec.Package.MatchOnlyEmptyQualifiers {
+		if certifyBadSpec.Subject.Package == nil || certifyBadSpec.Subject.Package != nil && certifyBadSpec.Subject.Package.Version == nil &&
+			certifyBadSpec.Subject.Package.Subpath == nil && len(certifyBadSpec.Subject.Package.Qualifiers) == 0 &&
+			!*certifyBadSpec.Subject.Package.MatchOnlyEmptyQualifiers {
 
 			sb.WriteString("\nUNION")
 			// query without pkgVersion
@@ -69,7 +71,10 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 			sb.WriteString(query)
 
 			firstMatch = true
-			setPkgMatchValues(&sb, certifyBadSpec.Package, false, &firstMatch, queryValues)
+
+			if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Package != nil {
+				setPkgMatchValues(&sb, certifyBadSpec.Subject.Package, false, &firstMatch, queryValues)
+			}
 			setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 			sb.WriteString(returnValue)
 		}
@@ -117,7 +122,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
 	}
 
-	if certifyBadSpec.Source != nil || queryAll {
+	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Source != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -126,7 +131,9 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 			"-[:SrcHasName]->(name:SrcName)-[:subject]-(certifyBad:CertifyBad)"
 		sb.WriteString(query)
 
-		setSrcMatchValues(&sb, certifyBadSpec.Source, false, &firstMatch, queryValues)
+		if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Source != nil {
+			setSrcMatchValues(&sb, certifyBadSpec.Subject.Source, false, &firstMatch, queryValues)
+		}
 		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, certifyBad")
 		result, err := session.ReadTransaction(
@@ -171,7 +178,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
 	}
 
-	if certifyBadSpec.Artifact != nil || queryAll {
+	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Artifact != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -179,7 +186,9 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		query := "MATCH (a:Artifact)-[:subject]-(certifyBad:CertifyBad)"
 		sb.WriteString(query)
 
-		setArtifactMatchValues(&sb, certifyBadSpec.Artifact, false, &firstMatch, queryValues)
+		if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Artifact != nil {
+			setArtifactMatchValues(&sb, certifyBadSpec.Subject.Artifact, false, &firstMatch, queryValues)
+		}
 		setCertifyBadValues(&sb, certifyBadSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN a.algorithm, a.digest, certifyBad")
 		result, err := session.ReadTransaction(
@@ -223,27 +232,6 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 }
 
-// TODO (pxp928): combine with testing backend in shared utility
-func checkCertifyBadInputs(certifyBadSpec *model.CertifyBadSpec) error {
-	invalidSubject := false
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Source != nil {
-		invalidSubject = true
-	}
-	if certifyBadSpec.Package != nil && certifyBadSpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if certifyBadSpec.Source != nil && certifyBadSpec.Artifact != nil {
-		invalidSubject = true
-	}
-	if invalidSubject {
-		return gqlerror.Errorf("cannot specify more than one subject for CertifyBad query")
-	}
-	return nil
-}
-
 func setCertifyBadValues(sb *strings.Builder, certifyBadSpec *model.CertifyBadSpec, firstMatch *bool, queryValues map[string]any) {
 	if certifyBadSpec.Justification != nil {
 		matchProperties(sb, *firstMatch, "certifyBad", "justification", "$justification")
@@ -270,4 +258,15 @@ func generateModelCertifyBad(subject model.PackageSourceOrArtifact, justificatio
 		Collector:     collector,
 	}
 	return &certifyBad
+}
+
+// ingest certifyBad
+
+func (c *neo4jClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
+
+	err := helper.CheckCertifyBadIngestionInput(subject)
+	if err != nil {
+		return nil, err
+	}
+	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }

@@ -155,6 +155,7 @@ type ComplexityRoot struct {
 		CertifyScorecard    func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
 		IngestArtifact      func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestBuilder       func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestCertifyBad    func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyPkg    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) int
 		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
@@ -745,6 +746,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestBuilder(childComplexity, args["builder"].(*model.BuilderInputSpec)), true
+
+	case "Mutation.ingestCertifyBad":
+		if e.complexity.Mutation.IngestCertifyBad == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyBad_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
 
 	case "Mutation.ingestCertifyPkg":
 		if e.complexity.Mutation.IngestCertifyPkg == nil {
@@ -1437,6 +1450,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBuilderSpec,
 		ec.unmarshalInputCVEInputSpec,
 		ec.unmarshalInputCVESpec,
+		ec.unmarshalInputCertifyBadInputSpec,
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyPkgInputSpec,
 		ec.unmarshalInputCertifyPkgSpec,
@@ -1454,6 +1468,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsOccurrenceInputSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
 		ec.unmarshalInputIsVulnerabilitySpec,
+		ec.unmarshalInputMatchFlags,
 		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputOsvCveOrGhsaInput,
@@ -1695,17 +1710,41 @@ For package - a PackageName or PackageVersion must be specified (name or name, v
 For source - a SourceName must be specified (name, tag or commit)
 """
 input CertifyBadSpec {
-  package: PkgSpec
-  source: SourceSpec
-  artifact: ArtifactSpec
+  subject: PackageSourceOrArtifactSpec
   justification: String
   origin: String
   collector: String
 }
 
+"""
+CertifyBadInputSpec is the same as CertifyBad but for mutation input.
+
+All fields are required.
+"""
+input CertifyBadInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+# TODO: use this for ingestion for CertifyBad and HasSourceAt
+enum PkgMatchType {
+  ALL_VERSIONS
+  SPECIFIC_VERSION
+}
+
+input MatchFlags {
+  pkg: PkgMatchType!
+} 
+
 extend type Query {
   "Returns all CertifyBad"
   CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
+}
+
+extend type Mutation {
+  "Adds a certification that two packages are similar"
+  ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyPkg.graphql", Input: `#

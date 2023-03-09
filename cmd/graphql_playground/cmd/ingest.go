@@ -46,6 +46,7 @@ func ingestData(port int) {
 	ingestOccurrence(ctx, gqlclient)
 	ingestVulnerability(ctx, gqlclient)
 	ingestCertifyPkg(ctx, gqlclient)
+	ingestCertifyBad(ctx, gqlclient)
 	time := time.Now().Sub(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }
@@ -642,6 +643,100 @@ func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
 		_, err := model.CertifyPkg(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.certifyPkg)
 		if err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+	}
+}
+
+func ingestCertifyBad(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	opensslNs := "openssl.org"
+	opensslVersion := "3.0.3"
+	djangoNameSpace := ""
+	sourceTag := "v0.0.1"
+
+	ingestCertifyPkg := []struct {
+		name         string
+		pkg          *model.PkgInputSpec
+		pkgMatchType *model.MatchFlags
+		source       *model.SourceInputSpec
+		artifact     *model.ArtifactInputSpec
+		certifyBad   model.CertifyBadInputSpec
+	}{{
+		name: "this package as this specific version has a malware",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		pkgMatchType: &model.MatchFlags{
+			Pkg: model.PkgMatchTypeSpecificVersion,
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this package as this specific version has a malware",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this package (all versions) is a known typo-squat",
+		pkg: &model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNameSpace,
+			Name:      "django",
+		},
+		pkgMatchType: &model.MatchFlags{
+			Pkg: model.PkgMatchTypeAllVersions,
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this package (all versions) is a known typo-squat",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this source repo is owned by a known attacker",
+		source: &model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "github.com/guacsec/guac",
+			Tag:       &sourceTag,
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this source repo is owned by a known attacker",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "these two dpkg packages are the same",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this artifact is associated with a malware package",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestCertifyPkg {
+		if ingest.pkg != nil {
+			_, err := model.CertifyBadPkg(context.Background(), client, *ingest.pkg, ingest.pkgMatchType, ingest.certifyBad)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+		} else if ingest.source != nil {
+			_, err := model.CertifyBadSrc(context.Background(), client, *ingest.source, ingest.certifyBad)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+		} else if ingest.artifact != nil {
+			_, err := model.CertifyBadArtifact(context.Background(), client, *ingest.artifact, ingest.certifyBad)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+		} else {
+			fmt.Printf("input missing for cve, osv or ghsa")
 		}
 	}
 }
