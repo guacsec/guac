@@ -144,3 +144,21 @@ fragment allSLSATree on HasSLSA {
     collector
   }
 }
+
+fragment allCertifyBad on CertifyBad {
+  justification
+  subject {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Source {
+      ...allSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  origin
+  collector
+}

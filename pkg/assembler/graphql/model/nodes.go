@@ -3,6 +3,9 @@
 package model
 
 import (
+	"fmt"
+	"io"
+	"strconv"
 	"time"
 )
 
@@ -132,17 +135,24 @@ type CertifyBad struct {
 	Collector     string                  `json:"collector"`
 }
 
+// CertifyBadInputSpec is the same as CertifyBad but for mutation input.
+//
+// All fields are required.
+type CertifyBadInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
 // CertifyBadSpec allows filtering the list of CertifyBad to return.
 // Note: Package, Source or artifact must be specified but not at the same time
 // For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
 // For source - a SourceName must be specified (name, tag or commit)
 type CertifyBadSpec struct {
-	Package       *PkgSpec      `json:"package"`
-	Source        *SourceSpec   `json:"source"`
-	Artifact      *ArtifactSpec `json:"artifact"`
-	Justification *string       `json:"justification"`
-	Origin        *string       `json:"origin"`
-	Collector     *string       `json:"collector"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
+	Justification *string                      `json:"justification"`
+	Origin        *string                      `json:"origin"`
+	Collector     *string                      `json:"collector"`
 }
 
 // CertifyPkg is an attestation that represents when a package objects are similar
@@ -488,6 +498,10 @@ type IsVulnerabilitySpec struct {
 	Justification *string   `json:"justification"`
 	Origin        *string   `json:"origin"`
 	Collector     *string   `json:"collector"`
+}
+
+type MatchFlags struct {
+	Pkg PkgMatchType `json:"pkg"`
 }
 
 // OSV represents an Open Source Vulnerability.
@@ -994,4 +1008,45 @@ type VulnerabilityMetaDataInput struct {
 	ScannerVersion string    `json:"scannerVersion"`
 	Origin         string    `json:"origin"`
 	Collector      string    `json:"collector"`
+}
+
+type PkgMatchType string
+
+const (
+	PkgMatchTypeAllVersions     PkgMatchType = "ALL_VERSIONS"
+	PkgMatchTypeSpecificVersion PkgMatchType = "SPECIFIC_VERSION"
+)
+
+var AllPkgMatchType = []PkgMatchType{
+	PkgMatchTypeAllVersions,
+	PkgMatchTypeSpecificVersion,
+}
+
+func (e PkgMatchType) IsValid() bool {
+	switch e {
+	case PkgMatchTypeAllVersions, PkgMatchTypeSpecificVersion:
+		return true
+	}
+	return false
+}
+
+func (e PkgMatchType) String() string {
+	return string(e)
+}
+
+func (e *PkgMatchType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PkgMatchType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PkgMatchType", str)
+	}
+	return nil
+}
+
+func (e PkgMatchType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

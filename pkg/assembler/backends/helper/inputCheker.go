@@ -75,3 +75,41 @@ func CheckOccurrenceIngestionInput(subject model.PackageOrSourceInput) error {
 	}
 	return nil
 }
+
+func CheckCertifyBadIngestionInput(subject model.PackageSourceOrArtifactInput) error {
+	subjectDefined := 0
+	if subject.Package != nil {
+		subjectDefined = subjectDefined + 1
+	}
+	if subject.Source != nil {
+		subjectDefined = subjectDefined + 1
+	}
+	if subject.Artifact != nil {
+		subjectDefined = subjectDefined + 1
+	}
+	if subjectDefined != 1 {
+		return gqlerror.Errorf("must specify at most one subject (package, source, or artifact)")
+	}
+	return nil
+}
+
+func CheckCertifyBadQueryInput(subject *model.PackageSourceOrArtifactSpec) (bool, error) {
+	if subject == nil {
+		return true, nil
+	} else {
+		subjectDefined := 0
+		if subject.Package != nil {
+			subjectDefined = subjectDefined + 1
+		}
+		if subject.Source != nil {
+			subjectDefined = subjectDefined + 1
+		}
+		if subject.Artifact != nil {
+			subjectDefined = subjectDefined + 1
+		}
+		if subjectDefined != 1 {
+			return false, gqlerror.Errorf("must specify at most one subject (package, source, or artifact)")
+		}
+	}
+	return false, nil
+}

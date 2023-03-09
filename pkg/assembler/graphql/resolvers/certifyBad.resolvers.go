@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestCertifyBad is the resolver for the ingestCertifyBad field.
+func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
+	return r.Backend.IngestCertifyBad(ctx, subject, pkgMatchType, certifyBad)
+}
+
 // CertifyBad is the resolver for the CertifyBad field.
 func (r *queryResolver) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 	return r.Backend.CertifyBad(ctx, certifyBadSpec)

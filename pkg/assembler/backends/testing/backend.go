@@ -74,38 +74,38 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
 	registerAllHashEqual(client)
-	err := registerAllIsOccurrence(client)
+	// err := registerAllIsOccurrence(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	err := registerAllhasSBOM(client)
 	if err != nil {
 		return nil, err
 	}
-	err = registerAllhasSBOM(client)
-	if err != nil {
-		return nil, err
-	}
-	err = registerAllIsDependency(client)
-	if err != nil {
-		return nil, err
-	}
-	err = registerAllCertifyPkg(client)
-	if err != nil {
-		return nil, err
-	}
+	// err = registerAllIsDependency(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// err = registerAllCertifyPkg(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	err = registerAllHasSourceAt(client)
 	if err != nil {
 		return nil, err
 	}
-	err = registerAllCertifyBad(client)
-	if err != nil {
-		return nil, err
-	}
-	err = registerAllCertifyScorecard(client)
-	if err != nil {
-		return nil, err
-	}
-	err = registerAllCertifyVuln(client)
-	if err != nil {
-		return nil, err
-	}
+	// err = registerAllCertifyBad(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// err = registerAllCertifyScorecard(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// err = registerAllCertifyVuln(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	err = registerAllIsVulnerability(client)
 	if err != nil {
 		return nil, err
