@@ -44,7 +44,25 @@ input HashEqualSpec {
 }
 
 
+"""
+HashEqualInputSpec is the same as HashEqual but for mutation input.
+
+All fields are required.
+"""
+input HashEqualInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+
 extend type Query {
   "Returns all HashEqual"
   HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
 }
+
+extend type Mutation {
+  "certify that two artifacts are the same (hashes are equal)"
+  ingestHashEqual(artifact: ArtifactInputSpec!, equalArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+}
+

@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -48,6 +49,10 @@ func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justificatio
 		Collector:     "testing backend",
 	}
 	c.hashEquals = append(c.hashEquals, newHashEqual)
+}
+
+func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
 
 // Query HashEqual

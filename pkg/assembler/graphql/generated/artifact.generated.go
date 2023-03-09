@@ -27,6 +27,7 @@ type MutationResolver interface {
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
 	IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error)
+	IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
@@ -239,6 +240,39 @@ func (ec *executionContext) field_Mutation_ingestGHSA_args(ctx context.Context, 
 		}
 	}
 	args["ghsa"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.ArtifactInputSpec
+	if tmp, ok := rawArgs["artifact"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+		arg0, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["artifact"] = arg0
+	var arg1 model.ArtifactInputSpec
+	if tmp, ok := rawArgs["equalArtifact"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("equalArtifact"))
+		arg1, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["equalArtifact"] = arg1
+	var arg2 model.HashEqualInputSpec
+	if tmp, ok := rawArgs["hashEqual"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqual"))
+		arg2, err = ec.unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hashEqual"] = arg2
 	return args, nil
 }
 
@@ -1313,6 +1347,70 @@ func (ec *executionContext) fieldContext_Mutation_ingestSLSA(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestSLSA_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestHashEqual(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestHashEqual(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestHashEqual(rctx, fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["equalArtifact"].(model.ArtifactInputSpec), fc.Args["hashEqual"].(model.HashEqualInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.HashEqual)
+	fc.Result = res
+	return ec.marshalNHashEqual2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqual(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestHashEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "artifacts":
+				return ec.fieldContext_HashEqual_artifacts(ctx, field)
+			case "justification":
+				return ec.fieldContext_HashEqual_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_HashEqual_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_HashEqual_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HashEqual", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestHashEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3135,6 +3233,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestSLSA(ctx, field)
+			})
+
+		case "ingestHashEqual":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestHashEqual(ctx, field)
 			})
 
 		case "ingestDependency":

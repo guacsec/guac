@@ -160,6 +160,7 @@ type ComplexityRoot struct {
 		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestHashEqual     func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestOccurrence    func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
@@ -806,6 +807,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
+
+	case "Mutation.ingestHashEqual":
+		if e.complexity.Mutation.IngestHashEqual == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHashEqual_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.ArtifactInputSpec), args["equalArtifact"].(model.ArtifactInputSpec), args["hashEqual"].(model.HashEqualInputSpec)), true
 
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
@@ -1462,6 +1475,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSLSASpec,
 		ec.unmarshalInputHasSourceAtSpec,
+		ec.unmarshalInputHashEqualInputSpec,
 		ec.unmarshalInputHashEqualSpec,
 		ec.unmarshalInputIsDependencyInputSpec,
 		ec.unmarshalInputIsDependencySpec,
@@ -2600,10 +2614,28 @@ input HashEqualSpec {
 }
 
 
+"""
+HashEqualInputSpec is the same as HashEqual but for mutation input.
+
+All fields are required.
+"""
+input HashEqualInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+
 extend type Query {
   "Returns all HashEqual"
   HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
 }
+
+extend type Mutation {
+  "certify that two artifacts are the same (hashes are equal)"
+  ingestHashEqual(artifact: ArtifactInputSpec!, equalArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+}
+
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.

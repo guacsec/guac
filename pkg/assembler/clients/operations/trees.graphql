@@ -159,6 +159,14 @@ fragment allCertifyBad on CertifyBad {
       ...allArtifactTree
     }
   }
+}
+
+fragment allHashEqualTree on HashEqual {
+  justification
+  artifacts {
+    algorithm
+    digest
+  }
   origin
   collector
 }

@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestHashEqual is the resolver for the ingestHashEqual field.
+func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+	return r.Backend.IngestHashEqual(ctx, artifact, equalArtifact, hashEqual)
+}
+
 // HashEqual is the resolver for the HashEqual field.
 func (r *queryResolver) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	return r.Backend.HashEqual(ctx, hashEqualSpec)

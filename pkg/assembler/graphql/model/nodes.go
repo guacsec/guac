@@ -385,6 +385,15 @@ type HashEqual struct {
 	Collector     string      `json:"collector"`
 }
 
+// HashEqualInputSpec is the same as HashEqual but for mutation input.
+//
+// All fields are required.
+type HashEqualInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
 // HashEqualSpec allows filtering the list of HashEqual to return.
 //
 // Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
