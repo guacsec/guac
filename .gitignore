@@ -11,3 +11,5 @@ go.work
 .idea
 *.DS_Store
 *pkg/.DS_Store
+*.swp
+*.swo
