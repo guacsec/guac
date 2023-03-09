@@ -40,7 +40,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 
 	aggregateCertifyBad := []*model.CertifyBad{}
 
-	if queryAll || certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Package != nil {
+	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Package != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -122,7 +122,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
 	}
 
-	if queryAll || certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Source != nil {
+	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Source != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -178,7 +178,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 		aggregateCertifyBad = append(aggregateCertifyBad, result.([]*model.CertifyBad)...)
 	}
 
-	if queryAll || certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Artifact != nil {
+	if queryAll || (certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Artifact != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -268,5 +268,5 @@ func (c *neo4jClient) IngestCertifyBad(ctx context.Context, subject model.Packag
 	if err != nil {
 		return nil, err
 	}
-	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
+	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }
