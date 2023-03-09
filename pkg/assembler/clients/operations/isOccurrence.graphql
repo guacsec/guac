@@ -15,30 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest a IsOccurrence into GUAC
-
-fragment allArtifactTree on Artifact {
-  algorithm
-  digest
-}
-
-fragment allIsOccurrencesTree on IsOccurrence {
-  subject {
-    __typename 
-    ... on Package {
-      ...allPkgTree
-    }
-   ...on Source {
-      ...allSrcTree
-    }
-  }
-  artifact {
-    ...allArtifactTree
-  }
-  justification
-  origin
-  collector
-}
+# Defines the GraphQL operations to ingest occurence information into GUAC
 
 mutation IsOccurrencePkg($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
   ingestPackage(pkg: $pkg) {
@@ -54,7 +31,7 @@ mutation IsOccurrencePkg($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $oc
 
 mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
   ingestSource(source: $source) {
-    ...allSrcTree
+    ...allSourceTree
   }
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree

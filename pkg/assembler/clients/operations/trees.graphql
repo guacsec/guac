@@ -1,0 +1,146 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines GraphQL fragments used in the operations
+
+# TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
+
+fragment allPkgTree on Package {
+  type
+  namespaces {
+    namespace
+    names {
+      name
+      versions {
+        version
+        qualifiers {
+          key
+          value
+        }
+        subpath
+      }
+    }
+  }
+}
+
+fragment allSourceTree on Source {
+  type
+    namespaces {
+      namespace
+        names {
+          name
+            tag
+            commit
+        }
+    }
+}
+
+fragment allArtifactTree on Artifact {
+  algorithm
+  digest
+}
+
+fragment allCertifyScorecard on CertifyScorecard {
+  source {
+    ...allSourceTree
+  }
+  scorecard {
+    timeScanned
+      aggregateScore
+      checks {
+        check
+          score
+      }
+    scorecardVersion
+      scorecardCommit
+      origin
+      collector
+  }
+}
+
+fragment allIsOccurrencesTree on IsOccurrence {
+  subject {
+    __typename
+    ...on Package {
+      ...allPkgTree
+    }
+   ...on Source {
+      ...allSourceTree
+    }
+  }
+  artifact {
+    ...allArtifactTree
+  }
+  justification
+  origin
+  collector
+}
+
+fragment allIsDependencyTree on IsDependency {
+  justification
+  package {
+    ...allPkgTree
+  }
+  dependentPackage {
+    ...allPkgTree
+  }
+  versionRange
+  origin
+  collector
+}
+
+fragment allSLSATree on HasSLSA {
+  subject {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Source {
+      ...allSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  slsa {
+    builtFrom {
+      __typename
+      ... on Package {
+        ...allPkgTree
+      }
+      ... on Source {
+        ...allSourceTree
+      }
+      ... on Artifact {
+        ...allArtifactTree
+      }
+    }
+    builtBy {
+      uri
+    }
+    buildType
+    slsaPredicate {
+      key
+      value
+    }
+    slsaVersion
+    startedOn
+    finishedOn
+    origin
+    collector
+  }
+}

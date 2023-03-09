@@ -15,13 +15,31 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest a Scorecard certification into GUAC
+# Defines the GraphQL operations to ingest SLSA attestations into GUAC
 
-mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
+mutation SLSAForPackage($pkg: PkgInputSpec!, $slsa: SLSAInputSpec!) {
+  ingestPackage(pkg: $pkg) {
+    ...allPkgTree
+  }
+  ingestSLSA(subject: {package: $pkg}, slsa: $slsa) {
+    ...allSLSATree
+  }
+}
+
+mutation SLSAForSource($source: SourceInputSpec!, $slsa: SLSAInputSpec!) {
   ingestSource(source: $source) {
     ...allSourceTree
   }
-  certifyScorecard(source: $source, scorecard: $scorecard) {
-    ...allCertifyScorecard
+  ingestSLSA(subject: {source: $source}, slsa: $slsa) {
+    ...allSLSATree
+  }
+}
+
+mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $slsa: SLSAInputSpec!) {
+  ingestArtifact(artifact: $artifact) {
+    ...allArtifactTree
+  }
+  ingestSLSA(subject: {artifact: $artifact}, slsa: $slsa) {
+    ...allSLSATree
   }
 }
