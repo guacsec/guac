@@ -343,7 +343,7 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveOrGhsa, timeS
 
 //  Ingest Vulnerability
 
-func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
 	vulnDefined := 0
 	if vulnerability.Osv != nil {

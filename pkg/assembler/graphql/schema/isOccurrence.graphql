@@ -96,5 +96,5 @@ extend type Query {
 
 extend type Mutation {
   "Adds an artifact as an occurrence for either a package or a source"
-  ingestOccurrence(subject: PackageOrSourceInput, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
 }

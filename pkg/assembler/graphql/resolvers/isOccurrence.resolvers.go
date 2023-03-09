@@ -11,7 +11,7 @@ import (
 )
 
 // IngestOccurrence is the resolver for the ingestOccurrence field.
-func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject *model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	return r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
 }
 

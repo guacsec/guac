@@ -598,19 +598,16 @@ func (ec *executionContext) marshalNPackageOrSource2githubᚗcomᚋguacsecᚋgua
 	return ec._PackageOrSource(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx context.Context, v interface{}) (model.PackageOrSourceInput, error) {
+	res, err := ec.unmarshalInputPackageOrSourceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOIsOccurrenceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx context.Context, v interface{}) (*model.IsOccurrenceSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputIsOccurrenceSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOPackageOrSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx context.Context, v interface{}) (*model.PackageOrSourceInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputPackageOrSourceInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

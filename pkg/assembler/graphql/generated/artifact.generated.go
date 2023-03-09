@@ -22,11 +22,11 @@ type MutationResolver interface {
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
 	IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
-	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
+	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
-	IngestOccurrence(ctx context.Context, subject *model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
+	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
@@ -225,10 +225,10 @@ func (ec *executionContext) field_Mutation_ingestOSV_args(ctx context.Context, r
 func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.PackageOrSourceInput
+	var arg0 model.PackageOrSourceInput
 	if tmp, ok := rawArgs["subject"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalOPackageOrSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
+		arg0, err = ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -297,10 +297,10 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 		}
 	}
 	args["pkg"] = arg0
-	var arg1 *model.OsvCveOrGhsaInput
+	var arg1 model.OsvCveOrGhsaInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalOOsvCveOrGhsaInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx, tmp)
+		arg1, err = ec.unmarshalNOsvCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -970,7 +970,7 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(*model.OsvCveOrGhsaInput), fc.Args["certifyVuln"].(model.VulnerabilityMetaDataInput))
+		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.OsvCveOrGhsaInput), fc.Args["certifyVuln"].(model.VulnerabilityMetaDataInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1218,7 +1218,7 @@ func (ec *executionContext) _Mutation_ingestOccurrence(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestOccurrence(rctx, fc.Args["subject"].(*model.PackageOrSourceInput), fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["occurrence"].(model.IsOccurrenceInputSpec))
+		return ec.resolvers.Mutation().IngestOccurrence(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["occurrence"].(model.IsOccurrenceInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

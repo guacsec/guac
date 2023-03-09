@@ -159,11 +159,11 @@ type ComplexityRoot struct {
 		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestOccurrence    func(childComplexity int, subject *model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
+		IngestOccurrence    func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSource        func(childComplexity int, source *model.SourceInputSpec) int
-		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability *model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
+		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
 
 	OSV struct {
@@ -803,7 +803,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["subject"].(*model.PackageOrSourceInput), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceInputSpec)), true
+		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["subject"].(model.PackageOrSourceInput), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceInputSpec)), true
 
 	case "Mutation.ingestOSV":
 		if e.complexity.Mutation.IngestOsv == nil {
@@ -851,7 +851,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(*model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
+		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
 
 	case "OSV.osvId":
 		if e.complexity.OSV.OsvID == nil {
@@ -2074,7 +2074,7 @@ extend type Query {
 
 extend type Mutation {
   "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
-  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
@@ -2694,7 +2694,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds an artifact as an occurrence for either a package or a source"
-  ingestOccurrence(subject: PackageOrSourceInput, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#

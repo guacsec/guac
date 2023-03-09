@@ -98,7 +98,7 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	return newIsOccurrence, nil
 }
 
-func (c *demoClient) IngestOccurrence(ctx context.Context, subject *model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	if subject.Package != nil && subject.Source != nil {
 		return nil, gqlerror.Errorf("cannot specify both package and source for IngestOccurrence")
 	}
