@@ -147,3 +147,7 @@ func GuacFilePurl(alg string, digest string, filename *string) string {
 	}
 	return s
 }
+
+func GuacGenericPurl(s string) string {
+	return fmt.Sprintf("pkg:guac/generic/%s", s)
+}

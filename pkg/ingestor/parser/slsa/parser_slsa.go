@@ -17,38 +17,54 @@ package slsa
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/in-toto/in-toto-golang/in_toto"
+	"github.com/jeremywohl/flatten"
 )
 
 const (
 	algorithmSHA256 string = "sha256"
 )
 
+// each subject or object is made of:
+// - A artifact for each digest information
+// - a pkg or source depending on what is represented by the name/URI
+// - An IsOccurence input spec which will generate a predicate for each occurence
+type slsaEntity struct {
+	artifacts []model.ArtifactInputSpec
+	occurence model.IsOccurrenceInputSpec
+
+	// Either pkg or source
+	pkg    *model.PkgInputSpec
+	source *model.SourceInputSpec
+}
+
 type slsaParser struct {
-	doc               *processor.Document
-	subjects          []assembler.ArtifactNode
-	dependencies      []assembler.ArtifactNode
-	attestations      []assembler.AttestationNode
-	builders          []assembler.BuilderNode
+	doc *processor.Document
+
+	subjects        []slsaEntity
+	materials       []slsaEntity
+	builder         model.BuilderInputSpec
+	slsaAttestation model.SLSAInputSpec
+
 	identifierStrings *common.IdentifierStrings
 }
 
 // NewSLSAParser initializes the slsaParser
 func NewSLSAParser() common.DocumentParser {
 	return &slsaParser{
-		subjects:          []assembler.ArtifactNode{},
-		dependencies:      []assembler.ArtifactNode{},
-		attestations:      []assembler.AttestationNode{},
-		builders:          []assembler.BuilderNode{},
+		subjects:          []slsaEntity{},
+		materials:         []slsaEntity{},
+		slsaAttestation:   model.SLSAInputSpec{},
+		builder:           model.BuilderInputSpec{},
 		identifierStrings: &common.IdentifierStrings{},
 	}
 }
@@ -61,44 +77,126 @@ func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
 	}
 	s.getSubject(statement)
-	s.getDependency(statement)
-	s.getAttestation(doc.Blob)
+	s.getMaterials(statement)
+	err = s.getSLSA(statement)
+	if err != nil {
+		return err
+	}
 	s.getBuilder(statement)
 	return nil
+}
+
+type parsedObject struct {
+	singletonArtifact *model.ArtifactInputSpec
+	singletonSource   *model.SourceInputSpec
+	// if it is a pkg, it returns the pkg encapsulated in
+	// the IsOccurence predicate
+	pkg *assembler.IsOccurenceIngest
+}
+
+func determineObject() (parsedObject, error) {
+	return parsedObject{}, fmt.Errorf("not yet implemented")
 }
 
 func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 	// append artifact node for the subjects
 	for _, sub := range statement.Subject {
+		artifacts := []model.ArtifactInputSpec{}
 		for alg, ds := range sub.Digest {
-			s.subjects = append(s.subjects, assembler.ArtifactNode{
-				Name: sub.Name, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
+			artifacts = append(artifacts, model.ArtifactInputSpec{
+				Algorithm: alg,
+				Digest:    strings.Trim(ds, "'"), // some slsa documents incorrectly add additional quotes
+			})
+
 			s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, sub.Name)
 		}
+		s.subjects = append(s.subjects, getSlsaEntity(sub.Name, artifacts))
 	}
 }
 
-func (s *slsaParser) getDependency(statement *in_toto.ProvenanceStatement) {
+func (s *slsaParser) getMaterials(statement *in_toto.ProvenanceStatement) {
 	// append dependency nodes for the materials
 	for _, mat := range statement.Predicate.Materials {
+		artifacts := []model.ArtifactInputSpec{}
 		for alg, ds := range mat.Digest {
-			s.dependencies = append(s.dependencies, assembler.ArtifactNode{
-				Name: mat.URI, Digest: alg + ":" + strings.Trim(ds, "'"), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
+			artifacts = append(artifacts, model.ArtifactInputSpec{
+				Algorithm: alg,
+				Digest:    strings.Trim(ds, "'"), // some slsa documents incorrectly add additional quotes
+			})
+
 			s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, mat.URI)
 		}
+		s.subjects = append(s.subjects, getSlsaEntity(mat.URI, artifacts))
 	}
 }
 
-func (s *slsaParser) getAttestation(blob []byte) {
-	h := sha256.Sum256(blob)
-	s.attestations = append(s.attestations, assembler.AttestationNode{
-		FilePath: s.doc.SourceInformation.Source, Digest: algorithmSHA256 + ":" + hex.EncodeToString(h[:]), NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
+func getSlsaEntity(name string, artifacts []model.ArtifactInputSpec) slsaEntity {
+	s := slsaEntity{
+		artifacts: artifacts,
+	}
+	pkg, err := helpers.PurlToPkg(name)
+	if err == nil {
+		s.pkg = pkg
+	}
+
+	// TODO (lumjjb) Add VCS check here
+	// src, err := helpers.VcsToSrc
+
+	// else we create a GUAC package for it
+	pkg, err = helpers.PurlToPkg(helpers.GuacGenericPurl(name))
+	if err == nil {
+		s.pkg = pkg
+	} else {
+		panic("unable to get Guac Generic Purl, this should not happen")
+	}
+
+	s.occurence = model.IsOccurrenceInputSpec{
+		Justification: "from SLSA definition of checksums for subject/materials",
+	}
+
+	return s
+}
+
+func (s *slsaParser) getSLSA(stmt *in_toto.ProvenanceStatement) error {
+	inp := model.SLSAInputSpec{}
+	inp.BuildType = stmt.Predicate.BuildType
+
+	inp.SlsaVersion = stmt.PredicateType
+	if stmt.Predicate.Metadata.BuildStartedOn != nil {
+		inp.StartedOn = *stmt.Predicate.Metadata.BuildStartedOn
+	}
+	if stmt.Predicate.Metadata.BuildFinishedOn != nil {
+		inp.FinishedOn = *stmt.Predicate.Metadata.BuildStartedOn
+	}
+
+	data, _ := json.Marshal(stmt.Predicate)
+	var genericMap map[string]any
+	err := json.Unmarshal(data, &genericMap)
+	if err != nil {
+		return err
+	}
+
+	flatMap, err := flatten.Flatten(genericMap, "slsa.", flatten.SeparatorStyle{Middle: "."})
+	if err != nil {
+		return err
+	}
+
+	for k, v := range flatMap {
+		inp.SlsaPredicate = append(inp.SlsaPredicate, model.SLSAPredicateInputSpec{
+			Key:   k,
+			Value: fmt.Sprintf("%v", v),
+		})
+	}
+
+	s.slsaAttestation = inp
+
+	return nil
 }
 
 func (s *slsaParser) getBuilder(statement *in_toto.ProvenanceStatement) {
-	// append builder node for builder
-	s.builders = append(s.builders, assembler.BuilderNode{
-		BuilderType: statement.Predicate.BuildType, BuilderId: statement.Predicate.Builder.ID, NodeData: *assembler.NewObjectMetadata(s.doc.SourceInformation)})
+	s.builder = model.BuilderInputSpec{
+		Uri: statement.Predicate.Builder.ID,
+	}
 }
 
 func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
@@ -109,49 +207,54 @@ func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
 	return &predicate, nil
 }
 
-// TODO(bulldozer): replace with GetPredicates
-// // CreateNodes creates the GuacNode for the graph inputs
-// func (s *slsaParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-// 	nodes := []assembler.GuacNode{}
-// 	for _, sub := range s.subjects {
-// 		nodes = append(nodes, sub)
-// 	}
-// 	for _, a := range s.attestations {
-// 		nodes = append(nodes, a)
-// 	}
-// 	for _, d := range s.dependencies {
-// 		nodes = append(nodes, d)
-// 	}
-// 	for _, b := range s.builders {
-// 		nodes = append(nodes, b)
-// 	}
-// 	return nodes
-// }
-//
-// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-// func (s *slsaParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
-// 	edges := []assembler.GuacEdge{}
-// 	for _, i := range foundIdentities {
-// 		for _, a := range s.attestations {
-// 			edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: a})
-// 		}
-// 	}
-// 	for _, sub := range s.subjects {
-// 		for _, build := range s.builders {
-// 			edges = append(edges, assembler.BuiltByEdge{ArtifactNode: sub, BuilderNode: build})
-// 		}
-// 		for _, a := range s.attestations {
-// 			edges = append(edges, assembler.AttestationForEdge{AttestationNode: a, ForArtifact: sub})
-// 		}
-// 		for _, d := range s.dependencies {
-// 			edges = append(edges, assembler.DependsOnEdge{ArtifactNode: sub, ArtifactDependency: d})
-// 		}
-// 	}
-// 	return edges
-// }
-
 func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
-	return nil
+	preds := &assembler.IngestPredicates{}
+
+	// Create occurences for subjects and materials
+	for _, o := range s.subjects {
+		for _, a := range o.artifacts {
+			preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
+				Pkg:         o.pkg,
+				Src:         o.source,
+				Artifact:    &a,
+				IsOccurence: &o.occurence,
+			})
+		}
+	}
+
+	for _, o := range s.materials {
+		for _, a := range o.artifacts {
+			preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
+				Pkg:         o.pkg,
+				Src:         o.source,
+				Artifact:    &a,
+				IsOccurence: &o.occurence,
+			})
+		}
+	}
+
+	// Assemble materials
+	var materials []model.PackageSourceOrArtifactInput
+	for _, o := range s.materials {
+		for _, a := range o.artifacts {
+			materials = append(materials, model.PackageSourceOrArtifactInput{
+				Artifact: &a,
+			})
+		}
+	}
+
+	for _, o := range s.subjects {
+		for _, a := range o.artifacts {
+			preds.HasSlsaIngest = append(preds.HasSlsaIngest, assembler.HasSlsaIngest{
+				Artifact:  &a,
+				HasSlsa:   &s.slsaAttestation,
+				Materials: materials,
+				Builder:   &s.builder,
+			})
+		}
+	}
+
+	return preds
 }
 
 // GetIdentities gets the identity node from the document if they exist
