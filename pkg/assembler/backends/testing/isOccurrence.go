@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -69,13 +70,13 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 	}
 
 	for _, occurrence := range c.isOccurrence {
-		if occurrence.Artifact == artifact && occurrence.Justification == justification {
+		if reflect.DeepEqual(occurrence.Artifact, artifact) && occurrence.Justification == justification {
 			if val, ok := occurrence.Subject.(model.Package); ok {
-				if &val == selectedPackage {
+				if reflect.DeepEqual(val, *selectedPackage) {
 					return occurrence, nil
 				}
 			} else if val, ok := occurrence.Subject.(model.Source); ok {
-				if &val == selectedSource {
+				if reflect.DeepEqual(val, *selectedSource) {
 					return occurrence, nil
 				}
 			}

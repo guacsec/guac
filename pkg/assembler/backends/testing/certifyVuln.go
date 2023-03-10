@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"reflect"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -89,7 +90,7 @@ func (c *demoClient) registerCertifyVuln(selectedPackage *model.Package, selecte
 	dbUri, dbVersion, scannerUri, scannerVersion, origin, collector string) *model.CertifyVuln {
 
 	for _, vuln := range c.certifyVuln {
-		if vuln.Package == selectedPackage && vuln.Metadata.DbURI == dbUri && vuln.Metadata.DbVersion == dbVersion &&
+		if reflect.DeepEqual(vuln.Package, selectedPackage) && vuln.Metadata.DbURI == dbUri && vuln.Metadata.DbVersion == dbVersion &&
 			vuln.Metadata.ScannerURI == scannerUri && vuln.Metadata.ScannerVersion == scannerVersion {
 			if val, ok := vuln.Vulnerability.(model.Osv); ok {
 				if &val == selectedOsv {

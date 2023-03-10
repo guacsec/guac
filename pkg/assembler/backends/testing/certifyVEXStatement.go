@@ -78,20 +78,20 @@ func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package,
 	for _, vex := range c.certifyVEXStatement {
 		if vex.Justification == justification {
 			if val, ok := vex.Subject.(model.Package); ok {
-				if &val == selectedPackage {
+				if reflect.DeepEqual(val, *selectedPackage) {
 					return nil
 				}
 			} else if val, ok := vex.Subject.(model.Artifact); ok {
-				if &val == selectedArtifact {
+				if reflect.DeepEqual(val, *selectedArtifact) {
 					return nil
 				}
 			}
 			if val, ok := vex.Vulnerability.(model.Cve); ok {
-				if &val == selectedCve {
+				if reflect.DeepEqual(val, *selectedCve) {
 					return nil
 				}
 			} else if val, ok := vex.Vulnerability.(model.Ghsa); ok {
-				if &val == selectedGhsa {
+				if reflect.DeepEqual(val, *selectedGhsa) {
 					return nil
 				}
 			}

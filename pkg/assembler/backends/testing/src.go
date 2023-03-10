@@ -101,9 +101,13 @@ func checkQualifier(n *model.SourceName, qualifier string) bool {
 	if qualifier != "" {
 		pair := strings.Split(qualifier, "=")
 		if pair[0] == "tag" {
-			return n.Tag == &pair[1]
+			if n.Tag != nil {
+				return *n.Tag == pair[1]
+			}
 		} else {
-			return n.Commit == &pair[1]
+			if n.Commit != nil {
+				return *n.Commit == pair[1]
+			}
 		}
 	}
 	return false
