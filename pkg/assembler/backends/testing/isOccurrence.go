@@ -157,8 +157,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 			occurrence.Origin,
 			occurrence.Collector)
 	}
-	// it should never reach here else it failed
-	return nil, gqlerror.Errorf("IngestOccurrence failed")
+	return nil, nil
 }
 
 // Query IsOccurrence
