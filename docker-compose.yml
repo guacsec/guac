@@ -32,7 +32,7 @@ services:
   # the service is ready for incoming requests.
   # TODO(lumjjb): no good way right now to do a healtcheck for nats-server since
   # it doesn't have utilities within it to perform the check from the container
-  # itself. 
+  # itself.
   service-health-1:
     image: "local-healthcheck"
     stdin_open: true
@@ -42,7 +42,7 @@ services:
       - -c
       - |
         echo "checking-for-services";
-        until curl -I http://nats:8222 > /dev/null 2>&1; do sleep 5; done; 
+        until curl -I http://nats:8222 > /dev/null 2>&1; do sleep 5; done;
         echo "nats-up";
         until curl -I http://neo4j:7474> /dev/null 2>&1; do sleep 5; done;
         echo "neo4j-up";

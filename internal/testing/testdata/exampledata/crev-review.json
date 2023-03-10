@@ -2,7 +2,7 @@
   "_type": "https://in-toto.io/Statement/v0.1",
   "subject": [
       {
-        "name": "git://github.com/kubernetes/kubernetes", 
+        "name": "git://github.com/kubernetes/kubernetes",
         "digest": {"sha1": "5835544ca568b757a8ecae5c153f317e5736700e"}
       }
   ],

@@ -30,7 +30,7 @@ message CollectEntry {
     string value = 2;
 }
 
-// rpc AddCollectEntry 
+// rpc AddCollectEntry
 message AddCollectEntriesRequest {
     repeated CollectEntry entries = 1;
 }

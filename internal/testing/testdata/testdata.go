@@ -127,7 +127,7 @@ var (
 			"invocation": {
 			  "configSource": {
 				"uri": "git+https://github.com/curl/curl-docker@master",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },   
+				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" },
 				"entryPoint": "build.yaml:maketgz"
 			  }
 			},
@@ -627,7 +627,6 @@ var (
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
 			  "db":{
-				 
 			  },
 			  "result":[
 				 {
@@ -658,7 +657,6 @@ var (
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
 			  "db":{
-				 
 			  },
 			  "result":[
 				 {
@@ -689,7 +687,6 @@ var (
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
 			  "db":{
-				 
 			  },
 			  "result":[
 				 {
@@ -738,7 +735,6 @@ var (
 			  "uri":"osv.dev",
 			  "version":"0.0.14",
 			  "db":{
-				 
 			  },
 			  "result":[
 				 {

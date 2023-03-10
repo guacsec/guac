@@ -68,9 +68,9 @@ var (
 			"configSource": {
 			  "uri": "https://example.com/example-1.2.3.tar.gz",
 			  "digest": {"sha256": "1234..."},
-			  "entryPoint": "src:foo",                
+			  "entryPoint": "src:foo",
 			},
-			"parameters": {"CFLAGS": "-O3"}           
+			"parameters": {"CFLAGS": "-O3"}
 		  },
 		  "materials": [{
 			"uri": "https://example.com/example-1.2.3.tar.gz",

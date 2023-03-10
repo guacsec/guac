@@ -509,7 +509,7 @@ type IsVulnerabilitySpec struct {
 	Collector     *string   `json:"collector"`
 }
 
-// MatchFlags is used to input the PkgMatchType enum
+// MatchFlags is used to input the PkgMatchType enum.
 type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }

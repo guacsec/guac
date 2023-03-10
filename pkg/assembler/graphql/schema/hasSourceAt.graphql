@@ -15,7 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector. 
+# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector.
 """
 HasSourceAt is an attestation represents that a package object has a source object since a timestamp
 

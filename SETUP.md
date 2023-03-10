@@ -216,14 +216,14 @@ In this example, we will ingest an SPDX SBOM for a custom vulnerable image that 
 Running the OSV Certifier will allow all the packages to be evaluated against the OSV database. If a vulnerability
 is found, a vulnerability node will be generated containing the OSV ID that can be queried further for more information.
 Along with the vulnerability node, a vulnerability attestation node is also generated based on a custom predicate defined
-in [pkg/certifier/attestation/attestation_vuln.go](https://github.com/guacsec/guac/blob/main/pkg/certifier/attestation/attestation_vuln.go) and an example defined in 
+in [pkg/certifier/attestation/attestation_vuln.go](https://github.com/guacsec/guac/blob/main/pkg/certifier/attestation/attestation_vuln.go) and an example defined in
 [internal/testing/testdata/exampledata/certify-vuln.json](https://github.com/guacsec/guac/blob/main/internal/testing/testdata/exampledata/certify-vuln.json). This attestation is generated
 for all packages that are evaluated, containing a list of vulnerabilities (if they exist). Future plans are that the `certifiers`
 would run periodically (or ad-hoc) to keep the information up to date.
 
-**NOTE:** 
+**NOTE:**
 
-The vulnerability predicate is a work in progress and might eventually be replaced and moved to 
+The vulnerability predicate is a work in progress and might eventually be replaced and moved to
 [in-toto/attestation](https://github.com/in-toto/attestation) repo.
 
 We first ingest the vulnerable SPDX SBOM into GUAC:

@@ -15,7 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector. 
+# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector.
 """
 HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 
@@ -37,7 +37,7 @@ type HasSBOM {
 HashEqualSpec allows filtering the list of HasSBOM to return.
 
 Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
-relationship. 
+relationship.
 """
 input HasSBOMSpec {
   package: PkgSpec

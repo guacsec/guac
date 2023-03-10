@@ -1763,12 +1763,10 @@ enum PkgMatchType {
   SPECIFIC_VERSION
 }
 
-"""
-MatchFlags is used to input the PkgMatchType enum
-"""
+"MatchFlags is used to input the PkgMatchType enum."
 input MatchFlags {
   pkg: PkgMatchType!
-} 
+}
 
 extend type Query {
   "Returns all CertifyBad"
@@ -2320,7 +2318,7 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector. 
+# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector.
 """
 HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
 
@@ -2342,7 +2340,7 @@ type HasSBOM {
 HashEqualSpec allows filtering the list of HasSBOM to return.
 
 Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
-relationship. 
+relationship.
 """
 input HasSBOMSpec {
   package: PkgSpec
@@ -2562,7 +2560,7 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector. 
+# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector.
 """
 HasSourceAt is an attestation represents that a package object has a source object since a timestamp
 
@@ -2617,7 +2615,7 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector. 
+# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector.
 """
 HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
 
@@ -2803,7 +2801,7 @@ type IsOccurrence {
 """
 IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 Note: Package or Source must be specified but not both at the same time
-For package - PackageVersion must be specified (version, qualifiers and subpath) 
+For package - PackageVersion must be specified (version, qualifiers and subpath)
 or it defaults to empty string for version, subpath and empty list for qualifiers
 For source - a SourceName must be specified (name, tag or commit)
 """

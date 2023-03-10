@@ -3,7 +3,7 @@ fragment allIsDependencyTree on IsDependency {
   package {
     type
     namespaces {
-      namespace 
+      namespace
       names {
         name
         versions {
@@ -20,7 +20,7 @@ fragment allIsDependencyTree on IsDependency {
 dependentPackage {
       type
     namespaces {
-      namespace 
+      namespace
       names {
         name
         versions {

@@ -1,7 +1,7 @@
 fragment allHasSBOMTree on HasSBOM {
   uri
   subject {
-    __typename 
+    __typename
     ... on Package {
       type
       namespaces {
