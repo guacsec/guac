@@ -48,6 +48,7 @@ func ingestData(port int) {
 	ingestCertifyPkg(ctx, gqlclient)
 	ingestCertifyBad(ctx, gqlclient)
 	ingestHashEqual(ctx, gqlclient)
+	ingestHasSBOM(ctx, gqlclient)
 	time := time.Now().Sub(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }
@@ -777,6 +778,63 @@ func ingestHashEqual(ctx context.Context, client graphql.Client) {
 		_, err := model.HashEqual(context.Background(), client, ingest.artifact, ingest.equalArtifact, ingest.hashEqual)
 		if err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+	}
+}
+
+func ingestHasSBOM(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	opensslNs := "openssl.org"
+	opensslVersion := "3.0.3"
+	sourceTag := "v0.0.1"
+
+	ingestHasSBOM := []struct {
+		name    string
+		pkg     *model.PkgInputSpec
+		source  *model.SourceInputSpec
+		hasSBOM model.HasSBOMInputSpec
+	}{{
+		name: "uri:location of package SBOM",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		hasSBOM: model.HasSBOMInputSpec{
+			Uri:       "uri:location of package SBOM",
+			Origin:    "Demo ingestion",
+			Collector: "Demo ingestion",
+		},
+	}, {
+		name: "uri:location of source SBOM",
+		source: &model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "github.com/guacsec/guac",
+			Tag:       &sourceTag,
+		},
+		hasSBOM: model.HasSBOMInputSpec{
+			Uri:       "uri:location of source SBOM",
+			Origin:    "Demo ingestion",
+			Collector: "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestHasSBOM {
+		if ingest.pkg != nil {
+			_, err := model.HasSBOMPkg(context.Background(), client, *ingest.pkg, ingest.hasSBOM)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+		} else if ingest.source != nil {
+			_, err := model.HasSBOMSrc(context.Background(), client, *ingest.source, ingest.hasSBOM)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+		} else {
+			fmt.Printf("input missing for package or source")
 		}
 	}
 }

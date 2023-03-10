@@ -160,6 +160,7 @@ type ComplexityRoot struct {
 		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestHasSbom       func(childComplexity int, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHashEqual     func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestMaterials     func(childComplexity int, materials []*model.PackageSourceOrArtifactInput) int
 		IngestOccurrence    func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
@@ -808,6 +809,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestGhsa(childComplexity, args["ghsa"].(*model.GHSAInputSpec)), true
+
+	case "Mutation.ingestHasSBOM":
+		if e.complexity.Mutation.IngestHasSbom == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasSBOM_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrSourceInput), args["hasSBOM"].(model.HasSBOMInputSpec)), true
 
 	case "Mutation.ingestHashEqual":
 		if e.complexity.Mutation.IngestHashEqual == nil {
@@ -1485,6 +1498,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyVulnSpec,
 		ec.unmarshalInputGHSAInputSpec,
 		ec.unmarshalInputGHSASpec,
+		ec.unmarshalInputHasSBOMInputSpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSLSASpec,
 		ec.unmarshalInputHasSourceAtSpec,
@@ -2343,17 +2357,33 @@ Only the package or source can be added, not both. HasSourceAt will be used to c
 relationship.
 """
 input HasSBOMSpec {
-  package: PkgSpec
-  source: SourceSpec
+  subject: PackageOrSourceSpec
   uri: String
   origin: String
   collector: String
+}
+
+"""
+HasSBOMInputSpec is the same as HasSBOM but for mutation input.
+
+All fields are required.
+"""
+input HasSBOMInputSpec {
+  uri: String!
+  origin: String!
+  collector: String!
 }
 
 extend type Query {
   "Returns all HasSBOM"
   HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
 }
+
+extend type Mutation {
+  "Certifies that a package or a source has SBOM at the URI"
+  ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+}
+
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
@@ -2742,7 +2772,6 @@ input IsDependencyInputSpec {
   origin: String!
   collector: String!
 }
-
 
 extend type Query {
   "Returns all IsDependency"

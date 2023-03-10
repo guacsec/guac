@@ -1567,6 +1567,383 @@ type GHSAInputSpec struct {
 // GetGhsaId returns GHSAInputSpec.GhsaId, and is useful for accessing the field via an interface.
 func (v *GHSAInputSpec) GetGhsaId() string { return v.GhsaId }
 
+// HasSBOMInputSpec is the same as HasSBOM but for mutation input.
+//
+// All fields are required.
+type HasSBOMInputSpec struct {
+	Uri       string `json:"uri"`
+	Origin    string `json:"origin"`
+	Collector string `json:"collector"`
+}
+
+// GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetUri() string { return v.Uri }
+
+// GetOrigin returns HasSBOMInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns HasSBOMInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
+
+// HasSBOMPkgIngestHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+// The GraphQL type's documentation follows.
+//
+// # HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+//
+// subject - union type that can be either a package or source object type
+// uri (property) - identifier string for the SBOM
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Only package object or source object can be defined. Not both.
+type HasSBOMPkgIngestHasSBOM struct {
+	allHasSBOMTree `json:"-"`
+}
+
+// GetUri returns HasSBOMPkgIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
+
+// GetSubject returns HasSBOMPkgIngestHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+	return v.allHasSBOMTree.Subject
+}
+
+// GetOrigin returns HasSBOMPkgIngestHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
+
+// GetCollector returns HasSBOMPkgIngestHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestHasSBOM) GetCollector() string { return v.allHasSBOMTree.Collector }
+
+func (v *HasSBOMPkgIngestHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMPkgIngestHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMPkgIngestHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMPkgIngestHasSBOM struct {
+	Uri string `json:"uri"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSBOMPkgIngestHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMPkgIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMPkgIngestHasSBOM, error) {
+	var retval __premarshalHasSBOMPkgIngestHasSBOM
+
+	retval.Uri = v.allHasSBOMTree.Uri
+	{
+
+		dst := &retval.Subject
+		src := v.allHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal HasSBOMPkgIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.allHasSBOMTree.Origin
+	retval.Collector = v.allHasSBOMTree.Collector
+	return &retval, nil
+}
+
+// HasSBOMPkgIngestPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type HasSBOMPkgIngestPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns HasSBOMPkgIngestPackage.Type, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns HasSBOMPkgIngestPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *HasSBOMPkgIngestPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMPkgIngestPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMPkgIngestPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMPkgIngestPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *HasSBOMPkgIngestPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMPkgIngestPackage) __premarshalJSON() (*__premarshalHasSBOMPkgIngestPackage, error) {
+	var retval __premarshalHasSBOMPkgIngestPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// HasSBOMPkgResponse is returned by HasSBOMPkg on success.
+type HasSBOMPkgResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	IngestPackage HasSBOMPkgIngestPackage `json:"ingestPackage"`
+	// Certifies that a package or a source has SBOM at the URI
+	IngestHasSBOM HasSBOMPkgIngestHasSBOM `json:"ingestHasSBOM"`
+}
+
+// GetIngestPackage returns HasSBOMPkgResponse.IngestPackage, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgResponse) GetIngestPackage() HasSBOMPkgIngestPackage { return v.IngestPackage }
+
+// GetIngestHasSBOM returns HasSBOMPkgResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgResponse) GetIngestHasSBOM() HasSBOMPkgIngestHasSBOM { return v.IngestHasSBOM }
+
+// HasSBOMSrcIngestHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+// The GraphQL type's documentation follows.
+//
+// # HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+//
+// subject - union type that can be either a package or source object type
+// uri (property) - identifier string for the SBOM
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Only package object or source object can be defined. Not both.
+type HasSBOMSrcIngestHasSBOM struct {
+	allHasSBOMTree `json:"-"`
+}
+
+// GetUri returns HasSBOMSrcIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
+
+// GetSubject returns HasSBOMSrcIngestHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+	return v.allHasSBOMTree.Subject
+}
+
+// GetOrigin returns HasSBOMSrcIngestHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
+
+// GetCollector returns HasSBOMSrcIngestHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestHasSBOM) GetCollector() string { return v.allHasSBOMTree.Collector }
+
+func (v *HasSBOMSrcIngestHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMSrcIngestHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMSrcIngestHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMSrcIngestHasSBOM struct {
+	Uri string `json:"uri"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSBOMSrcIngestHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMSrcIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMSrcIngestHasSBOM, error) {
+	var retval __premarshalHasSBOMSrcIngestHasSBOM
+
+	retval.Uri = v.allHasSBOMTree.Uri
+	{
+
+		dst := &retval.Subject
+		src := v.allHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal HasSBOMSrcIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.allHasSBOMTree.Origin
+	retval.Collector = v.allHasSBOMTree.Collector
+	return &retval, nil
+}
+
+// HasSBOMSrcIngestSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type HasSBOMSrcIngestSource struct {
+	allSourceTree `json:"-"`
+}
+
+// GetType returns HasSBOMSrcIngestSource.Type, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns HasSBOMSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *HasSBOMSrcIngestSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMSrcIngestSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMSrcIngestSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMSrcIngestSource struct {
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *HasSBOMSrcIngestSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMSrcIngestSource) __premarshalJSON() (*__premarshalHasSBOMSrcIngestSource, error) {
+	var retval __premarshalHasSBOMSrcIngestSource
+
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
+// HasSBOMSrcResponse is returned by HasSBOMSrc on success.
+type HasSBOMSrcResponse struct {
+	// Ingest a new source. Returns the ingested source trie
+	IngestSource HasSBOMSrcIngestSource `json:"ingestSource"`
+	// Certifies that a package or a source has SBOM at the URI
+	IngestHasSBOM HasSBOMSrcIngestHasSBOM `json:"ingestHasSBOM"`
+}
+
+// GetIngestSource returns HasSBOMSrcResponse.IngestSource, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcResponse) GetIngestSource() HasSBOMSrcIngestSource { return v.IngestSource }
+
+// GetIngestHasSBOM returns HasSBOMSrcResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcResponse) GetIngestHasSBOM() HasSBOMSrcIngestHasSBOM { return v.IngestHasSBOM }
+
 // HashEqualArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
 //
@@ -5025,6 +5402,30 @@ func (v *__CertifyPkgInput) GetDepPkg() PkgInputSpec { return v.DepPkg }
 // GetCertifyPkg returns __CertifyPkgInput.CertifyPkg, and is useful for accessing the field via an interface.
 func (v *__CertifyPkgInput) GetCertifyPkg() CertifyPkgInputSpec { return v.CertifyPkg }
 
+// __HasSBOMPkgInput is used internally by genqlient
+type __HasSBOMPkgInput struct {
+	Pkg     PkgInputSpec     `json:"pkg"`
+	HasSBOM HasSBOMInputSpec `json:"hasSBOM"`
+}
+
+// GetPkg returns __HasSBOMPkgInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__HasSBOMPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetHasSBOM returns __HasSBOMPkgInput.HasSBOM, and is useful for accessing the field via an interface.
+func (v *__HasSBOMPkgInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
+
+// __HasSBOMSrcInput is used internally by genqlient
+type __HasSBOMSrcInput struct {
+	Source  SourceInputSpec  `json:"source"`
+	HasSBOM HasSBOMInputSpec `json:"hasSBOM"`
+}
+
+// GetSource returns __HasSBOMSrcInput.Source, and is useful for accessing the field via an interface.
+func (v *__HasSBOMSrcInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetHasSBOM returns __HasSBOMSrcInput.HasSBOM, and is useful for accessing the field via an interface.
+func (v *__HasSBOMSrcInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
+
 // __HashEqualInput is used internally by genqlient
 type __HashEqualInput struct {
 	Artifact      ArtifactInputSpec  `json:"artifact"`
@@ -6420,6 +6821,419 @@ type allGHSATreeGhsaIdGHSAId struct {
 
 // GetId returns allGHSATreeGhsaIdGHSAId.Id, and is useful for accessing the field via an interface.
 func (v *allGHSATreeGhsaIdGHSAId) GetId() string { return v.Id }
+
+// allHasSBOMTree includes the GraphQL fields of HasSBOM requested by the fragment allHasSBOMTree.
+// The GraphQL type's documentation follows.
+//
+// # HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+//
+// subject - union type that can be either a package or source object type
+// uri (property) - identifier string for the SBOM
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Only package object or source object can be defined. Not both.
+type allHasSBOMTree struct {
+	Uri       string                               `json:"uri"`
+	Subject   allHasSBOMTreeSubjectPackageOrSource `json:"-"`
+	Origin    string                               `json:"origin"`
+	Collector string                               `json:"collector"`
+}
+
+// GetUri returns allHasSBOMTree.Uri, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTree) GetUri() string { return v.Uri }
+
+// GetSubject returns allHasSBOMTree.Subject, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTree) GetSubject() allHasSBOMTreeSubjectPackageOrSource { return v.Subject }
+
+// GetOrigin returns allHasSBOMTree.Origin, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTree) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allHasSBOMTree.Collector, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTree) GetCollector() string { return v.Collector }
+
+func (v *allHasSBOMTree) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasSBOMTree
+		Subject json.RawMessage `json:"subject"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasSBOMTree = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Subject
+		src := firstPass.Subject
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalallHasSBOMTreeSubjectPackageOrSource(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"Unable to unmarshal allHasSBOMTree.Subject: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalallHasSBOMTree struct {
+	Uri string `json:"uri"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *allHasSBOMTree) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error) {
+	var retval __premarshalallHasSBOMTree
+
+	retval.Uri = v.Uri
+	{
+
+		dst := &retval.Subject
+		src := v.Subject
+		var err error
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal allHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.Origin
+	retval.Collector = v.Collector
+	return &retval, nil
+}
+
+// allHasSBOMTreeSubjectPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type allHasSBOMTreeSubjectPackage struct {
+	Typename   *string                                                  `json:"__typename"`
+	Type       string                                                   `json:"type"`
+	Namespaces []allHasSBOMTreeSubjectPackageNamespacesPackageNamespace `json:"namespaces"`
+}
+
+// GetTypename returns allHasSBOMTreeSubjectPackage.Typename, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackage) GetTypename() *string { return v.Typename }
+
+// GetType returns allHasSBOMTreeSubjectPackage.Type, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackage) GetType() string { return v.Type }
+
+// GetNamespaces returns allHasSBOMTreeSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackage) GetNamespaces() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespace {
+	return v.Namespaces
+}
+
+// allHasSBOMTreeSubjectPackageNamespacesPackageNamespace includes the requested fields of the GraphQL type PackageNamespace.
+// The GraphQL type's documentation follows.
+//
+// PackageNamespace is a namespace for packages.
+//
+// In the pURL representation, each PackageNamespace matches the
+// `pkg:<type>/<namespace>/` partial pURL.
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type allHasSBOMTreeSubjectPackageNamespacesPackageNamespace struct {
+	Namespace string                                                                   `json:"namespace"`
+	Names     []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName `json:"names"`
+}
+
+// GetNamespace returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespace) GetNamespace() string {
+	return v.Namespace
+}
+
+// GetNames returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespace.Names, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespace) GetNames() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName {
+	return v.Names
+}
+
+// allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName includes the requested fields of the GraphQL type PackageName.
+// The GraphQL type's documentation follows.
+//
+// PackageName is a name for packages.
+//
+// In the pURL representation, each PackageName matches the
+// `pkg:<type>/<namespace>/<name>` pURL.
+//
+// Names are always mandatory.
+//
+// This is the first node in the trie that can be referred to by other parts of
+// GUAC.
+type allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName struct {
+	Name     string                                                                                         `json:"name"`
+	Versions []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion `json:"versions"`
+}
+
+// GetName returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName) GetName() string {
+	return v.Name
+}
+
+// GetVersions returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName.Versions, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName) GetVersions() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion {
+	return v.Versions
+}
+
+// allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+// The GraphQL type's documentation follows.
+//
+// PackageVersion is a package version.
+//
+// In the pURL representation, each PackageName matches the
+// `pkg:<type>/<namespace>/<name>@<version>` pURL.
+//
+// Versions are optional and each Package type defines own rules for handling them.
+// For this level of GUAC, these are just opaque strings.
+//
+// This node can be referred to by other parts of GUAC.
+//
+// Subpath and qualifiers are optional. Lack of qualifiers is represented by an
+// empty list and lack of subpath by empty string (to be consistent with
+// optionality of namespace and version). Two nodes that have different qualifiers
+// and/or subpath but the same version mean two different packages in the trie
+// (they are different). Two nodes that have same version but qualifiers of one are
+// a subset of the qualifier of the other also mean two different packages in the
+// trie.
+type allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
+	Version    string                                                                                                                   `json:"version"`
+	Qualifiers []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
+	Subpath    string                                                                                                                   `json:"subpath"`
+}
+
+// GetVersion returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetQualifiers returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetQualifiers() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier {
+	return v.Qualifiers
+}
+
+// GetSubpath returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Subpath, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetSubpath() string {
+	return v.Subpath
+}
+
+// allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier includes the requested fields of the GraphQL type PackageQualifier.
+// The GraphQL type's documentation follows.
+//
+// PackageQualifier is a qualifier for a package, a key-value pair.
+//
+// In the pURL representation, it is a part of the `<qualifiers>` part of the
+// `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` pURL.
+//
+// Qualifiers are optional, each Package type defines own rules for handling them,
+// and multiple qualifiers could be attached to the same package.
+//
+// This node cannot be directly referred by other parts of GUAC.
+type allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Key, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetKey() string {
+	return v.Key
+}
+
+// GetValue returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Value, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetValue() string {
+	return v.Value
+}
+
+// allHasSBOMTreeSubjectPackageOrSource includes the requested fields of the GraphQL interface PackageOrSource.
+//
+// allHasSBOMTreeSubjectPackageOrSource is implemented by the following types:
+// allHasSBOMTreeSubjectPackage
+// allHasSBOMTreeSubjectSource
+// The GraphQL type's documentation follows.
+//
+// PackageOrSource is a union of Package and Source. Any of these objects can be specified
+type allHasSBOMTreeSubjectPackageOrSource interface {
+	implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrSource()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *allHasSBOMTreeSubjectPackage) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrSource() {
+}
+func (v *allHasSBOMTreeSubjectSource) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrSource() {
+}
+
+func __unmarshalallHasSBOMTreeSubjectPackageOrSource(b []byte, v *allHasSBOMTreeSubjectPackageOrSource) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(allHasSBOMTreeSubjectPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(allHasSBOMTreeSubjectSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageOrSource.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for allHasSBOMTreeSubjectPackageOrSource: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalallHasSBOMTreeSubjectPackageOrSource(v *allHasSBOMTreeSubjectPackageOrSource) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *allHasSBOMTreeSubjectPackage:
+		typename = "Package"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*allHasSBOMTreeSubjectPackage
+		}{typename, v}
+		return json.Marshal(result)
+	case *allHasSBOMTreeSubjectSource:
+		typename = "Source"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*allHasSBOMTreeSubjectSource
+		}{typename, v}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for allHasSBOMTreeSubjectPackageOrSource: "%T"`, v)
+	}
+}
+
+// allHasSBOMTreeSubjectSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type allHasSBOMTreeSubjectSource struct {
+	Typename   *string                                                `json:"__typename"`
+	Type       string                                                 `json:"type"`
+	Namespaces []allHasSBOMTreeSubjectSourceNamespacesSourceNamespace `json:"namespaces"`
+}
+
+// GetTypename returns allHasSBOMTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSource) GetTypename() *string { return v.Typename }
+
+// GetType returns allHasSBOMTreeSubjectSource.Type, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSource) GetType() string { return v.Type }
+
+// GetNamespaces returns allHasSBOMTreeSubjectSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSource) GetNamespaces() []allHasSBOMTreeSubjectSourceNamespacesSourceNamespace {
+	return v.Namespaces
+}
+
+// allHasSBOMTreeSubjectSourceNamespacesSourceNamespace includes the requested fields of the GraphQL type SourceNamespace.
+// The GraphQL type's documentation follows.
+//
+// SourceNamespace is a namespace for sources.
+//
+// This is the location of the repository (such as github/gitlab/bitbucket).
+//
+// The `namespace` field is mandatory.
+type allHasSBOMTreeSubjectSourceNamespacesSourceNamespace struct {
+	Namespace string                                                                `json:"namespace"`
+	Names     []allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName `json:"names"`
+}
+
+// GetNamespace returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespace) GetNamespace() string {
+	return v.Namespace
+}
+
+// GetNames returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespace.Names, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespace) GetNames() []allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName {
+	return v.Names
+}
+
+// allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName includes the requested fields of the GraphQL type SourceName.
+// The GraphQL type's documentation follows.
+//
+// SourceName is a url of the repository and its tag or commit.
+//
+// The `name` field is mandatory. The `tag` and `commit` fields are optional, but
+// it is an error to specify both.
+//
+// This is the only source trie node that can be referenced by other parts of
+// GUAC.
+type allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName struct {
+	Name   string  `json:"name"`
+	Tag    *string `json:"tag"`
+	Commit *string `json:"commit"`
+}
+
+// GetName returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName.Name, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName) GetName() string {
+	return v.Name
+}
+
+// GetTag returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName.Tag, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName) GetTag() *string {
+	return v.Tag
+}
+
+// GetCommit returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName) GetCommit() *string {
+	return v.Commit
+}
 
 // allHashEqualTree includes the GraphQL fields of HashEqual requested by the fragment allHashEqualTree.
 // The GraphQL type's documentation follows.
@@ -8937,6 +9751,180 @@ fragment allCertifyPkg on CertifyPkg {
 	var err error
 
 	var data CertifyPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func HasSBOMPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	hasSBOM HasSBOMInputSpec,
+) (*HasSBOMPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSBOMPkg",
+		Query: `
+mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
+	ingestPackage(pkg: $pkg) {
+		... allPkgTree
+	}
+	ingestHasSBOM(subject: {package:$pkg}, hasSBOM: $hasSBOM) {
+		... allHasSBOMTree
+	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allHasSBOMTree on HasSBOM {
+	uri
+	subject {
+		__typename
+		... on Package {
+			type
+			namespaces {
+				namespace
+				names {
+					name
+					versions {
+						version
+						qualifiers {
+							key
+							value
+						}
+						subpath
+					}
+				}
+			}
+		}
+		... on Source {
+			type
+			namespaces {
+				namespace
+				names {
+					name
+					tag
+					commit
+				}
+			}
+		}
+	}
+	origin
+	collector
+}
+`,
+		Variables: &__HasSBOMPkgInput{
+			Pkg:     pkg,
+			HasSBOM: hasSBOM,
+		},
+	}
+	var err error
+
+	var data HasSBOMPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func HasSBOMSrc(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	hasSBOM HasSBOMInputSpec,
+) (*HasSBOMSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSBOMSrc",
+		Query: `
+mutation HasSBOMSrc ($source: SourceInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
+	ingestSource(source: $source) {
+		... allSourceTree
+	}
+	ingestHasSBOM(subject: {source:$source}, hasSBOM: $hasSBOM) {
+		... allHasSBOMTree
+	}
+}
+fragment allSourceTree on Source {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment allHasSBOMTree on HasSBOM {
+	uri
+	subject {
+		__typename
+		... on Package {
+			type
+			namespaces {
+				namespace
+				names {
+					name
+					versions {
+						version
+						qualifiers {
+							key
+							value
+						}
+						subpath
+					}
+				}
+			}
+		}
+		... on Source {
+			type
+			namespaces {
+				namespace
+				names {
+					name
+					tag
+					commit
+				}
+			}
+		}
+	}
+	origin
+	collector
+}
+`,
+		Variables: &__HasSBOMSrcInput{
+			Source:  source,
+			HasSBOM: hasSBOM,
+		},
+	}
+	var err error
+
+	var data HasSBOMSrcResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

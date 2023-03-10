@@ -48,19 +48,19 @@ query Q2 {
 }
 
 query Q3 {
-  HasSBOM(hasSBOMSpec: {package: {name: "openssl"}}) {
+  HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}}}) {
     ...allHasSBOMTree
   }
 }
 
 query Q4 {
-  HasSBOM(hasSBOMSpec: {source: {name: "github.com/guacsec/guac"}}) {
+  HasSBOM(hasSBOMSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
     ...allHasSBOMTree
   }
 }
 
 query Q5 {
-  HasSBOM(hasSBOMSpec: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}) {
+  HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}) {
     ...allHasSBOMTree
   }
 }

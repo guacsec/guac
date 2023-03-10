@@ -311,16 +311,24 @@ type HasSbom struct {
 	Collector string          `json:"collector"`
 }
 
+// HasSBOMInputSpec is the same as HasSBOM but for mutation input.
+//
+// All fields are required.
+type HasSBOMInputSpec struct {
+	URI       string `json:"uri"`
+	Origin    string `json:"origin"`
+	Collector string `json:"collector"`
+}
+
 // HashEqualSpec allows filtering the list of HasSBOM to return.
 //
 // Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
 // relationship.
 type HasSBOMSpec struct {
-	Package   *PkgSpec    `json:"package"`
-	Source    *SourceSpec `json:"source"`
-	URI       *string     `json:"uri"`
-	Origin    *string     `json:"origin"`
-	Collector *string     `json:"collector"`
+	Subject   *PackageOrSourceSpec `json:"subject"`
+	URI       *string              `json:"uri"`
+	Origin    *string              `json:"origin"`
+	Collector *string              `json:"collector"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.

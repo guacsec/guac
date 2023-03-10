@@ -114,3 +114,36 @@ func ValidatePackageSourceOrArtifactInput(item *model.PackageSourceOrArtifactInp
 
 	return nil
 }
+
+func ValidatePackageOrSourceInput(item *model.PackageOrSourceInput, path string) error {
+	valuesDefined := 0
+	if item.Package != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if item.Source != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return gqlerror.Errorf("Must specify at most one package or source for %v", path)
+	}
+
+	return nil
+}
+
+func CheckHasSBOMQueryInput(subject *model.PackageOrSourceSpec) (bool, error) {
+	if subject == nil {
+		return true, nil
+	} else {
+		subjectDefined := 0
+		if subject.Package != nil {
+			subjectDefined = subjectDefined + 1
+		}
+		if subject.Source != nil {
+			subjectDefined = subjectDefined + 1
+		}
+		if subjectDefined != 1 {
+			return false, gqlerror.Errorf("must specify at most one subject (package or source)")
+		}
+	}
+	return false, nil
+}
