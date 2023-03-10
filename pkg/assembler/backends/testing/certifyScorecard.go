@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"time"
 
@@ -100,7 +101,7 @@ func registerAllCertifyScorecard(client *demoClient) error {
 
 func (c *demoClient) registerCertifyScorecard(selectedSource *model.Source, timeScanned time.Time, aggregateScore float64, collectedChecks []*model.ScorecardCheckInputSpec, scorecardVersion, scorecardCommit, origin, collector string) (*model.CertifyScorecard, error) {
 	for _, h := range c.certifyScorecard {
-		if h.Source == selectedSource &&
+		if reflect.DeepEqual(h.Source, selectedSource) &&
 			h.Scorecard.AggregateScore == aggregateScore &&
 			h.Scorecard.ScorecardVersion == scorecardVersion &&
 			h.Scorecard.ScorecardCommit == scorecardCommit {

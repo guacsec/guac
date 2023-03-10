@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -78,15 +79,15 @@ func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selected
 	for _, bad := range c.certifyBad {
 		if bad.Justification == justification {
 			if val, ok := bad.Subject.(model.Package); ok {
-				if &val == selectedPackage {
+				if reflect.DeepEqual(val, *selectedPackage) {
 					return bad, nil
 				}
 			} else if val, ok := bad.Subject.(model.Source); ok {
-				if &val == selectedSource {
+				if reflect.DeepEqual(val, *selectedSource) {
 					return bad, nil
 				}
 			} else if val, ok := bad.Subject.(model.Artifact); ok {
-				if &val == selectedArtifact {
+				if reflect.DeepEqual(val, *selectedArtifact) {
 					return bad, nil
 				}
 			}

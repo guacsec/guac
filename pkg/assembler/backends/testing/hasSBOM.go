@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -69,11 +70,11 @@ func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSou
 	for _, h := range c.hasSBOM {
 		if h.URI == uri {
 			if val, ok := h.Subject.(model.Package); ok {
-				if &val == selectedPackage {
+				if reflect.DeepEqual(val, *selectedPackage) {
 					return nil
 				}
 			} else if val, ok := h.Subject.(model.Source); ok {
-				if &val == selectedSource {
+				if reflect.DeepEqual(val, *selectedSource) {
 					return nil
 				}
 			}

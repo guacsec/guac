@@ -18,6 +18,7 @@ package testing
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -93,7 +94,7 @@ func (c *demoClient) registerHasSourceAt(selectedPackage *model.Package, selecte
 	}
 
 	for _, h := range c.hasSourceAt {
-		if h.Justification == justification && h.Package == selectedPackage && h.Source == selectedSource {
+		if h.Justification == justification && reflect.DeepEqual(h.Package, selectedPackage) && reflect.DeepEqual(h.Source, selectedSource) {
 			return nil
 		}
 	}

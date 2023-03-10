@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -121,8 +122,8 @@ func registerAllIsDependency(client *demoClient) error {
 func (c *demoClient) registerIsDependency(selectedPackage *model.Package, dependentPackage *model.Package, versionRange, justification, origin, collector string) *model.IsDependency {
 
 	for _, dependency := range c.isDependency {
-		if dependency.DependentPackage == dependentPackage && dependency.Justification == justification &&
-			dependency.Package == selectedPackage && dependency.VersionRange == versionRange {
+		if reflect.DeepEqual(dependency.DependentPackage, dependentPackage) && dependency.Justification == justification &&
+			reflect.DeepEqual(dependency.Package, selectedPackage) && dependency.VersionRange == versionRange {
 			return dependency
 		}
 	}
