@@ -15,7 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector. 
+# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector.
 """
 HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
 

@@ -201,13 +201,21 @@ func (c *demoClient) ingestSLSAPackage(
 		}
 	}
 
-	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
+	subjects, err := c.Packages(ctx, helper.ConvertPkgInputSpecToPkgSpec(pkg))
+	if err != nil {
+		return nil, err
+	}
+	if len(subjects) != 1 {
+		return nil, gqlerror.Errorf("Found %d packages matching subject", len(subjects))
+	}
+
+	newSlsa, err := c.buildSLSA(ctx, builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
 
 	newHasSlsa := &model.HasSlsa{
-		Subject: generateModelPackage(pkg),
+		Subject: subjects[0],
 		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
@@ -228,13 +236,21 @@ func (c *demoClient) ingestSLSASource(
 		}
 	}
 
-	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
+	subjects, err := c.Sources(ctx, helper.ConvertSrcInputSpecToSrcSpec(source))
+	if err != nil {
+		return nil, err
+	}
+	if len(subjects) != 1 {
+		return nil, gqlerror.Errorf("Found %d sources matching subject", len(subjects))
+	}
+
+	newSlsa, err := c.buildSLSA(ctx, builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
 
 	newHasSlsa := &model.HasSlsa{
-		Subject: generateModelSource(source),
+		Subject: subjects[0],
 		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
@@ -255,33 +271,49 @@ func (c *demoClient) ingestSLSAArtifact(
 		}
 	}
 
-	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
+	subjects, err := c.Artifacts(ctx, helper.ConvertArtInputSpecToArtSpec(artifact))
+	if err != nil {
+		return nil, err
+	}
+	if len(subjects) != 1 {
+		return nil, gqlerror.Errorf("Found %d sources matching subject", len(subjects))
+	}
+
+	newSlsa, err := c.buildSLSA(ctx, builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
 
 	newHasSlsa := &model.HasSlsa{
-		Subject: generateModelArtifact(artifact),
+		Subject: subjects[0],
 		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
 	return newHasSlsa, nil
 }
 
-func buildSLSA(
+func (c *demoClient) buildSLSA(
+	ctx context.Context,
 	builtFrom []*model.PackageSourceOrArtifactInput,
 	builtBy *model.BuilderInputSpec, input *model.SLSAInputSpec,
 ) (*model.Slsa, error) {
 	materials := []model.PackageSourceOrArtifact{}
 	for _, m := range builtFrom {
-		material, err := processMaterialInput(m)
+		material, err := c.processMaterialInput(ctx, m)
 		if err != nil {
 			return nil, err
 		}
 		materials = append(materials, material)
 	}
 
-	builder := model.Builder{URI: builtBy.URI}
+	builders, err := c.Builders(ctx, helper.ConvertBuilderInputSpecToBuilderSpec(builtBy))
+	if err != nil {
+		return nil, err
+	}
+	if len(builders) != 1 {
+		return nil, gqlerror.Errorf("Found %d matches for SLSA builder", len(builders))
+	}
+	builder := builders[0]
 
 	predicates := []*model.SLSAPredicate{}
 	for _, p := range input.SlsaPredicate {
@@ -294,7 +326,7 @@ func buildSLSA(
 
 	slsa := model.Slsa{
 		BuiltFrom:     materials,
-		BuiltBy:       &builder,
+		BuiltBy:       builder,
 		BuildType:     input.BuildType,
 		SlsaPredicate: predicates,
 		SlsaVersion:   input.SlsaVersion,
@@ -304,6 +336,47 @@ func buildSLSA(
 		Collector:     input.Collector,
 	}
 	return &slsa, nil
+}
+
+func (c *demoClient) processMaterialInput(
+	ctx context.Context,
+	material *model.PackageSourceOrArtifactInput,
+) (model.PackageSourceOrArtifact, error) {
+	if material.Package != nil {
+		matches, err := c.Packages(ctx, helper.ConvertPkgInputSpecToPkgSpec(material.Package))
+		if err != nil {
+			return nil, err
+		}
+		if len(matches) != 1 {
+			return nil, gqlerror.Errorf("Found %d matches for one package material", len(matches))
+		}
+		return matches[0], nil
+	}
+
+	if material.Source != nil {
+		matches, err := c.Sources(ctx, helper.ConvertSrcInputSpecToSrcSpec(material.Source))
+		if err != nil {
+			return nil, err
+		}
+		if len(matches) != 1 {
+			return nil, gqlerror.Errorf("Found %d matches for one source material", len(matches))
+		}
+		return matches[0], nil
+	}
+
+	if material.Artifact != nil {
+		matches, err := c.Artifacts(ctx, helper.ConvertArtInputSpecToArtSpec(material.Artifact))
+		if err != nil {
+			return nil, err
+		}
+		if len(matches) != 1 {
+			return nil, gqlerror.Errorf("Found %d matches for one artifact material", len(matches))
+		}
+		return matches[0], nil
+	}
+
+	// We should not reach this as validation already happened before call
+	return nil, gqlerror.Errorf("Impossible configuration")
 }
 
 func slsaMatch(
@@ -381,44 +454,6 @@ func slsaMatch(
 	return true
 }
 
-// TODO(mihaimaruseac): Extract common utilities to common (separate PR!)
-// This is very large and surely can be split, but we need several refactors
-// before. Hence, separate PR!
-func processMaterialInput(material *model.PackageSourceOrArtifactInput) (model.PackageSourceOrArtifact, error) {
-	valuesDefined := 0
-	if material.Package != nil {
-		valuesDefined = valuesDefined + 1
-	}
-	if material.Source != nil {
-		valuesDefined = valuesDefined + 1
-	}
-	if material.Artifact != nil {
-		valuesDefined = valuesDefined + 1
-	}
-	if valuesDefined > 1 {
-		return nil, gqlerror.Errorf("Must specify at most one package, source, or artifact for a specific material")
-	}
-
-	if material.Package != nil {
-		return generateModelPackage(material.Package), nil
-	} else if material.Source != nil {
-		return generateModelSource(material.Source), nil
-	} else if material.Artifact != nil {
-		return generateModelArtifact(material.Artifact), nil
-	}
-
-	return nil, gqlerror.Errorf("Must specify exactly one package, source, or artifact for a specific material")
-}
-
-// TODO(mihaimaruseac): Merge with neo4j similar(ish) implementation.
-// In a separate PR, as this is already too large
-func generateModelArtifact(inputArtifact *model.ArtifactInputSpec) *model.Artifact {
-	return &model.Artifact{
-		Algorithm: inputArtifact.Algorithm,
-		Digest:    inputArtifact.Digest,
-	}
-}
-
 // TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
 func artifactMatch(artifact *model.Artifact, artifactInput *model.ArtifactInputSpec) bool {
 	if artifactInput == nil {
@@ -432,40 +467,6 @@ func artifactMatch(artifact *model.Artifact, artifactInput *model.ArtifactInputS
 		return false
 	}
 	return true
-}
-
-// TODO(mihaimaruseac): Merge with neo4j similar(ish) implementation.
-// In a separate PR, as this is already too large
-func generateModelSource(inputSource *model.SourceInputSpec) *model.Source {
-	var tag *string
-	tagValue := inputSource.Tag
-	if tagValue != nil {
-		tagStr := *tagValue
-		tag = &tagStr
-	}
-
-	var commit *string
-	commitValue := inputSource.Commit
-	if commitValue != nil {
-		commitStr := *commitValue
-		commit = &commitStr
-	}
-
-	name := &model.SourceName{
-		Name:   inputSource.Name,
-		Tag:    tag,
-		Commit: commit,
-	}
-
-	namespace := &model.SourceNamespace{
-		Namespace: inputSource.Namespace,
-		Names:     []*model.SourceName{name},
-	}
-
-	return &model.Source{
-		Type:       inputSource.Type,
-		Namespaces: []*model.SourceNamespace{namespace},
-	}
 }
 
 // TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
@@ -495,54 +496,6 @@ func sourceMatch(source *model.Source, sourceInput *model.SourceInputSpec) bool 
 		}
 	}
 	return false
-}
-
-// TODO(mihaimaruseac): Merge with neo4j similar(ish) implementation.
-// In a separate PR, as this is already too large
-func generateModelPackage(inputPackage *model.PkgInputSpec) *model.Package {
-	var version *model.PackageVersion
-	if inputPackage.Version != nil ||
-		inputPackage.Subpath != nil ||
-		inputPackage.Qualifiers != nil {
-		version = &model.PackageVersion{}
-		if inputPackage.Version != nil {
-			version.Version = *inputPackage.Version
-		}
-		if inputPackage.Subpath != nil {
-			version.Subpath = *inputPackage.Subpath
-		}
-		if inputPackage.Qualifiers != nil {
-			var qualifiers []*model.PackageQualifier
-			for _, q := range inputPackage.Qualifiers {
-				qual := model.PackageQualifier{
-					Key:   q.Key,
-					Value: q.Value,
-				}
-				qualifiers = append(qualifiers, &qual)
-			}
-			version.Qualifiers = qualifiers
-		}
-	}
-
-	var versions []*model.PackageVersion
-	if version != nil {
-		versions = append(versions, version)
-	}
-
-	name := &model.PackageName{
-		Name:     inputPackage.Name,
-		Versions: versions,
-	}
-
-	namespace := &model.PackageNamespace{
-		Namespace: *inputPackage.Namespace,
-		Names:     []*model.PackageName{name},
-	}
-
-	return &model.Package{
-		Type:       inputPackage.Type,
-		Namespaces: []*model.PackageNamespace{namespace},
-	}
 }
 
 // TODO(mihaimaruseac): Also merge this with neo4j / extract to common.

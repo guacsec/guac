@@ -116,3 +116,11 @@ func ConvertArtInputSpecToArtSpec(artInput *model.ArtifactInputSpec) *model.Arti
 	}
 	return &artSpec
 }
+
+func ConvertBuilderInputSpecToBuilderSpec(input *model.BuilderInputSpec) *model.BuilderSpec {
+	uri := input.URI
+	output := model.BuilderSpec{
+		URI: &uri,
+	}
+	return &output
+}

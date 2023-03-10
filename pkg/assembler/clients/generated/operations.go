@@ -2668,7 +2668,7 @@ func (v *IsOccurrenceSrcResponse) GetIngestOccurrence() IsOccurrenceSrcIngestOcc
 	return v.IngestOccurrence
 }
 
-// MatchFlags is used to input the PkgMatchType enum
+// MatchFlags is used to input the PkgMatchType enum.
 type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }

@@ -67,12 +67,10 @@ enum PkgMatchType {
   SPECIFIC_VERSION
 }
 
-"""
-MatchFlags is used to input the PkgMatchType enum
-"""
+"MatchFlags is used to input the PkgMatchType enum."
 input MatchFlags {
   pkg: PkgMatchType!
-} 
+}
 
 extend type Query {
   "Returns all CertifyBad"

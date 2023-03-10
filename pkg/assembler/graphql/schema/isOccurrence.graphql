@@ -45,7 +45,7 @@ type IsOccurrence {
 """
 IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
 Note: Package or Source must be specified but not both at the same time
-For package - PackageVersion must be specified (version, qualifiers and subpath) 
+For package - PackageVersion must be specified (version, qualifiers and subpath)
 or it defaults to empty string for version, subpath and empty list for qualifiers
 For source - a SourceName must be specified (name, tag or commit)
 """

@@ -1,6 +1,6 @@
 fragment allIsOccurrencesTree on IsOccurrence {
   subject {
-    __typename 
+    __typename
     ... on Package {
       type
       namespaces {
