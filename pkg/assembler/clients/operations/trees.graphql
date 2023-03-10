@@ -174,34 +174,12 @@ fragment allHashEqualTree on HashEqual {
 fragment allHasSBOMTree on HasSBOM {
   uri
   subject {
-    __typename 
+    __typename
     ... on Package {
-      type
-      namespaces {
-        namespace
-        names {
-          name
-          versions {
-            version
-            qualifiers {
-              key
-              value
-            }
-            subpath
-          }
-        }
-      }
+      ...allPkgTree
     }
-   ...on Source {
-      type
-      namespaces {
-        namespace
-        names {
-          name
-          tag
-          commit
-        }
-      }
+    ... on Source {
+      ...allSourceTree
     }
   }
   origin
