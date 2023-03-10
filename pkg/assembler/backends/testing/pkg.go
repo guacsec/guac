@@ -159,19 +159,13 @@ func registerVersion(n *model.PackageName, version, subpath string, qualifiers .
 		}
 		// TODO(mihaimaruseac): This is O(n*m) instead of O(n+m)
 		allFound := true
-		for i, _ := range v.Qualifiers {
-			if i%2 != 0 {
-				continue
-			}
-			dbKey := v.Qualifiers[i]
-			dbValue := v.Qualifiers[i+1]
+		for _, qualifier := range v.Qualifiers {
+			dbKey := qualifier.Key
+			dbValue := qualifier.Value
 			found := false
-			for j, _ := range inputQualifiers {
-				if j%2 != 0 {
-					continue
-				}
-				if inputQualifiers[j] == dbKey &&
-					inputQualifiers[j+1] == dbValue {
+			for _, inputQualifier := range inputQualifiers {
+				if inputQualifier.Key == dbKey &&
+					inputQualifier.Value == dbValue {
 					found = true
 					break
 				}
