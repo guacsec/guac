@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -154,9 +155,9 @@ func (ec *executionContext) _HasSourceAt_knownSince(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HasSourceAt_knownSince(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -166,7 +167,7 @@ func (ec *executionContext) fieldContext_HasSourceAt_knownSince(ctx context.Cont
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -308,6 +309,58 @@ func (ec *executionContext) fieldContext_HasSourceAt_collector(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputHasSourceAtInputSpec(ctx context.Context, obj interface{}) (model.HasSourceAtInputSpec, error) {
+	var it model.HasSourceAtInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"knownSince", "justification", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "knownSince":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
+			it.KnownSince, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputHasSourceAtSpec(ctx context.Context, obj interface{}) (model.HasSourceAtSpec, error) {
 	var it model.HasSourceAtSpec
 	asMap := map[string]interface{}{}
@@ -342,7 +395,7 @@ func (ec *executionContext) unmarshalInputHasSourceAtSpec(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
-			it.KnownSince, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			it.KnownSince, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -451,6 +504,10 @@ func (ec *executionContext) _HasSourceAt(ctx context.Context, sel ast.SelectionS
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNHasSourceAt2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAt(ctx context.Context, sel ast.SelectionSet, v model.HasSourceAt) graphql.Marshaler {
+	return ec._HasSourceAt(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNHasSourceAt2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasSourceAt) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -503,6 +560,11 @@ func (ec *executionContext) marshalNHasSourceAt2ᚖgithubᚗcomᚋguacsecᚋguac
 		return graphql.Null
 	}
 	return ec._HasSourceAt(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNHasSourceAtInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtInputSpec(ctx context.Context, v interface{}) (model.HasSourceAtInputSpec, error) {
+	res, err := ec.unmarshalInputHasSourceAtInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOHasSourceAtSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx context.Context, v interface{}) (*model.HasSourceAtSpec, error) {

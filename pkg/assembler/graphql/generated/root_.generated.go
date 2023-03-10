@@ -161,6 +161,7 @@ type ComplexityRoot struct {
 		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasSbom       func(childComplexity int, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) int
+		IngestHasSourceAt   func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual     func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestMaterials     func(childComplexity int, materials []*model.PackageSourceOrArtifactInput) int
 		IngestOccurrence    func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
@@ -821,6 +822,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrSourceInput), args["hasSBOM"].(model.HasSBOMInputSpec)), true
+
+	case "Mutation.ingestHasSourceAt":
+		if e.complexity.Mutation.IngestHasSourceAt == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestHasSourceAt_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestHasSourceAt(childComplexity, args["pkg"].(model.PkgInputSpec), args["pkgMatchType"].(model.MatchFlags), args["source"].(model.SourceInputSpec), args["hasSourceAt"].(model.HasSourceAtInputSpec)), true
 
 	case "Mutation.ingestHashEqual":
 		if e.complexity.Mutation.IngestHashEqual == nil {
@@ -1501,6 +1514,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputHasSBOMInputSpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSLSASpec,
+		ec.unmarshalInputHasSourceAtInputSpec,
 		ec.unmarshalInputHasSourceAtSpec,
 		ec.unmarshalInputHashEqualInputSpec,
 		ec.unmarshalInputHashEqualSpec,
@@ -2604,7 +2618,7 @@ collector (property) - the GUAC collector that collected the document that gener
 type HasSourceAt {
   package: Package!
   source: Source!
-  knownSince: String!
+  knownSince: Time!
   justification: String!
   origin: String!
   collector: String!
@@ -2616,16 +2630,33 @@ HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 input HasSourceAtSpec {
   package: PkgSpec
   source: SourceSpec
-  knownSince: String
+  knownSince: Time
   justification: String
   origin: String
   collector: String
+}
+
+"""
+HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
+
+All fields are required.
+"""
+input HasSourceAtInputSpec {
+  knownSince: Time!
+  justification: String!
+  origin: String!
+  collector: String!
 }
 
 
 extend type Query {
   "Returns all HasSourceAt"
   HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
+}
+
+extend type Mutation {
+  "Adds a certification that a package (either at the version level or package name level) is associated with the source"
+  ingestHasSourceAt(pkg: PkgInputSpec!, pkgMatchType: MatchFlags!, source: SourceInputSpec!, hasSourceAt: HasSourceAtInputSpec!): HasSourceAt!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hashEqual.graphql", Input: `#

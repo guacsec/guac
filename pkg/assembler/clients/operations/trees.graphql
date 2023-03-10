@@ -180,6 +180,41 @@ fragment allHasSBOMTree on HasSBOM {
     }
     ... on Source {
       ...allSourceTree
+      }
+  }
+  origin
+  collector
+}
+
+fragment allHasSourceAt on HasSourceAt {
+  justification
+  knownSince
+  package {
+    type
+    namespaces {
+      namespace
+      names {
+        name
+        versions {
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
+  }
+  source {
+    type
+    namespaces {
+      namespace
+      names {
+        name
+        tag
+        commit
+      }
     }
   }
   origin

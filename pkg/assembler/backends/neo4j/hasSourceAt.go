@@ -17,7 +17,9 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -109,7 +111,7 @@ func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Ha
 				hasSourceAt := &model.HasSourceAt{
 					Package:       pkg,
 					Source:        src,
-					KnownSince:    hasSourceAtNode.Props[knownSince].(string),
+					KnownSince:    hasSourceAtNode.Props[knownSince].(time.Time),
 					Justification: hasSourceAtNode.Props[justification].(string),
 					Origin:        hasSourceAtNode.Props[origin].(string),
 					Collector:     hasSourceAtNode.Props[collector].(string),
@@ -134,7 +136,7 @@ func setHasSourceAtValues(sb *strings.Builder, hasSourceAtSpec *model.HasSourceA
 
 		matchProperties(sb, *firstMatch, "hasSourceAt", "knownSince", "$knownSince")
 		*firstMatch = false
-		queryValues["knownSince"] = hasSourceAtSpec.KnownSince
+		queryValues["knownSince"] = hasSourceAtSpec.KnownSince.UTC()
 	}
 	if hasSourceAtSpec.Justification != nil {
 
@@ -154,4 +156,8 @@ func setHasSourceAtValues(sb *strings.Builder, hasSourceAtSpec *model.HasSourceA
 		*firstMatch = false
 		queryValues["collector"] = hasSourceAtSpec.Collector
 	}
+}
+
+func (c *neo4jClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }

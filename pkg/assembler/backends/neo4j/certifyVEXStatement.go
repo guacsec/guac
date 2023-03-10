@@ -18,6 +18,7 @@ package neo4jBackend
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -126,7 +127,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					}
 
 					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, cve, certifyVEXStatementNode.Props[justification].(string),
-						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
@@ -216,7 +217,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					}
 
 					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, ghsa, certifyVEXStatementNode.Props[justification].(string),
-						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
@@ -279,7 +280,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					}
 
 					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, cve, certifyVEXStatementNode.Props[justification].(string),
-						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
@@ -342,7 +343,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					}
 
 					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, ghsa, certifyVEXStatementNode.Props[justification].(string),
-						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string))
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
@@ -364,7 +365,7 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	if certifyVEXStatementSpec.KnownSince != nil {
 		matchProperties(sb, *firstMatch, "certifyVEXStatement", knownSince, "$"+knownSince)
 		*firstMatch = false
-		queryValues[knownSince] = certifyVEXStatementSpec.KnownSince
+		queryValues[knownSince] = certifyVEXStatementSpec.KnownSince.UTC()
 	}
 	if certifyVEXStatementSpec.Justification != nil {
 		matchProperties(sb, *firstMatch, "certifyVEXStatement", justification, "$"+justification)
@@ -383,11 +384,12 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	}
 }
 
-func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveGhsaObject, justification, origin, collector string) *model.CertifyVEXStatement {
+func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveGhsaObject, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
 	certifyVEXStatement := model.CertifyVEXStatement{
 		Subject:       subject,
 		Vulnerability: vuln,
 		Justification: justification,
+		KnownSince:    knownSince,
 		Origin:        origin,
 		Collector:     collector,
 	}
