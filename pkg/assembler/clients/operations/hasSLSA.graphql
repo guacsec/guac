@@ -17,29 +17,74 @@
 
 # Defines the GraphQL operations to ingest SLSA attestations into GUAC
 
-mutation SLSAForPackage($pkg: PkgInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForPackage($pkg: PkgInputSpec!, $materials: [PackageSourceOrArtifactInput!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
-  ingestSLSA(subject: {package: $pkg}, slsa: $slsa) {
+  ingestMaterials(materials: $materials) {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Source {
+      ...allSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  ingestBuilder(builder: $builder) {
+    uri
+  }
+  ingestSLSA(subject: {package: $pkg}, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
     ...allSLSATree
   }
 }
 
-mutation SLSAForSource($source: SourceInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForSource($source: SourceInputSpec!, $materials: [PackageSourceOrArtifactInput!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
   ingestSource(source: $source) {
     ...allSourceTree
   }
-  ingestSLSA(subject: {source: $source}, slsa: $slsa) {
+  ingestMaterials(materials: $materials) {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Source {
+      ...allSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  ingestBuilder(builder: $builder) {
+    uri
+  }
+  ingestSLSA(subject: {source: $source}, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
     ...allSLSATree
   }
 }
 
-mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForArtifact($artifact: ArtifactInputSpec!, $materials: [PackageSourceOrArtifactInput!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree
   }
-  ingestSLSA(subject: {artifact: $artifact}, slsa: $slsa) {
+  ingestMaterials(materials: $materials) {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Source {
+      ...allSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  ingestBuilder(builder: $builder) {
+    uri
+  }
+  ingestSLSA(subject: {artifact: $artifact}, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
     ...allSLSATree
   }
 }

@@ -264,7 +264,7 @@ func generateModelCertifyBad(subject model.PackageSourceOrArtifact, justificatio
 
 func (c *neo4jClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 
-	err := helper.CheckCertifyBadIngestionInput(subject)
+	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject")
 	if err != nil {
 		return nil, err
 	}

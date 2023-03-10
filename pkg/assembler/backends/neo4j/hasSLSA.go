@@ -600,6 +600,10 @@ func generateModelHasSLSA(subject model.PackageSourceOrArtifact,
 	return &hasSLSA
 }
 
-func (c *neo4jClient) IngestSLSA(ctx context.Context, subject model.PackageSourceOrArtifactInput, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (c *neo4jClient) IngestSLSA(ctx context.Context, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
+}
+
+func (c *neo4jClient) IngestMaterials(ctx context.Context, materials []*model.PackageSourceOrArtifactInput) ([]model.PackageSourceOrArtifact, error) {
 	panic(fmt.Errorf("not implemented: IngestSlsa - ingestSLSA"))
 }

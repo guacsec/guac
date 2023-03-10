@@ -143,8 +143,6 @@ SLSAInputSpec is the same as SLSA but for mutation input.
 All fields are required.
 """
 input SLSAInputSpec {
-  builtFrom: [PackageSourceOrArtifactInput!]
-  builtBy: BuilderInputSpec!
   buildType: String!
   slsaPredicate: [SLSAPredicateInputSpec!]!
   slsaVersion: String!
@@ -169,6 +167,21 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a SLSA attestation"
-  ingestSLSA(subject: PackageSourceOrArtifactInput!, slsa: SLSAInputSpec!): HasSLSA!
+  """
+  Ingests a SLSA attestation.
+
+  Note that materials and builder are extracted as separate arguments. This is
+  because this ingestion method assumes that the subject and the materials are
+  already ingested and only creates the SLSA node.
+  """
+  ingestSLSA(subject: PackageSourceOrArtifactInput!, builtFrom: [PackageSourceOrArtifactInput!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
+
+  """
+  Ingests a set of packages, sources, and artifacts.
+
+  This is a helper mutation for ingesting SLSA nodes. It should be more
+  efficient to call this method to ingest a set materials instead of ingesting
+  them one by one.
+  """
+  ingestMaterials(materials: [PackageSourceOrArtifactInput!]!): [PackageSourceOrArtifact!]!
 }

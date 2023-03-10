@@ -2829,6 +2829,356 @@ func (v *SLSAForArtifactIngestArtifact) __premarshalJSON() (*__premarshalSLSAFor
 	return &retval, nil
 }
 
+// SLSAForArtifactIngestBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder such as (FRSCA or github actions).
+//
+// Currently builders are identified by the `uri` field, which is mandatory.
+type SLSAForArtifactIngestBuilder struct {
+	Uri string `json:"uri"`
+}
+
+// GetUri returns SLSAForArtifactIngestBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestBuilder) GetUri() string { return v.Uri }
+
+// SLSAForArtifactIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type SLSAForArtifactIngestMaterialsArtifact struct {
+	Typename        *string `json:"__typename"`
+	allArtifactTree `json:"-"`
+}
+
+// GetTypename returns SLSAForArtifactIngestMaterialsArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsArtifact) GetTypename() *string { return v.Typename }
+
+// GetAlgorithm returns SLSAForArtifactIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsArtifact) GetAlgorithm() string {
+	return v.allArtifactTree.Algorithm
+}
+
+// GetDigest returns SLSAForArtifactIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *SLSAForArtifactIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForArtifactIngestMaterialsArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForArtifactIngestMaterialsArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForArtifactIngestMaterialsArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *SLSAForArtifactIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForArtifactIngestMaterialsArtifact) __premarshalJSON() (*__premarshalSLSAForArtifactIngestMaterialsArtifact, error) {
+	var retval __premarshalSLSAForArtifactIngestMaterialsArtifact
+
+	retval.Typename = v.Typename
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// SLSAForArtifactIngestMaterialsPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type SLSAForArtifactIngestMaterialsPackage struct {
+	Typename   *string `json:"__typename"`
+	allPkgTree `json:"-"`
+}
+
+// GetTypename returns SLSAForArtifactIngestMaterialsPackage.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsPackage) GetTypename() *string { return v.Typename }
+
+// GetType returns SLSAForArtifactIngestMaterialsPackage.Type, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns SLSAForArtifactIngestMaterialsPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *SLSAForArtifactIngestMaterialsPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForArtifactIngestMaterialsPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForArtifactIngestMaterialsPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForArtifactIngestMaterialsPackage struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *SLSAForArtifactIngestMaterialsPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForArtifactIngestMaterialsPackage) __premarshalJSON() (*__premarshalSLSAForArtifactIngestMaterialsPackage, error) {
+	var retval __premarshalSLSAForArtifactIngestMaterialsPackage
+
+	retval.Typename = v.Typename
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// SLSAForArtifactIngestMaterialsPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// SLSAForArtifactIngestMaterialsPackageSourceOrArtifact is implemented by the following types:
+// SLSAForArtifactIngestMaterialsPackage
+// SLSAForArtifactIngestMaterialsSource
+// SLSAForArtifactIngestMaterialsArtifact
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type SLSAForArtifactIngestMaterialsPackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceSLSAForArtifactIngestMaterialsPackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *SLSAForArtifactIngestMaterialsPackage) implementsGraphQLInterfaceSLSAForArtifactIngestMaterialsPackageSourceOrArtifact() {
+}
+func (v *SLSAForArtifactIngestMaterialsSource) implementsGraphQLInterfaceSLSAForArtifactIngestMaterialsPackageSourceOrArtifact() {
+}
+func (v *SLSAForArtifactIngestMaterialsArtifact) implementsGraphQLInterfaceSLSAForArtifactIngestMaterialsPackageSourceOrArtifact() {
+}
+
+func __unmarshalSLSAForArtifactIngestMaterialsPackageSourceOrArtifact(b []byte, v *SLSAForArtifactIngestMaterialsPackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(SLSAForArtifactIngestMaterialsPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(SLSAForArtifactIngestMaterialsSource)
+		return json.Unmarshal(b, *v)
+	case "Artifact":
+		*v = new(SLSAForArtifactIngestMaterialsArtifact)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for SLSAForArtifactIngestMaterialsPackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalSLSAForArtifactIngestMaterialsPackageSourceOrArtifact(v *SLSAForArtifactIngestMaterialsPackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *SLSAForArtifactIngestMaterialsPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForArtifactIngestMaterialsPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *SLSAForArtifactIngestMaterialsSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForArtifactIngestMaterialsSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *SLSAForArtifactIngestMaterialsArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForArtifactIngestMaterialsArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for SLSAForArtifactIngestMaterialsPackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// SLSAForArtifactIngestMaterialsSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type SLSAForArtifactIngestMaterialsSource struct {
+	Typename      *string `json:"__typename"`
+	allSourceTree `json:"-"`
+}
+
+// GetTypename returns SLSAForArtifactIngestMaterialsSource.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsSource) GetTypename() *string { return v.Typename }
+
+// GetType returns SLSAForArtifactIngestMaterialsSource.Type, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns SLSAForArtifactIngestMaterialsSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *SLSAForArtifactIngestMaterialsSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForArtifactIngestMaterialsSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForArtifactIngestMaterialsSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForArtifactIngestMaterialsSource struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *SLSAForArtifactIngestMaterialsSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForArtifactIngestMaterialsSource) __premarshalJSON() (*__premarshalSLSAForArtifactIngestMaterialsSource, error) {
+	var retval __premarshalSLSAForArtifactIngestMaterialsSource
+
+	retval.Typename = v.Typename
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
 // SLSAForArtifactIngestSLSAHasSLSA includes the requested fields of the GraphQL type HasSLSA.
 // The GraphQL type's documentation follows.
 //
@@ -2907,7 +3257,19 @@ func (v *SLSAForArtifactIngestSLSAHasSLSA) __premarshalJSON() (*__premarshalSLSA
 type SLSAForArtifactResponse struct {
 	// Ingest a new artifact. Returns the ingested artifact
 	IngestArtifact SLSAForArtifactIngestArtifact `json:"ingestArtifact"`
-	// Ingests a SLSA attestation
+	// Ingests a set of packages, sources, and artifacts.
+	//
+	// This is a helper mutation for ingesting SLSA nodes. It should be more
+	// efficient to call this method to ingest a set materials instead of ingesting
+	// them one by one.
+	IngestMaterials []SLSAForArtifactIngestMaterialsPackageSourceOrArtifact `json:"-"`
+	// Ingest a new builder. Returns the ingested builder
+	IngestBuilder SLSAForArtifactIngestBuilder `json:"ingestBuilder"`
+	// Ingests a SLSA attestation.
+	//
+	// Note that materials and builder are extracted as separate arguments. This is
+	// because this ingestion method assumes that the subject and the materials are
+	// already ingested and only creates the SLSA node.
 	IngestSLSA SLSAForArtifactIngestSLSAHasSLSA `json:"ingestSLSA"`
 }
 
@@ -2916,9 +3278,453 @@ func (v *SLSAForArtifactResponse) GetIngestArtifact() SLSAForArtifactIngestArtif
 	return v.IngestArtifact
 }
 
+// GetIngestMaterials returns SLSAForArtifactResponse.IngestMaterials, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactResponse) GetIngestMaterials() []SLSAForArtifactIngestMaterialsPackageSourceOrArtifact {
+	return v.IngestMaterials
+}
+
+// GetIngestBuilder returns SLSAForArtifactResponse.IngestBuilder, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactResponse) GetIngestBuilder() SLSAForArtifactIngestBuilder {
+	return v.IngestBuilder
+}
+
 // GetIngestSLSA returns SLSAForArtifactResponse.IngestSLSA, and is useful for accessing the field via an interface.
 func (v *SLSAForArtifactResponse) GetIngestSLSA() SLSAForArtifactIngestSLSAHasSLSA {
 	return v.IngestSLSA
+}
+
+func (v *SLSAForArtifactResponse) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForArtifactResponse
+		IngestMaterials []json.RawMessage `json:"ingestMaterials"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForArtifactResponse = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.IngestMaterials
+		src := firstPass.IngestMaterials
+		*dst = make(
+			[]SLSAForArtifactIngestMaterialsPackageSourceOrArtifact,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalSLSAForArtifactIngestMaterialsPackageSourceOrArtifact(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"Unable to unmarshal SLSAForArtifactResponse.IngestMaterials: %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalSLSAForArtifactResponse struct {
+	IngestArtifact SLSAForArtifactIngestArtifact `json:"ingestArtifact"`
+
+	IngestMaterials []json.RawMessage `json:"ingestMaterials"`
+
+	IngestBuilder SLSAForArtifactIngestBuilder `json:"ingestBuilder"`
+
+	IngestSLSA SLSAForArtifactIngestSLSAHasSLSA `json:"ingestSLSA"`
+}
+
+func (v *SLSAForArtifactResponse) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForArtifactResponse) __premarshalJSON() (*__premarshalSLSAForArtifactResponse, error) {
+	var retval __premarshalSLSAForArtifactResponse
+
+	retval.IngestArtifact = v.IngestArtifact
+	{
+
+		dst := &retval.IngestMaterials
+		src := v.IngestMaterials
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalSLSAForArtifactIngestMaterialsPackageSourceOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Unable to marshal SLSAForArtifactResponse.IngestMaterials: %w", err)
+			}
+		}
+	}
+	retval.IngestBuilder = v.IngestBuilder
+	retval.IngestSLSA = v.IngestSLSA
+	return &retval, nil
+}
+
+// SLSAForPackageIngestBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder such as (FRSCA or github actions).
+//
+// Currently builders are identified by the `uri` field, which is mandatory.
+type SLSAForPackageIngestBuilder struct {
+	Uri string `json:"uri"`
+}
+
+// GetUri returns SLSAForPackageIngestBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestBuilder) GetUri() string { return v.Uri }
+
+// SLSAForPackageIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type SLSAForPackageIngestMaterialsArtifact struct {
+	Typename        *string `json:"__typename"`
+	allArtifactTree `json:"-"`
+}
+
+// GetTypename returns SLSAForPackageIngestMaterialsArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsArtifact) GetTypename() *string { return v.Typename }
+
+// GetAlgorithm returns SLSAForPackageIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsArtifact) GetAlgorithm() string {
+	return v.allArtifactTree.Algorithm
+}
+
+// GetDigest returns SLSAForPackageIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *SLSAForPackageIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForPackageIngestMaterialsArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForPackageIngestMaterialsArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForPackageIngestMaterialsArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *SLSAForPackageIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForPackageIngestMaterialsArtifact) __premarshalJSON() (*__premarshalSLSAForPackageIngestMaterialsArtifact, error) {
+	var retval __premarshalSLSAForPackageIngestMaterialsArtifact
+
+	retval.Typename = v.Typename
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// SLSAForPackageIngestMaterialsPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type SLSAForPackageIngestMaterialsPackage struct {
+	Typename   *string `json:"__typename"`
+	allPkgTree `json:"-"`
+}
+
+// GetTypename returns SLSAForPackageIngestMaterialsPackage.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsPackage) GetTypename() *string { return v.Typename }
+
+// GetType returns SLSAForPackageIngestMaterialsPackage.Type, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns SLSAForPackageIngestMaterialsPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *SLSAForPackageIngestMaterialsPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForPackageIngestMaterialsPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForPackageIngestMaterialsPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForPackageIngestMaterialsPackage struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *SLSAForPackageIngestMaterialsPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForPackageIngestMaterialsPackage) __premarshalJSON() (*__premarshalSLSAForPackageIngestMaterialsPackage, error) {
+	var retval __premarshalSLSAForPackageIngestMaterialsPackage
+
+	retval.Typename = v.Typename
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// SLSAForPackageIngestMaterialsPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// SLSAForPackageIngestMaterialsPackageSourceOrArtifact is implemented by the following types:
+// SLSAForPackageIngestMaterialsPackage
+// SLSAForPackageIngestMaterialsSource
+// SLSAForPackageIngestMaterialsArtifact
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type SLSAForPackageIngestMaterialsPackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceSLSAForPackageIngestMaterialsPackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *SLSAForPackageIngestMaterialsPackage) implementsGraphQLInterfaceSLSAForPackageIngestMaterialsPackageSourceOrArtifact() {
+}
+func (v *SLSAForPackageIngestMaterialsSource) implementsGraphQLInterfaceSLSAForPackageIngestMaterialsPackageSourceOrArtifact() {
+}
+func (v *SLSAForPackageIngestMaterialsArtifact) implementsGraphQLInterfaceSLSAForPackageIngestMaterialsPackageSourceOrArtifact() {
+}
+
+func __unmarshalSLSAForPackageIngestMaterialsPackageSourceOrArtifact(b []byte, v *SLSAForPackageIngestMaterialsPackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(SLSAForPackageIngestMaterialsPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(SLSAForPackageIngestMaterialsSource)
+		return json.Unmarshal(b, *v)
+	case "Artifact":
+		*v = new(SLSAForPackageIngestMaterialsArtifact)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for SLSAForPackageIngestMaterialsPackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalSLSAForPackageIngestMaterialsPackageSourceOrArtifact(v *SLSAForPackageIngestMaterialsPackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *SLSAForPackageIngestMaterialsPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForPackageIngestMaterialsPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *SLSAForPackageIngestMaterialsSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForPackageIngestMaterialsSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *SLSAForPackageIngestMaterialsArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForPackageIngestMaterialsArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for SLSAForPackageIngestMaterialsPackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// SLSAForPackageIngestMaterialsSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type SLSAForPackageIngestMaterialsSource struct {
+	Typename      *string `json:"__typename"`
+	allSourceTree `json:"-"`
+}
+
+// GetTypename returns SLSAForPackageIngestMaterialsSource.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsSource) GetTypename() *string { return v.Typename }
+
+// GetType returns SLSAForPackageIngestMaterialsSource.Type, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns SLSAForPackageIngestMaterialsSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *SLSAForPackageIngestMaterialsSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForPackageIngestMaterialsSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForPackageIngestMaterialsSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForPackageIngestMaterialsSource struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *SLSAForPackageIngestMaterialsSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForPackageIngestMaterialsSource) __premarshalJSON() (*__premarshalSLSAForPackageIngestMaterialsSource, error) {
+	var retval __premarshalSLSAForPackageIngestMaterialsSource
+
+	retval.Typename = v.Typename
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
 }
 
 // SLSAForPackageIngestPackage includes the requested fields of the GraphQL type Package.
@@ -3073,7 +3879,19 @@ func (v *SLSAForPackageIngestSLSAHasSLSA) __premarshalJSON() (*__premarshalSLSAF
 type SLSAForPackageResponse struct {
 	// Ingest a new package. Returns the ingested package trie
 	IngestPackage SLSAForPackageIngestPackage `json:"ingestPackage"`
-	// Ingests a SLSA attestation
+	// Ingests a set of packages, sources, and artifacts.
+	//
+	// This is a helper mutation for ingesting SLSA nodes. It should be more
+	// efficient to call this method to ingest a set materials instead of ingesting
+	// them one by one.
+	IngestMaterials []SLSAForPackageIngestMaterialsPackageSourceOrArtifact `json:"-"`
+	// Ingest a new builder. Returns the ingested builder
+	IngestBuilder SLSAForPackageIngestBuilder `json:"ingestBuilder"`
+	// Ingests a SLSA attestation.
+	//
+	// Note that materials and builder are extracted as separate arguments. This is
+	// because this ingestion method assumes that the subject and the materials are
+	// already ingested and only creates the SLSA node.
 	IngestSLSA SLSAForPackageIngestSLSAHasSLSA `json:"ingestSLSA"`
 }
 
@@ -3082,8 +3900,452 @@ func (v *SLSAForPackageResponse) GetIngestPackage() SLSAForPackageIngestPackage 
 	return v.IngestPackage
 }
 
+// GetIngestMaterials returns SLSAForPackageResponse.IngestMaterials, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageResponse) GetIngestMaterials() []SLSAForPackageIngestMaterialsPackageSourceOrArtifact {
+	return v.IngestMaterials
+}
+
+// GetIngestBuilder returns SLSAForPackageResponse.IngestBuilder, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageResponse) GetIngestBuilder() SLSAForPackageIngestBuilder {
+	return v.IngestBuilder
+}
+
 // GetIngestSLSA returns SLSAForPackageResponse.IngestSLSA, and is useful for accessing the field via an interface.
 func (v *SLSAForPackageResponse) GetIngestSLSA() SLSAForPackageIngestSLSAHasSLSA { return v.IngestSLSA }
+
+func (v *SLSAForPackageResponse) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForPackageResponse
+		IngestMaterials []json.RawMessage `json:"ingestMaterials"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForPackageResponse = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.IngestMaterials
+		src := firstPass.IngestMaterials
+		*dst = make(
+			[]SLSAForPackageIngestMaterialsPackageSourceOrArtifact,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalSLSAForPackageIngestMaterialsPackageSourceOrArtifact(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"Unable to unmarshal SLSAForPackageResponse.IngestMaterials: %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalSLSAForPackageResponse struct {
+	IngestPackage SLSAForPackageIngestPackage `json:"ingestPackage"`
+
+	IngestMaterials []json.RawMessage `json:"ingestMaterials"`
+
+	IngestBuilder SLSAForPackageIngestBuilder `json:"ingestBuilder"`
+
+	IngestSLSA SLSAForPackageIngestSLSAHasSLSA `json:"ingestSLSA"`
+}
+
+func (v *SLSAForPackageResponse) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForPackageResponse) __premarshalJSON() (*__premarshalSLSAForPackageResponse, error) {
+	var retval __premarshalSLSAForPackageResponse
+
+	retval.IngestPackage = v.IngestPackage
+	{
+
+		dst := &retval.IngestMaterials
+		src := v.IngestMaterials
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalSLSAForPackageIngestMaterialsPackageSourceOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Unable to marshal SLSAForPackageResponse.IngestMaterials: %w", err)
+			}
+		}
+	}
+	retval.IngestBuilder = v.IngestBuilder
+	retval.IngestSLSA = v.IngestSLSA
+	return &retval, nil
+}
+
+// SLSAForSourceIngestBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder such as (FRSCA or github actions).
+//
+// Currently builders are identified by the `uri` field, which is mandatory.
+type SLSAForSourceIngestBuilder struct {
+	Uri string `json:"uri"`
+}
+
+// GetUri returns SLSAForSourceIngestBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestBuilder) GetUri() string { return v.Uri }
+
+// SLSAForSourceIngestMaterialsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type SLSAForSourceIngestMaterialsArtifact struct {
+	Typename        *string `json:"__typename"`
+	allArtifactTree `json:"-"`
+}
+
+// GetTypename returns SLSAForSourceIngestMaterialsArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsArtifact) GetTypename() *string { return v.Typename }
+
+// GetAlgorithm returns SLSAForSourceIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsArtifact) GetAlgorithm() string {
+	return v.allArtifactTree.Algorithm
+}
+
+// GetDigest returns SLSAForSourceIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *SLSAForSourceIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForSourceIngestMaterialsArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForSourceIngestMaterialsArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForSourceIngestMaterialsArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *SLSAForSourceIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForSourceIngestMaterialsArtifact) __premarshalJSON() (*__premarshalSLSAForSourceIngestMaterialsArtifact, error) {
+	var retval __premarshalSLSAForSourceIngestMaterialsArtifact
+
+	retval.Typename = v.Typename
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// SLSAForSourceIngestMaterialsPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type SLSAForSourceIngestMaterialsPackage struct {
+	Typename   *string `json:"__typename"`
+	allPkgTree `json:"-"`
+}
+
+// GetTypename returns SLSAForSourceIngestMaterialsPackage.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsPackage) GetTypename() *string { return v.Typename }
+
+// GetType returns SLSAForSourceIngestMaterialsPackage.Type, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns SLSAForSourceIngestMaterialsPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *SLSAForSourceIngestMaterialsPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForSourceIngestMaterialsPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForSourceIngestMaterialsPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForSourceIngestMaterialsPackage struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *SLSAForSourceIngestMaterialsPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForSourceIngestMaterialsPackage) __premarshalJSON() (*__premarshalSLSAForSourceIngestMaterialsPackage, error) {
+	var retval __premarshalSLSAForSourceIngestMaterialsPackage
+
+	retval.Typename = v.Typename
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// SLSAForSourceIngestMaterialsPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// SLSAForSourceIngestMaterialsPackageSourceOrArtifact is implemented by the following types:
+// SLSAForSourceIngestMaterialsPackage
+// SLSAForSourceIngestMaterialsSource
+// SLSAForSourceIngestMaterialsArtifact
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type SLSAForSourceIngestMaterialsPackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceSLSAForSourceIngestMaterialsPackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *SLSAForSourceIngestMaterialsPackage) implementsGraphQLInterfaceSLSAForSourceIngestMaterialsPackageSourceOrArtifact() {
+}
+func (v *SLSAForSourceIngestMaterialsSource) implementsGraphQLInterfaceSLSAForSourceIngestMaterialsPackageSourceOrArtifact() {
+}
+func (v *SLSAForSourceIngestMaterialsArtifact) implementsGraphQLInterfaceSLSAForSourceIngestMaterialsPackageSourceOrArtifact() {
+}
+
+func __unmarshalSLSAForSourceIngestMaterialsPackageSourceOrArtifact(b []byte, v *SLSAForSourceIngestMaterialsPackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(SLSAForSourceIngestMaterialsPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(SLSAForSourceIngestMaterialsSource)
+		return json.Unmarshal(b, *v)
+	case "Artifact":
+		*v = new(SLSAForSourceIngestMaterialsArtifact)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for SLSAForSourceIngestMaterialsPackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalSLSAForSourceIngestMaterialsPackageSourceOrArtifact(v *SLSAForSourceIngestMaterialsPackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *SLSAForSourceIngestMaterialsPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForSourceIngestMaterialsPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *SLSAForSourceIngestMaterialsSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForSourceIngestMaterialsSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *SLSAForSourceIngestMaterialsArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalSLSAForSourceIngestMaterialsArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for SLSAForSourceIngestMaterialsPackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// SLSAForSourceIngestMaterialsSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type SLSAForSourceIngestMaterialsSource struct {
+	Typename      *string `json:"__typename"`
+	allSourceTree `json:"-"`
+}
+
+// GetTypename returns SLSAForSourceIngestMaterialsSource.Typename, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsSource) GetTypename() *string { return v.Typename }
+
+// GetType returns SLSAForSourceIngestMaterialsSource.Type, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns SLSAForSourceIngestMaterialsSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *SLSAForSourceIngestMaterialsSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForSourceIngestMaterialsSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForSourceIngestMaterialsSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSLSAForSourceIngestMaterialsSource struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *SLSAForSourceIngestMaterialsSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForSourceIngestMaterialsSource) __premarshalJSON() (*__premarshalSLSAForSourceIngestMaterialsSource, error) {
+	var retval __premarshalSLSAForSourceIngestMaterialsSource
+
+	retval.Typename = v.Typename
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
 
 // SLSAForSourceIngestSLSAHasSLSA includes the requested fields of the GraphQL type HasSLSA.
 // The GraphQL type's documentation follows.
@@ -3234,36 +4496,132 @@ func (v *SLSAForSourceIngestSource) __premarshalJSON() (*__premarshalSLSAForSour
 type SLSAForSourceResponse struct {
 	// Ingest a new source. Returns the ingested source trie
 	IngestSource SLSAForSourceIngestSource `json:"ingestSource"`
-	// Ingests a SLSA attestation
+	// Ingests a set of packages, sources, and artifacts.
+	//
+	// This is a helper mutation for ingesting SLSA nodes. It should be more
+	// efficient to call this method to ingest a set materials instead of ingesting
+	// them one by one.
+	IngestMaterials []SLSAForSourceIngestMaterialsPackageSourceOrArtifact `json:"-"`
+	// Ingest a new builder. Returns the ingested builder
+	IngestBuilder SLSAForSourceIngestBuilder `json:"ingestBuilder"`
+	// Ingests a SLSA attestation.
+	//
+	// Note that materials and builder are extracted as separate arguments. This is
+	// because this ingestion method assumes that the subject and the materials are
+	// already ingested and only creates the SLSA node.
 	IngestSLSA SLSAForSourceIngestSLSAHasSLSA `json:"ingestSLSA"`
 }
 
 // GetIngestSource returns SLSAForSourceResponse.IngestSource, and is useful for accessing the field via an interface.
 func (v *SLSAForSourceResponse) GetIngestSource() SLSAForSourceIngestSource { return v.IngestSource }
 
+// GetIngestMaterials returns SLSAForSourceResponse.IngestMaterials, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceResponse) GetIngestMaterials() []SLSAForSourceIngestMaterialsPackageSourceOrArtifact {
+	return v.IngestMaterials
+}
+
+// GetIngestBuilder returns SLSAForSourceResponse.IngestBuilder, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceResponse) GetIngestBuilder() SLSAForSourceIngestBuilder { return v.IngestBuilder }
+
 // GetIngestSLSA returns SLSAForSourceResponse.IngestSLSA, and is useful for accessing the field via an interface.
 func (v *SLSAForSourceResponse) GetIngestSLSA() SLSAForSourceIngestSLSAHasSLSA { return v.IngestSLSA }
+
+func (v *SLSAForSourceResponse) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SLSAForSourceResponse
+		IngestMaterials []json.RawMessage `json:"ingestMaterials"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SLSAForSourceResponse = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.IngestMaterials
+		src := firstPass.IngestMaterials
+		*dst = make(
+			[]SLSAForSourceIngestMaterialsPackageSourceOrArtifact,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalSLSAForSourceIngestMaterialsPackageSourceOrArtifact(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"Unable to unmarshal SLSAForSourceResponse.IngestMaterials: %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalSLSAForSourceResponse struct {
+	IngestSource SLSAForSourceIngestSource `json:"ingestSource"`
+
+	IngestMaterials []json.RawMessage `json:"ingestMaterials"`
+
+	IngestBuilder SLSAForSourceIngestBuilder `json:"ingestBuilder"`
+
+	IngestSLSA SLSAForSourceIngestSLSAHasSLSA `json:"ingestSLSA"`
+}
+
+func (v *SLSAForSourceResponse) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SLSAForSourceResponse) __premarshalJSON() (*__premarshalSLSAForSourceResponse, error) {
+	var retval __premarshalSLSAForSourceResponse
+
+	retval.IngestSource = v.IngestSource
+	{
+
+		dst := &retval.IngestMaterials
+		src := v.IngestMaterials
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalSLSAForSourceIngestMaterialsPackageSourceOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Unable to marshal SLSAForSourceResponse.IngestMaterials: %w", err)
+			}
+		}
+	}
+	retval.IngestBuilder = v.IngestBuilder
+	retval.IngestSLSA = v.IngestSLSA
+	return &retval, nil
+}
 
 // SLSAInputSpec is the same as SLSA but for mutation input.
 //
 // All fields are required.
 type SLSAInputSpec struct {
-	BuiltFrom     []PackageSourceOrArtifactInput `json:"builtFrom"`
-	BuiltBy       BuilderInputSpec               `json:"builtBy"`
-	BuildType     string                         `json:"buildType"`
-	SlsaPredicate []SLSAPredicateInputSpec       `json:"slsaPredicate"`
-	SlsaVersion   string                         `json:"slsaVersion"`
-	StartedOn     time.Time                      `json:"startedOn"`
-	FinishedOn    time.Time                      `json:"finishedOn"`
-	Origin        string                         `json:"origin"`
-	Collector     string                         `json:"collector"`
+	BuildType     string                   `json:"buildType"`
+	SlsaPredicate []SLSAPredicateInputSpec `json:"slsaPredicate"`
+	SlsaVersion   string                   `json:"slsaVersion"`
+	StartedOn     time.Time                `json:"startedOn"`
+	FinishedOn    time.Time                `json:"finishedOn"`
+	Origin        string                   `json:"origin"`
+	Collector     string                   `json:"collector"`
 }
-
-// GetBuiltFrom returns SLSAInputSpec.BuiltFrom, and is useful for accessing the field via an interface.
-func (v *SLSAInputSpec) GetBuiltFrom() []PackageSourceOrArtifactInput { return v.BuiltFrom }
-
-// GetBuiltBy returns SLSAInputSpec.BuiltBy, and is useful for accessing the field via an interface.
-func (v *SLSAInputSpec) GetBuiltBy() BuilderInputSpec { return v.BuiltBy }
 
 // GetBuildType returns SLSAInputSpec.BuildType, and is useful for accessing the field via an interface.
 func (v *SLSAInputSpec) GetBuildType() string { return v.BuildType }
@@ -3733,36 +5091,60 @@ func (v *__IsOccurrenceSrcInput) GetOccurrence() IsOccurrenceInputSpec { return 
 
 // __SLSAForArtifactInput is used internally by genqlient
 type __SLSAForArtifactInput struct {
-	Artifact ArtifactInputSpec `json:"artifact"`
-	Slsa     SLSAInputSpec     `json:"slsa"`
+	Artifact  ArtifactInputSpec              `json:"artifact"`
+	Materials []PackageSourceOrArtifactInput `json:"materials"`
+	Builder   BuilderInputSpec               `json:"builder"`
+	Slsa      SLSAInputSpec                  `json:"slsa"`
 }
 
 // GetArtifact returns __SLSAForArtifactInput.Artifact, and is useful for accessing the field via an interface.
 func (v *__SLSAForArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetMaterials returns __SLSAForArtifactInput.Materials, and is useful for accessing the field via an interface.
+func (v *__SLSAForArtifactInput) GetMaterials() []PackageSourceOrArtifactInput { return v.Materials }
+
+// GetBuilder returns __SLSAForArtifactInput.Builder, and is useful for accessing the field via an interface.
+func (v *__SLSAForArtifactInput) GetBuilder() BuilderInputSpec { return v.Builder }
 
 // GetSlsa returns __SLSAForArtifactInput.Slsa, and is useful for accessing the field via an interface.
 func (v *__SLSAForArtifactInput) GetSlsa() SLSAInputSpec { return v.Slsa }
 
 // __SLSAForPackageInput is used internally by genqlient
 type __SLSAForPackageInput struct {
-	Pkg  PkgInputSpec  `json:"pkg"`
-	Slsa SLSAInputSpec `json:"slsa"`
+	Pkg       PkgInputSpec                   `json:"pkg"`
+	Materials []PackageSourceOrArtifactInput `json:"materials"`
+	Builder   BuilderInputSpec               `json:"builder"`
+	Slsa      SLSAInputSpec                  `json:"slsa"`
 }
 
 // GetPkg returns __SLSAForPackageInput.Pkg, and is useful for accessing the field via an interface.
 func (v *__SLSAForPackageInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetMaterials returns __SLSAForPackageInput.Materials, and is useful for accessing the field via an interface.
+func (v *__SLSAForPackageInput) GetMaterials() []PackageSourceOrArtifactInput { return v.Materials }
+
+// GetBuilder returns __SLSAForPackageInput.Builder, and is useful for accessing the field via an interface.
+func (v *__SLSAForPackageInput) GetBuilder() BuilderInputSpec { return v.Builder }
 
 // GetSlsa returns __SLSAForPackageInput.Slsa, and is useful for accessing the field via an interface.
 func (v *__SLSAForPackageInput) GetSlsa() SLSAInputSpec { return v.Slsa }
 
 // __SLSAForSourceInput is used internally by genqlient
 type __SLSAForSourceInput struct {
-	Source SourceInputSpec `json:"source"`
-	Slsa   SLSAInputSpec   `json:"slsa"`
+	Source    SourceInputSpec                `json:"source"`
+	Materials []PackageSourceOrArtifactInput `json:"materials"`
+	Builder   BuilderInputSpec               `json:"builder"`
+	Slsa      SLSAInputSpec                  `json:"slsa"`
 }
 
 // GetSource returns __SLSAForSourceInput.Source, and is useful for accessing the field via an interface.
 func (v *__SLSAForSourceInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetMaterials returns __SLSAForSourceInput.Materials, and is useful for accessing the field via an interface.
+func (v *__SLSAForSourceInput) GetMaterials() []PackageSourceOrArtifactInput { return v.Materials }
+
+// GetBuilder returns __SLSAForSourceInput.Builder, and is useful for accessing the field via an interface.
+func (v *__SLSAForSourceInput) GetBuilder() BuilderInputSpec { return v.Builder }
 
 // GetSlsa returns __SLSAForSourceInput.Slsa, and is useful for accessing the field via an interface.
 func (v *__SLSAForSourceInput) GetSlsa() SLSAInputSpec { return v.Slsa }
@@ -7878,22 +9260,67 @@ func SLSAForArtifact(
 	ctx context.Context,
 	client graphql.Client,
 	artifact ArtifactInputSpec,
+	materials []PackageSourceOrArtifactInput,
+	builder BuilderInputSpec,
 	slsa SLSAInputSpec,
 ) (*SLSAForArtifactResponse, error) {
 	req := &graphql.Request{
 		OpName: "SLSAForArtifact",
 		Query: `
-mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [PackageSourceOrArtifactInput!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... allArtifactTree
 	}
-	ingestSLSA(subject: {artifact:$artifact}, slsa: $slsa) {
+	ingestMaterials(materials: $materials) {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	ingestBuilder(builder: $builder) {
+		uri
+	}
+	ingestSLSA(subject: {artifact:$artifact}, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
 		... allSLSATree
 	}
 }
 fragment allArtifactTree on Artifact {
 	algorithm
 	digest
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allSourceTree on Source {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			tag
+			commit
+		}
+	}
 }
 fragment allSLSATree on HasSLSA {
 	subject {
@@ -7936,38 +9363,12 @@ fragment allSLSATree on HasSLSA {
 		collector
 	}
 }
-fragment allPkgTree on Package {
-	type
-	namespaces {
-		namespace
-		names {
-			name
-			versions {
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment allSourceTree on Source {
-	type
-	namespaces {
-		namespace
-		names {
-			name
-			tag
-			commit
-		}
-	}
-}
 `,
 		Variables: &__SLSAForArtifactInput{
-			Artifact: artifact,
-			Slsa:     slsa,
+			Artifact:  artifact,
+			Materials: materials,
+			Builder:   builder,
+			Slsa:      slsa,
 		},
 	}
 	var err error
@@ -7988,16 +9389,33 @@ func SLSAForPackage(
 	ctx context.Context,
 	client graphql.Client,
 	pkg PkgInputSpec,
+	materials []PackageSourceOrArtifactInput,
+	builder BuilderInputSpec,
 	slsa SLSAInputSpec,
 ) (*SLSAForPackageResponse, error) {
 	req := &graphql.Request{
 		OpName: "SLSAForPackage",
 		Query: `
-mutation SLSAForPackage ($pkg: PkgInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForPackage ($pkg: PkgInputSpec!, $materials: [PackageSourceOrArtifactInput!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... allPkgTree
 	}
-	ingestSLSA(subject: {package:$pkg}, slsa: $slsa) {
+	ingestMaterials(materials: $materials) {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	ingestBuilder(builder: $builder) {
+		uri
+	}
+	ingestSLSA(subject: {package:$pkg}, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
 		... allSLSATree
 	}
 }
@@ -8017,6 +9435,21 @@ fragment allPkgTree on Package {
 			}
 		}
 	}
+}
+fragment allSourceTree on Source {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment allArtifactTree on Artifact {
+	algorithm
+	digest
 }
 fragment allSLSATree on HasSLSA {
 	subject {
@@ -8059,25 +9492,12 @@ fragment allSLSATree on HasSLSA {
 		collector
 	}
 }
-fragment allSourceTree on Source {
-	type
-	namespaces {
-		namespace
-		names {
-			name
-			tag
-			commit
-		}
-	}
-}
-fragment allArtifactTree on Artifact {
-	algorithm
-	digest
-}
 `,
 		Variables: &__SLSAForPackageInput{
-			Pkg:  pkg,
-			Slsa: slsa,
+			Pkg:       pkg,
+			Materials: materials,
+			Builder:   builder,
+			Slsa:      slsa,
 		},
 	}
 	var err error
@@ -8098,16 +9518,33 @@ func SLSAForSource(
 	ctx context.Context,
 	client graphql.Client,
 	source SourceInputSpec,
+	materials []PackageSourceOrArtifactInput,
+	builder BuilderInputSpec,
 	slsa SLSAInputSpec,
 ) (*SLSAForSourceResponse, error) {
 	req := &graphql.Request{
 		OpName: "SLSAForSource",
 		Query: `
-mutation SLSAForSource ($source: SourceInputSpec!, $slsa: SLSAInputSpec!) {
+mutation SLSAForSource ($source: SourceInputSpec!, $materials: [PackageSourceOrArtifactInput!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
 	ingestSource(source: $source) {
 		... allSourceTree
 	}
-	ingestSLSA(subject: {source:$source}, slsa: $slsa) {
+	ingestMaterials(materials: $materials) {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	ingestBuilder(builder: $builder) {
+		uri
+	}
+	ingestSLSA(subject: {source:$source}, builtFrom: $materials, builtBy: $builder, slsa: $slsa) {
 		... allSLSATree
 	}
 }
@@ -8121,6 +9558,27 @@ fragment allSourceTree on Source {
 			commit
 		}
 	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allArtifactTree on Artifact {
+	algorithm
+	digest
 }
 fragment allSLSATree on HasSLSA {
 	subject {
@@ -8163,31 +9621,12 @@ fragment allSLSATree on HasSLSA {
 		collector
 	}
 }
-fragment allPkgTree on Package {
-	type
-	namespaces {
-		namespace
-		names {
-			name
-			versions {
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment allArtifactTree on Artifact {
-	algorithm
-	digest
-}
 `,
 		Variables: &__SLSAForSourceInput{
-			Source: source,
-			Slsa:   slsa,
+			Source:    source,
+			Materials: materials,
+			Builder:   builder,
+			Slsa:      slsa,
 		},
 	}
 	var err error

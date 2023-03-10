@@ -39,14 +39,14 @@ fragment allPkgTree on Package {
 
 fragment allSourceTree on Source {
   type
-    namespaces {
-      namespace
-        names {
-          name
-            tag
-            commit
-        }
+  namespaces {
+    namespace
+    names {
+      name
+      tag
+      commit
     }
+  }
 }
 
 fragment allArtifactTree on Artifact {
@@ -60,15 +60,15 @@ fragment allCertifyScorecard on CertifyScorecard {
   }
   scorecard {
     timeScanned
-      aggregateScore
-      checks {
-        check
-          score
-      }
+    aggregateScore
+    checks {
+      check
+      score
+    }
     scorecardVersion
-      scorecardCommit
-      origin
-      collector
+    scorecardCommit
+    origin
+    collector
   }
 }
 
