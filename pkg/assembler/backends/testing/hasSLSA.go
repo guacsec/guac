@@ -201,13 +201,21 @@ func (c *demoClient) ingestSLSAPackage(
 		}
 	}
 
+	subjects, err := c.Packages(ctx, helper.ConvertPkgInputSpecToPkgSpec(pkg))
+	if err != nil {
+		return nil, err
+	}
+	if len(subjects) != 1 {
+		return nil, gqlerror.Errorf("Found %d packages matching subject", len(subjects))
+	}
+
 	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
 
 	newHasSlsa := &model.HasSlsa{
-		Subject: generateModelPackage(pkg),
+		Subject: subjects[0],
 		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
@@ -228,13 +236,21 @@ func (c *demoClient) ingestSLSASource(
 		}
 	}
 
+	subjects, err := c.Sources(ctx, helper.ConvertSrcInputSpecToSrcSpec(source))
+	if err != nil {
+		return nil, err
+	}
+	if len(subjects) != 1 {
+		return nil, gqlerror.Errorf("Found %d sources matching subject", len(subjects))
+	}
+
 	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
 
 	newHasSlsa := &model.HasSlsa{
-		Subject: generateModelSource(source),
+		Subject: subjects[0],
 		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
@@ -255,13 +271,21 @@ func (c *demoClient) ingestSLSAArtifact(
 		}
 	}
 
+	subjects, err := c.Artifacts(ctx, helper.ConvertArtInputSpecToArtSpec(artifact))
+	if err != nil {
+		return nil, err
+	}
+	if len(subjects) != 1 {
+		return nil, gqlerror.Errorf("Found %d sources matching subject", len(subjects))
+	}
+
 	newSlsa, err := buildSLSA(builtFrom, builtBy, slsa)
 	if err != nil {
 		return nil, err
 	}
 
 	newHasSlsa := &model.HasSlsa{
-		Subject: generateModelArtifact(artifact),
+		Subject: subjects[0],
 		Slsa:    newSlsa,
 	}
 	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
