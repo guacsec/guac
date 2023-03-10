@@ -148,15 +148,48 @@ func registerName(ns *model.PackageNamespace, name, version, subpath string, qua
 }
 
 func registerVersion(n *model.PackageName, version, subpath string, qualifiers ...string) *model.PackageName {
-	// TODO(mihaimaruseac): Here we could use a utility to compare if there
-	// is already a version matching all of the arguments to not create
-	// duplicates, but in the end this is test data and we don't generate
-	// duplicates in input right now. Hence, each time this is called, we
-	// create a new node.
+	inputQualifiers := buildQualifierSet(qualifiers...)
+
+	for _, v := range n.Versions {
+		if v.Version != version {
+			continue
+		}
+		if v.Subpath != subpath {
+			continue
+		}
+		// TODO(mihaimaruseac): This is O(n*m) instead of O(n+m)
+		allFound := true
+		for i, _ := range v.Qualifiers {
+			if i%2 != 0 {
+				continue
+			}
+			dbKey := v.Qualifiers[i]
+			dbValue := v.Qualifiers[i+1]
+			found := false
+			for j, _ := range inputQualifiers {
+				if j%2 != 0 {
+					continue
+				}
+				if inputQualifiers[j] == dbKey &&
+					inputQualifiers[j+1] == dbValue {
+					found = true
+					break
+				}
+			}
+			if !found {
+				allFound = false
+				break
+			}
+		}
+		if allFound {
+			return n
+		}
+	}
+
 	newV := &model.PackageVersion{
 		Version:    version,
 		Subpath:    subpath,
-		Qualifiers: buildQualifierSet(qualifiers...),
+		Qualifiers: inputQualifiers,
 	}
 	n.Versions = append(n.Versions, newV)
 	return n
