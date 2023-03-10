@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -139,4 +140,8 @@ func setHashEqualValues(sb *strings.Builder, hashEqualSpec *model.HashEqualSpec,
 		*firstMatch = false
 		queryValues["collector"] = hashEqualSpec.Collector
 	}
+}
+
+func (c *neo4jClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }

@@ -137,12 +137,6 @@ func (v *CertifyBadArtifactIngestCertifyBad) GetSubject() allCertifyBadSubjectPa
 	return v.allCertifyBad.Subject
 }
 
-// GetOrigin returns CertifyBadArtifactIngestCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestCertifyBad) GetOrigin() string { return v.allCertifyBad.Origin }
-
-// GetCollector returns CertifyBadArtifactIngestCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestCertifyBad) GetCollector() string { return v.allCertifyBad.Collector }
-
 func (v *CertifyBadArtifactIngestCertifyBad) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -172,10 +166,6 @@ type __premarshalCertifyBadArtifactIngestCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *CertifyBadArtifactIngestCertifyBad) MarshalJSON() ([]byte, error) {
@@ -202,8 +192,6 @@ func (v *CertifyBadArtifactIngestCertifyBad) __premarshalJSON() (*__premarshalCe
 				"Unable to marshal CertifyBadArtifactIngestCertifyBad.allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.allCertifyBad.Origin
-	retval.Collector = v.allCertifyBad.Collector
 	return &retval, nil
 }
 
@@ -268,12 +256,6 @@ func (v *CertifyBadPkgIngestCertifyBad) GetSubject() allCertifyBadSubjectPackage
 	return v.allCertifyBad.Subject
 }
 
-// GetOrigin returns CertifyBadPkgIngestCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgIngestCertifyBad) GetOrigin() string { return v.allCertifyBad.Origin }
-
-// GetCollector returns CertifyBadPkgIngestCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadPkgIngestCertifyBad) GetCollector() string { return v.allCertifyBad.Collector }
-
 func (v *CertifyBadPkgIngestCertifyBad) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -303,10 +285,6 @@ type __premarshalCertifyBadPkgIngestCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *CertifyBadPkgIngestCertifyBad) MarshalJSON() ([]byte, error) {
@@ -333,8 +311,6 @@ func (v *CertifyBadPkgIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 				"Unable to marshal CertifyBadPkgIngestCertifyBad.allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.allCertifyBad.Origin
-	retval.Collector = v.allCertifyBad.Collector
 	return &retval, nil
 }
 
@@ -453,12 +429,6 @@ func (v *CertifyBadSrcIngestCertifyBad) GetSubject() allCertifyBadSubjectPackage
 	return v.allCertifyBad.Subject
 }
 
-// GetOrigin returns CertifyBadSrcIngestCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestCertifyBad) GetOrigin() string { return v.allCertifyBad.Origin }
-
-// GetCollector returns CertifyBadSrcIngestCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestCertifyBad) GetCollector() string { return v.allCertifyBad.Collector }
-
 func (v *CertifyBadSrcIngestCertifyBad) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -488,10 +458,6 @@ type __premarshalCertifyBadSrcIngestCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *CertifyBadSrcIngestCertifyBad) MarshalJSON() ([]byte, error) {
@@ -518,8 +484,6 @@ func (v *CertifyBadSrcIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 				"Unable to marshal CertifyBadSrcIngestCertifyBad.allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.allCertifyBad.Origin
-	retval.Collector = v.allCertifyBad.Collector
 	return &retval, nil
 }
 
@@ -1603,6 +1567,257 @@ type GHSAInputSpec struct {
 // GetGhsaId returns GHSAInputSpec.GhsaId, and is useful for accessing the field via an interface.
 func (v *GHSAInputSpec) GetGhsaId() string { return v.GhsaId }
 
+// HashEqualArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type HashEqualArtifact struct {
+	allArtifactTree `json:"-"`
+}
+
+// GetAlgorithm returns HashEqualArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *HashEqualArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns HashEqualArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *HashEqualArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *HashEqualArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HashEqualArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HashEqualArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHashEqualArtifact struct {
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *HashEqualArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HashEqualArtifact) __premarshalJSON() (*__premarshalHashEqualArtifact, error) {
+	var retval __premarshalHashEqualArtifact
+
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// HashEqualEqualArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type HashEqualEqualArtifact struct {
+	allArtifactTree `json:"-"`
+}
+
+// GetAlgorithm returns HashEqualEqualArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *HashEqualEqualArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns HashEqualEqualArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *HashEqualEqualArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *HashEqualEqualArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HashEqualEqualArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HashEqualEqualArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHashEqualEqualArtifact struct {
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *HashEqualEqualArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HashEqualEqualArtifact) __premarshalJSON() (*__premarshalHashEqualEqualArtifact, error) {
+	var retval __premarshalHashEqualEqualArtifact
+
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// HashEqualIngestHashEqual includes the requested fields of the GraphQL type HashEqual.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
+//
+// artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type HashEqualIngestHashEqual struct {
+	allHashEqualTree `json:"-"`
+}
+
+// GetJustification returns HashEqualIngestHashEqual.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualIngestHashEqual) GetJustification() string { return v.allHashEqualTree.Justification }
+
+// GetArtifacts returns HashEqualIngestHashEqual.Artifacts, and is useful for accessing the field via an interface.
+func (v *HashEqualIngestHashEqual) GetArtifacts() []allHashEqualTreeArtifactsArtifact {
+	return v.allHashEqualTree.Artifacts
+}
+
+// GetOrigin returns HashEqualIngestHashEqual.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualIngestHashEqual) GetOrigin() string { return v.allHashEqualTree.Origin }
+
+// GetCollector returns HashEqualIngestHashEqual.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualIngestHashEqual) GetCollector() string { return v.allHashEqualTree.Collector }
+
+func (v *HashEqualIngestHashEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HashEqualIngestHashEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HashEqualIngestHashEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHashEqualTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHashEqualIngestHashEqual struct {
+	Justification string `json:"justification"`
+
+	Artifacts []allHashEqualTreeArtifactsArtifact `json:"artifacts"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HashEqualIngestHashEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HashEqualIngestHashEqual) __premarshalJSON() (*__premarshalHashEqualIngestHashEqual, error) {
+	var retval __premarshalHashEqualIngestHashEqual
+
+	retval.Justification = v.allHashEqualTree.Justification
+	retval.Artifacts = v.allHashEqualTree.Artifacts
+	retval.Origin = v.allHashEqualTree.Origin
+	retval.Collector = v.allHashEqualTree.Collector
+	return &retval, nil
+}
+
+// HashEqualInputSpec is the same as HashEqual but for mutation input.
+//
+// All fields are required.
+type HashEqualInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
+// GetJustification returns HashEqualInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualInputSpec) GetJustification() string { return v.Justification }
+
+// GetOrigin returns HashEqualInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns HashEqualInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
+
+// HashEqualResponse is returned by HashEqual on success.
+type HashEqualResponse struct {
+	// Ingest a new artifact. Returns the ingested artifact
+	Artifact HashEqualArtifact `json:"artifact"`
+	// Ingest a new artifact. Returns the ingested artifact
+	EqualArtifact HashEqualEqualArtifact `json:"equalArtifact"`
+	// certify that two artifacts are the same (hashes are equal)
+	IngestHashEqual HashEqualIngestHashEqual `json:"ingestHashEqual"`
+}
+
+// GetArtifact returns HashEqualResponse.Artifact, and is useful for accessing the field via an interface.
+func (v *HashEqualResponse) GetArtifact() HashEqualArtifact { return v.Artifact }
+
+// GetEqualArtifact returns HashEqualResponse.EqualArtifact, and is useful for accessing the field via an interface.
+func (v *HashEqualResponse) GetEqualArtifact() HashEqualEqualArtifact { return v.EqualArtifact }
+
+// GetIngestHashEqual returns HashEqualResponse.IngestHashEqual, and is useful for accessing the field via an interface.
+func (v *HashEqualResponse) GetIngestHashEqual() HashEqualIngestHashEqual { return v.IngestHashEqual }
+
 // IsDependencyDependentPkgPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
 //
@@ -2453,6 +2668,7 @@ func (v *IsOccurrenceSrcResponse) GetIngestOccurrence() IsOccurrenceSrcIngestOcc
 	return v.IngestOccurrence
 }
 
+// MatchFlags is used to input the PkgMatchType enum
 type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
@@ -2537,6 +2753,8 @@ func (v *PkgInputSpec) GetQualifiers() []PackageQualifierInputSpec { return v.Qu
 // GetSubpath returns PkgInputSpec.Subpath, and is useful for accessing the field via an interface.
 func (v *PkgInputSpec) GetSubpath() *string { return v.Subpath }
 
+// PkgMatchType is an enum to determine if the attestation should be done at the
+// specific version or package name
 type PkgMatchType string
 
 const (
@@ -3449,6 +3667,22 @@ func (v *__CertifyPkgInput) GetDepPkg() PkgInputSpec { return v.DepPkg }
 // GetCertifyPkg returns __CertifyPkgInput.CertifyPkg, and is useful for accessing the field via an interface.
 func (v *__CertifyPkgInput) GetCertifyPkg() CertifyPkgInputSpec { return v.CertifyPkg }
 
+// __HashEqualInput is used internally by genqlient
+type __HashEqualInput struct {
+	Artifact      ArtifactInputSpec  `json:"artifact"`
+	EqualArtifact ArtifactInputSpec  `json:"equalArtifact"`
+	HashEqual     HashEqualInputSpec `json:"hashEqual"`
+}
+
+// GetArtifact returns __HashEqualInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__HashEqualInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetEqualArtifact returns __HashEqualInput.EqualArtifact, and is useful for accessing the field via an interface.
+func (v *__HashEqualInput) GetEqualArtifact() ArtifactInputSpec { return v.EqualArtifact }
+
+// GetHashEqual returns __HashEqualInput.HashEqual, and is useful for accessing the field via an interface.
+func (v *__HashEqualInput) GetHashEqual() HashEqualInputSpec { return v.HashEqual }
+
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
 	Pkg        PkgInputSpec          `json:"pkg"`
@@ -3580,8 +3814,6 @@ func (v *allArtifactTree) GetDigest() string { return v.Digest }
 type allCertifyBad struct {
 	Justification string                                      `json:"justification"`
 	Subject       allCertifyBadSubjectPackageSourceOrArtifact `json:"-"`
-	Origin        string                                      `json:"origin"`
-	Collector     string                                      `json:"collector"`
 }
 
 // GetJustification returns allCertifyBad.Justification, and is useful for accessing the field via an interface.
@@ -3589,12 +3821,6 @@ func (v *allCertifyBad) GetJustification() string { return v.Justification }
 
 // GetSubject returns allCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *allCertifyBad) GetSubject() allCertifyBadSubjectPackageSourceOrArtifact { return v.Subject }
-
-// GetOrigin returns allCertifyBad.Origin, and is useful for accessing the field via an interface.
-func (v *allCertifyBad) GetOrigin() string { return v.Origin }
-
-// GetCollector returns allCertifyBad.Collector, and is useful for accessing the field via an interface.
-func (v *allCertifyBad) GetCollector() string { return v.Collector }
 
 func (v *allCertifyBad) UnmarshalJSON(b []byte) error {
 
@@ -3633,10 +3859,6 @@ type __premarshalallCertifyBad struct {
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
 }
 
 func (v *allCertifyBad) MarshalJSON() ([]byte, error) {
@@ -3663,8 +3885,6 @@ func (v *allCertifyBad) __premarshalJSON() (*__premarshalallCertifyBad, error) {
 				"Unable to marshal allCertifyBad.Subject: %w", err)
 		}
 	}
-	retval.Origin = v.Origin
-	retval.Collector = v.Collector
 	return &retval, nil
 }
 
@@ -4818,6 +5038,55 @@ type allGHSATreeGhsaIdGHSAId struct {
 
 // GetId returns allGHSATreeGhsaIdGHSAId.Id, and is useful for accessing the field via an interface.
 func (v *allGHSATreeGhsaIdGHSAId) GetId() string { return v.Id }
+
+// allHashEqualTree includes the GraphQL fields of HashEqual requested by the fragment allHashEqualTree.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
+//
+// artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type allHashEqualTree struct {
+	Justification string                              `json:"justification"`
+	Artifacts     []allHashEqualTreeArtifactsArtifact `json:"artifacts"`
+	Origin        string                              `json:"origin"`
+	Collector     string                              `json:"collector"`
+}
+
+// GetJustification returns allHashEqualTree.Justification, and is useful for accessing the field via an interface.
+func (v *allHashEqualTree) GetJustification() string { return v.Justification }
+
+// GetArtifacts returns allHashEqualTree.Artifacts, and is useful for accessing the field via an interface.
+func (v *allHashEqualTree) GetArtifacts() []allHashEqualTreeArtifactsArtifact { return v.Artifacts }
+
+// GetOrigin returns allHashEqualTree.Origin, and is useful for accessing the field via an interface.
+func (v *allHashEqualTree) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allHashEqualTree.Collector, and is useful for accessing the field via an interface.
+func (v *allHashEqualTree) GetCollector() string { return v.Collector }
+
+// allHashEqualTreeArtifactsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type allHashEqualTreeArtifactsArtifact struct {
+	Algorithm string `json:"algorithm"`
+	Digest    string `json:"digest"`
+}
+
+// GetAlgorithm returns allHashEqualTreeArtifactsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *allHashEqualTreeArtifactsArtifact) GetAlgorithm() string { return v.Algorithm }
+
+// GetDigest returns allHashEqualTreeArtifactsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *allHashEqualTreeArtifactsArtifact) GetDigest() string { return v.Digest }
 
 // allIsDependencyTree includes the GraphQL fields of IsDependency requested by the fragment allIsDependencyTree.
 // The GraphQL type's documentation follows.
@@ -6677,8 +6946,6 @@ fragment allCertifyBad on CertifyBad {
 			... allArtifactTree
 		}
 	}
-	origin
-	collector
 }
 fragment allPkgTree on Package {
 	type
@@ -6777,8 +7044,6 @@ fragment allCertifyBad on CertifyBad {
 			... allArtifactTree
 		}
 	}
-	origin
-	collector
 }
 fragment allSourceTree on Source {
 	type
@@ -6858,8 +7123,6 @@ fragment allCertifyBad on CertifyBad {
 			... allArtifactTree
 		}
 	}
-	origin
-	collector
 }
 fragment allPkgTree on Package {
 	type
@@ -7292,6 +7555,61 @@ fragment allCertifyPkg on CertifyPkg {
 	var err error
 
 	var data CertifyPkgResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func HashEqual(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	equalArtifact ArtifactInputSpec,
+	hashEqual HashEqualInputSpec,
+) (*HashEqualResponse, error) {
+	req := &graphql.Request{
+		OpName: "HashEqual",
+		Query: `
+mutation HashEqual ($artifact: ArtifactInputSpec!, $equalArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
+	artifact: ingestArtifact(artifact: $artifact) {
+		... allArtifactTree
+	}
+	equalArtifact: ingestArtifact(artifact: $equalArtifact) {
+		... allArtifactTree
+	}
+	ingestHashEqual(artifact: $artifact, equalArtifact: $equalArtifact, hashEqual: $hashEqual) {
+		... allHashEqualTree
+	}
+}
+fragment allArtifactTree on Artifact {
+	algorithm
+	digest
+}
+fragment allHashEqualTree on HashEqual {
+	justification
+	artifacts {
+		algorithm
+		digest
+	}
+	origin
+	collector
+}
+`,
+		Variables: &__HashEqualInput{
+			Artifact:      artifact,
+			EqualArtifact: equalArtifact,
+			HashEqual:     hashEqual,
+		},
+	}
+	var err error
+
+	var data HashEqualResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

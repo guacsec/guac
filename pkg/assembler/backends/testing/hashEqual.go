@@ -21,33 +21,62 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllHashEqual(client *demoClient) {
 
 	// strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-	client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact")
+	client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "testing backend", "testing backend")
 	client.registerHashEqual([]*model.Artifact{{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"},
-		{Digest: "89bb0da1891646e58eb3e6ed24f3a6fc3c8eb5a0d44824cba581dfa34a0450cf", Algorithm: "sha256"}}, "these two are the same")
+		{Digest: "89bb0da1891646e58eb3e6ed24f3a6fc3c8eb5a0d44824cba581dfa34a0450cf", Algorithm: "sha256"}}, "these two are the same", "testing backend", "testing backend")
 }
 
 // Ingest HashEqual
 
-func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justification string) {
+func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justification, origin, collector string) *model.HashEqual {
 
 	for _, a := range c.hashEquals {
 		if reflect.DeepEqual(a.Artifacts, artifacts) && a.Justification == justification {
-			return
+			return a
 		}
 	}
 
 	newHashEqual := &model.HashEqual{
 		Justification: justification,
 		Artifacts:     artifacts,
-		Origin:        "testing backend",
-		Collector:     "testing backend",
+		Origin:        origin,
+		Collector:     collector,
 	}
 	c.hashEquals = append(c.hashEquals, newHashEqual)
+	return newHashEqual
+}
+
+func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+
+	collectedArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &artifact.Algorithm, Digest: &artifact.Digest})
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedArt) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestHashEqual :: multiple artifacts found")
+	}
+
+	collectedEqualArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &equalArtifact.Algorithm, Digest: &equalArtifact.Digest})
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedEqualArt) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestHashEqual :: multiple artifacts found")
+	}
+
+	return c.registerHashEqual(
+		[]*model.Artifact{collectedArt[0], collectedEqualArt[0]},
+		hashEqual.Justification,
+		hashEqual.Origin,
+		hashEqual.Collector), nil
 }
 
 // Query HashEqual

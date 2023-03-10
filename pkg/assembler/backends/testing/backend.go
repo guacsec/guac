@@ -73,7 +73,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllOSV(client)
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
-	registerAllHashEqual(client)
+	//registerAllHashEqual(client)
 	// err := registerAllIsOccurrence(client)
 	// if err != nil {
 	// 	return nil, err

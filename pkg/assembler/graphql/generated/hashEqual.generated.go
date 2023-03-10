@@ -214,6 +214,50 @@ func (ec *executionContext) fieldContext_HashEqual_collector(ctx context.Context
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputHashEqualInputSpec(ctx context.Context, obj interface{}) (model.HashEqualInputSpec, error) {
+	var it model.HashEqualInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"justification", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj interface{}) (model.HashEqualSpec, error) {
 	var it model.HashEqualSpec
 	asMap := map[string]interface{}{}
@@ -327,6 +371,10 @@ func (ec *executionContext) _HashEqual(ctx context.Context, sel ast.SelectionSet
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNHashEqual2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqual(ctx context.Context, sel ast.SelectionSet, v model.HashEqual) graphql.Marshaler {
+	return ec._HashEqual(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNHashEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HashEqual) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -379,6 +427,11 @@ func (ec *executionContext) marshalNHashEqual2ᚖgithubᚗcomᚋguacsecᚋguac�
 		return graphql.Null
 	}
 	return ec._HashEqual(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNHashEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualInputSpec(ctx context.Context, v interface{}) (model.HashEqualInputSpec, error) {
+	res, err := ec.unmarshalInputHashEqualInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOHashEqualSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx context.Context, v interface{}) (*model.HashEqualSpec, error) {
