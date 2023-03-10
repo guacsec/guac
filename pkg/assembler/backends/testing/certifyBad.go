@@ -186,7 +186,8 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 			certifyBad.Origin,
 			certifyBad.Collector)
 	}
-	return nil, nil
+	// it should never reach here else it failed
+	return nil, gqlerror.Errorf("IngestCertifyBad failed")
 }
 
 // Query CertifyBad

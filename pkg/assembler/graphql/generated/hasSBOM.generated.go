@@ -207,6 +207,50 @@ func (ec *executionContext) fieldContext_HasSBOM_collector(ctx context.Context, 
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, obj interface{}) (model.HasSBOMInputSpec, error) {
+	var it model.HasSBOMInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"uri", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "uri":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
+			it.URI, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj interface{}) (model.HasSBOMSpec, error) {
 	var it model.HasSBOMSpec
 	asMap := map[string]interface{}{}
@@ -214,26 +258,18 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"package", "source", "uri", "origin", "collector"}
+	fieldsInOrder := [...]string{"subject", "uri", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "package":
+		case "subject":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-			it.Package, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "source":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-			it.Source, err = ec.unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+			it.Subject, err = ec.unmarshalOPackageOrSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -328,6 +364,10 @@ func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, 
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNHasSBOM2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbom(ctx context.Context, sel ast.SelectionSet, v model.HasSbom) graphql.Marshaler {
+	return ec._HasSBOM(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNHasSBOM2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSbomᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.HasSbom) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -380,6 +420,11 @@ func (ec *executionContext) marshalNHasSBOM2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 		return graphql.Null
 	}
 	return ec._HasSBOM(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMInputSpec(ctx context.Context, v interface{}) (model.HasSBOMInputSpec, error) {
+	res, err := ec.unmarshalInputHasSBOMInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOHasSBOMSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx context.Context, v interface{}) (*model.HasSBOMSpec, error) {

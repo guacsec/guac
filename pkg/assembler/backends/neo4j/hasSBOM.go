@@ -17,8 +17,10 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -31,11 +33,9 @@ const (
 
 func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	queryAll := false
-	if hasSBOMSpec.Package != nil && hasSBOMSpec.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify both package and source for HasSBOM")
-	} else if hasSBOMSpec.Package == nil && hasSBOMSpec.Source == nil {
-		queryAll = true
+	queryAll, err := helper.CheckHasSBOMQueryInput(hasSBOMSpec.Subject)
+	if err != nil {
+		return nil, err
 	}
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
@@ -43,7 +43,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 
 	aggregateHasSBOM := []*model.HasSbom{}
 
-	if hasSBOMSpec.Package != nil || queryAll {
+	if queryAll || (hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Package != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -56,25 +56,11 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 			"-[:subject]-(hasSBOM:HasSBOM)"
 		sb.WriteString(query)
 
-		setPkgMatchValues(&sb, hasSBOMSpec.Package, false, &firstMatch, queryValues)
+		if hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Package != nil {
+			setPkgMatchValues(&sb, hasSBOMSpec.Subject.Package, false, &firstMatch, queryValues)
+		}
 		setHasSBOMValues(&sb, hasSBOMSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
-
-		if hasSBOMSpec.Package == nil || hasSBOMSpec.Package != nil && hasSBOMSpec.Package.Version == nil && hasSBOMSpec.Package.Subpath == nil &&
-			len(hasSBOMSpec.Package.Qualifiers) == 0 && !*hasSBOMSpec.Package.MatchOnlyEmptyQualifiers {
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)-[:subject]-(hasSBOM:HasSBOM)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setPkgMatchValues(&sb, hasSBOMSpec.Package, false, &firstMatch, queryValues)
-			setHasSBOMValues(&sb, hasSBOMSpec, &firstMatch, queryValues)
-			sb.WriteString(returnValue)
-		}
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -120,7 +106,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 		aggregateHasSBOM = append(aggregateHasSBOM, result.([]*model.HasSbom)...)
 	}
 
-	if hasSBOMSpec.Source != nil || queryAll {
+	if queryAll || (hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Source != nil) {
 		var sb strings.Builder
 		var firstMatch bool = true
 		queryValues := map[string]any{}
@@ -129,7 +115,9 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 			"-[:SrcHasName]->(name:SrcName)-[:subject]-(hasSBOM:HasSBOM)"
 		sb.WriteString(query)
 
-		setSrcMatchValues(&sb, hasSBOMSpec.Source, false, &firstMatch, queryValues)
+		if hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Source != nil {
+			setSrcMatchValues(&sb, hasSBOMSpec.Subject.Source, false, &firstMatch, queryValues)
+		}
 		setHasSBOMValues(&sb, hasSBOMSpec, &firstMatch, queryValues)
 		sb.WriteString(" RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, hasSBOM")
 
@@ -204,4 +192,8 @@ func generateModelHasSBOM(subject model.PackageOrSource, uri, origin, collector 
 		Collector: collector,
 	}
 	return &hasSBOM
+}
+
+func (c *neo4jClient) IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
+	panic(fmt.Errorf("not implemented: IngestHasSbom - IngestHasSbom"))
 }

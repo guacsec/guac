@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestHasSbom is the resolver for the ingestHasSBOM field.
+func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
+	return r.Backend.IngestHasSbom(ctx, subject, hasSbom)
+}
+
 // HasSbom is the resolver for the HasSBOM field.
 func (r *queryResolver) HasSbom(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	return r.Backend.HasSBOM(ctx, hasSBOMSpec)

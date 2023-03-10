@@ -170,3 +170,40 @@ fragment allHashEqualTree on HashEqual {
   origin
   collector
 }
+
+fragment allHasSBOMTree on HasSBOM {
+  uri
+  subject {
+    __typename 
+    ... on Package {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          versions {
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+   ...on Source {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+          tag
+          commit
+        }
+      }
+    }
+  }
+  origin
+  collector
+}

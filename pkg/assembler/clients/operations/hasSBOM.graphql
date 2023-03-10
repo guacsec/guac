@@ -15,25 +15,22 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest that a package or source has an SBOM into GUAC
+# Defines the GraphQL operations to ingest that a package or source has an SBOM (specified by a URI) into GUAC
 
-mutation IsOccurrencePkg($pkg: PkgInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
+mutation HasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
-  ingestOccurrence(subject: {package: $pkg}, artifact: $artifact, occurrence: $occurrence) {
-    ...allIsOccurrencesTree
+  ingestHasSBOM(subject: {package: $pkg}, hasSBOM: $hasSBOM) {
+    ...allHasSBOMTree
   }
 }
 
-mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
+mutation HasSBOMSrc($source: SourceInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
   ingestSource(source: $source) {
     ...allSourceTree
   }
-  ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
-  }
-  ingestOccurrence(subject: {source: $source}, artifact: $artifact, occurrence: $occurrence) {
-    ...allIsOccurrencesTree
+  ingestHasSBOM(subject: {source: $source}, hasSBOM: $hasSBOM) {
+    ...allHasSBOMTree
   }
 }

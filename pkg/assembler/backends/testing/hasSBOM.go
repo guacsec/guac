@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -39,7 +40,7 @@ func registerAllhasSBOM(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM")
+	_, err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -53,7 +54,7 @@ func registerAllhasSBOM(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM")
+	_, err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -62,20 +63,20 @@ func registerAllhasSBOM(client *demoClient) error {
 
 // Ingest HasSBOM
 
-func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSource *model.Source, uri string) error {
+func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSource *model.Source, uri, origin, collector string) (*model.HasSbom, error) {
 
 	if selectedPackage != nil && selectedSource != nil {
-		return fmt.Errorf("cannot specify both package and source for HasSBOM")
+		return nil, fmt.Errorf("cannot specify both package and source for HasSBOM")
 	}
 	for _, h := range c.hasSBOM {
 		if h.URI == uri {
 			if val, ok := h.Subject.(model.Package); ok {
 				if reflect.DeepEqual(val, *selectedPackage) {
-					return nil
+					return h, nil
 				}
 			} else if val, ok := h.Subject.(model.Source); ok {
 				if reflect.DeepEqual(val, *selectedSource) {
-					return nil
+					return h, nil
 				}
 			}
 		}
@@ -83,8 +84,8 @@ func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSou
 
 	newHasSBOM := &model.HasSbom{
 		URI:       uri,
-		Origin:    "testing backend",
-		Collector: "testing backend",
+		Origin:    origin,
+		Collector: collector,
 	}
 	if selectedPackage != nil {
 		newHasSBOM.Subject = selectedPackage
@@ -93,15 +94,66 @@ func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSou
 	}
 
 	c.hasSBOM = append(c.hasSBOM, newHasSBOM)
-	return nil
+	return newHasSBOM, nil
+}
+
+func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
+	err := helper.ValidatePackageOrSourceInput(&subject, "IngestHasSbom")
+	if err != nil {
+		return nil, err
+	}
+
+	if subject.Package != nil {
+		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
+
+		collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(collectedPkg) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestHasSbom :: multiple packages found")
+		}
+		return c.registerHasSBOM(
+			collectedPkg[0],
+			nil,
+			hasSbom.URI,
+			hasSbom.Origin,
+			hasSbom.Collector)
+	}
+
+	if subject.Source != nil {
+		sourceSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
+
+		sources, err := c.Sources(ctx, sourceSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(sources) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestHasSbom :: source argument must match one"+
+					" single source repository, found %d",
+				len(sources))
+		}
+		return c.registerHasSBOM(
+			nil,
+			sources[0],
+			hasSbom.URI,
+			hasSbom.Origin,
+			hasSbom.Collector)
+	}
+	// it should never reach here else it failed
+	return nil, gqlerror.Errorf("IngestHasSBOM failed")
 }
 
 // Query HasSBOM
 
 func (c *demoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	if hasSBOMSpec.Package != nil && hasSBOMSpec.Source != nil {
-		return nil, gqlerror.Errorf("cannot specify both package and source for HasSBOM")
+	queryAll, err := helper.CheckHasSBOMQueryInput(hasSBOMSpec.Subject)
+	if err != nil {
+		return nil, err
 	}
 
 	var collectedHasSBOM []*model.HasSbom
@@ -119,32 +171,34 @@ func (c *demoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec
 			matchOrSkip = false
 		}
 
-		if hasSBOMSpec.Package != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Package); ok {
-				if hasSBOMSpec.Package.Type == nil || val.Type == *hasSBOMSpec.Package.Type {
-					newPkg := filterPackageNamespace(val, hasSBOMSpec.Package)
-					if newPkg == nil {
-						matchOrSkip = false
+		if !queryAll {
+			if hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Package != nil && h.Subject != nil {
+				if val, ok := h.Subject.(*model.Package); ok {
+					if hasSBOMSpec.Subject.Package.Type == nil || val.Type == *hasSBOMSpec.Subject.Package.Type {
+						newPkg := filterPackageNamespace(val, hasSBOMSpec.Subject.Package)
+						if newPkg == nil {
+							matchOrSkip = false
+						}
 					}
+				} else {
+					matchOrSkip = false
 				}
-			} else {
-				matchOrSkip = false
 			}
-		}
 
-		if hasSBOMSpec.Source != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Source); ok {
-				if hasSBOMSpec.Source.Type == nil || val.Type == *hasSBOMSpec.Source.Type {
-					newSource, err := filterSourceNamespace(val, hasSBOMSpec.Source)
-					if err != nil {
-						return nil, err
+			if hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Source != nil && h.Subject != nil {
+				if val, ok := h.Subject.(*model.Source); ok {
+					if hasSBOMSpec.Subject.Source.Type == nil || val.Type == *hasSBOMSpec.Subject.Source.Type {
+						newSource, err := filterSourceNamespace(val, hasSBOMSpec.Subject.Source)
+						if err != nil {
+							return nil, err
+						}
+						if newSource == nil {
+							matchOrSkip = false
+						}
 					}
-					if newSource == nil {
-						matchOrSkip = false
-					}
+				} else {
+					matchOrSkip = false
 				}
-			} else {
-				matchOrSkip = false
 			}
 		}
 

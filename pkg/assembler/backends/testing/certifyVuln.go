@@ -230,7 +230,8 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 			certifyVuln.Origin,
 			certifyVuln.Collector), nil
 	}
-	return nil, nil
+	// it should never reach here else it failed
+	return nil, gqlerror.Errorf("IngestVulnerability failed")
 }
 
 // Query CertifyVuln
