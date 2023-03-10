@@ -49,6 +49,7 @@ func ingestData(port int) {
 	ingestCertifyBad(ctx, gqlclient)
 	ingestHashEqual(ctx, gqlclient)
 	ingestHasSBOM(ctx, gqlclient)
+	ingestHasSourceAt(ctx, gqlclient)
 	time := time.Now().Sub(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }
@@ -835,6 +836,77 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 			}
 		} else {
 			fmt.Printf("input missing for package or source")
+		}
+	}
+}
+
+func ingestHasSourceAt(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	djangoNameSpace := ""
+	djangoTag := "1.11.1"
+	kubetestNameSpace := ""
+	kubetestVersion := "0.9.5"
+	kubetestSubpath := ""
+	kubetestTag := "0.9.5"
+
+	ingestHasSourceAt := []struct {
+		name         string
+		pkg          model.PkgInputSpec
+		pkgMatchType model.MatchFlags
+		source       model.SourceInputSpec
+		hasSourceAt  model.HasSourceAtInputSpec
+	}{{
+		name: "django located at the following source based on deps.dev",
+		pkg: model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNameSpace,
+			Name:      "django",
+		},
+		pkgMatchType: model.MatchFlags{
+			Pkg: model.PkgMatchTypeAllVersions,
+		},
+		source: model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "https://github.com/django/django",
+			Tag:       &djangoTag,
+		},
+		hasSourceAt: model.HasSourceAtInputSpec{
+			KnownSince:    time.Now(),
+			Justification: "django located at the following source based on deps.dev",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "kubetest located at the following source based on deps.dev",
+		pkg: model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &kubetestNameSpace,
+			Name:      "kubetest",
+			Version:   &kubetestVersion,
+			Subpath:   &kubetestSubpath,
+		},
+		pkgMatchType: model.MatchFlags{
+			Pkg: model.PkgMatchTypeSpecificVersion,
+		},
+		source: model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "https://github.com/vapor-ware/kubetest",
+			Tag:       &kubetestTag,
+		},
+		hasSourceAt: model.HasSourceAtInputSpec{
+			KnownSince:    time.Now(),
+			Justification: "kubetest located at the following source based on deps.dev",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestHasSourceAt {
+		_, err := model.HasSourceAt(context.Background(), client, ingest.pkg, ingest.pkgMatchType, ingest.source, ingest.hasSourceAt)
+		if err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
 }

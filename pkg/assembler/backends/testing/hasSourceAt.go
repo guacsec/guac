@@ -21,7 +21,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllHasSourceAt(client *demoClient) error {
@@ -48,7 +50,7 @@ func registerAllHasSourceAt(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerHasSourceAt(selectedPackage[0], selectedSource[0], time.Now(), "django located at the following source based on deps.dev")
+	_, err = client.registerHasSourceAt(selectedPackage[0], selectedSource[0], time.Now(), "django located at the following source based on deps.dev", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -78,7 +80,7 @@ func registerAllHasSourceAt(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerHasSourceAt(selectedPackage[0], selectedSource[0], time.Now(), "kubetest located at the following source based on deps.dev")
+	_, err = client.registerHasSourceAt(selectedPackage[0], selectedSource[0], time.Now(), "kubetest located at the following source based on deps.dev", "testing backend", "testing backend")
 	if err != nil {
 		return err
 	}
@@ -87,27 +89,70 @@ func registerAllHasSourceAt(client *demoClient) error {
 
 // Ingest HasSourceAt
 
-func (c *demoClient) registerHasSourceAt(selectedPackage *model.Package, selectedSource *model.Source, since time.Time, justification string) error {
+func (c *demoClient) registerHasSourceAt(selectedPackage *model.Package, selectedSource *model.Source, since time.Time, justification, origin, collector string) (*model.HasSourceAt, error) {
 
 	if selectedPackage == nil || selectedSource == nil {
-		return fmt.Errorf("package or source is nil")
+		return nil, fmt.Errorf("package or source is nil")
 	}
 
 	for _, h := range c.hasSourceAt {
 		if h.Justification == justification && reflect.DeepEqual(h.Package, selectedPackage) && reflect.DeepEqual(h.Source, selectedSource) {
-			return nil
+			return h, nil
 		}
 	}
 	newHasSourceAt := &model.HasSourceAt{
 		Package:       selectedPackage,
 		Source:        selectedSource,
-		KnownSince:    since.String(),
+		KnownSince:    since.UTC(),
 		Justification: justification,
-		Origin:        "testing backend",
-		Collector:     "testing backend",
+		Origin:        origin,
+		Collector:     collector,
 	}
 	c.hasSourceAt = append(c.hasSourceAt, newHasSourceAt)
-	return nil
+	return newHasSourceAt, nil
+}
+
+func (c *demoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+
+	var selectedPkgSpec *model.PkgSpec
+	if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+		selectedPkgSpec = helper.ConvertPkgInputSpecToPkgSpec(&pkg)
+
+	} else {
+		selectedPkgSpec = &model.PkgSpec{
+			Type:      &pkg.Type,
+			Namespace: pkg.Namespace,
+			Name:      &pkg.Name,
+		}
+	}
+	collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
+	if err != nil {
+		return nil, err
+	}
+	if len(collectedPkg) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestCertifyBad :: multiple packages found")
+	}
+
+	sourceSpec := helper.ConvertSrcInputSpecToSrcSpec(&source)
+
+	sources, err := c.Sources(ctx, sourceSpec)
+	if err != nil {
+		return nil, err
+	}
+	if len(sources) != 1 {
+		return nil, gqlerror.Errorf(
+			"IngestOccurrence :: source argument must match one"+
+				" single source repository, found %d",
+			len(sources))
+	}
+	return c.registerHasSourceAt(
+		collectedPkg[0],
+		sources[0],
+		hasSourceAt.KnownSince,
+		hasSourceAt.Justification,
+		hasSourceAt.Origin,
+		hasSourceAt.Collector)
 }
 
 // Query HasSourceAt

@@ -362,19 +362,29 @@ type HasSLSASpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type HasSourceAt struct {
-	Package       *Package `json:"package"`
-	Source        *Source  `json:"source"`
-	KnownSince    string   `json:"knownSince"`
-	Justification string   `json:"justification"`
-	Origin        string   `json:"origin"`
-	Collector     string   `json:"collector"`
+	Package       *Package  `json:"package"`
+	Source        *Source   `json:"source"`
+	KnownSince    time.Time `json:"knownSince"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
+//
+// All fields are required.
+type HasSourceAtInputSpec struct {
+	KnownSince    time.Time `json:"knownSince"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
 }
 
 // HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 type HasSourceAtSpec struct {
 	Package       *PkgSpec    `json:"package"`
 	Source        *SourceSpec `json:"source"`
-	KnownSince    *string     `json:"knownSince"`
+	KnownSince    *time.Time  `json:"knownSince"`
 	Justification *string     `json:"justification"`
 	Origin        *string     `json:"origin"`
 	Collector     *string     `json:"collector"`

@@ -91,10 +91,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
-	err = registerAllHasSourceAt(client)
-	if err != nil {
-		return nil, err
-	}
+	// err = registerAllHasSourceAt(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	// err = registerAllCertifyBad(client)
 	// if err != nil {
 	// 	return nil, err

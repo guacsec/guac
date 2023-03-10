@@ -164,8 +164,7 @@ fragment allCertifyBad on CertifyBad {
 fragment allHashEqualTree on HashEqual {
   justification
   artifacts {
-    algorithm
-    digest
+    ...allArtifactTree
   }
   origin
   collector
@@ -180,7 +179,20 @@ fragment allHasSBOMTree on HasSBOM {
     }
     ... on Source {
       ...allSourceTree
-    }
+      }
+  }
+  origin
+  collector
+}
+
+fragment allHasSourceAt on HasSourceAt {
+  justification
+  knownSince
+  package {
+    ...allPkgTree
+  }
+  source {
+    ...allSourceTree
   }
   origin
   collector

@@ -29,7 +29,7 @@ collector (property) - the GUAC collector that collected the document that gener
 type HasSourceAt {
   package: Package!
   source: Source!
-  knownSince: String!
+  knownSince: Time!
   justification: String!
   origin: String!
   collector: String!
@@ -41,14 +41,31 @@ HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 input HasSourceAtSpec {
   package: PkgSpec
   source: SourceSpec
-  knownSince: String
+  knownSince: Time
   justification: String
   origin: String
   collector: String
+}
+
+"""
+HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
+
+All fields are required.
+"""
+input HasSourceAtInputSpec {
+  knownSince: Time!
+  justification: String!
+  origin: String!
+  collector: String!
 }
 
 
 extend type Query {
   "Returns all HasSourceAt"
   HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
+}
+
+extend type Mutation {
+  "Adds a certification that a package (either at the version level or package name level) is associated with the source"
+  ingestHasSourceAt(pkg: PkgInputSpec!, pkgMatchType: MatchFlags!, source: SourceInputSpec!, hasSourceAt: HasSourceAtInputSpec!): HasSourceAt!
 }

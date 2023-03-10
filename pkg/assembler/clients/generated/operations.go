@@ -1944,6 +1944,292 @@ func (v *HasSBOMSrcResponse) GetIngestSource() HasSBOMSrcIngestSource { return v
 // GetIngestHasSBOM returns HasSBOMSrcResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
 func (v *HasSBOMSrcResponse) GetIngestHasSBOM() HasSBOMSrcIngestHasSBOM { return v.IngestHasSBOM }
 
+// HasSourceAtIngestHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// # HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+//
+// package (subject) - the package object type that represents the package
+// source (object) - the source object type that represents the source
+// knownSince (property) - timestamp when this was last checked (exact time)
+// justification (property) - string value representing why the package has a source specified
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type HasSourceAtIngestHasSourceAt struct {
+	allHasSourceAt `json:"-"`
+}
+
+// GetJustification returns HasSourceAtIngestHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestHasSourceAt) GetJustification() string {
+	return v.allHasSourceAt.Justification
+}
+
+// GetKnownSince returns HasSourceAtIngestHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestHasSourceAt) GetKnownSince() time.Time { return v.allHasSourceAt.KnownSince }
+
+// GetPackage returns HasSourceAtIngestHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestHasSourceAt) GetPackage() allHasSourceAtPackage {
+	return v.allHasSourceAt.Package
+}
+
+// GetSource returns HasSourceAtIngestHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestHasSourceAt) GetSource() allHasSourceAtSource {
+	return v.allHasSourceAt.Source
+}
+
+// GetOrigin returns HasSourceAtIngestHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestHasSourceAt) GetOrigin() string { return v.allHasSourceAt.Origin }
+
+// GetCollector returns HasSourceAtIngestHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestHasSourceAt) GetCollector() string { return v.allHasSourceAt.Collector }
+
+func (v *HasSourceAtIngestHasSourceAt) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSourceAtIngestHasSourceAt
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSourceAtIngestHasSourceAt = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSourceAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSourceAtIngestHasSourceAt struct {
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Package allHasSourceAtPackage `json:"package"`
+
+	Source allHasSourceAtSource `json:"source"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSourceAtIngestHasSourceAt) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSourceAtIngestHasSourceAt) __premarshalJSON() (*__premarshalHasSourceAtIngestHasSourceAt, error) {
+	var retval __premarshalHasSourceAtIngestHasSourceAt
+
+	retval.Justification = v.allHasSourceAt.Justification
+	retval.KnownSince = v.allHasSourceAt.KnownSince
+	retval.Package = v.allHasSourceAt.Package
+	retval.Source = v.allHasSourceAt.Source
+	retval.Origin = v.allHasSourceAt.Origin
+	retval.Collector = v.allHasSourceAt.Collector
+	return &retval, nil
+}
+
+// HasSourceAtIngestPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type HasSourceAtIngestPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns HasSourceAtIngestPackage.Type, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns HasSourceAtIngestPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *HasSourceAtIngestPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSourceAtIngestPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSourceAtIngestPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSourceAtIngestPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *HasSourceAtIngestPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSourceAtIngestPackage) __premarshalJSON() (*__premarshalHasSourceAtIngestPackage, error) {
+	var retval __premarshalHasSourceAtIngestPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// HasSourceAtIngestSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type HasSourceAtIngestSource struct {
+	allSourceTree `json:"-"`
+}
+
+// GetType returns HasSourceAtIngestSource.Type, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns HasSourceAtIngestSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *HasSourceAtIngestSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSourceAtIngestSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSourceAtIngestSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSourceAtIngestSource struct {
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *HasSourceAtIngestSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSourceAtIngestSource) __premarshalJSON() (*__premarshalHasSourceAtIngestSource, error) {
+	var retval __premarshalHasSourceAtIngestSource
+
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
+// HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
+//
+// All fields are required.
+type HasSourceAtInputSpec struct {
+	KnownSince    time.Time `json:"knownSince"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// GetKnownSince returns HasSourceAtInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtInputSpec) GetKnownSince() time.Time { return v.KnownSince }
+
+// GetJustification returns HasSourceAtInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtInputSpec) GetJustification() string { return v.Justification }
+
+// GetOrigin returns HasSourceAtInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns HasSourceAtInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
+
+// HasSourceAtResponse is returned by HasSourceAt on success.
+type HasSourceAtResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	IngestPackage HasSourceAtIngestPackage `json:"ingestPackage"`
+	// Ingest a new source. Returns the ingested source trie
+	IngestSource HasSourceAtIngestSource `json:"ingestSource"`
+	// Adds a certification that a package (either at the version level or package name level) is associated with the source
+	IngestHasSourceAt HasSourceAtIngestHasSourceAt `json:"ingestHasSourceAt"`
+}
+
+// GetIngestPackage returns HasSourceAtResponse.IngestPackage, and is useful for accessing the field via an interface.
+func (v *HasSourceAtResponse) GetIngestPackage() HasSourceAtIngestPackage { return v.IngestPackage }
+
+// GetIngestSource returns HasSourceAtResponse.IngestSource, and is useful for accessing the field via an interface.
+func (v *HasSourceAtResponse) GetIngestSource() HasSourceAtIngestSource { return v.IngestSource }
+
+// GetIngestHasSourceAt returns HasSourceAtResponse.IngestHasSourceAt, and is useful for accessing the field via an interface.
+func (v *HasSourceAtResponse) GetIngestHasSourceAt() HasSourceAtIngestHasSourceAt {
+	return v.IngestHasSourceAt
+}
+
 // HashEqualArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
 //
@@ -5426,6 +5712,26 @@ func (v *__HasSBOMSrcInput) GetSource() SourceInputSpec { return v.Source }
 // GetHasSBOM returns __HasSBOMSrcInput.HasSBOM, and is useful for accessing the field via an interface.
 func (v *__HasSBOMSrcInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
 
+// __HasSourceAtInput is used internally by genqlient
+type __HasSourceAtInput struct {
+	Pkg          PkgInputSpec         `json:"pkg"`
+	PkgMatchType MatchFlags           `json:"pkgMatchType"`
+	Source       SourceInputSpec      `json:"source"`
+	HasSourceAt  HasSourceAtInputSpec `json:"hasSourceAt"`
+}
+
+// GetPkg returns __HasSourceAtInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetPkgMatchType returns __HasSourceAtInput.PkgMatchType, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
+
+// GetSource returns __HasSourceAtInput.Source, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtInput) GetSource() SourceInputSpec { return v.Source }
+
+// GetHasSourceAt returns __HasSourceAtInput.HasSourceAt, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtInput) GetHasSourceAt() HasSourceAtInputSpec { return v.HasSourceAt }
+
 // __HashEqualInput is used internally by genqlient
 type __HashEqualInput struct {
 	Artifact      ArtifactInputSpec  `json:"artifact"`
@@ -6940,140 +7246,69 @@ func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error)
 // Also note that this is named `Package`, not `PackageType`. This is only to make
 // queries more readable.
 type allHasSBOMTreeSubjectPackage struct {
-	Typename   *string                                                  `json:"__typename"`
-	Type       string                                                   `json:"type"`
-	Namespaces []allHasSBOMTreeSubjectPackageNamespacesPackageNamespace `json:"namespaces"`
+	Typename   *string `json:"__typename"`
+	allPkgTree `json:"-"`
 }
 
 // GetTypename returns allHasSBOMTreeSubjectPackage.Typename, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeSubjectPackage) GetTypename() *string { return v.Typename }
 
 // GetType returns allHasSBOMTreeSubjectPackage.Type, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackage) GetType() string { return v.Type }
+func (v *allHasSBOMTreeSubjectPackage) GetType() string { return v.allPkgTree.Type }
 
 // GetNamespaces returns allHasSBOMTreeSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackage) GetNamespaces() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespace {
-	return v.Namespaces
+func (v *allHasSBOMTreeSubjectPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
 }
 
-// allHasSBOMTreeSubjectPackageNamespacesPackageNamespace includes the requested fields of the GraphQL type PackageNamespace.
-// The GraphQL type's documentation follows.
-//
-// PackageNamespace is a namespace for packages.
-//
-// In the pURL representation, each PackageNamespace matches the
-// `pkg:<type>/<namespace>/` partial pURL.
-//
-// Namespaces are optional and type specific. Because they are optional, we use
-// empty string to denote missing namespaces.
-type allHasSBOMTreeSubjectPackageNamespacesPackageNamespace struct {
-	Namespace string                                                                   `json:"namespace"`
-	Names     []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName `json:"names"`
+func (v *allHasSBOMTreeSubjectPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasSBOMTreeSubjectPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasSBOMTreeSubjectPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// GetNamespace returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespace) GetNamespace() string {
-	return v.Namespace
+type __premarshalallHasSBOMTreeSubjectPackage struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
 }
 
-// GetNames returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespace.Names, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespace) GetNames() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName {
-	return v.Names
+func (v *allHasSBOMTreeSubjectPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
 }
 
-// allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName includes the requested fields of the GraphQL type PackageName.
-// The GraphQL type's documentation follows.
-//
-// PackageName is a name for packages.
-//
-// In the pURL representation, each PackageName matches the
-// `pkg:<type>/<namespace>/<name>` pURL.
-//
-// Names are always mandatory.
-//
-// This is the first node in the trie that can be referred to by other parts of
-// GUAC.
-type allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName struct {
-	Name     string                                                                                         `json:"name"`
-	Versions []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion `json:"versions"`
-}
+func (v *allHasSBOMTreeSubjectPackage) __premarshalJSON() (*__premarshalallHasSBOMTreeSubjectPackage, error) {
+	var retval __premarshalallHasSBOMTreeSubjectPackage
 
-// GetName returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName) GetName() string {
-	return v.Name
-}
-
-// GetVersions returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName.Versions, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageName) GetVersions() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion {
-	return v.Versions
-}
-
-// allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion includes the requested fields of the GraphQL type PackageVersion.
-// The GraphQL type's documentation follows.
-//
-// PackageVersion is a package version.
-//
-// In the pURL representation, each PackageName matches the
-// `pkg:<type>/<namespace>/<name>@<version>` pURL.
-//
-// Versions are optional and each Package type defines own rules for handling them.
-// For this level of GUAC, these are just opaque strings.
-//
-// This node can be referred to by other parts of GUAC.
-//
-// Subpath and qualifiers are optional. Lack of qualifiers is represented by an
-// empty list and lack of subpath by empty string (to be consistent with
-// optionality of namespace and version). Two nodes that have different qualifiers
-// and/or subpath but the same version mean two different packages in the trie
-// (they are different). Two nodes that have same version but qualifiers of one are
-// a subset of the qualifier of the other also mean two different packages in the
-// trie.
-type allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
-	Version    string                                                                                                                   `json:"version"`
-	Qualifiers []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
-	Subpath    string                                                                                                                   `json:"subpath"`
-}
-
-// GetVersion returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetVersion() string {
-	return v.Version
-}
-
-// GetQualifiers returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetQualifiers() []allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier {
-	return v.Qualifiers
-}
-
-// GetSubpath returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Subpath, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetSubpath() string {
-	return v.Subpath
-}
-
-// allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier includes the requested fields of the GraphQL type PackageQualifier.
-// The GraphQL type's documentation follows.
-//
-// PackageQualifier is a qualifier for a package, a key-value pair.
-//
-// In the pURL representation, it is a part of the `<qualifiers>` part of the
-// `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` pURL.
-//
-// Qualifiers are optional, each Package type defines own rules for handling them,
-// and multiple qualifiers could be attached to the same package.
-//
-// This node cannot be directly referred by other parts of GUAC.
-type allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-// GetKey returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Key, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetKey() string {
-	return v.Key
-}
-
-// GetValue returns allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Value, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetValue() string {
-	return v.Value
+	retval.Typename = v.Typename
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
 }
 
 // allHasSBOMTreeSubjectPackageOrSource includes the requested fields of the GraphQL interface PackageOrSource.
@@ -7131,18 +7366,26 @@ func __marshalallHasSBOMTreeSubjectPackageOrSource(v *allHasSBOMTreeSubjectPacka
 	case *allHasSBOMTreeSubjectPackage:
 		typename = "Package"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*allHasSBOMTreeSubjectPackage
-		}{typename, v}
+			*__premarshalallHasSBOMTreeSubjectPackage
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *allHasSBOMTreeSubjectSource:
 		typename = "Source"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*allHasSBOMTreeSubjectSource
-		}{typename, v}
+			*__premarshalallHasSBOMTreeSubjectSource
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -7165,23 +7408,281 @@ func __marshalallHasSBOMTreeSubjectPackageOrSource(v *allHasSBOMTreeSubjectPacka
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type allHasSBOMTreeSubjectSource struct {
-	Typename   *string                                                `json:"__typename"`
-	Type       string                                                 `json:"type"`
-	Namespaces []allHasSBOMTreeSubjectSourceNamespacesSourceNamespace `json:"namespaces"`
+	Typename      *string `json:"__typename"`
+	allSourceTree `json:"-"`
 }
 
 // GetTypename returns allHasSBOMTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeSubjectSource) GetTypename() *string { return v.Typename }
 
 // GetType returns allHasSBOMTreeSubjectSource.Type, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetType() string { return v.Type }
+func (v *allHasSBOMTreeSubjectSource) GetType() string { return v.allSourceTree.Type }
 
 // GetNamespaces returns allHasSBOMTreeSubjectSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetNamespaces() []allHasSBOMTreeSubjectSourceNamespacesSourceNamespace {
+func (v *allHasSBOMTreeSubjectSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *allHasSBOMTreeSubjectSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasSBOMTreeSubjectSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasSBOMTreeSubjectSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallHasSBOMTreeSubjectSource struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *allHasSBOMTreeSubjectSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allHasSBOMTreeSubjectSource) __premarshalJSON() (*__premarshalallHasSBOMTreeSubjectSource, error) {
+	var retval __premarshalallHasSBOMTreeSubjectSource
+
+	retval.Typename = v.Typename
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
+// allHasSourceAt includes the GraphQL fields of HasSourceAt requested by the fragment allHasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// # HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+//
+// package (subject) - the package object type that represents the package
+// source (object) - the source object type that represents the source
+// knownSince (property) - timestamp when this was last checked (exact time)
+// justification (property) - string value representing why the package has a source specified
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type allHasSourceAt struct {
+	Justification string                `json:"justification"`
+	KnownSince    time.Time             `json:"knownSince"`
+	Package       allHasSourceAtPackage `json:"package"`
+	Source        allHasSourceAtSource  `json:"source"`
+	Origin        string                `json:"origin"`
+	Collector     string                `json:"collector"`
+}
+
+// GetJustification returns allHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *allHasSourceAt) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns allHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *allHasSourceAt) GetKnownSince() time.Time { return v.KnownSince }
+
+// GetPackage returns allHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *allHasSourceAt) GetPackage() allHasSourceAtPackage { return v.Package }
+
+// GetSource returns allHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *allHasSourceAt) GetSource() allHasSourceAtSource { return v.Source }
+
+// GetOrigin returns allHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *allHasSourceAt) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *allHasSourceAt) GetCollector() string { return v.Collector }
+
+// allHasSourceAtPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type allHasSourceAtPackage struct {
+	Type       string                                            `json:"type"`
+	Namespaces []allHasSourceAtPackageNamespacesPackageNamespace `json:"namespaces"`
+}
+
+// GetType returns allHasSourceAtPackage.Type, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackage) GetType() string { return v.Type }
+
+// GetNamespaces returns allHasSourceAtPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackage) GetNamespaces() []allHasSourceAtPackageNamespacesPackageNamespace {
 	return v.Namespaces
 }
 
-// allHasSBOMTreeSubjectSourceNamespacesSourceNamespace includes the requested fields of the GraphQL type SourceNamespace.
+// allHasSourceAtPackageNamespacesPackageNamespace includes the requested fields of the GraphQL type PackageNamespace.
+// The GraphQL type's documentation follows.
+//
+// PackageNamespace is a namespace for packages.
+//
+// In the pURL representation, each PackageNamespace matches the
+// `pkg:<type>/<namespace>/` partial pURL.
+//
+// Namespaces are optional and type specific. Because they are optional, we use
+// empty string to denote missing namespaces.
+type allHasSourceAtPackageNamespacesPackageNamespace struct {
+	Namespace string                                                            `json:"namespace"`
+	Names     []allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName `json:"names"`
+}
+
+// GetNamespace returns allHasSourceAtPackageNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespace) GetNamespace() string { return v.Namespace }
+
+// GetNames returns allHasSourceAtPackageNamespacesPackageNamespace.Names, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespace) GetNames() []allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName {
+	return v.Names
+}
+
+// allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName includes the requested fields of the GraphQL type PackageName.
+// The GraphQL type's documentation follows.
+//
+// PackageName is a name for packages.
+//
+// In the pURL representation, each PackageName matches the
+// `pkg:<type>/<namespace>/<name>` pURL.
+//
+// Names are always mandatory.
+//
+// This is the first node in the trie that can be referred to by other parts of
+// GUAC.
+type allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName struct {
+	Name     string                                                                                  `json:"name"`
+	Versions []allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion `json:"versions"`
+}
+
+// GetName returns allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName) GetName() string {
+	return v.Name
+}
+
+// GetVersions returns allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName.Versions, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageName) GetVersions() []allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion {
+	return v.Versions
+}
+
+// allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion includes the requested fields of the GraphQL type PackageVersion.
+// The GraphQL type's documentation follows.
+//
+// PackageVersion is a package version.
+//
+// In the pURL representation, each PackageName matches the
+// `pkg:<type>/<namespace>/<name>@<version>` pURL.
+//
+// Versions are optional and each Package type defines own rules for handling them.
+// For this level of GUAC, these are just opaque strings.
+//
+// This node can be referred to by other parts of GUAC.
+//
+// Subpath and qualifiers are optional. Lack of qualifiers is represented by an
+// empty list and lack of subpath by empty string (to be consistent with
+// optionality of namespace and version). Two nodes that have different qualifiers
+// and/or subpath but the same version mean two different packages in the trie
+// (they are different). Two nodes that have same version but qualifiers of one are
+// a subset of the qualifier of the other also mean two different packages in the
+// trie.
+type allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
+	Version    string                                                                                                            `json:"version"`
+	Qualifiers []allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
+	Subpath    string                                                                                                            `json:"subpath"`
+}
+
+// GetVersion returns allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetVersion() string {
+	return v.Version
+}
+
+// GetQualifiers returns allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Qualifiers, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetQualifiers() []allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier {
+	return v.Qualifiers
+}
+
+// GetSubpath returns allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Subpath, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetSubpath() string {
+	return v.Subpath
+}
+
+// allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier includes the requested fields of the GraphQL type PackageQualifier.
+// The GraphQL type's documentation follows.
+//
+// PackageQualifier is a qualifier for a package, a key-value pair.
+//
+// In the pURL representation, it is a part of the `<qualifiers>` part of the
+// `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` pURL.
+//
+// Qualifiers are optional, each Package type defines own rules for handling them,
+// and multiple qualifiers could be attached to the same package.
+//
+// This node cannot be directly referred by other parts of GUAC.
+type allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Key, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetKey() string {
+	return v.Key
+}
+
+// GetValue returns allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier.Value, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackageNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier) GetValue() string {
+	return v.Value
+}
+
+// allHasSourceAtSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type allHasSourceAtSource struct {
+	Type       string                                          `json:"type"`
+	Namespaces []allHasSourceAtSourceNamespacesSourceNamespace `json:"namespaces"`
+}
+
+// GetType returns allHasSourceAtSource.Type, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSource) GetType() string { return v.Type }
+
+// GetNamespaces returns allHasSourceAtSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSource) GetNamespaces() []allHasSourceAtSourceNamespacesSourceNamespace {
+	return v.Namespaces
+}
+
+// allHasSourceAtSourceNamespacesSourceNamespace includes the requested fields of the GraphQL type SourceNamespace.
 // The GraphQL type's documentation follows.
 //
 // SourceNamespace is a namespace for sources.
@@ -7189,22 +7690,20 @@ func (v *allHasSBOMTreeSubjectSource) GetNamespaces() []allHasSBOMTreeSubjectSou
 // This is the location of the repository (such as github/gitlab/bitbucket).
 //
 // The `namespace` field is mandatory.
-type allHasSBOMTreeSubjectSourceNamespacesSourceNamespace struct {
-	Namespace string                                                                `json:"namespace"`
-	Names     []allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName `json:"names"`
+type allHasSourceAtSourceNamespacesSourceNamespace struct {
+	Namespace string                                                         `json:"namespace"`
+	Names     []allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName `json:"names"`
 }
 
-// GetNamespace returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespace.Namespace, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespace) GetNamespace() string {
-	return v.Namespace
-}
+// GetNamespace returns allHasSourceAtSourceNamespacesSourceNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSourceNamespacesSourceNamespace) GetNamespace() string { return v.Namespace }
 
-// GetNames returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespace.Names, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespace) GetNames() []allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName {
+// GetNames returns allHasSourceAtSourceNamespacesSourceNamespace.Names, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSourceNamespacesSourceNamespace) GetNames() []allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName {
 	return v.Names
 }
 
-// allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName includes the requested fields of the GraphQL type SourceName.
+// allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName includes the requested fields of the GraphQL type SourceName.
 // The GraphQL type's documentation follows.
 //
 // SourceName is a url of the repository and its tag or commit.
@@ -7214,24 +7713,22 @@ func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespace) GetNames() []allH
 //
 // This is the only source trie node that can be referenced by other parts of
 // GUAC.
-type allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName struct {
+type allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName struct {
 	Name   string  `json:"name"`
 	Tag    *string `json:"tag"`
 	Commit *string `json:"commit"`
 }
 
-// GetName returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName.Name, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName) GetName() string {
+// GetName returns allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName.Name, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName) GetName() string {
 	return v.Name
 }
 
-// GetTag returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName.Tag, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName) GetTag() *string {
-	return v.Tag
-}
+// GetTag returns allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName.Tag, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName) GetTag() *string { return v.Tag }
 
-// GetCommit returns allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSourceNamespacesSourceNamespaceNamesSourceName) GetCommit() *string {
+// GetCommit returns allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSourceNamespacesSourceNamespaceNamesSourceName) GetCommit() *string {
 	return v.Commit
 }
 
@@ -9801,36 +10298,25 @@ fragment allHasSBOMTree on HasSBOM {
 	subject {
 		__typename
 		... on Package {
-			type
-			namespaces {
-				namespace
-				names {
-					name
-					versions {
-						version
-						qualifiers {
-							key
-							value
-						}
-						subpath
-					}
-				}
-			}
+			... allPkgTree
 		}
 		... on Source {
-			type
-			namespaces {
-				namespace
-				names {
-					name
-					tag
-					commit
-				}
-			}
+			... allSourceTree
 		}
 	}
 	origin
 	collector
+}
+fragment allSourceTree on Source {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			tag
+			commit
+		}
+	}
 }
 `,
 		Variables: &__HasSBOMPkgInput{
@@ -9885,36 +10371,31 @@ fragment allHasSBOMTree on HasSBOM {
 	subject {
 		__typename
 		... on Package {
-			type
-			namespaces {
-				namespace
-				names {
-					name
-					versions {
-						version
-						qualifiers {
-							key
-							value
-						}
-						subpath
-					}
-				}
-			}
+			... allPkgTree
 		}
 		... on Source {
-			type
-			namespaces {
-				namespace
-				names {
-					name
-					tag
-					commit
-				}
-			}
+			... allSourceTree
 		}
 	}
 	origin
 	collector
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
 }
 `,
 		Variables: &__HasSBOMSrcInput{
@@ -9925,6 +10406,112 @@ fragment allHasSBOMTree on HasSBOM {
 	var err error
 
 	var data HasSBOMSrcResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func HasSourceAt(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType MatchFlags,
+	source SourceInputSpec,
+	hasSourceAt HasSourceAtInputSpec,
+) (*HasSourceAtResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSourceAt",
+		Query: `
+mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
+	ingestPackage(pkg: $pkg) {
+		... allPkgTree
+	}
+	ingestSource(source: $source) {
+		... allSourceTree
+	}
+	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt) {
+		... allHasSourceAt
+	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allSourceTree on Source {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment allHasSourceAt on HasSourceAt {
+	justification
+	knownSince
+	package {
+		type
+		namespaces {
+			namespace
+			names {
+				name
+				versions {
+					version
+					qualifiers {
+						key
+						value
+					}
+					subpath
+				}
+			}
+		}
+	}
+	source {
+		type
+		namespaces {
+			namespace
+			names {
+				name
+				tag
+				commit
+			}
+		}
+	}
+	origin
+	collector
+}
+`,
+		Variables: &__HasSourceAtInput{
+			Pkg:          pkg,
+			PkgMatchType: pkgMatchType,
+			Source:       source,
+			HasSourceAt:  hasSourceAt,
+		},
+	}
+	var err error
+
+	var data HasSourceAtResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
