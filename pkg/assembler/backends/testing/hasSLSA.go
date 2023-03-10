@@ -306,7 +306,14 @@ func (c *demoClient) buildSLSA(
 		materials = append(materials, material)
 	}
 
-	builder := model.Builder{URI: builtBy.URI}
+	builders, err := c.Builders(ctx, helper.ConvertBuilderInputSpecToBuilderSpec(builtBy))
+	if err != nil {
+		return nil, err
+	}
+	if len(builders) != 1 {
+		return nil, gqlerror.Errorf("Found %d matches for SLSA builder", len(builders))
+	}
+	builder := builders[0]
 
 	predicates := []*model.SLSAPredicate{}
 	for _, p := range input.SlsaPredicate {
@@ -319,7 +326,7 @@ func (c *demoClient) buildSLSA(
 
 	slsa := model.Slsa{
 		BuiltFrom:     materials,
-		BuiltBy:       &builder,
+		BuiltBy:       builder,
 		BuildType:     input.BuildType,
 		SlsaPredicate: predicates,
 		SlsaVersion:   input.SlsaVersion,
