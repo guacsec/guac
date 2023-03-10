@@ -40,14 +40,30 @@ Only the package or source can be added, not both. HasSourceAt will be used to c
 relationship.
 """
 input HasSBOMSpec {
-  package: PkgSpec
-  source: SourceSpec
+  subject: PackageOrSourceSpec
   uri: String
   origin: String
   collector: String
+}
+
+"""
+HasSBOMInputSpec is the same as HasSBOM but for mutation input.
+
+All fields are required.
+"""
+input HasSBOMInputSpec {
+  uri: String!
+  origin: String!
+  collector: String!
 }
 
 extend type Query {
   "Returns all HasSBOM"
   HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
 }
+
+extend type Mutation {
+  "Certifies that a package or a source has SBOM at the URI"
+  ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+}
+
