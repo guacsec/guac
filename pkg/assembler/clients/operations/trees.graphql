@@ -164,8 +164,7 @@ fragment allCertifyBad on CertifyBad {
 fragment allHashEqualTree on HashEqual {
   justification
   artifacts {
-    algorithm
-    digest
+    ...allArtifactTree
   }
   origin
   collector
@@ -190,32 +189,10 @@ fragment allHasSourceAt on HasSourceAt {
   justification
   knownSince
   package {
-    type
-    namespaces {
-      namespace
-      names {
-        name
-        versions {
-          version
-          qualifiers {
-            key
-            value
-          }
-          subpath
-        }
-      }
-    }
+    ...allPkgTree
   }
   source {
-    type
-    namespaces {
-      namespace
-      names {
-        name
-        tag
-        commit
-      }
-    }
+    ...allSourceTree
   }
   origin
   collector
