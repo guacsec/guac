@@ -42,6 +42,10 @@ type demoClient struct {
 	isVulnerability     []*model.IsVulnerability
 	certifyVEXStatement []*model.CertifyVEXStatement
 	hasSLSA             []*model.HasSlsa
+
+	// Indexes for queries
+	backEdges backEdges
+	pkgT      pkgT
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -65,6 +69,8 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
+		backEdges:           backEdges{},
+		pkgT:                pkgT{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)

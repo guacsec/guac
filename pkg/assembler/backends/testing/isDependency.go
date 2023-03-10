@@ -127,7 +127,7 @@ func (c *demoClient) registerIsDependency(selectedPackage *model.Package, depend
 		}
 	}
 
-	newIsOccurrence := &model.IsDependency{
+	newIsDependency := &model.IsDependency{
 		Package:          selectedPackage,
 		DependentPackage: dependentPackage,
 		VersionRange:     versionRange,
@@ -135,8 +135,21 @@ func (c *demoClient) registerIsDependency(selectedPackage *model.Package, depend
 		Origin:           origin,
 		Collector:        collector,
 	}
-	c.isDependency = append(c.isDependency, newIsOccurrence)
-	return newIsOccurrence
+	c.isDependency = append(c.isDependency, newIsDependency)
+
+	selectedPackageNodeId := c.pkgId(selectedPackage)
+	if _, ok := c.backEdges[selectedPackageNodeId]; !ok {
+		c.backEdges[selectedPackageNodeId] = &evidenceTrees{}
+	}
+	c.backEdges[selectedPackageNodeId].isDependency = append(c.backEdges[selectedPackageNodeId].isDependency, newIsDependency)
+
+	dependentPackageNodeId := c.pkgId(dependentPackage)
+	if _, ok := c.backEdges[dependentPackageNodeId]; !ok {
+		c.backEdges[dependentPackageNodeId] = &evidenceTrees{}
+	}
+	c.backEdges[dependentPackageNodeId].isDependency = append(c.backEdges[dependentPackageNodeId].isDependency, newIsDependency)
+
+	return newIsDependency
 }
 
 func (c *demoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {

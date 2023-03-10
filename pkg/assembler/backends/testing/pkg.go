@@ -17,6 +17,8 @@ package testing
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -100,71 +102,75 @@ func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec)
 	}
 
 	newPkg := c.registerPackage(pkgType, namespace, name, version, subpath, qualifiers...)
-
 	return newPkg, nil
 }
 
 func (c *demoClient) registerPackage(pkgType, namespace, name, version, subpath string, qualifiers ...string) *model.Package {
 	for i, p := range c.packages {
 		if p.Type == pkgType {
-			c.packages[i] = registerNamespace(p, namespace, name, version, subpath, qualifiers...)
+			c.packages[i] = registerNamespace(c.pkgT[pkgType], p, namespace, name, version, subpath, qualifiers...)
 			return c.packages[i]
 		}
 	}
 
+	c.pkgT[pkgType] = pkgNamespaceT{}
 	newPkg := &model.Package{Type: pkgType}
-	newPkg = registerNamespace(newPkg, namespace, name, version, subpath, qualifiers...)
+	newPkg = registerNamespace(c.pkgT[pkgType], newPkg, namespace, name, version, subpath, qualifiers...)
 	c.packages = append(c.packages, newPkg)
 
 	return newPkg
 }
 
-func registerNamespace(p *model.Package, namespace, name, version, subpath string, qualifiers ...string) *model.Package {
+func registerNamespace(index pkgNamespaceT, p *model.Package, namespace, name, version, subpath string, qualifiers ...string) *model.Package {
 	for i, ns := range p.Namespaces {
 		if ns.Namespace == namespace {
-			p.Namespaces[i] = registerName(ns, name, version, subpath, qualifiers...)
+			p.Namespaces[i] = registerName(index[namespace], ns, name, version, subpath, qualifiers...)
 			return p
 		}
 	}
 
+	index[namespace] = pkgNameT{}
 	newNs := &model.PackageNamespace{Namespace: namespace}
-	newNs = registerName(newNs, name, version, subpath, qualifiers...)
+	newNs = registerName(index[namespace], newNs, name, version, subpath, qualifiers...)
 	p.Namespaces = append(p.Namespaces, newNs)
 	return p
 }
 
-func registerName(ns *model.PackageNamespace, name, version, subpath string, qualifiers ...string) *model.PackageNamespace {
+func registerName(index pkgNameT, ns *model.PackageNamespace, name, version, subpath string, qualifiers ...string) *model.PackageNamespace {
 	for i, n := range ns.Names {
 		if n.Name == name {
-			ns.Names[i] = registerVersion(n, version, subpath, qualifiers...)
+			ns.Names[i] = registerVersion(index[name], n, version, subpath, qualifiers...)
 			return ns
 		}
 	}
 
+	index[name] = &pkgVersionT{}
 	newN := &model.PackageName{Name: name}
-	newN = registerVersion(newN, version, subpath, qualifiers...)
+	newN = registerVersion(index[name], newN, version, subpath, qualifiers...)
 	ns.Names = append(ns.Names, newN)
 	return ns
 }
 
-func registerVersion(n *model.PackageName, version, subpath string, qualifiers ...string) *model.PackageName {
-	// TODO(mihaimaruseac): Here we could use a utility to compare if there
-	// is already a version matching all of the arguments to not create
-	// duplicates, but in the end this is test data and we don't generate
-	// duplicates in input right now. Hence, each time this is called, we
-	// create a new node.
+func registerVersion(index *pkgVersionT, n *model.PackageName, version, subpath string, qualifiers ...string) *model.PackageName {
 	newV := &model.PackageVersion{
 		Version:    version,
 		Subpath:    subpath,
 		Qualifiers: buildQualifierSet(qualifiers...),
 	}
+
+	for _, v := range n.Versions {
+		if reflect.DeepEqual(v, newV) {
+			return n
+		}
+	}
 	n.Versions = append(n.Versions, newV)
+	*index = append(*index, newV)
 	return n
 }
 
 func buildQualifierSet(qualifiers ...string) []*model.PackageQualifier {
 	var qs []*model.PackageQualifier
-	for i, _ := range qualifiers {
+	for i := range qualifiers {
 		if i%2 == 0 {
 			qs = append(qs, &model.PackageQualifier{
 				Key:   qualifiers[i],
@@ -187,6 +193,16 @@ func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 			}
 		}
 	}
+	for _, v := range packages {
+		nodeId := c.pkgId(v)
+		edges, ok := c.backEdges[nodeId]
+		if ok {
+			fmt.Printf("package has backedges: %+v\n", edges)
+		} else {
+			fmt.Printf("package has no backedges\n")
+		}
+	}
+
 	return packages, nil
 }
 
