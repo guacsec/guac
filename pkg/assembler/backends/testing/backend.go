@@ -73,7 +73,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllOSV(client)
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
-	var err error
 	//registerAllHashEqual(client)
 	// err := registerAllIsOccurrence(client)
 	// if err != nil {
@@ -111,10 +110,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
-	err = registerAllCertifyVEXStatement(client)
-	if err != nil {
-		return nil, err
-	}
+	// err = registerAllCertifyVEXStatement(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return client, nil
 }
 

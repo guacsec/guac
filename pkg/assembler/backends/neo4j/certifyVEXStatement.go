@@ -379,7 +379,7 @@ func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln mode
 	return &certifyVEXStatement
 }
 
-func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VEXStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 
 	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
 	if err != nil {

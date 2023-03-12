@@ -24,6 +24,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllCertifyVEXStatement(client *demoClient) error {
@@ -49,7 +50,7 @@ func registerAllCertifyVEXStatement(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerCertifyVEXStatement(selectedPackage[0], nil, selectedCve[0], nil, "this package is not vulnerable to this CVE", time.Now())
+	_, err = client.registerCertifyVEXStatement(selectedPackage[0], nil, selectedCve[0], nil, "this package is not vulnerable to this CVE", "testing backend", "testing backend", time.Now())
 	if err != nil {
 		return err
 	}
@@ -60,7 +61,7 @@ func registerAllCertifyVEXStatement(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	err = client.registerCertifyVEXStatement(nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, nil, selectedGhsa[0], "this artifact is not vulnerable to this GHSA", time.Now())
+	_, err = client.registerCertifyVEXStatement(nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, nil, selectedGhsa[0], "this artifact is not vulnerable to this GHSA", "testing backend", "testing backend", time.Now())
 	if err != nil {
 		return err
 	}
@@ -69,30 +70,30 @@ func registerAllCertifyVEXStatement(client *demoClient) error {
 
 // Ingest CertifyPkg
 
-func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package, selectedArtifact *model.Artifact, selectedCve *model.Cve, selectedGhsa *model.Ghsa, justification string, timestamp time.Time) error {
+func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package, selectedArtifact *model.Artifact, selectedCve *model.Cve, selectedGhsa *model.Ghsa, justification, origin, collector string, timestamp time.Time) (*model.CertifyVEXStatement, error) {
 
 	if selectedPackage != nil && selectedArtifact != nil {
-		return fmt.Errorf("cannot specify both package and artifact for CertifyVEXStatement")
+		return nil, fmt.Errorf("cannot specify both package and artifact for CertifyVEXStatement")
 	}
 
 	for _, vex := range c.certifyVEXStatement {
 		if vex.Justification == justification {
 			if val, ok := vex.Subject.(model.Package); ok {
 				if reflect.DeepEqual(val, *selectedPackage) {
-					return nil
+					return vex, nil
 				}
 			} else if val, ok := vex.Subject.(model.Artifact); ok {
 				if reflect.DeepEqual(val, *selectedArtifact) {
-					return nil
+					return vex, nil
 				}
 			}
 			if val, ok := vex.Vulnerability.(model.Cve); ok {
 				if reflect.DeepEqual(val, *selectedCve) {
-					return nil
+					return vex, nil
 				}
 			} else if val, ok := vex.Vulnerability.(model.Ghsa); ok {
 				if reflect.DeepEqual(val, *selectedGhsa) {
-					return nil
+					return vex, nil
 				}
 			}
 		}
@@ -101,8 +102,8 @@ func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package,
 	newCertifyVEXStatement := &model.CertifyVEXStatement{
 		KnownSince:    timestamp,
 		Justification: justification,
-		Origin:        "testing backend",
-		Collector:     "testing backend",
+		Origin:        origin,
+		Collector:     collector,
 	}
 	if selectedCve != nil {
 		newCertifyVEXStatement.Vulnerability = selectedCve
@@ -116,10 +117,10 @@ func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package,
 	}
 
 	c.certifyVEXStatement = append(c.certifyVEXStatement, newCertifyVEXStatement)
-	return nil
+	return newCertifyVEXStatement, nil
 }
 
-func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VEXStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
 	if err != nil {
 		return nil, err
@@ -128,6 +129,123 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 	if err != nil {
 		return nil, err
 	}
+
+	if subject.Package != nil {
+		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
+
+		collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
+		if err != nil {
+			return nil, err
+		}
+		if len(collectedPkg) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestVEXStatement :: multiple packages found")
+		}
+
+		if vulnerability.Cve != nil {
+
+			cveSpec := helper.ConvertCveInputSpecToCveSpec(vulnerability.Cve)
+			collectedCve, err := c.Cve(ctx, cveSpec)
+			if err != nil {
+				return nil, err
+			}
+			if len(collectedCve) != 1 {
+				return nil, gqlerror.Errorf(
+					"IngestVEXStatement :: cve argument must match one, found %d",
+					len(collectedCve))
+			}
+			return c.registerCertifyVEXStatement(
+				collectedPkg[0],
+				nil,
+				collectedCve[0],
+				nil,
+				vexStatement.Justification,
+				vexStatement.Origin,
+				vexStatement.Collector,
+				vexStatement.KnownSince)
+		}
+
+		if vulnerability.Ghsa != nil {
+			ghsaSpec := helper.ConvertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
+
+			collectedGhsa, err := c.Ghsa(ctx, ghsaSpec)
+			if err != nil {
+				return nil, err
+			}
+			if len(collectedGhsa) != 1 {
+				return nil, gqlerror.Errorf(
+					"IngestVEXStatement :: ghsa argument must match one, found %d",
+					len(collectedGhsa))
+			}
+			return c.registerCertifyVEXStatement(
+				collectedPkg[0],
+				nil,
+				nil,
+				collectedGhsa[0],
+				vexStatement.Justification,
+				vexStatement.Origin,
+				vexStatement.Collector,
+				vexStatement.KnownSince)
+		}
+	}
+
+	if subject.Artifact != nil {
+		collectedArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &subject.Artifact.Algorithm, Digest: &subject.Artifact.Digest})
+		if err != nil {
+			return nil, err
+		}
+		if len(collectedArt) != 1 {
+			return nil, gqlerror.Errorf(
+				"IngestVEXStatement :: multiple artifacts found")
+		}
+		if vulnerability.Cve != nil {
+
+			cveSpec := helper.ConvertCveInputSpecToCveSpec(vulnerability.Cve)
+			collectedCve, err := c.Cve(ctx, cveSpec)
+			if err != nil {
+				return nil, err
+			}
+			if len(collectedCve) != 1 {
+				return nil, gqlerror.Errorf(
+					"IngestVEXStatement :: cve argument must match one, found %d",
+					len(collectedCve))
+			}
+			return c.registerCertifyVEXStatement(
+				nil,
+				collectedArt[0],
+				collectedCve[0],
+				nil,
+				vexStatement.Justification,
+				vexStatement.Origin,
+				vexStatement.Collector,
+				vexStatement.KnownSince)
+		}
+
+		if vulnerability.Ghsa != nil {
+			ghsaSpec := helper.ConvertGhsaInputSpecToGhsaSpec(vulnerability.Ghsa)
+
+			collectedGhsa, err := c.Ghsa(ctx, ghsaSpec)
+			if err != nil {
+				return nil, err
+			}
+			if len(collectedGhsa) != 1 {
+				return nil, gqlerror.Errorf(
+					"IngestVEXStatement :: ghsa argument must match one, found %d",
+					len(collectedGhsa))
+			}
+			return c.registerCertifyVEXStatement(
+				nil,
+				collectedArt[0],
+				nil,
+				collectedGhsa[0],
+				vexStatement.Justification,
+				vexStatement.Origin,
+				vexStatement.Collector,
+				vexStatement.KnownSince)
+		}
+	}
+	// it should never reach here else it failed
+	return nil, gqlerror.Errorf("IngestVEXStatement failed")
 }
 
 // Query CertifyPkg
@@ -165,7 +283,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatemen
 		}
 
 		if !queryAll {
-			if querySubjectAll {
+			if !querySubjectAll {
 				if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil && h.Subject != nil {
 					if val, ok := h.Subject.(*model.Package); ok {
 						if certifyVEXStatementSpec.Subject.Package.Type == nil || val.Type == *certifyVEXStatementSpec.Subject.Package.Type {
@@ -194,7 +312,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatemen
 				}
 			}
 
-			if queryVulnAll {
+			if !queryVulnAll {
 				if certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil && h.Vulnerability != nil {
 					if val, ok := h.Vulnerability.(*model.Cve); ok {
 						if certifyVEXStatementSpec.Vulnerability.Cve.Year == nil || val.Year == *certifyVEXStatementSpec.Vulnerability.Cve.Year {

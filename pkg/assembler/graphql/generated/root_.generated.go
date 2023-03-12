@@ -170,7 +170,7 @@ type ComplexityRoot struct {
 		IngestPackage         func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source *model.SourceInputSpec) int
-		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VEXStatementInputSpec) int
+		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
 
@@ -943,7 +943,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.CveOrGhsaInput), args["vexStatement"].(model.VEXStatementInputSpec)), true
+		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.CveOrGhsaInput), args["vexStatement"].(model.VexStatementInputSpec)), true
 
 	case "Mutation.ingestVulnerability":
 		if e.complexity.Mutation.IngestVulnerability == nil {
@@ -1576,7 +1576,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputScorecardInputSpec,
 		ec.unmarshalInputSourceInputSpec,
 		ec.unmarshalInputSourceSpec,
-		ec.unmarshalInputVEXStatementInputSpec,
+		ec.unmarshalInputVexStatementInputSpec,
 		ec.unmarshalInputVulnerabilityMetaDataInput,
 	)
 	first := true
@@ -2109,11 +2109,11 @@ input CertifyVEXStatementSpec {
 }
 
 """
-CertifyVEXStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
+VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
 
 All fields are required.
 """
-input VEXStatementInputSpec {
+input VexStatementInputSpec {
   justification: String!
   knownSince: Time!
   origin: String!
@@ -2137,7 +2137,7 @@ extend type Query {
 
 extend type Mutation {
   "certify that an either a package or artifact has an associated VEX for a CVE or GHSA"
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VEXStatementInputSpec!): CertifyVEXStatement!
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
@@ -3003,7 +3003,7 @@ extend type Mutation {
 # Defines a GraphQL schema for the IsVulnerability. It contains a OSV, vulnerability that can be of type
 # cve or ghsa, justification, origin and collector
 """
-CveGhsaObject is a union of CVE and GHSA.
+CveOrGhsa is a union of CVE and GHSA.
 """
 union CveOrGhsa = CVE | GHSA
 

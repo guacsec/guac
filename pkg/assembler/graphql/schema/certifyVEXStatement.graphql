@@ -66,11 +66,11 @@ input CertifyVEXStatementSpec {
 }
 
 """
-CertifyVEXStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
+VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
 
 All fields are required.
 """
-input VEXStatementInputSpec {
+input VexStatementInputSpec {
   justification: String!
   knownSince: Time!
   origin: String!
@@ -94,5 +94,5 @@ extend type Query {
 
 extend type Mutation {
   "certify that an either a package or artifact has an associated VEX for a CVE or GHSA"
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VEXStatementInputSpec!): CertifyVEXStatement!
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }

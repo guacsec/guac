@@ -437,8 +437,8 @@ func (ec *executionContext) unmarshalInputPackageOrArtifactSpec(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputVEXStatementInputSpec(ctx context.Context, obj interface{}) (model.VEXStatementInputSpec, error) {
-	var it model.VEXStatementInputSpec
+func (ec *executionContext) unmarshalInputVexStatementInputSpec(ctx context.Context, obj interface{}) (model.VexStatementInputSpec, error) {
+	var it model.VexStatementInputSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -660,8 +660,8 @@ func (ec *executionContext) unmarshalNPackageOrArtifactInput2githubᚗcomᚋguac
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNVEXStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVEXStatementInputSpec(ctx context.Context, v interface{}) (model.VEXStatementInputSpec, error) {
-	res, err := ec.unmarshalInputVEXStatementInputSpec(ctx, v)
+func (ec *executionContext) unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v interface{}) (model.VexStatementInputSpec, error) {
+	res, err := ec.unmarshalInputVexStatementInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

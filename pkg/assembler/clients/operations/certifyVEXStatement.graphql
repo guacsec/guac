@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest VEX Statement into GUAC
 
-mutation VEXPackageAndCVE($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VEXStatementInputSpec!) {
+mutation VexPackageAndCve($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
@@ -29,7 +29,7 @@ mutation VEXPackageAndCVE($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatemen
   }
 }
 
-mutation VEXAndGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VEXStatementInputSpec!) {
+mutation VEXPackageAndGhsa($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestPackage(pkg: $pkg) {
     ...allPkgTree
   }
@@ -41,7 +41,7 @@ mutation VEXAndGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: V
   }
 }
 
-mutation VEXArtifactAndCVE($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VEXStatementInputSpec!) {
+mutation VexArtifactAndCve($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree
   }
@@ -53,7 +53,7 @@ mutation VEXArtifactAndCVE($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $
   }
 }
 
-mutation VEXArtifactAndGHSA($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VEXStatementInputSpec!) {
+mutation VexArtifactAndGhsa($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree
   }

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// CveGhsaObject is a union of CVE and GHSA.
+// CveOrGhsa is a union of CVE and GHSA.
 type CveOrGhsa interface {
 	IsCveOrGhsa()
 }
@@ -1044,10 +1044,10 @@ type SourceSpec struct {
 	Commit    *string `json:"commit"`
 }
 
-// CertifyVEXStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
+// VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
 //
 // All fields are required.
-type VEXStatementInputSpec struct {
+type VexStatementInputSpec struct {
 	Justification string    `json:"justification"`
 	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
