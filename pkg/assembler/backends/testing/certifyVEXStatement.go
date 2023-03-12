@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func registerAllCertifyVEXStatement(client *demoClient) error {
@@ -119,15 +119,17 @@ func (c *demoClient) registerCertifyVEXStatement(selectedPackage *model.Package,
 	return nil
 }
 
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VEXStatementInputSpec) (*model.CertifyVEXStatement, error) {
+
+}
+
 // Query CertifyPkg
 
 func (c *demoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 
-	if certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify package and artifact together for CertifyVEXStatement")
-	}
-	if certifyVEXStatementSpec.Cve != nil && certifyVEXStatementSpec.Ghsa != nil {
-		return nil, gqlerror.Errorf("cannot specify cve and ghsa together for CertifyVEXStatement")
+	queryAll, err := helper.ValidateCveOrGhsaQueryInput(certifyVEXStatementSpec.Vulnerability, "CertifyVEXStatement")
+	if err != nil {
+		return nil, err
 	}
 
 	var foundCertifyVEXStatement []*model.CertifyVEXStatement

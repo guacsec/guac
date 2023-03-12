@@ -101,7 +101,7 @@ func (c *demoClient) registerIsOccurrence(selectedPackage *model.Package, select
 
 func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 
-	err := helper.CheckOccurrenceIngestionInput(subject)
+	err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence")
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 
 func (c *demoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
-	queryAll, err := helper.CheckOccurrenceQueryInput(isOccurrenceSpec.Subject)
+	queryAll, err := helper.ValidatePackageOrSourceQueryInput(isOccurrenceSpec.Subject)
 	if err != nil {
 		return nil, err
 	}

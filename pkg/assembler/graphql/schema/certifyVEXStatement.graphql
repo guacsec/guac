@@ -17,6 +17,22 @@
 
 # Defines a GraphQL schema for the CertifyVEXStatement. It contains a subject which can be a package or artifact object, vulnerability that can be of type
 # cve or ghsa, justification, origin and collector
+
+"""
+PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
+"""
+union PackageOrArtifact = Package | Artifact
+
+"""
+PackageOrArtifactSpec allows using PackageOrArtifact union as
+input type to be used in read queries.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrArtifactSpec {
+  package: PkgSpec
+  artifact: ArtifactSpec
+}
+
 """
 CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
 
@@ -28,7 +44,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVEXStatement {
-  subject: PkgArtObject!
+  subject: PackageOrArtifact!
   vulnerability: CveOrGhsa!
   justification: String!
   knownSince: Time!
@@ -41,10 +57,8 @@ CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to retu
 Only package or artifact and CVE or GHSA can be specified at once.
 """
 input CertifyVEXStatementSpec {
-  package: PkgSpec
-  artifact: ArtifactSpec
-  cve: CVESpec
-  ghsa: GHSASpec
+  subject: PackageOrArtifactSpec
+  vulnerability: CveOrGhsaSpec
   justification: String
   knownSince: Time
   origin: String
@@ -52,11 +66,33 @@ input CertifyVEXStatementSpec {
 }
 
 """
-PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
+CertifyVEXStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
+
+All fields are required.
 """
-union PkgArtObject = Package | Artifact
+input VEXStatementInputSpec {
+  justification: String!
+  knownSince: Time!
+  origin: String!
+  collector: String!
+}
+
+"""
+PackageOrArtifactInput allows using PackageOrArtifact union as
+input type to be used in mutations.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrArtifactInput {
+  package: PkgInputSpec
+  artifact: ArtifactInputSpec
+}
 
 extend type Query {
   "Returns all CertifyVEXStatement"
   CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
+}
+
+extend type Mutation {
+  "certify that an either a package or artifact has an associated VEX for a CVE or GHSA"
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VEXStatementInputSpec!): CertifyVEXStatement!
 }

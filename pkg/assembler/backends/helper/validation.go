@@ -90,25 +90,7 @@ func ValidateCveOrGhsaQueryInput(cveOrGhsa *model.CveOrGhsaSpec) (bool, error) {
 	return false, nil
 }
 
-func CheckOccurrenceQueryInput(subject *model.PackageOrSourceSpec) (bool, error) {
-	if subject == nil {
-		return true, nil
-	} else {
-		if subject.Package == nil && subject.Source == nil || subject.Package != nil && subject.Source != nil {
-			return false, gqlerror.Errorf("must specify one package or source for IsOccurrence")
-		}
-	}
-	return false, nil
-}
-
-func CheckOccurrenceIngestionInput(subject model.PackageOrSourceInput) error {
-	if subject.Package == nil && subject.Source == nil || subject.Package != nil && subject.Source != nil {
-		return gqlerror.Errorf("must specify one package or source for IsOccurrence")
-	}
-	return nil
-}
-
-func CheckCertifyBadQueryInput(subject *model.PackageSourceOrArtifactSpec) (bool, error) {
+func ValidatePackageSourceOrArtifactQueryInput(subject *model.PackageSourceOrArtifactSpec) (bool, error) {
 	if subject == nil {
 		return true, nil
 	} else {
@@ -162,7 +144,7 @@ func ValidatePackageOrSourceInput(item *model.PackageOrSourceInput, path string)
 	return nil
 }
 
-func CheckHasSBOMQueryInput(subject *model.PackageOrSourceSpec) (bool, error) {
+func ValidatePackageOrSourceQueryInput(subject *model.PackageOrSourceSpec) (bool, error) {
 	if subject == nil {
 		return true, nil
 	} else {
@@ -175,6 +157,39 @@ func CheckHasSBOMQueryInput(subject *model.PackageOrSourceSpec) (bool, error) {
 		}
 		if subjectDefined != 1 {
 			return false, gqlerror.Errorf("must specify at most one subject (package or source)")
+		}
+	}
+	return false, nil
+}
+
+func ValidatePackageOrArtifactInput(item *model.PackageOrArtifactInput, path string) error {
+	valuesDefined := 0
+	if item.Package != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if item.Artifact != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return gqlerror.Errorf("Must specify at most one package or artifact for %v", path)
+	}
+
+	return nil
+}
+
+func ValidatePackageOrArtifactQueryInput(subject *model.PackageOrArtifactSpec) (bool, error) {
+	if subject == nil {
+		return true, nil
+	} else {
+		subjectDefined := 0
+		if subject.Package != nil {
+			subjectDefined = subjectDefined + 1
+		}
+		if subject.Artifact != nil {
+			subjectDefined = subjectDefined + 1
+		}
+		if subjectDefined != 1 {
+			return false, gqlerror.Errorf("must specify at most one subject (package or artifact)")
 		}
 	}
 	return false, nil

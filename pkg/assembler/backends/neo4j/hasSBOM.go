@@ -33,7 +33,7 @@ const (
 
 func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	queryAll, err := helper.CheckHasSBOMQueryInput(hasSBOMSpec.Subject)
+	queryAll, err := helper.ValidatePackageOrSourceQueryInput(hasSBOMSpec.Subject)
 	if err != nil {
 		return nil, err
 	}

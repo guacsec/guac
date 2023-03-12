@@ -194,7 +194,7 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 
 func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 
-	queryAll, err := helper.CheckCertifyBadQueryInput(certifyBadSpec.Subject)
+	queryAll, err := helper.ValidatePackageSourceOrArtifactQueryInput(certifyBadSpec.Subject)
 	if err != nil {
 		return nil, err
 	}

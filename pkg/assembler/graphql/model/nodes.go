@@ -19,6 +19,11 @@ type OsvCveOrGhsa interface {
 	IsOsvCveOrGhsa()
 }
 
+// PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
+type PackageOrArtifact interface {
+	IsPackageOrArtifact()
+}
+
 // PackageOrSource is a union of Package and Source. Any of these objects can be specified
 type PackageOrSource interface {
 	IsPackageOrSource()
@@ -27,11 +32,6 @@ type PackageOrSource interface {
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
 type PackageSourceOrArtifact interface {
 	IsPackageSourceOrArtifact()
-}
-
-// PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
-type PkgArtObject interface {
-	IsPkgArtObject()
 }
 
 // Artifact represents the artifact and contains a digest field
@@ -46,7 +46,7 @@ type Artifact struct {
 	Digest    string `json:"digest"`
 }
 
-func (Artifact) IsPkgArtObject() {}
+func (Artifact) IsPackageOrArtifact() {}
 
 func (Artifact) IsPackageSourceOrArtifact() {}
 
@@ -217,25 +217,23 @@ type CertifyScorecardSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type CertifyVEXStatement struct {
-	Subject       PkgArtObject `json:"subject"`
-	Vulnerability CveOrGhsa    `json:"vulnerability"`
-	Justification string       `json:"justification"`
-	KnownSince    time.Time    `json:"knownSince"`
-	Origin        string       `json:"origin"`
-	Collector     string       `json:"collector"`
+	Subject       PackageOrArtifact `json:"subject"`
+	Vulnerability CveOrGhsa         `json:"vulnerability"`
+	Justification string            `json:"justification"`
+	KnownSince    time.Time         `json:"knownSince"`
+	Origin        string            `json:"origin"`
+	Collector     string            `json:"collector"`
 }
 
 // CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
 // Only package or artifact and CVE or GHSA can be specified at once.
 type CertifyVEXStatementSpec struct {
-	Package       *PkgSpec      `json:"package"`
-	Artifact      *ArtifactSpec `json:"artifact"`
-	Cve           *CVESpec      `json:"cve"`
-	Ghsa          *GHSASpec     `json:"ghsa"`
-	Justification *string       `json:"justification"`
-	KnownSince    *time.Time    `json:"knownSince"`
-	Origin        *string       `json:"origin"`
-	Collector     *string       `json:"collector"`
+	Subject       *PackageOrArtifactSpec `json:"subject"`
+	Vulnerability *CveOrGhsaSpec         `json:"vulnerability"`
+	Justification *string                `json:"justification"`
+	KnownSince    *time.Time             `json:"knownSince"`
+	Origin        *string                `json:"origin"`
+	Collector     *string                `json:"collector"`
 }
 
 // CertifyVuln is an attestation that represents when a package has a vulnerability
@@ -622,7 +620,7 @@ type Package struct {
 	Namespaces []*PackageNamespace `json:"namespaces"`
 }
 
-func (Package) IsPkgArtObject() {}
+func (Package) IsPackageOrArtifact() {}
 
 func (Package) IsPackageSourceOrArtifact() {}
 
@@ -652,6 +650,22 @@ type PackageName struct {
 type PackageNamespace struct {
 	Namespace string         `json:"namespace"`
 	Names     []*PackageName `json:"names"`
+}
+
+// PackageOrArtifactInput allows using PackageOrArtifact union as
+// input type to be used in mutations.
+// Exactly one of the value must be set to non-nil.
+type PackageOrArtifactInput struct {
+	Package  *PkgInputSpec      `json:"package"`
+	Artifact *ArtifactInputSpec `json:"artifact"`
+}
+
+// PackageOrArtifactSpec allows using PackageOrArtifact union as
+// input type to be used in read queries.
+// Exactly one of the value must be set to non-nil.
+type PackageOrArtifactSpec struct {
+	Package  *PkgSpec      `json:"package"`
+	Artifact *ArtifactSpec `json:"artifact"`
 }
 
 // PackageOrSourceInput allows using PackageOrSource union as
@@ -1028,6 +1042,16 @@ type SourceSpec struct {
 	Name      *string `json:"name"`
 	Tag       *string `json:"tag"`
 	Commit    *string `json:"commit"`
+}
+
+// CertifyVEXStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
+//
+// All fields are required.
+type VEXStatementInputSpec struct {
+	Justification string    `json:"justification"`
+	KnownSince    time.Time `json:"knownSince"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
 }
 
 type VulnerabilityMetaData struct {

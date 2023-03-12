@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -27,18 +28,15 @@ import (
 )
 
 func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	querySubjectAll := false
-	if certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify package and artifact together for CertifyVEXStatement")
-	} else if certifyVEXStatementSpec.Package == nil && certifyVEXStatementSpec.Artifact == nil {
-		querySubjectAll = true
+
+	querySubjectAll, err := helper.ValidatePackageOrArtifactQueryInput(certifyVEXStatementSpec.Subject, "CertifyVEXStatement")
+	if err != nil {
+		return nil, err
 	}
 
-	queryVulnAll := false
-	if certifyVEXStatementSpec.Cve != nil && certifyVEXStatementSpec.Ghsa != nil {
-		return nil, gqlerror.Errorf("cannot specify cve and ghsa together for CertifyVEXStatement")
-	} else if certifyVEXStatementSpec.Cve == nil && certifyVEXStatementSpec.Ghsa == nil {
-		queryVulnAll = true
+	queryVulnAll, err := helper.ValidateCveOrGhsaQueryInput(certifyVEXStatementSpec.Vulnerability, "CertifyVEXStatement")
+	if err != nil {
+		return nil, err
 	}
 
 	queryAll := false
@@ -394,4 +392,8 @@ func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.Cve
 		Collector:     collector,
 	}
 	return &certifyVEXStatement
+}
+
+func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VEXStatementInputSpec) (*model.CertifyVEXStatement, error) {
+
 }
