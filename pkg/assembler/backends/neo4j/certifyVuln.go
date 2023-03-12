@@ -41,7 +41,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	queryAll, err := helper.CheckVulnerabilityQueryInput(certifyVulnSpec.Vulnerability)
+	queryAll, err := helper.ValidateOsvCveOrGhsaQueryInput(certifyVulnSpec.Vulnerability)
 	if err != nil {
 		return nil, err
 	}
@@ -331,7 +331,7 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveOrGhsa, timeS
 
 func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	err := helper.CheckVulnerabilityIngestionInput(vulnerability)
+	err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability)
 	if err != nil {
 		return nil, err
 	}
