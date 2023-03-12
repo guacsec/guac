@@ -150,7 +150,7 @@ var (
 	}`
 
 	b64ITE6SLSA    = base64.StdEncoding.EncodeToString([]byte(ite6SLSA))
-	ite6Payload, _ = json.Marshal(dsse.Envelope{
+	Ite6Payload, _ = json.Marshal(dsse.Envelope{
 		PayloadType: "https://in-toto.io/Statement/v0.1",
 		Payload:     b64ITE6SLSA,
 		Signatures: []dsse.Signature{{
@@ -159,7 +159,7 @@ var (
 		}},
 	})
 	Ite6DSSEDoc = processor.Document{
-		Blob:   ite6Payload,
+		Blob:   Ite6Payload,
 		Type:   processor.DocumentDSSE,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
