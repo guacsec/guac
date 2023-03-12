@@ -360,6 +360,11 @@ func (ec *executionContext) marshalNOSVId2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkg
 	return ec._OSVId(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNOSVInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx context.Context, v interface{}) (model.OSVInputSpec, error) {
+	res, err := ec.unmarshalInputOSVInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx context.Context, v interface{}) (*model.OSVInputSpec, error) {
 	if v == nil {
 		return nil, nil

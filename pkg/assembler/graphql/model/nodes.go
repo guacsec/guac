@@ -10,8 +10,8 @@ import (
 )
 
 // CveGhsaObject is a union of CVE and GHSA.
-type CveGhsaObject interface {
-	IsCveGhsaObject()
+type CveOrGhsa interface {
+	IsCveOrGhsa()
 }
 
 // OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
@@ -97,7 +97,7 @@ type Cve struct {
 
 func (Cve) IsOsvCveOrGhsa() {}
 
-func (Cve) IsCveGhsaObject() {}
+func (Cve) IsCveOrGhsa() {}
 
 // CVEId is the actual ID that is given to a specific vulnerability
 //
@@ -217,12 +217,12 @@ type CertifyScorecardSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type CertifyVEXStatement struct {
-	Subject       PkgArtObject  `json:"subject"`
-	Vulnerability CveGhsaObject `json:"vulnerability"`
-	Justification string        `json:"justification"`
-	KnownSince    time.Time     `json:"knownSince"`
-	Origin        string        `json:"origin"`
-	Collector     string        `json:"collector"`
+	Subject       PkgArtObject `json:"subject"`
+	Vulnerability CveOrGhsa    `json:"vulnerability"`
+	Justification string       `json:"justification"`
+	KnownSince    time.Time    `json:"knownSince"`
+	Origin        string       `json:"origin"`
+	Collector     string       `json:"collector"`
 }
 
 // CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
@@ -264,6 +264,22 @@ type CertifyVulnSpec struct {
 	Collector      *string           `json:"collector"`
 }
 
+// CveOrGhsaInput allows using CveOrGhsa union as
+// input type to be used in mutations.
+// Exactly one of the value must be set to non-nil.
+type CveOrGhsaInput struct {
+	Cve  *CVEInputSpec  `json:"cve"`
+	Ghsa *GHSAInputSpec `json:"ghsa"`
+}
+
+// CveOrGhsaSpec allows using CveOrGhsa union as
+// input type to be used in read queries.
+// Exactly one of the value must be set to non-nil.
+type CveOrGhsaSpec struct {
+	Cve  *CVESpec  `json:"cve"`
+	Ghsa *GHSASpec `json:"ghsa"`
+}
+
 // GHSA represents GitHub security advisories.
 //
 // We create a separate node to allow retrieving all GHSAs.
@@ -273,7 +289,7 @@ type Ghsa struct {
 
 func (Ghsa) IsOsvCveOrGhsa() {}
 
-func (Ghsa) IsCveGhsaObject() {}
+func (Ghsa) IsCveOrGhsa() {}
 
 // GHSAId is the actual ID that is given to a specific vulnerability on GitHub
 //
@@ -509,22 +525,30 @@ type IsOccurrenceSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type IsVulnerability struct {
-	Osv           *Osv          `json:"osv"`
-	Vulnerability CveGhsaObject `json:"vulnerability"`
-	Justification string        `json:"justification"`
-	Origin        string        `json:"origin"`
-	Collector     string        `json:"collector"`
+	Osv           *Osv      `json:"osv"`
+	Vulnerability CveOrGhsa `json:"vulnerability"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// IsVulnerabilityInputSpec is the same as IsVulnerability but for mutation input.
+//
+// All fields are required.
+type IsVulnerabilityInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
 }
 
 // IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
 // Only CVE or GHSA can be specified at once.
 type IsVulnerabilitySpec struct {
-	Osv           *OSVSpec  `json:"osv"`
-	Cve           *CVESpec  `json:"cve"`
-	Ghsa          *GHSASpec `json:"ghsa"`
-	Justification *string   `json:"justification"`
-	Origin        *string   `json:"origin"`
-	Collector     *string   `json:"collector"`
+	Osv           *OSVSpec       `json:"osv"`
+	Vulnerability *CveOrGhsaSpec `json:"vulnerability"`
+	Justification *string        `json:"justification"`
+	Origin        *string        `json:"origin"`
+	Collector     *string        `json:"collector"`
 }
 
 // MatchFlags is used to input the PkgMatchType enum.
