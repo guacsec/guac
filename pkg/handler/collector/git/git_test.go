@@ -17,10 +17,12 @@ package git_collector
 
 import (
 	"context"
+	"errors"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -80,6 +82,11 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 			os.RemoveAll(tt.fields.dir)
 			g := NewGitDocumentCollector(ctx, tt.fields.url, tt.fields.dir, tt.fields.poll, tt.fields.interval)
 
+			if err := collector.RegisterDocumentCollector(g, CollectorGitDocument); err != nil &&
+				!errors.Is(err, collector.ErrCollectorOverwrite) {
+				t.Fatalf("could not register collector: %v", err)
+			}
+
 			if tt.preCreateDir {
 				if err := os.Mkdir(tt.fields.dir, os.ModePerm); err != nil {
 					t.Fatal(err)
@@ -96,36 +103,21 @@ func Test_gitCol_RetrieveArtifacts(t *testing.T) {
 				defer cancel()
 			}
 
-			docChan := make(chan *processor.Document, 1)
-			defer os.RemoveAll(tt.fields.dir) // clean up
-			errChan := make(chan error, 1)
-			defer close(docChan)
-			defer close(errChan)
-			go func() {
-				errChan <- g.RetrieveArtifacts(ctx, docChan)
-			}()
-
-			numCollectors := 1
-			collectorsDone := 0
-
-			collectedDocs := []*processor.Document{}
-
-			for collectorsDone < numCollectors {
-				select {
-				case d := <-docChan:
-					collectedDocs = append(collectedDocs, d)
-				case err := <-errChan:
-					if (err != nil) != tt.wantErr {
-						t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
-					}
-					collectorsDone += 1
+			var collectedDocs []*processor.Document
+			em := func(d *processor.Document) error {
+				collectedDocs = append(collectedDocs, d)
+				return nil
+			}
+			eh := func(err error) bool {
+				if (err != nil) != tt.wantErr {
+					t.Errorf("gitCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
 				}
+				return true
 			}
 
-			// Drain anything in document channel
-			for len(docChan) > 0 {
-				d := <-docChan
-				collectedDocs = append(collectedDocs, d)
+			defer os.RemoveAll(tt.fields.dir) // clean up
+			if err := collector.Collect(ctx, em, eh); err != nil {
+				t.Fatalf("Collector error handler error: %v", err)
 			}
 
 			if len(collectedDocs) != tt.numberOfFilesCollected {
