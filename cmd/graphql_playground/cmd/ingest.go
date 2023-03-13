@@ -50,6 +50,7 @@ func ingestData(port int) {
 	ingestHashEqual(ctx, gqlclient)
 	ingestHasSBOM(ctx, gqlclient)
 	ingestHasSourceAt(ctx, gqlclient)
+	ingestIsVulnerability(ctx, gqlclient)
 	time := time.Now().Sub(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }
@@ -907,6 +908,61 @@ func ingestHasSourceAt(ctx context.Context, client graphql.Client) {
 		_, err := model.HasSourceAt(context.Background(), client, ingest.pkg, ingest.pkgMatchType, ingest.source, ingest.hasSourceAt)
 		if err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+	}
+}
+
+func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
+
+	logger := logging.FromContext(ctx)
+
+	ingestIsVulnerability := []struct {
+		name            string
+		osv             *model.OSVInputSpec
+		cve             *model.CVEInputSpec
+		ghsa            *model.GHSAInputSpec
+		isVulnerability model.IsVulnerabilityInputSpec
+	}{{
+		name: "OSV maps to CVE",
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2019-13110",
+		},
+		cve: &model.CVEInputSpec{
+			Year:  "2019",
+			CveId: "CVE-2019-13110",
+		},
+		isVulnerability: model.IsVulnerabilityInputSpec{
+			Justification: "OSV maps to CVE",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "OSV maps to GHSA",
+		osv: &model.OSVInputSpec{
+			OsvId: "GHSA-h45f-rjvw-2rv2",
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-h45f-rjvw-2rv2",
+		},
+		isVulnerability: model.IsVulnerabilityInputSpec{
+			Justification: "OSV maps to GHSA",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestIsVulnerability {
+		if ingest.cve != nil {
+			_, err := model.IsVulnerabilityCVE(context.Background(), client, *ingest.osv, *ingest.cve, ingest.isVulnerability)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+		} else if ingest.ghsa != nil {
+			_, err := model.IsVulnerabilityGHSA(context.Background(), client, *ingest.osv, *ingest.ghsa, ingest.isVulnerability)
+			if err != nil {
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
+		} else {
+			fmt.Printf("input missing for cve or ghsa")
 		}
 	}
 }

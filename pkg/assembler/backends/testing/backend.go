@@ -107,10 +107,10 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
-	err = registerAllIsVulnerability(client)
-	if err != nil {
-		return nil, err
-	}
+	// err = registerAllIsVulnerability(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	err = registerAllCertifyVEXStatement(client)
 	if err != nil {
 		return nil, err

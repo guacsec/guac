@@ -29,7 +29,7 @@ collector (property) - the GUAC collector that collected the document that gener
 """
 type CertifyVEXStatement {
   subject: PkgArtObject!
-  vulnerability: CveGhsaObject!
+  vulnerability: CveOrGhsa!
   justification: String!
   knownSince: Time!
   origin: String!

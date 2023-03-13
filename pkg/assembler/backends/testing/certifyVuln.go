@@ -136,7 +136,7 @@ func (c *demoClient) registerCertifyVuln(selectedPackage *model.Package, selecte
 
 func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	err := helper.CheckVulnerabilityIngestionInput(vulnerability)
+	err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +238,7 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInput
 
 func (c *demoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
-	queryAll, err := helper.CheckVulnerabilityQueryInput(certifyVulnSpec.Vulnerability)
+	queryAll, err := helper.ValidateOsvCveOrGhsaQueryInput(certifyVulnSpec.Vulnerability)
 	if err != nil {
 		return nil, err
 	}

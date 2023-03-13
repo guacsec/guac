@@ -152,24 +152,25 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CertifyScorecard    func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
-		IngestArtifact      func(childComplexity int, artifact *model.ArtifactInputSpec) int
-		IngestBuilder       func(childComplexity int, builder *model.BuilderInputSpec) int
-		IngestCertifyBad    func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
-		IngestCertifyPkg    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) int
-		IngestCve           func(childComplexity int, cve *model.CVEInputSpec) int
-		IngestDependency    func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
-		IngestGhsa          func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestHasSbom       func(childComplexity int, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) int
-		IngestHasSourceAt   func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
-		IngestHashEqual     func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
-		IngestMaterials     func(childComplexity int, materials []*model.PackageSourceOrArtifactInput) int
-		IngestOccurrence    func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
-		IngestOsv           func(childComplexity int, osv *model.OSVInputSpec) int
-		IngestPackage       func(childComplexity int, pkg *model.PkgInputSpec) int
-		IngestSlsa          func(childComplexity int, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
-		IngestSource        func(childComplexity int, source *model.SourceInputSpec) int
-		IngestVulnerability func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
+		CertifyScorecard      func(childComplexity int, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) int
+		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
+		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
+		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
+		IngestCertifyPkg      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) int
+		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
+		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
+		IngestHasSbom         func(childComplexity int, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) int
+		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
+		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
+		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
+		IngestMaterials       func(childComplexity int, materials []*model.PackageSourceOrArtifactInput) int
+		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
+		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
+		IngestPackage         func(childComplexity int, pkg *model.PkgInputSpec) int
+		IngestSlsa            func(childComplexity int, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
+		IngestSource          func(childComplexity int, source *model.SourceInputSpec) int
+		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
 
 	OSV struct {
@@ -847,6 +848,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.ArtifactInputSpec), args["equalArtifact"].(model.ArtifactInputSpec), args["hashEqual"].(model.HashEqualInputSpec)), true
 
+	case "Mutation.ingestIsVulnerability":
+		if e.complexity.Mutation.IngestIsVulnerability == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestIsVulnerability_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestIsVulnerability(childComplexity, args["osv"].(model.OSVInputSpec), args["vulnerability"].(model.CveOrGhsaInput), args["isVulnerability"].(model.IsVulnerabilityInputSpec)), true
+
 	case "Mutation.ingestMaterials":
 		if e.complexity.Mutation.IngestMaterials == nil {
 			break
@@ -1509,6 +1522,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
+		ec.unmarshalInputCveOrGhsaInput,
+		ec.unmarshalInputCveOrGhsaSpec,
 		ec.unmarshalInputGHSAInputSpec,
 		ec.unmarshalInputGHSASpec,
 		ec.unmarshalInputHasSBOMInputSpec,
@@ -1522,6 +1537,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceInputSpec,
 		ec.unmarshalInputIsOccurrenceSpec,
+		ec.unmarshalInputIsVulnerabilityInputSpec,
 		ec.unmarshalInputIsVulnerabilitySpec,
 		ec.unmarshalInputMatchFlags,
 		ec.unmarshalInputOSVInputSpec,
@@ -2040,7 +2056,7 @@ collector (property) - the GUAC collector that collected the document that gener
 """
 type CertifyVEXStatement {
   subject: PkgArtObject!
-  vulnerability: CveGhsaObject!
+  vulnerability: CveOrGhsa!
   justification: String!
   knownSince: Time!
   origin: String!
@@ -2935,6 +2951,21 @@ extend type Mutation {
 # Defines a GraphQL schema for the IsVulnerability. It contains a OSV, vulnerability that can be of type
 # cve or ghsa, justification, origin and collector
 """
+CveGhsaObject is a union of CVE and GHSA.
+"""
+union CveOrGhsa = CVE | GHSA
+
+"""
+CveOrGhsaSpec allows using CveOrGhsa union as
+input type to be used in read queries.
+Exactly one of the value must be set to non-nil.
+"""
+input CveOrGhsaSpec {
+  cve: CVESpec
+  ghsa: GHSASpec
+}
+
+"""
 IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
 
 osv (subject) - the osv object type that represents OSV and its ID
@@ -2945,7 +2976,7 @@ collector (property) - the GUAC collector that collected the document that gener
 """
 type IsVulnerability {
   osv: OSV!
-  vulnerability: CveGhsaObject!
+  vulnerability: CveOrGhsa!
   justification: String!
   origin: String!
   collector: String!
@@ -2957,21 +2988,42 @@ Only CVE or GHSA can be specified at once.
 """
 input IsVulnerabilitySpec {
   osv: OSVSpec
-  cve: CVESpec
-  ghsa: GHSASpec
+  vulnerability: CveOrGhsaSpec
   justification: String
   origin: String
   collector: String
 }
 
 """
-CveGhsaObject is a union of CVE and GHSA.
+IsVulnerabilityInputSpec is the same as IsVulnerability but for mutation input.
+
+All fields are required.
 """
-union CveGhsaObject = CVE | GHSA
+input IsVulnerabilityInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+CveOrGhsaInput allows using CveOrGhsa union as
+input type to be used in mutations.
+Exactly one of the value must be set to non-nil.
+"""
+input CveOrGhsaInput {
+  cve: CVEInputSpec
+  ghsa: GHSAInputSpec
+}
+
 
 extend type Query {
   "Returns all IsVulnerability"
   IsVulnerability(isVulnerabilitySpec: IsVulnerabilitySpec): [IsVulnerability!]!
+}
+
+extend type Mutation {
+  "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
+  ingestIsVulnerability(osv: OSVInputSpec!, vulnerability: CveOrGhsaInput!, isVulnerability: IsVulnerabilityInputSpec!): IsVulnerability!
 }`, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.

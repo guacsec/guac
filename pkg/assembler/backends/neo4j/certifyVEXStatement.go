@@ -384,7 +384,7 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	}
 }
 
-func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveGhsaObject, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
+func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveOrGhsa, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
 	certifyVEXStatement := model.CertifyVEXStatement{
 		Subject:       subject,
 		Vulnerability: vuln,

@@ -197,3 +197,67 @@ fragment allHasSourceAt on HasSourceAt {
   origin
   collector
 }
+
+fragment allCveTree on CVE {
+  year
+  cveId {
+    id
+  }
+}
+
+fragment allGHSATree on GHSA {
+  ghsaId {
+    id
+  }
+}
+
+fragment allOSVTree on OSV {
+  osvId {
+    id
+  }
+}
+
+fragment allCertifyVuln on CertifyVuln {
+  package {
+    ...allPkgTree
+    }
+  vulnerability {
+    __typename
+    ... on CVE {
+      ...allCveTree
+    }
+    ... on OSV {
+      ...allOSVTree
+    }
+    ... on GHSA {
+      ...allGHSATree
+    }
+  }
+  metadata {
+    dbUri
+    dbVersion
+    scannerUri
+    scannerVersion
+    timeScanned
+    origin
+    collector
+  }
+}
+
+fragment allIsVulnerability on IsVulnerability {
+  osv {
+    ...allOSVTree
+  }
+  vulnerability {
+    __typename
+    ... on CVE {
+      ...allCveTree
+    }
+    ... on GHSA {
+      ...allGHSATree
+    }
+  }
+  justification
+  origin
+  collector
+}

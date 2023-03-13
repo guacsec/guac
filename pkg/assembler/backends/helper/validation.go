@@ -20,7 +20,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func CheckVulnerabilityIngestionInput(vulnerability model.OsvCveOrGhsaInput) error {
+func ValidateOsvCveOrGhsaIngestionInput(vulnerability model.OsvCveOrGhsaInput) error {
 	vulnDefined := 0
 	if vulnerability.Osv != nil {
 		vulnDefined = vulnDefined + 1
@@ -37,7 +37,7 @@ func CheckVulnerabilityIngestionInput(vulnerability model.OsvCveOrGhsaInput) err
 	return nil
 }
 
-func CheckVulnerabilityQueryInput(vulnerability *model.OsvCveOrGhsaSpec) (bool, error) {
+func ValidateOsvCveOrGhsaQueryInput(vulnerability *model.OsvCveOrGhsaSpec) (bool, error) {
 	if vulnerability == nil {
 		return true, nil
 	} else {
@@ -53,6 +53,38 @@ func CheckVulnerabilityQueryInput(vulnerability *model.OsvCveOrGhsaSpec) (bool, 
 		}
 		if vulnDefined != 1 {
 			return false, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+		}
+	}
+	return false, nil
+}
+
+func ValidateCveOrGhsaIngestionInput(cveOrGhsa model.CveOrGhsaInput, path string) error {
+	vulnDefined := 0
+	if cveOrGhsa.Ghsa != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if cveOrGhsa.Cve != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnDefined != 1 {
+		return gqlerror.Errorf("Must specify at most one vulnerability (cve, or ghsa) for %v", path)
+	}
+	return nil
+}
+
+func ValidateCveOrGhsaQueryInput(cveOrGhsa *model.CveOrGhsaSpec) (bool, error) {
+	if cveOrGhsa == nil {
+		return true, nil
+	} else {
+		vulnDefined := 0
+		if cveOrGhsa.Ghsa != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if cveOrGhsa.Cve != nil {
+			vulnDefined = vulnDefined + 1
+		}
+		if vulnDefined != 1 {
+			return false, gqlerror.Errorf("Must specify at most one vulnerability (cve, or ghsa)")
 		}
 	}
 	return false, nil
