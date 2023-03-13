@@ -150,7 +150,7 @@ type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest
 	IsDependency     []IsDependencyIngest
 	IsOccurence      []IsOccurenceIngest
-	HasSlsaIngest    []HasSlsaIngest
+	HasSlsa          []HasSlsaIngest
 }
 
 type CertifyScorecardIngest struct {

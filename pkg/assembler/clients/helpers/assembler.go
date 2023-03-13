@@ -45,6 +45,11 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				return err
 			}
 
+			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
+			if err := ingestHasSlsa(ctx, gqlclient, p.HasSlsa); err != nil {
+				return err
+			}
+
 		}
 		return nil
 	}
@@ -93,6 +98,16 @@ func ingestIsOccurence(ctx context.Context, client graphql.Client, vs []assemble
 
 		}
 
+	}
+	return nil
+}
+
+func ingestHasSlsa(ctx context.Context, client graphql.Client, vs []assembler.HasSlsaIngest) error {
+	for _, v := range vs {
+		_, err := model.SLSAForArtifact(ctx, client, *v.Artifact, v.Materials, *v.Builder, *v.HasSlsa)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
