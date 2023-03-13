@@ -10,6 +10,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+// IngestVEXStatement is the resolver for the ingestVEXStatement field.
+func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+	return r.Backend.IngestVEXStatement(ctx, subject, vulnerability, vexStatement)
+}
+
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.
 func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	return r.Backend.CertifyVEXStatement(ctx, certifyVEXStatementSpec)

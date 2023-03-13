@@ -23,6 +23,7 @@ type MutationResolver interface {
 	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
 	IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
+	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
@@ -511,6 +512,39 @@ func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context
 		}
 	}
 	args["source"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PackageOrArtifactInput
+	if tmp, ok := rawArgs["subject"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+		arg0, err = ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subject"] = arg0
+	var arg1 model.CveOrGhsaInput
+	if tmp, ok := rawArgs["vulnerability"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+		arg1, err = ec.unmarshalNCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveOrGhsaInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnerability"] = arg1
+	var arg2 model.VexStatementInputSpec
+	if tmp, ok := rawArgs["vexStatement"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vexStatement"))
+		arg2, err = ec.unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vexStatement"] = arg2
 	return args, nil
 }
 
@@ -1243,6 +1277,74 @@ func (ec *executionContext) fieldContext_Mutation_certifyScorecard(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_certifyScorecard_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestVEXStatement(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestVEXStatement(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.CveOrGhsaInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyVEXStatement)
+	fc.Result = res
+	return ec.marshalNCertifyVEXStatement2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatement(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestVEXStatement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "subject":
+				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
+			case "vulnerability":
+				return ec.fieldContext_CertifyVEXStatement_vulnerability(ctx, field)
+			case "justification":
+				return ec.fieldContext_CertifyVEXStatement_justification(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_CertifyVEXStatement_knownSince(ctx, field)
+			case "origin":
+				return ec.fieldContext_CertifyVEXStatement_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_CertifyVEXStatement_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyVEXStatement", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestVEXStatement_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3516,7 +3618,7 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 
 // region    **************************** object.gotpl ****************************
 
-var artifactImplementors = []string{"Artifact", "PkgArtObject", "PackageSourceOrArtifact"}
+var artifactImplementors = []string{"Artifact", "PackageOrArtifact", "PackageSourceOrArtifact"}
 
 func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet, obj *model.Artifact) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, artifactImplementors)
@@ -3597,6 +3699,12 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_certifyScorecard(ctx, field)
+			})
+
+		case "ingestVEXStatement":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestVEXStatement(ctx, field)
 			})
 
 		case "ingestVulnerability":

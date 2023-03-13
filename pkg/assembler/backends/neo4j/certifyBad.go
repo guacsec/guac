@@ -33,7 +33,7 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	queryAll, err := helper.CheckCertifyBadQueryInput(certifyBadSpec.Subject)
+	queryAll, err := helper.ValidatePackageSourceOrArtifactQueryInput(certifyBadSpec.Subject)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +264,7 @@ func generateModelCertifyBad(subject model.PackageSourceOrArtifact, justificatio
 
 func (c *neo4jClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 
-	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject")
+	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "IngestCertifyBad")
 	if err != nil {
 		return nil, err
 	}

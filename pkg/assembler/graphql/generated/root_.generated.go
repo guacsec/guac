@@ -170,6 +170,7 @@ type ComplexityRoot struct {
 		IngestPackage         func(childComplexity int, pkg *model.PkgInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source *model.SourceInputSpec) int
+		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
 
@@ -932,6 +933,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(*model.SourceInputSpec)), true
 
+	case "Mutation.ingestVEXStatement":
+		if e.complexity.Mutation.IngestVEXStatement == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestVEXStatement_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.CveOrGhsaInput), args["vexStatement"].(model.VexStatementInputSpec)), true
+
 	case "Mutation.ingestVulnerability":
 		if e.complexity.Mutation.IngestVulnerability == nil {
 			break
@@ -1544,6 +1557,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOSVSpec,
 		ec.unmarshalInputOsvCveOrGhsaInput,
 		ec.unmarshalInputOsvCveOrGhsaSpec,
+		ec.unmarshalInputPackageOrArtifactInput,
+		ec.unmarshalInputPackageOrArtifactSpec,
 		ec.unmarshalInputPackageOrSourceInput,
 		ec.unmarshalInputPackageOrSourceSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
@@ -1561,6 +1576,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputScorecardInputSpec,
 		ec.unmarshalInputSourceInputSpec,
 		ec.unmarshalInputSourceSpec,
+		ec.unmarshalInputVexStatementInputSpec,
 		ec.unmarshalInputVulnerabilityMetaDataInput,
 	)
 	first := true
@@ -2044,6 +2060,22 @@ extend type Mutation {
 
 # Defines a GraphQL schema for the CertifyVEXStatement. It contains a subject which can be a package or artifact object, vulnerability that can be of type
 # cve or ghsa, justification, origin and collector
+
+"""
+PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
+"""
+union PackageOrArtifact = Package | Artifact
+
+"""
+PackageOrArtifactSpec allows using PackageOrArtifact union as
+input type to be used in read queries.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrArtifactSpec {
+  package: PkgSpec
+  artifact: ArtifactSpec
+}
+
 """
 CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
 
@@ -2055,7 +2087,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVEXStatement {
-  subject: PkgArtObject!
+  subject: PackageOrArtifact!
   vulnerability: CveOrGhsa!
   justification: String!
   knownSince: Time!
@@ -2068,10 +2100,8 @@ CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to retu
 Only package or artifact and CVE or GHSA can be specified at once.
 """
 input CertifyVEXStatementSpec {
-  package: PkgSpec
-  artifact: ArtifactSpec
-  cve: CVESpec
-  ghsa: GHSASpec
+  subject: PackageOrArtifactSpec
+  vulnerability: CveOrGhsaSpec
   justification: String
   knownSince: Time
   origin: String
@@ -2079,13 +2109,35 @@ input CertifyVEXStatementSpec {
 }
 
 """
-PkgArtObject is a union of Package and Artifact. Any of these objects can be specified
+VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
+
+All fields are required.
 """
-union PkgArtObject = Package | Artifact
+input VexStatementInputSpec {
+  justification: String!
+  knownSince: Time!
+  origin: String!
+  collector: String!
+}
+
+"""
+PackageOrArtifactInput allows using PackageOrArtifact union as
+input type to be used in mutations.
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrArtifactInput {
+  package: PkgInputSpec
+  artifact: ArtifactInputSpec
+}
 
 extend type Query {
   "Returns all CertifyVEXStatement"
   CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
+}
+
+extend type Mutation {
+  "certify that an either a package or artifact has an associated VEX for a CVE or GHSA"
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
@@ -2951,7 +3003,7 @@ extend type Mutation {
 # Defines a GraphQL schema for the IsVulnerability. It contains a OSV, vulnerability that can be of type
 # cve or ghsa, justification, origin and collector
 """
-CveGhsaObject is a union of CVE and GHSA.
+CveOrGhsa is a union of CVE and GHSA.
 """
 union CveOrGhsa = CVE | GHSA
 
@@ -3022,9 +3074,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
+  "certify that a OSV is associated with either a CVE or GHSA"
   ingestIsVulnerability(osv: OSVInputSpec!, vulnerability: CveOrGhsaInput!, isVulnerability: IsVulnerabilityInputSpec!): IsVulnerability!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "../schema/osv.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #

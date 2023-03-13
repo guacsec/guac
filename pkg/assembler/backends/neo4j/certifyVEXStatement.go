@@ -17,9 +17,11 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -27,18 +29,15 @@ import (
 )
 
 func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	querySubjectAll := false
-	if certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Artifact != nil {
-		return nil, gqlerror.Errorf("cannot specify package and artifact together for CertifyVEXStatement")
-	} else if certifyVEXStatementSpec.Package == nil && certifyVEXStatementSpec.Artifact == nil {
-		querySubjectAll = true
+
+	querySubjectAll, err := helper.ValidatePackageOrArtifactQueryInput(certifyVEXStatementSpec.Subject)
+	if err != nil {
+		return nil, err
 	}
 
-	queryVulnAll := false
-	if certifyVEXStatementSpec.Cve != nil && certifyVEXStatementSpec.Ghsa != nil {
-		return nil, gqlerror.Errorf("cannot specify cve and ghsa together for CertifyVEXStatement")
-	} else if certifyVEXStatementSpec.Cve == nil && certifyVEXStatementSpec.Ghsa == nil {
-		queryVulnAll = true
+	queryVulnAll, err := helper.ValidateCveOrGhsaQueryInput(certifyVEXStatementSpec.Vulnerability)
+	if err != nil {
+		return nil, err
 	}
 
 	queryAll := false
@@ -51,8 +50,10 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 
 	aggregateCertifyVEXStatement := []*model.CertifyVEXStatement{}
 
-	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Cve != nil) || (queryVulnAll && certifyVEXStatementSpec.Package != nil) ||
-		(certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Cve != nil) {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil) ||
+		(queryVulnAll && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil) ||
+		(certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil &&
+			certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -69,30 +70,14 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 			"-(cveYear:CveYear)<-[:CveIsYear]-(rootCve:Cve)"
 		sb.WriteString(query)
 
-		setPkgMatchValues(&sb, certifyVEXStatementSpec.Package, false, &firstMatch, queryValues)
-		setCveMatchValues(&sb, certifyVEXStatementSpec.Cve, &firstMatch, queryValues)
+		if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil {
+			setPkgMatchValues(&sb, certifyVEXStatementSpec.Subject.Package, false, &firstMatch, queryValues)
+		}
+		if certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil {
+			setCveMatchValues(&sb, certifyVEXStatementSpec.Vulnerability.Cve, &firstMatch, queryValues)
+		}
 		setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
-
-		if certifyVEXStatementSpec.Package == nil || certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Package.Version == nil &&
-			certifyVEXStatementSpec.Package.Subpath == nil && len(certifyVEXStatementSpec.Package.Qualifiers) == 0 &&
-			!*certifyVEXStatementSpec.Package.MatchOnlyEmptyQualifiers {
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[:subject]-(certifyVEXStatement:CertifyVEXStatement)-[:about]-(cveID:CveID)<-[:CveHasID]" +
-				"-(cveYear:CveYear)<-[:CveIsYear]-(rootCve:Cve)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setPkgMatchValues(&sb, certifyVEXStatementSpec.Package, false, &firstMatch, queryValues)
-			setCveMatchValues(&sb, certifyVEXStatementSpec.Cve, &firstMatch, queryValues)
-			setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
-			sb.WriteString(returnValue)
-		}
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -143,8 +128,10 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
 
-	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Ghsa != nil) || (queryVulnAll && certifyVEXStatementSpec.Package != nil) ||
-		(certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Ghsa != nil) {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil) ||
+		(queryVulnAll && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil) ||
+		(certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil &&
+			certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -161,30 +148,14 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 			"-(rootGhsa:Ghsa)"
 		sb.WriteString(query)
 
-		setPkgMatchValues(&sb, certifyVEXStatementSpec.Package, false, &firstMatch, queryValues)
-		setGhsaMatchValues(&sb, certifyVEXStatementSpec.Ghsa, &firstMatch, queryValues)
+		if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil {
+			setPkgMatchValues(&sb, certifyVEXStatementSpec.Subject.Package, false, &firstMatch, queryValues)
+		}
+		if certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil {
+			setGhsaMatchValues(&sb, certifyVEXStatementSpec.Vulnerability.Ghsa, &firstMatch, queryValues)
+		}
 		setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
-
-		if certifyVEXStatementSpec.Package == nil || certifyVEXStatementSpec.Package != nil && certifyVEXStatementSpec.Package.Version == nil &&
-			certifyVEXStatementSpec.Package.Subpath == nil && len(certifyVEXStatementSpec.Package.Qualifiers) == 0 &&
-			!*certifyVEXStatementSpec.Package.MatchOnlyEmptyQualifiers {
-
-			sb.WriteString("\nUNION")
-			// query without pkgVersion
-			query = "\nMATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
-				"-[:PkgHasName]->(name:PkgName)" +
-				"-[:subject]-(certifyVEXStatement:CertifyVEXStatement)-[:about]-(ghsaID:GhsaID)<-[:GhsaHasID]" +
-				"-(rootGhsa:Ghsa)" +
-				"\nWITH *, null AS version"
-			sb.WriteString(query)
-
-			firstMatch = true
-			setPkgMatchValues(&sb, certifyVEXStatementSpec.Package, false, &firstMatch, queryValues)
-			setGhsaMatchValues(&sb, certifyVEXStatementSpec.Ghsa, &firstMatch, queryValues)
-			setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
-			sb.WriteString(returnValue)
-		}
 
 		result, err := session.ReadTransaction(
 			func(tx neo4j.Transaction) (interface{}, error) {
@@ -232,8 +203,10 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		}
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
-	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Cve != nil) || (queryVulnAll && certifyVEXStatementSpec.Artifact != nil) ||
-		(certifyVEXStatementSpec.Artifact != nil && certifyVEXStatementSpec.Cve != nil) {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil) ||
+		(queryVulnAll && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil) ||
+		(certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil &&
+			certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -248,8 +221,12 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 			"-(cveYear:CveYear)<-[:CveIsYear]-(rootCve:Cve)"
 		sb.WriteString(query)
 
-		setArtifactMatchValues(&sb, certifyVEXStatementSpec.Artifact, false, &firstMatch, queryValues)
-		setCveMatchValues(&sb, certifyVEXStatementSpec.Cve, &firstMatch, queryValues)
+		if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil {
+			setArtifactMatchValues(&sb, certifyVEXStatementSpec.Subject.Artifact, false, &firstMatch, queryValues)
+		}
+		if certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil {
+			setCveMatchValues(&sb, certifyVEXStatementSpec.Vulnerability.Cve, &firstMatch, queryValues)
+		}
 		setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -296,8 +273,10 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
 
-	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Ghsa != nil) || (queryVulnAll && certifyVEXStatementSpec.Artifact != nil) ||
-		(certifyVEXStatementSpec.Artifact != nil && certifyVEXStatementSpec.Ghsa != nil) {
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil) ||
+		(queryVulnAll && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil) ||
+		(certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil &&
+			certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil) {
 
 		var sb strings.Builder
 		var firstMatch bool = true
@@ -312,8 +291,12 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 			"-(rootGhsa:Ghsa)"
 		sb.WriteString(query)
 
-		setArtifactMatchValues(&sb, certifyVEXStatementSpec.Artifact, false, &firstMatch, queryValues)
-		setGhsaMatchValues(&sb, certifyVEXStatementSpec.Ghsa, &firstMatch, queryValues)
+		if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil {
+			setArtifactMatchValues(&sb, certifyVEXStatementSpec.Subject.Artifact, false, &firstMatch, queryValues)
+		}
+		if certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Ghsa != nil {
+			setGhsaMatchValues(&sb, certifyVEXStatementSpec.Vulnerability.Ghsa, &firstMatch, queryValues)
+		}
 		setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
 		sb.WriteString(returnValue)
 
@@ -384,7 +367,7 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	}
 }
 
-func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.CveOrGhsa, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
+func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln model.CveOrGhsa, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
 	certifyVEXStatement := model.CertifyVEXStatement{
 		Subject:       subject,
 		Vulnerability: vuln,
@@ -394,4 +377,17 @@ func generateModelCertifyVEXStatement(subject model.PkgArtObject, vuln model.Cve
 		Collector:     collector,
 	}
 	return &certifyVEXStatement
+}
+
+func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+
+	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
+	if err != nil {
+		return nil, err
+	}
+	err = helper.ValidateCveOrGhsaIngestionInput(vulnerability, "IngestVEXStatement")
+	if err != nil {
+		return nil, err
+	}
+	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
 }

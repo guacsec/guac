@@ -51,6 +51,7 @@ func ingestData(port int) {
 	ingestHasSBOM(ctx, gqlclient)
 	ingestHasSourceAt(ctx, gqlclient)
 	ingestIsVulnerability(ctx, gqlclient)
+	ingestVEXStatement(ctx, gqlclient)
 	time := time.Now().Sub(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }
@@ -963,6 +964,123 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 			}
 		} else {
 			fmt.Printf("input missing for cve or ghsa")
+		}
+	}
+}
+
+func ingestVEXStatement(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	opensslNs := "openssl.org"
+	opensslVersion := "3.0.3"
+
+	ingestCertifyBad := []struct {
+		name         string
+		pkg          *model.PkgInputSpec
+		artifact     *model.ArtifactInputSpec
+		cve          *model.CVEInputSpec
+		ghsa         *model.GHSAInputSpec
+		vexStatement model.VexStatementInputSpec
+	}{{
+		name: "this package is not vulnerable to this CVE",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		cve: &model.CVEInputSpec{
+			Year:  "2019",
+			CveId: "CVE-2019-13110",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this package is not vulnerable to this CVE",
+			KnownSince:    time.Now(),
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this package is not vulnerable to this GHSA",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-h45f-rjvw-2rv2",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this package is not vulnerable to this GHSA",
+			KnownSince:    time.Now(),
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this artifact is not vulnerable to this CVE",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		cve: &model.CVEInputSpec{
+			Year:  "2018",
+			CveId: "CVE-2018-43610",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this artifact is not vulnerable to this CVE",
+			KnownSince:    time.Now(),
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this artifact is not vulnerable to this GHSA",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-hj5f-4gvw-4rv2",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this artifact is not vulnerable to this GHSA",
+			KnownSince:    time.Now(),
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestCertifyBad {
+		if ingest.pkg != nil {
+			if ingest.cve != nil {
+				_, err := model.VexPackageAndCve(context.Background(), client, *ingest.pkg, *ingest.cve, ingest.vexStatement)
+				if err != nil {
+					logger.Errorf("Error in ingesting: %v\n", err)
+				}
+			} else if ingest.ghsa != nil {
+				_, err := model.VEXPackageAndGhsa(context.Background(), client, *ingest.pkg, *ingest.ghsa, ingest.vexStatement)
+				if err != nil {
+					logger.Errorf("Error in ingesting: %v\n", err)
+				}
+			} else {
+				fmt.Printf("input missing for cve or ghsa")
+			}
+		} else if ingest.artifact != nil {
+			if ingest.cve != nil {
+				_, err := model.VexArtifactAndCve(context.Background(), client, *ingest.artifact, *ingest.cve, ingest.vexStatement)
+				if err != nil {
+					logger.Errorf("Error in ingesting: %v\n", err)
+				}
+			} else if ingest.ghsa != nil {
+				_, err := model.VexArtifactAndGhsa(context.Background(), client, *ingest.artifact, *ingest.ghsa, ingest.vexStatement)
+				if err != nil {
+					logger.Errorf("Error in ingesting: %v\n", err)
+				}
+			} else {
+				fmt.Printf("input missing for cve or ghsa")
+			}
+		} else {
+			fmt.Printf("input missing for package or artifact")
 		}
 	}
 }

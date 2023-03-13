@@ -1,0 +1,66 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines the GraphQL operations to ingest VEX Statement into GUAC
+
+mutation VexPackageAndCve($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestPackage(pkg: $pkg) {
+    ...allPkgTree
+  }
+  ingestCVE(cve: $cve) {
+    ...allCveTree
+  }
+  ingestVEXStatement(subject: {package: $pkg}, vulnerability: {cve: $cve}, vexStatement: $vexStatement) {
+    ...allCertifyVEXStatement
+  }
+}
+
+mutation VEXPackageAndGhsa($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestPackage(pkg: $pkg) {
+    ...allPkgTree
+  }
+  ingestGHSA(ghsa: $ghsa) {
+    ...allGHSATree
+  }
+  ingestVEXStatement(subject: {package: $pkg}, vulnerability: {ghsa: $ghsa}, vexStatement: $vexStatement) {
+    ...allCertifyVEXStatement
+  }
+}
+
+mutation VexArtifactAndCve($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestArtifact(artifact: $artifact) {
+    ...allArtifactTree
+  }
+  ingestCVE(cve: $cve) {
+    ...allCveTree
+  }
+  ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: {cve: $cve}, vexStatement: $vexStatement) {
+    ...allCertifyVEXStatement
+  }
+}
+
+mutation VexArtifactAndGhsa($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestArtifact(artifact: $artifact) {
+    ...allArtifactTree
+  }
+  ingestGHSA(ghsa: $ghsa) {
+    ...allGHSATree
+  }
+  ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: {ghsa: $ghsa}, vexStatement: $vexStatement) {
+    ...allCertifyVEXStatement
+  }
+}

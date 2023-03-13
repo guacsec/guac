@@ -3567,7 +3567,7 @@ type IsVulnerabilityCVEResponse struct {
 	IngestOSV IsVulnerabilityCVEIngestOSV `json:"ingestOSV"`
 	// Ingest a new CVE. Returns the ingested object
 	IngestCVE IsVulnerabilityCVEIngestCVE `json:"ingestCVE"`
-	// certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)
+	// certify that a OSV is associated with either a CVE or GHSA
 	IngestIsVulnerability IsVulnerabilityCVEIngestIsVulnerability `json:"ingestIsVulnerability"`
 }
 
@@ -3810,7 +3810,7 @@ type IsVulnerabilityGHSAResponse struct {
 	IngestOSV IsVulnerabilityGHSAIngestOSV `json:"ingestOSV"`
 	// Ingest a new GHSA. Returns the ingested object
 	IngestGHSA IsVulnerabilityGHSAIngestGHSA `json:"ingestGHSA"`
-	// certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)
+	// certify that a OSV is associated with either a CVE or GHSA
 	IngestIsVulnerability IsVulnerabilityGHSAIngestIsVulnerability `json:"ingestIsVulnerability"`
 }
 
@@ -6064,6 +6064,1160 @@ func (v *SourceInputSpec) GetTag() *string { return v.Tag }
 // GetCommit returns SourceInputSpec.Commit, and is useful for accessing the field via an interface.
 func (v *SourceInputSpec) GetCommit() *string { return v.Commit }
 
+// VEXPackageAndGhsaIngestGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// We create a separate node to allow retrieving all GHSAs.
+type VEXPackageAndGhsaIngestGHSA struct {
+	allGHSATree `json:"-"`
+}
+
+// GetGhsaId returns VEXPackageAndGhsaIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestGHSA) GetGhsaId() []allGHSATreeGhsaIdGHSAId {
+	return v.allGHSATree.GhsaId
+}
+
+func (v *VEXPackageAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VEXPackageAndGhsaIngestGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VEXPackageAndGhsaIngestGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVEXPackageAndGhsaIngestGHSA struct {
+	GhsaId []allGHSATreeGhsaIdGHSAId `json:"ghsaId"`
+}
+
+func (v *VEXPackageAndGhsaIngestGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VEXPackageAndGhsaIngestGHSA) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestGHSA, error) {
+	var retval __premarshalVEXPackageAndGhsaIngestGHSA
+
+	retval.GhsaId = v.allGHSATree.GhsaId
+	return &retval, nil
+}
+
+// VEXPackageAndGhsaIngestPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type VEXPackageAndGhsaIngestPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns VEXPackageAndGhsaIngestPackage.Type, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns VEXPackageAndGhsaIngestPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *VEXPackageAndGhsaIngestPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VEXPackageAndGhsaIngestPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VEXPackageAndGhsaIngestPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVEXPackageAndGhsaIngestPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *VEXPackageAndGhsaIngestPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VEXPackageAndGhsaIngestPackage) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestPackage, error) {
+	var retval __premarshalVEXPackageAndGhsaIngestPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// subject - union type that represents a package or artifact
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - justification for VEX
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement struct {
+	allCertifyVEXStatement `json:"-"`
+}
+
+// GetSubject returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.allCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityCveOrGhsa {
+	return v.allCertifyVEXStatement.Vulnerability
+}
+
+// GetJustification returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetJustification() string {
+	return v.allCertifyVEXStatement.Justification
+}
+
+// GetKnownSince returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.allCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetOrigin() string {
+	return v.allCertifyVEXStatement.Origin
+}
+
+// GetCollector returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetCollector() string {
+	return v.allCertifyVEXStatement.Collector
+}
+
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement struct {
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement, error) {
+	var retval __premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement
+
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVEXStatement.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
+	retval.Origin = v.allCertifyVEXStatement.Origin
+	retval.Collector = v.allCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VEXPackageAndGhsaResponse is returned by VEXPackageAndGhsa on success.
+type VEXPackageAndGhsaResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	IngestPackage VEXPackageAndGhsaIngestPackage `json:"ingestPackage"`
+	// Ingest a new GHSA. Returns the ingested object
+	IngestGHSA VEXPackageAndGhsaIngestGHSA `json:"ingestGHSA"`
+	// certify that an either a package or artifact has an associated VEX for a CVE or GHSA
+	IngestVEXStatement VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
+}
+
+// GetIngestPackage returns VEXPackageAndGhsaResponse.IngestPackage, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaResponse) GetIngestPackage() VEXPackageAndGhsaIngestPackage {
+	return v.IngestPackage
+}
+
+// GetIngestGHSA returns VEXPackageAndGhsaResponse.IngestGHSA, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaResponse) GetIngestGHSA() VEXPackageAndGhsaIngestGHSA { return v.IngestGHSA }
+
+// GetIngestVEXStatement returns VEXPackageAndGhsaResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaResponse) GetIngestVEXStatement() VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement {
+	return v.IngestVEXStatement
+}
+
+// VexArtifactAndCveIngestArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type VexArtifactAndCveIngestArtifact struct {
+	allArtifactTree `json:"-"`
+}
+
+// GetAlgorithm returns VexArtifactAndCveIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns VexArtifactAndCveIngestArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *VexArtifactAndCveIngestArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexArtifactAndCveIngestArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexArtifactAndCveIngestArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexArtifactAndCveIngestArtifact struct {
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *VexArtifactAndCveIngestArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexArtifactAndCveIngestArtifact) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestArtifact, error) {
+	var retval __premarshalVexArtifactAndCveIngestArtifact
+
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// VexArtifactAndCveIngestCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// The year is mandatory.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `year` value.
+type VexArtifactAndCveIngestCVE struct {
+	allCveTree `json:"-"`
+}
+
+// GetYear returns VexArtifactAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestCVE) GetYear() string { return v.allCveTree.Year }
+
+// GetCveId returns VexArtifactAndCveIngestCVE.CveId, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestCVE) GetCveId() []allCveTreeCveIdCVEId { return v.allCveTree.CveId }
+
+func (v *VexArtifactAndCveIngestCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexArtifactAndCveIngestCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexArtifactAndCveIngestCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexArtifactAndCveIngestCVE struct {
+	Year string `json:"year"`
+
+	CveId []allCveTreeCveIdCVEId `json:"cveId"`
+}
+
+func (v *VexArtifactAndCveIngestCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexArtifactAndCveIngestCVE) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestCVE, error) {
+	var retval __premarshalVexArtifactAndCveIngestCVE
+
+	retval.Year = v.allCveTree.Year
+	retval.CveId = v.allCveTree.CveId
+	return &retval, nil
+}
+
+// VexArtifactAndCveIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// subject - union type that represents a package or artifact
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - justification for VEX
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type VexArtifactAndCveIngestVEXStatementCertifyVEXStatement struct {
+	allCertifyVEXStatement `json:"-"`
+}
+
+// GetSubject returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.allCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityCveOrGhsa {
+	return v.allCertifyVEXStatement.Vulnerability
+}
+
+// GetJustification returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetJustification() string {
+	return v.allCertifyVEXStatement.Justification
+}
+
+// GetKnownSince returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.allCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetOrigin() string {
+	return v.allCertifyVEXStatement.Origin
+}
+
+// GetCollector returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetCollector() string {
+	return v.allCertifyVEXStatement.Collector
+}
+
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexArtifactAndCveIngestVEXStatementCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexArtifactAndCveIngestVEXStatementCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement struct {
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement, error) {
+	var retval __premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement
+
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVEXStatement.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
+	retval.Origin = v.allCertifyVEXStatement.Origin
+	retval.Collector = v.allCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VexArtifactAndCveResponse is returned by VexArtifactAndCve on success.
+type VexArtifactAndCveResponse struct {
+	// Ingest a new artifact. Returns the ingested artifact
+	IngestArtifact VexArtifactAndCveIngestArtifact `json:"ingestArtifact"`
+	// Ingest a new CVE. Returns the ingested object
+	IngestCVE VexArtifactAndCveIngestCVE `json:"ingestCVE"`
+	// certify that an either a package or artifact has an associated VEX for a CVE or GHSA
+	IngestVEXStatement VexArtifactAndCveIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
+}
+
+// GetIngestArtifact returns VexArtifactAndCveResponse.IngestArtifact, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveResponse) GetIngestArtifact() VexArtifactAndCveIngestArtifact {
+	return v.IngestArtifact
+}
+
+// GetIngestCVE returns VexArtifactAndCveResponse.IngestCVE, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveResponse) GetIngestCVE() VexArtifactAndCveIngestCVE { return v.IngestCVE }
+
+// GetIngestVEXStatement returns VexArtifactAndCveResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveResponse) GetIngestVEXStatement() VexArtifactAndCveIngestVEXStatementCertifyVEXStatement {
+	return v.IngestVEXStatement
+}
+
+// VexArtifactAndGhsaIngestArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type VexArtifactAndGhsaIngestArtifact struct {
+	allArtifactTree `json:"-"`
+}
+
+// GetAlgorithm returns VexArtifactAndGhsaIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns VexArtifactAndGhsaIngestArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *VexArtifactAndGhsaIngestArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexArtifactAndGhsaIngestArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexArtifactAndGhsaIngestArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexArtifactAndGhsaIngestArtifact struct {
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *VexArtifactAndGhsaIngestArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexArtifactAndGhsaIngestArtifact) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestArtifact, error) {
+	var retval __premarshalVexArtifactAndGhsaIngestArtifact
+
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// VexArtifactAndGhsaIngestGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// We create a separate node to allow retrieving all GHSAs.
+type VexArtifactAndGhsaIngestGHSA struct {
+	allGHSATree `json:"-"`
+}
+
+// GetGhsaId returns VexArtifactAndGhsaIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestGHSA) GetGhsaId() []allGHSATreeGhsaIdGHSAId {
+	return v.allGHSATree.GhsaId
+}
+
+func (v *VexArtifactAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexArtifactAndGhsaIngestGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexArtifactAndGhsaIngestGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexArtifactAndGhsaIngestGHSA struct {
+	GhsaId []allGHSATreeGhsaIdGHSAId `json:"ghsaId"`
+}
+
+func (v *VexArtifactAndGhsaIngestGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexArtifactAndGhsaIngestGHSA) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestGHSA, error) {
+	var retval __premarshalVexArtifactAndGhsaIngestGHSA
+
+	retval.GhsaId = v.allGHSATree.GhsaId
+	return &retval, nil
+}
+
+// VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// subject - union type that represents a package or artifact
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - justification for VEX
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement struct {
+	allCertifyVEXStatement `json:"-"`
+}
+
+// GetSubject returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.allCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityCveOrGhsa {
+	return v.allCertifyVEXStatement.Vulnerability
+}
+
+// GetJustification returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetJustification() string {
+	return v.allCertifyVEXStatement.Justification
+}
+
+// GetKnownSince returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.allCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetOrigin() string {
+	return v.allCertifyVEXStatement.Origin
+}
+
+// GetCollector returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetCollector() string {
+	return v.allCertifyVEXStatement.Collector
+}
+
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement struct {
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement, error) {
+	var retval __premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement
+
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVEXStatement.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
+	retval.Origin = v.allCertifyVEXStatement.Origin
+	retval.Collector = v.allCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VexArtifactAndGhsaResponse is returned by VexArtifactAndGhsa on success.
+type VexArtifactAndGhsaResponse struct {
+	// Ingest a new artifact. Returns the ingested artifact
+	IngestArtifact VexArtifactAndGhsaIngestArtifact `json:"ingestArtifact"`
+	// Ingest a new GHSA. Returns the ingested object
+	IngestGHSA VexArtifactAndGhsaIngestGHSA `json:"ingestGHSA"`
+	// certify that an either a package or artifact has an associated VEX for a CVE or GHSA
+	IngestVEXStatement VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
+}
+
+// GetIngestArtifact returns VexArtifactAndGhsaResponse.IngestArtifact, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaResponse) GetIngestArtifact() VexArtifactAndGhsaIngestArtifact {
+	return v.IngestArtifact
+}
+
+// GetIngestGHSA returns VexArtifactAndGhsaResponse.IngestGHSA, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaResponse) GetIngestGHSA() VexArtifactAndGhsaIngestGHSA {
+	return v.IngestGHSA
+}
+
+// GetIngestVEXStatement returns VexArtifactAndGhsaResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaResponse) GetIngestVEXStatement() VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement {
+	return v.IngestVEXStatement
+}
+
+// VexPackageAndCveIngestCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// The year is mandatory.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `year` value.
+type VexPackageAndCveIngestCVE struct {
+	allCveTree `json:"-"`
+}
+
+// GetYear returns VexPackageAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestCVE) GetYear() string { return v.allCveTree.Year }
+
+// GetCveId returns VexPackageAndCveIngestCVE.CveId, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestCVE) GetCveId() []allCveTreeCveIdCVEId { return v.allCveTree.CveId }
+
+func (v *VexPackageAndCveIngestCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexPackageAndCveIngestCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexPackageAndCveIngestCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexPackageAndCveIngestCVE struct {
+	Year string `json:"year"`
+
+	CveId []allCveTreeCveIdCVEId `json:"cveId"`
+}
+
+func (v *VexPackageAndCveIngestCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexPackageAndCveIngestCVE) __premarshalJSON() (*__premarshalVexPackageAndCveIngestCVE, error) {
+	var retval __premarshalVexPackageAndCveIngestCVE
+
+	retval.Year = v.allCveTree.Year
+	retval.CveId = v.allCveTree.CveId
+	return &retval, nil
+}
+
+// VexPackageAndCveIngestPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type VexPackageAndCveIngestPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns VexPackageAndCveIngestPackage.Type, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns VexPackageAndCveIngestPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *VexPackageAndCveIngestPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexPackageAndCveIngestPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexPackageAndCveIngestPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexPackageAndCveIngestPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *VexPackageAndCveIngestPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexPackageAndCveIngestPackage) __premarshalJSON() (*__premarshalVexPackageAndCveIngestPackage, error) {
+	var retval __premarshalVexPackageAndCveIngestPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// VexPackageAndCveIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// subject - union type that represents a package or artifact
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - justification for VEX
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type VexPackageAndCveIngestVEXStatementCertifyVEXStatement struct {
+	allCertifyVEXStatement `json:"-"`
+}
+
+// GetSubject returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.allCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityCveOrGhsa {
+	return v.allCertifyVEXStatement.Vulnerability
+}
+
+// GetJustification returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetJustification() string {
+	return v.allCertifyVEXStatement.Justification
+}
+
+// GetKnownSince returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.allCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetOrigin() string {
+	return v.allCertifyVEXStatement.Origin
+}
+
+// GetCollector returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetCollector() string {
+	return v.allCertifyVEXStatement.Collector
+}
+
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VexPackageAndCveIngestVEXStatementCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VexPackageAndCveIngestVEXStatementCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement struct {
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement, error) {
+	var retval __premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement
+
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VexPackageAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVEXStatement.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal VexPackageAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
+	retval.Origin = v.allCertifyVEXStatement.Origin
+	retval.Collector = v.allCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// VexPackageAndCveResponse is returned by VexPackageAndCve on success.
+type VexPackageAndCveResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	IngestPackage VexPackageAndCveIngestPackage `json:"ingestPackage"`
+	// Ingest a new CVE. Returns the ingested object
+	IngestCVE VexPackageAndCveIngestCVE `json:"ingestCVE"`
+	// certify that an either a package or artifact has an associated VEX for a CVE or GHSA
+	IngestVEXStatement VexPackageAndCveIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
+}
+
+// GetIngestPackage returns VexPackageAndCveResponse.IngestPackage, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveResponse) GetIngestPackage() VexPackageAndCveIngestPackage {
+	return v.IngestPackage
+}
+
+// GetIngestCVE returns VexPackageAndCveResponse.IngestCVE, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveResponse) GetIngestCVE() VexPackageAndCveIngestCVE { return v.IngestCVE }
+
+// GetIngestVEXStatement returns VexPackageAndCveResponse.IngestVEXStatement, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveResponse) GetIngestVEXStatement() VexPackageAndCveIngestVEXStatementCertifyVEXStatement {
+	return v.IngestVEXStatement
+}
+
+// VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
+//
+// All fields are required.
+type VexStatementInputSpec struct {
+	Justification string    `json:"justification"`
+	KnownSince    time.Time `json:"knownSince"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+}
+
+// GetJustification returns VexStatementInputSpec.Justification, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns VexStatementInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetKnownSince() time.Time { return v.KnownSince }
+
+// GetOrigin returns VexStatementInputSpec.Origin, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetOrigin() string { return v.Origin }
+
+// GetCollector returns VexStatementInputSpec.Collector, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetCollector() string { return v.Collector }
+
 // VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
 //
 // All fields are required.
@@ -6417,6 +7571,70 @@ func (v *__ScorecardInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetScorecard returns __ScorecardInput.Scorecard, and is useful for accessing the field via an interface.
 func (v *__ScorecardInput) GetScorecard() ScorecardInputSpec { return v.Scorecard }
+
+// __VEXPackageAndGhsaInput is used internally by genqlient
+type __VEXPackageAndGhsaInput struct {
+	Pkg          PkgInputSpec          `json:"pkg"`
+	Ghsa         GHSAInputSpec         `json:"ghsa"`
+	VexStatement VexStatementInputSpec `json:"vexStatement"`
+}
+
+// GetPkg returns __VEXPackageAndGhsaInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__VEXPackageAndGhsaInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetGhsa returns __VEXPackageAndGhsaInput.Ghsa, and is useful for accessing the field via an interface.
+func (v *__VEXPackageAndGhsaInput) GetGhsa() GHSAInputSpec { return v.Ghsa }
+
+// GetVexStatement returns __VEXPackageAndGhsaInput.VexStatement, and is useful for accessing the field via an interface.
+func (v *__VEXPackageAndGhsaInput) GetVexStatement() VexStatementInputSpec { return v.VexStatement }
+
+// __VexArtifactAndCveInput is used internally by genqlient
+type __VexArtifactAndCveInput struct {
+	Artifact     ArtifactInputSpec     `json:"artifact"`
+	Cve          CVEInputSpec          `json:"cve"`
+	VexStatement VexStatementInputSpec `json:"vexStatement"`
+}
+
+// GetArtifact returns __VexArtifactAndCveInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__VexArtifactAndCveInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetCve returns __VexArtifactAndCveInput.Cve, and is useful for accessing the field via an interface.
+func (v *__VexArtifactAndCveInput) GetCve() CVEInputSpec { return v.Cve }
+
+// GetVexStatement returns __VexArtifactAndCveInput.VexStatement, and is useful for accessing the field via an interface.
+func (v *__VexArtifactAndCveInput) GetVexStatement() VexStatementInputSpec { return v.VexStatement }
+
+// __VexArtifactAndGhsaInput is used internally by genqlient
+type __VexArtifactAndGhsaInput struct {
+	Artifact     ArtifactInputSpec     `json:"artifact"`
+	Ghsa         GHSAInputSpec         `json:"ghsa"`
+	VexStatement VexStatementInputSpec `json:"vexStatement"`
+}
+
+// GetArtifact returns __VexArtifactAndGhsaInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__VexArtifactAndGhsaInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetGhsa returns __VexArtifactAndGhsaInput.Ghsa, and is useful for accessing the field via an interface.
+func (v *__VexArtifactAndGhsaInput) GetGhsa() GHSAInputSpec { return v.Ghsa }
+
+// GetVexStatement returns __VexArtifactAndGhsaInput.VexStatement, and is useful for accessing the field via an interface.
+func (v *__VexArtifactAndGhsaInput) GetVexStatement() VexStatementInputSpec { return v.VexStatement }
+
+// __VexPackageAndCveInput is used internally by genqlient
+type __VexPackageAndCveInput struct {
+	Pkg          PkgInputSpec          `json:"pkg"`
+	Cve          CVEInputSpec          `json:"cve"`
+	VexStatement VexStatementInputSpec `json:"vexStatement"`
+}
+
+// GetPkg returns __VexPackageAndCveInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__VexPackageAndCveInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetCve returns __VexPackageAndCveInput.Cve, and is useful for accessing the field via an interface.
+func (v *__VexPackageAndCveInput) GetCve() CVEInputSpec { return v.Cve }
+
+// GetVexStatement returns __VexPackageAndCveInput.VexStatement, and is useful for accessing the field via an interface.
+func (v *__VexPackageAndCveInput) GetVexStatement() VexStatementInputSpec { return v.VexStatement }
 
 // allArtifactTree includes the GraphQL fields of Artifact requested by the fragment allArtifactTree.
 // The GraphQL type's documentation follows.
@@ -7126,6 +8344,618 @@ func (v *allCertifyScorecardSource) __premarshalJSON() (*__premarshalallCertifyS
 
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
+// allCertifyVEXStatement includes the GraphQL fields of CertifyVEXStatement requested by the fragment allCertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// subject - union type that represents a package or artifact
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - justification for VEX
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type allCertifyVEXStatement struct {
+	Subject       allCertifyVEXStatementSubjectPackageOrArtifact `json:"-"`
+	Vulnerability allCertifyVEXStatementVulnerabilityCveOrGhsa   `json:"-"`
+	Justification string                                         `json:"justification"`
+	KnownSince    time.Time                                      `json:"knownSince"`
+	Origin        string                                         `json:"origin"`
+	Collector     string                                         `json:"collector"`
+}
+
+// GetSubject returns allCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.Subject
+}
+
+// GetVulnerability returns allCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityCveOrGhsa {
+	return v.Vulnerability
+}
+
+// GetJustification returns allCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns allCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetKnownSince() time.Time { return v.KnownSince }
+
+// GetOrigin returns allCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetOrigin() string { return v.Origin }
+
+// GetCollector returns allCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetCollector() string { return v.Collector }
+
+func (v *allCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allCertifyVEXStatement
+		Subject       json.RawMessage `json:"subject"`
+		Vulnerability json.RawMessage `json:"vulnerability"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Subject
+		src := firstPass.Subject
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalallCertifyVEXStatementSubjectPackageOrArtifact(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"Unable to unmarshal allCertifyVEXStatement.Subject: %w", err)
+			}
+		}
+	}
+
+	{
+		dst := &v.Vulnerability
+		src := firstPass.Vulnerability
+		if len(src) != 0 && string(src) != "null" {
+			err = __unmarshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+				src, dst)
+			if err != nil {
+				return fmt.Errorf(
+					"Unable to unmarshal allCertifyVEXStatement.Vulnerability: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalallCertifyVEXStatement struct {
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *allCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXStatement, error) {
+	var retval __premarshalallCertifyVEXStatement
+
+	{
+
+		dst := &retval.Subject
+		src := v.Subject
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal allCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.Vulnerability
+		src := v.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal allCertifyVEXStatement.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.Justification
+	retval.KnownSince = v.KnownSince
+	retval.Origin = v.Origin
+	retval.Collector = v.Collector
+	return &retval, nil
+}
+
+// allCertifyVEXStatementSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type allCertifyVEXStatementSubjectArtifact struct {
+	Typename        *string `json:"__typename"`
+	allArtifactTree `json:"-"`
+}
+
+// GetTypename returns allCertifyVEXStatementSubjectArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementSubjectArtifact) GetTypename() *string { return v.Typename }
+
+// GetAlgorithm returns allCertifyVEXStatementSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementSubjectArtifact) GetAlgorithm() string {
+	return v.allArtifactTree.Algorithm
+}
+
+// GetDigest returns allCertifyVEXStatementSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementSubjectArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *allCertifyVEXStatementSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allCertifyVEXStatementSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allCertifyVEXStatementSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallCertifyVEXStatementSubjectArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *allCertifyVEXStatementSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allCertifyVEXStatementSubjectArtifact) __premarshalJSON() (*__premarshalallCertifyVEXStatementSubjectArtifact, error) {
+	var retval __premarshalallCertifyVEXStatementSubjectArtifact
+
+	retval.Typename = v.Typename
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// allCertifyVEXStatementSubjectPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type allCertifyVEXStatementSubjectPackage struct {
+	Typename   *string `json:"__typename"`
+	allPkgTree `json:"-"`
+}
+
+// GetTypename returns allCertifyVEXStatementSubjectPackage.Typename, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementSubjectPackage) GetTypename() *string { return v.Typename }
+
+// GetType returns allCertifyVEXStatementSubjectPackage.Type, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementSubjectPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns allCertifyVEXStatementSubjectPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementSubjectPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *allCertifyVEXStatementSubjectPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allCertifyVEXStatementSubjectPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allCertifyVEXStatementSubjectPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallCertifyVEXStatementSubjectPackage struct {
+	Typename *string `json:"__typename"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *allCertifyVEXStatementSubjectPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allCertifyVEXStatementSubjectPackage) __premarshalJSON() (*__premarshalallCertifyVEXStatementSubjectPackage, error) {
+	var retval __premarshalallCertifyVEXStatementSubjectPackage
+
+	retval.Typename = v.Typename
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// allCertifyVEXStatementSubjectPackageOrArtifact includes the requested fields of the GraphQL interface PackageOrArtifact.
+//
+// allCertifyVEXStatementSubjectPackageOrArtifact is implemented by the following types:
+// allCertifyVEXStatementSubjectPackage
+// allCertifyVEXStatementSubjectArtifact
+// The GraphQL type's documentation follows.
+//
+// PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
+type allCertifyVEXStatementSubjectPackageOrArtifact interface {
+	implementsGraphQLInterfaceallCertifyVEXStatementSubjectPackageOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *allCertifyVEXStatementSubjectPackage) implementsGraphQLInterfaceallCertifyVEXStatementSubjectPackageOrArtifact() {
+}
+func (v *allCertifyVEXStatementSubjectArtifact) implementsGraphQLInterfaceallCertifyVEXStatementSubjectPackageOrArtifact() {
+}
+
+func __unmarshalallCertifyVEXStatementSubjectPackageOrArtifact(b []byte, v *allCertifyVEXStatementSubjectPackageOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(allCertifyVEXStatementSubjectPackage)
+		return json.Unmarshal(b, *v)
+	case "Artifact":
+		*v = new(allCertifyVEXStatementSubjectArtifact)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for allCertifyVEXStatementSubjectPackageOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalallCertifyVEXStatementSubjectPackageOrArtifact(v *allCertifyVEXStatementSubjectPackageOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *allCertifyVEXStatementSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementSubjectPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allCertifyVEXStatementSubjectArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for allCertifyVEXStatementSubjectPackageOrArtifact: "%T"`, v)
+	}
+}
+
+// allCertifyVEXStatementVulnerabilityCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// The year is mandatory.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `year` value.
+type allCertifyVEXStatementVulnerabilityCVE struct {
+	Typename   *string `json:"__typename"`
+	allCveTree `json:"-"`
+}
+
+// GetTypename returns allCertifyVEXStatementVulnerabilityCVE.Typename, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementVulnerabilityCVE) GetTypename() *string { return v.Typename }
+
+// GetYear returns allCertifyVEXStatementVulnerabilityCVE.Year, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementVulnerabilityCVE) GetYear() string { return v.allCveTree.Year }
+
+// GetCveId returns allCertifyVEXStatementVulnerabilityCVE.CveId, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementVulnerabilityCVE) GetCveId() []allCveTreeCveIdCVEId {
+	return v.allCveTree.CveId
+}
+
+func (v *allCertifyVEXStatementVulnerabilityCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allCertifyVEXStatementVulnerabilityCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allCertifyVEXStatementVulnerabilityCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallCertifyVEXStatementVulnerabilityCVE struct {
+	Typename *string `json:"__typename"`
+
+	Year string `json:"year"`
+
+	CveId []allCveTreeCveIdCVEId `json:"cveId"`
+}
+
+func (v *allCertifyVEXStatementVulnerabilityCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allCertifyVEXStatementVulnerabilityCVE) __premarshalJSON() (*__premarshalallCertifyVEXStatementVulnerabilityCVE, error) {
+	var retval __premarshalallCertifyVEXStatementVulnerabilityCVE
+
+	retval.Typename = v.Typename
+	retval.Year = v.allCveTree.Year
+	retval.CveId = v.allCveTree.CveId
+	return &retval, nil
+}
+
+// allCertifyVEXStatementVulnerabilityCveOrGhsa includes the requested fields of the GraphQL interface CveOrGhsa.
+//
+// allCertifyVEXStatementVulnerabilityCveOrGhsa is implemented by the following types:
+// allCertifyVEXStatementVulnerabilityCVE
+// allCertifyVEXStatementVulnerabilityGHSA
+// The GraphQL type's documentation follows.
+//
+// CveOrGhsa is a union of CVE and GHSA.
+type allCertifyVEXStatementVulnerabilityCveOrGhsa interface {
+	implementsGraphQLInterfaceallCertifyVEXStatementVulnerabilityCveOrGhsa()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *allCertifyVEXStatementVulnerabilityCVE) implementsGraphQLInterfaceallCertifyVEXStatementVulnerabilityCveOrGhsa() {
+}
+func (v *allCertifyVEXStatementVulnerabilityGHSA) implementsGraphQLInterfaceallCertifyVEXStatementVulnerabilityCveOrGhsa() {
+}
+
+func __unmarshalallCertifyVEXStatementVulnerabilityCveOrGhsa(b []byte, v *allCertifyVEXStatementVulnerabilityCveOrGhsa) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "CVE":
+		*v = new(allCertifyVEXStatementVulnerabilityCVE)
+		return json.Unmarshal(b, *v)
+	case "GHSA":
+		*v = new(allCertifyVEXStatementVulnerabilityGHSA)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing CveOrGhsa.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for allCertifyVEXStatementVulnerabilityCveOrGhsa: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(v *allCertifyVEXStatementVulnerabilityCveOrGhsa) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *allCertifyVEXStatementVulnerabilityCVE:
+		typename = "CVE"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementVulnerabilityCVE
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allCertifyVEXStatementVulnerabilityGHSA:
+		typename = "GHSA"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementVulnerabilityGHSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for allCertifyVEXStatementVulnerabilityCveOrGhsa: "%T"`, v)
+	}
+}
+
+// allCertifyVEXStatementVulnerabilityGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// We create a separate node to allow retrieving all GHSAs.
+type allCertifyVEXStatementVulnerabilityGHSA struct {
+	Typename    *string `json:"__typename"`
+	allGHSATree `json:"-"`
+}
+
+// GetTypename returns allCertifyVEXStatementVulnerabilityGHSA.Typename, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementVulnerabilityGHSA) GetTypename() *string { return v.Typename }
+
+// GetGhsaId returns allCertifyVEXStatementVulnerabilityGHSA.GhsaId, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementVulnerabilityGHSA) GetGhsaId() []allGHSATreeGhsaIdGHSAId {
+	return v.allGHSATree.GhsaId
+}
+
+func (v *allCertifyVEXStatementVulnerabilityGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allCertifyVEXStatementVulnerabilityGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allCertifyVEXStatementVulnerabilityGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallCertifyVEXStatementVulnerabilityGHSA struct {
+	Typename *string `json:"__typename"`
+
+	GhsaId []allGHSATreeGhsaIdGHSAId `json:"ghsaId"`
+}
+
+func (v *allCertifyVEXStatementVulnerabilityGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allCertifyVEXStatementVulnerabilityGHSA) __premarshalJSON() (*__premarshalallCertifyVEXStatementVulnerabilityGHSA, error) {
+	var retval __premarshalallCertifyVEXStatementVulnerabilityGHSA
+
+	retval.Typename = v.Typename
+	retval.GhsaId = v.allGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -9192,7 +11022,7 @@ func (v *allIsVulnerabilityVulnerabilityCVE) __premarshalJSON() (*__premarshalal
 // allIsVulnerabilityVulnerabilityGHSA
 // The GraphQL type's documentation follows.
 //
-// CveGhsaObject is a union of CVE and GHSA.
+// CveOrGhsa is a union of CVE and GHSA.
 type allIsVulnerabilityVulnerabilityCveOrGhsa interface {
 	implementsGraphQLInterfaceallIsVulnerabilityVulnerabilityCveOrGhsa()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
@@ -12312,6 +14142,398 @@ fragment allCertifyScorecard on CertifyScorecard {
 	var err error
 
 	var data ScorecardResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func VEXPackageAndGhsa(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	ghsa GHSAInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VEXPackageAndGhsaResponse, error) {
+	req := &graphql.Request{
+		OpName: "VEXPackageAndGhsa",
+		Query: `
+mutation VEXPackageAndGhsa ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
+	ingestPackage(pkg: $pkg) {
+		... allPkgTree
+	}
+	ingestGHSA(ghsa: $ghsa) {
+		... allGHSATree
+	}
+	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {ghsa:$ghsa}, vexStatement: $vexStatement) {
+		... allCertifyVEXStatement
+	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allGHSATree on GHSA {
+	ghsaId {
+		id
+	}
+}
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	knownSince
+	origin
+	collector
+}
+fragment allArtifactTree on Artifact {
+	algorithm
+	digest
+}
+fragment allCveTree on CVE {
+	year
+	cveId {
+		id
+	}
+}
+`,
+		Variables: &__VEXPackageAndGhsaInput{
+			Pkg:          pkg,
+			Ghsa:         ghsa,
+			VexStatement: vexStatement,
+		},
+	}
+	var err error
+
+	var data VEXPackageAndGhsaResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func VexArtifactAndCve(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	cve CVEInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexArtifactAndCveResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexArtifactAndCve",
+		Query: `
+mutation VexArtifactAndCve ($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
+	ingestArtifact(artifact: $artifact) {
+		... allArtifactTree
+	}
+	ingestCVE(cve: $cve) {
+		... allCveTree
+	}
+	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
+		... allCertifyVEXStatement
+	}
+}
+fragment allArtifactTree on Artifact {
+	algorithm
+	digest
+}
+fragment allCveTree on CVE {
+	year
+	cveId {
+		id
+	}
+}
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	knownSince
+	origin
+	collector
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allGHSATree on GHSA {
+	ghsaId {
+		id
+	}
+}
+`,
+		Variables: &__VexArtifactAndCveInput{
+			Artifact:     artifact,
+			Cve:          cve,
+			VexStatement: vexStatement,
+		},
+	}
+	var err error
+
+	var data VexArtifactAndCveResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func VexArtifactAndGhsa(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	ghsa GHSAInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexArtifactAndGhsaResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexArtifactAndGhsa",
+		Query: `
+mutation VexArtifactAndGhsa ($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
+	ingestArtifact(artifact: $artifact) {
+		... allArtifactTree
+	}
+	ingestGHSA(ghsa: $ghsa) {
+		... allGHSATree
+	}
+	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {ghsa:$ghsa}, vexStatement: $vexStatement) {
+		... allCertifyVEXStatement
+	}
+}
+fragment allArtifactTree on Artifact {
+	algorithm
+	digest
+}
+fragment allGHSATree on GHSA {
+	ghsaId {
+		id
+	}
+}
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	knownSince
+	origin
+	collector
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allCveTree on CVE {
+	year
+	cveId {
+		id
+	}
+}
+`,
+		Variables: &__VexArtifactAndGhsaInput{
+			Artifact:     artifact,
+			Ghsa:         ghsa,
+			VexStatement: vexStatement,
+		},
+	}
+	var err error
+
+	var data VexArtifactAndGhsaResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func VexPackageAndCve(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	cve CVEInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexPackageAndCveResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexPackageAndCve",
+		Query: `
+mutation VexPackageAndCve ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
+	ingestPackage(pkg: $pkg) {
+		... allPkgTree
+	}
+	ingestCVE(cve: $cve) {
+		... allCveTree
+	}
+	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
+		... allCertifyVEXStatement
+	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allCveTree on CVE {
+	year
+	cveId {
+		id
+	}
+}
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	knownSince
+	origin
+	collector
+}
+fragment allArtifactTree on Artifact {
+	algorithm
+	digest
+}
+fragment allGHSATree on GHSA {
+	ghsaId {
+		id
+	}
+}
+`,
+		Variables: &__VexPackageAndCveInput{
+			Pkg:          pkg,
+			Cve:          cve,
+			VexStatement: vexStatement,
+		},
+	}
+	var err error
+
+	var data VexPackageAndCveResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

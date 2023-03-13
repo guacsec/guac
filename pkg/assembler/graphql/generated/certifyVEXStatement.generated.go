@@ -55,9 +55,9 @@ func (ec *executionContext) _CertifyVEXStatement_subject(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.PkgArtObject)
+	res := resTmp.(model.PackageOrArtifact)
 	fc.Result = res
-	return ec.marshalNPkgArtObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgArtObject(ctx, field.Selections, res)
+	return ec.marshalNPackageOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifact(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyVEXStatement_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -67,7 +67,7 @@ func (ec *executionContext) fieldContext_CertifyVEXStatement_subject(ctx context
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type PkgArtObject does not have child fields")
+			return nil, errors.New("field of type PackageOrArtifact does not have child fields")
 		},
 	}
 	return fc, nil
@@ -304,42 +304,26 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"package", "artifact", "cve", "ghsa", "justification", "knownSince", "origin", "collector"}
+	fieldsInOrder := [...]string{"subject", "vulnerability", "justification", "knownSince", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "package":
+		case "subject":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-			it.Package, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+			it.Subject, err = ec.unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "artifact":
+		case "vulnerability":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-			it.Artifact, err = ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "cve":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-			it.Cve, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "ghsa":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-			it.Ghsa, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
+			it.Vulnerability, err = ec.unmarshalOCveOrGhsaSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveOrGhsaSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -381,11 +365,135 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputPackageOrArtifactInput(ctx context.Context, obj interface{}) (model.PackageOrArtifactInput, error) {
+	var it model.PackageOrArtifactInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"package", "artifact"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "package":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
+			it.Package, err = ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "artifact":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+			it.Artifact, err = ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPackageOrArtifactSpec(ctx context.Context, obj interface{}) (model.PackageOrArtifactSpec, error) {
+	var it model.PackageOrArtifactSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"package", "artifact"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "package":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
+			it.Package, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "artifact":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+			it.Artifact, err = ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputVexStatementInputSpec(ctx context.Context, obj interface{}) (model.VexStatementInputSpec, error) {
+	var it model.VexStatementInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"justification", "knownSince", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "justification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
+			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "knownSince":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
+			it.KnownSince, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _PkgArtObject(ctx context.Context, sel ast.SelectionSet, obj model.PkgArtObject) graphql.Marshaler {
+func (ec *executionContext) _PackageOrArtifact(ctx context.Context, sel ast.SelectionSet, obj model.PackageOrArtifact) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -479,6 +587,10 @@ func (ec *executionContext) _CertifyVEXStatement(ctx context.Context, sel ast.Se
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNCertifyVEXStatement2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatement(ctx context.Context, sel ast.SelectionSet, v model.CertifyVEXStatement) graphql.Marshaler {
+	return ec._CertifyVEXStatement(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNCertifyVEXStatement2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyVEXStatement) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -533,14 +645,24 @@ func (ec *executionContext) marshalNCertifyVEXStatement2ᚖgithubᚗcomᚋguacse
 	return ec._CertifyVEXStatement(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPkgArtObject2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgArtObject(ctx context.Context, sel ast.SelectionSet, v model.PkgArtObject) graphql.Marshaler {
+func (ec *executionContext) marshalNPackageOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifact(ctx context.Context, sel ast.SelectionSet, v model.PackageOrArtifact) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._PkgArtObject(ctx, sel, v)
+	return ec._PackageOrArtifact(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx context.Context, v interface{}) (model.PackageOrArtifactInput, error) {
+	res, err := ec.unmarshalInputPackageOrArtifactInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v interface{}) (model.VexStatementInputSpec, error) {
+	res, err := ec.unmarshalInputVexStatementInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOCertifyVEXStatementSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx context.Context, v interface{}) (*model.CertifyVEXStatementSpec, error) {
@@ -548,6 +670,14 @@ func (ec *executionContext) unmarshalOCertifyVEXStatementSpec2ᚖgithubᚗcomᚋ
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputCertifyVEXStatementSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageOrArtifactSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPackageOrArtifactSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -151,7 +151,7 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrS
 
 func (c *demoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	queryAll, err := helper.CheckHasSBOMQueryInput(hasSBOMSpec.Subject)
+	queryAll, err := helper.ValidatePackageOrSourceQueryInput(hasSBOMSpec.Subject)
 	if err != nil {
 		return nil, err
 	}

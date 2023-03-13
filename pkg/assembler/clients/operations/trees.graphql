@@ -220,7 +220,7 @@ fragment allOSVTree on OSV {
 fragment allCertifyVuln on CertifyVuln {
   package {
     ...allPkgTree
-    }
+  }
   vulnerability {
     __typename
     ... on CVE {
@@ -258,6 +258,31 @@ fragment allIsVulnerability on IsVulnerability {
     }
   }
   justification
+  origin
+  collector
+}
+
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+  subject {
+    __typename
+    ... on Package {
+      ...allPkgTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  vulnerability {
+    __typename
+    ... on CVE {
+      ...allCveTree
+    }
+    ... on GHSA {
+      ...allGHSATree
+    }
+  }
+  justification
+  knownSince
   origin
   collector
 }
