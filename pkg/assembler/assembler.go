@@ -15,7 +15,9 @@
 
 package assembler
 
-import "github.com/guacsec/guac/pkg/assembler/clients/generated"
+import (
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+)
 
 type assembler struct{} //nolint: unused
 
@@ -148,6 +150,7 @@ type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest
 	IsDependency     []IsDependencyIngest
 	IsOccurence      []IsOccurenceIngest
+	HasSlsa          []HasSlsaIngest
 }
 
 type CertifyScorecardIngest struct {
@@ -170,6 +173,19 @@ type IsOccurenceIngest struct {
 	Artifact *generated.ArtifactInputSpec
 
 	IsOccurence *generated.IsOccurrenceInputSpec
+}
+
+type HasSlsaIngest struct {
+	Artifact  *generated.ArtifactInputSpec
+	HasSlsa   *generated.SLSAInputSpec
+	Materials []generated.PackageSourceOrArtifactInput
+	Builder   *generated.BuilderInputSpec
+
+	// Unpon more investigation, seems like SLSA should
+	// only be applied to an artifact and linkages to pkg
+	// or src should be done via IsOccurrence
+	// Pkg      *generated.PkgInputSpec
+	// Src      *generated.SourceInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph
