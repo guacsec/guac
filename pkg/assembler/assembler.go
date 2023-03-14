@@ -151,6 +151,8 @@ type IngestPredicates struct {
 	IsDependency     []IsDependencyIngest
 	IsOccurence      []IsOccurenceIngest
 	HasSlsa          []HasSlsaIngest
+	CertifyVuln      []CertifyVulnIngest
+	IsVuln           []IsVulnIngest
 }
 
 type CertifyScorecardIngest struct {
@@ -186,6 +188,20 @@ type HasSlsaIngest struct {
 	// or src should be done via IsOccurrence
 	// Pkg      *generated.PkgInputSpec
 	// Src      *generated.SourceInputSpec
+}
+
+type CertifyVulnIngest struct {
+	Pkg      *generated.PkgInputSpec
+	OSV      *generated.OSVInputSpec
+	VulnData *generated.VulnerabilityMetaDataInput
+}
+
+// Only CVE or GHSA needed, not both
+type IsVulnIngest struct {
+	OSV    *generated.OSVInputSpec
+	CVE    *generated.CVEInputSpec
+	GHSA   *generated.GHSAInputSpec
+	IsVuln *generated.IsVulnerabilityInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph

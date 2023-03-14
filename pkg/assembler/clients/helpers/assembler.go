@@ -50,6 +50,16 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				return err
 			}
 
+			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
+			if err := ingestCertifyVuln(ctx, gqlclient, p.CertifyVuln); err != nil {
+				return err
+			}
+
+			logger.Infof("assembling IsVuln: %v", len(p.IsVuln))
+			if err := ingestIsVuln(ctx, gqlclient, p.IsVuln); err != nil {
+				return err
+			}
+
 		}
 		return nil
 	}
@@ -108,6 +118,43 @@ func ingestHasSlsa(ctx context.Context, client graphql.Client, vs []assembler.Ha
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func ingestCertifyVuln(ctx context.Context, client graphql.Client, cvs []assembler.CertifyVulnIngest) error {
+	for _, cv := range cvs {
+		_, err := model.CertifyOSV(ctx, client, *cv.Pkg, *cv.OSV, *cv.VulnData)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ingestIsVuln(ctx context.Context, client graphql.Client, ivs []assembler.IsVulnIngest) error {
+	for _, iv := range ivs {
+		if iv.CVE != nil && iv.GHSA != nil {
+			return fmt.Errorf("unable to create IsVuln with both CVE and GHSA specified")
+		}
+
+		if iv.CVE == nil && iv.GHSA == nil {
+			return fmt.Errorf("unable to create IsVuln without either CVE or GHSA specified")
+		}
+
+		if iv.CVE != nil {
+			_, err := model.IsVulnerabilityCVE(ctx, client, *iv.OSV, *iv.CVE, *iv.IsVuln)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := model.IsVulnerabilityGHSA(ctx, client, *iv.OSV, *iv.GHSA, *iv.IsVuln)
+			if err != nil {
+				return err
+			}
+
+		}
+
 	}
 	return nil
 }

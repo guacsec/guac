@@ -13,115 +13,74 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The Vulnerability attestation parser parses the attestation defined by
-// by the certifier using the predicate type"https://in-toto.io/attestation/vuln/v0.1"
-// Based on the information contained, a package node is generated with just purl and
-// digest (if found). This package node is merged into the graph database as it already exists.
+// Package vuln attestation parser parses the attestation defined by by
+// the certifier using the predicate type
+// "https://in-toto.io/attestation/vuln/v0.1" Three different types of ingest
+// predicates are created.
 //
-// An attestation node is generated that contains the information stored in the attestation document.
-// The attestation node is linked to the package node via a "attestation" edge type.
+// - IsOccurences are created mapping between any package
+// purls found in the subject, and any digests found under those.
 //
-// Depending on the number of vulnerabilities found, vulnerability nodes are generated that
-// contain just the vulnerability ID that can be used to query for more information as needed.
-// The vulnerability node is linked to the attestation node via a "vulnerable" edge type.
+// - CertifyVulnerabilies are created mapping any package purl found in the
+// subject and any vulnerabilites found in the scanner results. The
+// vulnerabilites are treated as OSV.
+//
+// - IsVulnerabilities are created between any found vulnerability in the
+// scanner results (OSV) and either a CVE or GHSA vulnerability that is created
+// by parsing the OSV ID.
 package vuln
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
 
-const (
-	algorithmSHA256 string = "sha256"
-	attestationType string = "CERTIFY_VULN"
-)
-
-type vulnCertificationParser struct {
-	doc         *processor.Document
-	packageNode []assembler.PackageNode
-	attestation assembler.AttestationNode
-	vulns       []assembler.VulnerabilityNode
+type parser struct {
+	packages  []*generated.PkgInputSpec
+	vulnData  *generated.VulnerabilityMetaDataInput
+	vulns     []*generated.OSVInputSpec
+	isVulns   []assembler.IsVulnIngest
+	isOccs    []assembler.IsOccurenceIngest
+	artifacts []*generated.ArtifactInputSpec
 }
 
-// NewVulnCertificationParser initializes the vulnCertificationParser
+// NewVulnCertificationParser initializes the parser
 func NewVulnCertificationParser() common.DocumentParser {
-	return &vulnCertificationParser{
-		packageNode: []assembler.PackageNode{},
-		attestation: assembler.AttestationNode{},
-		vulns:       []assembler.VulnerabilityNode{},
-	}
+	return &parser{}
 }
 
 // Parse breaks out the document into the graph components
-func (c *vulnCertificationParser) Parse(ctx context.Context, doc *processor.Document) error {
-	c.doc = doc
+func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	statement, err := parseVulnCertifyPredicate(doc.Blob)
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
 	}
-	c.getSubject(statement)
-	c.getAttestation(doc.Blob, doc.SourceInformation.Source, statement)
-	c.getVulns(doc.Blob, doc.SourceInformation.Source, statement)
+	ps, ios, err := parseSubject(statement)
+	if err != nil {
+		return fmt.Errorf("unable to parse subject of statement: %w", err)
+	}
+	c.packages = ps
+	c.isOccs = ios
+	c.vulnData = parseMetadata(statement)
+	vs, ivs, err := parseVulns(statement)
+	if err != nil {
+		return fmt.Errorf("unable to parse vulns of statement: %w", err)
+	}
+	c.vulns = vs
+	c.isVulns = ivs
 	return nil
 }
 
-func (c *vulnCertificationParser) getSubject(statement *attestation_vuln.VulnerabilityStatement) {
-	currentPackage := assembler.PackageNode{}
-	for _, sub := range statement.StatementHeader.Subject {
-		currentPackage.Purl = sub.Name
-		for alg, ds := range sub.Digest {
-			currentPackage.Digest = append(currentPackage.Digest, strings.ToLower(alg+":"+strings.Trim(ds, "'")))
-		}
-		c.packageNode = append(c.packageNode, currentPackage)
-	}
-}
-
-func (c *vulnCertificationParser) getAttestation(blob []byte, source string, statement *attestation_vuln.VulnerabilityStatement) {
-	h := sha256.Sum256(blob)
-	attNode := assembler.AttestationNode{
-		FilePath:        source,
-		Digest:          algorithmSHA256 + ":" + hex.EncodeToString(h[:]),
-		AttestationType: attestationType,
-		Payload:         map[string]interface{}{},
-		NodeData:        *assembler.NewObjectMetadata(c.doc.SourceInformation),
-	}
-	attNode.Payload["invocation_parameters"] = statement.Predicate.Invocation.Parameters
-	attNode.Payload["invocation_uri"] = statement.Predicate.Invocation.Uri
-	attNode.Payload["invocation_eventID"] = statement.Predicate.Invocation.EventID
-	attNode.Payload["invocation_producerID"] = statement.Predicate.Invocation.ProducerID
-	attNode.Payload["scanner_uri"] = statement.Predicate.Scanner.Uri
-	attNode.Payload["scanner_version"] = statement.Predicate.Scanner.Version
-	attNode.Payload["scanner_db_uri"] = statement.Predicate.Scanner.Database.Uri
-	attNode.Payload["scanner_db_version"] = statement.Predicate.Scanner.Database.Version
-	attNode.Payload["metadata_scannedOn"] = statement.Predicate.Metadata.ScannedOn.String()
-	for i, result := range statement.Predicate.Scanner.Result {
-		attNode.Payload["result_vulnerabilityID_"+strconv.Itoa(i)] = result.VulnerabilityId
-		attNode.Payload["result_alias_"+strconv.Itoa(i)] = result.Aliases
-	}
-	c.attestation = attNode
-}
-
-func (c *vulnCertificationParser) getVulns(blob []byte, source string, statement *attestation_vuln.VulnerabilityStatement) {
-	for _, id := range statement.Predicate.Scanner.Result {
-		vulNode := assembler.VulnerabilityNode{
-			ID:       id.VulnerabilityId,
-			NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
-		}
-		c.vulns = append(c.vulns, vulNode)
-	}
-}
-
-func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStatement, error) {
+func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStatement,
+	error) {
 	predicate := attestation_vuln.VulnerabilityStatement{}
 	if err := json.Unmarshal(p, &predicate); err != nil {
 		return nil, err
@@ -129,45 +88,92 @@ func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStateme
 	return &predicate, nil
 }
 
-// CreateNodes creates the GuacNode for the graph inputs
-func (c *vulnCertificationParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-	nodes := []assembler.GuacNode{}
-	for _, pack := range c.packageNode {
-		nodes = append(nodes, pack)
+func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgInputSpec,
+	[]assembler.IsOccurenceIngest, error) {
+	var ps []*generated.PkgInputSpec
+	var ios []assembler.IsOccurenceIngest
+	for _, sub := range s.StatementHeader.Subject {
+		p, err := helpers.PurlToPkg(sub.Name)
+		if err != nil {
+			return nil, nil, fmt.Errorf("bad purl in statement header: %w", err)
+		}
+		ps = append(ps, p)
+		for a, d := range sub.Digest {
+			io := assembler.IsOccurenceIngest{
+				Pkg: p,
+				Artifact: &generated.ArtifactInputSpec{
+					Algorithm: a,
+					Digest:    d,
+				},
+				IsOccurence: &generated.IsOccurrenceInputSpec{
+					Justification: "Package digest reported to vulnerability certifier",
+				},
+			}
+			ios = append(ios, io)
+		}
 	}
-	for _, vuln := range c.vulns {
-		nodes = append(nodes, vuln)
-	}
-	nodes = append(nodes, c.attestation)
-	return nodes
+	return ps, ios, nil
 }
 
-// TODO(bulldozer): replace with GetPredicate
-// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-// func (c *vulnCertificationParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
-// 	edges := []assembler.GuacEdge{}
-// 	for _, i := range foundIdentities {
-// 		edges = append(edges, assembler.IdentityForEdge{IdentityNode: i, AttestationNode: c.attestation})
-// 	}
-// 	for _, pack := range c.packageNode {
-// 		edges = append(edges, assembler.AttestationForEdge{AttestationNode: c.attestation, ForPackage: pack})
-// 	}
-// 	for _, vuln := range c.vulns {
-// 		edges = append(edges, assembler.VulnerableEdge{VulnerabilityNode: vuln, AttestationNode: c.attestation})
-// 	}
-// 	return edges
-// }
+func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.VulnerabilityMetaDataInput {
+	return &generated.VulnerabilityMetaDataInput{
+		TimeScanned:    *s.Predicate.Metadata.ScannedOn,
+		DbUri:          s.Predicate.Scanner.Database.Uri,
+		DbVersion:      s.Predicate.Scanner.Database.Version,
+		ScannerUri:     s.Predicate.Scanner.Uri,
+		ScannerVersion: s.Predicate.Scanner.Version,
+	}
+}
 
-// TODO(bulldozer)
-func (c *vulnCertificationParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
-	return nil
+func parseVulns(s *attestation_vuln.VulnerabilityStatement) ([]*generated.OSVInputSpec,
+	[]assembler.IsVulnIngest, error) {
+	var vs []*generated.OSVInputSpec
+	var ivs []assembler.IsVulnIngest
+	for _, id := range s.Predicate.Scanner.Result {
+		v := &generated.OSVInputSpec{
+			OsvId: id.VulnerabilityId,
+		}
+		vs = append(vs, v)
+		cve, ghsa, err := helpers.OSVToGHSACVE(id.VulnerabilityId)
+		if err != nil {
+			return nil, nil, fmt.Errorf("could not parse vuln id in attestation: %w", err)
+		}
+		iv := assembler.IsVulnIngest{
+			OSV:  v,
+			CVE:  cve,
+			GHSA: ghsa,
+			IsVuln: &generated.IsVulnerabilityInputSpec{
+				Justification: "Decoded OSV data",
+			},
+		}
+		ivs = append(ivs, iv)
+	}
+	return vs, ivs, nil
+}
+
+func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
+	rv := &assembler.IngestPredicates{
+		IsVuln:      c.isVulns,
+		IsOccurence: c.isOccs,
+	}
+	for _, p := range c.packages {
+		for _, v := range c.vulns {
+			cv := assembler.CertifyVulnIngest{
+				Pkg:      p,
+				OSV:      v,
+				VulnData: c.vulnData,
+			}
+			rv.CertifyVuln = append(rv.CertifyVuln, cv)
+		}
+	}
+	return rv
 }
 
 // GetIdentities gets the identity node from the document if they exist
-func (c *vulnCertificationParser) GetIdentities(ctx context.Context) []common.TrustInformation {
+func (c *parser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 
-func (c *vulnCertificationParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
+func (c *parser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
 }
