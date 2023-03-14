@@ -12,7 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package testdata
 
 import (
@@ -20,13 +19,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"reflect"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -119,7 +119,7 @@ var (
 	ite6SLSA = `
 	{
 		"_type": "https://in-toto.io/Statement/v0.1",
-		"subject": [{"name": "helloworld", "digest": {"sha256": "5678..."}}],
+		"subject": [{"name": "helloworld", "digest": {"sha256": "3a2bd2c5cc4c978e8aefd8bd0ef335fb42ee31d1"}}],
 		"predicateType": "https://slsa.dev/provenance/v0.2",
 		"predicate": {
 			"builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
@@ -140,10 +140,10 @@ var (
 			"materials": [
 			  {
 				"uri": "git+https://github.com/curl/curl-docker@master",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
+				"digest": { "sha1": "24279c5185ddc042896e3748f47fa89b48c1c14e" }
 			  }, {
 				"uri": "github_hosted_vm:ubuntu-18.04:20210123.1",
-				"digest": { "sha1": "d6525c840a62b398424a78d792f457477135d0cf" }
+				"digest": { "sha1": "0bcaaa161e719bca41b6d33fc02547c0f97d5397" }
 			  }
 			]
 		}
@@ -177,102 +177,89 @@ var (
 		},
 	}
 
-	art = assembler.ArtifactNode{
-		Name:   "helloworld",
-		Digest: "sha256:5678...",
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	art = model.ArtifactInputSpec{
+		Algorithm: "sha256",
+		Digest:    "3a2bd2c5cc4c978e8aefd8bd0ef335fb42ee31d1",
 	}
 
-	att = assembler.AttestationNode{
-		FilePath: "TestSource",
-		Digest:   "sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	artPkg, _ = helpers.PurlToPkg(helpers.GuacGenericPurl("helloworld"))
+
+	mat1 = model.ArtifactInputSpec{
+		Algorithm: "sha1",
+		Digest:    "24279c5185ddc042896e3748f47fa89b48c1c14e",
 	}
 
-	mat1 = assembler.ArtifactNode{
-		Name:   "git+https://github.com/curl/curl-docker@master",
-		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	mat1Src, _ = helpers.VcsToSrc("git+https://github.com/curl/curl-docker@master")
+
+	mat2 = model.ArtifactInputSpec{
+		Algorithm: "sha1",
+		Digest:    "0bcaaa161e719bca41b6d33fc02547c0f97d5397",
 	}
 
-	mat2 = assembler.ArtifactNode{
-		Name:   "github_hosted_vm:ubuntu-18.04:20210123.1",
-		Digest: "sha1:d6525c840a62b398424a78d792f457477135d0cf",
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	mat2Pkg, _ = helpers.PurlToPkg(helpers.GuacGenericPurl("github_hosted_vm:ubuntu-18.04:20210123.1"))
+
+	build = model.BuilderInputSpec{
+		Uri: "https://github.com/Attestations/GitHubHostedActions@v1",
 	}
 
-	build = assembler.BuilderNode{
-		BuilderType: "https://github.com/Attestations/GitHubActionsWorkflow@v1",
-		BuilderId:   "https://github.com/Attestations/GitHubHostedActions@v1",
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	// Not currently used due to skipping of DSSE and Trust information
+	// EcdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
+	// keyHash, _               = dsse.SHA256KeyID(EcdsaPubKey)
+	// Ident = assembler.IdentityNode{
+	// 	ID:        "test",
+	// 	Digest:    keyHash,
+	// 	Key:       base64.StdEncoding.EncodeToString(pemBytes),
+	// 	KeyType:   "ecdsa",
+	// 	KeyScheme: "ecdsa",
+	// 	NodeData: *assembler.NewObjectMetadata(
+	// 		processor.SourceInformation{
+	// 			Collector: "TestCollector",
+	// 			Source:    "TestSource",
+	// 		},
+	// 	),
+	// }
+
+	slsaIsOccurrence = model.IsOccurrenceInputSpec{
+		Justification: "from SLSA definition of checksums for subject/materials",
 	}
 
-	EcdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
-	keyHash, _               = dsse.SHA256KeyID(EcdsaPubKey)
-
-	Ident = assembler.IdentityNode{
-		ID:        "test",
-		Digest:    keyHash,
-		Key:       base64.StdEncoding.EncodeToString(pemBytes),
-		KeyType:   "ecdsa",
-		KeyScheme: "ecdsa",
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
-
-	DsseNodes = []assembler.GuacNode{Ident}
-	DsseEdges = []assembler.GuacEdge{}
-
-	SlsaNodes = []assembler.GuacNode{art, att, mat1, mat2, build}
-	SlsaEdges = []assembler.GuacEdge{
-		assembler.IdentityForEdge{
-			IdentityNode:    Ident,
-			AttestationNode: att,
+	slsaStartTime, _ = time.Parse(time.RFC3339, "2020-08-19T08:38:00Z")
+	SlsaPreds        = assembler.IngestPredicates{
+		IsOccurence: []assembler.IsOccurenceIngest{
+			{Pkg: artPkg, Artifact: &art, IsOccurence: &slsaIsOccurrence},
+			{Src: mat1Src, Artifact: &mat1, IsOccurence: &slsaIsOccurrence},
+			{Pkg: mat2Pkg, Artifact: &mat2, IsOccurence: &slsaIsOccurrence},
 		},
-		assembler.BuiltByEdge{
-			ArtifactNode: art,
-			BuilderNode:  build,
-		},
-		assembler.AttestationForEdge{
-			AttestationNode: att,
-			ForArtifact:     art,
-		},
-		assembler.DependsOnEdge{
-			ArtifactNode:       art,
-			ArtifactDependency: mat1,
-		},
-		assembler.DependsOnEdge{
-			ArtifactNode:       art,
-			ArtifactDependency: mat2,
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				HasSlsa: &generated.SLSAInputSpec{
+					BuildType:   "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+					SlsaVersion: "https://slsa.dev/provenance/v0.2",
+					StartedOn:   slsaStartTime,
+					SlsaPredicate: []generated.SLSAPredicateInputSpec{
+						{Key: "slsa.metadata.completeness.environment", Value: "true"},
+						{Key: "slsa.metadata.buildStartedOn", Value: "2020-08-19T08:38:00Z"},
+						{Key: "slsa.metadata.completeness.materials", Value: "false"},
+						{Key: "slsa.buildType", Value: "https://github.com/Attestations/GitHubActionsWorkflow@v1"},
+						{Key: "slsa.invocation.configSource.entryPoint", Value: "build.yaml:maketgz"},
+						{Key: "slsa.invocation.configSource.uri", Value: "git+https://github.com/curl/curl-docker@master"},
+						{Key: "slsa.metadata.reproducible", Value: "false"},
+						{Key: "slsa.materials.0.uri", Value: "git+https://github.com/curl/curl-docker@master"},
+						{Key: "slsa.builder.id", Value: "https://github.com/Attestations/GitHubHostedActions@v1"},
+						{Key: "slsa.invocation.configSource.digest.sha1", Value: "d6525c840a62b398424a78d792f457477135d0cf"},
+						{Key: "slsa.metadata.completeness.parameters", Value: "false"},
+						{Key: "slsa.materials.0.digest.sha1", Value: "24279c5185ddc042896e3748f47fa89b48c1c14e"},
+						{Key: "slsa.materials.1.uri", Value: "github_hosted_vm:ubuntu-18.04:20210123.1"},
+						{Key: "slsa.materials.1.digest.sha1", Value: "0bcaaa161e719bca41b6d33fc02547c0f97d5397"},
+					},
+				},
+				Artifact: &art,
+				Builder:  &build,
+				Materials: []model.PackageSourceOrArtifactInput{
+					{Artifact: &mat1},
+					{Artifact: &mat2},
+				},
+			},
 		},
 	}
 
@@ -1097,6 +1084,8 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(isDependencyLess),
 	cmpopts.SortSlices(isOccurenceLess),
 	cmpopts.SortSlices(packageQualifierInputSpecLess),
+	cmpopts.SortSlices(psaInputSpecLess),
+	cmpopts.SortSlices(slsaPredicateInputSpecLess),
 }
 
 func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
@@ -1112,6 +1101,14 @@ func isOccurenceLess(e1, e2 assembler.IsOccurenceIngest) bool {
 }
 
 func packageQualifierInputSpecLess(e1, e2 generated.PackageQualifierInputSpec) bool {
+	return gLess(e1, e2)
+}
+
+func psaInputSpecLess(e1, e2 generated.PackageSourceOrArtifactInput) bool {
+	return gLess(e1, e2)
+}
+
+func slsaPredicateInputSpecLess(e1, e2 generated.SLSAPredicateInputSpec) bool {
 	return gLess(e1, e2)
 }
 

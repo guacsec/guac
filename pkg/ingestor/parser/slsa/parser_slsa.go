@@ -94,10 +94,6 @@ type parsedObject struct {
 	pkg *assembler.IsOccurenceIngest
 }
 
-func determineObject() (parsedObject, error) {
-	return parsedObject{}, fmt.Errorf("not yet implemented")
-}
-
 func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 	// append artifact node for the subjects
 	for _, sub := range statement.Subject {
@@ -126,7 +122,7 @@ func (s *slsaParser) getMaterials(statement *in_toto.ProvenanceStatement) {
 
 			s.identifierStrings.UnclassifiedStrings = append(s.identifierStrings.UnclassifiedStrings, mat.URI)
 		}
-		s.subjects = append(s.subjects, getSlsaEntity(mat.URI, artifacts))
+		s.materials = append(s.materials, getSlsaEntity(mat.URI, artifacts))
 	}
 }
 
@@ -134,22 +130,33 @@ func getSlsaEntity(name string, artifacts []model.ArtifactInputSpec) slsaEntity 
 	s := slsaEntity{
 		artifacts: artifacts,
 	}
+
+	var (
+		src *model.SourceInputSpec
+		pkg *model.PkgInputSpec
+	)
 	pkg, err := helpers.PurlToPkg(name)
 	if err == nil {
 		s.pkg = pkg
+		goto finish
 	}
 
-	// TODO (lumjjb) Add VCS check here
-	// src, err := helpers.VcsToSrc
+	src, err = helpers.VcsToSrc(name)
+	if err == nil {
+		s.source = src
+		goto finish
+	}
 
 	// else we create a GUAC package for it
 	pkg, err = helpers.PurlToPkg(helpers.GuacGenericPurl(name))
 	if err == nil {
 		s.pkg = pkg
+		goto finish
 	} else {
 		panic("unable to get Guac Generic Purl, this should not happen")
 	}
 
+finish:
 	s.occurence = model.IsOccurrenceInputSpec{
 		Justification: "from SLSA definition of checksums for subject/materials",
 	}
@@ -234,7 +241,7 @@ func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 
 	// Assemble materials
-	var materials []model.PackageSourceOrArtifactInput
+	materials := []model.PackageSourceOrArtifactInput{}
 	for _, o := range s.materials {
 		for _, a := range o.artifacts {
 			materials = append(materials, model.PackageSourceOrArtifactInput{
@@ -245,7 +252,7 @@ func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 
 	for _, o := range s.subjects {
 		for _, a := range o.artifacts {
-			preds.HasSlsaIngest = append(preds.HasSlsaIngest, assembler.HasSlsaIngest{
+			preds.HasSlsa = append(preds.HasSlsa, assembler.HasSlsaIngest{
 				Artifact:  &a,
 				HasSlsa:   &s.slsaAttestation,
 				Materials: materials,

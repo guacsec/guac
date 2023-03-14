@@ -61,7 +61,7 @@ func Test_spdxParser(t *testing.T) {
 
 			preds := s.GetPredicates(ctx)
 			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
-				t.Errorf("scorecard.GetPredicate mismatch values (+got, -expected): %s", d)
+				t.Errorf("spdx.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}

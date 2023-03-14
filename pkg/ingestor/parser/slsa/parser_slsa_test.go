@@ -16,12 +16,11 @@
 package slsa
 
 // TODO(bulldozer): freeze test
-/*
 import (
 	"context"
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -31,17 +30,15 @@ import (
 func Test_slsaParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name      string
-		doc       *processor.Document
-		wantNodes []assembler.GuacNode
-		wantEdges []assembler.GuacEdge
-		wantErr   bool
+		name           string
+		doc            *processor.Document
+		wantPredicates *assembler.IngestPredicates
+		wantErr        bool
 	}{{
-		name:      "testing",
-		doc:       &testdata.Ite6SLSADoc,
-		wantNodes: testdata.SlsaNodes,
-		wantEdges: testdata.SlsaEdges,
-		wantErr:   false,
+		name:           "testing",
+		doc:            &testdata.Ite6SLSADoc,
+		wantPredicates: &testdata.SlsaPreds,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,13 +51,11 @@ func Test_slsaParser(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if nodes := s.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
-				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
-			}
-			if edges := s.CreateEdges(ctx, []assembler.IdentityNode{testdata.Ident}); !reflect.DeepEqual(edges, tt.wantEdges) {
-				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+
+			preds := s.GetPredicates(ctx)
+			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+				t.Errorf("slsa.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
 }
-*/
