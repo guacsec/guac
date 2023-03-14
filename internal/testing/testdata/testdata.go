@@ -23,6 +23,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -202,8 +203,8 @@ var (
 		Uri: "https://github.com/Attestations/GitHubHostedActions@v1",
 	}
 
+	EcdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
 	// Not currently used due to skipping of DSSE and Trust information
-	// EcdsaPubKey, pemBytes, _ = keyutil.GetECDSAPubKey()
 	// keyHash, _               = dsse.SHA256KeyID(EcdsaPubKey)
 	// Ident = assembler.IdentityNode{
 	// 	ID:        "test",
