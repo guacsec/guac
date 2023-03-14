@@ -32,6 +32,7 @@ import (
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
@@ -264,6 +265,24 @@ var (
 			},
 		},
 	}
+
+	// TODO: needs to be resolved by https://github.com/guacsec/guac/issues/75
+	Ident = []common.TrustInformation{}
+	// Ident = assembler.IdentityNode{
+	// 	ID:        "test",
+	// 	Digest:    keyHash,
+	// 	Key:       base64.StdEncoding.EncodeToString(pemBytes),
+	// 	KeyType:   "ecdsa",
+	// 	KeyScheme: "ecdsa",
+	// 	NodeData: *assembler.NewObjectMetadata(
+	// 		processor.SourceInformation{
+	// 			Collector: "TestCollector",
+	// 			Source:    "TestSource",
+	// 		},
+	// 	),
+	// }
+
+	DssePredicates = &assembler.IngestPredicates{}
 
 	// SPDX Testdata
 

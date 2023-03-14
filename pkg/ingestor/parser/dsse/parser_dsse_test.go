@@ -16,16 +16,16 @@
 package dsse
 
 // TODO(bulldozer): freeze tests
-/*
 import (
 	"context"
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/mockverifier"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/verifier"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -37,19 +37,17 @@ func Test_DsseParser(t *testing.T) {
 		t.Errorf("verifier.RegisterVerifier() failed with error: %v", err)
 	}
 	tests := []struct {
-		name         string
-		doc          *processor.Document
-		wantNodes    []assembler.GuacNode
-		wantEdges    []assembler.GuacEdge
-		wantIdentity assembler.IdentityNode
-		wantErr      bool
+		name           string
+		doc            *processor.Document
+		wantPredicates *assembler.IngestPredicates
+		wantIdentities []common.TrustInformation
+		wantErr        bool
 	}{{
-		name:         "testing",
-		doc:          &testdata.Ite6DSSEDoc,
-		wantNodes:    testdata.DsseNodes,
-		wantEdges:    testdata.DsseEdges,
-		wantIdentity: testdata.Ident,
-		wantErr:      false,
+		name:           "testing",
+		doc:            &testdata.Ite6DSSEDoc,
+		wantPredicates: testdata.DssePredicates,
+		wantIdentities: testdata.Ident,
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -62,16 +60,16 @@ func Test_DsseParser(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if nodes := d.CreateNodes(ctx); !reflect.DeepEqual(nodes, tt.wantNodes) {
-				t.Errorf("slsa.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
+
+			preds := d.GetPredicates(ctx)
+			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+				t.Errorf("dsse.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
-			if edges := d.CreateEdges(ctx, []assembler.IdentityNode{tt.wantIdentity}); !reflect.DeepEqual(edges, tt.wantEdges) {
-				t.Errorf("slsa.CreateEdges() = %v, want %v", edges, tt.wantEdges)
-			}
-			if identity := d.GetIdentities(ctx); !reflect.DeepEqual(identity, []assembler.IdentityNode{tt.wantIdentity}) {
-				t.Errorf("slsa.GetIdentities() = %v, want %v", identity, []assembler.IdentityNode{tt.wantIdentity})
+
+			identities := d.GetIdentities(ctx)
+			if d := cmp.Diff(tt.wantIdentities, identities, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+				t.Errorf("dsse.GetIdentities mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
 }
-*/
