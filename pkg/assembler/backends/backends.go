@@ -48,6 +48,9 @@ type Backend interface {
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error)
 
+	// Connected queries
+	Connected(ctx context.Context, subject model.PackageSourceArtifactOsvCveOrGhsaFilter, maxPathLength int) (*model.EvidenceTrees, error)
+
 	// Mutations for software trees (read-write queries)
 	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
 	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)

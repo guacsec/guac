@@ -29,6 +29,11 @@ type PackageOrSource interface {
 	IsPackageOrSource()
 }
 
+// PackageSourceArtifactOsvCveOrGhsa is a union of Package, Source, Artifact, OSV, CVE and GHSA.
+type PackageSourceArtifactOsvCveOrGhsa interface {
+	IsPackageSourceArtifactOsvCveOrGhsa()
+}
+
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
 type PackageSourceOrArtifact interface {
 	IsPackageSourceOrArtifact()
@@ -47,6 +52,8 @@ type Artifact struct {
 }
 
 func (Artifact) IsPackageOrArtifact() {}
+
+func (Artifact) IsPackageSourceArtifactOsvCveOrGhsa() {}
 
 func (Artifact) IsPackageSourceOrArtifact() {}
 
@@ -96,6 +103,8 @@ type Cve struct {
 }
 
 func (Cve) IsOsvCveOrGhsa() {}
+
+func (Cve) IsPackageSourceArtifactOsvCveOrGhsa() {}
 
 func (Cve) IsCveOrGhsa() {}
 
@@ -278,6 +287,22 @@ type CveOrGhsaSpec struct {
 	Ghsa *GHSASpec `json:"ghsa"`
 }
 
+type EvidenceTrees struct {
+	Subject          PackageSourceArtifactOsvCveOrGhsa `json:"subject"`
+	IsOccurrence     []*IsOccurrence                   `json:"isOccurrence"`
+	IsDependency     []*IsDependency                   `json:"isDependency"`
+	IsVulnerability  []*IsVulnerability                `json:"isVulnerability"`
+	VexStatement     []*CertifyVEXStatement            `json:"vexStatement"`
+	HashEqual        []*HashEqual                      `json:"hashEqual"`
+	CertifyBad       []*CertifyBad                     `json:"certifyBad"`
+	CertifyPkg       []*CertifyPkg                     `json:"certifyPkg"`
+	CertifyScorecard []*CertifyScorecard               `json:"certifyScorecard"`
+	CertifyVuln      []*CertifyVuln                    `json:"certifyVuln"`
+	HasSourceAt      []*HasSourceAt                    `json:"hasSourceAt"`
+	HasSbom          []*HasSbom                        `json:"hasSBOM"`
+	HasSlsa          []*HasSlsa                        `json:"hasSLSA"`
+}
+
 // GHSA represents GitHub security advisories.
 //
 // We create a separate node to allow retrieving all GHSAs.
@@ -286,6 +311,8 @@ type Ghsa struct {
 }
 
 func (Ghsa) IsOsvCveOrGhsa() {}
+
+func (Ghsa) IsPackageSourceArtifactOsvCveOrGhsa() {}
 
 func (Ghsa) IsCveOrGhsa() {}
 
@@ -563,6 +590,8 @@ type Osv struct {
 
 func (Osv) IsOsvCveOrGhsa() {}
 
+func (Osv) IsPackageSourceArtifactOsvCveOrGhsa() {}
+
 // OSVId is the actual ID that is given to a specific vulnerability.
 //
 // The `id` field is mandatory and canonicalized to be lowercase.
@@ -621,6 +650,8 @@ type Package struct {
 }
 
 func (Package) IsPackageOrArtifact() {}
+
+func (Package) IsPackageSourceArtifactOsvCveOrGhsa() {}
 
 func (Package) IsPackageSourceOrArtifact() {}
 
@@ -725,6 +756,19 @@ type PackageQualifierInputSpec struct {
 type PackageQualifierSpec struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
+}
+
+// PackageSourceArtifactOsvCveOrGhsaFilter allows using PackageSourceArtifactOsvCveOrGhsa union as
+// query type.
+//
+// Exactly one of the value must be set to non-nil.
+type PackageSourceArtifactOsvCveOrGhsaFilter struct {
+	Package  *PkgSpec      `json:"package"`
+	Source   *SourceSpec   `json:"source"`
+	Artifact *ArtifactSpec `json:"artifact"`
+	Osv      *OSVSpec      `json:"osv"`
+	Cve      *CVESpec      `json:"cve"`
+	Ghsa     *GHSASpec     `json:"ghsa"`
 }
 
 // PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
@@ -984,6 +1028,8 @@ type Source struct {
 	Type       string             `json:"type"`
 	Namespaces []*SourceNamespace `json:"namespaces"`
 }
+
+func (Source) IsPackageSourceArtifactOsvCveOrGhsa() {}
 
 func (Source) IsPackageSourceOrArtifact() {}
 

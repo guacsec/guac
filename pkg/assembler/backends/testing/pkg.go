@@ -21,88 +21,88 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func registerAllPackages(client *demoClient) {
-	// TODO: add util to convert from pURL to package fields
-	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-	client.registerPackage("apk", "alpine", "apk", "2.12.9-r3", "", "arch", "x86")
-	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
-	client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch", "x86")
-	// pkg:conan/openssl.org/openssl@3.0.3?arch=x86_64&build_type=Debug&compiler=Visual%20Studio&compiler.runtime=MDd&compiler.version=16&os=Windows&shared=True&rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e&prev=b429db8a0e324114c25ec387bfd8281f330d7c5c
-	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "arch", "x86_64", "build_type", "Debug", "compiler", "Visual%20Studio", "compiler.runtime", "MDd", "compiler.version", "16", "os", "Windows", "shared", "True", "rrev", "93a82349c31917d2d674d22065c7a9ef9f380c8e", "prev", "b429db8a0e324114c25ec387bfd8281f330d7c5c")
-	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "user", "bincrafters", "channel", "stable")
-	// pkg:conan/openssl@3.0.3
-	client.registerPackage("conan", "", "openssl", "3.0.3", "")
-	// pkg:deb/debian/attr@1:2.4.47-2?arch=amd64
-	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch", "amd64")
-	// pkg:deb/debian/attr@1:2.4.47-2?arch=source
-	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch", "source")
-	// pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie
-	client.registerPackage("deb", "debian", "curl", "7.50.3-1", "", "arch", "i386", "distro", "jessie")
-	// pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch
-	client.registerPackage("deb", "debian", "dpkg", "1.19.0.4", "", "arch", "amd64", "distro", "stretch")
-	// pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64
-	client.registerPackage("deb", "ubuntu", "dpkg", "1.19.0.4", "", "arch", "amd64")
-	// pkg:docker/cassandra@latest
-	client.registerPackage("docker", "", "cassandra", "latest", "")
-	// pkg:docker/cassandra@sha256:244fd47e07d1004f0aed9c
-	client.registerPackage("docker", "", "cassandra", "sha256:244fd47e07d1004f0aed9c", "")
-	// pkg:docker/customer/dockerimage@sha256:244fd47e07d1004f0aed9c?repository_url=gcr.io
-	client.registerPackage("docker", "customer", "dockerimage", "sha256:244fd47e07d1004f0aed9c", "", "repository_url", "gcr.io")
-	// pkg:docker/smartentry/debian@dc437cc87d10
-	client.registerPackage("docker", "smartentry", "debian", "dc437cc87d10", "")
-	// pkg:generic/bitwarderl?vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32
-	client.registerPackage("generic", "", "bitwarderl", "", "", "vcs_url", "git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32")
-	// pkg:generic/openssl@1.1.10g
-	client.registerPackage("generic", "", "openssl", "1.1.10g", "")
-	// pkg:generic/openssl@1.1.10g?download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da
-	client.registerPackage("generic", "", "openssl", "1.1.10g", "", "download_url", "https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum", "sha256:de4d501267da")
-	// pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
-	client.registerPackage("oci", "", "debian", "sha256:244fd47e07d10", "", "repository_url", "ghcr.io/debian", "tag", "bullseye")
-	// pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1
-	client.registerPackage("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", "tag", "v1")
-	// pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io/distroless/static&tag=latest
-	client.registerPackage("oci", "", "static", "sha256:244fd47e07d10", "", "repository_url", "gcr.io/distroless/static", "tag", "latest")
-	// pkg:pypi/django-allauth@12.23
-	client.registerPackage("pypi", "", "django-allauth", "12.23", "")
-	// pkg:pypi/django@1.11.1
-	client.registerPackage("pypi", "", "django", "1.11.1", "")
-	// pkg:pypi/django@1.11.1#subpath
-	client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
-	// pkg:pypi/kubetest@0.9.5
-	client.registerPackage("pypi", "", "kubetest", "0.9.5", "")
-}
+// func registerAllPackages(client *demoClient) {
+// 	// TODO: add util to convert from pURL to package fields
+// 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
+// 	client.registerPackage("apk", "alpine", "apk", "2.12.9-r3", "", "arch", "x86")
+// 	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
+// 	client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch", "x86")
+// 	// pkg:conan/openssl.org/openssl@3.0.3?arch=x86_64&build_type=Debug&compiler=Visual%20Studio&compiler.runtime=MDd&compiler.version=16&os=Windows&shared=True&rrev=93a82349c31917d2d674d22065c7a9ef9f380c8e&prev=b429db8a0e324114c25ec387bfd8281f330d7c5c
+// 	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "arch", "x86_64", "build_type", "Debug", "compiler", "Visual%20Studio", "compiler.runtime", "MDd", "compiler.version", "16", "os", "Windows", "shared", "True", "rrev", "93a82349c31917d2d674d22065c7a9ef9f380c8e", "prev", "b429db8a0e324114c25ec387bfd8281f330d7c5c")
+// 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
+// 	client.registerPackage("conan", "openssl.org", "openssl", "3.0.3", "", "user", "bincrafters", "channel", "stable")
+// 	// pkg:conan/openssl@3.0.3
+// 	client.registerPackage("conan", "", "openssl", "3.0.3", "")
+// 	// pkg:deb/debian/attr@1:2.4.47-2?arch=amd64
+// 	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch", "amd64")
+// 	// pkg:deb/debian/attr@1:2.4.47-2?arch=source
+// 	client.registerPackage("deb", "debian", "attr", "1:2.4.47-2", "", "arch", "source")
+// 	// pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie
+// 	client.registerPackage("deb", "debian", "curl", "7.50.3-1", "", "arch", "i386", "distro", "jessie")
+// 	// pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch
+// 	client.registerPackage("deb", "debian", "dpkg", "1.19.0.4", "", "arch", "amd64", "distro", "stretch")
+// 	// pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64
+// 	client.registerPackage("deb", "ubuntu", "dpkg", "1.19.0.4", "", "arch", "amd64")
+// 	// pkg:docker/cassandra@latest
+// 	client.registerPackage("docker", "", "cassandra", "latest", "")
+// 	// pkg:docker/cassandra@sha256:244fd47e07d1004f0aed9c
+// 	client.registerPackage("docker", "", "cassandra", "sha256:244fd47e07d1004f0aed9c", "")
+// 	// pkg:docker/customer/dockerimage@sha256:244fd47e07d1004f0aed9c?repository_url=gcr.io
+// 	client.registerPackage("docker", "customer", "dockerimage", "sha256:244fd47e07d1004f0aed9c", "", "repository_url", "gcr.io")
+// 	// pkg:docker/smartentry/debian@dc437cc87d10
+// 	client.registerPackage("docker", "smartentry", "debian", "dc437cc87d10", "")
+// 	// pkg:generic/bitwarderl?vcs_url=git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32
+// 	client.registerPackage("generic", "", "bitwarderl", "", "", "vcs_url", "git%2Bhttps://git.fsfe.org/dxtr/bitwarderl%40cc55108da32")
+// 	// pkg:generic/openssl@1.1.10g
+// 	client.registerPackage("generic", "", "openssl", "1.1.10g", "")
+// 	// pkg:generic/openssl@1.1.10g?download_url=https://openssl.org/source/openssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da
+// 	client.registerPackage("generic", "", "openssl", "1.1.10g", "", "download_url", "https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum", "sha256:de4d501267da")
+// 	// pkg:oci/debian@sha256:244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
+// 	client.registerPackage("oci", "", "debian", "sha256:244fd47e07d10", "", "repository_url", "ghcr.io/debian", "tag", "bullseye")
+// 	// pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1
+// 	client.registerPackage("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", "tag", "v1")
+// 	// pkg:oci/static@sha256:244fd47e07d10?repository_url=gcr.io/distroless/static&tag=latest
+// 	client.registerPackage("oci", "", "static", "sha256:244fd47e07d10", "", "repository_url", "gcr.io/distroless/static", "tag", "latest")
+// 	// pkg:pypi/django-allauth@12.23
+// 	client.registerPackage("pypi", "", "django-allauth", "12.23", "")
+// 	// pkg:pypi/django@1.11.1
+// 	client.registerPackage("pypi", "", "django", "1.11.1", "")
+// 	// pkg:pypi/django@1.11.1#subpath
+// 	client.registerPackage("pypi", "", "django", "1.11.1", "subpath")
+// 	// pkg:pypi/kubetest@0.9.5
+// 	client.registerPackage("pypi", "", "kubetest", "0.9.5", "")
+// }
 
-// Ingest Package
+// // Ingest Package
 
-func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
-	pkgType := pkg.Type
-	name := pkg.Name
+// func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+// 	pkgType := pkg.Type
+// 	name := pkg.Name
 
-	namespace := ""
-	if pkg.Namespace != nil {
-		namespace = *pkg.Namespace
-	}
+// 	namespace := ""
+// 	if pkg.Namespace != nil {
+// 		namespace = *pkg.Namespace
+// 	}
 
-	version := ""
-	if pkg.Version != nil {
-		version = *pkg.Version
-	}
+// 	version := ""
+// 	if pkg.Version != nil {
+// 		version = *pkg.Version
+// 	}
 
-	subpath := ""
-	if pkg.Subpath != nil {
-		subpath = *pkg.Subpath
-	}
+// 	subpath := ""
+// 	if pkg.Subpath != nil {
+// 		subpath = *pkg.Subpath
+// 	}
 
-	var qualifiers []string
-	for _, qualifier := range pkg.Qualifiers {
-		qualifiers = append(qualifiers, qualifier.Key, qualifier.Value)
-	}
+// 	var qualifiers []string
+// 	for _, qualifier := range pkg.Qualifiers {
+// 		qualifiers = append(qualifiers, qualifier.Key, qualifier.Value)
+// 	}
 
-	newPkg := c.registerPackage(pkgType, namespace, name, version, subpath, qualifiers...)
+// 	newPkg := c.registerPackage(pkgType, namespace, name, version, subpath, qualifiers...)
 
-	return newPkg, nil
-}
+// 	return newPkg, nil
+// }
 
 func (c *demoClient) registerPackage(pkgType, namespace, name, version, subpath string, qualifiers ...string) *model.Package {
 	for i, p := range c.packages {
@@ -202,20 +202,20 @@ func buildQualifierSet(qualifiers ...string) []*model.PackageQualifier {
 	return qs
 }
 
-// Query Package
+// // Query Package
 
-func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	var packages []*model.Package
-	for _, p := range c.packages {
-		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
-			newPkg := filterPackageNamespace(p, pkgSpec)
-			if newPkg != nil {
-				packages = append(packages, newPkg)
-			}
-		}
-	}
-	return packages, nil
-}
+// func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+// 	var packages []*model.Package
+// 	for _, p := range c.packages {
+// 		if pkgSpec.Type == nil || p.Type == *pkgSpec.Type {
+// 			newPkg := filterPackageNamespace(p, pkgSpec)
+// 			if newPkg != nil {
+// 				packages = append(packages, newPkg)
+// 			}
+// 		}
+// 	}
+// 	return packages, nil
+// }
 
 func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
 	var namespaces []*model.PackageNamespace
@@ -305,4 +305,279 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 		}
 	}
 	return v
+}
+
+// Internal data: Packages
+type pkgTypeMap map[string]pkgNamespaceMap
+type pkgNamespaceMap map[string]pkgNameMap
+type pkgNameMap map[string]*pkgVersionStruct
+type pkgVersionStruct struct {
+	source   *srcMapLink
+	versions pkgVersionList
+}
+type pkgVersionList []*pkgVersionNode
+type pkgVersionNode struct {
+	version string
+	subpath string
+	source  *srcMapLink
+}
+
+// Be type safe, don't use any / interface{}
+type pkgNameOrVersion interface {
+	implementsPkgNameOrVersion()
+	setSource(link *srcMapLink)
+}
+
+func (p *pkgVersionStruct) implementsPkgNameOrVersion() {}
+func (p *pkgVersionNode) implementsPkgNameOrVersion()   {}
+func (p *pkgVersionStruct) setSource(link *srcMapLink)  { p.source = link }
+func (p *pkgVersionNode) setSource(link *srcMapLink)    { p.source = link }
+
+var packages = pkgTypeMap{}
+
+func (c *demoClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+	namespaces, hasNamespace := packages[pkg.Type]
+	names, hasName := namespaces[nilToEmpty(pkg.Namespace)]
+	versionStruct, hasVersions := names[pkg.Name]
+	versions := pkgVersionList{}
+	if hasVersions {
+		versions = versionStruct.versions
+	}
+	newVersion := pkgVersionNode{
+		version: nilToEmpty(pkg.Version),
+		subpath: nilToEmpty(pkg.Subpath),
+	}
+
+	// Don't insert duplicates
+	duplicate := false
+	for _, v := range versions {
+		if v.version == newVersion.version && v.subpath == newVersion.subpath {
+			duplicate = true
+			break
+		}
+	}
+	if !duplicate {
+		versions = append(versions, &newVersion)
+		if !hasNamespace {
+			packages[pkg.Type] = pkgNamespaceMap{}
+		}
+		if !hasName {
+			packages[pkg.Type][nilToEmpty(pkg.Namespace)] = pkgNameMap{}
+		}
+		if !hasVersions {
+			versionStruct = &pkgVersionStruct{}
+		}
+		versionStruct.versions = versions
+		packages[pkg.Type][nilToEmpty(pkg.Namespace)][pkg.Name] = versionStruct
+	}
+
+	// build return GraphQL type
+	out := packageFromInput(*pkg)
+	return out, nil
+}
+
+func (c *demoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	out := []*model.Package{}
+	for dbType, namespaces := range packages {
+		if noMatch(pkgSpec.Type, dbType) {
+			continue
+		}
+		pNamespaces := []*model.PackageNamespace{}
+		for namespace, names := range namespaces {
+			if noMatch(pkgSpec.Namespace, namespace) {
+				continue
+			}
+			pns := []*model.PackageName{}
+			for name, versions := range names {
+				if noMatch(pkgSpec.Name, name) {
+					continue
+				}
+				pvs := []*model.PackageVersion{}
+				for _, v := range versions.versions {
+					if noMatch(pkgSpec.Version, v.version) {
+						continue
+					}
+					if noMatch(pkgSpec.Subpath, v.subpath) {
+						continue
+					}
+					pv := model.PackageVersion{
+						Version: v.version,
+						Subpath: v.subpath,
+					}
+					pvs = append(pvs, &pv)
+				}
+				pn := model.PackageName{
+					Name:     name,
+					Versions: pvs,
+				}
+				pns = append(pns, &pn)
+			}
+			pn := model.PackageNamespace{
+				Namespace: namespace,
+				Names:     pns,
+			}
+			pNamespaces = append(pNamespaces, &pn)
+		}
+		p := model.Package{
+			Type:       dbType,
+			Namespaces: pNamespaces,
+		}
+		out = append(out, &p)
+	}
+	return out, nil
+}
+
+func noMatch(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return false
+}
+
+func noMatchInput(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return value != ""
+}
+
+func noMatchPtr(filter *string, value *string) bool {
+	if filter == nil {
+		if value == nil {
+			return false
+		} else {
+			return false
+		}
+	} else {
+		if value == nil {
+			return true
+		} else {
+			return *value != *filter
+		}
+	}
+}
+
+func noMatchPtrInput(input *string, value *string) bool {
+	if input == nil {
+		if value == nil {
+			return false
+		} else {
+			return *value != ""
+		}
+	} else {
+		if value == nil {
+			return true
+		} else {
+			return *value != *input
+		}
+	}
+}
+
+func nilToEmpty(input *string) string {
+	if input == nil {
+		return ""
+	}
+	return *input
+}
+
+func packageFromInput(input model.PkgInputSpec) *model.Package {
+	pv := model.PackageVersion{
+		Version: nilToEmpty(input.Version),
+		Subpath: nilToEmpty(input.Subpath),
+	}
+	pn := model.PackageName{
+		Name:     input.Name,
+		Versions: []*model.PackageVersion{&pv},
+	}
+	pns := model.PackageNamespace{
+		Namespace: nilToEmpty(input.Namespace),
+		Names:     []*model.PackageName{&pn},
+	}
+	return &model.Package{
+		Type:       input.Type,
+		Namespaces: []*model.PackageNamespace{&pns},
+	}
+}
+
+func packageMatchingFilter(filter *model.PkgSpec, packageArg pkgNameOrVersion) *model.Package {
+	var out *model.Package
+	out = nil
+
+	for dbType, namespaces := range packages {
+		if filter != nil && noMatch(filter.Type, dbType) {
+			continue
+		}
+		foundNamespace := false
+		pNamespaces := []*model.PackageNamespace{}
+		for namespace, names := range namespaces {
+			if filter != nil && noMatch(filter.Namespace, namespace) {
+				continue
+			}
+			foundName := false
+			pns := []*model.PackageName{}
+			for name, versions := range names {
+				if filter != nil && noMatch(filter.Name, name) {
+					continue
+				}
+				if packageArg == versions {
+					if filter != nil && filter.Version != nil {
+						continue
+					}
+					pn := model.PackageName{
+						Name: name,
+					}
+					pns = append(pns, &pn)
+					foundName = true
+					break
+				} else {
+					pvs := []*model.PackageVersion{}
+					foundVersion := false
+					for _, v := range versions.versions {
+						if filter != nil && noMatch(filter.Version, v.version) {
+							continue
+						}
+						if filter != nil && noMatch(filter.Subpath, v.subpath) {
+							continue
+						}
+						if packageArg != v {
+							continue
+						}
+						pv := model.PackageVersion{
+							Version: v.version,
+							Subpath: v.subpath,
+						}
+						pvs = append(pvs, &pv)
+						foundVersion = true
+					}
+					if foundVersion {
+						pn := model.PackageName{
+							Name:     name,
+							Versions: pvs,
+						}
+						pns = append(pns, &pn)
+						foundName = true
+						break
+					}
+				}
+			}
+			if foundName {
+				pn := model.PackageNamespace{
+					Namespace: namespace,
+					Names:     pns,
+				}
+				pNamespaces = append(pNamespaces, &pn)
+				foundNamespace = true
+				break
+			}
+		}
+		if foundNamespace {
+			out = &model.Package{
+				Type:       dbType,
+				Namespaces: pNamespaces,
+			}
+			break
+		}
+	}
+
+	return out
 }

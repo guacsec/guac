@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -40,6 +41,8 @@ func ingestData(port int) {
 
 	start := time.Now()
 	logger.Infof("Ingesting test data into backend server")
+	ingestPackages(ctx, gqlclient)
+	ingestSources(ctx, gqlclient)
 	ingestScorecards(ctx, gqlclient)
 	ingestSLSA(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
@@ -49,7 +52,8 @@ func ingestData(port int) {
 	ingestCertifyBad(ctx, gqlclient)
 	ingestHashEqual(ctx, gqlclient)
 	ingestHasSBOM(ctx, gqlclient)
-	ingestHasSourceAt(ctx, gqlclient)
+	//ingestHasSourceAt(ctx, gqlclient)
+	ingestHasSourceAtNew(ctx, gqlclient)
 	ingestIsVulnerability(ctx, gqlclient)
 	ingestVEXStatement(ctx, gqlclient)
 	time := time.Now().Sub(start)
@@ -1081,6 +1085,141 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			}
 		} else {
 			fmt.Printf("input missing for package or artifact")
+		}
+	}
+}
+
+func ingestPackages(ctx context.Context, client graphql.Client) {
+	v11 := "2.11.1"
+	v12 := "2.12.0"
+	subpath1 := "saved_model_cli.py"
+	subpath2 := "__init__.py"
+	opensslNamespace := "openssl.org"
+	opensslVersion := "3.0.3"
+
+	inputs := []model.PkgInputSpec{{
+		Type: "pypi",
+		Name: "tensorflow",
+	}, {
+		Type:    "pypi",
+		Name:    "tensorflow",
+		Version: &v11,
+	}, {
+		Type:    "pypi",
+		Name:    "tensorflow",
+		Version: &v12,
+	}, {
+		Type:    "pypi",
+		Name:    "tensorflow",
+		Version: &v12,
+		Subpath: &subpath1,
+	}, {
+		Type:    "pypi",
+		Name:    "tensorflow",
+		Version: &v12,
+		Subpath: &subpath2,
+	}, {
+		Type:      "conan",
+		Namespace: &opensslNamespace,
+		Name:      "openssl",
+		Version:   &opensslVersion,
+	}}
+
+	for _, input := range inputs {
+		_, err := model.IngestPackage(ctx, client, input)
+		if err != nil {
+			log.Printf("Error in ingesting: %v\n", err)
+		}
+	}
+}
+
+func ingestSources(ctx context.Context, client graphql.Client) {
+	v12 := "v2.12.0"
+	commit := "abcdef"
+
+	inputs := []model.SourceInputSpec{{
+		Type:      "git",
+		Namespace: "github.com/tensorflow",
+		Name:      "tensorflow",
+	}, {
+		Type:      "git",
+		Namespace: "github.com/tensorflow",
+		Name:      "build",
+	}, {
+		Type:      "git",
+		Namespace: "github.com/tensorflow",
+		Name:      "tensorflow",
+		Tag:       &v12,
+	}, {
+		Type:      "git",
+		Namespace: "github.com/tensorflow",
+		Name:      "tensorflow",
+		Commit:    &commit,
+	}}
+
+	for _, input := range inputs {
+		_, err := model.IngestSource(ctx, client, input)
+		if err != nil {
+			log.Printf("Error in ingesting: %v\n", err)
+		}
+	}
+}
+
+func ingestHasSourceAtNew(ctx context.Context, client graphql.Client) {
+	version := "2.12.0"
+	tag := "v2.12.0"
+
+	inputs := []struct {
+		pkg          model.PkgInputSpec
+		pkgMatchType model.MatchFlags
+		src          model.SourceInputSpec
+		input        model.HasSourceAtInputSpec
+	}{{
+		pkg: model.PkgInputSpec{
+			Type:    "pypi",
+			Name:    "tensorflow",
+			Version: &version,
+		},
+		pkgMatchType: model.MatchFlags{
+			Pkg: model.PkgMatchTypeSpecificVersion,
+		},
+		src: model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github.com/tensorflow",
+			Name:      "tensorflow",
+			Tag:       &tag,
+		},
+		input: model.HasSourceAtInputSpec{
+			Justification: "TF 2.12.0 release",
+			KnownSince:    time.Now(),
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		pkg: model.PkgInputSpec{
+			Type: "pypi",
+			Name: "tensorflow",
+		},
+		pkgMatchType: model.MatchFlags{
+			Pkg: model.PkgMatchTypeAllVersions,
+		},
+		src: model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github.com/tensorflow",
+			Name:      "tensorflow",
+		},
+		input: model.HasSourceAtInputSpec{
+			Justification: "General mapping between wheel and repo",
+			KnownSince:    time.Now(),
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}}
+
+	for _, input := range inputs {
+		_, err := model.HasSourceAt(ctx, client, input.pkg, input.pkgMatchType, input.src, input.input)
+		if err != nil {
+			log.Printf("Error in ingesting: %v\n", err)
 		}
 	}
 }

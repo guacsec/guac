@@ -66,8 +66,8 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
 	}
-	registerAllPackages(client)
-	registerAllSources(client)
+	//registerAllPackages(client)
+	//registerAllSources(client)
 	registerAllCVE(client)
 	registerAllGHSA(client)
 	registerAllOSV(client)

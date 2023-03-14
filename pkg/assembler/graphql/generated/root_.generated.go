@@ -90,6 +90,22 @@ type ComplexityRoot struct {
 		Vulnerability func(childComplexity int) int
 	}
 
+	EvidenceTrees struct {
+		CertifyBad       func(childComplexity int) int
+		CertifyPkg       func(childComplexity int) int
+		CertifyScorecard func(childComplexity int) int
+		CertifyVuln      func(childComplexity int) int
+		HasSbom          func(childComplexity int) int
+		HasSlsa          func(childComplexity int) int
+		HasSourceAt      func(childComplexity int) int
+		HashEqual        func(childComplexity int) int
+		IsDependency     func(childComplexity int) int
+		IsOccurrence     func(childComplexity int) int
+		IsVulnerability  func(childComplexity int) int
+		Subject          func(childComplexity int) int
+		VexStatement     func(childComplexity int) int
+	}
+
 	GHSA struct {
 		GhsaID func(childComplexity int) int
 	}
@@ -215,6 +231,7 @@ type ComplexityRoot struct {
 		CertifyPkg          func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
+		Connected           func(childComplexity int, subject model.PackageSourceArtifactOsvCveOrGhsaFilter, maxPathLength int) int
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
 		Ghsa                func(childComplexity int, ghsaSpec *model.GHSASpec) int
 		HasSbom             func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
@@ -478,6 +495,97 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVuln.Vulnerability(childComplexity), true
+
+	case "EvidenceTrees.certifyBad":
+		if e.complexity.EvidenceTrees.CertifyBad == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.CertifyBad(childComplexity), true
+
+	case "EvidenceTrees.certifyPkg":
+		if e.complexity.EvidenceTrees.CertifyPkg == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.CertifyPkg(childComplexity), true
+
+	case "EvidenceTrees.certifyScorecard":
+		if e.complexity.EvidenceTrees.CertifyScorecard == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.CertifyScorecard(childComplexity), true
+
+	case "EvidenceTrees.certifyVuln":
+		if e.complexity.EvidenceTrees.CertifyVuln == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.CertifyVuln(childComplexity), true
+
+	case "EvidenceTrees.hasSBOM":
+		if e.complexity.EvidenceTrees.HasSbom == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.HasSbom(childComplexity), true
+
+	case "EvidenceTrees.hasSLSA":
+		if e.complexity.EvidenceTrees.HasSlsa == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.HasSlsa(childComplexity), true
+
+	case "EvidenceTrees.hasSourceAt":
+		if e.complexity.EvidenceTrees.HasSourceAt == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.HasSourceAt(childComplexity), true
+
+	case "EvidenceTrees.hashEqual":
+		if e.complexity.EvidenceTrees.HashEqual == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.HashEqual(childComplexity), true
+
+	case "EvidenceTrees.isDependency":
+		if e.complexity.EvidenceTrees.IsDependency == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.IsDependency(childComplexity), true
+
+	case "EvidenceTrees.isOccurrence":
+		if e.complexity.EvidenceTrees.IsOccurrence == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.IsOccurrence(childComplexity), true
+
+	case "EvidenceTrees.isVulnerability":
+		if e.complexity.EvidenceTrees.IsVulnerability == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.IsVulnerability(childComplexity), true
+
+	case "EvidenceTrees.subject":
+		if e.complexity.EvidenceTrees.Subject == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.Subject(childComplexity), true
+
+	case "EvidenceTrees.vexStatement":
+		if e.complexity.EvidenceTrees.VexStatement == nil {
+			break
+		}
+
+		return e.complexity.EvidenceTrees.VexStatement(childComplexity), true
 
 	case "GHSA.ghsaId":
 		if e.complexity.GHSA.GhsaID == nil {
@@ -1120,6 +1228,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyVuln(childComplexity, args["certifyVulnSpec"].(*model.CertifyVulnSpec)), true
 
+	case "Query.connected":
+		if e.complexity.Query.Connected == nil {
+			break
+		}
+
+		args, err := ec.field_Query_connected_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Connected(childComplexity, args["subject"].(model.PackageSourceArtifactOsvCveOrGhsaFilter), args["maxPathLength"].(int)), true
+
 	case "Query.cve":
 		if e.complexity.Query.Cve == nil {
 			break
@@ -1563,6 +1683,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageOrSourceSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
+		ec.unmarshalInputPackageSourceArtifactOsvCveOrGhsaFilter,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgInputSpec,
@@ -2259,6 +2380,66 @@ extend type Mutation {
   ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
+	{Name: "../schema/connected.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the artifact. It contains the algorithm and
+# digest fields
+
+"""
+PackageSourceArtifactOsvCveOrGhsa is a union of Package, Source, Artifact, OSV, CVE and GHSA.
+"""
+union PackageSourceArtifactOsvCveOrGhsa = Package | Source | Artifact| OSV | CVE | GHSA
+
+type EvidenceTrees {
+  subject: PackageSourceArtifactOsvCveOrGhsa!
+  isOccurrence: [IsOccurrence]
+  isDependency: [IsDependency]
+  isVulnerability: [IsVulnerability]
+  vexStatement: [CertifyVEXStatement]
+  hashEqual: [HashEqual]
+  certifyBad: [CertifyBad]
+  certifyPkg: [CertifyPkg]
+  certifyScorecard: [CertifyScorecard]
+  certifyVuln: [CertifyVuln]
+  hasSourceAt: [HasSourceAt]
+  hasSBOM: [HasSBOM]
+  hasSLSA: [HasSLSA]
+}
+
+"""
+PackageSourceArtifactOsvCveOrGhsaFilter allows using PackageSourceArtifactOsvCveOrGhsa union as
+query type.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceArtifactOsvCveOrGhsaFilter {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+}
+
+extend type Query {
+  "Returns all artifacts"
+  connected(subject: PackageSourceArtifactOsvCveOrGhsaFilter!, maxPathLength: Int!): EvidenceTrees!
+}`, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #

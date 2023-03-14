@@ -2481,6 +2481,169 @@ func (v *HashEqualResponse) GetEqualArtifact() HashEqualEqualArtifact { return v
 // GetIngestHashEqual returns HashEqualResponse.IngestHashEqual, and is useful for accessing the field via an interface.
 func (v *HashEqualResponse) GetIngestHashEqual() HashEqualIngestHashEqual { return v.IngestHashEqual }
 
+// IngestPackageIngestPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type IngestPackageIngestPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetType returns IngestPackageIngestPackage.Type, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns IngestPackageIngestPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *IngestPackageIngestPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestPackageIngestPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestPackageIngestPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestPackageIngestPackage struct {
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *IngestPackageIngestPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestPackageIngestPackage) __premarshalJSON() (*__premarshalIngestPackageIngestPackage, error) {
+	var retval __premarshalIngestPackageIngestPackage
+
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// IngestPackageResponse is returned by IngestPackage on success.
+type IngestPackageResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	IngestPackage IngestPackageIngestPackage `json:"ingestPackage"`
+}
+
+// GetIngestPackage returns IngestPackageResponse.IngestPackage, and is useful for accessing the field via an interface.
+func (v *IngestPackageResponse) GetIngestPackage() IngestPackageIngestPackage { return v.IngestPackage }
+
+// IngestSourceIngestSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type IngestSourceIngestSource struct {
+	allSourceTree `json:"-"`
+}
+
+// GetType returns IngestSourceIngestSource.Type, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns IngestSourceIngestSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *IngestSourceIngestSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IngestSourceIngestSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IngestSourceIngestSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIngestSourceIngestSource struct {
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *IngestSourceIngestSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IngestSourceIngestSource) __premarshalJSON() (*__premarshalIngestSourceIngestSource, error) {
+	var retval __premarshalIngestSourceIngestSource
+
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
+// IngestSourceResponse is returned by IngestSource on success.
+type IngestSourceResponse struct {
+	// Ingest a new source. Returns the ingested source trie
+	IngestSource IngestSourceIngestSource `json:"ingestSource"`
+}
+
+// GetIngestSource returns IngestSourceResponse.IngestSource, and is useful for accessing the field via an interface.
+func (v *IngestSourceResponse) GetIngestSource() IngestSourceIngestSource { return v.IngestSource }
+
 // IsDependencyDependentPkgPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
 //
@@ -7415,6 +7578,22 @@ func (v *__HashEqualInput) GetEqualArtifact() ArtifactInputSpec { return v.Equal
 
 // GetHashEqual returns __HashEqualInput.HashEqual, and is useful for accessing the field via an interface.
 func (v *__HashEqualInput) GetHashEqual() HashEqualInputSpec { return v.HashEqual }
+
+// __IngestPackageInput is used internally by genqlient
+type __IngestPackageInput struct {
+	Pkg PkgInputSpec `json:"pkg"`
+}
+
+// GetPkg returns __IngestPackageInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__IngestPackageInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// __IngestSourceInput is used internally by genqlient
+type __IngestSourceInput struct {
+	Source SourceInputSpec `json:"source"`
+}
+
+// GetSource returns __IngestSourceInput.Source, and is useful for accessing the field via an interface.
+func (v *__IngestSourceInput) GetSource() SourceInputSpec { return v.Source }
 
 // __IsDependencyInput is used internally by genqlient
 type __IsDependencyInput struct {
@@ -13287,6 +13466,98 @@ fragment allHashEqualTree on HashEqual {
 	var err error
 
 	var data HashEqualResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func IngestPackage(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+) (*IngestPackageResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestPackage",
+		Query: `
+mutation IngestPackage ($pkg: PkgInputSpec!) {
+	ingestPackage(pkg: $pkg) {
+		... allPkgTree
+	}
+}
+fragment allPkgTree on Package {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			versions {
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`,
+		Variables: &__IngestPackageInput{
+			Pkg: pkg,
+		},
+	}
+	var err error
+
+	var data IngestPackageResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func IngestSource(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+) (*IngestSourceResponse, error) {
+	req := &graphql.Request{
+		OpName: "IngestSource",
+		Query: `
+mutation IngestSource ($source: SourceInputSpec!) {
+	ingestSource(source: $source) {
+		... allSourceTree
+	}
+}
+fragment allSourceTree on Source {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			tag
+			commit
+		}
+	}
+}
+`,
+		Variables: &__IngestSourceInput{
+			Source: source,
+		},
+	}
+	var err error
+
+	var data IngestSourceResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
