@@ -24,7 +24,7 @@
 // Depending on the number of vulnerabilities found, vulnerability nodes are generated that
 // contain just the vulnerability ID that can be used to query for more information as needed.
 // The vulnerability node is linked to the attestation node via a "vulnerable" edge type.
-package certify_vuln
+package vuln
 
 import (
 	"context"
