@@ -1,18 +1,19 @@
 version: "3"
 
 services:
-  neo4j:
-    image: "neo4j:4.4.9-community"
-    environment:
-      NEO4J_AUTH: "neo4j/s3cr3t"
-      NEO4J_apoc_export_file_enabled: true
-      NEO4J_apoc_import_file_enabled: true
-      NEO4J_apoc_import_file_use__neo4j__config: true
-      NEO4JLABS_PLUGINS: '["apoc"]'
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-    restart: on-failure
+  # Neo4j is turned down for now since we are currently only using the in memory backend
+  # neo4j:
+  #   image: "neo4j:4.4.9-community"
+  #   environment:
+  #     NEO4J_AUTH: "neo4j/s3cr3t"
+  #     NEO4J_apoc_export_file_enabled: true
+  #     NEO4J_apoc_import_file_enabled: true
+  #     NEO4J_apoc_import_file_use__neo4j__config: true
+  #     NEO4JLABS_PLUGINS: '["apoc"]'
+  #   ports:
+  #     - "7474:7474"
+  #     - "7687:7687"
+  #   restart: on-failure
 
   nats:
     image: "nats:2.9.14"
@@ -44,8 +45,9 @@ services:
         echo "checking-for-services";
         until curl -I http://nats:8222 > /dev/null 2>&1; do sleep 5; done;
         echo "nats-up";
-        until curl -I http://neo4j:7474> /dev/null 2>&1; do sleep 5; done;
-        echo "neo4j-up";
+        # Neo4j is turned down for now since we are currently only using the in memory backend
+        # until curl -I http://neo4j:7474> /dev/null 2>&1; do sleep 5; done;
+        # echo "neo4j-up";
 
   guac-collectsub:
     image: "local-organic-guac"

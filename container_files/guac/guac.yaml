@@ -12,7 +12,7 @@ csub-addr: guac-collectsub:2782
 csub-listen-port: 2782
 
 # graphql
-gql-backend: neo4j
+gql-backend: inmem
 gql-port: 8080
-gql-debug: false
+gql-debug: true
 gql-endpoint: http://guac-graphql:8080/query
