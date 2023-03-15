@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
-	sc "github.com/guacsec/guac/pkg/certifier/components/source_artifact"
+	sc "github.com/guacsec/guac/pkg/certifier/components/source"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"

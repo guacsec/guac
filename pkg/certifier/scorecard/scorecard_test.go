@@ -24,9 +24,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	mocks "github.com/guacsec/guac/internal/testing/mock"
-	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/ossf/scorecard/v4/pkg"
 )
@@ -41,7 +40,6 @@ func TestNewScorecard(t *testing.T) {
 	tests := []struct {
 		name          string
 		sc            Scorecard
-		client        graphdb.Client
 		want          certifier.Certifier
 		wantErr       bool
 		authToken     string
@@ -89,8 +87,8 @@ func Test_CertifyComponent(t *testing.T) {
 	defer cancel()
 
 	type fields struct {
-		ghToken  string
-		artifact *assembler.ArtifactNode
+		ghToken    string
+		sourceNode *source.SourceNode
 	}
 	type args struct {
 		rootComponent interface{}
@@ -106,11 +104,11 @@ func Test_CertifyComponent(t *testing.T) {
 		{
 			name: "doc chan is nil",
 			fields: fields{
-				ghToken:  "",
-				artifact: &assembler.ArtifactNode{},
+				ghToken:    "",
+				sourceNode: &source.SourceNode{},
 			},
 			args: args{
-				rootComponent: &assembler.ArtifactNode{},
+				rootComponent: &source.SourceNode{},
 				docChannel:    nil,
 			},
 			wantErr: true,
@@ -118,8 +116,8 @@ func Test_CertifyComponent(t *testing.T) {
 		{
 			name: "root component is nil",
 			fields: fields{
-				ghToken:  "",
-				artifact: &assembler.ArtifactNode{},
+				ghToken:    "",
+				sourceNode: &source.SourceNode{},
 			},
 			args: args{
 				docChannel:    make(chan *processor.Document),
@@ -130,8 +128,8 @@ func Test_CertifyComponent(t *testing.T) {
 		{
 			name: "root component is not an artifact node",
 			fields: fields{
-				ghToken:  "",
-				artifact: &assembler.ArtifactNode{},
+				ghToken:    "",
+				sourceNode: &source.SourceNode{},
 			},
 			args: args{
 				docChannel:    make(chan *processor.Document),
@@ -142,25 +140,25 @@ func Test_CertifyComponent(t *testing.T) {
 		{
 			name: "artifactNode.Digest error",
 			fields: fields{
-				ghToken:  "",
-				artifact: &assembler.ArtifactNode{},
+				ghToken:    "",
+				sourceNode: &source.SourceNode{},
 			},
 			args: args{
 				docChannel:    make(chan *processor.Document),
-				rootComponent: &assembler.ArtifactNode{},
+				rootComponent: &source.SourceNode{},
 			},
 			wantErr: true,
 		},
 		{
 			name: "repo name is empty",
 			fields: fields{
-				ghToken:  "",
-				artifact: &assembler.ArtifactNode{},
+				ghToken:    "",
+				sourceNode: &source.SourceNode{},
 			},
 			args: args{
 				docChannel: make(chan *processor.Document),
-				rootComponent: &assembler.ArtifactNode{
-					Digest: "test",
+				rootComponent: &source.SourceNode{
+					Commit: "test",
 				},
 			},
 			wantErr: true,
@@ -168,14 +166,14 @@ func Test_CertifyComponent(t *testing.T) {
 		{
 			name: "scorecard getScore returns error",
 			fields: fields{
-				ghToken:  "",
-				artifact: &assembler.ArtifactNode{},
+				ghToken:    "",
+				sourceNode: &source.SourceNode{},
 			},
 			args: args{
 				docChannel: make(chan *processor.Document),
-				rootComponent: &assembler.ArtifactNode{
-					Digest: "test",
-					Name:   "test",
+				rootComponent: &source.SourceNode{
+					Commit: "test",
+					Repo:   "test",
 				},
 			},
 			getScoreShouldReturnErr: true,
@@ -217,9 +215,9 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 		}).AnyTimes()
 
 	// Create a mock ArtifactNode to use as input
-	artifact := &assembler.ArtifactNode{
-		Name:   "git+myrepo",
-		Digest: "abc123",
+	artifact := &source.SourceNode{
+		Repo:   "git+myrepo",
+		Commit: "abc123",
 	}
 
 	// Create a mock Scorecard instance to use

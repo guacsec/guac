@@ -22,8 +22,7 @@ import (
 	"os"
 
 	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/guacsec/guac/pkg/certifier/components/source_artifact"
-
+	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/ossf/scorecard/v4/docs/checks"
 	"github.com/ossf/scorecard/v4/log"
 
@@ -47,9 +46,9 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		return fmt.Errorf("rootComponent cannot be nil")
 	}
 
-	var sourceNode *source_artifact.SourceNode
+	var sourceNode *source.SourceNode
 
-	if component, ok := rootComponent.(*source_artifact.SourceNode); ok {
+	if component, ok := rootComponent.(*source.SourceNode); ok {
 		sourceNode = component
 	} else {
 		return ErrArtifactNodeTypeMismatch
