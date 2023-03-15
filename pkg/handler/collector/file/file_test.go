@@ -17,10 +17,12 @@ package file
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -44,7 +46,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			poll:        false,
 			interval:    0,
 		},
-		want:    []*processor.Document{},
+		want:    nil,
 		wantErr: true,
 	}, {
 		name: "found file",
@@ -102,36 +104,28 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			} else {
 				ctx = context.Background()
 			}
-			docChan := make(chan *processor.Document, 1)
-			errChan := make(chan error, 1)
-			defer close(docChan)
-			defer close(errChan)
-			go func() {
-				errChan <- f.RetrieveArtifacts(ctx, docChan)
-			}()
 
-			numCollectors := 1
-			collectorsDone := 0
-
-			s := []*processor.Document{}
-
-			for collectorsDone < numCollectors {
-				select {
-				case d := <-docChan:
-					s = append(s, d)
-				case err := <-errChan:
-					if (err != nil) != tt.wantErr {
-						t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
-					}
-					collectorsDone += 1
-				}
+			if err := collector.RegisterDocumentCollector(f, FileCollector); err != nil &&
+				!errors.Is(err, collector.ErrCollectorOverwrite) {
+				t.Fatalf("could not register collector: %v", err)
 			}
 
-			// Drain anything in document channel
-			for len(docChan) > 0 {
-				d := <-docChan
+			var s []*processor.Document
+			em := func(d *processor.Document) error {
 				s = append(s, d)
+				return nil
 			}
+			eh := func(err error) bool {
+				if (err != nil) != tt.wantErr {
+					t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
+				}
+				return true
+			}
+
+			if err := collector.Collect(ctx, em, eh); err != nil {
+				t.Fatalf("Collector error handler error: %v", err)
+			}
+
 			if !reflect.DeepEqual(s, tt.want) {
 				t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", s, tt.want)
 			}

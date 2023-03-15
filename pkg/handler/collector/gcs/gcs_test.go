@@ -17,12 +17,14 @@ package gcs
 
 import (
 	"context"
+	"errors"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/fsouza/fake-gcs-server/fakestorage"
+	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -61,7 +63,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 	tests := []struct {
 		name     string
 		fields   fields
-		want     *processor.Document
+		want     []*processor.Document
 		wantErr  bool
 		wantDone bool
 	}{{
@@ -74,7 +76,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			bucket: getBucketPath(),
 			reader: &reader{client: client, bucket: getBucketPath()},
 		},
-		want:     doc,
+		want:     []*processor.Document{doc},
 		wantErr:  false,
 		wantDone: true,
 	}, {
@@ -94,7 +96,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			reader:       &reader{client: client, bucket: getBucketPath()},
 			lastDownload: time.Date(2009, 10, 17, 20, 34, 58, 651387237, time.UTC),
 		},
-		want:     doc,
+		want:     []*processor.Document{doc},
 		wantErr:  false,
 		wantDone: true,
 	}}
@@ -106,32 +108,29 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				lastDownload: tt.fields.lastDownload,
 				poll:         tt.fields.poll,
 			}
-			docChan := make(chan *processor.Document, 1)
-			errChan := make(chan error, 1)
-			defer close(docChan)
-			defer close(errChan)
-			go func() {
-				errChan <- g.RetrieveArtifacts(ctx, docChan)
-			}()
-			numCollectors := 1
-			collectorsDone := 0
-			for collectorsDone < numCollectors {
-				select {
-				case d := <-docChan:
-					if !reflect.DeepEqual(d, tt.want) {
-						t.Errorf("g.RetrieveArtifacts() = %v, want %v", d, tt.want)
-					}
-				case err := <-errChan:
-					if (err != nil) != tt.wantErr {
-						t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
-						return
-					}
-					collectorsDone += 1
-				}
+			if err := collector.RegisterDocumentCollector(g, CollectorGCS); err != nil &&
+				!errors.Is(err, collector.ErrCollectorOverwrite) {
+				t.Fatalf("could not register collector: %v", err)
 			}
-			// Drain anything left in document channel
-			for len(docChan) > 0 {
-				<-docChan
+
+			var docs []*processor.Document
+			em := func(d *processor.Document) error {
+				docs = append(docs, d)
+				return nil
+			}
+			eh := func(err error) bool {
+				if (err != nil) != tt.wantErr {
+					t.Errorf("gcsCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
+				}
+				return true
+			}
+
+			if err := collector.Collect(ctx, em, eh); err != nil {
+				t.Fatalf("Collector error handler error: %v", err)
+			}
+
+			if !reflect.DeepEqual(docs, tt.want) {
+				t.Errorf("g.RetrieveArtifacts() = %v, want %v", docs, tt.want)
 			}
 			if g.Type() != CollectorGCS {
 				t.Errorf("g.Type() = %s, want %s", g.Type(), CollectorGCS)

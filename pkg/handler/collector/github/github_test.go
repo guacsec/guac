@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
+	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -351,55 +352,42 @@ func Test_githubCollector_RetrieveArtifacts(t *testing.T) {
 			ctx := context.Background()
 			var cancel context.CancelFunc
 
+			if err := collector.RegisterDocumentCollector(g, GithubCollector); err != nil &&
+				!errors.Is(err, collector.ErrCollectorOverwrite) {
+				t.Fatalf("could not register collector: %v", err)
+			}
+
 			if tt.fields.poll {
 				ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 				defer cancel()
 			}
 
-			var err error
-			docChan := make(chan *processor.Document, 1)
-			errChan := make(chan error, 1)
-			defer close(docChan)
-			defer close(errChan)
-			go func() {
-				errChan <- g.RetrieveArtifacts(ctx, docChan)
-			}()
-			numCollectors := 1
-			collectorsDone := 0
+			var collectedDocs []*processor.Document
 
-			collectedDocs := []*processor.Document{}
-
-			for collectorsDone < numCollectors {
-				select {
-				case d := <-docChan:
-					collectedDocs = append(collectedDocs, d)
-				case err = <-errChan:
-					if err != nil {
-						if !tt.wantErr {
-							if err := g.RetrieveArtifacts(ctx, docChan); (err != nil) != tt.wantErr {
-								t.Errorf("g.RetrieveArtifacts() error = %v, wantErr %v", err, tt.wantErr)
-							}
-						}
-					}
-					collectorsDone += 1
-				}
-			}
-			// Drain anything left in document channel
-			for len(docChan) > 0 {
-				d := <-docChan
+			em := func(d *processor.Document) error {
 				collectedDocs = append(collectedDocs, d)
+				return nil
 			}
-			if err == nil {
-				for i := range collectedDocs {
-					result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
-					if !result {
-						t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
-					}
+			eh := func(err error) bool {
+				if (err != nil) && !tt.wantErr {
+					t.Errorf("gitHubCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
 				}
+				return true
+			}
 
-				if g.Type() != GithubCollector {
-					t.Errorf("g.Type() = %s, want %s", g.Type(), GithubCollector)
+			if err := collector.Collect(ctx, em, eh); err != nil {
+				t.Fatalf("Collector error handler error: %v", err)
+			}
+
+			for i := range collectedDocs {
+				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
+				if !result {
+					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
 				}
+			}
+
+			if g.Type() != GithubCollector {
+				t.Errorf("g.Type() = %s, want %s", g.Type(), GithubCollector)
 			}
 		})
 	}
