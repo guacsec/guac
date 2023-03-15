@@ -111,6 +111,14 @@ var getAllFilters = []*collectsub.CollectEntryFilter{
 		Type: collectsub.CollectDataType_DATATYPE_OCI,
 		Glob: "*",
 	},
+	{
+		Type: collectsub.CollectDataType_DATATYPE_PURL,
+		Glob: "*",
+	},
+	{
+		Type: collectsub.CollectDataType_DATATYPE_GITHUB_RELEASE,
+		Glob: "*",
+	},
 }
 
 /*

@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 )
 
+// TODO(lumjjb): add tests for GITHUB and PURL
 func createSimpleCsubClient(ctx context.Context) (client.Client, error) {
 	c, err := client.NewMockClient()
 	if err != nil {
@@ -36,6 +37,8 @@ func createSimpleCsubClient(ctx context.Context) (client.Client, error) {
 		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "abc"},
 		{Type: collectsub.CollectDataType_DATATYPE_OCI, Value: "def"},
 		{Type: collectsub.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
+		{Type: collectsub.CollectDataType_DATATYPE_GITHUB_RELEASE, Value: "http://github.com/guacsec/guac/releases"},
+		{Type: collectsub.CollectDataType_DATATYPE_PURL, Value: "pkg:npm/foobar@12.3.1"},
 	})
 	if err != nil {
 		return nil, err
@@ -43,7 +46,25 @@ func createSimpleCsubClient(ctx context.Context) (client.Client, error) {
 	return c, nil
 }
 
-func Test_FileSourceGetDataSources(t *testing.T) {
+var (
+	expectedDataSource = datasource.DataSources{
+		OciDataSources: []datasource.Source{
+			{Value: "abc"},
+			{Value: "def"},
+		},
+		GitDataSources: []datasource.Source{
+			{Value: "git+https://github.com/guacsec/guac"},
+		},
+		GithubReleaseDataSources: []datasource.Source{
+			{Value: "http://github.com/guacsec/guac/releases"},
+		},
+		PurlDataSources: []datasource.Source{
+			{Value: "pkg:npm/foobar@12.3.1"},
+		},
+	}
+)
+
+func Test_CsubSourceGetDataSources(t *testing.T) {
 	ctx := context.TODO()
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
@@ -67,22 +88,12 @@ func Test_FileSourceGetDataSources(t *testing.T) {
 		return
 	}
 
-	expected := &datasource.DataSources{
-		OciDataSources: []datasource.Source{
-			{Value: "abc"},
-			{Value: "def"},
-		},
-		GitDataSources: []datasource.Source{
-			{Value: "git+https://github.com/guacsec/guac"},
-		},
-	}
-
-	if !reflect.DeepEqual(ds, expected) {
-		t.Errorf("unexpected datasource output: expect %v, got %v", expected, ds)
+	if !reflect.DeepEqual(ds, &expectedDataSource) {
+		t.Errorf("unexpected datasource output: expect %v, got %v", &expectedDataSource, ds)
 	}
 }
 
-func Test_FileSourceDataSourcesUpdate(t *testing.T) {
+func Test_CsubSourceDataSourcesUpdate(t *testing.T) {
 	ctx := context.TODO()
 
 	c, err := createSimpleCsubClient(ctx)
@@ -109,18 +120,10 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 		return
 	}
 
-	expected := &datasource.DataSources{
-		OciDataSources: []datasource.Source{
-			{Value: "abc"},
-			{Value: "def"},
-		},
-		GitDataSources: []datasource.Source{
-			{Value: "git+https://github.com/guacsec/guac"},
-		},
-	}
-
-	if !reflect.DeepEqual(ds, expected) {
-		t.Errorf("unexpected datasource output: expect %v, got %v", expected, ds)
+	var expected datasource.DataSources
+	expected = expectedDataSource
+	if !reflect.DeepEqual(ds, &expected) {
+		t.Errorf("unexpected datasource output: expect %v, got %v", &expected, ds)
 
 	}
 
@@ -154,19 +157,10 @@ func Test_FileSourceDataSourcesUpdate(t *testing.T) {
 		return
 	}
 
-	expected = &datasource.DataSources{
-		OciDataSources: []datasource.Source{
-			{Value: "abc"},
-			{Value: "def"},
-		},
-		GitDataSources: []datasource.Source{
-			{Value: "git+https://github.com/guacsec/guac"},
-			{Value: "git+newentry"},
-		},
-	}
+	expected.GitDataSources = append(expected.GitDataSources, datasource.Source{Value: "git+newentry"})
 
-	if !reflect.DeepEqual(ds, expected) {
-		t.Errorf("unexpected datasource output: expect %v, got %v", expected, ds)
+	if !reflect.DeepEqual(ds, &expected) {
+		t.Errorf("unexpected datasource output after adding: expect %v, got %v", &expected, ds)
 	}
 
 }

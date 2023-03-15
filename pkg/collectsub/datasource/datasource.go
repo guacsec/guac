@@ -41,13 +41,14 @@ type DataSources struct {
 	// <vcs_tool>+<transport>://<host_name>[/<path_to_repository>][@<revision_tag_or_branch>][#<sub_path>]
 	// e.g. git+https://github.com/guacsec/guac@v1
 	GitDataSources []Source
-	// TODO (lumjjb): Csub interface and proto need to be updated to support GithubReleaseDataSources
 	// NOTE: It is expected that a GithubReleaseDataSource is of the form:
 	// https://github.com/<org>/<repo>/releases/<tag> or
 	// https://github.com/<org>/<repo>/releases/tag/<tag> or
 	// https://github.com/<org>/<repo>/releases
 	// Tag is optional and left off will assume latest.
 	GithubReleaseDataSources []Source
+	// PurlDataSources encodes the list of PURLs
+	PurlDataSources []Source
 }
 
 type Source struct {

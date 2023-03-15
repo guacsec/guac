@@ -19,9 +19,11 @@ option go_package = "github.com/guacsec/guac/pkg/collectsub";
 package guacsec.guac.collect_subscriber.schema;
 
 enum CollectDataType {
-    DATATYPE_GIT = 0;
-    DATATYPE_OCI = 1;
-    DATATYPE_UNKNOWN = 999;
+    DATATYPE_UNKNOWN = 0;
+    DATATYPE_GIT = 1;
+    DATATYPE_OCI = 2;
+    DATATYPE_PURL = 3;
+    DATATYPE_GITHUB_RELEASE = 4;
 }
 
 // Generic types
