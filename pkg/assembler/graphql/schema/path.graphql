@@ -1,0 +1,47 @@
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the artifact. It contains the algorithm and
+# digest fields
+
+"""
+Nodes is a union type of all the possible nodes. It encapsulates the software tree nodes along with the evidence nodes.
+In a path query, all connecting evidence nodes along with their intermediate subject nodes need to be returned
+in order to create a complete graph.
+"""
+union Nodes = Package | Source | Artifact | Builder | OSV | CVE | GHSA | IsOccurrence | IsDependency | IsVulnerability| CertifyVEXStatement | HashEqual | CertifyBad | CertifyPkg | CertifyScorecard | CertifyVuln | HasSourceAt | HasSBOM | HasSourceAt
+
+
+"""
+PackageSourceArtifactOsvCveOrGhsaFilter allows for all the software tree node types to be
+specified for the subject or the end target in a path query.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceArtifactOsvCveOrGhsaFilter {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+}
+
+extend type Query {
+  "path query is used to determine reachability between the subject and target. It returns the path to the target via a list of nodes"
+  path(subject: PackageSourceArtifactOsvCveOrGhsaFilter!, target: PackageSourceArtifactOsvCveOrGhsaFilter!, maxPathLength: Int!): [Nodes!]!
+}
