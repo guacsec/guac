@@ -18,48 +18,70 @@ package source_artifact
 import (
 	"context"
 	"fmt"
+	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
 )
 
 type sourceArtifacts struct {
-	client graphdb.Client
+	client graphql.Client
 }
 
-func (s sourceArtifacts) GetComponents(_ context.Context, compChan chan<- interface{}) error {
+type SourceNode struct {
+	Repo   string
+	Commit string
+	Tag    string
+}
+
+func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	// TODO: Add integration tests, have not added it yet because the code needs data to be present in the graphdb to test it
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
 	}
-	roots, err := graphdb.ReadQuery(s.client, "MATCH (n:Artifact) WHERE n.name CONTAINS 'git+' RETURN n", nil)
+	// TODO: specify scorecard time-scanned to determine when they are out of data and need to be re-scanned again.
+	response, err := generated.SourcesRequiringScorecard(ctx, s.client, nil)
 	if err != nil {
 		return fmt.Errorf("failed to read query: %w", err)
 	}
+	sources := response.GetSourcesRequiringScorecard()
 
-	for _, result := range roots {
-		foundNode, ok := result.(dbtype.Node)
-		if !ok {
-			return fmt.Errorf("failed to cast to node type")
+	for _, src := range sources {
+		for _, namespace := range src.Namespaces {
+			for _, names := range namespace.Names {
+				sourceNode := SourceNode{
+					Repo:   namespace.Namespace + "/" + names.Name,
+					Commit: trimAlgorithm(nilOrEmpty(names.Commit)),
+					Tag:    nilOrEmpty(names.Tag),
+				}
+				compChan <- &sourceNode
+			}
 		}
-		artifactNode := assembler.ArtifactNode{}
-		artifactNode.Name, ok = foundNode.Props["name"].(string)
-		if !ok {
-			return fmt.Errorf("failed to cast name property to string type")
-		}
-		artifactNode.Digest, ok = foundNode.Props["digest"].(string)
-		if !ok {
-			return fmt.Errorf("failed to cast digest property to string type")
-		}
-		compChan <- &artifactNode
 	}
 	return nil
 }
 
+func nilOrEmpty(value *string) string {
+	if value != nil {
+		return *value
+	} else {
+		return ""
+	}
+}
+
+// remove the "sha1:" prefix from the digest before passing it to the scorecard runner.
+func trimAlgorithm(commit string) string {
+	if commit == "" {
+		return commit
+	} else {
+		commitSplit := strings.Split(commit, ":")
+		return commitSplit[1]
+	}
+}
+
 // NewCertifier returns a new sourceArtifacts certifier
-func NewCertifier(client graphdb.Client) (certifier.QueryComponents, error) {
+func NewCertifier(client graphql.Client) (certifier.QueryComponents, error) {
 	if client == nil {
 		return nil, fmt.Errorf("client cannot be nil")
 	}

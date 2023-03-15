@@ -71,6 +71,9 @@ type Backend interface {
 	IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error)
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
+
+	// Certifier queries
+	SourcesRequiringScorecard(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.Source, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

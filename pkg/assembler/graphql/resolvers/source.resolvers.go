@@ -19,3 +19,8 @@ func (r *mutationResolver) IngestSource(ctx context.Context, source *model.Sourc
 func (r *queryResolver) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	return r.Backend.Sources(ctx, sourceSpec)
 }
+
+// SourcesRequiringScorecard is the resolver for the sourcesRequiringScorecard field.
+func (r *queryResolver) SourcesRequiringScorecard(ctx context.Context, scorecard *model.CertifyScorecardSpec) ([]*model.Source, error) {
+	return r.Backend.SourcesRequiringScorecard(ctx, scorecard)
+}

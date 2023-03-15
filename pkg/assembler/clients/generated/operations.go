@@ -1559,6 +1559,42 @@ func (v *CertifyPkgResponse) GetIngestCertifyPkg() CertifyPkgIngestCertifyPkg {
 	return v.IngestCertifyPkg
 }
 
+// CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
+type CertifyScorecardSpec struct {
+	Source           *SourceSpec          `json:"source"`
+	TimeScanned      *time.Time           `json:"timeScanned"`
+	AggregateScore   *float64             `json:"aggregateScore"`
+	Checks           []ScorecardCheckSpec `json:"checks"`
+	ScorecardVersion *string              `json:"scorecardVersion"`
+	ScorecardCommit  *string              `json:"scorecardCommit"`
+	Origin           *string              `json:"origin"`
+	Collector        *string              `json:"collector"`
+}
+
+// GetSource returns CertifyScorecardSpec.Source, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetSource() *SourceSpec { return v.Source }
+
+// GetTimeScanned returns CertifyScorecardSpec.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetTimeScanned() *time.Time { return v.TimeScanned }
+
+// GetAggregateScore returns CertifyScorecardSpec.AggregateScore, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetAggregateScore() *float64 { return v.AggregateScore }
+
+// GetChecks returns CertifyScorecardSpec.Checks, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetChecks() []ScorecardCheckSpec { return v.Checks }
+
+// GetScorecardVersion returns CertifyScorecardSpec.ScorecardVersion, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetScorecardVersion() *string { return v.ScorecardVersion }
+
+// GetScorecardCommit returns CertifyScorecardSpec.ScorecardCommit, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetScorecardCommit() *string { return v.ScorecardCommit }
+
+// GetOrigin returns CertifyScorecardSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyScorecardSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetCollector() *string { return v.Collector }
+
 // GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
 type GHSAInputSpec struct {
 	GhsaId string `json:"ghsaId"`
@@ -5912,6 +5948,18 @@ func (v *ScorecardCheckInputSpec) GetCheck() string { return v.Check }
 // GetScore returns ScorecardCheckInputSpec.Score, and is useful for accessing the field via an interface.
 func (v *ScorecardCheckInputSpec) GetScore() int { return v.Score }
 
+// ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input.
+type ScorecardCheckSpec struct {
+	Check string `json:"check"`
+	Score int    `json:"score"`
+}
+
+// GetCheck returns ScorecardCheckSpec.Check, and is useful for accessing the field via an interface.
+func (v *ScorecardCheckSpec) GetCheck() string { return v.Check }
+
+// GetScore returns ScorecardCheckSpec.Score, and is useful for accessing the field via an interface.
+func (v *ScorecardCheckSpec) GetScore() int { return v.Score }
+
 // ScorecardIngestSource includes the requested fields of the GraphQL type Source.
 // The GraphQL type's documentation follows.
 //
@@ -6063,6 +6111,121 @@ func (v *SourceInputSpec) GetTag() *string { return v.Tag }
 
 // GetCommit returns SourceInputSpec.Commit, and is useful for accessing the field via an interface.
 func (v *SourceInputSpec) GetCommit() *string { return v.Commit }
+
+// SourceSpec allows filtering the list of sources to return.
+//
+// Empty string at a field means matching with the empty string. Missing field
+// means retrieving all possible matches.
+//
+// It is an error to specify both `tag` and `commit` fields, except it both are
+// set as empty string (in which case the returned sources are only those for
+// which there is no tag/commit information).
+type SourceSpec struct {
+	Type      *string `json:"type"`
+	Namespace *string `json:"namespace"`
+	Name      *string `json:"name"`
+	Tag       *string `json:"tag"`
+	Commit    *string `json:"commit"`
+}
+
+// GetType returns SourceSpec.Type, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetType() *string { return v.Type }
+
+// GetNamespace returns SourceSpec.Namespace, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetNamespace() *string { return v.Namespace }
+
+// GetName returns SourceSpec.Name, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetName() *string { return v.Name }
+
+// GetTag returns SourceSpec.Tag, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetTag() *string { return v.Tag }
+
+// GetCommit returns SourceSpec.Commit, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetCommit() *string { return v.Commit }
+
+// SourcesRequiringScorecardResponse is returned by SourcesRequiringScorecard on success.
+type SourcesRequiringScorecardResponse struct {
+	// query for all sources that do not contain a scorecard or need to be updated after a certain threshold of time
+	SourcesRequiringScorecard []SourcesRequiringScorecardSourcesRequiringScorecardSource `json:"sourcesRequiringScorecard"`
+}
+
+// GetSourcesRequiringScorecard returns SourcesRequiringScorecardResponse.SourcesRequiringScorecard, and is useful for accessing the field via an interface.
+func (v *SourcesRequiringScorecardResponse) GetSourcesRequiringScorecard() []SourcesRequiringScorecardSourcesRequiringScorecardSource {
+	return v.SourcesRequiringScorecard
+}
+
+// SourcesRequiringScorecardSourcesRequiringScorecardSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type SourcesRequiringScorecardSourcesRequiringScorecardSource struct {
+	allSourceTree `json:"-"`
+}
+
+// GetType returns SourcesRequiringScorecardSourcesRequiringScorecardSource.Type, and is useful for accessing the field via an interface.
+func (v *SourcesRequiringScorecardSourcesRequiringScorecardSource) GetType() string {
+	return v.allSourceTree.Type
+}
+
+// GetNamespaces returns SourcesRequiringScorecardSourcesRequiringScorecardSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *SourcesRequiringScorecardSourcesRequiringScorecardSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *SourcesRequiringScorecardSourcesRequiringScorecardSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SourcesRequiringScorecardSourcesRequiringScorecardSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SourcesRequiringScorecardSourcesRequiringScorecardSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSourcesRequiringScorecardSourcesRequiringScorecardSource struct {
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *SourcesRequiringScorecardSourcesRequiringScorecardSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SourcesRequiringScorecardSourcesRequiringScorecardSource) __premarshalJSON() (*__premarshalSourcesRequiringScorecardSourcesRequiringScorecardSource, error) {
+	var retval __premarshalSourcesRequiringScorecardSourcesRequiringScorecardSource
+
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
 
 // VEXPackageAndGhsaIngestGHSA includes the requested fields of the GraphQL type GHSA.
 // The GraphQL type's documentation follows.
@@ -7571,6 +7734,14 @@ func (v *__ScorecardInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetScorecard returns __ScorecardInput.Scorecard, and is useful for accessing the field via an interface.
 func (v *__ScorecardInput) GetScorecard() ScorecardInputSpec { return v.Scorecard }
+
+// __SourcesRequiringScorecardInput is used internally by genqlient
+type __SourcesRequiringScorecardInput struct {
+	Scorecard *CertifyScorecardSpec `json:"scorecard"`
+}
+
+// GetScorecard returns __SourcesRequiringScorecardInput.Scorecard, and is useful for accessing the field via an interface.
+func (v *__SourcesRequiringScorecardInput) GetScorecard() *CertifyScorecardSpec { return v.Scorecard }
 
 // __VEXPackageAndGhsaInput is used internally by genqlient
 type __VEXPackageAndGhsaInput struct {
@@ -14142,6 +14313,49 @@ fragment allCertifyScorecard on CertifyScorecard {
 	var err error
 
 	var data ScorecardResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func SourcesRequiringScorecard(
+	ctx context.Context,
+	client graphql.Client,
+	scorecard *CertifyScorecardSpec,
+) (*SourcesRequiringScorecardResponse, error) {
+	req := &graphql.Request{
+		OpName: "SourcesRequiringScorecard",
+		Query: `
+query SourcesRequiringScorecard ($scorecard: CertifyScorecardSpec) {
+	sourcesRequiringScorecard(scorecard: $scorecard) {
+		... allSourceTree
+	}
+}
+fragment allSourceTree on Source {
+	type
+	namespaces {
+		namespace
+		names {
+			name
+			tag
+			commit
+		}
+	}
+}
+`,
+		Variables: &__SourcesRequiringScorecardInput{
+			Scorecard: scorecard,
+		},
+	}
+	var err error
+
+	var data SourcesRequiringScorecardResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

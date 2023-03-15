@@ -17,6 +17,7 @@ package neo4jBackend
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -409,6 +410,11 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 	}
 
 	return result.([]*model.Source), nil
+}
+
+// TODO: implement for neo4j
+func (c *neo4jClient) SourcesRequiringScorecard(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.Source, error) {
+	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }
 
 func (c *neo4jClient) IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error) {

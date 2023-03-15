@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -129,6 +130,12 @@ func (c *demoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) 
 		}
 	}
 	return sources, nil
+}
+
+// TODO (pxp928): implement once the back edges are integrated. Get all source that do not have scorecard associated with it or that have been
+// scanned after a time period
+func (c *demoClient) SourcesRequiringScorecard(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.Source, error) {
+	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }
 
 func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*model.Source, error) {
