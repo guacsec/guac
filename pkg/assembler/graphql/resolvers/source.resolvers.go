@@ -11,7 +11,7 @@ import (
 )
 
 // IngestSource is the resolver for the ingestSource field.
-func (r *mutationResolver) IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error) {
+func (r *mutationResolver) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
 	return r.Backend.IngestSource(ctx, source)
 }
 

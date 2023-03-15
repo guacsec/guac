@@ -376,6 +376,7 @@ type HasSLSASpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type HasSourceAt struct {
+	ID            string    `json:"id"`
 	Package       *Package  `json:"package"`
 	Source        *Source   `json:"source"`
 	KnownSince    time.Time `json:"knownSince"`
@@ -396,6 +397,7 @@ type HasSourceAtInputSpec struct {
 
 // HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 type HasSourceAtSpec struct {
+	ID            *string     `json:"id"`
 	Package       *PkgSpec    `json:"package"`
 	Source        *SourceSpec `json:"source"`
 	KnownSince    *time.Time  `json:"knownSince"`
@@ -616,6 +618,7 @@ type OsvCveOrGhsaSpec struct {
 // Also note that this is named `Package`, not `PackageType`. This is only to make
 // queries more readable.
 type Package struct {
+	ID         string              `json:"id"`
 	Type       string              `json:"type"`
 	Namespaces []*PackageNamespace `json:"namespaces"`
 }
@@ -636,6 +639,7 @@ func (Package) IsPackageOrSource() {}
 // This is the first node in the trie that can be referred to by other parts of
 // GUAC.
 type PackageName struct {
+	ID       string            `json:"id"`
 	Name     string            `json:"name"`
 	Versions []*PackageVersion `json:"versions"`
 }
@@ -648,6 +652,7 @@ type PackageName struct {
 // Namespaces are optional and type specific. Because they are optional, we use
 // empty string to denote missing namespaces.
 type PackageNamespace struct {
+	ID        string         `json:"id"`
 	Namespace string         `json:"namespace"`
 	Names     []*PackageName `json:"names"`
 }
@@ -765,6 +770,7 @@ type PackageSourceOrArtifactSpec struct {
 // a subset of the qualifier of the other also mean two different packages in the
 // trie.
 type PackageVersion struct {
+	ID         string              `json:"id"`
 	Version    string              `json:"version"`
 	Qualifiers []*PackageQualifier `json:"qualifiers"`
 	Subpath    string              `json:"subpath"`
@@ -805,6 +811,7 @@ type PkgNameSpec struct {
 // on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
 // true. If this field is true, then the qualifiers argument is ignored.
 type PkgSpec struct {
+	ID                       *string                 `json:"id"`
 	Type                     *string                 `json:"type"`
 	Namespace                *string                 `json:"namespace"`
 	Name                     *string                 `json:"name"`
@@ -981,6 +988,7 @@ type ScorecardInputSpec struct {
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type Source struct {
+	ID         string             `json:"id"`
 	Type       string             `json:"type"`
 	Namespaces []*SourceNamespace `json:"namespaces"`
 }
@@ -1013,6 +1021,7 @@ type SourceInputSpec struct {
 // This is the only source trie node that can be referenced by other parts of
 // GUAC.
 type SourceName struct {
+	ID     string  `json:"id"`
 	Name   string  `json:"name"`
 	Tag    *string `json:"tag"`
 	Commit *string `json:"commit"`
@@ -1024,6 +1033,7 @@ type SourceName struct {
 //
 // The `namespace` field is mandatory.
 type SourceNamespace struct {
+	ID        string        `json:"id"`
 	Namespace string        `json:"namespace"`
 	Names     []*SourceName `json:"names"`
 }
@@ -1037,6 +1047,7 @@ type SourceNamespace struct {
 // set as empty string (in which case the returned sources are only those for
 // which there is no tag/commit information).
 type SourceSpec struct {
+	ID        *string `json:"id"`
 	Type      *string `json:"type"`
 	Namespace *string `json:"namespace"`
 	Name      *string `json:"name"`

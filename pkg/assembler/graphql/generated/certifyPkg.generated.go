@@ -67,6 +67,8 @@ func (ec *executionContext) fieldContext_CertifyPkg_packages(ctx context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Package_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Package_type(ctx, field)
 			case "namespaces":

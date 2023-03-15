@@ -11,7 +11,7 @@ import (
 )
 
 // IngestPackage is the resolver for the ingestPackage field.
-func (r *mutationResolver) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+func (r *mutationResolver) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	return r.Backend.IngestPackage(ctx, pkg)
 }
 

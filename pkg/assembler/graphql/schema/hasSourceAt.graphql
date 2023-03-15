@@ -27,6 +27,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HasSourceAt {
+  id: ID!
   package: Package!
   source: Source!
   knownSince: Time!
@@ -39,6 +40,7 @@ type HasSourceAt {
 HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 """
 input HasSourceAtSpec {
+  id: ID
   package: PkgSpec
   source: SourceSpec
   knownSince: Time

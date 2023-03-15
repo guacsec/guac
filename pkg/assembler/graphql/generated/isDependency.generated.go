@@ -67,6 +67,8 @@ func (ec *executionContext) fieldContext_IsDependency_package(ctx context.Contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Package_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Package_type(ctx, field)
 			case "namespaces":
@@ -117,6 +119,8 @@ func (ec *executionContext) fieldContext_IsDependency_dependentPackage(ctx conte
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Package_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Package_type(ctx, field)
 			case "namespaces":

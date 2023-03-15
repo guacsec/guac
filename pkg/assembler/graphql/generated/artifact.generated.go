@@ -37,8 +37,8 @@ type MutationResolver interface {
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
-	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
-	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
+	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
+	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
 }
 type QueryResolver interface {
 	Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error)
@@ -447,10 +447,10 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.PkgInputSpec
+	var arg0 model.PkgInputSpec
 	if tmp, ok := rawArgs["pkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -504,10 +504,10 @@ func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.SourceInputSpec
+	var arg0 model.SourceInputSpec
 	if tmp, ok := rawArgs["source"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg0, err = ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1761,6 +1761,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestHasSourceAt(ctx context.
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_HasSourceAt_id(ctx, field)
 			case "package":
 				return ec.fieldContext_HasSourceAt_package(ctx, field)
 			case "source":
@@ -2132,7 +2134,7 @@ func (ec *executionContext) _Mutation_ingestPackage(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPackage(rctx, fc.Args["pkg"].(*model.PkgInputSpec))
+		return ec.resolvers.Mutation().IngestPackage(rctx, fc.Args["pkg"].(model.PkgInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2157,6 +2159,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestPackage(ctx context.Cont
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Package_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Package_type(ctx, field)
 			case "namespaces":
@@ -2193,7 +2197,7 @@ func (ec *executionContext) _Mutation_ingestSource(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestSource(rctx, fc.Args["source"].(*model.SourceInputSpec))
+		return ec.resolvers.Mutation().IngestSource(rctx, fc.Args["source"].(model.SourceInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2218,6 +2222,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestSource(ctx context.Conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Source_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Source_type(ctx, field)
 			case "namespaces":
@@ -2968,6 +2974,8 @@ func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_HasSourceAt_id(ctx, field)
 			case "package":
 				return ec.fieldContext_HasSourceAt_package(ctx, field)
 			case "source":
@@ -3364,6 +3372,8 @@ func (ec *executionContext) fieldContext_Query_packages(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Package_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Package_type(ctx, field)
 			case "namespaces":
@@ -3425,6 +3435,8 @@ func (ec *executionContext) fieldContext_Query_sources(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Source_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Source_type(ctx, field)
 			case "namespaces":

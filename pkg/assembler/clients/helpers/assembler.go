@@ -41,7 +41,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			}
 
 			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurence))
-			if err := ingestIsOccurence(ctx, gqlclient, p.IsOccurence); err != nil {
+			if err := ingestIsOccurrence(ctx, gqlclient, p.IsOccurence); err != nil {
 				return err
 			}
 
@@ -75,7 +75,7 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, vs []assembl
 	return nil
 }
 
-func ingestIsOccurence(ctx context.Context, client graphql.Client, vs []assembler.IsOccurenceIngest) error {
+func ingestIsOccurrence(ctx context.Context, client graphql.Client, vs []assembler.IsOccurenceIngest) error {
 	for _, v := range vs {
 		if v.Pkg != nil && v.Src != nil {
 			return fmt.Errorf("unable to create IsOccurence with both Src and Pkg subject specified")

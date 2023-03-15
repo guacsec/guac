@@ -31,6 +31,7 @@ Also note that this is named `Source`, not `SourceType`. This is only to make
 queries more readable.
 """
 type Source {
+  id: ID!
   type: String!
   namespaces: [SourceNamespace!]!
 }
@@ -43,6 +44,7 @@ This is the location of the repository (such as github/gitlab/bitbucket).
 The `namespace` field is mandatory.
 """
 type SourceNamespace {
+  id: ID!
   namespace: String!
   names: [SourceName!]!
 }
@@ -57,6 +59,7 @@ This is the only source trie node that can be referenced by other parts of
 GUAC.
 """
 type SourceName {
+  id: ID!
   name: String!
   tag: String
   commit: String
@@ -73,6 +76,7 @@ set as empty string (in which case the returned sources are only those for
 which there is no tag/commit information).
 """
 input SourceSpec {
+  id: ID
   type: String
   namespace: String
   name: String
@@ -105,5 +109,5 @@ extend type Query {
 
 extend type Mutation {
   "Ingest a new source. Returns the ingested source trie"
-  ingestSource(source: SourceInputSpec): Source!
+  ingestSource(source: SourceInputSpec!): Source!
 }

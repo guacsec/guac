@@ -16,11 +16,40 @@
 package testing
 
 import (
+	"sync"
+
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+var (
+	index      = indexType{}
+	packages   = pkgTypeMap{}
+	sources    = srcTypeMap{}
+	sourceMaps = srcMaps{}
+)
+
 type DemoCredentials struct{}
+
+// IDs: We have a global ID for all nodes that have references to/from.
+// Since we always ingest data and never remove, we can keep this global and
+// increment it as needed.
+// For fast retrieval, we also keep a map from ID from nodes that have it.
+type nodeID int
+
+type hasID interface {
+	getID() nodeID
+}
+
+type indexType map[nodeID]hasID
+
+// In general, we would add a lock around this function
+func (c *demoClient) getNextID() nodeID {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.id = c.id + 1
+	return c.id
+}
 
 type demoClient struct {
 	packages            []*model.Package
@@ -42,6 +71,8 @@ type demoClient struct {
 	isVulnerability     []*model.IsVulnerability
 	certifyVEXStatement []*model.CertifyVEXStatement
 	hasSLSA             []*model.HasSlsa
+	mu                  sync.Mutex
+	id                  nodeID
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -65,6 +96,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
+		id:                  0,
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -138,6 +170,60 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
+		id:                  0,
 	}
 	return client, nil
+}
+
+func noMatch(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return false
+}
+
+func noMatchInput(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return value != ""
+}
+
+func noMatchPtr(filter *string, value *string) bool {
+	if filter == nil {
+		if value == nil {
+			return false
+		} else {
+			return false
+		}
+	} else {
+		if value == nil {
+			return true
+		} else {
+			return *value != *filter
+		}
+	}
+}
+
+func noMatchPtrInput(input *string, value *string) bool {
+	if input == nil {
+		if value == nil {
+			return false
+		} else {
+			return *value != ""
+		}
+	} else {
+		if value == nil {
+			return true
+		} else {
+			return *value != *input
+		}
+	}
+}
+
+func nilToEmpty(input *string) string {
+	if input == nil {
+		return ""
+	}
+	return *input
 }

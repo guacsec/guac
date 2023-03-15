@@ -68,6 +68,8 @@ func (ec *executionContext) fieldContext_CertifyScorecard_source(ctx context.Con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Source_id(ctx, field)
 			case "type":
 				return ec.fieldContext_Source_type(ctx, field)
 			case "namespaces":
