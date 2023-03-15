@@ -49,7 +49,7 @@ fmt:
 # Check that generated files are up to date
 .PHONY: generated_up_to_date
 generated_up_to_date: generate
-	test -z "$(git status -s)"
+	test -z "$(shell git status -s)"
 
 # Run all the linters
 .PHONY: lint
