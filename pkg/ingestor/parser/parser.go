@@ -29,7 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/scorecard"
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
-	certify_vuln "github.com/guacsec/guac/pkg/ingestor/parser/vuln"
+	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/logging"
 	uuid "github.com/satori/go.uuid"
 )
@@ -37,7 +37,7 @@ import (
 func init() {
 	_ = RegisterDocumentParser(dsse.NewDSSEParser, processor.DocumentDSSE)
 	_ = RegisterDocumentParser(slsa.NewSLSAParser, processor.DocumentITE6SLSA)
-	_ = RegisterDocumentParser(certify_vuln.NewVulnCertificationParser, processor.DocumentITE6Vul)
+	_ = RegisterDocumentParser(vuln.NewVulnCertificationParser, processor.DocumentITE6Vul)
 	_ = RegisterDocumentParser(spdx.NewSpdxParser, processor.DocumentSPDX)
 	_ = RegisterDocumentParser(cyclonedx.NewCycloneDXParser, processor.DocumentCycloneDX)
 	_ = RegisterDocumentParser(scorecard.NewScorecardParser, processor.DocumentScorecard)
