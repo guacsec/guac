@@ -36,6 +36,7 @@ Also note that this is named `Package`, not `PackageType`. This is only to make
 queries more readable.
 """
 type Package {
+  id: ID!
   type: String!
   namespaces: [PackageNamespace!]!
 }
@@ -50,6 +51,7 @@ Namespaces are optional and type specific. Because they are optional, we use
 empty string to denote missing namespaces.
 """
 type PackageNamespace {
+  id: ID!
   namespace: String!
   names: [PackageName!]!
 }
@@ -66,6 +68,7 @@ This is the first node in the trie that can be referred to by other parts of
 GUAC.
 """
 type PackageName {
+  id: ID!
   name: String!
   versions: [PackageVersion!]!
 }
@@ -90,6 +93,7 @@ a subset of the qualifier of the other also mean two different packages in the
 trie.
 """
 type PackageVersion {
+  id: ID!
   version: String!
   qualifiers: [PackageQualifier!]!
   subpath: String!
@@ -126,6 +130,7 @@ on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
 true. If this field is true, then the qualifiers argument is ignored.
 """
 input PkgSpec {
+  id: ID
   type: String
   namespace: String
   name: String
@@ -190,5 +195,5 @@ extend type Query {
 
 extend type Mutation {
   "Ingest a new package. Returns the ingested package trie"
-  ingestPackage(pkg: PkgInputSpec): Package!
+  ingestPackage(pkg: PkgInputSpec!): Package!
 }

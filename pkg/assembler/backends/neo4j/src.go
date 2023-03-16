@@ -411,7 +411,7 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 	return result.([]*model.Source), nil
 }
 
-func (c *neo4jClient) IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error) {
+func (c *neo4jClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 

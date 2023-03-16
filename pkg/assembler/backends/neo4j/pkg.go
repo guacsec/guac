@@ -575,7 +575,7 @@ func removeInvalidCharFromProperty(key string) string {
 	return strings.ReplaceAll(key, ".", "_")
 }
 
-func (c *neo4jClient) IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error) {
+func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 

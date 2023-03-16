@@ -112,6 +112,7 @@ type ComplexityRoot struct {
 
 	HasSourceAt struct {
 		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
@@ -167,9 +168,9 @@ type ComplexityRoot struct {
 		IngestMaterials       func(childComplexity int, materials []*model.PackageSourceOrArtifactInput) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
-		IngestPackage         func(childComplexity int, pkg *model.PkgInputSpec) int
+		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
-		IngestSource          func(childComplexity int, source *model.SourceInputSpec) int
+		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
@@ -183,16 +184,19 @@ type ComplexityRoot struct {
 	}
 
 	Package struct {
+		ID         func(childComplexity int) int
 		Namespaces func(childComplexity int) int
 		Type       func(childComplexity int) int
 	}
 
 	PackageName struct {
+		ID       func(childComplexity int) int
 		Name     func(childComplexity int) int
 		Versions func(childComplexity int) int
 	}
 
 	PackageNamespace struct {
+		ID        func(childComplexity int) int
 		Names     func(childComplexity int) int
 		Namespace func(childComplexity int) int
 	}
@@ -203,6 +207,7 @@ type ComplexityRoot struct {
 	}
 
 	PackageVersion struct {
+		ID         func(childComplexity int) int
 		Qualifiers func(childComplexity int) int
 		Subpath    func(childComplexity int) int
 		Version    func(childComplexity int) int
@@ -263,17 +268,20 @@ type ComplexityRoot struct {
 	}
 
 	Source struct {
+		ID         func(childComplexity int) int
 		Namespaces func(childComplexity int) int
 		Type       func(childComplexity int) int
 	}
 
 	SourceName struct {
 		Commit func(childComplexity int) int
+		ID     func(childComplexity int) int
 		Name   func(childComplexity int) int
 		Tag    func(childComplexity int) int
 	}
 
 	SourceNamespace struct {
+		ID        func(childComplexity int) int
 		Names     func(childComplexity int) int
 		Namespace func(childComplexity int) int
 	}
@@ -541,6 +549,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSourceAt.Collector(childComplexity), true
+
+	case "HasSourceAt.id":
+		if e.complexity.HasSourceAt.ID == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.ID(childComplexity), true
 
 	case "HasSourceAt.justification":
 		if e.complexity.HasSourceAt.Justification == nil {
@@ -907,7 +922,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(*model.PkgInputSpec)), true
+		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(model.PkgInputSpec)), true
 
 	case "Mutation.ingestSLSA":
 		if e.complexity.Mutation.IngestSlsa == nil {
@@ -931,7 +946,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(*model.SourceInputSpec)), true
+		return e.complexity.Mutation.IngestSource(childComplexity, args["source"].(model.SourceInputSpec)), true
 
 	case "Mutation.ingestVEXStatement":
 		if e.complexity.Mutation.IngestVEXStatement == nil {
@@ -971,6 +986,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OSVId.ID(childComplexity), true
 
+	case "Package.id":
+		if e.complexity.Package.ID == nil {
+			break
+		}
+
+		return e.complexity.Package.ID(childComplexity), true
+
 	case "Package.namespaces":
 		if e.complexity.Package.Namespaces == nil {
 			break
@@ -985,6 +1007,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Package.Type(childComplexity), true
 
+	case "PackageName.id":
+		if e.complexity.PackageName.ID == nil {
+			break
+		}
+
+		return e.complexity.PackageName.ID(childComplexity), true
+
 	case "PackageName.name":
 		if e.complexity.PackageName.Name == nil {
 			break
@@ -998,6 +1027,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PackageName.Versions(childComplexity), true
+
+	case "PackageNamespace.id":
+		if e.complexity.PackageNamespace.ID == nil {
+			break
+		}
+
+		return e.complexity.PackageNamespace.ID(childComplexity), true
 
 	case "PackageNamespace.names":
 		if e.complexity.PackageNamespace.Names == nil {
@@ -1026,6 +1062,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PackageQualifier.Value(childComplexity), true
+
+	case "PackageVersion.id":
+		if e.complexity.PackageVersion.ID == nil {
+			break
+		}
+
+		return e.complexity.PackageVersion.ID(childComplexity), true
 
 	case "PackageVersion.qualifiers":
 		if e.complexity.PackageVersion.Qualifiers == nil {
@@ -1416,6 +1459,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ScorecardCheck.Score(childComplexity), true
 
+	case "Source.id":
+		if e.complexity.Source.ID == nil {
+			break
+		}
+
+		return e.complexity.Source.ID(childComplexity), true
+
 	case "Source.namespaces":
 		if e.complexity.Source.Namespaces == nil {
 			break
@@ -1437,6 +1487,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SourceName.Commit(childComplexity), true
 
+	case "SourceName.id":
+		if e.complexity.SourceName.ID == nil {
+			break
+		}
+
+		return e.complexity.SourceName.ID(childComplexity), true
+
 	case "SourceName.name":
 		if e.complexity.SourceName.Name == nil {
 			break
@@ -1450,6 +1507,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SourceName.Tag(childComplexity), true
+
+	case "SourceNamespace.id":
+		if e.complexity.SourceNamespace.ID == nil {
+			break
+		}
+
+		return e.complexity.SourceNamespace.ID(childComplexity), true
 
 	case "SourceNamespace.names":
 		if e.complexity.SourceNamespace.Names == nil {
@@ -2684,6 +2748,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HasSourceAt {
+  id: ID!
   package: Package!
   source: Source!
   knownSince: Time!
@@ -2696,6 +2761,7 @@ type HasSourceAt {
 HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 """
 input HasSourceAtSpec {
+  id: ID
   package: PkgSpec
   source: SourceSpec
   knownSince: Time
@@ -3183,6 +3249,7 @@ Also note that this is named ` + "`" + `Package` + "`" + `, not ` + "`" + `Packa
 queries more readable.
 """
 type Package {
+  id: ID!
   type: String!
   namespaces: [PackageNamespace!]!
 }
@@ -3197,6 +3264,7 @@ Namespaces are optional and type specific. Because they are optional, we use
 empty string to denote missing namespaces.
 """
 type PackageNamespace {
+  id: ID!
   namespace: String!
   names: [PackageName!]!
 }
@@ -3213,6 +3281,7 @@ This is the first node in the trie that can be referred to by other parts of
 GUAC.
 """
 type PackageName {
+  id: ID!
   name: String!
   versions: [PackageVersion!]!
 }
@@ -3237,6 +3306,7 @@ a subset of the qualifier of the other also mean two different packages in the
 trie.
 """
 type PackageVersion {
+  id: ID!
   version: String!
   qualifiers: [PackageQualifier!]!
   subpath: String!
@@ -3273,6 +3343,7 @@ on nodes that don't contain any qualifier, set ` + "`" + `matchOnlyEmptyQualifie
 true. If this field is true, then the qualifiers argument is ignored.
 """
 input PkgSpec {
+  id: ID
   type: String
   namespace: String
   name: String
@@ -3337,7 +3408,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingest a new package. Returns the ingested package trie"
-  ingestPackage(pkg: PkgInputSpec): Package!
+  ingestPackage(pkg: PkgInputSpec!): Package!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
@@ -3373,6 +3444,7 @@ Also note that this is named ` + "`" + `Source` + "`" + `, not ` + "`" + `Source
 queries more readable.
 """
 type Source {
+  id: ID!
   type: String!
   namespaces: [SourceNamespace!]!
 }
@@ -3385,6 +3457,7 @@ This is the location of the repository (such as github/gitlab/bitbucket).
 The ` + "`" + `namespace` + "`" + ` field is mandatory.
 """
 type SourceNamespace {
+  id: ID!
   namespace: String!
   names: [SourceName!]!
 }
@@ -3399,6 +3472,7 @@ This is the only source trie node that can be referenced by other parts of
 GUAC.
 """
 type SourceName {
+  id: ID!
   name: String!
   tag: String
   commit: String
@@ -3415,6 +3489,7 @@ set as empty string (in which case the returned sources are only those for
 which there is no tag/commit information).
 """
 input SourceSpec {
+  id: ID
   type: String
   namespace: String
   name: String
@@ -3447,7 +3522,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingest a new source. Returns the ingested source trie"
-  ingestSource(source: SourceInputSpec): Source!
+  ingestSource(source: SourceInputSpec!): Source!
 }
 `, BuiltIn: false},
 }

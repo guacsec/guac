@@ -49,8 +49,8 @@ type Backend interface {
 	HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error)
 
 	// Mutations for software trees (read-write queries)
-	IngestPackage(ctx context.Context, pkg *model.PkgInputSpec) (*model.Package, error)
-	IngestSource(ctx context.Context, source *model.SourceInputSpec) (*model.Source, error)
+	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
+	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
 	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error)
 	IngestMaterials(ctx context.Context, materials []*model.PackageSourceOrArtifactInput) ([]model.PackageSourceOrArtifact, error)
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)

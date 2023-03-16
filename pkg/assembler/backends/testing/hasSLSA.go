@@ -136,13 +136,13 @@ func (c *demoClient) IngestMaterials(
 		}
 
 		if material.Package != nil {
-			pkg, err := c.IngestPackage(ctx, material.Package)
+			pkg, err := c.IngestPackage(ctx, *material.Package)
 			if err != nil {
 				return nil, err
 			}
 			output = append(output, pkg)
 		} else if material.Source != nil {
-			source, err := c.IngestSource(ctx, material.Source)
+			source, err := c.IngestSource(ctx, *material.Source)
 			if err != nil {
 				return nil, err
 			}

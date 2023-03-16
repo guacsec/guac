@@ -16,11 +16,37 @@
 package testing
 
 import (
+	"sync/atomic"
+
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+var (
+	index      = indexType{}
+	packages   = pkgTypeMap{}
+	sources    = srcTypeMap{}
+	sourceMaps = srcMaps{}
+)
+
 type DemoCredentials struct{}
+
+// IDs: We have a global ID for all nodes that have references to/from.
+// Since we always ingest data and never remove, we can keep this global and
+// increment it as needed.
+// For fast retrieval, we also keep a map from ID from nodes that have it.
+// IDs are stored as string in graphql even though we ask for integers
+// See https://github.com/99designs/gqlgen/issues/2561
+type hasID interface {
+	getID() uint32
+}
+
+type indexType map[uint32]hasID
+
+// atomic add to ensure ID is not duplicated
+func (c *demoClient) getNextID() uint32 {
+	return atomic.AddUint32(&c.id, 1)
+}
 
 type demoClient struct {
 	packages            []*model.Package
@@ -42,6 +68,7 @@ type demoClient struct {
 	isVulnerability     []*model.IsVulnerability
 	certifyVEXStatement []*model.CertifyVEXStatement
 	hasSLSA             []*model.HasSlsa
+	id                  uint32
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -73,47 +100,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllOSV(client)
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
-	//registerAllHashEqual(client)
-	// err := registerAllIsOccurrence(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err := registerAllhasSBOM(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllIsDependency(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyPkg(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllHasSourceAt(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyBad(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyScorecard(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyVuln(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllIsVulnerability(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyVEXStatement(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
+
 	return client, nil
 }
 
@@ -140,4 +127,25 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		hasSLSA:             []*model.HasSlsa{},
 	}
 	return client, nil
+}
+
+func noMatch(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return false
+}
+
+func noMatchInput(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return value != ""
+}
+
+func nilToEmpty(input *string) string {
+	if input == nil {
+		return ""
+	}
+	return *input
 }
