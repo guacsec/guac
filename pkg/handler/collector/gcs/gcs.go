@@ -71,12 +71,12 @@ func NewGCSClient(ctx context.Context, poll bool, interval time.Duration) (*gcs,
 	if err != nil {
 		return nil, err
 	}
-	if getBucketPath() == "" {
+	bucket := getBucketPath()
+	if bucket == "" {
 		return nil, errors.New("gcs bucket not specified")
 	}
-	bucket := getBucketPath()
 	gstore := &gcs{
-		bucket:   getBucketPath(),
+		bucket:   bucket,
 		reader:   &reader{client: client, bucket: bucket},
 		poll:     poll,
 		interval: interval,
@@ -121,21 +121,29 @@ func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processo
 	if g.reader == nil {
 		return errors.New("gcs not initialized")
 	}
+
+	gcsGetArtifacts := func() error {
+		err := g.getArtifacts(ctx, docChannel)
+		if err != nil {
+			return fmt.Errorf("failed to get artifacts from gcs: %w", err)
+		}
+		g.lastDownload = time.Now()
+		return nil
+	}
+
 	if g.poll {
 		for {
 			time.Sleep(g.interval)
-			err := g.getArtifacts(ctx, docChannel)
+			err := gcsGetArtifacts()
 			if err != nil {
 				return err
 			}
-			g.lastDownload = time.Now()
 		}
 	} else {
-		err := g.getArtifacts(ctx, docChannel)
+		err := gcsGetArtifacts()
 		if err != nil {
 			return err
 		}
-		g.lastDownload = time.Now()
 	}
 	return nil
 }
@@ -154,21 +162,19 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 		if err != nil {
 			return fmt.Errorf("failed to retrieve object attribute from bucket: %s, error: %w", g.bucket, err)
 		}
+
 		payload := []byte{}
-		if g.lastDownload.IsZero() {
+
+		if g.lastDownload.IsZero() || attrs.Updated.After(g.lastDownload) {
 			payload, err = g.getObject(ctx, attrs.Name)
 			if err != nil {
 				logger.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
 				continue
 			}
-		} else if attrs.Updated.After(g.lastDownload) {
-			payload, err = g.getObject(ctx, attrs.Name)
-			if err != nil {
-				logger.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
+			if len(payload) == 0 {
 				continue
 			}
-		}
-		if len(payload) > 0 {
+
 			doc := &processor.Document{
 				Blob:   payload,
 				Type:   processor.DocumentUnknown,
