@@ -267,7 +267,7 @@ func buildSourceResponse(id uint32, filter *model.SourceSpec) (*model.Source, er
 
 	namespaceStruct, ok := node.(*srcNamespaceStruct)
 	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type")
+		return nil, gqlerror.Errorf("ID does not match expected node type for source namespace")
 	}
 	s := model.Source{
 		ID:         fmt.Sprintf("%d", namespaceStruct.id),

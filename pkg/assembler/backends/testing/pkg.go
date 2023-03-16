@@ -330,7 +330,7 @@ func buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, err
 
 	namespaceStruct, ok := node.(*pkgNamespaceStruct)
 	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type")
+		return nil, gqlerror.Errorf("ID does not match expected node type for package namespace")
 	}
 	p := model.Package{
 		ID:         fmt.Sprintf("%d", namespaceStruct.id),
