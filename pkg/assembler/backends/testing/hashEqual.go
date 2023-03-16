@@ -17,113 +17,205 @@ package testing
 
 import (
 	"context"
-	"reflect"
+	"errors"
+	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/exp/slices"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func registerAllHashEqual(client *demoClient) {
+// Internal hashEqual
 
+type hashEqualList []*hashEqualStruct
+type hashEqualStruct struct {
+	id            uint32
+	artifacts     []uint32
+	justification string
+	origin        string
+	collector     string
+}
+
+func (n *hashEqualStruct) getID() uint32 { return n.id }
+
+func registerAllHashEqual(client *demoClient) {
 	// strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-	client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "testing backend", "testing backend")
-	client.registerHashEqual([]*model.Artifact{{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"},
-		{Digest: "89bb0da1891646e58eb3e6ed24f3a6fc3c8eb5a0d44824cba581dfa34a0450cf", Algorithm: "sha256"}}, "these two are the same", "testing backend", "testing backend")
+	//-client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "testing backend", "testing backend")
+	client.IngestHashEqual(
+		context.Background(),
+		model.ArtifactInputSpec{
+			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+			Algorithm: "sha1",
+		},
+		model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		model.HashEqualInputSpec{
+			Justification: "these two are the same",
+			Origin:        "testing backend",
+			Collector:     "testing backend",
+		})
+}
+
+func (c *demoClient) hashEqualByID(id uint32) (*hashEqualStruct, error) {
+	o, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find hashEqual")
+	}
+	a, ok := o.(*hashEqualStruct)
+	if !ok {
+		return nil, errors.New("not a hashEqual")
+	}
+	return a, nil
 }
 
 // Ingest HashEqual
+func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 
-func (c *demoClient) registerHashEqual(artifacts []*model.Artifact, justification, origin, collector string) *model.HashEqual {
+	aInt1, err := c.artifactByKey(artifact.Algorithm, artifact.Digest)
+	if err != nil {
+		return nil, gqlerror.Errorf("IngestHashEqual :: Artifact not found")
+	}
+	aInt2, err := c.artifactByKey(equalArtifact.Algorithm, equalArtifact.Digest)
+	if err != nil {
+		return nil, gqlerror.Errorf("IngestHashEqual :: Artifact not found")
+	}
+	artIDs := []uint32{aInt1.id, aInt2.id}
+	sort.Slice(artIDs, func(i, j int) bool { return artIDs[i] < artIDs[j] })
 
-	for _, a := range c.hashEquals {
-		if reflect.DeepEqual(a.Artifacts, artifacts) && a.Justification == justification {
-			return a
+	// Search backedges for existing.
+	searchHEs := slices.Clone(aInt1.hashEquals)
+	searchHEs = append(searchHEs, aInt2.hashEquals...)
+
+	for _, he := range searchHEs {
+		h, err := c.hashEqualByID(he)
+		if err != nil {
+			return nil, gqlerror.Errorf(
+				"IngestHashEqual :: Bad hashEqual id stored on existing artifact: %s", err)
+		}
+		if h.justification == hashEqual.Justification &&
+			h.origin == hashEqual.Origin &&
+			h.collector == hashEqual.Collector &&
+			slices.Equal(h.artifacts, artIDs) {
+			return c.convHashEqual(h), nil
 		}
 	}
 
-	newHashEqual := &model.HashEqual{
-		Justification: justification,
-		Artifacts:     artifacts,
-		Origin:        origin,
-		Collector:     collector,
+	he := &hashEqualStruct{
+		id:            c.getNextID(),
+		artifacts:     artIDs,
+		justification: hashEqual.Justification,
+		origin:        hashEqual.Origin,
+		collector:     hashEqual.Collector,
 	}
-	c.hashEquals = append(c.hashEquals, newHashEqual)
-	return newHashEqual
+	c.index[he.id] = he
+	c.hashEquals = append(c.hashEquals, he)
+	aInt1.hashEquals = append(aInt1.hashEquals, he.id)
+	aInt2.hashEquals = append(aInt2.hashEquals, he.id)
+
+	return c.convHashEqual(he), nil
 }
 
-func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
-
-	collectedArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &artifact.Algorithm, Digest: &artifact.Digest})
-	if err != nil {
-		return nil, err
+func (c *demoClient) matchArtifacts(filter []*model.ArtifactSpec, value []uint32) bool {
+	val := slices.Clone(value)
+	var matchID []uint32
+	var matchPartial []*model.ArtifactSpec
+	for _, aSpec := range filter {
+		a, _ := c.artifactExact(aSpec)
+		// drop error here if ID is bad
+		if a != nil {
+			matchID = append(matchID, a.id)
+		} else if aSpec.Algorithm != nil || aSpec.Digest != nil {
+			matchPartial = append(matchPartial, aSpec)
+		}
 	}
-	if len(collectedArt) != 1 {
-		return nil, gqlerror.Errorf(
-			"IngestHashEqual :: multiple artifacts found")
+	for _, m := range matchID {
+		if !slices.Contains(val, m) {
+			return false
+		}
+		val = slices.Delete(val, slices.Index(val, m), slices.Index(val, m)+1)
 	}
-
-	collectedEqualArt, err := c.Artifacts(ctx, &model.ArtifactSpec{Algorithm: &equalArtifact.Algorithm, Digest: &equalArtifact.Digest})
-	if err != nil {
-		return nil, err
+	for _, m := range matchPartial {
+		match := false
+		remove := -1
+		for i, v := range val {
+			a, _ := c.artifactByID(v)
+			if (m.Algorithm == nil || strings.ToLower(*m.Algorithm) == a.algorithm) &&
+				(m.Digest == nil || strings.ToLower(*m.Digest) == a.digest) {
+				match = true
+				remove = i
+				break
+			}
+		}
+		if !match {
+			return false
+		}
+		val = slices.Delete(val, remove, remove+1)
 	}
-	if len(collectedEqualArt) != 1 {
-		return nil, gqlerror.Errorf(
-			"IngestHashEqual :: multiple artifacts found")
-	}
-
-	return c.registerHashEqual(
-		[]*model.Artifact{collectedArt[0], collectedEqualArt[0]},
-		hashEqual.Justification,
-		hashEqual.Origin,
-		hashEqual.Collector), nil
+	return true
 }
 
 // Query HashEqual
 
-func (c *demoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+func (c *demoClient) HashEqual(ctx context.Context, hSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
+	if len(hSpec.Artifacts) > 2 {
+		return nil, gqlerror.Errorf(
+			"HashEqual :: Provided spec has too many Artifacts")
+	}
+
+	// If ID is provided, try to look up, then check if rest matches
+	if hSpec.ID != nil {
+		id64, err := strconv.ParseUint(*hSpec.ID, 10, 32)
+		if err != nil {
+			return nil, gqlerror.Errorf("HashEqual :: invalid ID %s", err)
+		}
+		id := uint32(id64)
+		h, err := c.hashEqualByID(id)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		if noMatch(hSpec.Justification, h.justification) ||
+			noMatch(hSpec.Origin, h.origin) ||
+			noMatch(hSpec.Collector, h.collector) ||
+			!c.matchArtifacts(hSpec.Artifacts, h.artifacts) {
+			return nil, nil
+		}
+		return []*model.HashEqual{c.convHashEqual(h)}, nil
+	}
+
 	var hashEquals []*model.HashEqual
-
+	//FIXME if any artifacts are exact matches only search those backedges
 	for _, h := range c.hashEquals {
-		matchOrSkip := true
-
-		if hashEqualSpec.Justification != nil && h.Justification != *hashEqualSpec.Justification {
-			matchOrSkip = false
+		if noMatch(hSpec.Justification, h.justification) ||
+			noMatch(hSpec.Origin, h.origin) ||
+			noMatch(hSpec.Collector, h.collector) ||
+			!c.matchArtifacts(hSpec.Artifacts, h.artifacts) {
+			continue
 		}
-		if hashEqualSpec.Collector != nil && h.Collector != *hashEqualSpec.Collector {
-			matchOrSkip = false
-		}
-		if hashEqualSpec.Origin != nil && h.Origin != *hashEqualSpec.Origin {
-			matchOrSkip = false
-		}
-
-		if len(hashEqualSpec.Artifacts) > 0 && !filterEqualArtifact(h.Artifacts, hashEqualSpec.Artifacts) {
-			matchOrSkip = false
-		}
-
-		if matchOrSkip {
-			hashEquals = append(hashEquals, h)
-		}
+		hashEquals = append(hashEquals, c.convHashEqual(h))
 	}
 
 	return hashEquals, nil
 }
 
-func filterEqualArtifact(storedArtifacts []*model.Artifact, queryArtifacts []*model.ArtifactSpec) bool {
-	exists := make(map[model.Artifact]bool)
-	for _, value := range storedArtifacts {
-		exists[*value] = true
+func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
+	var artifacts []*model.Artifact
+	for _, id := range h.artifacts {
+		a, _ := c.artifactByID(id)
+		//FIXME this will panic, if not found, but it should always be?
+		artifacts = append(artifacts, convArtifact(a))
 	}
-
-	// enforce lowercase for both the algorithm and digest when querying
-	for _, value := range queryArtifacts {
-		queryArt := model.Artifact{
-			Algorithm: strings.ToLower(*value.Algorithm),
-			Digest:    strings.ToLower(*value.Digest),
-		}
-		if _, ok := exists[queryArt]; ok {
-			return true
-		}
+	return &model.HashEqual{
+		ID:            fmt.Sprint(h.id),
+		Justification: h.justification,
+		Artifacts:     artifacts,
+		Origin:        h.origin,
+		Collector:     h.collector,
 	}
-	return false
 }

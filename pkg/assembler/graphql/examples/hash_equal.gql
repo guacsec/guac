@@ -1,6 +1,8 @@
 fragment allHashEqualTree on HashEqual {
+  id
   justification
   artifacts {
+    id
     algorithm
     digest
   }

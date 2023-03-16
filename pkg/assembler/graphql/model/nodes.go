@@ -42,6 +42,7 @@ type PackageSourceOrArtifact interface {
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type Artifact struct {
+	ID        string `json:"id"`
 	Algorithm string `json:"algorithm"`
 	Digest    string `json:"digest"`
 }
@@ -62,6 +63,7 @@ type ArtifactInputSpec struct {
 //
 // Both arguments will be canonicalized to lowercase.
 type ArtifactSpec struct {
+	ID        *string `json:"id"`
 	Algorithm *string `json:"algorithm"`
 	Digest    *string `json:"digest"`
 }
@@ -421,6 +423,7 @@ type HasSourceAtSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type HashEqual struct {
+	ID            string      `json:"id"`
 	Artifacts     []*Artifact `json:"artifacts"`
 	Justification string      `json:"justification"`
 	Origin        string      `json:"origin"`
@@ -440,6 +443,7 @@ type HashEqualInputSpec struct {
 //
 // Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 type HashEqualSpec struct {
+	ID            *string         `json:"id"`
 	Artifacts     []*ArtifactSpec `json:"artifacts"`
 	Justification *string         `json:"justification"`
 	Origin        *string         `json:"origin"`
@@ -493,6 +497,7 @@ type IsDependencySpec struct {
 // Note: Package or Source must be specified but not both at the same time.
 // Attestation must occur at the PackageVersion or at the SourceName.
 type IsOccurrence struct {
+	ID string `json:"id"`
 	// subject - union type that can be either a package or source object type
 	Subject PackageOrSource `json:"subject"`
 	// artifact (object) - artifact that represent the the package or source
@@ -520,6 +525,7 @@ type IsOccurrenceInputSpec struct {
 // or it defaults to empty string for version, subpath and empty list for qualifiers
 // For source - a SourceName must be specified (name, tag or commit)
 type IsOccurrenceSpec struct {
+	ID            *string              `json:"id"`
 	Subject       *PackageOrSourceSpec `json:"subject"`
 	Artifact      *ArtifactSpec        `json:"artifact"`
 	Justification *string              `json:"justification"`

@@ -44,10 +44,7 @@ func (c *demoClient) getNextID() uint32 {
 }
 
 type demoClient struct {
-	artifacts           []*model.Artifact
 	builders            []*model.Builder
-	hashEquals          []*model.HashEqual
-	isOccurrence        []*model.IsOccurrence
 	hasSBOM             []*model.HasSbom
 	certifyPkg          []*model.CertifyPkg
 	certifyVuln         []*model.CertifyVuln
@@ -66,14 +63,14 @@ type demoClient struct {
 	hasSources          hasSrcList
 	isDependencies      isDependencyList
 	scorecards          scorecardList
+	artifacts           artMap
+	hashEquals          hashEqualList
+	occurrences         isOccurrenceList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		artifacts:           []*model.Artifact{},
 		builders:            []*model.Builder{},
-		hashEquals:          []*model.HashEqual{},
-		isOccurrence:        []*model.IsOccurrence{},
 		hasSBOM:             []*model.HasSbom{},
 		certifyPkg:          []*model.CertifyPkg{},
 		certifyVuln:         []*model.CertifyVuln{},
@@ -91,6 +88,9 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		hasSources:          hasSrcList{},
 		isDependencies:      isDependencyList{},
 		scorecards:          scorecardList{},
+		artifacts:           artMap{},
+		hashEquals:          hashEqualList{},
+		occurrences:         isOccurrenceList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -98,6 +98,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllGHSA(client)
 	registerAllOSV(client)
 	registerAllArtifacts(client)
+	registerAllHashEqual(client)
 	registerAllBuilders(client)
 
 	return client, nil
@@ -105,10 +106,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 
 func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		artifacts:           []*model.Artifact{},
 		builders:            []*model.Builder{},
-		hashEquals:          []*model.HashEqual{},
-		isOccurrence:        []*model.IsOccurrence{},
 		hasSBOM:             []*model.HasSbom{},
 		certifyPkg:          []*model.CertifyPkg{},
 		certifyVuln:         []*model.CertifyVuln{},
@@ -126,6 +124,9 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		hasSources:          hasSrcList{},
 		isDependencies:      isDependencyList{},
 		scorecards:          scorecardList{},
+		artifacts:           artMap{},
+		hashEquals:          hashEqualList{},
+		occurrences:         isOccurrenceList{},
 	}
 	return client, nil
 }

@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"errors"
 	"log"
 	"strconv"
 
@@ -81,6 +82,7 @@ type srcNameNode struct {
 	commit        string
 	srcMapLink    []uint32
 	scorecardLink []uint32
+	occurrences   []uint32
 }
 
 func (n *srcNamespaceStruct) getID() uint32 { return n.id }
@@ -438,4 +440,16 @@ func matchInputSpecWithDBField(spec *string, dbField *string) bool {
 	}
 
 	return (dbField != nil && *dbField == *spec)
+}
+
+func (c *demoClient) sourceByID(id uint32) (*srcNameNode, error) {
+	o, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find source")
+	}
+	a, ok := o.(*srcNameNode)
+	if !ok {
+		return nil, errors.New("not a source")
+	}
+	return a, nil
 }

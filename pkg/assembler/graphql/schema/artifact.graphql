@@ -28,6 +28,7 @@ If having a `checksum` Go object, `algorithm` can be
 `checksum.Value`.
 """
 type Artifact {
+  id: ID!
   algorithm: String!
   digest: String!
 }
@@ -38,6 +39,7 @@ ArtifactSpec allows filtering the list of artifacts to return.
 Both arguments will be canonicalized to lowercase.
 """
 input ArtifactSpec {
+  id: ID
   algorithm: String
   digest: String
 }

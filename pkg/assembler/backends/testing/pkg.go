@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"errors"
 	"log"
 	"reflect"
 	"strconv"
@@ -99,6 +100,7 @@ type pkgVersionStruct struct {
 	versions         pkgVersionList
 	srcMapLink       []uint32
 	isDependencyLink []uint32
+	occurrences      []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
@@ -109,6 +111,7 @@ type pkgVersionNode struct {
 	qualifiers       map[string]string
 	srcMapLink       []uint32
 	isDependencyLink []uint32
+	occurrences      []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -608,4 +611,18 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 		}
 	}
 	return v
+}
+
+func (c *demoClient) pkgByID(id uint32) (*pkgVersionStruct, *pkgVersionNode, error) {
+	o, ok := c.index[id]
+	if !ok {
+		return nil, nil, errors.New("could not find source")
+	}
+	if a, ok := o.(*pkgVersionStruct); ok {
+		return a, nil, nil
+	}
+	if a, ok := o.(*pkgVersionNode); ok {
+		return nil, a, nil
+	}
+	return nil, nil, errors.New("not a source")
 }

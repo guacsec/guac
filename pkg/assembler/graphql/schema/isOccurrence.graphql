@@ -30,6 +30,7 @@ Note: Package or Source must be specified but not both at the same time.
 Attestation must occur at the PackageVersion or at the SourceName.
 """
 type IsOccurrence {
+  id: ID!
   "subject - union type that can be either a package or source object type"
   subject: PackageOrSource!
   "artifact (object) - artifact that represent the the package or source"
@@ -50,6 +51,7 @@ or it defaults to empty string for version, subpath and empty list for qualifier
 For source - a SourceName must be specified (name, tag or commit)
 """
 input IsOccurrenceSpec {
+  id: ID
   subject: PackageOrSourceSpec
   artifact: ArtifactSpec
   justification: String

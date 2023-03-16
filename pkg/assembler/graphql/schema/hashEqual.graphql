@@ -25,6 +25,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HashEqual {
+  id: ID!
   artifacts: [Artifact!]!
   justification: String!
   origin: String!
@@ -37,6 +38,7 @@ HashEqualSpec allows filtering the list of HashEqual to return.
 Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 """
 input HashEqualSpec {
+  id: ID
   artifacts: [ArtifactSpec]
   justification: String
   origin: String
@@ -65,4 +67,3 @@ extend type Mutation {
   "certify that two artifacts are the same (hashes are equal)"
   ingestHashEqual(artifact: ArtifactInputSpec!, equalArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
 }
-
