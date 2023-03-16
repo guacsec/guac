@@ -35,6 +35,8 @@ type DemoCredentials struct{}
 // Since we always ingest data and never remove, we can keep this global and
 // increment it as needed.
 // For fast retrieval, we also keep a map from ID from nodes that have it.
+// IDs are stored as string in graphql even though we ask for integers
+// See https://github.com/99designs/gqlgen/issues/2561
 type nodeID int
 
 type hasID interface {
@@ -43,7 +45,7 @@ type hasID interface {
 
 type indexType map[nodeID]hasID
 
-// In general, we would add a lock around this function
+// locking to ensure ID is not duplicated
 func (c *demoClient) getNextID() nodeID {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -96,7 +98,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
-		id:                  0,
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -105,47 +106,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllOSV(client)
 	registerAllArtifacts(client)
 	registerAllBuilders(client)
-	//registerAllHashEqual(client)
-	// err := registerAllIsOccurrence(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err := registerAllhasSBOM(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllIsDependency(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyPkg(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllHasSourceAt(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyBad(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyScorecard(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyVuln(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllIsVulnerability(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// err = registerAllCertifyVEXStatement(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
+
 	return client, nil
 }
 
@@ -170,7 +131,6 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
-		id:                  0,
 	}
 	return client, nil
 }
@@ -187,38 +147,6 @@ func noMatchInput(filter *string, value string) bool {
 		return value != *filter
 	}
 	return value != ""
-}
-
-func noMatchPtr(filter *string, value *string) bool {
-	if filter == nil {
-		if value == nil {
-			return false
-		} else {
-			return false
-		}
-	} else {
-		if value == nil {
-			return true
-		} else {
-			return *value != *filter
-		}
-	}
-}
-
-func noMatchPtrInput(input *string, value *string) bool {
-	if input == nil {
-		if value == nil {
-			return false
-		} else {
-			return *value != ""
-		}
-	} else {
-		if value == nil {
-			return true
-		} else {
-			return *value != *input
-		}
-	}
 }
 
 func nilToEmpty(input *string) string {

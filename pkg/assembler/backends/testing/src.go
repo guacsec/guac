@@ -25,6 +25,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+// TODO: move this into a unit test for this file
 func registerAllSources(client *demoClient) {
 	ctx := context.Background()
 	v12 := "v2.12.0"
@@ -150,6 +151,8 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 	return buildSourceResponse(newSource.id, nil)
 }
 
+// Query Source
+
 func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
 	if filter.ID != nil {
 		id, err := strconv.Atoi(*filter.ID)
@@ -183,36 +186,27 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 				if noMatch(filter.Commit, s.commit) {
 					continue
 				}
-				newSrc := model.SourceName{
-					// IDs are generated as string even though we ask for integers
-					// See https://github.com/99designs/gqlgen/issues/2561
+				sns = append(sns, &model.SourceName{
 					ID:     fmt.Sprintf("%d", s.id),
 					Name:   s.name,
 					Tag:    &s.tag,
 					Commit: &s.commit,
-				}
-				sns = append(sns, &newSrc)
+				})
 			}
 			if len(sns) > 0 {
-				sn := model.SourceNamespace{
-					// IDs are generated as string even though we ask for integers
-					// See https://github.com/99designs/gqlgen/issues/2561
+				sNamespaces = append(sNamespaces, &model.SourceNamespace{
 					ID:        fmt.Sprintf("%d", names.id),
 					Namespace: namespace,
 					Names:     sns,
-				}
-				sNamespaces = append(sNamespaces, &sn)
+				})
 			}
 		}
 		if len(sNamespaces) > 0 {
-			s := model.Source{
-				// IDs are generated as string even though we ask for integers
-				// See https://github.com/99designs/gqlgen/issues/2561
+			out = append(out, &model.Source{
 				ID:         fmt.Sprintf("%d", namespaces.id),
 				Type:       dbType,
 				Namespaces: sNamespaces,
-			}
-			out = append(out, &s)
+			})
 		}
 	}
 	return out, nil
@@ -238,42 +232,36 @@ func buildSourceResponse(id nodeID, filter *model.SourceSpec) (*model.Source, er
 
 	snl := []*model.SourceName{}
 	if nameNode, ok := node.(*srcNameNode); ok {
-		sn := model.SourceName{
+		if filter != nil && noMatch(filter.Name, nameNode.name) {
+			return nil, nil
+		}
+		if filter != nil && noMatch(filter.Tag, nameNode.tag) {
+			return nil, nil
+		}
+		if filter != nil && noMatch(filter.Commit, nameNode.commit) {
+			return nil, nil
+		}
+		snl = append(snl, &model.SourceName{
 			// IDs are generated as string even though we ask for integers
 			// See https://github.com/99designs/gqlgen/issues/2561
-			ID:   fmt.Sprintf("%d", nameNode.id),
-			Name: nameNode.name,
-		}
-		sn.Tag = &nameNode.tag
-
-		sn.Commit = &nameNode.commit
-
-		if filter != nil && noMatch(filter.Name, sn.Name) {
-			return nil, nil
-		}
-		if filter != nil && noMatchPtr(filter.Tag, sn.Tag) {
-			return nil, nil
-		}
-		if filter != nil && noMatchPtr(filter.Commit, sn.Commit) {
-			return nil, nil
-		}
-		snl = append(snl, &sn)
+			ID:     fmt.Sprintf("%d", nameNode.id),
+			Name:   nameNode.name,
+			Tag:    &nameNode.tag,
+			Commit: &nameNode.commit,
+		})
 		node = index[nameNode.parent]
 	}
 
 	snsl := []*model.SourceNamespace{}
 	if nameStruct, ok := node.(*srcNameStruct); ok {
-		sns := model.SourceNamespace{
-			// IDs are generated as string even though we ask for integers
-			// See https://github.com/99designs/gqlgen/issues/2561
+		if filter != nil && noMatch(filter.Namespace, nameStruct.namespace) {
+			return nil, nil
+		}
+		snsl = append(snsl, &model.SourceNamespace{
 			ID:        fmt.Sprintf("%d", nameStruct.id),
 			Namespace: nameStruct.namespace,
 			Names:     snl,
-		}
-		if filter != nil && noMatch(filter.Namespace, sns.Namespace) {
-			return nil, nil
-		}
-		snsl = append(snsl, &sns)
+		})
 		node = index[nameStruct.parent]
 	}
 
@@ -282,8 +270,6 @@ func buildSourceResponse(id nodeID, filter *model.SourceSpec) (*model.Source, er
 		return nil, gqlerror.Errorf("ID does not match expected node type")
 	}
 	s := model.Source{
-		// IDs are generated as string even though we ask for integers
-		// See https://github.com/99designs/gqlgen/issues/2561
 		ID:         fmt.Sprintf("%d", namespaceStruct.id),
 		Type:       namespaceStruct.typeKey,
 		Namespaces: snsl,
@@ -294,8 +280,7 @@ func buildSourceResponse(id nodeID, filter *model.SourceSpec) (*model.Source, er
 	return &s, nil
 }
 
-// Query Source
-
+// TODO: remove these once the other components don't utilize it
 func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*model.Source, error) {
 	var namespaces []*model.SourceNamespace
 	for _, ns := range src.Namespaces {
@@ -318,6 +303,7 @@ func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*mo
 	}, nil
 }
 
+// TODO: remove these once the other components don't utilize it
 func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (*model.SourceNamespace, error) {
 	var names []*model.SourceName
 	for _, n := range ns.Names {
@@ -340,6 +326,7 @@ func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (
 	}, nil
 }
 
+// TODO: remove these once the other components don't utilize it
 func filterSourceTagCommit(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
 	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
 		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
@@ -358,13 +345,7 @@ func filterSourceTagCommit(n *model.SourceName, sourceSpec *model.SourceSpec) (*
 	return n, nil
 }
 
-// TODO(mihaimaruseac): Probably move to utility
-// Matches a field in the database with a spec, considering that null argument
-// means anything is ok whereas empty string means matching only with empty
-// (null/empty). That is:
-// - if spec is nil: match anything
-// - if spec is empty: match nil or empty
-// - otherwise: match exactly spec
+// TODO: remove these once the other components don't utilize it
 func matchInputSpecWithDBField(spec *string, dbField *string) bool {
 	if spec == nil {
 		return true
