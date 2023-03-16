@@ -333,6 +333,9 @@ type CertifyBadPkgIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns CertifyBadPkgIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns CertifyBadPkgIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *CertifyBadPkgIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -367,6 +370,8 @@ func (v *CertifyBadPkgIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyBadPkgIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -383,6 +388,7 @@ func (v *CertifyBadPkgIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *CertifyBadPkgIngestPackage) __premarshalJSON() (*__premarshalCertifyBadPkgIngestPackage, error) {
 	var retval __premarshalCertifyBadPkgIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -503,6 +509,9 @@ type CertifyBadSrcIngestSource struct {
 	allSourceTree `json:"-"`
 }
 
+// GetId returns CertifyBadSrcIngestSource.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcIngestSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns CertifyBadSrcIngestSource.Type, and is useful for accessing the field via an interface.
 func (v *CertifyBadSrcIngestSource) GetType() string { return v.allSourceTree.Type }
 
@@ -537,6 +546,8 @@ func (v *CertifyBadSrcIngestSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyBadSrcIngestSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -553,6 +564,7 @@ func (v *CertifyBadSrcIngestSource) MarshalJSON() ([]byte, error) {
 func (v *CertifyBadSrcIngestSource) __premarshalJSON() (*__premarshalCertifyBadSrcIngestSource, error) {
 	var retval __premarshalCertifyBadSrcIngestSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -660,6 +672,9 @@ type CertifyCVEIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns CertifyCVEIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *CertifyCVEIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns CertifyCVEIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *CertifyCVEIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -694,6 +709,8 @@ func (v *CertifyCVEIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyCVEIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -710,6 +727,7 @@ func (v *CertifyCVEIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *CertifyCVEIngestPackage) __premarshalJSON() (*__premarshalCertifyCVEIngestPackage, error) {
 	var retval __premarshalCertifyCVEIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -896,6 +914,9 @@ type CertifyGHSAIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns CertifyGHSAIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGHSAIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns CertifyGHSAIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *CertifyGHSAIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -930,6 +951,8 @@ func (v *CertifyGHSAIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyGHSAIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -946,6 +969,7 @@ func (v *CertifyGHSAIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *CertifyGHSAIngestPackage) __premarshalJSON() (*__premarshalCertifyGHSAIngestPackage, error) {
 	var retval __premarshalCertifyGHSAIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -1132,6 +1156,9 @@ type CertifyOSVIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns CertifyOSVIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *CertifyOSVIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns CertifyOSVIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *CertifyOSVIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -1166,6 +1193,8 @@ func (v *CertifyOSVIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyOSVIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -1182,6 +1211,7 @@ func (v *CertifyOSVIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *CertifyOSVIngestPackage) __premarshalJSON() (*__premarshalCertifyOSVIngestPackage, error) {
 	var retval __premarshalCertifyOSVIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -1311,6 +1341,9 @@ type CertifyPkgDependentPkgPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns CertifyPkgDependentPkgPackage.Id, and is useful for accessing the field via an interface.
+func (v *CertifyPkgDependentPkgPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns CertifyPkgDependentPkgPackage.Type, and is useful for accessing the field via an interface.
 func (v *CertifyPkgDependentPkgPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -1345,6 +1378,8 @@ func (v *CertifyPkgDependentPkgPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyPkgDependentPkgPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -1361,6 +1396,7 @@ func (v *CertifyPkgDependentPkgPackage) MarshalJSON() ([]byte, error) {
 func (v *CertifyPkgDependentPkgPackage) __premarshalJSON() (*__premarshalCertifyPkgDependentPkgPackage, error) {
 	var retval __premarshalCertifyPkgDependentPkgPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -1483,6 +1519,9 @@ type CertifyPkgPkgPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns CertifyPkgPkgPackage.Id, and is useful for accessing the field via an interface.
+func (v *CertifyPkgPkgPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns CertifyPkgPkgPackage.Type, and is useful for accessing the field via an interface.
 func (v *CertifyPkgPkgPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -1517,6 +1556,8 @@ func (v *CertifyPkgPkgPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyPkgPkgPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -1533,6 +1574,7 @@ func (v *CertifyPkgPkgPackage) MarshalJSON() ([]byte, error) {
 func (v *CertifyPkgPkgPackage) __premarshalJSON() (*__premarshalCertifyPkgPkgPackage, error) {
 	var retval __premarshalCertifyPkgPkgPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -1697,6 +1739,9 @@ type HasSBOMPkgIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns HasSBOMPkgIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns HasSBOMPkgIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -1731,6 +1776,8 @@ func (v *HasSBOMPkgIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalHasSBOMPkgIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -1747,6 +1794,7 @@ func (v *HasSBOMPkgIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *HasSBOMPkgIngestPackage) __premarshalJSON() (*__premarshalHasSBOMPkgIngestPackage, error) {
 	var retval __premarshalHasSBOMPkgIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -1875,6 +1923,9 @@ type HasSBOMSrcIngestSource struct {
 	allSourceTree `json:"-"`
 }
 
+// GetId returns HasSBOMSrcIngestSource.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns HasSBOMSrcIngestSource.Type, and is useful for accessing the field via an interface.
 func (v *HasSBOMSrcIngestSource) GetType() string { return v.allSourceTree.Type }
 
@@ -1909,6 +1960,8 @@ func (v *HasSBOMSrcIngestSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalHasSBOMSrcIngestSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -1925,6 +1978,7 @@ func (v *HasSBOMSrcIngestSource) MarshalJSON() ([]byte, error) {
 func (v *HasSBOMSrcIngestSource) __premarshalJSON() (*__premarshalHasSBOMSrcIngestSource, error) {
 	var retval __premarshalHasSBOMSrcIngestSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -1958,6 +2012,9 @@ func (v *HasSBOMSrcResponse) GetIngestHasSBOM() HasSBOMSrcIngestHasSBOM { return
 type HasSourceAtIngestHasSourceAt struct {
 	allHasSourceAt `json:"-"`
 }
+
+// GetId returns HasSourceAtIngestHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestHasSourceAt) GetId() string { return v.allHasSourceAt.Id }
 
 // GetJustification returns HasSourceAtIngestHasSourceAt.Justification, and is useful for accessing the field via an interface.
 func (v *HasSourceAtIngestHasSourceAt) GetJustification() string {
@@ -2009,6 +2066,8 @@ func (v *HasSourceAtIngestHasSourceAt) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalHasSourceAtIngestHasSourceAt struct {
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -2033,6 +2092,7 @@ func (v *HasSourceAtIngestHasSourceAt) MarshalJSON() ([]byte, error) {
 func (v *HasSourceAtIngestHasSourceAt) __premarshalJSON() (*__premarshalHasSourceAtIngestHasSourceAt, error) {
 	var retval __premarshalHasSourceAtIngestHasSourceAt
 
+	retval.Id = v.allHasSourceAt.Id
 	retval.Justification = v.allHasSourceAt.Justification
 	retval.KnownSince = v.allHasSourceAt.KnownSince
 	retval.Package = v.allHasSourceAt.Package
@@ -2060,6 +2120,9 @@ func (v *HasSourceAtIngestHasSourceAt) __premarshalJSON() (*__premarshalHasSourc
 type HasSourceAtIngestPackage struct {
 	allPkgTree `json:"-"`
 }
+
+// GetId returns HasSourceAtIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestPackage) GetId() string { return v.allPkgTree.Id }
 
 // GetType returns HasSourceAtIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *HasSourceAtIngestPackage) GetType() string { return v.allPkgTree.Type }
@@ -2095,6 +2158,8 @@ func (v *HasSourceAtIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalHasSourceAtIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -2111,6 +2176,7 @@ func (v *HasSourceAtIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *HasSourceAtIngestPackage) __premarshalJSON() (*__premarshalHasSourceAtIngestPackage, error) {
 	var retval __premarshalHasSourceAtIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -2131,6 +2197,9 @@ func (v *HasSourceAtIngestPackage) __premarshalJSON() (*__premarshalHasSourceAtI
 type HasSourceAtIngestSource struct {
 	allSourceTree `json:"-"`
 }
+
+// GetId returns HasSourceAtIngestSource.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtIngestSource) GetId() string { return v.allSourceTree.Id }
 
 // GetType returns HasSourceAtIngestSource.Type, and is useful for accessing the field via an interface.
 func (v *HasSourceAtIngestSource) GetType() string { return v.allSourceTree.Type }
@@ -2166,6 +2235,8 @@ func (v *HasSourceAtIngestSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalHasSourceAtIngestSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -2182,6 +2253,7 @@ func (v *HasSourceAtIngestSource) MarshalJSON() ([]byte, error) {
 func (v *HasSourceAtIngestSource) __premarshalJSON() (*__premarshalHasSourceAtIngestSource, error) {
 	var retval __premarshalHasSourceAtIngestSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -2500,6 +2572,9 @@ type IsDependencyDependentPkgPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns IsDependencyDependentPkgPackage.Id, and is useful for accessing the field via an interface.
+func (v *IsDependencyDependentPkgPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns IsDependencyDependentPkgPackage.Type, and is useful for accessing the field via an interface.
 func (v *IsDependencyDependentPkgPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -2534,6 +2609,8 @@ func (v *IsDependencyDependentPkgPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalIsDependencyDependentPkgPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -2550,6 +2627,7 @@ func (v *IsDependencyDependentPkgPackage) MarshalJSON() ([]byte, error) {
 func (v *IsDependencyDependentPkgPackage) __premarshalJSON() (*__premarshalIsDependencyDependentPkgPackage, error) {
 	var retval __premarshalIsDependencyDependentPkgPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -2700,6 +2778,9 @@ type IsDependencyPkgPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns IsDependencyPkgPackage.Id, and is useful for accessing the field via an interface.
+func (v *IsDependencyPkgPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns IsDependencyPkgPackage.Type, and is useful for accessing the field via an interface.
 func (v *IsDependencyPkgPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -2734,6 +2815,8 @@ func (v *IsDependencyPkgPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalIsDependencyPkgPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -2750,6 +2833,7 @@ func (v *IsDependencyPkgPackage) MarshalJSON() ([]byte, error) {
 func (v *IsDependencyPkgPackage) __premarshalJSON() (*__premarshalIsDependencyPkgPackage, error) {
 	var retval __premarshalIsDependencyPkgPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -2985,6 +3069,9 @@ type IsOccurrencePkgIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns IsOccurrencePkgIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrencePkgIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns IsOccurrencePkgIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *IsOccurrencePkgIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -3019,6 +3106,8 @@ func (v *IsOccurrencePkgIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalIsOccurrencePkgIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -3035,6 +3124,7 @@ func (v *IsOccurrencePkgIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *IsOccurrencePkgIngestPackage) __premarshalJSON() (*__premarshalIsOccurrencePkgIngestPackage, error) {
 	var retval __premarshalIsOccurrencePkgIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -3251,6 +3341,9 @@ type IsOccurrenceSrcIngestSource struct {
 	allSourceTree `json:"-"`
 }
 
+// GetId returns IsOccurrenceSrcIngestSource.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSrcIngestSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns IsOccurrenceSrcIngestSource.Type, and is useful for accessing the field via an interface.
 func (v *IsOccurrenceSrcIngestSource) GetType() string { return v.allSourceTree.Type }
 
@@ -3285,6 +3378,8 @@ func (v *IsOccurrenceSrcIngestSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalIsOccurrenceSrcIngestSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -3301,6 +3396,7 @@ func (v *IsOccurrenceSrcIngestSource) MarshalJSON() ([]byte, error) {
 func (v *IsOccurrenceSrcIngestSource) __premarshalJSON() (*__premarshalIsOccurrenceSrcIngestSource, error) {
 	var retval __premarshalIsOccurrenceSrcIngestSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -4118,6 +4214,9 @@ type SLSAForArtifactIngestMaterialsPackage struct {
 // GetTypename returns SLSAForArtifactIngestMaterialsPackage.Typename, and is useful for accessing the field via an interface.
 func (v *SLSAForArtifactIngestMaterialsPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns SLSAForArtifactIngestMaterialsPackage.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns SLSAForArtifactIngestMaterialsPackage.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForArtifactIngestMaterialsPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -4154,6 +4253,8 @@ func (v *SLSAForArtifactIngestMaterialsPackage) UnmarshalJSON(b []byte) error {
 type __premarshalSLSAForArtifactIngestMaterialsPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -4171,6 +4272,7 @@ func (v *SLSAForArtifactIngestMaterialsPackage) __premarshalJSON() (*__premarsha
 	var retval __premarshalSLSAForArtifactIngestMaterialsPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -4298,6 +4400,9 @@ type SLSAForArtifactIngestMaterialsSource struct {
 // GetTypename returns SLSAForArtifactIngestMaterialsSource.Typename, and is useful for accessing the field via an interface.
 func (v *SLSAForArtifactIngestMaterialsSource) GetTypename() *string { return v.Typename }
 
+// GetId returns SLSAForArtifactIngestMaterialsSource.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForArtifactIngestMaterialsSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns SLSAForArtifactIngestMaterialsSource.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForArtifactIngestMaterialsSource) GetType() string { return v.allSourceTree.Type }
 
@@ -4334,6 +4439,8 @@ func (v *SLSAForArtifactIngestMaterialsSource) UnmarshalJSON(b []byte) error {
 type __premarshalSLSAForArtifactIngestMaterialsSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -4351,6 +4458,7 @@ func (v *SLSAForArtifactIngestMaterialsSource) __premarshalJSON() (*__premarshal
 	var retval __premarshalSLSAForArtifactIngestMaterialsSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -4666,6 +4774,9 @@ type SLSAForPackageIngestMaterialsPackage struct {
 // GetTypename returns SLSAForPackageIngestMaterialsPackage.Typename, and is useful for accessing the field via an interface.
 func (v *SLSAForPackageIngestMaterialsPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns SLSAForPackageIngestMaterialsPackage.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns SLSAForPackageIngestMaterialsPackage.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForPackageIngestMaterialsPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -4702,6 +4813,8 @@ func (v *SLSAForPackageIngestMaterialsPackage) UnmarshalJSON(b []byte) error {
 type __premarshalSLSAForPackageIngestMaterialsPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -4719,6 +4832,7 @@ func (v *SLSAForPackageIngestMaterialsPackage) __premarshalJSON() (*__premarshal
 	var retval __premarshalSLSAForPackageIngestMaterialsPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -4846,6 +4960,9 @@ type SLSAForPackageIngestMaterialsSource struct {
 // GetTypename returns SLSAForPackageIngestMaterialsSource.Typename, and is useful for accessing the field via an interface.
 func (v *SLSAForPackageIngestMaterialsSource) GetTypename() *string { return v.Typename }
 
+// GetId returns SLSAForPackageIngestMaterialsSource.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestMaterialsSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns SLSAForPackageIngestMaterialsSource.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForPackageIngestMaterialsSource) GetType() string { return v.allSourceTree.Type }
 
@@ -4882,6 +4999,8 @@ func (v *SLSAForPackageIngestMaterialsSource) UnmarshalJSON(b []byte) error {
 type __premarshalSLSAForPackageIngestMaterialsSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -4899,6 +5018,7 @@ func (v *SLSAForPackageIngestMaterialsSource) __premarshalJSON() (*__premarshalS
 	var retval __premarshalSLSAForPackageIngestMaterialsSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -4922,6 +5042,9 @@ func (v *SLSAForPackageIngestMaterialsSource) __premarshalJSON() (*__premarshalS
 type SLSAForPackageIngestPackage struct {
 	allPkgTree `json:"-"`
 }
+
+// GetId returns SLSAForPackageIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForPackageIngestPackage) GetId() string { return v.allPkgTree.Id }
 
 // GetType returns SLSAForPackageIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForPackageIngestPackage) GetType() string { return v.allPkgTree.Type }
@@ -4957,6 +5080,8 @@ func (v *SLSAForPackageIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalSLSAForPackageIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -4973,6 +5098,7 @@ func (v *SLSAForPackageIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *SLSAForPackageIngestPackage) __premarshalJSON() (*__premarshalSLSAForPackageIngestPackage, error) {
 	var retval __premarshalSLSAForPackageIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -5286,6 +5412,9 @@ type SLSAForSourceIngestMaterialsPackage struct {
 // GetTypename returns SLSAForSourceIngestMaterialsPackage.Typename, and is useful for accessing the field via an interface.
 func (v *SLSAForSourceIngestMaterialsPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns SLSAForSourceIngestMaterialsPackage.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns SLSAForSourceIngestMaterialsPackage.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForSourceIngestMaterialsPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -5322,6 +5451,8 @@ func (v *SLSAForSourceIngestMaterialsPackage) UnmarshalJSON(b []byte) error {
 type __premarshalSLSAForSourceIngestMaterialsPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -5339,6 +5470,7 @@ func (v *SLSAForSourceIngestMaterialsPackage) __premarshalJSON() (*__premarshalS
 	var retval __premarshalSLSAForSourceIngestMaterialsPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -5466,6 +5598,9 @@ type SLSAForSourceIngestMaterialsSource struct {
 // GetTypename returns SLSAForSourceIngestMaterialsSource.Typename, and is useful for accessing the field via an interface.
 func (v *SLSAForSourceIngestMaterialsSource) GetTypename() *string { return v.Typename }
 
+// GetId returns SLSAForSourceIngestMaterialsSource.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestMaterialsSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns SLSAForSourceIngestMaterialsSource.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForSourceIngestMaterialsSource) GetType() string { return v.allSourceTree.Type }
 
@@ -5502,6 +5637,8 @@ func (v *SLSAForSourceIngestMaterialsSource) UnmarshalJSON(b []byte) error {
 type __premarshalSLSAForSourceIngestMaterialsSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -5519,6 +5656,7 @@ func (v *SLSAForSourceIngestMaterialsSource) __premarshalJSON() (*__premarshalSL
 	var retval __premarshalSLSAForSourceIngestMaterialsSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -5614,6 +5752,9 @@ type SLSAForSourceIngestSource struct {
 	allSourceTree `json:"-"`
 }
 
+// GetId returns SLSAForSourceIngestSource.Id, and is useful for accessing the field via an interface.
+func (v *SLSAForSourceIngestSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns SLSAForSourceIngestSource.Type, and is useful for accessing the field via an interface.
 func (v *SLSAForSourceIngestSource) GetType() string { return v.allSourceTree.Type }
 
@@ -5648,6 +5789,8 @@ func (v *SLSAForSourceIngestSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalSLSAForSourceIngestSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -5664,6 +5807,7 @@ func (v *SLSAForSourceIngestSource) MarshalJSON() ([]byte, error) {
 func (v *SLSAForSourceIngestSource) __premarshalJSON() (*__premarshalSLSAForSourceIngestSource, error) {
 	var retval __premarshalSLSAForSourceIngestSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -5928,6 +6072,9 @@ type ScorecardIngestSource struct {
 	allSourceTree `json:"-"`
 }
 
+// GetId returns ScorecardIngestSource.Id, and is useful for accessing the field via an interface.
+func (v *ScorecardIngestSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns ScorecardIngestSource.Type, and is useful for accessing the field via an interface.
 func (v *ScorecardIngestSource) GetType() string { return v.allSourceTree.Type }
 
@@ -5962,6 +6109,8 @@ func (v *ScorecardIngestSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalScorecardIngestSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -5978,6 +6127,7 @@ func (v *ScorecardIngestSource) MarshalJSON() ([]byte, error) {
 func (v *ScorecardIngestSource) __premarshalJSON() (*__premarshalScorecardIngestSource, error) {
 	var retval __premarshalScorecardIngestSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -6142,6 +6292,9 @@ type VEXPackageAndGhsaIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns VEXPackageAndGhsaIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns VEXPackageAndGhsaIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *VEXPackageAndGhsaIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -6176,6 +6329,8 @@ func (v *VEXPackageAndGhsaIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalVEXPackageAndGhsaIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -6192,6 +6347,7 @@ func (v *VEXPackageAndGhsaIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *VEXPackageAndGhsaIngestPackage) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestPackage, error) {
 	var retval __premarshalVEXPackageAndGhsaIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -6992,6 +7148,9 @@ type VexPackageAndCveIngestPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns VexPackageAndCveIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns VexPackageAndCveIngestPackage.Type, and is useful for accessing the field via an interface.
 func (v *VexPackageAndCveIngestPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -7026,6 +7185,8 @@ func (v *VexPackageAndCveIngestPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalVexPackageAndCveIngestPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -7042,6 +7203,7 @@ func (v *VexPackageAndCveIngestPackage) MarshalJSON() ([]byte, error) {
 func (v *VexPackageAndCveIngestPackage) __premarshalJSON() (*__premarshalVexPackageAndCveIngestPackage, error) {
 	var retval __premarshalVexPackageAndCveIngestPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -7842,6 +8004,9 @@ type allCertifyBadSubjectPackage struct {
 // GetTypename returns allCertifyBadSubjectPackage.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyBadSubjectPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns allCertifyBadSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyBadSubjectPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allCertifyBadSubjectPackage.Type, and is useful for accessing the field via an interface.
 func (v *allCertifyBadSubjectPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -7878,6 +8043,8 @@ func (v *allCertifyBadSubjectPackage) UnmarshalJSON(b []byte) error {
 type __premarshalallCertifyBadSubjectPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -7895,6 +8062,7 @@ func (v *allCertifyBadSubjectPackage) __premarshalJSON() (*__premarshalallCertif
 	var retval __premarshalallCertifyBadSubjectPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -8022,6 +8190,9 @@ type allCertifyBadSubjectSource struct {
 // GetTypename returns allCertifyBadSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyBadSubjectSource) GetTypename() *string { return v.Typename }
 
+// GetId returns allCertifyBadSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyBadSubjectSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns allCertifyBadSubjectSource.Type, and is useful for accessing the field via an interface.
 func (v *allCertifyBadSubjectSource) GetType() string { return v.allSourceTree.Type }
 
@@ -8058,6 +8229,8 @@ func (v *allCertifyBadSubjectSource) UnmarshalJSON(b []byte) error {
 type __premarshalallCertifyBadSubjectSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -8075,6 +8248,7 @@ func (v *allCertifyBadSubjectSource) __premarshalJSON() (*__premarshalallCertify
 	var retval __premarshalallCertifyBadSubjectSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -8127,6 +8301,9 @@ type allCertifyPkgPackagesPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns allCertifyPkgPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyPkgPackagesPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allCertifyPkgPackagesPackage.Type, and is useful for accessing the field via an interface.
 func (v *allCertifyPkgPackagesPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -8161,6 +8338,8 @@ func (v *allCertifyPkgPackagesPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallCertifyPkgPackagesPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -8177,6 +8356,7 @@ func (v *allCertifyPkgPackagesPackage) MarshalJSON() ([]byte, error) {
 func (v *allCertifyPkgPackagesPackage) __premarshalJSON() (*__premarshalallCertifyPkgPackagesPackage, error) {
 	var retval __premarshalallCertifyPkgPackagesPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -8292,6 +8472,9 @@ type allCertifyScorecardSource struct {
 	allSourceTree `json:"-"`
 }
 
+// GetId returns allCertifyScorecardSource.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyScorecardSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns allCertifyScorecardSource.Type, and is useful for accessing the field via an interface.
 func (v *allCertifyScorecardSource) GetType() string { return v.allSourceTree.Type }
 
@@ -8326,6 +8509,8 @@ func (v *allCertifyScorecardSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallCertifyScorecardSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -8342,6 +8527,7 @@ func (v *allCertifyScorecardSource) MarshalJSON() ([]byte, error) {
 func (v *allCertifyScorecardSource) __premarshalJSON() (*__premarshalallCertifyScorecardSource, error) {
 	var retval __premarshalallCertifyScorecardSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -8591,6 +8777,9 @@ type allCertifyVEXStatementSubjectPackage struct {
 // GetTypename returns allCertifyVEXStatementSubjectPackage.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementSubjectPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns allCertifyVEXStatementSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementSubjectPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allCertifyVEXStatementSubjectPackage.Type, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementSubjectPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -8627,6 +8816,8 @@ func (v *allCertifyVEXStatementSubjectPackage) UnmarshalJSON(b []byte) error {
 type __premarshalallCertifyVEXStatementSubjectPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -8644,6 +8835,7 @@ func (v *allCertifyVEXStatementSubjectPackage) __premarshalJSON() (*__premarshal
 	var retval __premarshalallCertifyVEXStatementSubjectPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -9114,6 +9306,9 @@ type allCertifyVulnPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns allCertifyVulnPackage.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyVulnPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allCertifyVulnPackage.Type, and is useful for accessing the field via an interface.
 func (v *allCertifyVulnPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -9148,6 +9343,8 @@ func (v *allCertifyVulnPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallCertifyVulnPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -9164,6 +9361,7 @@ func (v *allCertifyVulnPackage) MarshalJSON() ([]byte, error) {
 func (v *allCertifyVulnPackage) __premarshalJSON() (*__premarshalallCertifyVulnPackage, error) {
 	var retval __premarshalallCertifyVulnPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -9664,6 +9862,9 @@ type allHasSBOMTreeSubjectPackage struct {
 // GetTypename returns allHasSBOMTreeSubjectPackage.Typename, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeSubjectPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns allHasSBOMTreeSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allHasSBOMTreeSubjectPackage.Type, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeSubjectPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -9700,6 +9901,8 @@ func (v *allHasSBOMTreeSubjectPackage) UnmarshalJSON(b []byte) error {
 type __premarshalallHasSBOMTreeSubjectPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -9717,6 +9920,7 @@ func (v *allHasSBOMTreeSubjectPackage) __premarshalJSON() (*__premarshalallHasSB
 	var retval __premarshalallHasSBOMTreeSubjectPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -9826,6 +10030,9 @@ type allHasSBOMTreeSubjectSource struct {
 // GetTypename returns allHasSBOMTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeSubjectSource) GetTypename() *string { return v.Typename }
 
+// GetId returns allHasSBOMTreeSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns allHasSBOMTreeSubjectSource.Type, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeSubjectSource) GetType() string { return v.allSourceTree.Type }
 
@@ -9862,6 +10069,8 @@ func (v *allHasSBOMTreeSubjectSource) UnmarshalJSON(b []byte) error {
 type __premarshalallHasSBOMTreeSubjectSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -9879,6 +10088,7 @@ func (v *allHasSBOMTreeSubjectSource) __premarshalJSON() (*__premarshalallHasSBO
 	var retval __premarshalallHasSBOMTreeSubjectSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -9896,6 +10106,7 @@ func (v *allHasSBOMTreeSubjectSource) __premarshalJSON() (*__premarshalallHasSBO
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type allHasSourceAt struct {
+	Id            string                `json:"id"`
 	Justification string                `json:"justification"`
 	KnownSince    time.Time             `json:"knownSince"`
 	Package       allHasSourceAtPackage `json:"package"`
@@ -9903,6 +10114,9 @@ type allHasSourceAt struct {
 	Origin        string                `json:"origin"`
 	Collector     string                `json:"collector"`
 }
+
+// GetId returns allHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *allHasSourceAt) GetId() string { return v.Id }
 
 // GetJustification returns allHasSourceAt.Justification, and is useful for accessing the field via an interface.
 func (v *allHasSourceAt) GetJustification() string { return v.Justification }
@@ -9941,6 +10155,9 @@ type allHasSourceAtPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns allHasSourceAtPackage.Id, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allHasSourceAtPackage.Type, and is useful for accessing the field via an interface.
 func (v *allHasSourceAtPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -9975,6 +10192,8 @@ func (v *allHasSourceAtPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallHasSourceAtPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -9991,6 +10210,7 @@ func (v *allHasSourceAtPackage) MarshalJSON() ([]byte, error) {
 func (v *allHasSourceAtPackage) __premarshalJSON() (*__premarshalallHasSourceAtPackage, error) {
 	var retval __premarshalallHasSourceAtPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -10011,6 +10231,9 @@ func (v *allHasSourceAtPackage) __premarshalJSON() (*__premarshalallHasSourceAtP
 type allHasSourceAtSource struct {
 	allSourceTree `json:"-"`
 }
+
+// GetId returns allHasSourceAtSource.Id, and is useful for accessing the field via an interface.
+func (v *allHasSourceAtSource) GetId() string { return v.allSourceTree.Id }
 
 // GetType returns allHasSourceAtSource.Type, and is useful for accessing the field via an interface.
 func (v *allHasSourceAtSource) GetType() string { return v.allSourceTree.Type }
@@ -10046,6 +10269,8 @@ func (v *allHasSourceAtSource) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallHasSourceAtSource struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -10062,6 +10287,7 @@ func (v *allHasSourceAtSource) MarshalJSON() ([]byte, error) {
 func (v *allHasSourceAtSource) __premarshalJSON() (*__premarshalallHasSourceAtSource, error) {
 	var retval __premarshalallHasSourceAtSource
 
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -10221,6 +10447,9 @@ type allIsDependencyTreeDependentPackage struct {
 	allPkgTree `json:"-"`
 }
 
+// GetId returns allIsDependencyTreeDependentPackage.Id, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTreeDependentPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allIsDependencyTreeDependentPackage.Type, and is useful for accessing the field via an interface.
 func (v *allIsDependencyTreeDependentPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -10255,6 +10484,8 @@ func (v *allIsDependencyTreeDependentPackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallIsDependencyTreeDependentPackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -10271,6 +10502,7 @@ func (v *allIsDependencyTreeDependentPackage) MarshalJSON() ([]byte, error) {
 func (v *allIsDependencyTreeDependentPackage) __premarshalJSON() (*__premarshalallIsDependencyTreeDependentPackage, error) {
 	var retval __premarshalallIsDependencyTreeDependentPackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -10294,6 +10526,9 @@ func (v *allIsDependencyTreeDependentPackage) __premarshalJSON() (*__premarshala
 type allIsDependencyTreePackage struct {
 	allPkgTree `json:"-"`
 }
+
+// GetId returns allIsDependencyTreePackage.Id, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTreePackage) GetId() string { return v.allPkgTree.Id }
 
 // GetType returns allIsDependencyTreePackage.Type, and is useful for accessing the field via an interface.
 func (v *allIsDependencyTreePackage) GetType() string { return v.allPkgTree.Type }
@@ -10329,6 +10564,8 @@ func (v *allIsDependencyTreePackage) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallIsDependencyTreePackage struct {
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -10345,6 +10582,7 @@ func (v *allIsDependencyTreePackage) MarshalJSON() ([]byte, error) {
 func (v *allIsDependencyTreePackage) __premarshalJSON() (*__premarshalallIsDependencyTreePackage, error) {
 	var retval __premarshalallIsDependencyTreePackage
 
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -10552,6 +10790,9 @@ type allIsOccurrencesTreeSubjectPackage struct {
 // GetTypename returns allIsOccurrencesTreeSubjectPackage.Typename, and is useful for accessing the field via an interface.
 func (v *allIsOccurrencesTreeSubjectPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns allIsOccurrencesTreeSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allIsOccurrencesTreeSubjectPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allIsOccurrencesTreeSubjectPackage.Type, and is useful for accessing the field via an interface.
 func (v *allIsOccurrencesTreeSubjectPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -10588,6 +10829,8 @@ func (v *allIsOccurrencesTreeSubjectPackage) UnmarshalJSON(b []byte) error {
 type __premarshalallIsOccurrencesTreeSubjectPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -10605,6 +10848,7 @@ func (v *allIsOccurrencesTreeSubjectPackage) __premarshalJSON() (*__premarshalal
 	var retval __premarshalallIsOccurrencesTreeSubjectPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -10714,6 +10958,9 @@ type allIsOccurrencesTreeSubjectSource struct {
 // GetTypename returns allIsOccurrencesTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *allIsOccurrencesTreeSubjectSource) GetTypename() *string { return v.Typename }
 
+// GetId returns allIsOccurrencesTreeSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *allIsOccurrencesTreeSubjectSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns allIsOccurrencesTreeSubjectSource.Type, and is useful for accessing the field via an interface.
 func (v *allIsOccurrencesTreeSubjectSource) GetType() string { return v.allSourceTree.Type }
 
@@ -10750,6 +10997,8 @@ func (v *allIsOccurrencesTreeSubjectSource) UnmarshalJSON(b []byte) error {
 type __premarshalallIsOccurrencesTreeSubjectSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -10767,6 +11016,7 @@ func (v *allIsOccurrencesTreeSubjectSource) __premarshalJSON() (*__premarshalall
 	var retval __premarshalallIsOccurrencesTreeSubjectSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -11212,9 +11462,13 @@ func (v *allOSVTreeOsvIdOSVId) GetId() string { return v.Id }
 // Also note that this is named `Package`, not `PackageType`. This is only to make
 // queries more readable.
 type allPkgTree struct {
+	Id         string                                 `json:"id"`
 	Type       string                                 `json:"type"`
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
 }
+
+// GetId returns allPkgTree.Id, and is useful for accessing the field via an interface.
+func (v *allPkgTree) GetId() string { return v.Id }
 
 // GetType returns allPkgTree.Type, and is useful for accessing the field via an interface.
 func (v *allPkgTree) GetType() string { return v.Type }
@@ -11233,9 +11487,13 @@ func (v *allPkgTree) GetNamespaces() []allPkgTreeNamespacesPackageNamespace { re
 // Namespaces are optional and type specific. Because they are optional, we use
 // empty string to denote missing namespaces.
 type allPkgTreeNamespacesPackageNamespace struct {
+	Id        string                                                 `json:"id"`
 	Namespace string                                                 `json:"namespace"`
 	Names     []allPkgTreeNamespacesPackageNamespaceNamesPackageName `json:"names"`
 }
+
+// GetId returns allPkgTreeNamespacesPackageNamespace.Id, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespace) GetId() string { return v.Id }
 
 // GetNamespace returns allPkgTreeNamespacesPackageNamespace.Namespace, and is useful for accessing the field via an interface.
 func (v *allPkgTreeNamespacesPackageNamespace) GetNamespace() string { return v.Namespace }
@@ -11258,9 +11516,13 @@ func (v *allPkgTreeNamespacesPackageNamespace) GetNames() []allPkgTreeNamespaces
 // This is the first node in the trie that can be referred to by other parts of
 // GUAC.
 type allPkgTreeNamespacesPackageNamespaceNamesPackageName struct {
+	Id       string                                                                       `json:"id"`
 	Name     string                                                                       `json:"name"`
 	Versions []allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion `json:"versions"`
 }
+
+// GetId returns allPkgTreeNamespacesPackageNamespaceNamesPackageName.Id, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageName) GetId() string { return v.Id }
 
 // GetName returns allPkgTreeNamespacesPackageNamespaceNamesPackageName.Name, and is useful for accessing the field via an interface.
 func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageName) GetName() string { return v.Name }
@@ -11291,9 +11553,15 @@ func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageName) GetVersions() []a
 // a subset of the qualifier of the other also mean two different packages in the
 // trie.
 type allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
+	Id         string                                                                                                 `json:"id"`
 	Version    string                                                                                                 `json:"version"`
 	Qualifiers []allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
 	Subpath    string                                                                                                 `json:"subpath"`
+}
+
+// GetId returns allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Id, and is useful for accessing the field via an interface.
+func (v *allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetId() string {
+	return v.Id
 }
 
 // GetVersion returns allPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
@@ -11695,6 +11963,9 @@ type allSLSATreeSlsaSLSABuiltFromPackage struct {
 // GetTypename returns allSLSATreeSlsaSLSABuiltFromPackage.Typename, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSlsaSLSABuiltFromPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns allSLSATreeSlsaSLSABuiltFromPackage.Id, and is useful for accessing the field via an interface.
+func (v *allSLSATreeSlsaSLSABuiltFromPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allSLSATreeSlsaSLSABuiltFromPackage.Type, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSlsaSLSABuiltFromPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -11731,6 +12002,8 @@ func (v *allSLSATreeSlsaSLSABuiltFromPackage) UnmarshalJSON(b []byte) error {
 type __premarshalallSLSATreeSlsaSLSABuiltFromPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -11748,6 +12021,7 @@ func (v *allSLSATreeSlsaSLSABuiltFromPackage) __premarshalJSON() (*__premarshala
 	var retval __premarshalallSLSATreeSlsaSLSABuiltFromPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -11875,6 +12149,9 @@ type allSLSATreeSlsaSLSABuiltFromSource struct {
 // GetTypename returns allSLSATreeSlsaSLSABuiltFromSource.Typename, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSlsaSLSABuiltFromSource) GetTypename() *string { return v.Typename }
 
+// GetId returns allSLSATreeSlsaSLSABuiltFromSource.Id, and is useful for accessing the field via an interface.
+func (v *allSLSATreeSlsaSLSABuiltFromSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns allSLSATreeSlsaSLSABuiltFromSource.Type, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSlsaSLSABuiltFromSource) GetType() string { return v.allSourceTree.Type }
 
@@ -11911,6 +12188,8 @@ func (v *allSLSATreeSlsaSLSABuiltFromSource) UnmarshalJSON(b []byte) error {
 type __premarshalallSLSATreeSlsaSLSABuiltFromSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -11928,6 +12207,7 @@ func (v *allSLSATreeSlsaSLSABuiltFromSource) __premarshalJSON() (*__premarshalal
 	var retval __premarshalallSLSATreeSlsaSLSABuiltFromSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -12071,6 +12351,9 @@ type allSLSATreeSubjectPackage struct {
 // GetTypename returns allSLSATreeSubjectPackage.Typename, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSubjectPackage) GetTypename() *string { return v.Typename }
 
+// GetId returns allSLSATreeSubjectPackage.Id, and is useful for accessing the field via an interface.
+func (v *allSLSATreeSubjectPackage) GetId() string { return v.allPkgTree.Id }
+
 // GetType returns allSLSATreeSubjectPackage.Type, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSubjectPackage) GetType() string { return v.allPkgTree.Type }
 
@@ -12107,6 +12390,8 @@ func (v *allSLSATreeSubjectPackage) UnmarshalJSON(b []byte) error {
 type __premarshalallSLSATreeSubjectPackage struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
@@ -12124,6 +12409,7 @@ func (v *allSLSATreeSubjectPackage) __premarshalJSON() (*__premarshalallSLSATree
 	var retval __premarshalallSLSATreeSubjectPackage
 
 	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
 	retval.Type = v.allPkgTree.Type
 	retval.Namespaces = v.allPkgTree.Namespaces
 	return &retval, nil
@@ -12251,6 +12537,9 @@ type allSLSATreeSubjectSource struct {
 // GetTypename returns allSLSATreeSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSubjectSource) GetTypename() *string { return v.Typename }
 
+// GetId returns allSLSATreeSubjectSource.Id, and is useful for accessing the field via an interface.
+func (v *allSLSATreeSubjectSource) GetId() string { return v.allSourceTree.Id }
+
 // GetType returns allSLSATreeSubjectSource.Type, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSubjectSource) GetType() string { return v.allSourceTree.Type }
 
@@ -12287,6 +12576,8 @@ func (v *allSLSATreeSubjectSource) UnmarshalJSON(b []byte) error {
 type __premarshalallSLSATreeSubjectSource struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Type string `json:"type"`
 
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
@@ -12304,6 +12595,7 @@ func (v *allSLSATreeSubjectSource) __premarshalJSON() (*__premarshalallSLSATreeS
 	var retval __premarshalallSLSATreeSubjectSource
 
 	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
 	retval.Type = v.allSourceTree.Type
 	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
@@ -12322,9 +12614,13 @@ func (v *allSLSATreeSubjectSource) __premarshalJSON() (*__premarshalallSLSATreeS
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type allSourceTree struct {
+	Id         string                                   `json:"id"`
 	Type       string                                   `json:"type"`
 	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
+
+// GetId returns allSourceTree.Id, and is useful for accessing the field via an interface.
+func (v *allSourceTree) GetId() string { return v.Id }
 
 // GetType returns allSourceTree.Type, and is useful for accessing the field via an interface.
 func (v *allSourceTree) GetType() string { return v.Type }
@@ -12341,9 +12637,13 @@ func (v *allSourceTree) GetNamespaces() []allSourceTreeNamespacesSourceNamespace
 //
 // The `namespace` field is mandatory.
 type allSourceTreeNamespacesSourceNamespace struct {
+	Id        string                                                  `json:"id"`
 	Namespace string                                                  `json:"namespace"`
 	Names     []allSourceTreeNamespacesSourceNamespaceNamesSourceName `json:"names"`
 }
+
+// GetId returns allSourceTreeNamespacesSourceNamespace.Id, and is useful for accessing the field via an interface.
+func (v *allSourceTreeNamespacesSourceNamespace) GetId() string { return v.Id }
 
 // GetNamespace returns allSourceTreeNamespacesSourceNamespace.Namespace, and is useful for accessing the field via an interface.
 func (v *allSourceTreeNamespacesSourceNamespace) GetNamespace() string { return v.Namespace }
@@ -12364,10 +12664,14 @@ func (v *allSourceTreeNamespacesSourceNamespace) GetNames() []allSourceTreeNames
 // This is the only source trie node that can be referenced by other parts of
 // GUAC.
 type allSourceTreeNamespacesSourceNamespaceNamesSourceName struct {
+	Id     string  `json:"id"`
 	Name   string  `json:"name"`
 	Tag    *string `json:"tag"`
 	Commit *string `json:"commit"`
 }
+
+// GetId returns allSourceTreeNamespacesSourceNamespaceNamesSourceName.Id, and is useful for accessing the field via an interface.
+func (v *allSourceTreeNamespacesSourceNamespaceNamesSourceName) GetId() string { return v.Id }
 
 // GetName returns allSourceTreeNamespacesSourceNamespaceNamesSourceName.Name, and is useful for accessing the field via an interface.
 func (v *allSourceTreeNamespacesSourceNamespaceNamesSourceName) GetName() string { return v.Name }
@@ -12415,12 +12719,16 @@ fragment allCertifyBad on CertifyBad {
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -12432,10 +12740,13 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -12481,12 +12792,16 @@ mutation CertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certify
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -12513,10 +12828,13 @@ fragment allCertifyBad on CertifyBad {
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -12566,10 +12884,13 @@ mutation CertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBadInputS
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -12592,12 +12913,16 @@ fragment allCertifyBad on CertifyBad {
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -12654,12 +12979,16 @@ mutation CertifyCVE ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: Vul
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -12755,12 +13084,16 @@ mutation CertifyGHSA ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: 
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -12856,12 +13189,16 @@ mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: Vul
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -12957,12 +13294,16 @@ mutation CertifyPkg ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $certifyPkg: C
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13020,12 +13361,16 @@ mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13051,10 +13396,13 @@ fragment allHasSBOMTree on HasSBOM {
 	collector
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -13099,10 +13447,13 @@ mutation HasSBOMSrc ($source: SourceInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -13124,12 +13475,16 @@ fragment allHasSBOMTree on HasSBOM {
 	collector
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13183,12 +13538,16 @@ mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: 
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13200,10 +13559,13 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -13211,6 +13573,7 @@ fragment allSourceTree on Source {
 	}
 }
 fragment allHasSourceAt on HasSourceAt {
+	id
 	justification
 	knownSince
 	package {
@@ -13320,12 +13683,16 @@ mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency:
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13391,12 +13758,16 @@ mutation IsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $o
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13429,10 +13800,13 @@ fragment allIsOccurrencesTree on IsOccurrence {
 	collector
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -13482,10 +13856,13 @@ mutation IsOccurrenceSrc ($source: SourceInputSpec!, $artifact: ArtifactInputSpe
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -13514,12 +13891,16 @@ fragment allIsOccurrencesTree on IsOccurrence {
 	collector
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13740,12 +14121,16 @@ fragment allArtifactTree on Artifact {
 	digest
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13757,10 +14142,13 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -13865,12 +14253,16 @@ mutation SLSAForPackage ($pkg: PkgInputSpec!, $materials: [PackageSourceOrArtifa
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -13882,10 +14274,13 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -13994,10 +14389,13 @@ mutation SLSAForSource ($source: SourceInputSpec!, $materials: [PackageSourceOrA
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -14005,12 +14403,16 @@ fragment allSourceTree on Source {
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -14106,10 +14508,13 @@ mutation Scorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) 
 	}
 }
 fragment allSourceTree on Source {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			tag
 			commit
@@ -14175,12 +14580,16 @@ mutation VEXPackageAndGhsa ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStat
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -14307,12 +14716,16 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	collector
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -14404,12 +14817,16 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	collector
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key
@@ -14469,12 +14886,16 @@ mutation VexPackageAndCve ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStateme
 	}
 }
 fragment allPkgTree on Package {
+	id
 	type
 	namespaces {
+		id
 		namespace
 		names {
+			id
 			name
 			versions {
+				id
 				version
 				qualifiers {
 					key

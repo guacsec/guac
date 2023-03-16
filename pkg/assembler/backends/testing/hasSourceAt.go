@@ -17,7 +17,9 @@ package testing
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -25,7 +27,7 @@ import (
 )
 
 // Internal data: link between sources and packages (HasSourceAt)
-type srcMaps []*srcMapLink
+type hasSrcMaps map[uint32]*srcMapLink
 type srcMapLink struct {
 	id            uint32
 	sourceID      uint32
@@ -43,7 +45,7 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	// Note: This assumes that the package and source have already been
 	// ingested (and should error otherwise).
 
-	srcNamespace, srcHasNamespace := sources[source.Type]
+	srcNamespace, srcHasNamespace := c.sources[source.Type]
 	if !srcHasNamespace {
 		return nil, gqlerror.Errorf("Source type \"%s\" not found", source.Type)
 	}
@@ -73,7 +75,7 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		return nil, gqlerror.Errorf("No source matches input")
 	}
 
-	pkgNamespace, pkgHasNamespace := packages[packageArg.Type]
+	pkgNamespace, pkgHasNamespace := c.packages[packageArg.Type]
 	if !pkgHasNamespace {
 		return nil, gqlerror.Errorf("Package type \"%s\" not found", packageArg.Type)
 	}
@@ -111,38 +113,52 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		}
 	}
 
-	// store the link
-	newSrcMapLink := &srcMapLink{
-		id:            c.getNextID(),
-		sourceID:      sourceID,
-		packageID:     packageID,
-		knownSince:    hasSourceAt.KnownSince.UTC(),
-		justification: hasSourceAt.Justification,
-		origin:        hasSourceAt.Origin,
-		collector:     hasSourceAt.Collector,
+	// Don't insert duplicates
+	duplicate := false
+	collectedSrcMapLink := srcMapLink{}
+	for _, v := range c.hasSourceMaps {
+		if packageID == v.packageID && sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
+			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.UTC() == v.knownSince {
+			collectedSrcMapLink = *v
+			duplicate = true
+			break
+		}
 	}
-	index[newSrcMapLink.id] = newSrcMapLink
-	sourceMaps = append(sourceMaps, newSrcMapLink)
-	// set the backlinks
-	index[packageID].(pkgNameOrVersion).setSrcMapLink(newSrcMapLink.id)
-	index[sourceID].(*srcNameNode).srcMapLink = newSrcMapLink.id
+	if !duplicate {
+		// store the link
+		collectedSrcMapLink = srcMapLink{
+			id:            c.getNextID(),
+			sourceID:      sourceID,
+			packageID:     packageID,
+			knownSince:    hasSourceAt.KnownSince.UTC(),
+			justification: hasSourceAt.Justification,
+			origin:        hasSourceAt.Origin,
+			collector:     hasSourceAt.Collector,
+		}
+		c.index[collectedSrcMapLink.id] = &collectedSrcMapLink
+		c.hasSourceMaps[collectedSrcMapLink.id] = &collectedSrcMapLink
+		// set the backlinks
+		c.index[packageID].(pkgNameOrVersion).setSrcMapLink(collectedSrcMapLink.id)
+		c.index[sourceID].(*srcNameNode).setSrcMapLink(collectedSrcMapLink.id)
+	}
 
 	// build return GraphQL type
-	p, err := buildPackageResponse(packageID, nil)
+	p, err := c.buildPackageResponse(packageID, nil)
 	if err != nil {
 		return nil, err
 	}
-	s, err := buildSourceResponse(sourceID, nil)
+	s, err := c.buildSourceResponse(sourceID, nil)
 	if err != nil {
 		return nil, err
 	}
 	out := model.HasSourceAt{
+		ID:            fmt.Sprintf("%d", collectedSrcMapLink.id),
 		Package:       p,
 		Source:        s,
-		KnownSince:    newSrcMapLink.knownSince,
-		Justification: newSrcMapLink.justification,
-		Origin:        newSrcMapLink.origin,
-		Collector:     newSrcMapLink.collector,
+		KnownSince:    collectedSrcMapLink.knownSince,
+		Justification: collectedSrcMapLink.justification,
+		Origin:        collectedSrcMapLink.origin,
+		Collector:     collectedSrcMapLink.collector,
 	}
 
 	return &out, nil
@@ -153,25 +169,78 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	out := []*model.HasSourceAt{}
 
-	for _, mapLink := range sourceMaps {
-		if noMatch(filter.Justification, mapLink.justification) || noMatch(filter.Origin, mapLink.origin) || noMatch(filter.Collector, mapLink.collector) {
-			continue
+	if filter != nil && filter.ID != nil {
+		id, err := strconv.Atoi(*filter.ID)
+		if err != nil {
+			return nil, err
 		}
-		p, err := buildPackageResponse(mapLink.packageID, filter.Package)
+		mapLink := c.hasSourceMaps[uint32(id)]
+		p, err := c.buildPackageResponse(mapLink.packageID, filter.Package)
 		if err != nil {
 			return nil, err
 		}
 		if p == nil {
-			continue
+			return nil, gqlerror.Errorf("package not found for specified hasSourceAt ID")
 		}
-		s, err := buildSourceResponse(mapLink.sourceID, filter.Source)
+		s, err := c.buildSourceResponse(mapLink.sourceID, filter.Source)
 		if err != nil {
 			return nil, err
+		}
+		if s == nil {
+			return nil, gqlerror.Errorf("source not found for specified hasSourceAt ID")
+		}
+		newHSA := model.HasSourceAt{
+			ID:            fmt.Sprintf("%d", mapLink.id),
+			Package:       p,
+			Source:        s,
+			KnownSince:    mapLink.knownSince,
+			Justification: mapLink.justification,
+			Origin:        mapLink.origin,
+			Collector:     mapLink.collector,
+		}
+		return []*model.HasSourceAt{&newHSA}, nil
+	}
+
+	for _, mapLink := range c.hasSourceMaps {
+		if filter != nil && noMatch(filter.Justification, mapLink.justification) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Origin, mapLink.origin) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Collector, mapLink.collector) {
+			continue
+		}
+		var p *model.Package
+		var s *model.Source
+		var err error
+		if filter != nil {
+			p, err = c.buildPackageResponse(mapLink.packageID, filter.Package)
+			if err != nil {
+				return nil, err
+			}
+			s, err = c.buildSourceResponse(mapLink.sourceID, filter.Source)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			p, err = c.buildPackageResponse(mapLink.packageID, nil)
+			if err != nil {
+				return nil, err
+			}
+			s, err = c.buildSourceResponse(mapLink.sourceID, nil)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if p == nil {
+			continue
 		}
 		if s == nil {
 			continue
 		}
 		newHSA := model.HasSourceAt{
+			ID:            fmt.Sprintf("%d", mapLink.id),
 			Package:       p,
 			Source:        s,
 			KnownSince:    mapLink.knownSince,
