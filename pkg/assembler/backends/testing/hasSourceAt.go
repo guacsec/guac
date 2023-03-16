@@ -27,16 +27,16 @@ import (
 // Internal data: link between sources and packages (HasSourceAt)
 type srcMaps []*srcMapLink
 type srcMapLink struct {
-	id            nodeID
-	sourceID      nodeID
-	packageID     nodeID
+	id            uint32
+	sourceID      uint32
+	packageID     uint32
 	knownSince    time.Time
 	justification string
 	origin        string
 	collector     string
 }
 
-func (n *srcMapLink) getID() nodeID { return n.id }
+func (n *srcMapLink) getID() uint32 { return n.id }
 
 // Ingest HasSourceAt
 func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
@@ -52,7 +52,7 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		return nil, gqlerror.Errorf("Source namespace \"%s\" not found", source.Namespace)
 	}
 	found := false
-	var sourceID nodeID
+	var sourceID uint32
 	for _, src := range srcName.names {
 		if src.name != source.Name {
 			continue
@@ -85,7 +85,7 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	if !pkgHasVersion {
 		return nil, gqlerror.Errorf("Package name \"%s\" not found", packageArg.Name)
 	}
-	var packageID nodeID
+	var packageID uint32
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 		packageID = pkgVersion.id
 	} else {

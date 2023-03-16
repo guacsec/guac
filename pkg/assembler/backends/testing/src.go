@@ -62,30 +62,30 @@ func registerAllSources(client *demoClient) {
 // Internal data: Sources
 type srcTypeMap map[string]*srcNamespaceStruct
 type srcNamespaceStruct struct {
-	id         nodeID
+	id         uint32
 	typeKey    string
 	namespaces srcNamespaceMap
 }
 type srcNamespaceMap map[string]*srcNameStruct
 type srcNameStruct struct {
-	id        nodeID
-	parent    nodeID
+	id        uint32
+	parent    uint32
 	namespace string
 	names     srcNameList
 }
 type srcNameList []*srcNameNode
 type srcNameNode struct {
-	id         nodeID
-	parent     nodeID
+	id         uint32
+	parent     uint32
 	name       string
 	tag        string
 	commit     string
-	srcMapLink nodeID
+	srcMapLink uint32
 }
 
-func (n *srcNamespaceStruct) getID() nodeID { return n.id }
-func (n *srcNameStruct) getID() nodeID      { return n.id }
-func (n *srcNameNode) getID() nodeID        { return n.id }
+func (n *srcNamespaceStruct) getID() uint32 { return n.id }
+func (n *srcNameStruct) getID() uint32      { return n.id }
+func (n *srcNameNode) getID() uint32        { return n.id }
 
 // Ingest Source
 
@@ -159,7 +159,7 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 		if err != nil {
 			return nil, err
 		}
-		s, err := buildSourceResponse(nodeID(id), filter)
+		s, err := buildSourceResponse(uint32(id), filter)
 		if err != nil {
 			return nil, err
 		}
@@ -214,13 +214,13 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 
 // Builds a model.Source to send as GraphQL response, starting from id.
 // The optional filter allows restricting output (on selection operations).
-func buildSourceResponse(id nodeID, filter *model.SourceSpec) (*model.Source, error) {
+func buildSourceResponse(id uint32, filter *model.SourceSpec) (*model.Source, error) {
 	if filter != nil && filter.ID != nil {
 		filteredID, err := strconv.Atoi(*filter.ID)
 		if err != nil {
 			return nil, err
 		}
-		if nodeID(filteredID) != id {
+		if uint32(filteredID) != id {
 			return nil, nil
 		}
 	}

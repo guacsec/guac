@@ -76,53 +76,53 @@ func registerAllPackages(client *demoClient) {
 // Internal data: Packages
 type pkgTypeMap map[string]*pkgNamespaceStruct
 type pkgNamespaceStruct struct {
-	id         nodeID
+	id         uint32
 	typeKey    string
 	namespaces pkgNamespaceMap
 }
 type pkgNamespaceMap map[string]*pkgNameStruct
 type pkgNameStruct struct {
-	id        nodeID
-	parent    nodeID
+	id        uint32
+	parent    uint32
 	namespace string
 	names     pkgNameMap
 }
 type pkgNameMap map[string]*pkgVersionStruct
 type pkgVersionStruct struct {
-	id         nodeID
-	parent     nodeID
+	id         uint32
+	parent     uint32
 	name       string
 	versions   pkgVersionList
-	srcMapLink nodeID
+	srcMapLink uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
-	id         nodeID
-	parent     nodeID
+	id         uint32
+	parent     uint32
 	version    string
 	subpath    string
 	qualifiers map[string]string
-	srcMapLink nodeID
+	srcMapLink uint32
 }
 
 // Be type safe, don't use any / interface{}
 type pkgNameOrVersion interface {
 	implementsPkgNameOrVersion()
-	setSrcMapLink(id nodeID)
-	getSrcMapLink() nodeID
+	setSrcMapLink(id uint32)
+	getSrcMapLink() uint32
 }
 
-func (n *pkgNamespaceStruct) getID() nodeID { return n.id }
-func (n *pkgNameStruct) getID() nodeID      { return n.id }
-func (n *pkgVersionStruct) getID() nodeID   { return n.id }
-func (n *pkgVersionNode) getID() nodeID     { return n.id }
+func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
+func (n *pkgNameStruct) getID() uint32      { return n.id }
+func (n *pkgVersionStruct) getID() uint32   { return n.id }
+func (n *pkgVersionNode) getID() uint32     { return n.id }
 
 func (p *pkgVersionStruct) implementsPkgNameOrVersion() {}
 func (p *pkgVersionNode) implementsPkgNameOrVersion()   {}
-func (p *pkgVersionStruct) setSrcMapLink(id nodeID)     { p.srcMapLink = id }
-func (p *pkgVersionNode) setSrcMapLink(id nodeID)       { p.srcMapLink = id }
-func (p *pkgVersionStruct) getSrcMapLink() nodeID       { return p.srcMapLink }
-func (p *pkgVersionNode) getSrcMapLink() nodeID         { return p.srcMapLink }
+func (p *pkgVersionStruct) setSrcMapLink(id uint32)     { p.srcMapLink = id }
+func (p *pkgVersionNode) setSrcMapLink(id uint32)       { p.srcMapLink = id }
+func (p *pkgVersionStruct) getSrcMapLink() uint32       { return p.srcMapLink }
+func (p *pkgVersionNode) getSrcMapLink() uint32         { return p.srcMapLink }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
@@ -198,7 +198,7 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 		if err != nil {
 			return nil, err
 		}
-		p, err := buildPackageResponse(nodeID(id), filter)
+		p, err := buildPackageResponse(uint32(id), filter)
 		if err != nil {
 			return nil, err
 		}
@@ -266,13 +266,13 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 
 // Builds a model.Package to send as GraphQL response, starting from id.
 // The optional filter allows restricting output (on selection operations).
-func buildPackageResponse(id nodeID, filter *model.PkgSpec) (*model.Package, error) {
+func buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, error) {
 	if filter != nil && filter.ID != nil {
 		filteredID, err := strconv.Atoi(*filter.ID)
 		if err != nil {
 			return nil, err
 		}
-		if nodeID(filteredID) != id {
+		if uint32(filteredID) != id {
 			return nil, nil
 		}
 	}

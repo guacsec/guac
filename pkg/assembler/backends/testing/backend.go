@@ -16,7 +16,7 @@
 package testing
 
 import (
-	"sync"
+	"sync/atomic"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -37,20 +37,15 @@ type DemoCredentials struct{}
 // For fast retrieval, we also keep a map from ID from nodes that have it.
 // IDs are stored as string in graphql even though we ask for integers
 // See https://github.com/99designs/gqlgen/issues/2561
-type nodeID int
-
 type hasID interface {
-	getID() nodeID
+	getID() uint32
 }
 
-type indexType map[nodeID]hasID
+type indexType map[uint32]hasID
 
-// locking to ensure ID is not duplicated
-func (c *demoClient) getNextID() nodeID {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.id = c.id + 1
-	return c.id
+// atomic add to ensure ID is not duplicated
+func (c *demoClient) getNextID() uint32 {
+	return atomic.AddUint32(&c.id, 1)
 }
 
 type demoClient struct {
@@ -73,8 +68,7 @@ type demoClient struct {
 	isVulnerability     []*model.IsVulnerability
 	certifyVEXStatement []*model.CertifyVEXStatement
 	hasSLSA             []*model.HasSlsa
-	mu                  sync.Mutex
-	id                  nodeID
+	id                  uint32
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
