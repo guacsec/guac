@@ -33,20 +33,20 @@ func registerAllSources(client *demoClient) {
 
 	inputs := []model.SourceInputSpec{{
 		Type:      "git",
-		Namespace: "github.com/tensorflow",
+		Namespace: "github.com",
 		Name:      "tensorflow",
 	}, {
 		Type:      "git",
-		Namespace: "github.com/tensorflow",
+		Namespace: "github.com",
 		Name:      "build",
 	}, {
 		Type:      "git",
-		Namespace: "github.com/tensorflow",
+		Namespace: "github.com",
 		Name:      "tensorflow",
 		Tag:       &v12,
 	}, {
 		Type:      "git",
-		Namespace: "github.com/tensorflow",
+		Namespace: "github.com",
 		Name:      "tensorflow",
 		Commit:    &commit,
 	}}
@@ -159,6 +159,11 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 // Query Source
 
 func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
+	if filter.Commit != nil && filter.Tag != nil {
+		if *filter.Commit != "" && *filter.Tag != "" {
+			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
+		}
+	}
 	if filter != nil && filter.ID != nil {
 		id, err := strconv.Atoi(*filter.ID)
 		if err != nil {
@@ -170,51 +175,84 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 		}
 		return []*model.Source{s}, nil
 	}
+
 	out := []*model.Source{}
-	for dbType, namespaces := range c.sources {
-		if filter != nil && noMatch(filter.Type, dbType) {
-			continue
-		}
-		sNamespaces := []*model.SourceNamespace{}
-		for namespace, names := range namespaces.namespaces {
-			if filter != nil && noMatch(filter.Namespace, namespace) {
-				continue
-			}
-			sns := []*model.SourceName{}
-			for _, s := range names.names {
-				if filter != nil && noMatch(filter.Name, s.name) {
-					continue
-				}
-				if filter != nil && noMatch(filter.Tag, s.tag) {
-					continue
-				}
-				if filter != nil && noMatch(filter.Commit, s.commit) {
-					continue
-				}
-				sns = append(sns, &model.SourceName{
-					ID:     fmt.Sprintf("%d", s.id),
-					Name:   s.name,
-					Tag:    &s.tag,
-					Commit: &s.commit,
+	if filter != nil && filter.Type != nil {
+		srcNamespaceStruct, ok := c.sources[*filter.Type]
+		if ok {
+			sNamespaces := buildSourceNamespace(srcNamespaceStruct, filter)
+			if len(sNamespaces) > 0 {
+				out = append(out, &model.Source{
+					ID:         fmt.Sprintf("%d", srcNamespaceStruct.id),
+					Type:       srcNamespaceStruct.typeKey,
+					Namespaces: sNamespaces,
 				})
 			}
+		}
+	} else {
+		for dbType, srcNamespaceStruct := range c.sources {
+			sNamespaces := buildSourceNamespace(srcNamespaceStruct, filter)
+			if len(sNamespaces) > 0 {
+				out = append(out, &model.Source{
+					ID:         fmt.Sprintf("%d", srcNamespaceStruct.id),
+					Type:       dbType,
+					Namespaces: sNamespaces,
+				})
+			}
+		}
+	}
+	return out, nil
+}
+
+func buildSourceNamespace(srcNamespaceStruct *srcNamespaceStruct, filter *model.SourceSpec) []*model.SourceNamespace {
+	sNamespaces := []*model.SourceNamespace{}
+	if filter != nil && filter.Namespace != nil {
+		srcNameStruct, ok := srcNamespaceStruct.namespaces[*filter.Namespace]
+		if ok {
+			sns := buildSourceName(srcNameStruct, filter)
 			if len(sns) > 0 {
 				sNamespaces = append(sNamespaces, &model.SourceNamespace{
-					ID:        fmt.Sprintf("%d", names.id),
+					ID:        fmt.Sprintf("%d", srcNameStruct.id),
+					Namespace: srcNameStruct.namespace,
+					Names:     sns,
+				})
+			}
+		}
+	} else {
+		for namespace, srcNameStruct := range srcNamespaceStruct.namespaces {
+			sns := buildSourceName(srcNameStruct, filter)
+			if len(sns) > 0 {
+				sNamespaces = append(sNamespaces, &model.SourceNamespace{
+					ID:        fmt.Sprintf("%d", srcNameStruct.id),
 					Namespace: namespace,
 					Names:     sns,
 				})
 			}
 		}
-		if len(sNamespaces) > 0 {
-			out = append(out, &model.Source{
-				ID:         fmt.Sprintf("%d", namespaces.id),
-				Type:       dbType,
-				Namespaces: sNamespaces,
-			})
-		}
 	}
-	return out, nil
+	return sNamespaces
+}
+
+func buildSourceName(srcNameStruct *srcNameStruct, filter *model.SourceSpec) []*model.SourceName {
+	sns := []*model.SourceName{}
+	for _, s := range srcNameStruct.names {
+		if filter != nil && noMatch(filter.Name, s.name) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Tag, s.tag) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Commit, s.commit) {
+			continue
+		}
+		sns = append(sns, &model.SourceName{
+			ID:     fmt.Sprintf("%d", s.id),
+			Name:   s.name,
+			Tag:    &s.tag,
+			Commit: &s.commit,
+		})
+	}
+	return sns
 }
 
 // Builds a model.Source to send as GraphQL response, starting from id.

@@ -222,63 +222,112 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 		return []*model.Package{p}, nil
 	}
 	out := []*model.Package{}
-	for dbType, namespaces := range c.packages {
-		if filter != nil && noMatch(filter.Type, dbType) {
-			continue
+
+	if filter != nil && filter.Type != nil {
+		pkgNamespaceStruct, ok := c.packages[*filter.Type]
+		if ok {
+			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
+			if len(pNamespaces) > 0 {
+				out = append(out, &model.Package{
+					ID:         fmt.Sprintf("%d", pkgNamespaceStruct.id),
+					Type:       pkgNamespaceStruct.typeKey,
+					Namespaces: pNamespaces,
+				})
+			}
 		}
-		pNamespaces := []*model.PackageNamespace{}
-		for namespace, names := range namespaces.namespaces {
-			if filter != nil && noMatch(filter.Namespace, namespace) {
-				continue
+	} else {
+		for dbType, pkgNamespaceStruct := range c.packages {
+			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
+			if len(pNamespaces) > 0 {
+				out = append(out, &model.Package{
+					ID:         fmt.Sprintf("%d", pkgNamespaceStruct.id),
+					Type:       dbType,
+					Namespaces: pNamespaces,
+				})
 			}
-			pns := []*model.PackageName{}
-			for name, versions := range names.names {
-				if filter != nil && noMatch(filter.Name, name) {
-					continue
-				}
-				pvs := []*model.PackageVersion{}
-				for _, v := range versions.versions {
-					if filter != nil && noMatch(filter.Version, v.version) {
-						continue
-					}
-					if filter != nil && noMatch(filter.Subpath, v.subpath) {
-						continue
-					}
-					if filter != nil && noMatchQualifiers(filter, v.qualifiers) {
-						continue
-					}
-					pvs = append(pvs, &model.PackageVersion{
-						ID:         fmt.Sprintf("%d", v.id),
-						Version:    v.version,
-						Subpath:    v.subpath,
-						Qualifiers: getCollectedPackageQualifiers(v.qualifiers),
-					})
-				}
-				if len(pvs) > 0 {
-					pns = append(pns, &model.PackageName{
-						ID:       fmt.Sprintf("%d", versions.id),
-						Name:     name,
-						Versions: pvs,
-					})
-				}
-			}
+		}
+	}
+	return out, nil
+}
+
+func buildPkgNamespace(pkgNamespaceStruct *pkgNamespaceStruct, filter *model.PkgSpec) []*model.PackageNamespace {
+	pNamespaces := []*model.PackageNamespace{}
+	if filter != nil && filter.Namespace != nil {
+		pkgNameStruct, ok := pkgNamespaceStruct.namespaces[*filter.Namespace]
+		if ok {
+			pns := buildPkgName(pkgNameStruct, filter)
 			if len(pns) > 0 {
 				pNamespaces = append(pNamespaces, &model.PackageNamespace{
-					ID:        fmt.Sprintf("%d", names.id),
+					ID:        fmt.Sprintf("%d", pkgNameStruct.id),
+					Namespace: pkgNameStruct.namespace,
+					Names:     pns,
+				})
+			}
+		}
+	} else {
+		for namespace, pkgNameStruct := range pkgNamespaceStruct.namespaces {
+			pns := buildPkgName(pkgNameStruct, filter)
+			if len(pns) > 0 {
+				pNamespaces = append(pNamespaces, &model.PackageNamespace{
+					ID:        fmt.Sprintf("%d", pkgNameStruct.id),
 					Namespace: namespace,
 					Names:     pns,
 				})
 			}
 		}
-		if len(pNamespaces) > 0 {
-			out = append(out, &model.Package{
-				ID:         fmt.Sprintf("%d", namespaces.id),
-				Type:       dbType,
-				Namespaces: pNamespaces,
-			})
+	}
+	return pNamespaces
+}
+
+func buildPkgName(pkgNameStruct *pkgNameStruct, filter *model.PkgSpec) []*model.PackageName {
+	pns := []*model.PackageName{}
+	if filter != nil && filter.Name != nil {
+		pkgVersionStruct, ok := pkgNameStruct.names[*filter.Name]
+		if ok {
+			pvs := buildPkgVersion(pkgVersionStruct, filter)
+			if len(pvs) > 0 {
+				pns = append(pns, &model.PackageName{
+					ID:       fmt.Sprintf("%d", pkgVersionStruct.id),
+					Name:     pkgVersionStruct.name,
+					Versions: pvs,
+				})
+			}
+		}
+	} else {
+		for name, pkgVersionStruct := range pkgNameStruct.names {
+			pvs := buildPkgVersion(pkgVersionStruct, filter)
+			if len(pvs) > 0 {
+				pns = append(pns, &model.PackageName{
+					ID:       fmt.Sprintf("%d", pkgVersionStruct.id),
+					Name:     name,
+					Versions: pvs,
+				})
+			}
 		}
 	}
-	return out, nil
+	return pns
+}
+
+func buildPkgVersion(pkgVersionStruct *pkgVersionStruct, filter *model.PkgSpec) []*model.PackageVersion {
+	pvs := []*model.PackageVersion{}
+	for _, v := range pkgVersionStruct.versions {
+		if filter != nil && noMatch(filter.Version, v.version) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Subpath, v.subpath) {
+			continue
+		}
+		if filter != nil && noMatchQualifiers(filter, v.qualifiers) {
+			continue
+		}
+		pvs = append(pvs, &model.PackageVersion{
+			ID:         fmt.Sprintf("%d", v.id),
+			Version:    v.version,
+			Subpath:    v.subpath,
+			Qualifiers: getCollectedPackageQualifiers(v.qualifiers),
+		})
+	}
+	return pvs
 }
 
 // Builds a model.Package to send as GraphQL response, starting from id.

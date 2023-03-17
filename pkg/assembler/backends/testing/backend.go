@@ -62,7 +62,7 @@ type demoClient struct {
 	index               indexType
 	packages            pkgTypeMap
 	sources             srcTypeMap
-	hasSourceMaps       hasSrcMaps
+	hasSources          hasSrcList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -86,7 +86,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		index:               indexType{},
 		packages:            pkgTypeMap{},
 		sources:             srcTypeMap{},
-		hasSourceMaps:       hasSrcMaps{},
+		hasSources:          hasSrcList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
