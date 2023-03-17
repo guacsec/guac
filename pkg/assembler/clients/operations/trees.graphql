@@ -20,12 +20,16 @@
 # TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 
 fragment allPkgTree on Package {
+  id
   type
   namespaces {
+    id
     namespace
     names {
+      id
       name
       versions {
+        id
         version
         qualifiers {
           key
@@ -38,10 +42,13 @@ fragment allPkgTree on Package {
 }
 
 fragment allSourceTree on Source {
+  id
   type
   namespaces {
+    id
     namespace
     names {
+      id
       name
       tag
       commit
@@ -186,6 +193,7 @@ fragment allHasSBOMTree on HasSBOM {
 }
 
 fragment allHasSourceAt on HasSourceAt {
+  id
   justification
   knownSince
   package {

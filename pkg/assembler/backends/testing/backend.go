@@ -22,13 +22,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-var (
-	index      = indexType{}
-	packages   = pkgTypeMap{}
-	sources    = srcTypeMap{}
-	sourceMaps = srcMaps{}
-)
-
 type DemoCredentials struct{}
 
 // IDs: We have a global ID for all nodes that have references to/from.
@@ -49,8 +42,6 @@ func (c *demoClient) getNextID() uint32 {
 }
 
 type demoClient struct {
-	packages            []*model.Package
-	sources             []*model.Source
 	cve                 []*model.Cve
 	ghsa                []*model.Ghsa
 	osv                 []*model.Osv
@@ -62,19 +53,20 @@ type demoClient struct {
 	isDependency        []*model.IsDependency
 	certifyPkg          []*model.CertifyPkg
 	certifyVuln         []*model.CertifyVuln
-	hasSourceAt         []*model.HasSourceAt
 	certifyScorecard    []*model.CertifyScorecard
 	certifyBad          []*model.CertifyBad
 	isVulnerability     []*model.IsVulnerability
 	certifyVEXStatement []*model.CertifyVEXStatement
 	hasSLSA             []*model.HasSlsa
 	id                  uint32
+	index               indexType
+	packages            pkgTypeMap
+	sources             srcTypeMap
+	hasSources          hasSrcList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		packages:            []*model.Package{},
-		sources:             []*model.Source{},
 		cve:                 []*model.Cve{},
 		ghsa:                []*model.Ghsa{},
 		osv:                 []*model.Osv{},
@@ -86,12 +78,15 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isDependency:        []*model.IsDependency{},
 		certifyPkg:          []*model.CertifyPkg{},
 		certifyVuln:         []*model.CertifyVuln{},
-		hasSourceAt:         []*model.HasSourceAt{},
 		certifyScorecard:    []*model.CertifyScorecard{},
 		certifyBad:          []*model.CertifyBad{},
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
+		index:               indexType{},
+		packages:            pkgTypeMap{},
+		sources:             srcTypeMap{},
+		hasSources:          hasSrcList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -106,8 +101,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 
 func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		packages:            []*model.Package{},
-		sources:             []*model.Source{},
 		cve:                 []*model.Cve{},
 		ghsa:                []*model.Ghsa{},
 		osv:                 []*model.Osv{},
@@ -119,7 +112,6 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isDependency:        []*model.IsDependency{},
 		certifyPkg:          []*model.CertifyPkg{},
 		certifyVuln:         []*model.CertifyVuln{},
-		hasSourceAt:         []*model.HasSourceAt{},
 		certifyScorecard:    []*model.CertifyScorecard{},
 		certifyBad:          []*model.CertifyBad{},
 		isVulnerability:     []*model.IsVulnerability{},

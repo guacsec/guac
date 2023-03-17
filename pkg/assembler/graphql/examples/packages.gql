@@ -1,10 +1,14 @@
 fragment allPkgTree on Package {
+  id
   type
   namespaces {
+    id
     namespace
     names {
+      id
       name
       versions {
+        id
         version
         qualifiers {
           key

@@ -222,7 +222,7 @@ func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec)
 	defer session.Close()
 
 	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
-		if *sourceSpec.Commit != "" || *sourceSpec.Tag != "" {
+		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
 			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
 		}
 	}

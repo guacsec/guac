@@ -59,6 +59,11 @@ func registerAllPackages(client *demoClient) {
 		Version: &v12,
 		Subpath: &subpath2,
 	}, {
+		Type:    "pypi",
+		Name:    "tensorflow",
+		Version: &v12,
+		Subpath: &subpath1,
+	}, {
 		Type:      "conan",
 		Namespace: &opensslNamespace,
 		Name:      "openssl",
@@ -93,7 +98,7 @@ type pkgVersionStruct struct {
 	parent     uint32
 	name       string
 	versions   pkgVersionList
-	srcMapLink uint32
+	srcMapLink []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
@@ -102,14 +107,14 @@ type pkgVersionNode struct {
 	version    string
 	subpath    string
 	qualifiers map[string]string
-	srcMapLink uint32
+	srcMapLink []uint32
 }
 
 // Be type safe, don't use any / interface{}
 type pkgNameOrVersion interface {
 	implementsPkgNameOrVersion()
 	setSrcMapLink(id uint32)
-	getSrcMapLink() uint32
+	getSrcMapLink() []uint32
 }
 
 func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
@@ -119,21 +124,21 @@ func (n *pkgVersionNode) getID() uint32     { return n.id }
 
 func (p *pkgVersionStruct) implementsPkgNameOrVersion() {}
 func (p *pkgVersionNode) implementsPkgNameOrVersion()   {}
-func (p *pkgVersionStruct) setSrcMapLink(id uint32)     { p.srcMapLink = id }
-func (p *pkgVersionNode) setSrcMapLink(id uint32)       { p.srcMapLink = id }
-func (p *pkgVersionStruct) getSrcMapLink() uint32       { return p.srcMapLink }
-func (p *pkgVersionNode) getSrcMapLink() uint32         { return p.srcMapLink }
+func (p *pkgVersionStruct) setSrcMapLink(id uint32)     { p.srcMapLink = append(p.srcMapLink, id) }
+func (p *pkgVersionNode) setSrcMapLink(id uint32)       { p.srcMapLink = append(p.srcMapLink, id) }
+func (p *pkgVersionStruct) getSrcMapLink() []uint32     { return p.srcMapLink }
+func (p *pkgVersionNode) getSrcMapLink() []uint32       { return p.srcMapLink }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
-	namespacesStruct, hasNamespace := packages[input.Type]
+	namespacesStruct, hasNamespace := c.packages[input.Type]
 	if !hasNamespace {
 		namespacesStruct = &pkgNamespaceStruct{
 			id:         c.getNextID(),
 			typeKey:    input.Type,
 			namespaces: pkgNamespaceMap{},
 		}
-		index[namespacesStruct.id] = namespacesStruct
+		c.index[namespacesStruct.id] = namespacesStruct
 	}
 	namespaces := namespacesStruct.namespaces
 
@@ -145,128 +150,189 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 			namespace: nilToEmpty(input.Namespace),
 			names:     pkgNameMap{},
 		}
-		index[namesStruct.id] = namesStruct
+		c.index[namesStruct.id] = namesStruct
 	}
 	names := namesStruct.names
 
 	versionStruct, hasVersions := names[input.Name]
 	if !hasVersions {
 		versionStruct = &pkgVersionStruct{
-			id:       c.getNextID(),
-			parent:   namesStruct.id,
-			name:     input.Name,
-			versions: pkgVersionList{},
+			id:         c.getNextID(),
+			parent:     namesStruct.id,
+			name:       input.Name,
+			versions:   pkgVersionList{},
+			srcMapLink: []uint32{},
 		}
-		index[versionStruct.id] = versionStruct
+		c.index[versionStruct.id] = versionStruct
 	}
 	versions := versionStruct.versions
 
-	newVersion := pkgVersionNode{
-		id:         c.getNextID(),
-		parent:     versionStruct.id,
-		version:    nilToEmpty(input.Version),
-		subpath:    nilToEmpty(input.Subpath),
-		qualifiers: getQualifiersFromInput(input.Qualifiers),
-	}
-	index[newVersion.id] = &newVersion
+	qualifiersVal := getQualifiersFromInput(input.Qualifiers)
 
 	// Don't insert duplicates
 	duplicate := false
+	collectedVersion := pkgVersionNode{}
 	for _, v := range versions {
-		if v.version == newVersion.version && v.subpath == newVersion.subpath && reflect.DeepEqual(v.qualifiers, newVersion.qualifiers) {
-			duplicate = true
-			break
+		if noMatchInput(input.Version, v.version) {
+			continue
 		}
+		if noMatchInput(input.Subpath, v.subpath) {
+			continue
+		}
+		if !reflect.DeepEqual(v.qualifiers, qualifiersVal) {
+			continue
+		}
+		collectedVersion = *v
+		duplicate = true
+		break
 	}
 	if !duplicate {
+		collectedVersion = pkgVersionNode{
+			id:         c.getNextID(),
+			parent:     versionStruct.id,
+			version:    nilToEmpty(input.Version),
+			subpath:    nilToEmpty(input.Subpath),
+			qualifiers: qualifiersVal,
+			srcMapLink: []uint32{},
+		}
+		c.index[collectedVersion.id] = &collectedVersion
 		// Need to append to version and replace field in versionStruct
-		versionStruct.versions = append(versions, &newVersion)
+		versionStruct.versions = append(versions, &collectedVersion)
 		// All others are refs to maps, so no need to update struct
 		names[input.Name] = versionStruct
 		namespaces[nilToEmpty(input.Namespace)] = namesStruct
-		packages[input.Type] = namespacesStruct
+		c.packages[input.Type] = namespacesStruct
 	}
 
 	// build return GraphQL type
-	return buildPackageResponse(newVersion.id, nil)
+	return c.buildPackageResponse(collectedVersion.id, nil)
 }
 
 // Query Package
 func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*model.Package, error) {
-	if filter.ID != nil {
+	if filter != nil && filter.ID != nil {
 		id, err := strconv.Atoi(*filter.ID)
 		if err != nil {
 			return nil, err
 		}
-		p, err := buildPackageResponse(uint32(id), filter)
+		p, err := c.buildPackageResponse(uint32(id), filter)
 		if err != nil {
 			return nil, err
 		}
 		return []*model.Package{p}, nil
 	}
 	out := []*model.Package{}
-	for dbType, namespaces := range packages {
-		if filter != nil && noMatch(filter.Type, dbType) {
-			continue
-		}
-		pNamespaces := []*model.PackageNamespace{}
-		for namespace, names := range namespaces.namespaces {
-			if filter != nil && noMatch(filter.Namespace, namespace) {
-				continue
-			}
-			pns := []*model.PackageName{}
-			for name, versions := range names.names {
-				if filter != nil && noMatch(filter.Name, name) {
-					continue
-				}
-				pvs := []*model.PackageVersion{}
-				for _, v := range versions.versions {
-					if filter != nil && noMatch(filter.Version, v.version) {
-						continue
-					}
-					if filter != nil && noMatch(filter.Subpath, v.subpath) {
-						continue
-					}
-					if filter != nil && noMatchQualifiers(filter, v.qualifiers) {
-						continue
-					}
-					pvs = append(pvs, &model.PackageVersion{
-						ID:         fmt.Sprintf("%d", v.id),
-						Version:    v.version,
-						Subpath:    v.subpath,
-						Qualifiers: getCollectedPackageQualifiers(v.qualifiers),
-					})
-				}
-				if len(pvs) > 0 {
-					pns = append(pns, &model.PackageName{
-						ID:       fmt.Sprintf("%d", versions.id),
-						Name:     name,
-						Versions: pvs,
-					})
-				}
-			}
-			if len(pns) > 0 {
-				pNamespaces = append(pNamespaces, &model.PackageNamespace{
-					ID:        fmt.Sprintf("%d", names.id),
-					Namespace: namespace,
-					Names:     pns,
+
+	if filter != nil && filter.Type != nil {
+		pkgNamespaceStruct, ok := c.packages[*filter.Type]
+		if ok {
+			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
+			if len(pNamespaces) > 0 {
+				out = append(out, &model.Package{
+					ID:         fmt.Sprintf("%d", pkgNamespaceStruct.id),
+					Type:       pkgNamespaceStruct.typeKey,
+					Namespaces: pNamespaces,
 				})
 			}
 		}
-		if len(pNamespaces) > 0 {
-			out = append(out, &model.Package{
-				ID:         fmt.Sprintf("%d", namespaces.id),
-				Type:       dbType,
-				Namespaces: pNamespaces,
-			})
+	} else {
+		for dbType, pkgNamespaceStruct := range c.packages {
+			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
+			if len(pNamespaces) > 0 {
+				out = append(out, &model.Package{
+					ID:         fmt.Sprintf("%d", pkgNamespaceStruct.id),
+					Type:       dbType,
+					Namespaces: pNamespaces,
+				})
+			}
 		}
 	}
 	return out, nil
 }
 
+func buildPkgNamespace(pkgNamespaceStruct *pkgNamespaceStruct, filter *model.PkgSpec) []*model.PackageNamespace {
+	pNamespaces := []*model.PackageNamespace{}
+	if filter != nil && filter.Namespace != nil {
+		pkgNameStruct, ok := pkgNamespaceStruct.namespaces[*filter.Namespace]
+		if ok {
+			pns := buildPkgName(pkgNameStruct, filter)
+			if len(pns) > 0 {
+				pNamespaces = append(pNamespaces, &model.PackageNamespace{
+					ID:        fmt.Sprintf("%d", pkgNameStruct.id),
+					Namespace: pkgNameStruct.namespace,
+					Names:     pns,
+				})
+			}
+		}
+	} else {
+		for namespace, pkgNameStruct := range pkgNamespaceStruct.namespaces {
+			pns := buildPkgName(pkgNameStruct, filter)
+			if len(pns) > 0 {
+				pNamespaces = append(pNamespaces, &model.PackageNamespace{
+					ID:        fmt.Sprintf("%d", pkgNameStruct.id),
+					Namespace: namespace,
+					Names:     pns,
+				})
+			}
+		}
+	}
+	return pNamespaces
+}
+
+func buildPkgName(pkgNameStruct *pkgNameStruct, filter *model.PkgSpec) []*model.PackageName {
+	pns := []*model.PackageName{}
+	if filter != nil && filter.Name != nil {
+		pkgVersionStruct, ok := pkgNameStruct.names[*filter.Name]
+		if ok {
+			pvs := buildPkgVersion(pkgVersionStruct, filter)
+			if len(pvs) > 0 {
+				pns = append(pns, &model.PackageName{
+					ID:       fmt.Sprintf("%d", pkgVersionStruct.id),
+					Name:     pkgVersionStruct.name,
+					Versions: pvs,
+				})
+			}
+		}
+	} else {
+		for name, pkgVersionStruct := range pkgNameStruct.names {
+			pvs := buildPkgVersion(pkgVersionStruct, filter)
+			if len(pvs) > 0 {
+				pns = append(pns, &model.PackageName{
+					ID:       fmt.Sprintf("%d", pkgVersionStruct.id),
+					Name:     name,
+					Versions: pvs,
+				})
+			}
+		}
+	}
+	return pns
+}
+
+func buildPkgVersion(pkgVersionStruct *pkgVersionStruct, filter *model.PkgSpec) []*model.PackageVersion {
+	pvs := []*model.PackageVersion{}
+	for _, v := range pkgVersionStruct.versions {
+		if filter != nil && noMatch(filter.Version, v.version) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Subpath, v.subpath) {
+			continue
+		}
+		if filter != nil && noMatchQualifiers(filter, v.qualifiers) {
+			continue
+		}
+		pvs = append(pvs, &model.PackageVersion{
+			ID:         fmt.Sprintf("%d", v.id),
+			Version:    v.version,
+			Subpath:    v.subpath,
+			Qualifiers: getCollectedPackageQualifiers(v.qualifiers),
+		})
+	}
+	return pvs
+}
+
 // Builds a model.Package to send as GraphQL response, starting from id.
 // The optional filter allows restricting output (on selection operations).
-func buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, error) {
+func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, error) {
 	if filter != nil && filter.ID != nil {
 		filteredID, err := strconv.Atoi(*filter.ID)
 		if err != nil {
@@ -277,7 +343,7 @@ func buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, err
 		}
 	}
 
-	node, ok := index[id]
+	node, ok := c.index[id]
 	if !ok {
 		return nil, gqlerror.Errorf("ID does not match existing node")
 	}
@@ -299,7 +365,7 @@ func buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, err
 			Subpath:    versionNode.subpath,
 			Qualifiers: getCollectedPackageQualifiers(versionNode.qualifiers),
 		})
-		node = index[versionNode.parent]
+		node = c.index[versionNode.parent]
 	}
 
 	pnl := []*model.PackageName{}
@@ -312,7 +378,7 @@ func buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, err
 			Name:     versionStruct.name,
 			Versions: pvl,
 		})
-		node = index[versionStruct.parent]
+		node = c.index[versionStruct.parent]
 	}
 
 	pnsl := []*model.PackageNamespace{}
@@ -325,7 +391,7 @@ func buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, err
 			Namespace: nameStruct.namespace,
 			Names:     pnl,
 		})
-		node = index[nameStruct.parent]
+		node = c.index[nameStruct.parent]
 	}
 
 	namespaceStruct, ok := node.(*pkgNamespaceStruct)

@@ -844,6 +844,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 
 func ingestHasSourceAt(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 
 	djangoNameSpace := ""
 	djangoTag := "1.11.1"
@@ -875,7 +876,29 @@ func ingestHasSourceAt(ctx context.Context, client graphql.Client) {
 			Tag:       &djangoTag,
 		},
 		hasSourceAt: model.HasSourceAtInputSpec{
-			KnownSince:    time.Now(),
+			KnownSince:    tm,
+			Justification: "django located at the following source based on deps.dev",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "duplicate entry",
+		pkg: model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNameSpace,
+			Name:      "django",
+		},
+		pkgMatchType: model.MatchFlags{
+			Pkg: model.PkgMatchTypeAllVersions,
+		},
+		source: model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "https://github.com/django/django",
+			Tag:       &djangoTag,
+		},
+		hasSourceAt: model.HasSourceAtInputSpec{
+			KnownSince:    tm,
 			Justification: "django located at the following source based on deps.dev",
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",

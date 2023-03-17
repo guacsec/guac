@@ -1,13 +1,18 @@
 fragment allHasSourceAt on HasSourceAt {
+  id
   justification
   knownSince
   package {
+    id
     type
     namespaces {
+      id
       namespace
       names {
+        id
         name
         versions {
+          id
           version
           qualifiers {
             key
@@ -19,10 +24,13 @@ fragment allHasSourceAt on HasSourceAt {
     }
   }
   source {
+    id
     type
     namespaces {
+      id
       namespace
       names {
+        id
         name
         tag
         commit
