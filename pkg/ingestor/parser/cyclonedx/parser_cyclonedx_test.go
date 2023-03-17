@@ -17,24 +17,26 @@ package cyclonedx
 
 // TODO(bulldozer): freeze test
 import (
+	"context"
 	"testing"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/google/go-cmp/cmp"
+	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
-/*
 func Test_cyclonedxParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name      string
-		doc       *processor.Document
-		wantNodes []assembler.GuacNode
-		wantEdges []assembler.GuacEdge
-		wantErr   bool
+		name           string
+		doc            *processor.Document
+		wantPredicates *assembler.IngestPredicates
+		wantErr        bool
 	}{{
 		name: "valid small CycloneDX document",
 		doc: &processor.Document{
@@ -46,9 +48,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.CycloneDXNodes,
-		wantEdges: testdata.CyloneDXEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxIngestionPredicates,
+		wantErr:        false,
 	}, {
 		name: "valid small CycloneDX document with package dependencies",
 		doc: &processor.Document{
@@ -60,9 +61,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.CycloneDXQuarkusNodes,
-		wantEdges: testdata.CyloneDXQuarkusEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxQuarkusIngestionPredicates,
+		wantErr:        false,
 	}, {
 		name: "valid CycloneDX document where dependencies are missing dependsOn properties",
 		doc: &processor.Document{
@@ -74,9 +74,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.NpmMissingDependsOnCycloneDXNodes,
-		wantEdges: testdata.NpmMissingDependsOnCycloneDXEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxNpmIngestionPredicates,
+		wantErr:        false,
 	}, {
 		name: "valid CycloneDX document with no package dependencies",
 		doc: &processor.Document{
@@ -88,9 +87,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.CycloneDXNoDependentComponentsNodes,
-		wantEdges: testdata.CyloneDXNoDependentComponentsEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxEmptyIngestionPredicates,
+		wantErr:        false,
 	},
 	}
 	for _, tt := range tests {
@@ -104,16 +102,15 @@ func Test_cyclonedxParser(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if nodes := s.CreateNodes(ctx); !testdata.GuacNodeSliceEqual(nodes, tt.wantNodes) {
-				t.Errorf("cyclonedxParser.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
-			}
-			if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
-				t.Errorf("cyclonedxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+
+			preds := s.GetPredicates(ctx)
+			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+				t.Errorf("cyclondx.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
 }
-
+/*
 func Test_addEdgesRecursive(t *testing.T) {
 	packageA := component{curPackage: assembler.PackageNode{Name: "A"}}
 	packageB := component{curPackage: assembler.PackageNode{Name: "B"}}
