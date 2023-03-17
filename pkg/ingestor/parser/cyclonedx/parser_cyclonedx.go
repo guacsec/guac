@@ -24,14 +24,19 @@ import (
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
 
 type cyclonedxParser struct {
-	doc           *processor.Document
-	rootComponent component
-	pkgMap        map[string]*component
+	doc             *processor.Document
+	rootComponent   component
+	pkgMap          map[string]*component
+	packagePackages map[string][]model.PkgInputSpec
+
+	cdxBom *cdx.BOM
 }
 
 type component struct {
@@ -41,8 +46,9 @@ type component struct {
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
-		rootComponent: component{},
-		pkgMap:        map[string]*component{},
+		rootComponent:   component{},
+		pkgMap:          map[string]*component{},
+		packagePackages: map[string][]model.PkgInputSpec{},
 	}
 }
 
@@ -84,6 +90,7 @@ func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) er
 	if err != nil {
 		return fmt.Errorf("failed to parse cyclonedx BOM: %w", err)
 	}
+	c.cdxBom = cdxBom
 	c.addRootPackage(cdxBom)
 	c.addPackages(cdxBom)
 
@@ -110,9 +117,11 @@ func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 		rootPackage.Name = cdxBom.Metadata.Component.Name
 		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
 		if cdxBom.Metadata.Component.PackageURL != "" {
-			rootPackage.Purl = cdxBom.Metadata.Component.PackageURL
-			rootPackage.Version = cdxBom.Metadata.Component.Version
-			rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
+			topPackage, err := asmhelpers.PurlToPkg(cdxBom.Metadata.Component.PackageURL)
+			if err != nil {
+				return
+			}
+			c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)] = append(c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)], *topPackage)
 		} else {
 			if cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
 				splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
@@ -161,39 +170,11 @@ func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
 			// the required purl for package node. Currently there is no use-case
 			// to capture OS for GUAC.
 			if comp.Type != cdx.ComponentTypeOS {
-				curPkg := assembler.PackageNode{
-					Name: comp.Name,
-					// Digest: []string{comp.Version},
-					Purl:     comp.PackageURL,
-					Version:  comp.Version,
-					NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
+				pkg, err := asmhelpers.PurlToPkg(comp.PackageURL)
+				if err != nil {
+					return
 				}
-				if comp.CPE != "" {
-					curPkg.CPEs = []string{comp.CPE}
-				}
-				parentPkg := component{
-					curPackage:  curPkg,
-					depPackages: []*component{},
-				}
-				c.rootComponent.depPackages = append(c.rootComponent.depPackages, &parentPkg)
-				c.pkgMap[comp.BOMRef] = &parentPkg
-			}
-		}
-	}
-
-	if cdxBom.Dependencies == nil {
-		return
-	}
-	for _, deps := range *cdxBom.Dependencies {
-		currPkg, found := c.pkgMap[deps.Ref]
-		if !found {
-			continue
-		}
-		if deps.Dependencies != nil {
-			for _, depPkg := range *deps.Dependencies {
-				if depPkg, exist := c.pkgMap[depPkg]; exist {
-					currPkg.depPackages = append(currPkg.depPackages, depPkg)
-				}
+				c.packagePackages[string(comp.BOMRef)] = append(c.packagePackages[string(comp.BOMRef)], *pkg)
 			}
 		}
 	}
@@ -221,5 +202,66 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 }
 
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
+	//logger := logging.FromContext(ctx)
+
+	preds := &assembler.IngestPredicates{}
+
+	for _, deps := range *c.cdxBom.Dependencies {
+		currPkg, found := c.packagePackages[deps.Ref]
+		if !found {
+			continue
+		}
+		if deps.Dependencies != nil {
+			for _, depPkg := range *deps.Dependencies {
+				if depPkg, exist := c.packagePackages[depPkg]; exist {
+					for _, packNode := range currPkg {
+						p, err := getIsDep(packNode, depPkg, []model.PkgInputSpec{}, "BOM Dependency")
+						if err != nil {
+							//logger.Errorf("error generating spdx edge %v", err)
+							continue
+						}
+						if p != nil {
+							preds.IsDependency = append(preds.IsDependency, *p)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return preds
+}
+
+func (s *cyclonedxParser) getPackageElement(elementID string) []model.PkgInputSpec {
+	if packNode, ok := s.packagePackages[string(elementID)]; ok {
+		return packNode
+	}
 	return nil
+}
+
+func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
+	if len(relatedFileNodes) > 0 {
+		for _, rfileNode := range relatedFileNodes {
+			// TODO: Check is this always just expected to be one?
+			return &assembler.IsDependencyIngest{
+				Pkg:    &foundNode,
+				DepPkg: &rfileNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
+			}, nil
+		}
+	} else if len(relatedPackNodes) > 0 {
+		for _, rpackNode := range relatedPackNodes {
+			return &assembler.IsDependencyIngest{
+				Pkg:    &foundNode,
+				DepPkg: &rpackNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
+			}, nil
+
+		}
+	}
+	return nil, nil
 }
