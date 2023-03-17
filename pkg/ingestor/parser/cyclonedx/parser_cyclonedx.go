@@ -64,9 +64,6 @@ func (c *cyclonedxParser) GetIdentities(ctx context.Context) []common.TrustInfor
 
 func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
 	if cdxBom.Metadata.Component != nil {
-		rootPackage := assembler.PackageNode{}
-		rootPackage.Name = cdxBom.Metadata.Component.Name
-		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
 		purl := cdxBom.Metadata.Component.PackageURL
 		if cdxBom.Metadata.Component.PackageURL == "" {
 			if cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {

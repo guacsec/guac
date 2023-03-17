@@ -16,19 +16,17 @@
 package cyclonedx
 
 // TODO(bulldozer): freeze test
-/*
 import (
-	"context"
-	"reflect"
 	"testing"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
-	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/google/go-cmp/cmp"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/logging"
 )
 
+/*
 func Test_cyclonedxParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
@@ -115,6 +113,7 @@ func Test_cyclonedxParser(t *testing.T) {
 		})
 	}
 }
+
 func Test_addEdgesRecursive(t *testing.T) {
 	packageA := component{curPackage: assembler.PackageNode{Name: "A"}}
 	packageB := component{curPackage: assembler.PackageNode{Name: "B"}}
@@ -154,7 +153,7 @@ func Test_addEdgesRecursive(t *testing.T) {
 	visited = make(map[string]bool)
 	addEdges(packageA, &e, visited)
 }
-
+*/
 func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -274,17 +273,17 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 						Source:    "test",
 					},
 				},
-				rootComponent: component{},
-				pkgMap:        map[string]*component{},
+				packagePackages: map[string][]model.PkgInputSpec{},
 			}
+			c.cdxBom = tt.cdxBom
 			c.addRootPackage(tt.cdxBom)
-			if !reflect.DeepEqual(c.rootComponent.curPackage.Purl, tt.wantPurl) {
-				t.Errorf("addRootPackage failed to produce expected purl = %v, want %v", c.rootComponent.curPackage.Purl, tt.wantPurl)
+			wantPackage, err := asmhelpers.PurlToPkg(tt.wantPurl)
+			if err != nil {
+				t.Errorf("Failed to parse purl %v", tt.wantPurl)
 			}
-			if !reflect.DeepEqual(c.rootComponent.curPackage.Tags[0], tt.wantTag) {
-				t.Errorf("addRootPackage failed to produce expected tag = %v, want %v", c.rootComponent.curPackage.Tags[0], tt.wantTag)
+			if d := cmp.Diff(*wantPackage, c.packagePackages[tt.cdxBom.Metadata.Component.BOMRef][0]); len(d) != 0 {
+				t.Errorf("addRootPackage failed to produce expected package for %v", tt.name)
 			}
 		})
 	}
 }
-*/
