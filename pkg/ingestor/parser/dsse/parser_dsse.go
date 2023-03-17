@@ -60,7 +60,7 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 			if err != nil {
 				return fmt.Errorf("MarshalPublicKeyToPEM returned error: %w", err)
 			}
-			// TODO(bulldozer): change this to new TrustInformation struct
+			// TODO: change this to new TrustInformation struct by resolving https://github.com/guacsec/guac/issues/75
 			// d.identities = append(d.identities, common.TrustInformation{
 			// 	ID: i.ID, Digest: i.Key.Hash, Key: base64.StdEncoding.EncodeToString(pemBytes),
 			// 	KeyType: string(i.Key.Type), KeyScheme: string(i.Key.Scheme), NodeData: *assembler.NewObjectMetadata(d.doc.SourceInformation)})
@@ -73,32 +73,19 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 	return nil
 }
 
-// TODO(bulldozer): implement GetIdentities
+// TODO: Needs to be handled as part of https://github.com/guacsec/guac/issues/75
 // GetIdentities gets the identity node from the document if they exist
 func (d *dsseParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return []common.TrustInformation{}
 	//return d.identities
 }
 
-// TODO(bulldozer): replace with GetPredicates
-// // CreateNodes creates the GuacNode for the graph inputs
-// func (d *dsseParser) CreateNodes(_ context.Context) []assembler.GuacNode {
-// 	nodes := []assembler.GuacNode{}
-// 	for _, i := range d.identities {
-// 		nodes = append(nodes, i)
-// 	}
-// 	return nodes
-// }
-//
-// // CreateEdges creates the GuacEdges that form the relationship for the graph inputs
-// func (d *dsseParser) CreateEdges(_ context.Context, _ []common.TrustInformation) []assembler.GuacEdge {
-// 	return []assembler.GuacEdge{}
-// }
-
 func (d *dsseParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	return nil, fmt.Errorf("not yet implemented")
 }
 
+// TODO: Right now, trust information isn't encapsulated yet as nodes as edges
+// see https://github.com/guacsec/guac/issues/75
 func (d *dsseParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
-	return nil
+	return &assembler.IngestPredicates{}
 }
