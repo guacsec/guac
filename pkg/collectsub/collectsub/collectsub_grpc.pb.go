@@ -36,7 +36,7 @@ func NewColectSubscriberServiceClient(cc grpc.ClientConnInterface) ColectSubscri
 
 func (c *colectSubscriberServiceClient) AddCollectEntries(ctx context.Context, in *AddCollectEntriesRequest, opts ...grpc.CallOption) (*AddCollectEntriesResponse, error) {
 	out := new(AddCollectEntriesResponse)
-	err := c.cc.Invoke(ctx, "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/AddCollectEntries", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/guacsec.guac.collect_subscriber.schema.ColectSubscriberService/AddCollectEntries", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *colectSubscriberServiceClient) AddCollectEntries(ctx context.Context, i
 
 func (c *colectSubscriberServiceClient) GetCollectEntries(ctx context.Context, in *GetCollectEntriesRequest, opts ...grpc.CallOption) (*GetCollectEntriesResponse, error) {
 	out := new(GetCollectEntriesResponse)
-	err := c.cc.Invoke(ctx, "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/GetCollectEntries", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/guacsec.guac.collect_subscriber.schema.ColectSubscriberService/GetCollectEntries", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func _ColectSubscriberService_AddCollectEntries_Handler(srv interface{}, ctx con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/AddCollectEntries",
+		FullMethod: "/guacsec.guac.collect_subscriber.schema.ColectSubscriberService/AddCollectEntries",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ColectSubscriberServiceServer).AddCollectEntries(ctx, req.(*AddCollectEntriesRequest))
@@ -113,7 +113,7 @@ func _ColectSubscriberService_GetCollectEntries_Handler(srv interface{}, ctx con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gaucsec.guac.collect_subscriber.schema.ColectSubscriberService/GetCollectEntries",
+		FullMethod: "/guacsec.guac.collect_subscriber.schema.ColectSubscriberService/GetCollectEntries",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ColectSubscriberServiceServer).GetCollectEntries(ctx, req.(*GetCollectEntriesRequest))
@@ -125,7 +125,7 @@ func _ColectSubscriberService_GetCollectEntries_Handler(srv interface{}, ctx con
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ColectSubscriberService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gaucsec.guac.collect_subscriber.schema.ColectSubscriberService",
+	ServiceName: "guacsec.guac.collect_subscriber.schema.ColectSubscriberService",
 	HandlerType: (*ColectSubscriberServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
