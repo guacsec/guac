@@ -16,6 +16,7 @@
 package testing
 
 import (
+	"strings"
 	"sync/atomic"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -42,9 +43,6 @@ func (c *demoClient) getNextID() uint32 {
 }
 
 type demoClient struct {
-	cve                 []*model.Cve
-	ghsa                []*model.Ghsa
-	osv                 []*model.Osv
 	artifacts           []*model.Artifact
 	builders            []*model.Builder
 	hashEquals          []*model.HashEqual
@@ -63,13 +61,13 @@ type demoClient struct {
 	sources             srcTypeMap
 	hasSources          hasSrcList
 	isDependencies      isDependencyList
+	osvs                osvMap
+	ghsas               ghsaMap
+	cves                cveMap
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		cve:                 []*model.Cve{},
-		ghsa:                []*model.Ghsa{},
-		osv:                 []*model.Osv{},
 		artifacts:           []*model.Artifact{},
 		builders:            []*model.Builder{},
 		hashEquals:          []*model.HashEqual{},
@@ -87,6 +85,9 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		sources:             srcTypeMap{},
 		hasSources:          hasSrcList{},
 		isDependencies:      isDependencyList{},
+		osvs:                osvMap{},
+		ghsas:               ghsaMap{},
+		cves:                cveMap{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -101,9 +102,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 
 func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		cve:                 []*model.Cve{},
-		ghsa:                []*model.Ghsa{},
-		osv:                 []*model.Osv{},
 		artifacts:           []*model.Artifact{},
 		builders:            []*model.Builder{},
 		hashEquals:          []*model.HashEqual{},
@@ -116,7 +114,14 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
+		index:               indexType{},
+		packages:            pkgTypeMap{},
+		sources:             srcTypeMap{},
+		hasSources:          hasSrcList{},
 		isDependencies:      isDependencyList{},
+		osvs:                osvMap{},
+		ghsas:               ghsaMap{},
+		cves:                cveMap{},
 	}
 	return client, nil
 }
@@ -124,6 +129,13 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 func noMatch(filter *string, value string) bool {
 	if filter != nil {
 		return value != *filter
+	}
+	return false
+}
+
+func noMatchLowerCase(filter *string, value string) bool {
+	if filter != nil {
+		return value != strings.ToLower(*filter)
 	}
 	return false
 }

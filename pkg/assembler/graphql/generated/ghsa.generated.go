@@ -28,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _GHSA_ghsaId(ctx context.Context, field graphql.CollectedField, obj *model.Ghsa) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_GHSA_ghsaId(ctx, field)
+func (ec *executionContext) _GHSA_id(ctx context.Context, field graphql.CollectedField, obj *model.Ghsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GHSA_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -42,7 +42,51 @@ func (ec *executionContext) _GHSA_ghsaId(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.GhsaID, nil
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GHSA_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GHSA",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GHSA_ghsaIds(ctx context.Context, field graphql.CollectedField, obj *model.Ghsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GHSA_ghsaIds(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GhsaIds, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -59,7 +103,7 @@ func (ec *executionContext) _GHSA_ghsaId(ctx context.Context, field graphql.Coll
 	return ec.marshalNGHSAId2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAIdᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_GHSA_ghsaId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_GHSA_ghsaIds(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "GHSA",
 		Field:      field,
@@ -69,6 +113,8 @@ func (ec *executionContext) fieldContext_GHSA_ghsaId(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_GHSAId_id(ctx, field)
+			case "ghsaId":
+				return ec.fieldContext_GHSAId_ghsaId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GHSAId", field.Name)
 		},
@@ -104,10 +150,54 @@ func (ec *executionContext) _GHSAId_id(ctx context.Context, field graphql.Collec
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_GHSAId_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GHSAId",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GHSAId_ghsaId(ctx context.Context, field graphql.CollectedField, obj *model.GHSAId) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_GHSAId_ghsaId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GhsaID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_GHSAId_ghsaId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "GHSAId",
 		Field:      field,
@@ -159,13 +249,21 @@ func (ec *executionContext) unmarshalInputGHSASpec(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"ghsaId"}
+	fieldsInOrder := [...]string{"id", "ghsaId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "ghsaId":
 			var err error
 
@@ -198,9 +296,16 @@ func (ec *executionContext) _GHSA(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("GHSA")
-		case "ghsaId":
+		case "id":
 
-			out.Values[i] = ec._GHSA_ghsaId(ctx, field, obj)
+			out.Values[i] = ec._GHSA_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ghsaIds":
+
+			out.Values[i] = ec._GHSA_ghsaIds(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -229,6 +334,13 @@ func (ec *executionContext) _GHSAId(ctx context.Context, sel ast.SelectionSet, o
 		case "id":
 
 			out.Values[i] = ec._GHSAId_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ghsaId":
+
+			out.Values[i] = ec._GHSAId_ghsaId(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

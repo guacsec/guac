@@ -17,63 +17,169 @@ package testing
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"strconv"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+// TODO: convert to unit test
 func registerAllGHSA(client *demoClient) {
-	client.registerGhsa("GHSA-h45f-rjvw-2rv2")
-	client.registerGhsa("GHSA-xrw3-wqph-3fxg")
-	client.registerGhsa("GHSA-8v4j-7jgf-5rg9")
-}
+	ctx := context.Background()
 
-// Ingest GHSA
-
-func (c *demoClient) registerGhsa(id string) *model.Ghsa {
-	idLower := strings.ToLower(id)
-	for i, g := range c.ghsa {
-		c.ghsa[i] = registerGhsaID(g, idLower)
-		return c.ghsa[i]
-	}
-
-	newGhsa := &model.Ghsa{}
-	newGhsa = registerGhsaID(newGhsa, idLower)
-	c.ghsa = append(c.ghsa, newGhsa)
-
-	return newGhsa
-}
-
-func registerGhsaID(g *model.Ghsa, id string) *model.Ghsa {
-	for _, cveID := range g.GhsaID {
-		if cveID.ID == id {
-			return g
+	inputs := []model.GHSAInputSpec{{
+		GhsaID: "GHSA-h45f-rjvw-2rv2",
+	}, {
+		GhsaID: "GHSA-xrw3-wqph-3fxg",
+	}, {
+		GhsaID: "GHSA-8v4j-7jgf-5rg9",
+	}}
+	for _, input := range inputs {
+		_, err := client.IngestGhsa(ctx, &input)
+		if err != nil {
+			log.Printf("Error in ingesting: %v\n", err)
 		}
 	}
+}
 
-	g.GhsaID = append(g.GhsaID, &model.GHSAId{ID: id})
-	return g
+const ghsa string = "ghsa"
+
+// Internal data: osv
+type ghsaMap map[string]*ghsaNode
+type ghsaNode struct {
+	id      uint32
+	ghsaIDs ghsaIDMap
+}
+type ghsaIDMap map[string]*ghsaIDNode
+type ghsaIDNode struct {
+	id     uint32
+	parent uint32
+	ghsaID string
+	//TODO: add other back edges
+}
+
+func (n *ghsaIDNode) getID() uint32 { return n.id }
+func (n *ghsaNode) getID() uint32   { return n.id }
+
+// Ingest GHSA
+func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec) (*model.Ghsa, error) {
+	ghsaStruct, hasGhsa := c.ghsas[ghsa]
+	if !hasGhsa {
+		ghsaStruct = &ghsaNode{
+			id:      c.getNextID(),
+			ghsaIDs: ghsaIDMap{},
+		}
+		c.index[ghsaStruct.id] = ghsaStruct
+		c.ghsas[ghsa] = ghsaStruct
+	}
+	ghsaIDs := ghsaStruct.ghsaIDs
+	ghsaID := strings.ToLower(input.GhsaID)
+
+	ghsaIDStruct, hasGhsaID := ghsaIDs[ghsaID]
+	if !hasGhsaID {
+		ghsaIDStruct = &ghsaIDNode{
+			id:     c.getNextID(),
+			parent: ghsaStruct.id,
+			ghsaID: ghsaID,
+		}
+		c.index[ghsaIDStruct.id] = ghsaIDStruct
+		ghsaIDs[ghsaID] = ghsaIDStruct
+	}
+
+	// build return GraphQL type
+	return c.buildGhsaResponse(ghsaIDStruct.id, nil)
 }
 
 // Query GHSA
-
-func (c *demoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
-	var ghsa []*model.Ghsa
-	for _, g := range c.ghsa {
-		newGHSA, err := filterGHSAID(g, ghsaSpec)
+func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model.Ghsa, error) {
+	if filter != nil && filter.ID != nil {
+		id, err := strconv.Atoi(*filter.ID)
 		if err != nil {
 			return nil, err
 		}
-		if newGHSA != nil {
-			ghsa = append(ghsa, newGHSA)
+		osv, err := c.buildGhsaResponse(uint32(id), filter)
+		if err != nil {
+			return nil, err
+		}
+		return []*model.Ghsa{osv}, nil
+	}
+	out := []*model.Ghsa{}
+	for _, ghsaNode := range c.ghsas {
+		ghsaIDList := []*model.GHSAId{}
+		if filter != nil && filter.GhsaID != nil {
+			ghsaIDNode, hasGhsaIDNode := ghsaNode.ghsaIDs[strings.ToLower(*filter.GhsaID)]
+			if hasGhsaIDNode {
+				ghsaIDList = append(ghsaIDList, &model.GHSAId{
+					ID:     fmt.Sprintf("%d", ghsaIDNode.id),
+					GhsaID: ghsaIDNode.ghsaID,
+				})
+			}
+		} else {
+			for _, ghsaIDNode := range ghsaNode.ghsaIDs {
+				ghsaIDList = append(ghsaIDList, &model.GHSAId{
+					ID:     fmt.Sprintf("%d", ghsaIDNode.id),
+					GhsaID: ghsaIDNode.ghsaID,
+				})
+			}
+		}
+		if len(ghsaIDList) > 0 {
+			out = append(out, &model.Ghsa{
+				ID:      fmt.Sprintf("%d", ghsaNode.id),
+				GhsaIds: ghsaIDList,
+			})
 		}
 	}
-	return ghsa, nil
+	return out, nil
 }
 
+// Builds a model.Ghsa to send as GraphQL response, starting from id.
+// The optional filter allows restricting output (on selection operations).
+func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*model.Ghsa, error) {
+	if filter != nil && filter.ID != nil {
+		filteredID, err := strconv.Atoi(*filter.ID)
+		if err != nil {
+			return nil, err
+		}
+		if uint32(filteredID) != id {
+			return nil, nil
+		}
+	}
+
+	node, ok := c.index[id]
+	if !ok {
+		return nil, gqlerror.Errorf("ID does not match existing node")
+	}
+
+	ghsaIDList := []*model.GHSAId{}
+	if ghsaIDNode, ok := node.(*ghsaIDNode); ok {
+		if filter != nil && noMatchLowerCase(filter.GhsaID, ghsaIDNode.ghsaID) {
+			return nil, nil
+		}
+		ghsaIDList = append(ghsaIDList, &model.GHSAId{
+			ID:     fmt.Sprintf("%d", ghsaIDNode.id),
+			GhsaID: ghsaIDNode.ghsaID,
+		})
+		node = c.index[ghsaIDNode.parent]
+	}
+
+	ghsaNode, ok := node.(*ghsaNode)
+	if !ok {
+		return nil, gqlerror.Errorf("ID does not match expected node type for ghsa root")
+	}
+	s := model.Ghsa{
+		ID:      fmt.Sprintf("%d", ghsaNode.id),
+		GhsaIds: ghsaIDList,
+	}
+	return &s, nil
+}
+
+// TODO: remove
 func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, error) {
 	var ghsaID []*model.GHSAId
-	for _, id := range ghsa.GhsaID {
+	for _, id := range ghsa.GhsaIds {
 		if ghsaSpec.GhsaID == nil || id.ID == strings.ToLower(*ghsaSpec.GhsaID) {
 			ghsaID = append(ghsaID, id)
 		}
@@ -82,10 +188,6 @@ func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, erro
 		return nil, nil
 	}
 	return &model.Ghsa{
-		GhsaID: ghsaID,
+		GhsaIds: ghsaID,
 	}, nil
-}
-
-func (c *demoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
-	return c.registerGhsa(ghsa.GhsaID), nil
 }

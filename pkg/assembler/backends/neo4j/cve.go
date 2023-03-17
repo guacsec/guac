@@ -181,7 +181,7 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 			cvesPerYear := map[string][]*model.CVEId{}
 			for result.Next() {
 				cveID := &model.CVEId{
-					ID: result.Record().Values[1].(string),
+					CveID: result.Record().Values[1].(string),
 				}
 				cvesPerYear[result.Record().Values[0].(string)] = append(cvesPerYear[result.Record().Values[0].(string)], cveID)
 			}
@@ -192,8 +192,8 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 			cves := []*model.Cve{}
 			for year := range cvesPerYear {
 				cve := &model.Cve{
-					Year:  year,
-					CveID: cvesPerYear[year],
+					Year:   year,
+					CveIds: cvesPerYear[year],
 				}
 				cves = append(cves, cve)
 			}
@@ -233,8 +233,8 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 			cves := []*model.Cve{}
 			for result.Next() {
 				cve := &model.Cve{
-					Year:  result.Record().Values[0].(string),
-					CveID: []*model.CVEId{},
+					Year:   result.Record().Values[0].(string),
+					CveIds: []*model.CVEId{},
 				}
 				cves = append(cves, cve)
 			}
@@ -292,9 +292,9 @@ RETURN cveYear.year, cveID.id`
 				return nil, err
 			}
 
-			idStr := record.Values[1].(string)
+			cveIdStr := record.Values[1].(string)
 			yearStr := record.Values[0].(string)
-			cve := generateModelCve(yearStr, idStr)
+			cve := generateModelCve(yearStr, cveIdStr)
 
 			return cve, nil
 		})
@@ -305,11 +305,12 @@ RETURN cveYear.year, cveID.id`
 	return result.(*model.Cve), nil
 }
 
+// TODO: update to pass in the ID from neo4j
 func generateModelCve(yearStr, idStr string) *model.Cve {
-	id := &model.CVEId{ID: idStr}
+	id := &model.CVEId{CveID: idStr}
 	cve := model.Cve{
-		Year:  yearStr,
-		CveID: []*model.CVEId{id},
+		Year:   yearStr,
+		CveIds: []*model.CVEId{id},
 	}
 	return &cve
 }

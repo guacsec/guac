@@ -1460,10 +1460,12 @@ func (ec *executionContext) fieldContext_Mutation_ingestCVE(ctx context.Context,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CVE_id(ctx, field)
 			case "year":
 				return ec.fieldContext_CVE_year(ctx, field)
-			case "cveId":
-				return ec.fieldContext_CVE_cveId(ctx, field)
+			case "cveIds":
+				return ec.fieldContext_CVE_cveIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CVE", field.Name)
 		},
@@ -1521,8 +1523,10 @@ func (ec *executionContext) fieldContext_Mutation_ingestGHSA(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "ghsaId":
-				return ec.fieldContext_GHSA_ghsaId(ctx, field)
+			case "id":
+				return ec.fieldContext_GHSA_id(ctx, field)
+			case "ghsaIds":
+				return ec.fieldContext_GHSA_ghsaIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GHSA", field.Name)
 		},
@@ -2102,8 +2106,10 @@ func (ec *executionContext) fieldContext_Mutation_ingestOSV(ctx context.Context,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "osvId":
-				return ec.fieldContext_OSV_osvId(ctx, field)
+			case "id":
+				return ec.fieldContext_OSV_id(ctx, field)
+			case "osvIds":
+				return ec.fieldContext_OSV_osvIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type OSV", field.Name)
 		},
@@ -2730,10 +2736,12 @@ func (ec *executionContext) fieldContext_Query_cve(ctx context.Context, field gr
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CVE_id(ctx, field)
 			case "year":
 				return ec.fieldContext_CVE_year(ctx, field)
-			case "cveId":
-				return ec.fieldContext_CVE_cveId(ctx, field)
+			case "cveIds":
+				return ec.fieldContext_CVE_cveIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CVE", field.Name)
 		},
@@ -2791,8 +2799,10 @@ func (ec *executionContext) fieldContext_Query_ghsa(ctx context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "ghsaId":
-				return ec.fieldContext_GHSA_ghsaId(ctx, field)
+			case "id":
+				return ec.fieldContext_GHSA_id(ctx, field)
+			case "ghsaIds":
+				return ec.fieldContext_GHSA_ghsaIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GHSA", field.Name)
 		},
@@ -3317,8 +3327,10 @@ func (ec *executionContext) fieldContext_Query_osv(ctx context.Context, field gr
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "osvId":
-				return ec.fieldContext_OSV_osvId(ctx, field)
+			case "id":
+				return ec.fieldContext_OSV_id(ctx, field)
+			case "osvIds":
+				return ec.fieldContext_OSV_osvIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type OSV", field.Name)
 		},
