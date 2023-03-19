@@ -130,6 +130,7 @@ type ComplexityRoot struct {
 	IsDependency struct {
 		Collector        func(childComplexity int) int
 		DependentPackage func(childComplexity int) int
+		ID               func(childComplexity int) int
 		Justification    func(childComplexity int) int
 		Origin           func(childComplexity int) int
 		Package          func(childComplexity int) int
@@ -633,6 +634,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsDependency.DependentPackage(childComplexity), true
+
+	case "IsDependency.id":
+		if e.complexity.IsDependency.ID == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.ID(childComplexity), true
 
 	case "IsDependency.justification":
 		if e.complexity.IsDependency.Justification == nil {
@@ -2892,6 +2900,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type IsDependency {
+  id: ID!
   package: Package!
   dependentPackage: Package!
   versionRange: String!
@@ -2907,6 +2916,7 @@ Note: the package object must be defined to return its dependent packages.
 Dependent Packages must represent the packageName (cannot be the packageVersion)
 """
 input IsDependencySpec {
+  id: ID
   package: PkgSpec
   dependentPackage: PkgNameSpec
   versionRange: String
@@ -2921,6 +2931,7 @@ as the IsDependency attestation should only be allowed to be made to the package
 packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
 """
 input PkgNameSpec {
+  id: ID
   type: String
   namespace: String
   name: String

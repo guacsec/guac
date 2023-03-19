@@ -1897,6 +1897,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestDependency(ctx context.C
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsDependency_id(ctx, field)
 			case "package":
 				return ec.fieldContext_IsDependency_package(ctx, field)
 			case "dependentPackage":
@@ -3110,6 +3112,8 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsDependency_id(ctx, field)
 			case "package":
 				return ec.fieldContext_IsDependency_package(ctx, field)
 			case "dependentPackage":

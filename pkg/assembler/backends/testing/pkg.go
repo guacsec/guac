@@ -94,20 +94,22 @@ type pkgNameStruct struct {
 }
 type pkgNameMap map[string]*pkgVersionStruct
 type pkgVersionStruct struct {
-	id         uint32
-	parent     uint32
-	name       string
-	versions   pkgVersionList
-	srcMapLink []uint32
+	id               uint32
+	parent           uint32
+	name             string
+	versions         pkgVersionList
+	srcMapLink       []uint32
+	isDependencyLink []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
-	id         uint32
-	parent     uint32
-	version    string
-	subpath    string
-	qualifiers map[string]string
-	srcMapLink []uint32
+	id               uint32
+	parent           uint32
+	version          string
+	subpath          string
+	qualifiers       map[string]string
+	srcMapLink       []uint32
+	isDependencyLink []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -115,6 +117,8 @@ type pkgNameOrVersion interface {
 	implementsPkgNameOrVersion()
 	setSrcMapLink(id uint32)
 	getSrcMapLink() []uint32
+	setIsDependencyLink(id uint32)
+	getIsDependencyLink() []uint32
 }
 
 func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
@@ -124,10 +128,22 @@ func (n *pkgVersionNode) getID() uint32     { return n.id }
 
 func (p *pkgVersionStruct) implementsPkgNameOrVersion() {}
 func (p *pkgVersionNode) implementsPkgNameOrVersion()   {}
-func (p *pkgVersionStruct) setSrcMapLink(id uint32)     { p.srcMapLink = append(p.srcMapLink, id) }
-func (p *pkgVersionNode) setSrcMapLink(id uint32)       { p.srcMapLink = append(p.srcMapLink, id) }
-func (p *pkgVersionStruct) getSrcMapLink() []uint32     { return p.srcMapLink }
-func (p *pkgVersionNode) getSrcMapLink() []uint32       { return p.srcMapLink }
+
+// hasSourceAt back edges
+func (p *pkgVersionStruct) setSrcMapLink(id uint32) { p.srcMapLink = append(p.srcMapLink, id) }
+func (p *pkgVersionNode) setSrcMapLink(id uint32)   { p.srcMapLink = append(p.srcMapLink, id) }
+func (p *pkgVersionStruct) getSrcMapLink() []uint32 { return p.srcMapLink }
+func (p *pkgVersionNode) getSrcMapLink() []uint32   { return p.srcMapLink }
+
+// isDependency back edges
+func (p *pkgVersionStruct) setIsDependencyLink(id uint32) {
+	p.isDependencyLink = append(p.isDependencyLink, id)
+}
+func (p *pkgVersionNode) setIsDependencyLink(id uint32) {
+	p.isDependencyLink = append(p.isDependencyLink, id)
+}
+func (p *pkgVersionStruct) getIsDependencyLink() []uint32 { return p.isDependencyLink }
+func (p *pkgVersionNode) getIsDependencyLink() []uint32   { return p.isDependencyLink }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
@@ -157,11 +173,12 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 	versionStruct, hasVersions := names[input.Name]
 	if !hasVersions {
 		versionStruct = &pkgVersionStruct{
-			id:         c.getNextID(),
-			parent:     namesStruct.id,
-			name:       input.Name,
-			versions:   pkgVersionList{},
-			srcMapLink: []uint32{},
+			id:               c.getNextID(),
+			parent:           namesStruct.id,
+			name:             input.Name,
+			versions:         pkgVersionList{},
+			srcMapLink:       []uint32{},
+			isDependencyLink: []uint32{},
 		}
 		c.index[versionStruct.id] = versionStruct
 	}
@@ -188,12 +205,13 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 	}
 	if !duplicate {
 		collectedVersion = pkgVersionNode{
-			id:         c.getNextID(),
-			parent:     versionStruct.id,
-			version:    nilToEmpty(input.Version),
-			subpath:    nilToEmpty(input.Subpath),
-			qualifiers: qualifiersVal,
-			srcMapLink: []uint32{},
+			id:               c.getNextID(),
+			parent:           versionStruct.id,
+			version:          nilToEmpty(input.Version),
+			subpath:          nilToEmpty(input.Subpath),
+			qualifiers:       qualifiersVal,
+			srcMapLink:       []uint32{},
+			isDependencyLink: []uint32{},
 		}
 		c.index[collectedVersion.id] = &collectedVersion
 		// Need to append to version and replace field in versionStruct
@@ -409,6 +427,47 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 	return &p, nil
 }
 
+func getPackageIDFromInput(c *demoClient, input model.PkgInputSpec, pkgMatchType model.MatchFlags) (*uint32, error) {
+	pkgNamespace, pkgHasNamespace := c.packages[input.Type]
+	if !pkgHasNamespace {
+		return nil, gqlerror.Errorf("Package type \"%s\" not found", input.Type)
+	}
+	pkgName, pkgHasName := pkgNamespace.namespaces[nilToEmpty(input.Namespace)]
+	if !pkgHasName {
+		return nil, gqlerror.Errorf("Package namespace \"%s\" not found", nilToEmpty(input.Namespace))
+	}
+	pkgVersion, pkgHasVersion := pkgName.names[input.Name]
+	if !pkgHasVersion {
+		return nil, gqlerror.Errorf("Package name \"%s\" not found", input.Name)
+	}
+	var packageID uint32
+	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		packageID = pkgVersion.id
+	} else {
+		found := false
+		for _, version := range pkgVersion.versions {
+			if noMatchInput(input.Version, version.version) {
+				continue
+			}
+			if noMatchInput(input.Subpath, version.subpath) {
+				continue
+			}
+			if !reflect.DeepEqual(version.qualifiers, getQualifiersFromInput(input.Qualifiers)) {
+				continue
+			}
+			if found {
+				return nil, gqlerror.Errorf("More than one package matches input")
+			}
+			packageID = version.id
+			found = true
+		}
+		if !found {
+			return nil, gqlerror.Errorf("No package matches input")
+		}
+	}
+	return &packageID, nil
+}
+
 func getCollectedPackageQualifiers(qualifierMap map[string]string) []*model.PackageQualifier {
 	qualifiers := []*model.PackageQualifier{}
 	for key, val := range qualifierMap {
@@ -451,7 +510,7 @@ func noMatchQualifiers(filter *model.PkgSpec, v map[string]string) bool {
 			return true
 		}
 	}
-	if filter.Qualifiers != nil {
+	if filter.Qualifiers != nil && len(filter.Qualifiers) > 0 {
 		filterQualifiers := getQualifiersFromFilter(filter.Qualifiers)
 		return !reflect.DeepEqual(v, filterQualifiers)
 	}

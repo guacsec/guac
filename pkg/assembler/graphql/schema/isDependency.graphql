@@ -28,6 +28,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type IsDependency {
+  id: ID!
   package: Package!
   dependentPackage: Package!
   versionRange: String!
@@ -43,6 +44,7 @@ Note: the package object must be defined to return its dependent packages.
 Dependent Packages must represent the packageName (cannot be the packageVersion)
 """
 input IsDependencySpec {
+  id: ID
   package: PkgSpec
   dependentPackage: PkgNameSpec
   versionRange: String
@@ -57,6 +59,7 @@ as the IsDependency attestation should only be allowed to be made to the package
 packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
 """
 input PkgNameSpec {
+  id: ID
   type: String
   namespace: String
   name: String

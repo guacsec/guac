@@ -447,6 +447,7 @@ type HashEqualSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type IsDependency struct {
+	ID               string   `json:"id"`
 	Package          *Package `json:"package"`
 	DependentPackage *Package `json:"dependentPackage"`
 	VersionRange     string   `json:"versionRange"`
@@ -470,6 +471,7 @@ type IsDependencyInputSpec struct {
 // Note: the package object must be defined to return its dependent packages.
 // Dependent Packages must represent the packageName (cannot be the packageVersion)
 type IsDependencySpec struct {
+	ID               *string      `json:"id"`
 	Package          *PkgSpec     `json:"package"`
 	DependentPackage *PkgNameSpec `json:"dependentPackage"`
 	VersionRange     *string      `json:"versionRange"`
@@ -793,6 +795,7 @@ type PkgInputSpec struct {
 // as the IsDependency attestation should only be allowed to be made to the packageName node and not the
 // packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
 type PkgNameSpec struct {
+	ID        *string `json:"id"`
 	Type      *string `json:"type"`
 	Namespace *string `json:"namespace"`
 	Name      *string `json:"name"`

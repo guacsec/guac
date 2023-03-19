@@ -275,6 +275,28 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
 		},
+	}, {
+		name: "deb: part of SBOM - openssl (duplicate)",
+		pkg: model.PkgInputSpec{
+			Type:      "deb",
+			Namespace: &ns,
+			Name:      "dpkg",
+			Version:   &version,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "arch", Value: "amd64"},
+			},
+		},
+		depPkg: model.PkgInputSpec{
+			Type:      "conan",
+			Namespace: &depns,
+			Name:      "openssl",
+		},
+		dependency: model.IsDependencyInputSpec{
+			VersionRange:  "3.0.3",
+			Justification: "deb: part of SBOM - openssl",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
 	}}
 	for _, ingest := range ingestDependencies {
 		_, err := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.dependency)

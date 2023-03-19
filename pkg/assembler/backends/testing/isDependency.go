@@ -17,213 +17,184 @@ package testing
 
 import (
 	"context"
-	"reflect"
+	"fmt"
+	"strconv"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func registerAllIsDependency(client *demoClient) error {
-	// TestData1
-
-	// Package:
-	// pkg:deb/ubuntu/dpkg@1.19.0.4?arch=amd64
-	// "deb", "ubuntu", "dpkg", "1.19.0.4", "", "arch=amd64"
-
-	selectedType := "deb"
-	selectedNameSpace := "ubuntu"
-	selectedName := "dpkg"
-	selectedVersion := "1.19.0.4"
-	qualifierA := "amd64"
-	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "arch", Value: &qualifierA}}
-	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
-	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
-	if err != nil {
-		return err
-	}
-
-	// Dependent Package:
-	// pkg:conan/openssl@3.0.3
-	// "conan", "", "openssl", "3.0.3", ""
-	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
-
-	depType := "conan"
-	depdNameSpace := "openssl.org"
-	depdName := "openssl"
-	depPkgNameSpec := &model.PkgNameSpec{Type: &depType, Namespace: &depdNameSpace, Name: &depdName}
-	depPkgSpec := &model.PkgSpec{Type: depPkgNameSpec.Type, Namespace: depPkgNameSpec.Namespace, Name: depPkgNameSpec.Name}
-
-	depPackage, err := client.Packages(context.TODO(), depPkgSpec)
-	if err != nil {
-		return err
-	}
-
-	client.registerIsDependency(selectedPackage[0], depPackage[0], "3.0.3", "deb: part of SBOM - openssl", "testing backend", "testing backend")
-
-	// TestData2
-
-	// pkg:docker/smartentry/debian@dc437cc87d10
-	// client.registerPackage("docker", "smartentry", "debian", "dc437cc87d10", "")
-
-	selectedType = "docker"
-	selectedNameSpace = "smartentry"
-	selectedName = "debian"
-	selectedVersion = "dc437cc87d10"
-	selectedPkgSpec = &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion}
-	selectedPackage, err = client.Packages(context.TODO(), selectedPkgSpec)
-	if err != nil {
-		return err
-	}
-
-	// Dependent Package:
-	// pkg:apk/alpine/curl@7.83.0-r0?arch=x86
-	//client.registerPackage("apk", "alpine", "curl", "7.83.0-r0", "", "arch", "x86")
-
-	depType = "apk"
-	depdNameSpace = "alpine"
-	depdName = "curl"
-	depPkgNameSpec = &model.PkgNameSpec{Type: &depType, Namespace: &depdNameSpace, Name: &depdName}
-	depPkgSpec = &model.PkgSpec{Type: depPkgNameSpec.Type, Namespace: depPkgNameSpec.Namespace, Name: depPkgNameSpec.Name}
-	depPackage, err = client.Packages(context.TODO(), depPkgSpec)
-	if err != nil {
-		return err
-	}
-
-	client.registerIsDependency(selectedPackage[0], depPackage[0], "7.83.0-r0", "docker: part of SBOM - curl", "testing backend", "testing backend")
-
-	// TestData3
-
-	// Dependent Package:
-	// pkg:conan/openssl@3.0.3
-	// "conan", "", "openssl", "3.0.3", ""
-	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
-
-	depType = "conan"
-	depdNameSpace = "openssl.org"
-	depdName = "openssl"
-	depPkgNameSpec = &model.PkgNameSpec{Type: &depType, Namespace: &depdNameSpace, Name: &depdName}
-	depPkgSpec = &model.PkgSpec{Type: depPkgNameSpec.Type, Namespace: depPkgNameSpec.Namespace, Name: depPkgNameSpec.Name}
-
-	depPackage, err = client.Packages(context.TODO(), depPkgSpec)
-	if err != nil {
-		return err
-	}
-
-	client.registerIsDependency(selectedPackage[0], depPackage[0], "3.0.3", "docker: part of SBOM - openssl", "testing backend", "testing backend")
-
-	return nil
+// Internal data: link between packages and dependent packages (isDependency)
+type isDependencyList []*isDependencyLink
+type isDependencyLink struct {
+	id            uint32
+	packageID     uint32
+	depPackageID  uint32
+	versionRange  string
+	justification string
+	origin        string
+	collector     string
 }
+
+func (n *isDependencyLink) getID() uint32 { return n.id }
 
 // Ingest IsDependency
+func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
+	if err != nil {
+		return nil, err
+	}
 
-func (c *demoClient) registerIsDependency(selectedPackage *model.Package, dependentPackage *model.Package, versionRange, justification, origin, collector string) *model.IsDependency {
+	// for IsDependency the dependent package will return the ID at the packageName node. VersionRange will be used to specify the
+	// versions are the attestation relates to
+	depPackageID, err := getPackageIDFromInput(c, dependentPackageArg, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions})
+	if err != nil {
+		return nil, err
+	}
 
-	for _, dependency := range c.isDependency {
-		if reflect.DeepEqual(dependency.DependentPackage, dependentPackage) && dependency.Justification == justification &&
-			reflect.DeepEqual(dependency.Package, selectedPackage) && dependency.VersionRange == versionRange {
-			return dependency
+	// Don't insert duplicates
+	duplicate := false
+	collectedIsDependencyLink := isDependencyLink{}
+	for _, v := range c.isDependencies {
+		if *packageID == v.packageID && *depPackageID == v.depPackageID && dependency.Justification == v.justification &&
+			dependency.Origin == v.origin && dependency.Collector == v.collector && dependency.VersionRange == v.versionRange {
+			collectedIsDependencyLink = *v
+			duplicate = true
+			break
 		}
 	}
-
-	newIsOccurrence := &model.IsDependency{
-		Package:          selectedPackage,
-		DependentPackage: dependentPackage,
-		VersionRange:     versionRange,
-		Justification:    justification,
-		Origin:           origin,
-		Collector:        collector,
+	if !duplicate {
+		// store the link
+		collectedIsDependencyLink = isDependencyLink{
+			id:            c.getNextID(),
+			packageID:     *packageID,
+			depPackageID:  *depPackageID,
+			versionRange:  dependency.VersionRange,
+			justification: dependency.Justification,
+			origin:        dependency.Origin,
+			collector:     dependency.Collector,
+		}
+		c.index[collectedIsDependencyLink.id] = &collectedIsDependencyLink
+		c.isDependencies = append(c.isDependencies, &collectedIsDependencyLink)
+		// set the backlinks
+		c.index[*packageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
+		c.index[*depPackageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
 	}
-	c.isDependency = append(c.isDependency, newIsOccurrence)
-	return newIsOccurrence
-}
 
-func (c *demoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
-
-	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
-
-	collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
+	// build return GraphQL type
+	foundIsDependency, err := buildIsDependency(c, &collectedIsDependencyLink, nil, true)
 	if err != nil {
 		return nil, err
 	}
-	if len(collectedPkg) != 1 {
-		return nil, gqlerror.Errorf(
-			"IngestDependency :: multiple package found")
-	}
 
-	// Note: depPkgSpec only takes up to the pkgName as IsDependency does not allow for the attestation
-	// to be made at the pkgVersion level. Version range for the dependent package is defined as a property
-	// on IsDependency.
-	depPkgSpec := model.PkgSpec{
-		Type:      &depPkg.Type,
-		Namespace: depPkg.Namespace,
-		Name:      &depPkg.Name,
-	}
-	collectedDepPkg, err := c.Packages(ctx, &depPkgSpec)
-	if err != nil {
-		return nil, err
-	}
-	if len(collectedDepPkg) != 1 {
-		return nil, gqlerror.Errorf(
-			"IngestDependency :: multiple dependent package found")
-	}
-
-	return c.registerIsDependency(
-		collectedPkg[0],
-		collectedDepPkg[0],
-		dependency.VersionRange,
-		dependency.Justification,
-		dependency.Origin,
-		dependency.Collector), nil
+	return foundIsDependency, nil
 }
 
 // Query IsDependency
+func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependencySpec) ([]*model.IsDependency, error) {
+	out := []*model.IsDependency{}
 
-func (c *demoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	var isDependencies []*model.IsDependency
-
-	for _, h := range c.isDependency {
-		matchOrSkip := true
-
-		if isDependencySpec.Justification != nil && h.Justification != *isDependencySpec.Justification {
-			matchOrSkip = false
+	if filter != nil && filter.ID != nil {
+		id, err := strconv.Atoi(*filter.ID)
+		if err != nil {
+			return nil, err
 		}
-		if isDependencySpec.Collector != nil && h.Collector != *isDependencySpec.Collector {
-			matchOrSkip = false
+		node, ok := c.index[uint32(id)]
+		if !ok {
+			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
-		if isDependencySpec.Origin != nil && h.Origin != *isDependencySpec.Origin {
-			matchOrSkip = false
-		}
-		if isDependencySpec.VersionRange != nil && h.VersionRange != *isDependencySpec.VersionRange {
-			matchOrSkip = false
-		}
-
-		if isDependencySpec.Package != nil && h.Package != nil {
-			if isDependencySpec.Package.Type == nil || h.Package.Type == *isDependencySpec.Package.Type {
-				newPkg := filterPackageNamespace(h.Package, isDependencySpec.Package)
-				if newPkg == nil {
-					matchOrSkip = false
-				}
+		if link, ok := node.(*isDependencyLink); ok {
+			foundIsDependency, err := buildIsDependency(c, link, filter, true)
+			if err != nil {
+				return nil, err
 			}
-		}
-
-		if isDependencySpec.DependentPackage != nil && h.DependentPackage != nil {
-			if isDependencySpec.DependentPackage.Type == nil || h.DependentPackage.Type == *isDependencySpec.DependentPackage.Type {
-				depPkgSpec := &model.PkgSpec{Type: isDependencySpec.DependentPackage.Type, Namespace: isDependencySpec.DependentPackage.Namespace,
-					Name: isDependencySpec.DependentPackage.Name}
-				newPkg := filterPackageNamespace(h.DependentPackage, depPkgSpec)
-				if newPkg == nil {
-					matchOrSkip = false
-				}
-			}
-		}
-
-		if matchOrSkip {
-			isDependencies = append(isDependencies, h)
+			return []*model.IsDependency{foundIsDependency}, nil
+		} else {
+			return nil, gqlerror.Errorf("ID does not match expected node type for isDependency")
 		}
 	}
 
-	return isDependencies, nil
+	for _, link := range c.isDependencies {
+		if filter != nil && noMatch(filter.Justification, link.justification) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Origin, link.origin) {
+			continue
+		}
+		if filter != nil && noMatch(filter.Collector, link.collector) {
+			continue
+		}
+		if filter != nil && noMatch(filter.VersionRange, link.versionRange) {
+			continue
+		}
+
+		foundIsDependency, err := buildIsDependency(c, link, filter, false)
+		if err != nil {
+			return nil, err
+		}
+		if foundIsDependency == nil {
+			continue
+		}
+		out = append(out, foundIsDependency)
+	}
+
+	return out, nil
+}
+
+func buildIsDependency(c *demoClient, link *isDependencyLink, filter *model.IsDependencySpec, ingestOrIDProvided bool) (*model.IsDependency, error) {
+	var p *model.Package
+	var dep *model.Package
+	var err error
+	if filter != nil {
+		p, err = c.buildPackageResponse(link.packageID, filter.Package)
+		if err != nil {
+			return nil, err
+		}
+		if filter.DependentPackage != nil {
+			depPkgFilter := &model.PkgSpec{Type: filter.DependentPackage.Type, Namespace: filter.DependentPackage.Namespace,
+				Name: filter.DependentPackage.Name}
+			dep, err = c.buildPackageResponse(link.depPackageID, depPkgFilter)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			dep, err = c.buildPackageResponse(link.depPackageID, nil)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+	} else {
+		p, err = c.buildPackageResponse(link.packageID, nil)
+		if err != nil {
+			return nil, err
+		}
+		dep, err = c.buildPackageResponse(link.depPackageID, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
+	if p == nil && ingestOrIDProvided {
+		return nil, gqlerror.Errorf("failed to retrieve package via packageID")
+	} else if p == nil && !ingestOrIDProvided {
+		return nil, nil
+	}
+	// if dependent package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
+	if dep == nil && ingestOrIDProvided {
+		return nil, gqlerror.Errorf("failed to retrieve dependent package via dependent packageID")
+	} else if dep == nil && !ingestOrIDProvided {
+		return nil, nil
+	}
+
+	foundIsDependency := model.IsDependency{
+		ID:               fmt.Sprintf("%d", link.id),
+		Package:          p,
+		DependentPackage: dep,
+		VersionRange:     link.versionRange,
+		Justification:    link.justification,
+		Origin:           link.origin,
+		Collector:        link.collector,
+	}
+	return &foundIsDependency, nil
 }
