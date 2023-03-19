@@ -60,11 +60,12 @@ type demoClient struct {
 	index               indexType
 	packages            pkgTypeMap
 	sources             srcTypeMap
-	hasSources          hasSrcList
-	isDependencies      isDependencyList
 	osvs                osvMap
 	ghsas               ghsaMap
 	cves                cveMap
+	hasSources          hasSrcList
+	isDependencies      isDependencyList
+	scorecards          scorecardList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -84,11 +85,12 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		index:               indexType{},
 		packages:            pkgTypeMap{},
 		sources:             srcTypeMap{},
-		hasSources:          hasSrcList{},
-		isDependencies:      isDependencyList{},
 		osvs:                osvMap{},
 		ghsas:               ghsaMap{},
 		cves:                cveMap{},
+		hasSources:          hasSrcList{},
+		isDependencies:      isDependencyList{},
+		scorecards:          scorecardList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -118,11 +120,12 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		index:               indexType{},
 		packages:            pkgTypeMap{},
 		sources:             srcTypeMap{},
-		hasSources:          hasSrcList{},
-		isDependencies:      isDependencyList{},
 		osvs:                osvMap{},
 		ghsas:               ghsaMap{},
 		cves:                cveMap{},
+		hasSources:          hasSrcList{},
+		isDependencies:      isDependencyList{},
+		scorecards:          scorecardList{},
 	}
 	return client, nil
 }

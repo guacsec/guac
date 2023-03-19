@@ -193,6 +193,7 @@ type CertifyPkgSpec struct {
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
 type CertifyScorecard struct {
+	ID string `json:"id"`
 	// The source repository that is being scanned (attestation subject)
 	Source *Source `json:"source"`
 	// The Scorecard attached to the repository (attestation object)
@@ -201,6 +202,7 @@ type CertifyScorecard struct {
 
 // CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
 type CertifyScorecardSpec struct {
+	ID               *string               `json:"id"`
 	Source           *SourceSpec           `json:"source"`
 	TimeScanned      *time.Time            `json:"timeScanned"`
 	AggregateScore   *float64              `json:"aggregateScore"`

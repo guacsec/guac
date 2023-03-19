@@ -1267,6 +1267,8 @@ func (ec *executionContext) fieldContext_Mutation_certifyScorecard(ctx context.C
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyScorecard_id(ctx, field)
 			case "source":
 				return ec.fieldContext_CertifyScorecard_source(ctx, field)
 			case "scorecard":
@@ -2543,6 +2545,8 @@ func (ec *executionContext) fieldContext_Query_scorecards(ctx context.Context, f
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyScorecard_id(ctx, field)
 			case "source":
 				return ec.fieldContext_CertifyScorecard_source(ctx, field)
 			case "scorecard":

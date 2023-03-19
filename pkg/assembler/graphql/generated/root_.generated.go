@@ -73,6 +73,7 @@ type ComplexityRoot struct {
 	}
 
 	CertifyScorecard struct {
+		ID        func(childComplexity int) int
 		Scorecard func(childComplexity int) int
 		Source    func(childComplexity int) int
 	}
@@ -430,6 +431,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyPkg.Packages(childComplexity), true
+
+	case "CertifyScorecard.id":
+		if e.complexity.CertifyScorecard.ID == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecard.ID(childComplexity), true
 
 	case "CertifyScorecard.scorecard":
 		if e.complexity.CertifyScorecard.Scorecard == nil {
@@ -2059,6 +2067,7 @@ CertifyScorecard is an attestation which represents the scorecard of a
 particular source repository.
 """
 type CertifyScorecard {
+  id: ID!
   "The source repository that is being scanned (attestation subject)"
   source: Source!
   "The Scorecard attached to the repository (attestation object)"
@@ -2112,6 +2121,7 @@ type ScorecardCheck {
 
 "CertifyScorecardSpec allows filtering the list of CertifyScorecard to return."
 input CertifyScorecardSpec {
+  id: ID
   source: SourceSpec
   timeScanned: Time
   aggregateScore: Float
