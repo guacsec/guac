@@ -39,20 +39,21 @@ type artStruct struct {
 
 func (n *artStruct) getID() uint32 { return n.id }
 
-func registerAllArtifacts(c *demoClient) {
-	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
-		Algorithm: "sha256",
-		Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-	})
-	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
-		Algorithm: "sha1",
-		Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
-	})
-	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
-		Algorithm: "sha512",
-		Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
-	})
-}
+// TODO convert to unit tests
+// func registerAllArtifacts(c *demoClient) {
+// 	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
+// 		Algorithm: "sha256",
+// 		Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+// 	})
+// 	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
+// 		Algorithm: "sha1",
+// 		Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+// 	})
+// 	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
+// 		Algorithm: "sha512",
+// 		Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
+// 	})
+// }
 
 // Ingest Artifacts
 
@@ -111,12 +112,7 @@ func (c *demoClient) artifactExact(artifactSpec *model.ArtifactSpec) (*artStruct
 			// Not found
 			return nil, nil
 		}
-		if algorithm != "" && algorithm != a.algorithm {
-			return nil, nil
-		}
-		if digest != "" && digest != a.digest {
-			return nil, nil
-		}
+		// If found by id, ignore rest of fields in spec and return as a match
 		return a, nil
 	}
 

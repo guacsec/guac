@@ -45,43 +45,42 @@ type isOccurrenceStruct struct {
 
 func (n *isOccurrenceStruct) getID() uint32 { return n.id }
 
-func registerAllIsOccurrence(client *demoClient) error {
-	// TODO convert these
-	// // pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	// // "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
-	// selectedType := "conan"
-	// selectedNameSpace := "openssl.org"
-	// selectedName := "openssl"
-	// selectedVersion := "3.0.3"
-	// qualifierA := "bincrafters"
-	// qualifierB := "stable"
-	// selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
-	// selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
-	// selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
-	// if err != nil {
-	// 	return err
-	// }
-	// _, err = client.registerIsOccurrence(selectedPackage[0], nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is an occurrence of this package", "testing backend", "testing backend")
-	// if err != nil {
-	// 	return err
-	// }
-	// // "git", "github", "github.com/guacsec/guac", "tag=v0.0.1"
-	// selectedSourceType := "git"
-	// selectedSourceNameSpace := "github"
-	// selectedSourceName := "github.com/guacsec/guac"
-	// selectedTag := "v0.0.1"
-	// selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
-	// //selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
-	// _, err = client.Sources(context.TODO(), selectedSourceSpec)
-	// if err != nil {
-	// 	return err
-	// }
-	// //_, err = client.registerIsOccurrence(nil, selectedSource[0], client.artifacts[0], "this artifact is an occurrence of this source", "testing backend", "testing backend")
-	// if err != nil {
-	// 	return err
-	// }
-	return nil
-}
+// TODO convert to unit tests
+// func registerAllIsOccurrence(client *demoClient) error {
+// 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
+// 	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
+// 	selectedType := "conan"
+// 	selectedNameSpace := "openssl.org"
+// 	selectedName := "openssl"
+// 	selectedVersion := "3.0.3"
+// 	qualifierA := "bincrafters"
+// 	qualifierB := "stable"
+// 	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
+// 	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
+// 	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	_, err = client.registerIsOccurrence(selectedPackage[0], nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is an occurrence of this package", "testing backend", "testing backend")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// "git", "github", "github.com/guacsec/guac", "tag=v0.0.1"
+// 	selectedSourceType := "git"
+// 	selectedSourceNameSpace := "github"
+// 	selectedSourceName := "github.com/guacsec/guac"
+// 	selectedTag := "v0.0.1"
+// 	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
+// 	//selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
+// 	_, err = client.Sources(context.TODO(), selectedSourceSpec)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	//_, err = client.registerIsOccurrence(nil, selectedSource[0], client.artifacts[0], "this artifact is an occurrence of this source", "testing backend", "testing backend")
+// 	if err != nil {
+// 		return err
+// 	}
+// }
 
 // Ingest IsOccurrence
 func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
@@ -210,7 +209,7 @@ func (c *demoClient) IsOccurrence(ctx context.Context, ioSpec *model.IsOccurrenc
 	if err != nil {
 		return nil, err
 	}
-	// FIXME some code duplication here
+
 	if ioSpec.ID != nil {
 		id64, err := strconv.ParseUint(*ioSpec.ID, 10, 32)
 		if err != nil {
@@ -222,46 +221,12 @@ func (c *demoClient) IsOccurrence(ctx context.Context, ioSpec *model.IsOccurrenc
 			// Not found
 			return nil, nil
 		}
-		if noMatch(ioSpec.Justification, o.justification) ||
-			noMatch(ioSpec.Origin, o.origin) ||
-			noMatch(ioSpec.Collector, o.collector) {
-			// also check that subject and artifact match if provided
-			return nil, nil
-		}
-		if ioSpec.Artifact != nil && !c.artifactMatch(o.artifact, ioSpec.Artifact) {
-			return nil, nil
-		}
-		if ioSpec.Subject != nil {
-			if ioSpec.Subject.Package != nil {
-				if o.pkg == maxUint32 {
-					return nil, nil
-				}
-				p, err := c.buildPackageResponse(o.pkg, ioSpec.Subject.Package)
-				if err != nil {
-					return nil, err
-				}
-				if p == nil {
-					return nil, nil
-				}
-			} else if ioSpec.Subject.Source != nil {
-				if o.source == maxUint32 {
-					return nil, nil
-				}
-				s, err := c.buildSourceResponse(o.source, ioSpec.Subject.Source)
-				if err != nil {
-					return nil, err
-				}
-				if s == nil {
-					return nil, nil
-				}
-			}
-		}
-
+		// If found by id, ignore rest of fields in spec and return as a match
 		return []*model.IsOccurrence{c.convOccurrence(o)}, nil
 	}
 
 	var rv []*model.IsOccurrence
-	// FIXME if any of the pkg/src/artifact are specified, ony search those backedges
+	// TODO if any of the pkg/src/artifact are specified, ony search those backedges
 	for _, o := range c.occurrences {
 		if noMatch(ioSpec.Justification, o.justification) ||
 			noMatch(ioSpec.Origin, o.origin) ||

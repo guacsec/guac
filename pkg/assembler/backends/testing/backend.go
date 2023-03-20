@@ -97,8 +97,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	registerAllCVE(client)
 	registerAllGHSA(client)
 	registerAllOSV(client)
-	registerAllArtifacts(client)
-	registerAllHashEqual(client)
 	registerAllBuilders(client)
 
 	return client, nil

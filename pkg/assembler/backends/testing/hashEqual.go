@@ -42,25 +42,26 @@ type hashEqualStruct struct {
 
 func (n *hashEqualStruct) getID() uint32 { return n.id }
 
-func registerAllHashEqual(client *demoClient) {
-	// strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-	//-client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "testing backend", "testing backend")
-	client.IngestHashEqual(
-		context.Background(),
-		model.ArtifactInputSpec{
-			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
-			Algorithm: "sha1",
-		},
-		model.ArtifactInputSpec{
-			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-			Algorithm: "sha256",
-		},
-		model.HashEqualInputSpec{
-			Justification: "these two are the same",
-			Origin:        "testing backend",
-			Collector:     "testing backend",
-		})
-}
+// TODO convert to unit tests
+// func registerAllHashEqual(client *demoClient) {
+// 	strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
+// 	-client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "testing backend", "testing backend")
+// 	client.IngestHashEqual(
+// 		context.Background(),
+// 		model.ArtifactInputSpec{
+// 			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+// 			Algorithm: "sha1",
+// 		},
+// 		model.ArtifactInputSpec{
+// 			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+// 			Algorithm: "sha256",
+// 		},
+// 		model.HashEqualInputSpec{
+// 			Justification: "these two are the same",
+// 			Origin:        "testing backend",
+// 			Collector:     "testing backend",
+// 		})
+// }
 
 func (c *demoClient) hashEqualByID(id uint32) (*hashEqualStruct, error) {
 	o, ok := c.index[id]
@@ -180,17 +181,12 @@ func (c *demoClient) HashEqual(ctx context.Context, hSpec *model.HashEqualSpec) 
 			// Not found
 			return nil, nil
 		}
-		if noMatch(hSpec.Justification, h.justification) ||
-			noMatch(hSpec.Origin, h.origin) ||
-			noMatch(hSpec.Collector, h.collector) ||
-			!c.matchArtifacts(hSpec.Artifacts, h.artifacts) {
-			return nil, nil
-		}
+		// If found by id, ignore rest of fields in spec and return as a match
 		return []*model.HashEqual{c.convHashEqual(h)}, nil
 	}
 
 	var hashEquals []*model.HashEqual
-	//FIXME if any artifacts are exact matches only search those backedges
+	// TODO if any artifacts are exact matches only search those backedges
 	for _, h := range c.hashEquals {
 		if noMatch(hSpec.Justification, h.justification) ||
 			noMatch(hSpec.Origin, h.origin) ||
@@ -208,7 +204,7 @@ func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
 	var artifacts []*model.Artifact
 	for _, id := range h.artifacts {
 		a, _ := c.artifactByID(id)
-		//FIXME this will panic, if not found, but it should always be?
+		// TODO propagate error back
 		artifacts = append(artifacts, convArtifact(a))
 	}
 	return &model.HashEqual{
