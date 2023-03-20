@@ -205,7 +205,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		justification := getJustification(rel)
 
 		for _, packNode := range foundPackNodes {
-			p, err := getIsDep(packNode, relatedPackNodes, relatedFileNodes, justification)
+			p, err := common.GetIsDep(packNode, relatedPackNodes, relatedFileNodes, justification)
 			if err != nil {
 				logger.Errorf("error generating spdx edge %v", err)
 				continue
@@ -215,7 +215,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			}
 		}
 		for _, fileNode := range foundFileNodes {
-			p, err := getIsDep(fileNode, relatedPackNodes, relatedFileNodes, justification)
+			p, err := common.GetIsDep(fileNode, relatedPackNodes, relatedFileNodes, justification)
 			if err != nil {
 				logger.Errorf("error generating spdx edge %v", err)
 				continue
@@ -258,6 +258,10 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	return preds
 }
 
+func getIsDep(packNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) {
+	panic("unimplemented")
+}
+
 func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]model.PkgInputSpec, files map[string][]model.PkgInputSpec, justification string) []assembler.IsDependencyIngest {
 	isDeps := []assembler.IsDependencyIngest{}
 	for _, packNodes := range packages {
@@ -289,33 +293,6 @@ func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]mod
 	}
 
 	return isDeps
-}
-
-func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
-	if len(relatedFileNodes) > 0 {
-		for _, rfileNode := range relatedFileNodes {
-			// TODO: Check is this always just expected to be one?
-			return &assembler.IsDependencyIngest{
-				Pkg:    &foundNode,
-				DepPkg: &rfileNode,
-				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-				},
-			}, nil
-		}
-	} else if len(relatedPackNodes) > 0 {
-		for _, rpackNode := range relatedPackNodes {
-			return &assembler.IsDependencyIngest{
-				Pkg:    &foundNode,
-				DepPkg: &rpackNode,
-				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-				},
-			}, nil
-
-		}
-	}
-	return nil, nil
 }
 
 func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformation {

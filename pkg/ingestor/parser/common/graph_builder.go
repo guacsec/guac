@@ -19,6 +19,7 @@ import (
 	"context"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -92,4 +93,31 @@ func addMetadata(predicates *assembler.IngestPredicates, foundIdentities []Trust
 		v.IsVuln.Collector = srcInfo.Collector
 		v.IsVuln.Origin = srcInfo.Source
 	}
+}
+
+func GetIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
+	if len(relatedFileNodes) > 0 {
+		for _, rfileNode := range relatedFileNodes {
+			// TODO: Check is this always just expected to be one?
+			return &assembler.IsDependencyIngest{
+				Pkg:    &foundNode,
+				DepPkg: &rfileNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
+			}, nil
+		}
+	} else if len(relatedPackNodes) > 0 {
+		for _, rpackNode := range relatedPackNodes {
+			return &assembler.IsDependencyIngest{
+				Pkg:    &foundNode,
+				DepPkg: &rpackNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
+			}, nil
+
+		}
+	}
+	return nil, nil
 }
