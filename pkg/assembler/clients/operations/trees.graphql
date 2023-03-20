@@ -98,6 +98,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
 }
 
 fragment allIsDependencyTree on IsDependency {
+  id
   justification
   package {
     ...allPkgTree

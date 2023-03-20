@@ -1,12 +1,17 @@
 fragment allIsDependencyTree on IsDependency {
+  id
   justification
   package {
+    id
     type
     namespaces {
+      id
       namespace
       names {
+        id
         name
         versions {
+          id
           version
           qualifiers {
             key
@@ -18,12 +23,16 @@ fragment allIsDependencyTree on IsDependency {
     }
   }
 dependentPackage {
-      type
+    id
+    type
     namespaces {
+      id
       namespace
       names {
+        id
         name
         versions {
+          id
           version
           qualifiers {
             key
@@ -58,12 +67,18 @@ query Q3 {
 }
 
 query Q4 {
+  IsDependency(isDependencySpec: {package: {name: "dpkg"}}) {
+    ...allIsDependencyTree
+  }
+}
+# returns nothing as there is no package with openSSL. It is a dependent package
+query Q5 {
   IsDependency(isDependencySpec: {package: {name: "openssl", version: "3.0.3"}}) {
     ...allIsDependencyTree
   }
 }
 
-query Q5 {
+query Q6 {
   IsDependency(isDependencySpec: {dependentPackage: {name: "openssl"}}) {
     ...allIsDependencyTree
   }

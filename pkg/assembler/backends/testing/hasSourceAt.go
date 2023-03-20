@@ -45,79 +45,21 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	// Note: This assumes that the package and source have already been
 	// ingested (and should error otherwise).
 
-	srcNamespace, srcHasNamespace := c.sources[source.Type]
-	if !srcHasNamespace {
-		return nil, gqlerror.Errorf("Source type \"%s\" not found", source.Type)
-	}
-	srcName, srcHasName := srcNamespace.namespaces[source.Namespace]
-	if !srcHasName {
-		return nil, gqlerror.Errorf("Source namespace \"%s\" not found", source.Namespace)
-	}
-	found := false
-	var sourceID uint32
-	for _, src := range srcName.names {
-		if src.name != source.Name {
-			continue
-		}
-		if noMatchInput(source.Tag, src.tag) {
-			continue
-		}
-		if noMatchInput(source.Commit, src.commit) {
-			continue
-		}
-		if found {
-			return nil, gqlerror.Errorf("More than one source matches input")
-		}
-		sourceID = src.id
-		found = true
-	}
-	if !found {
-		return nil, gqlerror.Errorf("No source matches input")
+	sourceID, err := getSourceIDFromInput(c, source)
+	if err != nil {
+		return nil, err
 	}
 
-	pkgNamespace, pkgHasNamespace := c.packages[packageArg.Type]
-	if !pkgHasNamespace {
-		return nil, gqlerror.Errorf("Package type \"%s\" not found", packageArg.Type)
-	}
-	pkgName, pkgHasName := pkgNamespace.namespaces[nilToEmpty(packageArg.Namespace)]
-	if !pkgHasName {
-		return nil, gqlerror.Errorf("Package namespace \"%s\" not found", nilToEmpty(packageArg.Namespace))
-	}
-	pkgVersion, pkgHasVersion := pkgName.names[packageArg.Name]
-	if !pkgHasVersion {
-		return nil, gqlerror.Errorf("Package name \"%s\" not found", packageArg.Name)
-	}
-	var packageID uint32
-	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		packageID = pkgVersion.id
-	} else {
-		found = false
-		for _, version := range pkgVersion.versions {
-			if noMatchInput(packageArg.Version, version.version) {
-				continue
-			}
-			if noMatchInput(packageArg.Subpath, version.subpath) {
-				continue
-			}
-			if !reflect.DeepEqual(version.qualifiers, getQualifiersFromInput(packageArg.Qualifiers)) {
-				continue
-			}
-			if found {
-				return nil, gqlerror.Errorf("More than one package matches input")
-			}
-			packageID = version.id
-			found = true
-		}
-		if !found {
-			return nil, gqlerror.Errorf("No package matches input")
-		}
+	packageID, err := getPackageIDFromInput(c, packageArg, pkgMatchType)
+	if err != nil {
+		return nil, err
 	}
 
 	// Don't insert duplicates
 	duplicate := false
 	collectedSrcMapLink := srcMapLink{}
 	for _, v := range c.hasSources {
-		if packageID == v.packageID && sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
+		if *packageID == v.packageID && *sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
 			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.UTC() == v.knownSince {
 			collectedSrcMapLink = *v
 			duplicate = true
@@ -128,8 +70,8 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		// store the link
 		collectedSrcMapLink = srcMapLink{
 			id:            c.getNextID(),
-			sourceID:      sourceID,
-			packageID:     packageID,
+			sourceID:      *sourceID,
+			packageID:     *packageID,
 			knownSince:    hasSourceAt.KnownSince.UTC(),
 			justification: hasSourceAt.Justification,
 			origin:        hasSourceAt.Origin,
@@ -138,30 +80,17 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		c.index[collectedSrcMapLink.id] = &collectedSrcMapLink
 		c.hasSources = append(c.hasSources, &collectedSrcMapLink)
 		// set the backlinks
-		c.index[packageID].(pkgNameOrVersion).setSrcMapLink(collectedSrcMapLink.id)
-		c.index[sourceID].(*srcNameNode).setSrcMapLink(collectedSrcMapLink.id)
+		c.index[*packageID].(pkgNameOrVersion).setSrcMapLink(collectedSrcMapLink.id)
+		c.index[*sourceID].(*srcNameNode).setSrcMapLink(collectedSrcMapLink.id)
 	}
 
 	// build return GraphQL type
-	p, err := c.buildPackageResponse(packageID, nil)
+	foundHasSourceAt, err := buildHasSourceAt(c, &collectedSrcMapLink, nil, true)
 	if err != nil {
 		return nil, err
-	}
-	s, err := c.buildSourceResponse(sourceID, nil)
-	if err != nil {
-		return nil, err
-	}
-	out := model.HasSourceAt{
-		ID:            fmt.Sprintf("%d", collectedSrcMapLink.id),
-		Package:       p,
-		Source:        s,
-		KnownSince:    collectedSrcMapLink.knownSince,
-		Justification: collectedSrcMapLink.justification,
-		Origin:        collectedSrcMapLink.origin,
-		Collector:     collectedSrcMapLink.collector,
 	}
 
-	return &out, nil
+	return foundHasSourceAt, nil
 }
 
 // Query HasSourceAt
@@ -178,88 +107,87 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		if !ok {
 			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
-		if mapLink, ok := node.(*srcMapLink); ok {
-			p, err := c.buildPackageResponse(mapLink.packageID, filter.Package)
+		if link, ok := node.(*srcMapLink); ok {
+			foundHasSourceAt, err := buildHasSourceAt(c, link, filter, true)
 			if err != nil {
 				return nil, err
 			}
-			if p == nil {
-				return nil, gqlerror.Errorf("package not found for specified hasSourceAt ID")
-			}
-			s, err := c.buildSourceResponse(mapLink.sourceID, filter.Source)
-			if err != nil {
-				return nil, err
-			}
-			if s == nil {
-				return nil, gqlerror.Errorf("source not found for specified hasSourceAt ID")
-			}
-			newHSA := model.HasSourceAt{
-				ID:            fmt.Sprintf("%d", mapLink.id),
-				Package:       p,
-				Source:        s,
-				KnownSince:    mapLink.knownSince,
-				Justification: mapLink.justification,
-				Origin:        mapLink.origin,
-				Collector:     mapLink.collector,
-			}
-			return []*model.HasSourceAt{&newHSA}, nil
+			return []*model.HasSourceAt{foundHasSourceAt}, nil
 		} else {
 			return nil, gqlerror.Errorf("ID does not match expected node type for hasSourceAt")
 		}
 	}
 
-	for _, mapLink := range c.hasSources {
-		if filter != nil && noMatch(filter.Justification, mapLink.justification) {
+	for _, link := range c.hasSources {
+		if filter != nil && noMatch(filter.Justification, link.justification) {
 			continue
 		}
-		if filter != nil && noMatch(filter.Origin, mapLink.origin) {
+		if filter != nil && noMatch(filter.Origin, link.origin) {
 			continue
 		}
-		if filter != nil && noMatch(filter.Collector, mapLink.collector) {
+		if filter != nil && noMatch(filter.Collector, link.collector) {
 			continue
 		}
-		if filter != nil && filter.KnownSince != nil && !reflect.DeepEqual(filter.KnownSince.UTC(), mapLink.knownSince) {
+		if filter != nil && filter.KnownSince != nil && !reflect.DeepEqual(filter.KnownSince.UTC(), link.knownSince) {
 			continue
 		}
-		var p *model.Package
-		var s *model.Source
-		var err error
-		if filter != nil {
-			p, err = c.buildPackageResponse(mapLink.packageID, filter.Package)
-			if err != nil {
-				return nil, err
-			}
-			s, err = c.buildSourceResponse(mapLink.sourceID, filter.Source)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			p, err = c.buildPackageResponse(mapLink.packageID, nil)
-			if err != nil {
-				return nil, err
-			}
-			s, err = c.buildSourceResponse(mapLink.sourceID, nil)
-			if err != nil {
-				return nil, err
-			}
+		foundHasSourceAt, err := buildHasSourceAt(c, link, filter, false)
+		if err != nil {
+			return nil, err
 		}
-		if p == nil {
+		if foundHasSourceAt == nil {
 			continue
 		}
-		if s == nil {
-			continue
-		}
-		newHSA := model.HasSourceAt{
-			ID:            fmt.Sprintf("%d", mapLink.id),
-			Package:       p,
-			Source:        s,
-			KnownSince:    mapLink.knownSince,
-			Justification: mapLink.justification,
-			Origin:        mapLink.origin,
-			Collector:     mapLink.collector,
-		}
-		out = append(out, &newHSA)
+		out = append(out, foundHasSourceAt)
 	}
 
 	return out, nil
+}
+
+func buildHasSourceAt(c *demoClient, link *srcMapLink, filter *model.HasSourceAtSpec, ingestOrIDProvided bool) (*model.HasSourceAt, error) {
+	var p *model.Package
+	var s *model.Source
+	var err error
+	if filter != nil {
+		p, err = c.buildPackageResponse(link.packageID, filter.Package)
+		if err != nil {
+			return nil, err
+		}
+		s, err = c.buildSourceResponse(link.sourceID, filter.Source)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		p, err = c.buildPackageResponse(link.packageID, nil)
+		if err != nil {
+			return nil, err
+		}
+		s, err = c.buildSourceResponse(link.sourceID, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
+	if p == nil && ingestOrIDProvided {
+		return nil, gqlerror.Errorf("failed to retrieve package via packageID")
+	} else if p == nil && !ingestOrIDProvided {
+		return nil, nil
+	}
+	// if source not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
+	if s == nil && ingestOrIDProvided {
+		return nil, gqlerror.Errorf("failed to retrieve source via sourceID")
+	} else if s == nil && !ingestOrIDProvided {
+		return nil, nil
+	}
+
+	newHSA := model.HasSourceAt{
+		ID:            fmt.Sprintf("%d", link.id),
+		Package:       p,
+		Source:        s,
+		KnownSince:    link.knownSince,
+		Justification: link.justification,
+		Origin:        link.origin,
+		Collector:     link.collector,
+	}
+	return &newHSA, nil
 }

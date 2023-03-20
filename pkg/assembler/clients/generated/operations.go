@@ -2648,6 +2648,9 @@ type IsDependencyIngestDependencyIsDependency struct {
 	allIsDependencyTree `json:"-"`
 }
 
+// GetId returns IsDependencyIngestDependencyIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetId() string { return v.allIsDependencyTree.Id }
+
 // GetJustification returns IsDependencyIngestDependencyIsDependency.Justification, and is useful for accessing the field via an interface.
 func (v *IsDependencyIngestDependencyIsDependency) GetJustification() string {
 	return v.allIsDependencyTree.Justification
@@ -2704,6 +2707,8 @@ func (v *IsDependencyIngestDependencyIsDependency) UnmarshalJSON(b []byte) error
 }
 
 type __premarshalIsDependencyIngestDependencyIsDependency struct {
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Package allIsDependencyTreePackage `json:"package"`
@@ -2728,6 +2733,7 @@ func (v *IsDependencyIngestDependencyIsDependency) MarshalJSON() ([]byte, error)
 func (v *IsDependencyIngestDependencyIsDependency) __premarshalJSON() (*__premarshalIsDependencyIngestDependencyIsDependency, error) {
 	var retval __premarshalIsDependencyIngestDependencyIsDependency
 
+	retval.Id = v.allIsDependencyTree.Id
 	retval.Justification = v.allIsDependencyTree.Justification
 	retval.Package = v.allIsDependencyTree.Package
 	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
@@ -10400,6 +10406,7 @@ func (v *allHashEqualTreeArtifactsArtifact) __premarshalJSON() (*__premarshalall
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type allIsDependencyTree struct {
+	Id               string                              `json:"id"`
 	Justification    string                              `json:"justification"`
 	Package          allIsDependencyTreePackage          `json:"package"`
 	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
@@ -10407,6 +10414,9 @@ type allIsDependencyTree struct {
 	Origin           string                              `json:"origin"`
 	Collector        string                              `json:"collector"`
 }
+
+// GetId returns allIsDependencyTree.Id, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetId() string { return v.Id }
 
 // GetJustification returns allIsDependencyTree.Justification, and is useful for accessing the field via an interface.
 func (v *allIsDependencyTree) GetJustification() string { return v.Justification }
@@ -13704,6 +13714,7 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allIsDependencyTree on IsDependency {
+	id
 	justification
 	package {
 		... allPkgTree

@@ -87,6 +87,7 @@ func (n *srcNamespaceStruct) getID() uint32 { return n.id }
 func (n *srcNameStruct) getID() uint32      { return n.id }
 func (n *srcNameNode) getID() uint32        { return n.id }
 
+// hasSourceAt back edges
 func (p *srcNameNode) setSrcMapLink(id uint32) { p.srcMapLink = append(p.srcMapLink, id) }
 func (p *srcNameNode) getSrcMapLink() []uint32 { return p.srcMapLink }
 
@@ -321,6 +322,39 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 		return nil, nil
 	}
 	return &s, nil
+}
+
+func getSourceIDFromInput(c *demoClient, input model.SourceInputSpec) (*uint32, error) {
+	srcNamespace, srcHasNamespace := c.sources[input.Type]
+	if !srcHasNamespace {
+		return nil, gqlerror.Errorf("Source type \"%s\" not found", input.Type)
+	}
+	srcName, srcHasName := srcNamespace.namespaces[input.Namespace]
+	if !srcHasName {
+		return nil, gqlerror.Errorf("Source namespace \"%s\" not found", input.Namespace)
+	}
+	found := false
+	var sourceID uint32
+	for _, src := range srcName.names {
+		if src.name != input.Name {
+			continue
+		}
+		if noMatchInput(input.Tag, src.tag) {
+			continue
+		}
+		if noMatchInput(input.Commit, src.commit) {
+			continue
+		}
+		if found {
+			return nil, gqlerror.Errorf("More than one source matches input")
+		}
+		sourceID = src.id
+		found = true
+	}
+	if !found {
+		return nil, gqlerror.Errorf("No source matches input")
+	}
+	return &sourceID, nil
 }
 
 // TODO: remove these once the other components don't utilize it

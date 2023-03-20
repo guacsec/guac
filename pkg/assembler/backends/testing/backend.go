@@ -50,7 +50,6 @@ type demoClient struct {
 	hashEquals          []*model.HashEqual
 	isOccurrence        []*model.IsOccurrence
 	hasSBOM             []*model.HasSbom
-	isDependency        []*model.IsDependency
 	certifyPkg          []*model.CertifyPkg
 	certifyVuln         []*model.CertifyVuln
 	certifyScorecard    []*model.CertifyScorecard
@@ -63,6 +62,7 @@ type demoClient struct {
 	packages            pkgTypeMap
 	sources             srcTypeMap
 	hasSources          hasSrcList
+	isDependencies      isDependencyList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -75,7 +75,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		hashEquals:          []*model.HashEqual{},
 		isOccurrence:        []*model.IsOccurrence{},
 		hasSBOM:             []*model.HasSbom{},
-		isDependency:        []*model.IsDependency{},
 		certifyPkg:          []*model.CertifyPkg{},
 		certifyVuln:         []*model.CertifyVuln{},
 		certifyScorecard:    []*model.CertifyScorecard{},
@@ -87,6 +86,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		packages:            pkgTypeMap{},
 		sources:             srcTypeMap{},
 		hasSources:          hasSrcList{},
+		isDependencies:      isDependencyList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -109,7 +109,6 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		hashEquals:          []*model.HashEqual{},
 		isOccurrence:        []*model.IsOccurrence{},
 		hasSBOM:             []*model.HasSbom{},
-		isDependency:        []*model.IsDependency{},
 		certifyPkg:          []*model.CertifyPkg{},
 		certifyVuln:         []*model.CertifyVuln{},
 		certifyScorecard:    []*model.CertifyScorecard{},
@@ -117,6 +116,7 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		isVulnerability:     []*model.IsVulnerability{},
 		certifyVEXStatement: []*model.CertifyVEXStatement{},
 		hasSLSA:             []*model.HasSlsa{},
+		isDependencies:      isDependencyList{},
 	}
 	return client, nil
 }

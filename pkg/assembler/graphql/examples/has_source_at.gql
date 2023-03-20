@@ -53,13 +53,14 @@ query Q2 {
   }
 }
 
-query Q4 {
+# this will return nothing as we are not ingesting package openssl in testdata
+query Q3 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "openssl", version: "3.0.3"}})  {
     ...allHasSourceAt
   }
 }
 
-query Q5 {
+query Q4 {
   HasSourceAt(
     hasSourceAtSpec: {source: {name: "https://github.com/django/django"}}
   ) {
@@ -67,13 +68,13 @@ query Q5 {
   }
 }
 
-query Q6 {
+query Q5 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "kubetest"}}) {
     ...allHasSourceAt
   }
 }
 
-query Q7 {
+query Q6 {
   HasSourceAt(
     hasSourceAtSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
   ) {
