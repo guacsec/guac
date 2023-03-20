@@ -18,7 +18,6 @@ package testing
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -208,7 +207,7 @@ func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
 		artifacts = append(artifacts, convArtifact(a))
 	}
 	return &model.HashEqual{
-		ID:            fmt.Sprint(h.id),
+		ID:            nodeID(h.id),
 		Justification: h.justification,
 		Artifacts:     artifacts,
 		Origin:        h.origin,

@@ -165,7 +165,7 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 
 func convArtifact(a *artStruct) *model.Artifact {
 	return &model.Artifact{
-		ID:        fmt.Sprint(a.id),
+		ID:        nodeID(a.id),
 		Digest:    a.digest,
 		Algorithm: a.algorithm,
 	}

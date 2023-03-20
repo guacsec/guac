@@ -18,7 +18,6 @@ package testing
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -164,7 +163,7 @@ func (c *demoClient) occurrenceByID(id uint32) (*isOccurrenceStruct, error) {
 func (c *demoClient) convOccurrence(in *isOccurrenceStruct) *model.IsOccurrence {
 	a, _ := c.artifactByID(in.artifact)
 	o := &model.IsOccurrence{
-		ID:            fmt.Sprint(in.id),
+		ID:            nodeID(in.id),
 		Artifact:      convArtifact(a),
 		Justification: in.justification,
 		Origin:        in.origin,
