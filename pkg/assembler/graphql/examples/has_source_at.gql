@@ -53,8 +53,7 @@ query HasSourceAtQ2 {
   }
 }
 
-# this will return nothing as we are not ingesting package openssl in testdata
-query HasSourceAtQ3 {
+query Q3 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "openssl", version: "3.0.3"}})  {
     ...allHasSourceAt
   }

@@ -19,19 +19,25 @@ fragment allCertifyVuln on CertifyVuln {
   vulnerability {
     __typename
     ... on CVE {
+      id
       year
      cveIds{
       id
+      cveId
     }
     }
     ... on OSV {
+      id
      osvIds{
       id
+      osvId
     }
     }
     ... on GHSA {
+      id
       ghsaIds{
         id
+        ghsaId
       }
     }
   }

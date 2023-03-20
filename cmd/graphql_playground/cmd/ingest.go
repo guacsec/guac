@@ -1214,7 +1214,7 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 			Collector:     "Demo ingestion",
 		},
 		cve: &model.CVEInputSpec{
-			Year:  "2019",
+			Year:  2019,
 			CveId: "CVE-2019-13110",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
