@@ -1019,7 +1019,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
 
-	ingestCertifyBad := []struct {
+	ingestCertifyVex := []struct {
 		name         string
 		pkg          *model.PkgInputSpec
 		artifact     *model.ArtifactInputSpec
@@ -1095,7 +1095,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			Collector:     "Demo ingestion",
 		},
 	}}
-	for _, ingest := range ingestCertifyBad {
+	for _, ingest := range ingestCertifyVex {
 		if ingest.pkg != nil {
 			if ingest.cve != nil {
 				_, err := model.VexPackageAndCve(context.Background(), client, *ingest.pkg, *ingest.cve, ingest.vexStatement)
@@ -1126,6 +1126,126 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			}
 		} else {
 			fmt.Printf("input missing for package or artifact")
+		}
+	}
+}
+
+func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
+	logger := logging.FromContext(ctx)
+
+	ns := "ubuntu"
+	version := "1.19.0.4"
+	depns := "openssl.org"
+	opensslVersion := "3.0.3"
+	opensslTag := "3.0.3"
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+
+	ingestDependencies := []struct {
+		name              string
+		pkg               model.PkgInputSpec
+		depPkg            model.PkgInputSpec
+		dependency        model.IsDependencyInputSpec
+		depPkgWithVersion model.PkgInputSpec
+		art               model.ArtifactInputSpec
+		occurrence        model.IsOccurrenceInputSpec
+		source            model.SourceInputSpec
+		hasSourceAt       model.HasSourceAtInputSpec
+		sourceArt         model.ArtifactInputSpec
+		sourceOccurrence  model.IsOccurrenceInputSpec
+		cve               *model.CVEInputSpec
+		vulnerability     model.VulnerabilityMetaDataInput
+	}{{
+		name: "deb: part of SBOM - openssl",
+		pkg: model.PkgInputSpec{
+			Type:      "deb",
+			Namespace: &ns,
+			Name:      "dpkg",
+			Version:   &version,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "arch", Value: "amd64"},
+			},
+		},
+		depPkg: model.PkgInputSpec{
+			Type:      "conan",
+			Namespace: &depns,
+			Name:      "openssl",
+		},
+		dependency: model.IsDependencyInputSpec{
+			VersionRange:  "3.0.3",
+			Justification: "deb: part of SBOM - openssl",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+		depPkgWithVersion: model.PkgInputSpec{
+			Type:      "conan",
+			Namespace: &depns,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+		},
+		art: model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		occurrence: model.IsOccurrenceInputSpec{
+			Justification: "openssl v3.0.3 is represented by this artifact",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+		source: model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "https://github.com/openssl/openssl",
+			Tag:       &opensslTag,
+		},
+		hasSourceAt: model.HasSourceAtInputSpec{
+			KnownSince:    tm,
+			Justification: "openssl 3.0.3 source repo based on deps.dev",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+		sourceArt: model.ArtifactInputSpec{
+			Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
+			Algorithm: "sha512",
+		},
+		sourceOccurrence: model.IsOccurrenceInputSpec{
+			Justification: "this artifact is an occurrence of openssl source repo",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+		cve: &model.CVEInputSpec{
+			Year:  "2019",
+			CveId: "CVE-2019-13110",
+		},
+		vulnerability: model.VulnerabilityMetaDataInput{
+			TimeScanned:    time.Now(),
+			DbUri:          "MITRE",
+			DbVersion:      "v1.0.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}}
+	for _, ingest := range ingestDependencies {
+		_, err := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.dependency)
+		if err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+		_, err = model.IsOccurrencePkg(context.Background(), client, ingest.depPkgWithVersion, ingest.art, ingest.occurrence)
+		if err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+		_, err = model.HasSourceAt(context.Background(), client, ingest.depPkgWithVersion, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, ingest.source, ingest.hasSourceAt)
+		if err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+		_, err = model.IsOccurrenceSrc(context.Background(), client, ingest.source, ingest.sourceArt, ingest.sourceOccurrence)
+		if err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
+		}
+		_, err = model.CertifyCVE(context.Background(), client, ingest.depPkgWithVersion, *ingest.cve, ingest.vulnerability)
+		if err != nil {
+			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
 }
