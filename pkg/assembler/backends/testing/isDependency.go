@@ -76,8 +76,8 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 		c.index[collectedIsDependencyLink.id] = &collectedIsDependencyLink
 		c.isDependencies = append(c.isDependencies, &collectedIsDependencyLink)
 		// set the backlinks
-		c.index[*packageID].(*pkgVersionNode).setIsDependencyLink(collectedIsDependencyLink.id)
-		c.index[*depPackageID].(*pkgVersionNode).setIsDependencyLink(collectedIsDependencyLink.id)
+		c.index[*packageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
+		c.index[*depPackageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
 	}
 
 	// build return GraphQL type
