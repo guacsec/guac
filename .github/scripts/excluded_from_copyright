@@ -44,3 +44,5 @@
 ./pkg/assembler/graphql/resolvers/isVulnerability.resolvers.go
 ./pkg/assembler/graphql/generated/certifyVEXStatement.generated.go
 ./pkg/assembler/graphql/resolvers/certifyVEXStatement.resolvers.go
+./pkg/assembler/graphql/resolvers/path.resolvers.go
+./pkg/assembler/graphql/generated/path.generated.go
