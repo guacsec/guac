@@ -36,7 +36,7 @@ func TestOSVToGHSACVE(t *testing.T) {
 			Input: "CVE-1999-1234",
 			ExpCVE: &generated.CVEInputSpec{
 				CveId: "CVE-1999-1234",
-				Year:  "1999",
+				Year:  1999,
 			},
 			ExpGHSA: nil,
 			ExpErr:  false,

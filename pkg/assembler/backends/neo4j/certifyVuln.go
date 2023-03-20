@@ -93,7 +93,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
 					idStr := result.Record().Values[8].(string)
-					yearStr := result.Record().Values[7].(string)
+					yearStr := result.Record().Values[7].(int)
 					cve := generateModelCve(yearStr, idStr)
 
 					certifyVulnNode := dbtype.Node{}
@@ -466,7 +466,7 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 				pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
 				idStr := record.Values[8].(string)
-				yearStr := record.Values[7].(string)
+				yearStr := record.Values[7].(int)
 				cve := generateModelCve(yearStr, idStr)
 
 				certifyVulnNode := dbtype.Node{}

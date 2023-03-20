@@ -30,7 +30,7 @@ query CVEQ1 {
 }
 
 query CVEQ2 {
-  cve(cveSpec: {year: "2014"}) {
+  cve(cveSpec: {year: 2014}) {
     ...allCveTree
   }
 }
@@ -42,19 +42,19 @@ query CVEQ3 {
 }
 
 query CVEQ4 {
-  cve(cveSpec: {year: "2014", cveId: "CVE-2014-8140"}) {
+  cve(cveSpec: {year: 2014, cveId: "CVE-2014-8140"}) {
     ...allCveTree
   }
 }
 
 mutation CVEM1 {
-  ingestCVE(cve: {year: "2023", cveId: "CVE-2023-12345"}) {
+  ingestCVE(cve: {year: 2023, cveId: "CVE-2023-12345"}) {
     ...allCveTree
   }
 }
 
 mutation CVEM2 {
-  ingestCVE(cve: {year: "2032", cveId: "cve-2032-12345"}) {
+  ingestCVE(cve: {year: 2032, cveId: "cve-2032-12345"}) {
     ...allCveTree
   }
 }

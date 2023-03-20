@@ -2460,7 +2460,7 @@ with the same ` + "`" + `year` + "`" + ` value.
 """
 type CVE {
   id: ID!
-  year: String!
+  year: Int!
   cveIds: [CVEId!]!
 }
 
@@ -2481,7 +2481,7 @@ CVESpec allows filtering the list of cves to return.
 """
 input CVESpec {
   id: ID
-  year: String
+  year: Int
   cveId: String
 }
 
@@ -2489,7 +2489,7 @@ input CVESpec {
 CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
 """
 input CVEInputSpec {
-  year: String!
+  year: Int!
   cveId: String!
 }
 

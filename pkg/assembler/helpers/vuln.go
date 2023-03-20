@@ -17,6 +17,7 @@ package helpers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -28,9 +29,13 @@ func OSVToGHSACVE(OSVId string) (*generated.CVEInputSpec, *generated.GHSAInputSp
 		if len(p) != 3 {
 			return nil, nil, fmt.Errorf("malformed CVE identifier: %q", OSVId)
 		}
+		year, err := strconv.Atoi(p[1])
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to convert year to int: %w", err)
+		}
 		return &generated.CVEInputSpec{
 			CveId: OSVId,
-			Year:  p[1],
+			Year:  year,
 		}, nil, nil
 	}
 	if strings.HasPrefix(OSVId, "GHSA") {

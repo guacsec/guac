@@ -424,7 +424,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			},
 		},
 		cve: &model.CVEInputSpec{
-			Year:  "2019",
+			Year:  2019,
 			CveId: "CVE-2019-13110",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
@@ -492,7 +492,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			Name:      "django",
 		},
 		cve: &model.CVEInputSpec{
-			Year:  "2018",
+			Year:  2018,
 			CveId: "CVE-2018-12310",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
@@ -974,7 +974,7 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 			OsvId: "CVE-2019-13110",
 		},
 		cve: &model.CVEInputSpec{
-			Year:  "2019",
+			Year:  2019,
 			CveId: "CVE-2019-13110",
 		},
 		isVulnerability: model.IsVulnerabilityInputSpec{
@@ -1036,7 +1036,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 		},
 		cve: &model.CVEInputSpec{
-			Year:  "2019",
+			Year:  2019,
 			CveId: "CVE-2019-13110",
 		},
 		vexStatement: model.VexStatementInputSpec{
@@ -1070,7 +1070,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			Algorithm: "sha256",
 		},
 		cve: &model.CVEInputSpec{
-			Year:  "2018",
+			Year:  2018,
 			CveId: "CVE-2018-43610",
 		},
 		vexStatement: model.VexStatementInputSpec{
