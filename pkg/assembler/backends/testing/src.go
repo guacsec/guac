@@ -145,11 +145,9 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 	}
 	if !duplicate {
 		collectedSrcName = srcNameNode{
-			id:            c.getNextID(),
-			parent:        namesStruct.id,
-			name:          input.Name,
-			srcMapLink:    []uint32{},
-			scorecardLink: []uint32{},
+			id:     c.getNextID(),
+			parent: namesStruct.id,
+			name:   input.Name,
 		}
 		c.index[collectedSrcName.id] = &collectedSrcName
 		if input.Tag != nil {

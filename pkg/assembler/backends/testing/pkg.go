@@ -176,12 +176,10 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 	versionStruct, hasVersions := names[input.Name]
 	if !hasVersions {
 		versionStruct = &pkgVersionStruct{
-			id:               c.getNextID(),
-			parent:           namesStruct.id,
-			name:             input.Name,
-			versions:         pkgVersionList{},
-			srcMapLink:       []uint32{},
-			isDependencyLink: []uint32{},
+			id:       c.getNextID(),
+			parent:   namesStruct.id,
+			name:     input.Name,
+			versions: pkgVersionList{},
 		}
 		c.index[versionStruct.id] = versionStruct
 	}
@@ -208,14 +206,11 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 	}
 	if !duplicate {
 		collectedVersion = pkgVersionNode{
-			id:               c.getNextID(),
-			parent:           versionStruct.id,
-			version:          nilToEmpty(input.Version),
-			subpath:          nilToEmpty(input.Subpath),
-			qualifiers:       qualifiersVal,
-			srcMapLink:       []uint32{},
-			isDependencyLink: []uint32{},
-			occurrences:      []uint32{},
+			id:         c.getNextID(),
+			parent:     versionStruct.id,
+			version:    nilToEmpty(input.Version),
+			subpath:    nilToEmpty(input.Subpath),
+			qualifiers: qualifiersVal,
 		}
 		c.index[collectedVersion.id] = &collectedVersion
 		// Need to append to version and replace field in versionStruct

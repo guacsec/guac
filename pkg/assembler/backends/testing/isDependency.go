@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -51,12 +52,32 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 		return nil, err
 	}
 
+	packageDependencies := []uint32{}
+	pkgVersionNode, ok := c.index[*packageID].(*pkgVersionNode)
+	if ok {
+		packageDependencies = append(packageDependencies, pkgVersionNode.isDependencyLink...)
+	}
+	depPackageDependencies := []uint32{}
+	pkgName, ok := c.index[*depPackageID].(*pkgVersionStruct)
+	if ok {
+		depPackageDependencies = append(depPackageDependencies, pkgName.isDependencyLink...)
+	}
+
+	searchIDs := []uint32{}
+	if len(packageDependencies) > len(depPackageDependencies) {
+		searchIDs = append(searchIDs, depPackageDependencies...)
+	} else {
+		searchIDs = append(searchIDs, packageDependencies...)
+	}
+
 	// Don't insert duplicates
 	duplicate := false
 	collectedIsDependencyLink := isDependencyLink{}
-	for _, v := range c.isDependencies {
+	for _, id := range searchIDs {
+		v, _ := c.dependencyByID(id)
 		if *packageID == v.packageID && *depPackageID == v.depPackageID && dependency.Justification == v.justification &&
 			dependency.Origin == v.origin && dependency.Collector == v.collector && dependency.VersionRange == v.versionRange {
+
 			collectedIsDependencyLink = *v
 			duplicate = true
 			break
@@ -196,4 +217,16 @@ func buildIsDependency(c *demoClient, link *isDependencyLink, filter *model.IsDe
 		Collector:        link.collector,
 	}
 	return &foundIsDependency, nil
+}
+
+func (c *demoClient) dependencyByID(id uint32) (*isDependencyLink, error) {
+	o, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find isDependencyLink")
+	}
+	a, ok := o.(*isDependencyLink)
+	if !ok {
+		return nil, errors.New("not an isDependencyLink")
+	}
+	return a, nil
 }
