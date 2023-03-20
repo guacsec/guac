@@ -53,7 +53,7 @@ query HasSourceAtQ2 {
   }
 }
 
-query Q3 {
+query HasSourceAtQ3 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "openssl", version: "3.0.3"}})  {
     ...allHasSourceAt
   }
