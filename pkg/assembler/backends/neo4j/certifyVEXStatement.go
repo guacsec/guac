@@ -101,7 +101,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
 
 					idStr := result.Record().Values[8].(string)
-					yearStr := result.Record().Values[7].(string)
+					yearStr := result.Record().Values[7].(int)
 					cve := generateModelCve(yearStr, idStr)
 
 					certifyVEXStatementNode := dbtype.Node{}
@@ -246,7 +246,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 					artifact := generateModelArtifact(algorithm, digest)
 
 					idStr := result.Record().Values[4].(string)
-					yearStr := result.Record().Values[3].(string)
+					yearStr := result.Record().Values[3].(int)
 					cve := generateModelCve(yearStr, idStr)
 
 					certifyVEXStatementNode := dbtype.Node{}

@@ -29,19 +29,19 @@ func registerAllCVE(client *demoClient) {
 	ctx := context.Background()
 
 	inputs := []model.CVEInputSpec{{
-		Year:  "2019",
+		Year:  2019,
 		CveID: "CVE-2019-13110",
 	}, {
-		Year:  "2014",
+		Year:  2014,
 		CveID: "CVE-2014-8139",
 	}, {
-		Year:  "2014",
+		Year:  2014,
 		CveID: "CVE-2014-8140",
 	}, {
-		Year:  "2022",
+		Year:  2022,
 		CveID: "CVE-2022-26499",
 	}, {
-		Year:  "2014",
+		Year:  2014,
 		CveID: "CVE-2014-8140",
 	}}
 	for _, input := range inputs {
@@ -53,10 +53,10 @@ func registerAllCVE(client *demoClient) {
 }
 
 // Internal data: osv
-type cveMap map[string]*cveNode
+type cveMap map[int]*cveNode
 type cveNode struct {
 	id     uint32
-	year   string
+	year   int
 	cveIDs cveIDMap
 }
 type cveIDMap map[string]*cveIDNode

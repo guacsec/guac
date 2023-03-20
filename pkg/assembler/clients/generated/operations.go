@@ -35,12 +35,12 @@ func (v *BuilderInputSpec) GetUri() string { return v.Uri }
 
 // CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
 type CVEInputSpec struct {
-	Year  string `json:"year"`
+	Year  int    `json:"year"`
 	CveId string `json:"cveId"`
 }
 
 // GetYear returns CVEInputSpec.Year, and is useful for accessing the field via an interface.
-func (v *CVEInputSpec) GetYear() string { return v.Year }
+func (v *CVEInputSpec) GetYear() int { return v.Year }
 
 // GetCveId returns CVEInputSpec.CveId, and is useful for accessing the field via an interface.
 func (v *CVEInputSpec) GetCveId() string { return v.CveId }
@@ -604,7 +604,7 @@ type CertifyCVEIngestCVE struct {
 func (v *CertifyCVEIngestCVE) GetId() string { return v.allCveTree.Id }
 
 // GetYear returns CertifyCVEIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestCVE) GetYear() string { return v.allCveTree.Year }
+func (v *CertifyCVEIngestCVE) GetYear() int { return v.allCveTree.Year }
 
 // GetCveIds returns CertifyCVEIngestCVE.CveIds, and is useful for accessing the field via an interface.
 func (v *CertifyCVEIngestCVE) GetCveIds() []allCveTreeCveIdsCVEId { return v.allCveTree.CveIds }
@@ -637,7 +637,7 @@ func (v *CertifyCVEIngestCVE) UnmarshalJSON(b []byte) error {
 type __premarshalCertifyCVEIngestCVE struct {
 	Id string `json:"id"`
 
-	Year string `json:"year"`
+	Year int `json:"year"`
 
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }
@@ -3469,7 +3469,7 @@ type IsVulnerabilityCVEIngestCVE struct {
 func (v *IsVulnerabilityCVEIngestCVE) GetId() string { return v.allCveTree.Id }
 
 // GetYear returns IsVulnerabilityCVEIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestCVE) GetYear() string { return v.allCveTree.Year }
+func (v *IsVulnerabilityCVEIngestCVE) GetYear() int { return v.allCveTree.Year }
 
 // GetCveIds returns IsVulnerabilityCVEIngestCVE.CveIds, and is useful for accessing the field via an interface.
 func (v *IsVulnerabilityCVEIngestCVE) GetCveIds() []allCveTreeCveIdsCVEId { return v.allCveTree.CveIds }
@@ -3502,7 +3502,7 @@ func (v *IsVulnerabilityCVEIngestCVE) UnmarshalJSON(b []byte) error {
 type __premarshalIsVulnerabilityCVEIngestCVE struct {
 	Id string `json:"id"`
 
-	Year string `json:"year"`
+	Year int `json:"year"`
 
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }
@@ -6643,7 +6643,7 @@ type VexArtifactAndCveIngestCVE struct {
 func (v *VexArtifactAndCveIngestCVE) GetId() string { return v.allCveTree.Id }
 
 // GetYear returns VexArtifactAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestCVE) GetYear() string { return v.allCveTree.Year }
+func (v *VexArtifactAndCveIngestCVE) GetYear() int { return v.allCveTree.Year }
 
 // GetCveIds returns VexArtifactAndCveIngestCVE.CveIds, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndCveIngestCVE) GetCveIds() []allCveTreeCveIdsCVEId { return v.allCveTree.CveIds }
@@ -6676,7 +6676,7 @@ func (v *VexArtifactAndCveIngestCVE) UnmarshalJSON(b []byte) error {
 type __premarshalVexArtifactAndCveIngestCVE struct {
 	Id string `json:"id"`
 
-	Year string `json:"year"`
+	Year int `json:"year"`
 
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }
@@ -7148,7 +7148,7 @@ type VexPackageAndCveIngestCVE struct {
 func (v *VexPackageAndCveIngestCVE) GetId() string { return v.allCveTree.Id }
 
 // GetYear returns VexPackageAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestCVE) GetYear() string { return v.allCveTree.Year }
+func (v *VexPackageAndCveIngestCVE) GetYear() int { return v.allCveTree.Year }
 
 // GetCveIds returns VexPackageAndCveIngestCVE.CveIds, and is useful for accessing the field via an interface.
 func (v *VexPackageAndCveIngestCVE) GetCveIds() []allCveTreeCveIdsCVEId { return v.allCveTree.CveIds }
@@ -7181,7 +7181,7 @@ func (v *VexPackageAndCveIngestCVE) UnmarshalJSON(b []byte) error {
 type __premarshalVexPackageAndCveIngestCVE struct {
 	Id string `json:"id"`
 
-	Year string `json:"year"`
+	Year int `json:"year"`
 
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }
@@ -9021,7 +9021,7 @@ func (v *allCertifyVEXStatementVulnerabilityCVE) GetTypename() *string { return 
 func (v *allCertifyVEXStatementVulnerabilityCVE) GetId() string { return v.allCveTree.Id }
 
 // GetYear returns allCertifyVEXStatementVulnerabilityCVE.Year, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityCVE) GetYear() string { return v.allCveTree.Year }
+func (v *allCertifyVEXStatementVulnerabilityCVE) GetYear() int { return v.allCveTree.Year }
 
 // GetCveIds returns allCertifyVEXStatementVulnerabilityCVE.CveIds, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementVulnerabilityCVE) GetCveIds() []allCveTreeCveIdsCVEId {
@@ -9058,7 +9058,7 @@ type __premarshalallCertifyVEXStatementVulnerabilityCVE struct {
 
 	Id string `json:"id"`
 
-	Year string `json:"year"`
+	Year int `json:"year"`
 
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }
@@ -9475,7 +9475,7 @@ func (v *allCertifyVulnVulnerabilityCVE) GetTypename() *string { return v.Typena
 func (v *allCertifyVulnVulnerabilityCVE) GetId() string { return v.allCveTree.Id }
 
 // GetYear returns allCertifyVulnVulnerabilityCVE.Year, and is useful for accessing the field via an interface.
-func (v *allCertifyVulnVulnerabilityCVE) GetYear() string { return v.allCveTree.Year }
+func (v *allCertifyVulnVulnerabilityCVE) GetYear() int { return v.allCveTree.Year }
 
 // GetCveIds returns allCertifyVulnVulnerabilityCVE.CveIds, and is useful for accessing the field via an interface.
 func (v *allCertifyVulnVulnerabilityCVE) GetCveIds() []allCveTreeCveIdsCVEId {
@@ -9512,7 +9512,7 @@ type __premarshalallCertifyVulnVulnerabilityCVE struct {
 
 	Id string `json:"id"`
 
-	Year string `json:"year"`
+	Year int `json:"year"`
 
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }
@@ -9793,7 +9793,7 @@ func __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(v *allCertifyVulnVulnerabi
 // with the same `year` value.
 type allCveTree struct {
 	Id     string                  `json:"id"`
-	Year   string                  `json:"year"`
+	Year   int                     `json:"year"`
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }
 
@@ -9801,7 +9801,7 @@ type allCveTree struct {
 func (v *allCveTree) GetId() string { return v.Id }
 
 // GetYear returns allCveTree.Year, and is useful for accessing the field via an interface.
-func (v *allCveTree) GetYear() string { return v.Year }
+func (v *allCveTree) GetYear() int { return v.Year }
 
 // GetCveIds returns allCveTree.CveIds, and is useful for accessing the field via an interface.
 func (v *allCveTree) GetCveIds() []allCveTreeCveIdsCVEId { return v.CveIds }
@@ -11345,7 +11345,7 @@ func (v *allIsVulnerabilityVulnerabilityCVE) GetTypename() *string { return v.Ty
 func (v *allIsVulnerabilityVulnerabilityCVE) GetId() string { return v.allCveTree.Id }
 
 // GetYear returns allIsVulnerabilityVulnerabilityCVE.Year, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityVulnerabilityCVE) GetYear() string { return v.allCveTree.Year }
+func (v *allIsVulnerabilityVulnerabilityCVE) GetYear() int { return v.allCveTree.Year }
 
 // GetCveIds returns allIsVulnerabilityVulnerabilityCVE.CveIds, and is useful for accessing the field via an interface.
 func (v *allIsVulnerabilityVulnerabilityCVE) GetCveIds() []allCveTreeCveIdsCVEId {
@@ -11382,7 +11382,7 @@ type __premarshalallIsVulnerabilityVulnerabilityCVE struct {
 
 	Id string `json:"id"`
 
-	Year string `json:"year"`
+	Year int `json:"year"`
 
 	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
 }

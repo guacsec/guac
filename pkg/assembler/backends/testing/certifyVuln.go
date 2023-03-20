@@ -43,7 +43,7 @@ func registerAllCertifyVuln(client *demoClient) error {
 	if err != nil {
 		return err
 	}
-	selectedYear := "2019"
+	selectedYear := 2019
 	selectedCveID := "CVE-2019-13110"
 	selectedCVESpec := &model.CVESpec{Year: &selectedYear, CveID: &selectedCveID}
 	selectedCve, err := client.Cve(context.TODO(), selectedCVESpec)

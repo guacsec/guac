@@ -92,7 +92,7 @@ type BuilderSpec struct {
 // with the same `year` value.
 type Cve struct {
 	ID     string   `json:"id"`
-	Year   string   `json:"year"`
+	Year   int      `json:"year"`
 	CveIds []*CVEId `json:"cveIds"`
 }
 
@@ -112,14 +112,14 @@ type CVEId struct {
 
 // CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
 type CVEInputSpec struct {
-	Year  string `json:"year"`
+	Year  int    `json:"year"`
 	CveID string `json:"cveId"`
 }
 
 // CVESpec allows filtering the list of cves to return.
 type CVESpec struct {
 	ID    *string `json:"id"`
-	Year  *string `json:"year"`
+	Year  *int    `json:"year"`
 	CveID *string `json:"cveId"`
 }
 
