@@ -57,6 +57,7 @@ fragment allSourceTree on Source {
 }
 
 fragment allArtifactTree on Artifact {
+  id
   algorithm
   digest
 }
@@ -106,6 +107,7 @@ fragment allCertifyScorecard on CertifyScorecard {
 }
 
 fragment allIsOccurrencesTree on IsOccurrence {
+  id
   subject {
     __typename
     ...on Package {
@@ -196,6 +198,7 @@ fragment allCertifyBad on CertifyBad {
 }
 
 fragment allHashEqualTree on HashEqual {
+  id
   justification
   artifacts {
     ...allArtifactTree

@@ -1,4 +1,5 @@
 fragment allArtifactTree on Artifact {
+  id
   algorithm
   digest
 }

@@ -41,6 +41,7 @@ type ComplexityRoot struct {
 	Artifact struct {
 		Algorithm func(childComplexity int) int
 		Digest    func(childComplexity int) int
+		ID        func(childComplexity int) int
 	}
 
 	Builder struct {
@@ -128,6 +129,7 @@ type ComplexityRoot struct {
 	HashEqual struct {
 		Artifacts     func(childComplexity int) int
 		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
 	}
@@ -145,6 +147,7 @@ type ComplexityRoot struct {
 	IsOccurrence struct {
 		Artifact      func(childComplexity int) int
 		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
@@ -334,6 +337,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Artifact.Digest(childComplexity), true
+
+	case "Artifact.id":
+		if e.complexity.Artifact.ID == nil {
+			break
+		}
+
+		return e.complexity.Artifact.ID(childComplexity), true
 
 	case "Builder.uri":
 		if e.complexity.Builder.URI == nil {
@@ -650,6 +660,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HashEqual.Collector(childComplexity), true
 
+	case "HashEqual.id":
+		if e.complexity.HashEqual.ID == nil {
+			break
+		}
+
+		return e.complexity.HashEqual.ID(childComplexity), true
+
 	case "HashEqual.justification":
 		if e.complexity.HashEqual.Justification == nil {
 			break
@@ -726,6 +743,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsOccurrence.Collector(childComplexity), true
+
+	case "IsOccurrence.id":
+		if e.complexity.IsOccurrence.ID == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.ID(childComplexity), true
 
 	case "IsOccurrence.justification":
 		if e.complexity.IsOccurrence.Justification == nil {
@@ -1810,6 +1834,7 @@ If having a ` + "`" + `checksum` + "`" + ` Go object, ` + "`" + `algorithm` + "`
 ` + "`" + `checksum.Value` + "`" + `.
 """
 type Artifact {
+  id: ID!
   algorithm: String!
   digest: String!
 }
@@ -1820,6 +1845,7 @@ ArtifactSpec allows filtering the list of artifacts to return.
 Both arguments will be canonicalized to lowercase.
 """
 input ArtifactSpec {
+  id: ID
   algorithm: String
   digest: String
 }
@@ -2906,6 +2932,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type HashEqual {
+  id: ID!
   artifacts: [Artifact!]!
   justification: String!
   origin: String!
@@ -2918,6 +2945,7 @@ HashEqualSpec allows filtering the list of HashEqual to return.
 Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 """
 input HashEqualSpec {
+  id: ID
   artifacts: [ArtifactSpec]
   justification: String
   origin: String
@@ -2946,7 +2974,6 @@ extend type Mutation {
   "certify that two artifacts are the same (hashes are equal)"
   ingestHashEqual(artifact: ArtifactInputSpec!, equalArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
 }
-
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
@@ -3069,6 +3096,7 @@ Note: Package or Source must be specified but not both at the same time.
 Attestation must occur at the PackageVersion or at the SourceName.
 """
 type IsOccurrence {
+  id: ID!
   "subject - union type that can be either a package or source object type"
   subject: PackageOrSource!
   "artifact (object) - artifact that represent the the package or source"
@@ -3089,6 +3117,7 @@ or it defaults to empty string for version, subpath and empty list for qualifier
 For source - a SourceName must be specified (name, tag or commit)
 """
 input IsOccurrenceSpec {
+  id: ID
   subject: PackageOrSourceSpec
   artifact: ArtifactSpec
   justification: String

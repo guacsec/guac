@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"errors"
 	"log"
 	"strconv"
 
@@ -81,6 +82,7 @@ type srcNameNode struct {
 	commit        string
 	srcMapLink    []uint32
 	scorecardLink []uint32
+	occurrences   []uint32
 }
 
 func (n *srcNamespaceStruct) getID() uint32 { return n.id }
@@ -94,6 +96,9 @@ func (p *srcNameNode) getSrcMapLink() []uint32 { return p.srcMapLink }
 // scorecard back edges
 func (p *srcNameNode) setScorecardLink(id uint32) { p.scorecardLink = append(p.scorecardLink, id) }
 func (p *srcNameNode) getScorecardLink() []uint32 { return p.scorecardLink }
+
+func (p *srcNameNode) setOccurrences(id uint32) { p.occurrences = append(p.occurrences, id) }
+func (p *srcNameNode) getOccurrences() []uint32 { return p.occurrences }
 
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
@@ -438,4 +443,16 @@ func matchInputSpecWithDBField(spec *string, dbField *string) bool {
 	}
 
 	return (dbField != nil && *dbField == *spec)
+}
+
+func (c *demoClient) sourceByID(id uint32) (*srcNameNode, error) {
+	o, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find source")
+	}
+	a, ok := o.(*srcNameNode)
+	if !ok {
+		return nil, errors.New("not a source")
+	}
+	return a, nil
 }
