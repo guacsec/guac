@@ -74,12 +74,13 @@ type srcNameStruct struct {
 }
 type srcNameList []*srcNameNode
 type srcNameNode struct {
-	id         uint32
-	parent     uint32
-	name       string
-	tag        string
-	commit     string
-	srcMapLink []uint32
+	id            uint32
+	parent        uint32
+	name          string
+	tag           string
+	commit        string
+	srcMapLink    []uint32
+	scorecardLink []uint32
 }
 
 func (n *srcNamespaceStruct) getID() uint32 { return n.id }
@@ -90,8 +91,11 @@ func (n *srcNameNode) getID() uint32        { return n.id }
 func (p *srcNameNode) setSrcMapLink(id uint32) { p.srcMapLink = append(p.srcMapLink, id) }
 func (p *srcNameNode) getSrcMapLink() []uint32 { return p.srcMapLink }
 
-// Ingest Source
+// scorecard back edges
+func (p *srcNameNode) setScorecardLink(id uint32) { p.scorecardLink = append(p.scorecardLink, id) }
+func (p *srcNameNode) getScorecardLink() []uint32 { return p.scorecardLink }
 
+// Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
 	namespacesStruct, hasNamespace := c.sources[input.Type]
 	if !hasNamespace {
@@ -136,9 +140,11 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 	}
 	if !duplicate {
 		collectedSrcName = srcNameNode{
-			id:     c.getNextID(),
-			parent: namesStruct.id,
-			name:   input.Name,
+			id:            c.getNextID(),
+			parent:        namesStruct.id,
+			name:          input.Name,
+			srcMapLink:    []uint32{},
+			scorecardLink: []uint32{},
 		}
 		c.index[collectedSrcName.id] = &collectedSrcName
 		if input.Tag != nil {

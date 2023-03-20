@@ -6037,6 +6037,9 @@ type ScorecardCertifyScorecard struct {
 	allCertifyScorecard `json:"-"`
 }
 
+// GetId returns ScorecardCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *ScorecardCertifyScorecard) GetId() string { return v.allCertifyScorecard.Id }
+
 // GetSource returns ScorecardCertifyScorecard.Source, and is useful for accessing the field via an interface.
 func (v *ScorecardCertifyScorecard) GetSource() allCertifyScorecardSource {
 	return v.allCertifyScorecard.Source
@@ -6073,6 +6076,8 @@ func (v *ScorecardCertifyScorecard) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalScorecardCertifyScorecard struct {
+	Id string `json:"id"`
+
 	Source allCertifyScorecardSource `json:"source"`
 
 	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
@@ -6089,6 +6094,7 @@ func (v *ScorecardCertifyScorecard) MarshalJSON() ([]byte, error) {
 func (v *ScorecardCertifyScorecard) __premarshalJSON() (*__premarshalScorecardCertifyScorecard, error) {
 	var retval __premarshalScorecardCertifyScorecard
 
+	retval.Id = v.allCertifyScorecard.Id
 	retval.Source = v.allCertifyScorecard.Source
 	retval.Scorecard = v.allCertifyScorecard.Scorecard
 	return &retval, nil
@@ -8442,11 +8448,15 @@ func (v *allCertifyPkgPackagesPackage) __premarshalJSON() (*__premarshalallCerti
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
 type allCertifyScorecard struct {
+	Id string `json:"id"`
 	// The source repository that is being scanned (attestation subject)
 	Source allCertifyScorecardSource `json:"source"`
 	// The Scorecard attached to the repository (attestation object)
 	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
 }
+
+// GetId returns allCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyScorecard) GetId() string { return v.Id }
 
 // GetSource returns allCertifyScorecard.Source, and is useful for accessing the field via an interface.
 func (v *allCertifyScorecard) GetSource() allCertifyScorecardSource { return v.Source }
@@ -14707,6 +14717,7 @@ fragment allSourceTree on Source {
 	}
 }
 fragment allCertifyScorecard on CertifyScorecard {
+	id
 	source {
 		... allSourceTree
 	}

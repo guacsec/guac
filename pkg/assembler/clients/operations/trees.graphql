@@ -87,6 +87,7 @@ fragment allOSVTree on OSV {
 }
 
 fragment allCertifyScorecard on CertifyScorecard {
+  id
   source {
     ...allSourceTree
   }

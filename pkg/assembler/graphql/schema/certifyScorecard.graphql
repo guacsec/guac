@@ -31,6 +31,7 @@ CertifyScorecard is an attestation which represents the scorecard of a
 particular source repository.
 """
 type CertifyScorecard {
+  id: ID!
   "The source repository that is being scanned (attestation subject)"
   source: Source!
   "The Scorecard attached to the repository (attestation object)"
@@ -84,6 +85,7 @@ type ScorecardCheck {
 
 "CertifyScorecardSpec allows filtering the list of CertifyScorecard to return."
 input CertifyScorecardSpec {
+  id: ID
   source: SourceSpec
   timeScanned: Time
   aggregateScore: Float

@@ -1,8 +1,11 @@
 fragment allSrcTree on Source {
+  id
   type
   namespaces {
+    id
     namespace
     names {
+      id
       name
       tag
       commit
@@ -11,6 +14,7 @@ fragment allSrcTree on Source {
 }
 
 fragment allCertifyScorecard on CertifyScorecard {
+  id
   source {
     ...allSrcTree
   }
@@ -41,14 +45,14 @@ query ScorecardQ2 {
 }
 
 query ScorecardQ3 {
-  scorecards(scorecardSpec: {source: {name: "https://github.com/django/django"}}) {
+  scorecards(scorecardSpec: {source: {name: "github.com/tensorflow/tensorflow"}}) {
     ...allCertifyScorecard
   }
 }
 
 query ScorecardQ4 {
   scorecards(
-    scorecardSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
+    scorecardSpec: {aggregateScore: 2.9}
   ) {
     ...allCertifyScorecard
   }
