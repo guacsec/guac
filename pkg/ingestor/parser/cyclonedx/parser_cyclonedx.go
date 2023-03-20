@@ -152,6 +152,10 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 
 	preds := &assembler.IngestPredicates{}
 
+	if *c.cdxBom.Dependencies == nil {
+		return preds
+	}
+
 	for _, deps := range *c.cdxBom.Dependencies {
 		currPkg, found := c.packagePackages[deps.Ref]
 		if !found {
