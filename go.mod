@@ -3,7 +3,7 @@ module github.com/guacsec/guac
 go 1.19
 
 require (
-	cloud.google.com/go/storage v1.29.0
+	cloud.google.com/go/storage v1.30.0
 	github.com/fsouza/fake-gcs-server v1.44.0
 	github.com/in-toto/in-toto-golang v0.7.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
