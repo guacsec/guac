@@ -17,66 +17,175 @@ package testing
 
 import (
 	"context"
+	"log"
+	"strconv"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+// TODO: convert to unit test
 func registerAllOSV(client *demoClient) {
-	client.registerOSV("CVE-2019-13110")
-	client.registerOSV("CVE-2014-8139")
-	client.registerOSV("CVE-2014-8140")
-	client.registerOSV("CVE-2022-26499")
-	client.registerOSV("GHSA-h45f-rjvw-2rv2")
-}
+	ctx := context.Background()
 
-// Ingest OSV
-
-func (c *demoClient) registerOSV(id string) *model.Osv {
-	idLower := strings.ToLower(id)
-	for i, o := range c.osv {
-		c.osv[i] = registerOsvID(o, idLower)
-		return c.osv[i]
-	}
-
-	newOsv := &model.Osv{}
-	newOsv = registerOsvID(newOsv, idLower)
-	c.osv = append(c.osv, newOsv)
-
-	return newOsv
-}
-
-func registerOsvID(o *model.Osv, id string) *model.Osv {
-	for _, cveID := range o.OsvID {
-		if cveID.ID == id {
-			return o
+	inputs := []model.OSVInputSpec{{
+		OsvID: "CVE-2019-13110",
+	}, {
+		OsvID: "CVE-2014-8139",
+	}, {
+		OsvID: "CVE-2014-8140",
+	}, {
+		OsvID: "CVE-2022-26499",
+	}, {
+		OsvID: "GHSA-h45f-rjvw-2rv2",
+	}}
+	for _, input := range inputs {
+		_, err := client.IngestOsv(ctx, &input)
+		if err != nil {
+			log.Printf("Error in ingesting: %v\n", err)
 		}
 	}
+}
 
-	o.OsvID = append(o.OsvID, &model.OSVId{ID: id})
-	return o
+const osv string = "osv"
+
+// Internal data: osv
+type osvMap map[string]*osvNode
+type osvNode struct {
+	id      uint32
+	typeKey string
+	osvIDs  osvIDMap
+}
+type osvIDMap map[string]*osvIDNode
+type osvIDNode struct {
+	id     uint32
+	parent uint32
+	osvID  string
+	//TODO: add other back edges
+}
+
+func (n *osvIDNode) getID() uint32 { return n.id }
+func (n *osvNode) getID() uint32   { return n.id }
+
+// Ingest OSV
+func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (*model.Osv, error) {
+	osvStruct, hasOsv := c.osvs[osv]
+	if !hasOsv {
+		osvStruct = &osvNode{
+			id:      c.getNextID(),
+			typeKey: osv,
+			osvIDs:  osvIDMap{},
+		}
+		c.index[osvStruct.id] = osvStruct
+		c.osvs[osv] = osvStruct
+	}
+	osvIDs := osvStruct.osvIDs
+	osvID := strings.ToLower(input.OsvID)
+
+	osvIDStruct, hasOsvID := osvIDs[osvID]
+	if !hasOsvID {
+		osvIDStruct = &osvIDNode{
+			id:     c.getNextID(),
+			parent: osvStruct.id,
+			osvID:  osvID,
+		}
+		c.index[osvIDStruct.id] = osvIDStruct
+		osvIDs[osvID] = osvIDStruct
+	}
+
+	// build return GraphQL type
+	return c.buildOsvResponse(osvIDStruct.id, nil)
 }
 
 // Query OSV
-
-func (c *demoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
-	var osv []*model.Osv
-	for _, o := range c.osv {
-		newOSV, err := filterOSVID(o, osvSpec)
+func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.Osv, error) {
+	if filter != nil && filter.ID != nil {
+		id, err := strconv.Atoi(*filter.ID)
 		if err != nil {
 			return nil, err
 		}
-		if newOSV != nil {
-			osv = append(osv, newOSV)
+		osv, err := c.buildOsvResponse(uint32(id), filter)
+		if err != nil {
+			return nil, err
+		}
+		return []*model.Osv{osv}, nil
+	}
+	out := []*model.Osv{}
+	for _, osvNode := range c.osvs {
+		osvIDList := []*model.OSVId{}
+		if filter != nil && filter.OsvID != nil {
+			osvIDNode, hasOsvIDNode := osvNode.osvIDs[strings.ToLower(*filter.OsvID)]
+			if hasOsvIDNode {
+				osvIDList = append(osvIDList, &model.OSVId{
+					ID:    nodeID(osvIDNode.id),
+					OsvID: osvIDNode.osvID,
+				})
+			}
+		} else {
+			for _, osvIDNode := range osvNode.osvIDs {
+				osvIDList = append(osvIDList, &model.OSVId{
+					ID:    nodeID(osvIDNode.id),
+					OsvID: osvIDNode.osvID,
+				})
+			}
+		}
+		if len(osvIDList) > 0 {
+			out = append(out, &model.Osv{
+				ID:     nodeID(osvNode.id),
+				OsvIds: osvIDList,
+			})
 		}
 	}
-	return osv, nil
+	return out, nil
 }
 
-func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
+// Builds a model.osv to send as GraphQL response, starting from id.
+// The optional filter allows restricting output (on selection operations).
+func (c *demoClient) buildOsvResponse(id uint32, filter *model.OSVSpec) (*model.Osv, error) {
+	if filter != nil && filter.ID != nil {
+		filteredID, err := strconv.Atoi(*filter.ID)
+		if err != nil {
+			return nil, err
+		}
+		if uint32(filteredID) != id {
+			return nil, nil
+		}
+	}
+
+	node, ok := c.index[id]
+	if !ok {
+		return nil, gqlerror.Errorf("ID does not match existing node")
+	}
+
+	osvIDList := []*model.OSVId{}
+	if osvIDNode, ok := node.(*osvIDNode); ok {
+		if filter != nil && noMatch(toLower(filter.OsvID), osvIDNode.osvID) {
+			return nil, nil
+		}
+		osvIDList = append(osvIDList, &model.OSVId{
+			ID:    nodeID(osvIDNode.id),
+			OsvID: osvIDNode.osvID,
+		})
+		node = c.index[osvIDNode.parent]
+	}
+
+	osvNode, ok := node.(*osvNode)
+	if !ok {
+		return nil, gqlerror.Errorf("ID does not match expected node type for osv root")
+	}
+	s := model.Osv{
+		ID:     nodeID(osvNode.id),
+		OsvIds: osvIDList,
+	}
+	return &s, nil
+}
+
+// TODO: remove
+func filterOSVID(osv *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 	var osvID []*model.OSVId
-	for _, id := range ghsa.OsvID {
-		if osvSpec.OsvID == nil || id.ID == strings.ToLower(*osvSpec.OsvID) {
+	for _, id := range osv.OsvIds {
+		if osvSpec.OsvID == nil || id.OsvID == strings.ToLower(*osvSpec.OsvID) {
 			osvID = append(osvID, id)
 		}
 	}
@@ -84,10 +193,6 @@ func filterOSVID(ghsa *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 		return nil, nil
 	}
 	return &model.Osv{
-		OsvID: osvID,
+		OsvIds: osvID,
 	}, nil
-}
-
-func (c *demoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
-	return c.registerOSV(osv.OsvID), nil
 }

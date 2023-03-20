@@ -61,6 +61,31 @@ fragment allArtifactTree on Artifact {
   digest
 }
 
+fragment allCveTree on CVE {
+  id
+  year
+  cveIds {
+    id
+    cveId
+  }
+}
+
+fragment allGHSATree on GHSA {
+  id
+  ghsaIds {
+    id
+    ghsaId
+  }
+}
+
+fragment allOSVTree on OSV {
+  id
+  osvIds {
+    id
+    osvId
+  }
+}
+
 fragment allCertifyScorecard on CertifyScorecard {
   source {
     ...allSourceTree
@@ -205,25 +230,6 @@ fragment allHasSourceAt on HasSourceAt {
   }
   origin
   collector
-}
-
-fragment allCveTree on CVE {
-  year
-  cveId {
-    id
-  }
-}
-
-fragment allGHSATree on GHSA {
-  ghsaId {
-    id
-  }
-}
-
-fragment allOSVTree on OSV {
-  osvId {
-    id
-  }
 }
 
 fragment allCertifyVuln on CertifyVuln {

@@ -119,7 +119,7 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 			osvIds := []*model.OSVId{}
 			for result.Next() {
 				osvId := &model.OSVId{
-					ID: result.Record().Values[0].(string),
+					OsvID: result.Record().Values[0].(string),
 				}
 				osvIds = append(osvIds, osvId)
 			}
@@ -128,7 +128,7 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 			}
 
 			osv := &model.Osv{
-				OsvID: osvIds,
+				OsvIds: osvIds,
 			}
 
 			return []*model.Osv{osv}, nil
@@ -173,8 +173,8 @@ RETURN osvID.id`
 				return nil, err
 			}
 
-			id := record.Values[0].(string)
-			osv := generateModelOsv(id)
+			osvID := record.Values[0].(string)
+			osv := generateModelOsv(osvID)
 
 			return osv, nil
 		})
@@ -185,10 +185,11 @@ RETURN osvID.id`
 	return result.(*model.Osv), nil
 }
 
+// TODO: update to pass in the ID from neo4j
 func generateModelOsv(id string) *model.Osv {
-	osvID := &model.OSVId{ID: id}
+	osvID := &model.OSVId{OsvID: id}
 	osv := model.Osv{
-		OsvID: []*model.OSVId{osvID},
+		OsvIds: []*model.OSVId{osvID},
 	}
 	return &osv
 }

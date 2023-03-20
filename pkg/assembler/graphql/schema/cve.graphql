@@ -28,8 +28,9 @@ This node is a singleton: backends guarantee that there is exactly one node
 with the same `year` value.
 """
 type CVE {
+  id: ID!
   year: String!
-  cveId: [CVEId!]!
+  cveIds: [CVEId!]!
 }
 
 """
@@ -40,13 +41,15 @@ The `id` field is mandatory and canonicalized to be lowercase.
 This node can be referred to by other parts of GUAC.
 """
 type CVEId {
-  id: String!
+  id: ID!
+  cveId: String!
 }
 
 """
 CVESpec allows filtering the list of cves to return.
 """
 input CVESpec {
+  id: ID
   year: String
   cveId: String
 }

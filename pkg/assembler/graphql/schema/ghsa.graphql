@@ -25,7 +25,8 @@ GHSA represents GitHub security advisories.
 We create a separate node to allow retrieving all GHSAs.
 """
 type GHSA {
-  ghsaId: [GHSAId!]!
+  id: ID!
+  ghsaIds: [GHSAId!]!
 }
 
 """
@@ -36,7 +37,8 @@ The `id` field is mandatory and canonicalized to be lowercase.
 This node can be referred to by other parts of GUAC.
 """
 type GHSAId {
-  id: String!
+  id: ID!
+  ghsaId: String!
 }
 
 """
@@ -45,6 +47,7 @@ GHSASpec allows filtering the list of GHSA to return.
 The argument will be canonicalized to lowercase.
 """
 input GHSASpec {
+  id: ID
   ghsaId: String
 }
 

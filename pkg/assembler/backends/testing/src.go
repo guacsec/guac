@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -184,7 +183,7 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 			sNamespaces := buildSourceNamespace(srcNamespaceStruct, filter)
 			if len(sNamespaces) > 0 {
 				out = append(out, &model.Source{
-					ID:         fmt.Sprintf("%d", srcNamespaceStruct.id),
+					ID:         nodeID(srcNamespaceStruct.id),
 					Type:       srcNamespaceStruct.typeKey,
 					Namespaces: sNamespaces,
 				})
@@ -195,7 +194,7 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 			sNamespaces := buildSourceNamespace(srcNamespaceStruct, filter)
 			if len(sNamespaces) > 0 {
 				out = append(out, &model.Source{
-					ID:         fmt.Sprintf("%d", srcNamespaceStruct.id),
+					ID:         nodeID(srcNamespaceStruct.id),
 					Type:       dbType,
 					Namespaces: sNamespaces,
 				})
@@ -213,7 +212,7 @@ func buildSourceNamespace(srcNamespaceStruct *srcNamespaceStruct, filter *model.
 			sns := buildSourceName(srcNameStruct, filter)
 			if len(sns) > 0 {
 				sNamespaces = append(sNamespaces, &model.SourceNamespace{
-					ID:        fmt.Sprintf("%d", srcNameStruct.id),
+					ID:        nodeID(srcNameStruct.id),
 					Namespace: srcNameStruct.namespace,
 					Names:     sns,
 				})
@@ -224,7 +223,7 @@ func buildSourceNamespace(srcNamespaceStruct *srcNamespaceStruct, filter *model.
 			sns := buildSourceName(srcNameStruct, filter)
 			if len(sns) > 0 {
 				sNamespaces = append(sNamespaces, &model.SourceNamespace{
-					ID:        fmt.Sprintf("%d", srcNameStruct.id),
+					ID:        nodeID(srcNameStruct.id),
 					Namespace: namespace,
 					Names:     sns,
 				})
@@ -247,7 +246,7 @@ func buildSourceName(srcNameStruct *srcNameStruct, filter *model.SourceSpec) []*
 			continue
 		}
 		sns = append(sns, &model.SourceName{
-			ID:     fmt.Sprintf("%d", s.id),
+			ID:     nodeID(s.id),
 			Name:   s.name,
 			Tag:    &s.tag,
 			Commit: &s.commit,
@@ -288,7 +287,7 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 		snl = append(snl, &model.SourceName{
 			// IDs are generated as string even though we ask for integers
 			// See https://github.com/99designs/gqlgen/issues/2561
-			ID:     fmt.Sprintf("%d", nameNode.id),
+			ID:     nodeID(nameNode.id),
 			Name:   nameNode.name,
 			Tag:    &nameNode.tag,
 			Commit: &nameNode.commit,
@@ -302,7 +301,7 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 			return nil, nil
 		}
 		snsl = append(snsl, &model.SourceNamespace{
-			ID:        fmt.Sprintf("%d", nameStruct.id),
+			ID:        nodeID(nameStruct.id),
 			Namespace: nameStruct.namespace,
 			Names:     snl,
 		})
@@ -314,7 +313,7 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 		return nil, gqlerror.Errorf("ID does not match expected node type for source namespace")
 	}
 	s := model.Source{
-		ID:         fmt.Sprintf("%d", namespaceStruct.id),
+		ID:         nodeID(namespaceStruct.id),
 		Type:       namespaceStruct.typeKey,
 		Namespaces: snsl,
 	}

@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"reflect"
 	"strconv"
@@ -247,7 +246,7 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
 			if len(pNamespaces) > 0 {
 				out = append(out, &model.Package{
-					ID:         fmt.Sprintf("%d", pkgNamespaceStruct.id),
+					ID:         nodeID(pkgNamespaceStruct.id),
 					Type:       pkgNamespaceStruct.typeKey,
 					Namespaces: pNamespaces,
 				})
@@ -258,7 +257,7 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 			pNamespaces := buildPkgNamespace(pkgNamespaceStruct, filter)
 			if len(pNamespaces) > 0 {
 				out = append(out, &model.Package{
-					ID:         fmt.Sprintf("%d", pkgNamespaceStruct.id),
+					ID:         nodeID(pkgNamespaceStruct.id),
 					Type:       dbType,
 					Namespaces: pNamespaces,
 				})
@@ -276,7 +275,7 @@ func buildPkgNamespace(pkgNamespaceStruct *pkgNamespaceStruct, filter *model.Pkg
 			pns := buildPkgName(pkgNameStruct, filter)
 			if len(pns) > 0 {
 				pNamespaces = append(pNamespaces, &model.PackageNamespace{
-					ID:        fmt.Sprintf("%d", pkgNameStruct.id),
+					ID:        nodeID(pkgNameStruct.id),
 					Namespace: pkgNameStruct.namespace,
 					Names:     pns,
 				})
@@ -287,7 +286,7 @@ func buildPkgNamespace(pkgNamespaceStruct *pkgNamespaceStruct, filter *model.Pkg
 			pns := buildPkgName(pkgNameStruct, filter)
 			if len(pns) > 0 {
 				pNamespaces = append(pNamespaces, &model.PackageNamespace{
-					ID:        fmt.Sprintf("%d", pkgNameStruct.id),
+					ID:        nodeID(pkgNameStruct.id),
 					Namespace: namespace,
 					Names:     pns,
 				})
@@ -305,7 +304,7 @@ func buildPkgName(pkgNameStruct *pkgNameStruct, filter *model.PkgSpec) []*model.
 			pvs := buildPkgVersion(pkgVersionStruct, filter)
 			if len(pvs) > 0 {
 				pns = append(pns, &model.PackageName{
-					ID:       fmt.Sprintf("%d", pkgVersionStruct.id),
+					ID:       nodeID(pkgVersionStruct.id),
 					Name:     pkgVersionStruct.name,
 					Versions: pvs,
 				})
@@ -316,7 +315,7 @@ func buildPkgName(pkgNameStruct *pkgNameStruct, filter *model.PkgSpec) []*model.
 			pvs := buildPkgVersion(pkgVersionStruct, filter)
 			if len(pvs) > 0 {
 				pns = append(pns, &model.PackageName{
-					ID:       fmt.Sprintf("%d", pkgVersionStruct.id),
+					ID:       nodeID(pkgVersionStruct.id),
 					Name:     name,
 					Versions: pvs,
 				})
@@ -339,7 +338,7 @@ func buildPkgVersion(pkgVersionStruct *pkgVersionStruct, filter *model.PkgSpec) 
 			continue
 		}
 		pvs = append(pvs, &model.PackageVersion{
-			ID:         fmt.Sprintf("%d", v.id),
+			ID:         nodeID(v.id),
 			Version:    v.version,
 			Subpath:    v.subpath,
 			Qualifiers: getCollectedPackageQualifiers(v.qualifiers),
@@ -378,7 +377,7 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 			return nil, nil
 		}
 		pvl = append(pvl, &model.PackageVersion{
-			ID:         fmt.Sprintf("%d", versionNode.id),
+			ID:         nodeID(versionNode.id),
 			Version:    versionNode.version,
 			Subpath:    versionNode.subpath,
 			Qualifiers: getCollectedPackageQualifiers(versionNode.qualifiers),
@@ -392,7 +391,7 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 			return nil, nil
 		}
 		pnl = append(pnl, &model.PackageName{
-			ID:       fmt.Sprintf("%d", versionStruct.id),
+			ID:       nodeID(versionStruct.id),
 			Name:     versionStruct.name,
 			Versions: pvl,
 		})
@@ -405,7 +404,7 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 			return nil, nil
 		}
 		pnsl = append(pnsl, &model.PackageNamespace{
-			ID:        fmt.Sprintf("%d", nameStruct.id),
+			ID:        nodeID(nameStruct.id),
 			Namespace: nameStruct.namespace,
 			Names:     pnl,
 		})
@@ -417,7 +416,7 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 		return nil, gqlerror.Errorf("ID does not match expected node type for package namespace")
 	}
 	p := model.Package{
-		ID:         fmt.Sprintf("%d", namespaceStruct.id),
+		ID:         nodeID(namespaceStruct.id),
 		Type:       namespaceStruct.typeKey,
 		Namespaces: pnsl,
 	}

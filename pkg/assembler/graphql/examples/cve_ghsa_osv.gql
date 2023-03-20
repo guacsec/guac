@@ -1,7 +1,25 @@
 fragment allCveTree on CVE {
+  id
   year
-  cveId {
+  cveIds {
     id
+    cveId
+  }
+}
+
+fragment allGHSATree on GHSA {
+  id
+  ghsaIds {
+    id
+    ghsaId
+  }
+}
+
+fragment allOSVTree on OSV {
+  id
+  osvIds {
+    id
+    osvId
   }
 }
 
@@ -41,12 +59,6 @@ mutation CVEM2 {
   }
 }
 
-fragment allGHSATree on GHSA {
-  ghsaId {
-    id
-  }
-}
-
 query GHSAQ1 {
   ghsa(ghsaSpec: {}) {
     ...allGHSATree
@@ -62,12 +74,6 @@ query GHSAQ2 {
 mutation GHSAM1 {
   ingestGHSA(ghsa: {ghsaId: "GHSA-abcd-efgh-1234"}) {
     ...allGHSATree
-  }
-}
-
-fragment allOSVTree on OSV {
-  osvId {
-    id
   }
 }
 

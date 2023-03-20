@@ -119,7 +119,7 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 			ghsaIds := []*model.GHSAId{}
 			for result.Next() {
 				ghsaId := &model.GHSAId{
-					ID: result.Record().Values[0].(string),
+					GhsaID: result.Record().Values[0].(string),
 				}
 				ghsaIds = append(ghsaIds, ghsaId)
 			}
@@ -128,7 +128,7 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 			}
 
 			ghsa := &model.Ghsa{
-				GhsaID: ghsaIds,
+				GhsaIds: ghsaIds,
 			}
 
 			return []*model.Ghsa{ghsa}, nil
@@ -173,8 +173,8 @@ RETURN ghsaID.id`
 				return nil, err
 			}
 
-			id := record.Values[0].(string)
-			ghsa := generateModelGhsa(id)
+			ghsaID := record.Values[0].(string)
+			ghsa := generateModelGhsa(ghsaID)
 
 			return ghsa, nil
 		})
@@ -185,10 +185,11 @@ RETURN ghsaID.id`
 	return result.(*model.Ghsa), nil
 }
 
+// TODO: update to pass in the ID from neo4j
 func generateModelGhsa(id string) *model.Ghsa {
-	ghsaID := &model.GHSAId{ID: id}
+	ghsaID := &model.GHSAId{GhsaID: id}
 	ghsa := model.Ghsa{
-		GhsaID: []*model.GHSAId{ghsaID},
+		GhsaIds: []*model.GHSAId{ghsaID},
 	}
 	return &ghsa
 }

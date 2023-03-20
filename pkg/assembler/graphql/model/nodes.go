@@ -91,8 +91,9 @@ type BuilderSpec struct {
 // This node is a singleton: backends guarantee that there is exactly one node
 // with the same `year` value.
 type Cve struct {
-	Year  string   `json:"year"`
-	CveID []*CVEId `json:"cveId"`
+	ID     string   `json:"id"`
+	Year   string   `json:"year"`
+	CveIds []*CVEId `json:"cveIds"`
 }
 
 func (Cve) IsOsvCveOrGhsa() {}
@@ -105,7 +106,8 @@ func (Cve) IsCveOrGhsa() {}
 //
 // This node can be referred to by other parts of GUAC.
 type CVEId struct {
-	ID string `json:"id"`
+	ID    string `json:"id"`
+	CveID string `json:"cveId"`
 }
 
 // CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
@@ -116,6 +118,7 @@ type CVEInputSpec struct {
 
 // CVESpec allows filtering the list of cves to return.
 type CVESpec struct {
+	ID    *string `json:"id"`
 	Year  *string `json:"year"`
 	CveID *string `json:"cveId"`
 }
@@ -282,7 +285,8 @@ type CveOrGhsaSpec struct {
 //
 // We create a separate node to allow retrieving all GHSAs.
 type Ghsa struct {
-	GhsaID []*GHSAId `json:"ghsaId"`
+	ID      string    `json:"id"`
+	GhsaIds []*GHSAId `json:"ghsaIds"`
 }
 
 func (Ghsa) IsOsvCveOrGhsa() {}
@@ -295,7 +299,8 @@ func (Ghsa) IsCveOrGhsa() {}
 //
 // This node can be referred to by other parts of GUAC.
 type GHSAId struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	GhsaID string `json:"ghsaId"`
 }
 
 // GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
@@ -307,6 +312,7 @@ type GHSAInputSpec struct {
 //
 // The argument will be canonicalized to lowercase.
 type GHSASpec struct {
+	ID     *string `json:"id"`
 	GhsaID *string `json:"ghsaId"`
 }
 
@@ -562,21 +568,23 @@ type MatchFlags struct {
 //
 // We create a separate node to allow retrieving all OSVs.
 type Osv struct {
-	OsvID []*OSVId `json:"osvId"`
+	ID     string   `json:"id"`
+	OsvIds []*OSVId `json:"osvIds"`
 }
 
 func (Osv) IsOsvCveOrGhsa() {}
 
 // OSVId is the actual ID that is given to a specific vulnerability.
 //
-// The `id` field is mandatory and canonicalized to be lowercase.
+// The `osvId` field is mandatory and canonicalized to be lowercase.
 //
 // This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
 // CVE ID).
 //
 // This node can be referred to by other parts of GUAC.
 type OSVId struct {
-	ID string `json:"id"`
+	ID    string `json:"id"`
+	OsvID string `json:"osvId"`
 }
 
 // OSVInputSpec is the same as OSVSpec, but used for mutation ingestion.
@@ -586,6 +594,7 @@ type OSVInputSpec struct {
 
 // OSVSpec allows filtering the list of OSV to return.
 type OSVSpec struct {
+	ID    *string `json:"id"`
 	OsvID *string `json:"osvId"`
 }
 

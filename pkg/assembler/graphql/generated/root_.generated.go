@@ -48,12 +48,14 @@ type ComplexityRoot struct {
 	}
 
 	CVE struct {
-		CveID func(childComplexity int) int
-		Year  func(childComplexity int) int
+		CveIds func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Year   func(childComplexity int) int
 	}
 
 	CVEId struct {
-		ID func(childComplexity int) int
+		CveID func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 
 	CertifyBad struct {
@@ -91,11 +93,13 @@ type ComplexityRoot struct {
 	}
 
 	GHSA struct {
-		GhsaID func(childComplexity int) int
+		GhsaIds func(childComplexity int) int
+		ID      func(childComplexity int) int
 	}
 
 	GHSAId struct {
-		ID func(childComplexity int) int
+		GhsaID func(childComplexity int) int
+		ID     func(childComplexity int) int
 	}
 
 	HasSBOM struct {
@@ -177,11 +181,13 @@ type ComplexityRoot struct {
 	}
 
 	OSV struct {
-		OsvID func(childComplexity int) int
+		ID     func(childComplexity int) int
+		OsvIds func(childComplexity int) int
 	}
 
 	OSVId struct {
-		ID func(childComplexity int) int
+		ID    func(childComplexity int) int
+		OsvID func(childComplexity int) int
 	}
 
 	Package struct {
@@ -334,12 +340,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Builder.URI(childComplexity), true
 
-	case "CVE.cveId":
-		if e.complexity.CVE.CveID == nil {
+	case "CVE.cveIds":
+		if e.complexity.CVE.CveIds == nil {
 			break
 		}
 
-		return e.complexity.CVE.CveID(childComplexity), true
+		return e.complexity.CVE.CveIds(childComplexity), true
+
+	case "CVE.id":
+		if e.complexity.CVE.ID == nil {
+			break
+		}
+
+		return e.complexity.CVE.ID(childComplexity), true
 
 	case "CVE.year":
 		if e.complexity.CVE.Year == nil {
@@ -347,6 +360,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CVE.Year(childComplexity), true
+
+	case "CVEId.cveId":
+		if e.complexity.CVEId.CveID == nil {
+			break
+		}
+
+		return e.complexity.CVEId.CveID(childComplexity), true
 
 	case "CVEId.id":
 		if e.complexity.CVEId.ID == nil {
@@ -488,12 +508,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyVuln.Vulnerability(childComplexity), true
 
-	case "GHSA.ghsaId":
-		if e.complexity.GHSA.GhsaID == nil {
+	case "GHSA.ghsaIds":
+		if e.complexity.GHSA.GhsaIds == nil {
 			break
 		}
 
-		return e.complexity.GHSA.GhsaID(childComplexity), true
+		return e.complexity.GHSA.GhsaIds(childComplexity), true
+
+	case "GHSA.id":
+		if e.complexity.GHSA.ID == nil {
+			break
+		}
+
+		return e.complexity.GHSA.ID(childComplexity), true
+
+	case "GHSAId.ghsaId":
+		if e.complexity.GHSAId.GhsaID == nil {
+			break
+		}
+
+		return e.complexity.GHSAId.GhsaID(childComplexity), true
 
 	case "GHSAId.id":
 		if e.complexity.GHSAId.ID == nil {
@@ -980,12 +1014,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
 
-	case "OSV.osvId":
-		if e.complexity.OSV.OsvID == nil {
+	case "OSV.id":
+		if e.complexity.OSV.ID == nil {
 			break
 		}
 
-		return e.complexity.OSV.OsvID(childComplexity), true
+		return e.complexity.OSV.ID(childComplexity), true
+
+	case "OSV.osvIds":
+		if e.complexity.OSV.OsvIds == nil {
+			break
+		}
+
+		return e.complexity.OSV.OsvIds(childComplexity), true
 
 	case "OSVId.id":
 		if e.complexity.OSVId.ID == nil {
@@ -993,6 +1034,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.OSVId.ID(childComplexity), true
+
+	case "OSVId.osvId":
+		if e.complexity.OSVId.OsvID == nil {
+			break
+		}
+
+		return e.complexity.OSVId.OsvID(childComplexity), true
 
 	case "Package.id":
 		if e.complexity.Package.ID == nil {
@@ -2361,8 +2409,9 @@ This node is a singleton: backends guarantee that there is exactly one node
 with the same ` + "`" + `year` + "`" + ` value.
 """
 type CVE {
+  id: ID!
   year: String!
-  cveId: [CVEId!]!
+  cveIds: [CVEId!]!
 }
 
 """
@@ -2373,13 +2422,15 @@ The ` + "`" + `id` + "`" + ` field is mandatory and canonicalized to be lowercas
 This node can be referred to by other parts of GUAC.
 """
 type CVEId {
-  id: String!
+  id: ID!
+  cveId: String!
 }
 
 """
 CVESpec allows filtering the list of cves to return.
 """
 input CVESpec {
+  id: ID
   year: String
   cveId: String
 }
@@ -2429,7 +2480,8 @@ GHSA represents GitHub security advisories.
 We create a separate node to allow retrieving all GHSAs.
 """
 type GHSA {
-  ghsaId: [GHSAId!]!
+  id: ID!
+  ghsaIds: [GHSAId!]!
 }
 
 """
@@ -2440,7 +2492,8 @@ The ` + "`" + `id` + "`" + ` field is mandatory and canonicalized to be lowercas
 This node can be referred to by other parts of GUAC.
 """
 type GHSAId {
-  id: String!
+  id: ID!
+  ghsaId: String!
 }
 
 """
@@ -2449,6 +2502,7 @@ GHSASpec allows filtering the list of GHSA to return.
 The argument will be canonicalized to lowercase.
 """
 input GHSASpec {
+  id: ID
   ghsaId: String
 }
 
@@ -3181,13 +3235,14 @@ OSV represents an Open Source Vulnerability.
 We create a separate node to allow retrieving all OSVs.
 """
 type OSV {
-  osvId: [OSVId!]!
+  id: ID!
+  osvIds: [OSVId!]!
 }
 
 """
 OSVId is the actual ID that is given to a specific vulnerability.
 
-The ` + "`" + `id` + "`" + ` field is mandatory and canonicalized to be lowercase.
+The ` + "`" + `osvId` + "`" + ` field is mandatory and canonicalized to be lowercase.
 
 This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
 CVE ID).
@@ -3195,13 +3250,15 @@ CVE ID).
 This node can be referred to by other parts of GUAC.
 """
 type OSVId {
-  id: String!
+  id: ID!
+  osvId: String!
 }
 
 """
 OSVSpec allows filtering the list of OSV to return.
 """
 input OSVSpec {
+  id: ID
   osvId: String
 }
 
