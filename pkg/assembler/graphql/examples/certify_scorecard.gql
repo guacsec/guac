@@ -1,4 +1,4 @@
-fragment allCertifyScorecard on CertifyScorecard {
+fragment allCertifyScorecardTree on CertifyScorecard {
   id
   source {
     ...allSrcTree
@@ -19,19 +19,19 @@ fragment allCertifyScorecard on CertifyScorecard {
 
 query ScorecardQ1 {
   scorecards(scorecardSpec: {}) {
-    ...allCertifyScorecard
+    ...allCertifyScorecardTree
   }
 }
 
 query ScorecardQ2 {
   scorecards(scorecardSpec: {origin: "testing backend"}) {
-    ...allCertifyScorecard
+    ...allCertifyScorecardTree
   }
 }
 
 query ScorecardQ3 {
   scorecards(scorecardSpec: {source: {name: "github.com/tensorflow/tensorflow"}}) {
-    ...allCertifyScorecard
+    ...allCertifyScorecardTree
   }
 }
 
@@ -39,7 +39,7 @@ query ScorecardQ4 {
   scorecards(
     scorecardSpec: {aggregateScore: 2.9}
   ) {
-    ...allCertifyScorecard
+    ...allCertifyScorecardTree
   }
 }
 
@@ -48,6 +48,6 @@ mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
     ...allSrcTree
   }
   certifyScorecard(source: $source, scorecard: $scorecard) {
-    ...allCertifyScorecard
+    ...allCertifyScorecardTree
   }
 }

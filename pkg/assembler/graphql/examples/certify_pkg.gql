@@ -1,4 +1,4 @@
-fragment allCertifyPkg on CertifyPkg {
+fragment allCertifyPkgTree on CertifyPkg {
   justification
   packages {
     type
@@ -23,13 +23,13 @@ fragment allCertifyPkg on CertifyPkg {
 
 query CertifyPkgQ1 {
   CertifyPkg(certifyPkgSpec: {}) {
-    ...allCertifyPkg
+    ...allCertifyPkgTree
   }
 }
 
 query CertifyPkgQ2 {
   CertifyPkg(certifyPkgSpec: {origin: "Demo ingestion"}) {
-    ...allCertifyPkg
+    ...allCertifyPkgTree
   }
 }
 
@@ -37,7 +37,7 @@ query CertifyPkgQ3 {
   CertifyPkg(
     certifyPkgSpec: {packages: {type: "conan", namespace: "openssl.org", name: "openssl", version: "3.0.3", subpath: ""}}
   ) {
-    ...allCertifyPkg
+    ...allCertifyPkgTree
   }
 }
 
@@ -45,7 +45,7 @@ query CertifyPkgQ4 {
   CertifyPkg(
     certifyPkgSpec: {packages: {type: "pypi", namespace: "", name: "django", version: "1.11.1", subpath: "subpath"}}
   ) {
-    ...allCertifyPkg
+    ...allCertifyPkgTree
   }
 }
 
@@ -53,6 +53,6 @@ query CertifyPkgQ5 {
   CertifyPkg(
     certifyPkgSpec: {packages: {type: "deb", namespace: "debian"}}
   ) {
-    ...allCertifyPkg
+    ...allCertifyPkgTree
   }
 }

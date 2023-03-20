@@ -1,4 +1,4 @@
-fragment allHasSourceAt on HasSourceAt {
+fragment allHasSourceAtTree on HasSourceAt {
   id
   justification
   knownSince
@@ -43,19 +43,19 @@ fragment allHasSourceAt on HasSourceAt {
 
 query HasSourceAtQ1 {
   HasSourceAt(hasSourceAtSpec: {}) {
-    ...allHasSourceAt
+    ...allHasSourceAtTree
   }
 }
 
 query HasSourceAtQ2 {
   HasSourceAt(hasSourceAtSpec: {origin: "testing backend"}) {
-    ...allHasSourceAt
+    ...allHasSourceAtTree
   }
 }
 
 query HasSourceAtQ3 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "openssl", version: "3.0.3"}})  {
-    ...allHasSourceAt
+    ...allHasSourceAtTree
   }
 }
 
@@ -63,13 +63,13 @@ query HasSourceAtQ4 {
   HasSourceAt(
     hasSourceAtSpec: {source: {name: "https://github.com/django/django"}}
   ) {
-    ...allHasSourceAt
+    ...allHasSourceAtTree
   }
 }
 
 query HasSourceAtQ5 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "kubetest"}}) {
-    ...allHasSourceAt
+    ...allHasSourceAtTree
   }
 }
 
@@ -77,6 +77,6 @@ query HasSourceAtQ6 {
   HasSourceAt(
     hasSourceAtSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
   ) {
-    ...allHasSourceAt
+    ...allHasSourceAtTree
   }
 }

@@ -1,4 +1,4 @@
-fragment allCertifyVuln on CertifyVuln {
+fragment allCertifyVulnTree on CertifyVuln {
   package {
       type
       namespaces {
@@ -54,43 +54,43 @@ fragment allCertifyVuln on CertifyVuln {
 
 query CertifyVulnQ1 {
   CertifyVuln(certifyVulnSpec: {}) {
-    ...allCertifyVuln
+    ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ2 {
   CertifyVuln(certifyVulnSpec: {origin: "testing backend"}) {
-    ...allCertifyVuln
+    ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ3 {
   CertifyVuln(certifyVulnSpec: {package: {name: "openssl"}}) {
-    ...allCertifyVuln
+    ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ4 {
   CertifyVuln(certifyVulnSpec: {package: {name: "django"}}) {
-    ...allCertifyVuln
+    ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ5 {
   CertifyVuln(certifyVulnSpec: {vulnerability: {cve: {cveId: "CVE-2019-13110"}}}) {
-    ...allCertifyVuln
+    ...allCertifyVulnTree
   }
 }
 
 
 query CertifyVulnQ6 {
   CertifyVuln(certifyVulnSpec: {vulnerability: {ghsa: {ghsaId: "GHSA-h45f-rjvw-2rv2"}}}) {
-    ...allCertifyVuln
+    ...allCertifyVulnTree
   }
 }
 
 query CertifyVulnQ7 {
   CertifyVuln(certifyVulnSpec: {vulnerability: {osv: {osvId: "CVE-2019-13110"}}}) {
-    ...allCertifyVuln
+    ...allCertifyVulnTree
   }
 }

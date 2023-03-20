@@ -1,0 +1,58 @@
+query QueryPkg ($spec: PkgSpec) {
+  packages(pkgSpec: $spec){
+    ...allPkgTree
+  }
+}
+
+query QuerySrc  ($spec: SourceSpec) {
+  sources(sourceSpec: $spec){
+    ...allSrcTree
+  }
+}
+
+query QueryArtifact ($spec: ArtifactSpec) {
+  artifacts(artifactSpec: $spec){
+    ...allArtifactTree
+  }
+}
+
+query QueryCve ($spec: CVESpec) {
+    cve(cveSpec: $spec) {
+        ...allCveTree
+    }
+}
+
+query QueryIsDepedency($spec: IsDependencySpec) {
+  IsDependency(isDependencySpec: $spec){
+      ...allIsDependencyTree
+  }
+}
+
+query QueryIsOccurrence($spec: IsOccurrenceSpec) {
+  IsOccurrence(isOccurrenceSpec: $spec){
+      ...allIsOccurrencesTree
+  }
+}
+
+query QueryHasSourceAt($spec: HasSourceAtSpec) {
+  HasSourceAt(hasSourceAtSpec: $spec){
+      ...allHasSourceAtTree
+  }
+}
+
+query QueryCertifyVuln($spec: CertifyVulnSpec) {
+  CertifyVuln(certifyVulnSpec: $spec){
+      ...allCertifyVulnTree
+  }
+}
+
+query ReachQ1 {
+  packages(pkgSpec: {
+    type:"deb",
+    namespace:"ubuntu",
+    name: "dpkg",
+    qualifiers: [{key:"arch", value:"amd64"}],
+  }) {
+    ...allPkgTree
+  }
+}
