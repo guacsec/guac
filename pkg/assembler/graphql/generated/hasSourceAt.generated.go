@@ -437,7 +437,7 @@ func (ec *executionContext) unmarshalInputHasSourceAtSpec(ctx context.Context, o
 
 // region    **************************** object.gotpl ****************************
 
-var hasSourceAtImplementors = []string{"HasSourceAt"}
+var hasSourceAtImplementors = []string{"HasSourceAt", "Nodes"}
 
 func (ec *executionContext) _HasSourceAt(ctx context.Context, sel ast.SelectionSet, obj *model.HasSourceAt) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hasSourceAtImplementors)

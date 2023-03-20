@@ -465,7 +465,7 @@ func (ec *executionContext) _PackageOrSource(ctx context.Context, sel ast.Select
 
 // region    **************************** object.gotpl ****************************
 
-var isOccurrenceImplementors = []string{"IsOccurrence"}
+var isOccurrenceImplementors = []string{"IsOccurrence", "Nodes"}
 
 func (ec *executionContext) _IsOccurrence(ctx context.Context, sel ast.SelectionSet, obj *model.IsOccurrence) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, isOccurrenceImplementors)

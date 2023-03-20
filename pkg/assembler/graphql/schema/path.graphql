@@ -23,19 +23,20 @@ Nodes is a union type of all the possible nodes. It encapsulates the software tr
 In a path query, all connecting evidence nodes along with their intermediate subject nodes need to be returned
 in order to create a complete graph.
 """
-union Nodes = Package | Source | Artifact | Builder | OSV | CVE | GHSA | IsOccurrence | IsDependency | IsVulnerability| CertifyVEXStatement | HashEqual | CertifyBad | CertifyPkg | CertifyScorecard | CertifyVuln | HasSourceAt | HasSBOM | HasSourceAt
+union Nodes = Package | Source | Artifact | Builder | OSV | CVE | GHSA | IsOccurrence | IsDependency | IsVulnerability| CertifyVEXStatement | HashEqual | CertifyBad | CertifyPkg | CertifyScorecard | CertifyVuln | HasSourceAt | HasSBOM | HasSLSA
 
 
 """
-PackageSourceArtifactOsvCveOrGhsaFilter allows for all the software tree node types to be
+PackageSourceArtifactBuilderOsvCveOrGhsaFilter allows for all the software tree node types to be
 specified for the subject or the end target in a path query.
 
 Exactly one of the value must be set to non-nil.
 """
-input PackageSourceArtifactOsvCveOrGhsaFilter {
+input PackageSourceArtifactBuilderOsvCveOrGhsaFilter {
   package: PkgSpec
   source: SourceSpec
   artifact: ArtifactSpec
+  builder: BuilderSpec
   osv: OSVSpec
   cve: CVESpec
   ghsa: GHSASpec
@@ -43,5 +44,5 @@ input PackageSourceArtifactOsvCveOrGhsaFilter {
 
 extend type Query {
   "path query is used to determine reachability between the subject and target. It returns the path to the target via a list of nodes"
-  path(subject: PackageSourceArtifactOsvCveOrGhsaFilter!, target: PackageSourceArtifactOsvCveOrGhsaFilter!, maxPathLength: Int!): [Nodes!]!
+  path(subject: PackageSourceArtifactBuilderOsvCveOrGhsaFilter!, target: PackageSourceArtifactBuilderOsvCveOrGhsaFilter!, maxPathLength: Int!): [Nodes!]!
 }

@@ -339,7 +339,7 @@ func (ec *executionContext) unmarshalInputMatchFlags(ctx context.Context, obj in
 
 // region    **************************** object.gotpl ****************************
 
-var certifyBadImplementors = []string{"CertifyBad"}
+var certifyBadImplementors = []string{"CertifyBad", "Nodes"}
 
 func (ec *executionContext) _CertifyBad(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyBad) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyBadImplementors)

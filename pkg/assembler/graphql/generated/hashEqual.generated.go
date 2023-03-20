@@ -318,7 +318,7 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 
 // region    **************************** object.gotpl ****************************
 
-var hashEqualImplementors = []string{"HashEqual"}
+var hashEqualImplementors = []string{"HashEqual", "Nodes"}
 
 func (ec *executionContext) _HashEqual(ctx context.Context, sel ast.SelectionSet, obj *model.HashEqual) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hashEqualImplementors)

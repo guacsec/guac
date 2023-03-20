@@ -226,6 +226,7 @@ type ComplexityRoot struct {
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
+		Path                func(childComplexity int, subject model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, target model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, maxPathLength int) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
@@ -1252,6 +1253,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(*model.PkgSpec)), true
 
+	case "Query.path":
+		if e.complexity.Query.Path == nil {
+			break
+		}
+
+		args, err := ec.field_Query_path_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Path(childComplexity, args["subject"].(model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter), args["target"].(model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter), args["maxPathLength"].(int)), true
+
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
 			break
@@ -1563,6 +1576,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageOrSourceSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
+		ec.unmarshalInputPackageSourceArtifactBuilderOsvCveOrGhsaFilter,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgInputSpec,
@@ -3338,6 +3352,55 @@ extend type Query {
 extend type Mutation {
   "Ingest a new package. Returns the ingested package trie"
   ingestPackage(pkg: PkgInputSpec): Package!
+}
+`, BuiltIn: false},
+	{Name: "../schema/path.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the artifact. It contains the algorithm and
+# digest fields
+
+"""
+Nodes is a union type of all the possible nodes. It encapsulates the software tree nodes along with the evidence nodes.
+In a path query, all connecting evidence nodes along with their intermediate subject nodes need to be returned
+in order to create a complete graph.
+"""
+union Nodes = Package | Source | Artifact | Builder | OSV | CVE | GHSA | IsOccurrence | IsDependency | IsVulnerability| CertifyVEXStatement | HashEqual | CertifyBad | CertifyPkg | CertifyScorecard | CertifyVuln | HasSourceAt | HasSBOM | HasSLSA
+
+
+"""
+PackageSourceArtifactBuilderOsvCveOrGhsaFilter allows for all the software tree node types to be
+specified for the subject or the end target in a path query.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceArtifactBuilderOsvCveOrGhsaFilter {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+  builder: BuilderSpec
+  osv: OSVSpec
+  cve: CVESpec
+  ghsa: GHSASpec
+}
+
+extend type Query {
+  "path query is used to determine reachability between the subject and target. It returns the path to the target via a list of nodes"
+  path(subject: PackageSourceArtifactBuilderOsvCveOrGhsaFilter!, target: PackageSourceArtifactBuilderOsvCveOrGhsaFilter!, maxPathLength: Int!): [Nodes!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
