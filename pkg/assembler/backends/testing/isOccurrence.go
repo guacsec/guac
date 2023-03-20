@@ -97,11 +97,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 	packageID := maxUint32
 	if subject.Package != nil {
 		var pmt model.MatchFlags
-		if subject.Package.Version == nil {
-			pmt.Pkg = model.PkgMatchTypeAllVersions
-		} else {
-			pmt.Pkg = model.PkgMatchTypeSpecificVersion
-		}
+		pmt.Pkg = model.PkgMatchTypeSpecificVersion
 		pid, err := getPackageIDFromInput(c, *subject.Package, pmt)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
@@ -140,13 +136,13 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 		collector:     occurrence.Collector,
 	}
 	c.index[o.id] = o
-	a.occurrences = append(a.occurrences, o.id)
+	a.setOccurrences(o.id)
 	if packageID != maxUint32 {
-		p, _ := c.pkgByID(packageID)
+		p, _ := c.pkgVersionByID(packageID)
 		p.setOccurrenceLink(o.id)
 	} else {
 		s, _ := c.sourceByID(sourceID)
-		s.occurrences = append(s.occurrences, o.id)
+		s.setOccurrences(o.id)
 	}
 	c.occurrences = append(c.occurrences, o)
 

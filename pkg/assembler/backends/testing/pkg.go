@@ -94,13 +94,11 @@ type pkgNameStruct struct {
 }
 type pkgNameMap map[string]*pkgVersionStruct
 type pkgVersionStruct struct {
-	id               uint32
-	parent           uint32
-	name             string
-	versions         pkgVersionList
-	srcMapLink       []uint32
-	isDependencyLink []uint32
-	occurrences      []uint32
+	id         uint32
+	parent     uint32
+	name       string
+	versions   pkgVersionList
+	srcMapLink []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
@@ -119,10 +117,6 @@ type pkgNameOrVersion interface {
 	implementsPkgNameOrVersion()
 	setSrcMapLink(id uint32)
 	getSrcMapLink() []uint32
-	setIsDependencyLink(id uint32)
-	getIsDependencyLink() []uint32
-	setOccurrenceLink(id uint32)
-	getOccurrenceLink() []uint32
 }
 
 func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
@@ -140,19 +134,13 @@ func (p *pkgVersionStruct) getSrcMapLink() []uint32 { return p.srcMapLink }
 func (p *pkgVersionNode) getSrcMapLink() []uint32   { return p.srcMapLink }
 
 // isDependency back edges
-func (p *pkgVersionStruct) setIsDependencyLink(id uint32) {
-	p.isDependencyLink = append(p.isDependencyLink, id)
-}
 func (p *pkgVersionNode) setIsDependencyLink(id uint32) {
 	p.isDependencyLink = append(p.isDependencyLink, id)
 }
-func (p *pkgVersionStruct) getIsDependencyLink() []uint32 { return p.isDependencyLink }
-func (p *pkgVersionNode) getIsDependencyLink() []uint32   { return p.isDependencyLink }
+func (p *pkgVersionNode) getIsDependencyLink() []uint32 { return p.isDependencyLink }
 
-func (p *pkgVersionStruct) setOccurrenceLink(id uint32) { p.occurrences = append(p.occurrences, id) }
-func (p *pkgVersionNode) setOccurrenceLink(id uint32)   { p.occurrences = append(p.occurrences, id) }
-func (p *pkgVersionStruct) getOccurrenceLink() []uint32 { return p.occurrences }
-func (p *pkgVersionNode) getOccurrenceLink() []uint32   { return p.occurrences }
+func (p *pkgVersionNode) setOccurrenceLink(id uint32) { p.occurrences = append(p.occurrences, id) }
+func (p *pkgVersionNode) getOccurrenceLink() []uint32 { return p.occurrences }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
@@ -182,12 +170,11 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 	versionStruct, hasVersions := names[input.Name]
 	if !hasVersions {
 		versionStruct = &pkgVersionStruct{
-			id:               c.getNextID(),
-			parent:           namesStruct.id,
-			name:             input.Name,
-			versions:         pkgVersionList{},
-			srcMapLink:       []uint32{},
-			isDependencyLink: []uint32{},
+			id:         c.getNextID(),
+			parent:     namesStruct.id,
+			name:       input.Name,
+			versions:   pkgVersionList{},
+			srcMapLink: []uint32{},
 		}
 		c.index[versionStruct.id] = versionStruct
 	}
@@ -620,13 +607,10 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 	return v
 }
 
-func (c *demoClient) pkgByID(id uint32) (pkgNameOrVersion, error) {
+func (c *demoClient) pkgVersionByID(id uint32) (*pkgVersionNode, error) {
 	o, ok := c.index[id]
 	if !ok {
 		return nil, errors.New("could not find pkg")
-	}
-	if a, ok := o.(*pkgVersionStruct); ok {
-		return a, nil
 	}
 	if a, ok := o.(*pkgVersionNode); ok {
 		return a, nil

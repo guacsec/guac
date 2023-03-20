@@ -97,6 +97,9 @@ func (p *srcNameNode) getSrcMapLink() []uint32 { return p.srcMapLink }
 func (p *srcNameNode) setScorecardLink(id uint32) { p.scorecardLink = append(p.scorecardLink, id) }
 func (p *srcNameNode) getScorecardLink() []uint32 { return p.scorecardLink }
 
+func (p *srcNameNode) setOccurrences(id uint32) { p.occurrences = append(p.occurrences, id) }
+func (p *srcNameNode) getOccurrences() []uint32 { return p.occurrences }
+
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
 	namespacesStruct, hasNamespace := c.sources[input.Type]

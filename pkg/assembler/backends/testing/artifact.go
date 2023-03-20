@@ -39,6 +39,12 @@ type artStruct struct {
 
 func (n *artStruct) getID() uint32 { return n.id }
 
+func (n *artStruct) getHashEquals() []uint32 { return n.hashEquals }
+func (n *artStruct) setHashEquals(id uint32) { n.hashEquals = append(n.hashEquals, id) }
+
+func (n *artStruct) getOccurrences() []uint32 { return n.occurrences }
+func (n *artStruct) setOccurrences(id uint32) { n.occurrences = append(n.occurrences, id) }
+
 // TODO convert to unit tests
 // func registerAllArtifacts(c *demoClient) {
 // 	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
