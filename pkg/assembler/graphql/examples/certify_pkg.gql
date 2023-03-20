@@ -21,19 +21,19 @@ fragment allCertifyPkg on CertifyPkg {
   collector
 }
 
-query Q1 {
+query CertifyPkgQ1 {
   CertifyPkg(certifyPkgSpec: {}) {
     ...allCertifyPkg
   }
 }
 
-query Q2 {
+query CertifyPkgQ2 {
   CertifyPkg(certifyPkgSpec: {origin: "Demo ingestion"}) {
     ...allCertifyPkg
   }
 }
 
-query Q3 {
+query CertifyPkgQ3 {
   CertifyPkg(
     certifyPkgSpec: {packages: {type: "conan", namespace: "openssl.org", name: "openssl", version: "3.0.3", subpath: ""}}
   ) {
@@ -41,7 +41,7 @@ query Q3 {
   }
 }
 
-query Q4 {
+query CertifyPkgQ4 {
   CertifyPkg(
     certifyPkgSpec: {packages: {type: "pypi", namespace: "", name: "django", version: "1.11.1", subpath: "subpath"}}
   ) {
@@ -49,7 +49,7 @@ query Q4 {
   }
 }
 
-query Q5 {
+query CertifyPkgQ5 {
   CertifyPkg(
     certifyPkgSpec: {packages: {type: "deb", namespace: "debian"}}
   ) {

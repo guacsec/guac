@@ -35,31 +35,31 @@ fragment allHasSBOMTree on HasSBOM {
   collector
 }
 
-query Q1 {
+query HasSBOMQ1 {
   HasSBOM(hasSBOMSpec: {}) {
     ...allHasSBOMTree
   }
 }
 
-query Q2 {
+query HasSBOMQ2 {
   HasSBOM(hasSBOMSpec: {origin: "testing backend"}) {
     ...allHasSBOMTree
   }
 }
 
-query Q3 {
+query HasSBOMQ3 {
   HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}}}) {
     ...allHasSBOMTree
   }
 }
 
-query Q4 {
+query HasSBOMQ4 {
   HasSBOM(hasSBOMSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
     ...allHasSBOMTree
   }
 }
 
-query Q5 {
+query HasSBOMQ5 {
   HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}) {
     ...allHasSBOMTree
   }
