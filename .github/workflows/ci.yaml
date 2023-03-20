@@ -42,7 +42,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # tag=v3
       - name: setup-go
-        uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # tag=v3.2.1
+        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
         with:
           go-version: '1.19'
       - uses: actions/cache@v3
@@ -63,7 +63,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # tag=v3
       - name: setup-go
-        uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # tag=v3.2.1
+        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
         with:
           go-version: '1.19'
       - uses: actions/cache@v3
@@ -82,7 +82,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # tag=v3
       - name: setup-go
-        uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # tag=v3.2.1
+        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
         with:
           go-version: '1.19'
       - name: Install formatter
