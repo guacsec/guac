@@ -121,6 +121,8 @@ type pkgNameOrVersion interface {
 	getSrcMapLink() []uint32
 	setIsDependencyLink(id uint32)
 	getIsDependencyLink() []uint32
+	setOccurrenceLink(id uint32)
+	getOccurrenceLink() []uint32
 }
 
 func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
@@ -146,6 +148,11 @@ func (p *pkgVersionNode) setIsDependencyLink(id uint32) {
 }
 func (p *pkgVersionStruct) getIsDependencyLink() []uint32 { return p.isDependencyLink }
 func (p *pkgVersionNode) getIsDependencyLink() []uint32   { return p.isDependencyLink }
+
+func (p *pkgVersionStruct) setOccurrenceLink(id uint32) { p.occurrences = append(p.occurrences, id) }
+func (p *pkgVersionNode) setOccurrenceLink(id uint32)   { p.occurrences = append(p.occurrences, id) }
+func (p *pkgVersionStruct) getOccurrenceLink() []uint32 { return p.occurrences }
+func (p *pkgVersionNode) getOccurrenceLink() []uint32   { return p.occurrences }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
@@ -613,16 +620,16 @@ func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec)
 	return v
 }
 
-func (c *demoClient) pkgByID(id uint32) (*pkgVersionStruct, *pkgVersionNode, error) {
+func (c *demoClient) pkgByID(id uint32) (pkgNameOrVersion, error) {
 	o, ok := c.index[id]
 	if !ok {
-		return nil, nil, errors.New("could not find source")
+		return nil, errors.New("could not find pkg")
 	}
 	if a, ok := o.(*pkgVersionStruct); ok {
-		return a, nil, nil
+		return a, nil
 	}
 	if a, ok := o.(*pkgVersionNode); ok {
-		return nil, a, nil
+		return a, nil
 	}
-	return nil, nil, errors.New("not a source")
+	return nil, errors.New("not a pkg")
 }

@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -96,79 +95,28 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 		return nil, gqlerror.Errorf("IngestOccurrence :: Artifact not found")
 	}
 
-	// FIXME these sections are copied from ingestPackage/Source or hasSourceAt
 	packageID := maxUint32
 	if subject.Package != nil {
-		packageArg := subject.Package
-		pkgNamespace, pkgHasNamespace := c.packages[packageArg.Type]
-		if !pkgHasNamespace {
-			return nil, gqlerror.Errorf("Package type \"%s\" not found", packageArg.Type)
-		}
-		pkgName, pkgHasName := pkgNamespace.namespaces[nilToEmpty(packageArg.Namespace)]
-		if !pkgHasName {
-			return nil, gqlerror.Errorf("Package namespace \"%s\" not found", nilToEmpty(packageArg.Namespace))
-		}
-		pkgVersion, pkgHasVersion := pkgName.names[packageArg.Name]
-		if !pkgHasVersion {
-			return nil, gqlerror.Errorf("Package name \"%s\" not found", packageArg.Name)
-		}
-		if packageArg.Version == nil {
-			packageID = pkgVersion.id
+		var pmt model.MatchFlags
+		if subject.Package.Version == nil {
+			pmt.Pkg = model.PkgMatchTypeAllVersions
 		} else {
-			found := false
-			for _, version := range pkgVersion.versions {
-				if noMatchInput(packageArg.Version, version.version) {
-					continue
-				}
-				if noMatchInput(packageArg.Subpath, version.subpath) {
-					continue
-				}
-				if !reflect.DeepEqual(version.qualifiers, getQualifiersFromInput(packageArg.Qualifiers)) {
-					continue
-				}
-				if found {
-					return nil, gqlerror.Errorf("More than one package matches input")
-				}
-				packageID = version.id
-				found = true
-			}
-			if !found {
-				return nil, gqlerror.Errorf("No package matches input")
-			}
+			pmt.Pkg = model.PkgMatchTypeSpecificVersion
 		}
+		pid, err := getPackageIDFromInput(c, *subject.Package, pmt)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
+		}
+		packageID = *pid
 	}
 
 	sourceID := maxUint32
 	if subject.Source != nil {
-		source := subject.Source
-		srcNamespace, srcHasNamespace := c.sources[source.Type]
-		if !srcHasNamespace {
-			return nil, gqlerror.Errorf("IngestOccurrence :: Source type \"%s\" not found", source.Type)
+		sid, err := getSourceIDFromInput(c, *subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
 		}
-		srcName, srcHasName := srcNamespace.namespaces[source.Namespace]
-		if !srcHasName {
-			return nil, gqlerror.Errorf("IngestOccurrence :: Source namespace \"%s\" not found", source.Namespace)
-		}
-		found := false
-		for _, src := range srcName.names {
-			if src.name != source.Name {
-				continue
-			}
-			if noMatchInput(source.Tag, src.tag) {
-				continue
-			}
-			if noMatchInput(source.Commit, src.commit) {
-				continue
-			}
-			if found {
-				return nil, gqlerror.Errorf("IngestOccurrence :: More than one source matches input")
-			}
-			sourceID = src.id
-			found = true
-		}
-		if !found {
-			return nil, gqlerror.Errorf("IngestOccurrence :: No source matches input")
-		}
+		sourceID = *sid
 	}
 
 	// could search backedges for pkg/src or artifiact, just do artifact
@@ -195,12 +143,8 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 	c.index[o.id] = o
 	a.occurrences = append(a.occurrences, o.id)
 	if packageID != maxUint32 {
-		pv, pn, _ := c.pkgByID(packageID)
-		if pv != nil {
-			pv.occurrences = append(pv.occurrences, o.id)
-		} else {
-			pn.occurrences = append(pn.occurrences, o.id)
-		}
+		p, _ := c.pkgByID(packageID)
+		p.setOccurrenceLink(o.id)
 	} else {
 		s, _ := c.sourceByID(sourceID)
 		s.occurrences = append(s.occurrences, o.id)
