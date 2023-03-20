@@ -1,4 +1,4 @@
-fragment allCertifyBad on CertifyBad {
+fragment allCertifyBadTree on CertifyBad {
   justification
   subject {
     __typename
@@ -41,31 +41,31 @@ fragment allCertifyBad on CertifyBad {
 
 query CertifactBadQ1 {
   CertifyBad(certifyBadSpec: {}) {
-    ...allCertifyBad
+    ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ2 {
   CertifyBad(certifyBadSpec: {origin: "testing backend"}) {
-    ...allCertifyBad
+    ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ3 {
   CertifyBad(certifyBadSpec: {subject: {package: {name: "openssl"}}}) {
-    ...allCertifyBad
+    ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ4 {
   CertifyBad(certifyBadSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
-    ...allCertifyBad
+    ...allCertifyBadTree
   }
 }
 
 query CertifactBadQ5 {
   CertifyBad(certifyBadSpec: {subject: {artifact: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", algorithm: "sha256"}}}) {
-    ...allCertifyBad
+    ...allCertifyBadTree
   }
 }
 
@@ -73,6 +73,6 @@ query CertifactBadQ6 {
   CertifyBad(
     certifyBadSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
   ) {
-    ...allCertifyBad
+    ...allCertifyBadTree
   }
 }

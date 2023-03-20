@@ -1,4 +1,4 @@
-fragment allCertifyVEXStatement on CertifyVEXStatement {
+fragment allCertifyVEXStatementTree on CertifyVEXStatement {
   subject {
     __typename
     ... on Package {
@@ -45,49 +45,49 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 
 query CertifyVEXStatementQ1 {
   CertifyVEXStatement(certifyVEXStatementSpec: {}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
 
 query CertifyVEXStatementQ2 {
   CertifyVEXStatement(certifyVEXStatementSpec: {origin: "testing backend"}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
 
 query CertifyVEXStatementQ3 {
   CertifyVEXStatement(certifyVEXStatementSpec: {subject: {package: {name: "openssl"}}}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
 
 
 query CertifyVEXStatementQ4 {
   CertifyVEXStatement(certifyVEXStatementSpec: {subject: {artifact: {algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}}}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
 
 query CertifyVEXStatementQ5 {
   CertifyVEXStatement(certifyVEXStatementSpec: {vulnerability: {cve: {cveId: "CVE-2019-13110"}}}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
 
 query CertifyVEXStatementQ6 {
   CertifyVEXStatement(certifyVEXStatementSpec: {vulnerability: {ghsa: {ghsaId: "GHSA-h45f-rjvw-2rv2"}}}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
 
 query CertifyVEXStatementQ7 {
   CertifyVEXStatement(certifyVEXStatementSpec: {vulnerability: {cve: {cveId: "CVE-2018-43610"}}}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
 
 query CertifyVEXStatementQ8 {
   CertifyVEXStatement(certifyVEXStatementSpec: {vulnerability: {ghsa: {ghsaId: "GHSA-hj5f-4gvw-4rv2"}}}) {
-    ...allCertifyVEXStatement
+    ...allCertifyVEXStatementTree
   }
 }
