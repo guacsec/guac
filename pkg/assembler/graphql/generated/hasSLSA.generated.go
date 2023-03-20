@@ -1010,7 +1010,7 @@ func (ec *executionContext) _PackageSourceOrArtifact(ctx context.Context, sel as
 
 // region    **************************** object.gotpl ****************************
 
-var hasSLSAImplementors = []string{"HasSLSA"}
+var hasSLSAImplementors = []string{"HasSLSA", "Nodes"}
 
 func (ec *executionContext) _HasSLSA(ctx context.Context, sel ast.SelectionSet, obj *model.HasSlsa) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hasSLSAImplementors)

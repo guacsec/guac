@@ -14,6 +14,13 @@ type CveOrGhsa interface {
 	IsCveOrGhsa()
 }
 
+// Nodes is a union type of all the possible nodes. It encapsulates the software tree nodes along with the evidence nodes.
+// In a path query, all connecting evidence nodes along with their intermediate subject nodes need to be returned
+// in order to create a complete graph.
+type Nodes interface {
+	IsNodes()
+}
+
 // OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
 type OsvCveOrGhsa interface {
 	IsOsvCveOrGhsa()
@@ -50,6 +57,8 @@ func (Artifact) IsPackageOrArtifact() {}
 
 func (Artifact) IsPackageSourceOrArtifact() {}
 
+func (Artifact) IsNodes() {}
+
 // ArtifactInputSpec is the same as Artifact, but used as mutation input.
 //
 // Both arguments will be canonicalized to lowercase.
@@ -72,6 +81,8 @@ type ArtifactSpec struct {
 type Builder struct {
 	URI string `json:"uri"`
 }
+
+func (Builder) IsNodes() {}
 
 // BuilderInputSpec is the same as Builder, but used for mutation ingestion.
 type BuilderInputSpec struct {
@@ -99,6 +110,8 @@ type Cve struct {
 func (Cve) IsOsvCveOrGhsa() {}
 
 func (Cve) IsCveOrGhsa() {}
+
+func (Cve) IsNodes() {}
 
 // CVEId is the actual ID that is given to a specific vulnerability
 //
@@ -138,6 +151,8 @@ type CertifyBad struct {
 	Collector     string                  `json:"collector"`
 }
 
+func (CertifyBad) IsNodes() {}
+
 // CertifyBadInputSpec is the same as CertifyBad but for mutation input.
 //
 // All fields are required.
@@ -171,6 +186,8 @@ type CertifyPkg struct {
 	Collector     string     `json:"collector"`
 }
 
+func (CertifyPkg) IsNodes() {}
+
 // CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
 //
 // All fields are required.
@@ -199,6 +216,8 @@ type CertifyScorecard struct {
 	// The Scorecard attached to the repository (attestation object)
 	Scorecard *Scorecard `json:"scorecard"`
 }
+
+func (CertifyScorecard) IsNodes() {}
 
 // CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
 type CertifyScorecardSpec struct {
@@ -230,6 +249,8 @@ type CertifyVEXStatement struct {
 	Collector     string            `json:"collector"`
 }
 
+func (CertifyVEXStatement) IsNodes() {}
+
 // CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
 // Only package or artifact and CVE or GHSA can be specified at once.
 type CertifyVEXStatementSpec struct {
@@ -250,6 +271,8 @@ type CertifyVuln struct {
 	// metadata (property) - contains all the vulnerability metadata
 	Metadata *VulnerabilityMetaData `json:"metadata"`
 }
+
+func (CertifyVuln) IsNodes() {}
 
 // CertifyVulnSpec allows filtering the list of CertifyVuln to return.
 //
@@ -295,6 +318,8 @@ func (Ghsa) IsOsvCveOrGhsa() {}
 
 func (Ghsa) IsCveOrGhsa() {}
 
+func (Ghsa) IsNodes() {}
+
 // GHSAId is the actual ID that is given to a specific vulnerability on GitHub
 //
 // The `id` field is mandatory and canonicalized to be lowercase.
@@ -333,6 +358,8 @@ type HasSbom struct {
 	Collector string          `json:"collector"`
 }
 
+func (HasSbom) IsNodes() {}
+
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 //
 // All fields are required.
@@ -360,6 +387,8 @@ type HasSlsa struct {
 	// The SLSA attestation.
 	Slsa *Slsa `json:"slsa"`
 }
+
+func (HasSlsa) IsNodes() {}
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
@@ -392,6 +421,8 @@ type HasSourceAt struct {
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
 }
+
+func (HasSourceAt) IsNodes() {}
 
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 //
@@ -426,6 +457,8 @@ type HashEqual struct {
 	Origin        string      `json:"origin"`
 	Collector     string      `json:"collector"`
 }
+
+func (HashEqual) IsNodes() {}
 
 // HashEqualInputSpec is the same as HashEqual but for mutation input.
 //
@@ -463,6 +496,8 @@ type IsDependency struct {
 	Origin           string   `json:"origin"`
 	Collector        string   `json:"collector"`
 }
+
+func (IsDependency) IsNodes() {}
 
 // IsDependencyInputSpec is the same as IsDependency but for mutation input.
 //
@@ -505,6 +540,8 @@ type IsOccurrence struct {
 	Collector string `json:"collector"`
 }
 
+func (IsOccurrence) IsNodes() {}
+
 // IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
 //
 // All fields are required.
@@ -542,6 +579,8 @@ type IsVulnerability struct {
 	Collector     string    `json:"collector"`
 }
 
+func (IsVulnerability) IsNodes() {}
+
 // IsVulnerabilityInputSpec is the same as IsVulnerability but for mutation input.
 //
 // All fields are required.
@@ -575,6 +614,8 @@ type Osv struct {
 }
 
 func (Osv) IsOsvCveOrGhsa() {}
+
+func (Osv) IsNodes() {}
 
 // OSVId is the actual ID that is given to a specific vulnerability.
 //
@@ -641,6 +682,8 @@ func (Package) IsPackageOrArtifact() {}
 func (Package) IsPackageSourceOrArtifact() {}
 
 func (Package) IsPackageOrSource() {}
+
+func (Package) IsNodes() {}
 
 // PackageName is a name for packages.
 //
@@ -743,6 +786,20 @@ type PackageQualifierInputSpec struct {
 type PackageQualifierSpec struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value"`
+}
+
+// PackageSourceArtifactBuilderOsvCveOrGhsaFilter allows for all the software tree node types to be
+// specified for the subject or the end target in a path query.
+//
+// Exactly one of the value must be set to non-nil.
+type PackageSourceArtifactBuilderOsvCveOrGhsaFilter struct {
+	Package  *PkgSpec      `json:"package"`
+	Source   *SourceSpec   `json:"source"`
+	Artifact *ArtifactSpec `json:"artifact"`
+	Builder  *BuilderSpec  `json:"builder"`
+	Osv      *OSVSpec      `json:"osv"`
+	Cve      *CVESpec      `json:"cve"`
+	Ghsa     *GHSASpec     `json:"ghsa"`
 }
 
 // PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
@@ -1010,6 +1067,8 @@ type Source struct {
 func (Source) IsPackageSourceOrArtifact() {}
 
 func (Source) IsPackageOrSource() {}
+
+func (Source) IsNodes() {}
 
 // SourceInputSpec specifies a source for a mutation.
 //

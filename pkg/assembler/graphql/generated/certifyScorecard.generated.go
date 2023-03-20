@@ -843,7 +843,7 @@ func (ec *executionContext) unmarshalInputScorecardInputSpec(ctx context.Context
 
 // region    **************************** object.gotpl ****************************
 
-var certifyScorecardImplementors = []string{"CertifyScorecard"}
+var certifyScorecardImplementors = []string{"CertifyScorecard", "Nodes"}
 
 func (ec *executionContext) _CertifyScorecard(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyScorecard) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyScorecardImplementors)

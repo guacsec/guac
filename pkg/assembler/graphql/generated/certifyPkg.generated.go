@@ -320,7 +320,7 @@ func (ec *executionContext) unmarshalInputCertifyPkgSpec(ctx context.Context, ob
 
 // region    **************************** object.gotpl ****************************
 
-var certifyPkgImplementors = []string{"CertifyPkg"}
+var certifyPkgImplementors = []string{"CertifyPkg", "Nodes"}
 
 func (ec *executionContext) _CertifyPkg(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyPkg) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyPkgImplementors)
