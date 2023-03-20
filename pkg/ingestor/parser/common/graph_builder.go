@@ -17,6 +17,7 @@ package common
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -120,4 +121,37 @@ func GetIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpe
 		}
 	}
 	return nil, nil
+}
+
+func CreateTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]model.PkgInputSpec, files map[string][]model.PkgInputSpec, justification string) []assembler.IsDependencyIngest {
+	isDeps := []assembler.IsDependencyIngest{}
+	for _, packNodes := range packages {
+		for _, packNode := range packNodes {
+			if !reflect.DeepEqual(packNode, toplevel) {
+				p := assembler.IsDependencyIngest{
+					Pkg:    &toplevel,
+					DepPkg: &packNode,
+					IsDependency: &model.IsDependencyInputSpec{
+						Justification: justification,
+					},
+				}
+				isDeps = append(isDeps, p)
+			}
+		}
+	}
+
+	for _, fileNodes := range files {
+		for _, fileNode := range fileNodes {
+			p := assembler.IsDependencyIngest{
+				Pkg:    &toplevel,
+				DepPkg: &fileNode,
+				IsDependency: &model.IsDependencyInputSpec{
+					Justification: justification,
+				},
+			}
+			isDeps = append(isDeps, p)
+		}
+	}
+
+	return isDeps
 }

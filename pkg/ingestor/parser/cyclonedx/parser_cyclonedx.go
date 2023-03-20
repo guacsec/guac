@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"reflect"
 	"strings"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
@@ -69,6 +70,7 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 		if cdxBom.Metadata.Component.PackageURL == "" {
 			if cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
 				splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
+
 				const (
 					ociPrefix        = "pkg:oci/"
 					repositoryURLKey = "?repository_url="
@@ -152,7 +154,13 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 
 	preds := &assembler.IngestPredicates{}
 
-	if *c.cdxBom.Dependencies == nil {
+	toplevel := c.getPackageElement(string(c.cdxBom.Metadata.Component.BOMRef))
+	// adding top level package edge manually for all depends on package
+	if toplevel != nil {
+		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
+	}
+
+	if c.cdxBom.Dependencies == nil {
 		return preds
 	}
 
@@ -161,13 +169,16 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		if !found {
 			continue
 		}
+		if reflect.DeepEqual(currPkg, toplevel) {
+			continue
+		}
 		if deps.Dependencies != nil {
 			for _, depPkg := range *deps.Dependencies {
 				if depPkg, exist := c.packagePackages[depPkg]; exist {
 					for _, packNode := range currPkg {
 						p, err := common.GetIsDep(packNode, depPkg, []model.PkgInputSpec{}, "BOM Dependency")
 						if err != nil {
-							logger.Errorf("error generating spdx edge %v", err)
+							logger.Errorf("error generating CycloneDX edge %v", err)
 							continue
 						}
 						if p != nil {
@@ -180,4 +191,11 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	}
 
 	return preds
+}
+
+func (s *cyclonedxParser) getPackageElement(elementID string) []model.PkgInputSpec {
+	if packNode, ok := s.packagePackages[string(elementID)]; ok {
+		return packNode
+	}
+	return nil
 }

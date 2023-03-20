@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler"
@@ -186,7 +185,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	toplevel := s.getPackageElement("DOCUMENT")
 	// adding top level package edge manually for all depends on package
 	if toplevel != nil {
-		preds.IsDependency = append(preds.IsDependency, createTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages, "top-level package GUAC heuristic connecting to each file/package")...)
+		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages, "top-level package GUAC heuristic connecting to each file/package")...)
 	}
 	for _, rel := range s.spdxDoc.Relationships {
 
@@ -260,39 +259,6 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 
 func getIsDep(packNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) {
 	panic("unimplemented")
-}
-
-func createTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]model.PkgInputSpec, files map[string][]model.PkgInputSpec, justification string) []assembler.IsDependencyIngest {
-	isDeps := []assembler.IsDependencyIngest{}
-	for _, packNodes := range packages {
-		for _, packNode := range packNodes {
-			if !reflect.DeepEqual(packNode, toplevel) {
-				p := assembler.IsDependencyIngest{
-					Pkg:    &toplevel,
-					DepPkg: &packNode,
-					IsDependency: &model.IsDependencyInputSpec{
-						Justification: justification,
-					},
-				}
-				isDeps = append(isDeps, p)
-			}
-		}
-	}
-
-	for _, fileNodes := range files {
-		for _, fileNode := range fileNodes {
-			p := assembler.IsDependencyIngest{
-				Pkg:    &toplevel,
-				DepPkg: &fileNode,
-				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-				},
-			}
-			isDeps = append(isDeps, p)
-		}
-	}
-
-	return isDeps
 }
 
 func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformation {

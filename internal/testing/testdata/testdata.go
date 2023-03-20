@@ -324,6 +324,9 @@ var (
 	isDepJustifyDepends = &model.IsDependencyInputSpec{
 		Justification: "Derived from SPDX DEPENDS_ON relationship",
 	}
+	isCDXDepJustifyDepends = &model.IsDependencyInputSpec{
+		Justification: "BOM Dependency",
+	}
 
 	isOccJustifyFile = &model.IsOccurrenceInputSpec{
 		Justification: "spdx file with checksum",
@@ -468,8 +471,9 @@ var (
 			IsDependency: isDepJustifyTopPkg,
 		},
 		{
-			Pkg:    cdxResteasyPack,
-			DepPkg: cdxReactiveCommonPack,
+			Pkg:          cdxResteasyPack,
+			DepPkg:       cdxReactiveCommonPack,
+			IsDependency: isCDXDepJustifyDepends,
 		},
 	}
 
@@ -483,8 +487,9 @@ var (
 
 	CdxNpmDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:    cdxWebAppPackage,
-			DepPkg: cdxBootstrapPackage,
+			Pkg:          cdxWebAppPackage,
+			DepPkg:       cdxBootstrapPackage,
+			IsDependency: isDepJustifyTopPkg,
 		},
 	}
 
