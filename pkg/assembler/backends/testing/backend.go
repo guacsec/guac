@@ -17,6 +17,7 @@ package testing
 
 import (
 	"fmt"
+	"strings"
 	"sync/atomic"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -149,4 +150,12 @@ func nilToEmpty(input *string) string {
 		return ""
 	}
 	return *input
+}
+
+func toLower(filter *string) *string {
+	if filter != nil {
+		lower := strings.ToLower(*filter)
+		return &lower
+	}
+	return nil
 }

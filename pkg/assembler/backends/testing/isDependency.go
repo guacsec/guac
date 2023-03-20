@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -188,7 +187,7 @@ func buildIsDependency(c *demoClient, link *isDependencyLink, filter *model.IsDe
 	}
 
 	foundIsDependency := model.IsDependency{
-		ID:               fmt.Sprintf("%d", link.id),
+		ID:               nodeID(link.id),
 		Package:          p,
 		DependentPackage: dep,
 		VersionRange:     link.versionRange,

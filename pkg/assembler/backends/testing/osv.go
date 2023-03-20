@@ -181,14 +181,6 @@ func (c *demoClient) buildOsvResponse(id uint32, filter *model.OSVSpec) (*model.
 	return &s, nil
 }
 
-func toLower(filter *string) *string {
-	if filter != nil {
-		lower := strings.ToLower(*filter)
-		return &lower
-	}
-	return nil
-}
-
 // TODO: remove
 func filterOSVID(osv *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
 	var osvID []*model.OSVId

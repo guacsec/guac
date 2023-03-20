@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -180,7 +179,7 @@ func buildHasSourceAt(c *demoClient, link *srcMapLink, filter *model.HasSourceAt
 	}
 
 	newHSA := model.HasSourceAt{
-		ID:            fmt.Sprintf("%d", link.id),
+		ID:            nodeID(link.id),
 		Package:       p,
 		Source:        s,
 		KnownSince:    link.knownSince,
