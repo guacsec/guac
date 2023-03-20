@@ -1,33 +1,3 @@
-fragment allPkgTree on Package {
-  type
-  namespaces {
-    namespace
-    names {
-      name
-      versions {
-        version
-        qualifiers {
-          key
-          value
-        }
-        subpath
-      }
-    }
-  }
-}
-
-fragment allSrcTree on Source {
-  type
-  namespaces {
-    namespace
-    names {
-      name
-      tag
-      commit
-    }
-  }
-}
-
 fragment allSLSATree on HasSLSA {
   subject {
     __typename
@@ -42,32 +12,34 @@ fragment allSLSATree on HasSLSA {
       digest
     }
   }
-  builtFrom {
-    __typename
-    ... on Package {
-      ...allPkgTree
-    }
-    ... on Source {
-      ...allSrcTree
-    }
-    ... on Artifact {
-      algorithm
-      digest
-    }
+  slsa {
+      builtFrom {
+        __typename
+        ... on Package {
+          ...allPkgTree
+        }
+        ... on Source {
+          ...allSrcTree
+        }
+        ... on Artifact {
+          algorithm
+          digest
+        }
+      }
+      builtBy {
+        uri
+      }
+      buildType
+      slsaPredicate {
+        key
+        value
+      }
+      slsaVersion
+      startedOn
+      finishedOn
+      origin
+      collector
   }
-  builtBy {
-    uri
-  }
-  buildType
-  slsaPredicate {
-    key
-    value
-  }
-  slsaVersion
-  startedOn
-  finishedOn
-  origin
-  collector
 }
 
 query SLSAQ1 {
@@ -83,7 +55,7 @@ query SLSAQ2 {
 }
 
 query SLSAQ3 {
-  HasSLSA(hasSLSASpec: {package: {name: "django"}}) {
+  HasSLSA(hasSLSASpec: {subject: {package: {name: "django"}}}) {
     ...allSLSATree
   }
 }

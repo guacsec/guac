@@ -3,13 +3,13 @@ fragment allArtifactTree on Artifact {
   digest
 }
 
-query ArtQ1 {
+query ArtifactQ1 {
   artifacts(artifactSpec: {}) {
     ...allArtifactTree
   }
 }
 
-query ArtQ2 {
+query ArtifactQ2 {
   artifacts(
     artifactSpec: {algorithm: "sha256", digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}
   ) {
@@ -17,7 +17,7 @@ query ArtQ2 {
   }
 }
 
-query ArtQ3 {
+query ArtifactQ3 {
   artifacts(
     artifactSpec: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"}
   ) {
@@ -25,37 +25,37 @@ query ArtQ3 {
   }
 }
 
-query ArtQ4 {
+query ArtifactQ4 {
   artifacts(artifactSpec: {algorithm: "sha512"}) {
     ...allArtifactTree
   }
 }
 
-query ArtQ5 {
+query ArtifactQ5 {
   artifacts(artifactSpec: {digest: "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"}) {
     ...allArtifactTree
   }
 }
 
-mutation ArtM1 {
+mutation ArtifactM1 {
   ingestArtifact(artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}) {
     ...allArtifactTree
   }
 }
 
-mutation ArtM2 {
+mutation ArtifactM2 {
   ingestArtifact(artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}) {
     ...allArtifactTree
   }
 }
 
-query BQ1 {
+query BuilderQ1 {
   builders(builderSpec: {}) {
     uri
   }
 }
 
-query BQ2 {
+query BuilderQ2 {
   builders(
     builderSpec: {uri: "https://github.com/Attestations/GitHubHostedActions@v1"}
   ) {
@@ -63,7 +63,7 @@ query BQ2 {
   }
 }
 
-mutation BM1 {
+mutation BuilderM1 {
   ingestBuilder(builder: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"}) {
     uri
   }

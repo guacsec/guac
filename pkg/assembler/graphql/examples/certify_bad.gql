@@ -39,37 +39,37 @@ fragment allCertifyBad on CertifyBad {
   collector
 }
 
-query Q1 {
+query CertifactBadQ1 {
   CertifyBad(certifyBadSpec: {}) {
     ...allCertifyBad
   }
 }
 
-query Q2 {
+query CertifactBadQ2 {
   CertifyBad(certifyBadSpec: {origin: "testing backend"}) {
     ...allCertifyBad
   }
 }
 
-query Q3 {
+query CertifactBadQ3 {
   CertifyBad(certifyBadSpec: {subject: {package: {name: "openssl"}}}) {
     ...allCertifyBad
   }
 }
 
-query Q4 {
+query CertifactBadQ4 {
   CertifyBad(certifyBadSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
     ...allCertifyBad
   }
 }
 
-query Q5 {
+query CertifactBadQ5 {
   CertifyBad(certifyBadSpec: {subject: {artifact: {digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf", algorithm: "sha256"}}}) {
     ...allCertifyBad
   }
 }
 
-query Q6 {
+query CertifactBadQ6 {
   CertifyBad(
     certifyBadSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
   ) {

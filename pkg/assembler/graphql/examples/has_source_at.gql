@@ -41,26 +41,26 @@ fragment allHasSourceAt on HasSourceAt {
   collector
 }
 
-query Q1 {
+query HasSourceAtQ1 {
   HasSourceAt(hasSourceAtSpec: {}) {
     ...allHasSourceAt
   }
 }
 
-query Q2 {
+query HasSourceAtQ2 {
   HasSourceAt(hasSourceAtSpec: {origin: "testing backend"}) {
     ...allHasSourceAt
   }
 }
 
 # this will return nothing as we are not ingesting package openssl in testdata
-query Q3 {
+query HasSourceAtQ3 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "openssl", version: "3.0.3"}})  {
     ...allHasSourceAt
   }
 }
 
-query Q4 {
+query HasSourceAtQ4 {
   HasSourceAt(
     hasSourceAtSpec: {source: {name: "https://github.com/django/django"}}
   ) {
@@ -68,13 +68,13 @@ query Q4 {
   }
 }
 
-query Q5 {
+query HasSourceAtQ5 {
   HasSourceAt(hasSourceAtSpec: {package: {name: "kubetest"}}) {
     ...allHasSourceAt
   }
 }
 
-query Q6 {
+query HasSourceAtQ6 {
   HasSourceAt(
     hasSourceAtSpec: {source: {name: "https://github.com/vapor-ware/kubetest"}}
   ) {

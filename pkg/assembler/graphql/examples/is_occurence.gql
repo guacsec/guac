@@ -39,37 +39,37 @@ fragment allIsOccurrencesTree on IsOccurrence {
   collector
 }
 
-query Q1 {
+query IsOccurrenceQ1 {
   IsOccurrence(isOccurrenceSpec: {}) {
     ...allIsOccurrencesTree
   }
 }
 
-query Q2 {
+query IsOccurrenceQ2 {
   IsOccurrence(isOccurrenceSpec: {origin: "testing backend"}) {
     ...allIsOccurrencesTree
   }
 }
 
-query Q3 {
+query IsOccurrenceQ3 {
   IsOccurrence(isOccurrenceSpec: {subject: {package: {name: "openssl"}}}) {
     ...allIsOccurrencesTree
   }
 }
 
-query Q4 {
+query IsOccurrenceQ4 {
   IsOccurrence(isOccurrenceSpec: {subject: {package: {name: "openssl", version: "3.0.3"}}}) {
     ...allIsOccurrencesTree
   }
 }
 
-query Q5 {
+query IsOccurrenceQ5 {
   IsOccurrence(isOccurrenceSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
     ...allIsOccurrencesTree
   }
 }
 
-query Q6 {
+query IsOccurrenceQ6 {
   IsOccurrence(
     isOccurrenceSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
   ) {
