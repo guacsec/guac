@@ -72,9 +72,9 @@ type ArtifactInputSpec struct {
 //
 // Both arguments will be canonicalized to lowercase.
 type ArtifactSpec struct {
-	ID        *string `json:"id"`
-	Algorithm *string `json:"algorithm"`
-	Digest    *string `json:"digest"`
+	ID        *string `json:"id,omitempty"`
+	Algorithm *string `json:"algorithm,omitempty"`
+	Digest    *string `json:"digest,omitempty"`
 }
 
 // Builder represents the builder such as (FRSCA or github actions).
@@ -93,7 +93,7 @@ type BuilderInputSpec struct {
 
 // BuilderSpec allows filtering the list of builders to return.
 type BuilderSpec struct {
-	URI *string `json:"uri"`
+	URI *string `json:"uri,omitempty"`
 }
 
 // CVE represents common vulnerabilities and exposures. It contains the year along
@@ -133,9 +133,9 @@ type CVEInputSpec struct {
 
 // CVESpec allows filtering the list of cves to return.
 type CVESpec struct {
-	ID    *string `json:"id"`
-	Year  *int    `json:"year"`
-	CveID *string `json:"cveId"`
+	ID    *string `json:"id,omitempty"`
+	Year  *int    `json:"year,omitempty"`
+	CveID *string `json:"cveId,omitempty"`
 }
 
 // CertifyBad is an attestation represents when a package, source or artifact is considered bad
@@ -169,10 +169,10 @@ type CertifyBadInputSpec struct {
 // For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
 // For source - a SourceName must be specified (name, tag or commit)
 type CertifyBadSpec struct {
-	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
-	Justification *string                      `json:"justification"`
-	Origin        *string                      `json:"origin"`
-	Collector     *string                      `json:"collector"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
+	Justification *string                      `json:"justification,omitempty"`
+	Origin        *string                      `json:"origin,omitempty"`
+	Collector     *string                      `json:"collector,omitempty"`
 }
 
 // CertifyPkg is an attestation that represents when a package objects are similar
@@ -203,10 +203,10 @@ type CertifyPkgInputSpec struct {
 //
 // Specifying just the package allows to query for all similar packages (if they exist)
 type CertifyPkgSpec struct {
-	Packages      []*PkgSpec `json:"packages"`
-	Justification *string    `json:"justification"`
-	Origin        *string    `json:"origin"`
-	Collector     *string    `json:"collector"`
+	Packages      []*PkgSpec `json:"packages,omitempty"`
+	Justification *string    `json:"justification,omitempty"`
+	Origin        *string    `json:"origin,omitempty"`
+	Collector     *string    `json:"collector,omitempty"`
 }
 
 // CertifyScorecard is an attestation which represents the scorecard of a
@@ -223,15 +223,15 @@ func (CertifyScorecard) IsNodes() {}
 
 // CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
 type CertifyScorecardSpec struct {
-	ID               *string               `json:"id"`
-	Source           *SourceSpec           `json:"source"`
-	TimeScanned      *time.Time            `json:"timeScanned"`
-	AggregateScore   *float64              `json:"aggregateScore"`
-	Checks           []*ScorecardCheckSpec `json:"checks"`
-	ScorecardVersion *string               `json:"scorecardVersion"`
-	ScorecardCommit  *string               `json:"scorecardCommit"`
-	Origin           *string               `json:"origin"`
-	Collector        *string               `json:"collector"`
+	ID               *string               `json:"id,omitempty"`
+	Source           *SourceSpec           `json:"source,omitempty"`
+	TimeScanned      *time.Time            `json:"timeScanned,omitempty"`
+	AggregateScore   *float64              `json:"aggregateScore,omitempty"`
+	Checks           []*ScorecardCheckSpec `json:"checks,omitempty"`
+	ScorecardVersion *string               `json:"scorecardVersion,omitempty"`
+	ScorecardCommit  *string               `json:"scorecardCommit,omitempty"`
+	Origin           *string               `json:"origin,omitempty"`
+	Collector        *string               `json:"collector,omitempty"`
 }
 
 // CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
@@ -256,12 +256,12 @@ func (CertifyVEXStatement) IsNodes() {}
 // CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
 // Only package or artifact and CVE or GHSA can be specified at once.
 type CertifyVEXStatementSpec struct {
-	Subject       *PackageOrArtifactSpec `json:"subject"`
-	Vulnerability *CveOrGhsaSpec         `json:"vulnerability"`
-	Justification *string                `json:"justification"`
-	KnownSince    *time.Time             `json:"knownSince"`
-	Origin        *string                `json:"origin"`
-	Collector     *string                `json:"collector"`
+	Subject       *PackageOrArtifactSpec `json:"subject,omitempty"`
+	Vulnerability *CveOrGhsaSpec         `json:"vulnerability,omitempty"`
+	Justification *string                `json:"justification,omitempty"`
+	KnownSince    *time.Time             `json:"knownSince,omitempty"`
+	Origin        *string                `json:"origin,omitempty"`
+	Collector     *string                `json:"collector,omitempty"`
 }
 
 // CertifyVuln is an attestation that represents when a package has a vulnerability
@@ -281,31 +281,31 @@ func (CertifyVuln) IsNodes() {}
 // Specifying just the package allows to query for all vulnerabilities associated with the package.
 // Only OSV, CVE or GHSA can be specified at once
 type CertifyVulnSpec struct {
-	Package        *PkgSpec          `json:"package"`
-	Vulnerability  *OsvCveOrGhsaSpec `json:"vulnerability"`
-	TimeScanned    *time.Time        `json:"timeScanned"`
-	DbURI          *string           `json:"dbUri"`
-	DbVersion      *string           `json:"dbVersion"`
-	ScannerURI     *string           `json:"scannerUri"`
-	ScannerVersion *string           `json:"scannerVersion"`
-	Origin         *string           `json:"origin"`
-	Collector      *string           `json:"collector"`
+	Package        *PkgSpec          `json:"package,omitempty"`
+	Vulnerability  *OsvCveOrGhsaSpec `json:"vulnerability,omitempty"`
+	TimeScanned    *time.Time        `json:"timeScanned,omitempty"`
+	DbURI          *string           `json:"dbUri,omitempty"`
+	DbVersion      *string           `json:"dbVersion,omitempty"`
+	ScannerURI     *string           `json:"scannerUri,omitempty"`
+	ScannerVersion *string           `json:"scannerVersion,omitempty"`
+	Origin         *string           `json:"origin,omitempty"`
+	Collector      *string           `json:"collector,omitempty"`
 }
 
 // CveOrGhsaInput allows using CveOrGhsa union as
 // input type to be used in mutations.
 // Exactly one of the value must be set to non-nil.
 type CveOrGhsaInput struct {
-	Cve  *CVEInputSpec  `json:"cve"`
-	Ghsa *GHSAInputSpec `json:"ghsa"`
+	Cve  *CVEInputSpec  `json:"cve,omitempty"`
+	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
 }
 
 // CveOrGhsaSpec allows using CveOrGhsa union as
 // input type to be used in read queries.
 // Exactly one of the value must be set to non-nil.
 type CveOrGhsaSpec struct {
-	Cve  *CVESpec  `json:"cve"`
-	Ghsa *GHSASpec `json:"ghsa"`
+	Cve  *CVESpec  `json:"cve,omitempty"`
+	Ghsa *GHSASpec `json:"ghsa,omitempty"`
 }
 
 // GHSA represents GitHub security advisories.
@@ -341,8 +341,8 @@ type GHSAInputSpec struct {
 //
 // The argument will be canonicalized to lowercase.
 type GHSASpec struct {
-	ID     *string `json:"id"`
-	GhsaID *string `json:"ghsaId"`
+	ID     *string `json:"id,omitempty"`
+	GhsaID *string `json:"ghsaId,omitempty"`
 }
 
 // HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
@@ -376,10 +376,10 @@ type HasSBOMInputSpec struct {
 // Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
 // relationship.
 type HasSBOMSpec struct {
-	Subject   *PackageOrSourceSpec `json:"subject"`
-	URI       *string              `json:"uri"`
-	Origin    *string              `json:"origin"`
-	Collector *string              `json:"collector"`
+	Subject   *PackageOrSourceSpec `json:"subject,omitempty"`
+	URI       *string              `json:"uri,omitempty"`
+	Origin    *string              `json:"origin,omitempty"`
+	Collector *string              `json:"collector,omitempty"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.
@@ -387,23 +387,23 @@ type HasSlsa struct {
 	// The subject of SLSA attestation: package, source, or artifact.
 	Subject PackageSourceOrArtifact `json:"subject"`
 	// The SLSA attestation.
-	Slsa *Slsa `json:"slsa"`
+	Slsa *Slsa `json:"slsa,omitempty"`
 }
 
 func (HasSlsa) IsNodes() {}
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
-	Subject     *PackageSourceOrArtifactSpec   `json:"subject"`
-	BuiltFrom   []*PackageSourceOrArtifactSpec `json:"builtFrom"`
-	BuiltBy     *BuilderSpec                   `json:"builtBy"`
-	BuildType   *string                        `json:"buildType"`
-	Predicate   []*SLSAPredicateSpec           `json:"predicate"`
-	SlsaVersion *string                        `json:"slsaVersion"`
-	StartedOn   *time.Time                     `json:"startedOn"`
-	FinishedOn  *time.Time                     `json:"finishedOn"`
-	Origin      *string                        `json:"origin"`
-	Collector   *string                        `json:"collector"`
+	Subject     *PackageSourceOrArtifactSpec   `json:"subject,omitempty"`
+	BuiltFrom   []*PackageSourceOrArtifactSpec `json:"builtFrom,omitempty"`
+	BuiltBy     *BuilderSpec                   `json:"builtBy,omitempty"`
+	BuildType   *string                        `json:"buildType,omitempty"`
+	Predicate   []*SLSAPredicateSpec           `json:"predicate,omitempty"`
+	SlsaVersion *string                        `json:"slsaVersion,omitempty"`
+	StartedOn   *time.Time                     `json:"startedOn,omitempty"`
+	FinishedOn  *time.Time                     `json:"finishedOn,omitempty"`
+	Origin      *string                        `json:"origin,omitempty"`
+	Collector   *string                        `json:"collector,omitempty"`
 }
 
 // HasSourceAt is an attestation represents that a package object has a source object since a timestamp
@@ -438,13 +438,13 @@ type HasSourceAtInputSpec struct {
 
 // HasSourceAtSpec allows filtering the list of HasSourceAt to return.
 type HasSourceAtSpec struct {
-	ID            *string     `json:"id"`
-	Package       *PkgSpec    `json:"package"`
-	Source        *SourceSpec `json:"source"`
-	KnownSince    *time.Time  `json:"knownSince"`
-	Justification *string     `json:"justification"`
-	Origin        *string     `json:"origin"`
-	Collector     *string     `json:"collector"`
+	ID            *string     `json:"id,omitempty"`
+	Package       *PkgSpec    `json:"package,omitempty"`
+	Source        *SourceSpec `json:"source,omitempty"`
+	KnownSince    *time.Time  `json:"knownSince,omitempty"`
+	Justification *string     `json:"justification,omitempty"`
+	Origin        *string     `json:"origin,omitempty"`
+	Collector     *string     `json:"collector,omitempty"`
 }
 
 // HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
@@ -476,11 +476,11 @@ type HashEqualInputSpec struct {
 //
 // Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
 type HashEqualSpec struct {
-	ID            *string         `json:"id"`
-	Artifacts     []*ArtifactSpec `json:"artifacts"`
-	Justification *string         `json:"justification"`
-	Origin        *string         `json:"origin"`
-	Collector     *string         `json:"collector"`
+	ID            *string         `json:"id,omitempty"`
+	Artifacts     []*ArtifactSpec `json:"artifacts,omitempty"`
+	Justification *string         `json:"justification,omitempty"`
+	Origin        *string         `json:"origin,omitempty"`
+	Collector     *string         `json:"collector,omitempty"`
 }
 
 // IsDependency is an attestation that represents when a package is dependent on another package
@@ -518,13 +518,13 @@ type IsDependencyInputSpec struct {
 // Note: the package object must be defined to return its dependent packages.
 // Dependent Packages must represent the packageName (cannot be the packageVersion)
 type IsDependencySpec struct {
-	ID               *string      `json:"id"`
-	Package          *PkgSpec     `json:"package"`
-	DependentPackage *PkgNameSpec `json:"dependentPackage"`
-	VersionRange     *string      `json:"versionRange"`
-	Justification    *string      `json:"justification"`
-	Origin           *string      `json:"origin"`
-	Collector        *string      `json:"collector"`
+	ID               *string      `json:"id,omitempty"`
+	Package          *PkgSpec     `json:"package,omitempty"`
+	DependentPackage *PkgNameSpec `json:"dependentPackage,omitempty"`
+	VersionRange     *string      `json:"versionRange,omitempty"`
+	Justification    *string      `json:"justification,omitempty"`
+	Origin           *string      `json:"origin,omitempty"`
+	Collector        *string      `json:"collector,omitempty"`
 }
 
 // IsOccurrence is an attestation represents when either a package or source is represented by an artifact
@@ -562,12 +562,12 @@ type IsOccurrenceInputSpec struct {
 // or it defaults to empty string for version, subpath and empty list for qualifiers
 // For source - a SourceName must be specified (name, tag or commit)
 type IsOccurrenceSpec struct {
-	ID            *string              `json:"id"`
-	Subject       *PackageOrSourceSpec `json:"subject"`
-	Artifact      *ArtifactSpec        `json:"artifact"`
-	Justification *string              `json:"justification"`
-	Origin        *string              `json:"origin"`
-	Collector     *string              `json:"collector"`
+	ID            *string              `json:"id,omitempty"`
+	Subject       *PackageOrSourceSpec `json:"subject,omitempty"`
+	Artifact      *ArtifactSpec        `json:"artifact,omitempty"`
+	Justification *string              `json:"justification,omitempty"`
+	Origin        *string              `json:"origin,omitempty"`
+	Collector     *string              `json:"collector,omitempty"`
 }
 
 // IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
@@ -599,11 +599,11 @@ type IsVulnerabilityInputSpec struct {
 // IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
 // Only CVE or GHSA can be specified at once.
 type IsVulnerabilitySpec struct {
-	Osv           *OSVSpec       `json:"osv"`
-	Vulnerability *CveOrGhsaSpec `json:"vulnerability"`
-	Justification *string        `json:"justification"`
-	Origin        *string        `json:"origin"`
-	Collector     *string        `json:"collector"`
+	Osv           *OSVSpec       `json:"osv,omitempty"`
+	Vulnerability *CveOrGhsaSpec `json:"vulnerability,omitempty"`
+	Justification *string        `json:"justification,omitempty"`
+	Origin        *string        `json:"origin,omitempty"`
+	Collector     *string        `json:"collector,omitempty"`
 }
 
 // MatchFlags is used to input the PkgMatchType enum.
@@ -643,26 +643,26 @@ type OSVInputSpec struct {
 
 // OSVSpec allows filtering the list of OSV to return.
 type OSVSpec struct {
-	ID    *string `json:"id"`
-	OsvID *string `json:"osvId"`
+	ID    *string `json:"id,omitempty"`
+	OsvID *string `json:"osvId,omitempty"`
 }
 
 // OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
 // input type to be used in mutations.
 // Exactly one of the value must be set to non-nil.
 type OsvCveOrGhsaInput struct {
-	Osv  *OSVInputSpec  `json:"osv"`
-	Cve  *CVEInputSpec  `json:"cve"`
-	Ghsa *GHSAInputSpec `json:"ghsa"`
+	Osv  *OSVInputSpec  `json:"osv,omitempty"`
+	Cve  *CVEInputSpec  `json:"cve,omitempty"`
+	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
 }
 
 // OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
 // input type to be used in read queries.
 // Exactly one of the value must be set to non-nil.
 type OsvCveOrGhsaSpec struct {
-	Osv  *OSVSpec  `json:"osv"`
-	Cve  *CVESpec  `json:"cve"`
-	Ghsa *GHSASpec `json:"ghsa"`
+	Osv  *OSVSpec  `json:"osv,omitempty"`
+	Cve  *CVESpec  `json:"cve,omitempty"`
+	Ghsa *GHSASpec `json:"ghsa,omitempty"`
 }
 
 // Package represents a package.
@@ -723,32 +723,32 @@ type PackageNamespace struct {
 // input type to be used in mutations.
 // Exactly one of the value must be set to non-nil.
 type PackageOrArtifactInput struct {
-	Package  *PkgInputSpec      `json:"package"`
-	Artifact *ArtifactInputSpec `json:"artifact"`
+	Package  *PkgInputSpec      `json:"package,omitempty"`
+	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
 }
 
 // PackageOrArtifactSpec allows using PackageOrArtifact union as
 // input type to be used in read queries.
 // Exactly one of the value must be set to non-nil.
 type PackageOrArtifactSpec struct {
-	Package  *PkgSpec      `json:"package"`
-	Artifact *ArtifactSpec `json:"artifact"`
+	Package  *PkgSpec      `json:"package,omitempty"`
+	Artifact *ArtifactSpec `json:"artifact,omitempty"`
 }
 
 // PackageOrSourceInput allows using PackageOrSource union as
 // input type to be used in mutations.
 // Exactly one of the value must be set to non-nil.
 type PackageOrSourceInput struct {
-	Package *PkgInputSpec    `json:"package"`
-	Source  *SourceInputSpec `json:"source"`
+	Package *PkgInputSpec    `json:"package,omitempty"`
+	Source  *SourceInputSpec `json:"source,omitempty"`
 }
 
 // PackageOrSourceSpec allows using PackageOrSource union as
 // input type to be used in read queries.
 // Exactly one of the value must be set to non-nil.
 type PackageOrSourceSpec struct {
-	Package *PkgSpec    `json:"package"`
-	Source  *SourceSpec `json:"source"`
+	Package *PkgSpec    `json:"package,omitempty"`
+	Source  *SourceSpec `json:"source,omitempty"`
 }
 
 // PackageQualifier is a qualifier for a package, a key-value pair.
@@ -791,7 +791,7 @@ type PackageQualifierInputSpec struct {
 // TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
 type PackageQualifierSpec struct {
 	Key   string  `json:"key"`
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 }
 
 // PackageSourceArtifactBuilderOsvCveOrGhsaFilter allows for all the software tree node types to be
@@ -799,13 +799,13 @@ type PackageQualifierSpec struct {
 //
 // Exactly one of the value must be set to non-nil.
 type PackageSourceArtifactBuilderOsvCveOrGhsaFilter struct {
-	Package  *PkgSpec      `json:"package"`
-	Source   *SourceSpec   `json:"source"`
-	Artifact *ArtifactSpec `json:"artifact"`
-	Builder  *BuilderSpec  `json:"builder"`
-	Osv      *OSVSpec      `json:"osv"`
-	Cve      *CVESpec      `json:"cve"`
-	Ghsa     *GHSASpec     `json:"ghsa"`
+	Package  *PkgSpec      `json:"package,omitempty"`
+	Source   *SourceSpec   `json:"source,omitempty"`
+	Artifact *ArtifactSpec `json:"artifact,omitempty"`
+	Builder  *BuilderSpec  `json:"builder,omitempty"`
+	Osv      *OSVSpec      `json:"osv,omitempty"`
+	Cve      *CVESpec      `json:"cve,omitempty"`
+	Ghsa     *GHSASpec     `json:"ghsa,omitempty"`
 }
 
 // PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
@@ -813,9 +813,9 @@ type PackageSourceArtifactBuilderOsvCveOrGhsaFilter struct {
 //
 // Exactly one of the value must be set to non-nil.
 type PackageSourceOrArtifactInput struct {
-	Package  *PkgInputSpec      `json:"package"`
-	Source   *SourceInputSpec   `json:"source"`
-	Artifact *ArtifactInputSpec `json:"artifact"`
+	Package  *PkgInputSpec      `json:"package,omitempty"`
+	Source   *SourceInputSpec   `json:"source,omitempty"`
+	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
 }
 
 // PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
@@ -823,9 +823,9 @@ type PackageSourceOrArtifactInput struct {
 //
 // Exactly one of the value must be set to non-nil.
 type PackageSourceOrArtifactSpec struct {
-	Package  *PkgSpec      `json:"package"`
-	Source   *SourceSpec   `json:"source"`
-	Artifact *ArtifactSpec `json:"artifact"`
+	Package  *PkgSpec      `json:"package,omitempty"`
+	Source   *SourceSpec   `json:"source,omitempty"`
+	Artifact *ArtifactSpec `json:"artifact,omitempty"`
 }
 
 // PackageVersion is a package version.
@@ -858,21 +858,21 @@ type PackageVersion struct {
 // `type` and `name`. All optional fields are given empty default values.
 type PkgInputSpec struct {
 	Type       string                       `json:"type"`
-	Namespace  *string                      `json:"namespace"`
+	Namespace  *string                      `json:"namespace,omitempty"`
 	Name       string                       `json:"name"`
-	Version    *string                      `json:"version"`
-	Qualifiers []*PackageQualifierInputSpec `json:"qualifiers"`
-	Subpath    *string                      `json:"subpath"`
+	Version    *string                      `json:"version,omitempty"`
+	Qualifiers []*PackageQualifierInputSpec `json:"qualifiers,omitempty"`
+	Subpath    *string                      `json:"subpath,omitempty"`
 }
 
 // PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
 // as the IsDependency attestation should only be allowed to be made to the packageName node and not the
 // packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
 type PkgNameSpec struct {
-	ID        *string `json:"id"`
-	Type      *string `json:"type"`
-	Namespace *string `json:"namespace"`
-	Name      *string `json:"name"`
+	ID        *string `json:"id,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      *string `json:"name,omitempty"`
 }
 
 // PkgSpec allows filtering the list of packages to return.
@@ -888,14 +888,14 @@ type PkgNameSpec struct {
 // on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
 // true. If this field is true, then the qualifiers argument is ignored.
 type PkgSpec struct {
-	ID                       *string                 `json:"id"`
-	Type                     *string                 `json:"type"`
-	Namespace                *string                 `json:"namespace"`
-	Name                     *string                 `json:"name"`
-	Version                  *string                 `json:"version"`
-	Qualifiers               []*PackageQualifierSpec `json:"qualifiers"`
-	MatchOnlyEmptyQualifiers *bool                   `json:"matchOnlyEmptyQualifiers"`
-	Subpath                  *string                 `json:"subpath"`
+	ID                       *string                 `json:"id,omitempty"`
+	Type                     *string                 `json:"type,omitempty"`
+	Namespace                *string                 `json:"namespace,omitempty"`
+	Name                     *string                 `json:"name,omitempty"`
+	Version                  *string                 `json:"version,omitempty"`
+	Qualifiers               []*PackageQualifierSpec `json:"qualifiers,omitempty"`
+	MatchOnlyEmptyQualifiers *bool                   `json:"matchOnlyEmptyQualifiers,omitempty"`
+	Subpath                  *string                 `json:"subpath,omitempty"`
 }
 
 // SLSA contains all of the fields present in a SLSA attestation.
@@ -1088,8 +1088,8 @@ type SourceInputSpec struct {
 	Type      string  `json:"type"`
 	Namespace string  `json:"namespace"`
 	Name      string  `json:"name"`
-	Tag       *string `json:"tag"`
-	Commit    *string `json:"commit"`
+	Tag       *string `json:"tag,omitempty"`
+	Commit    *string `json:"commit,omitempty"`
 }
 
 // SourceName is a url of the repository and its tag or commit.
@@ -1102,8 +1102,8 @@ type SourceInputSpec struct {
 type SourceName struct {
 	ID     string  `json:"id"`
 	Name   string  `json:"name"`
-	Tag    *string `json:"tag"`
-	Commit *string `json:"commit"`
+	Tag    *string `json:"tag,omitempty"`
+	Commit *string `json:"commit,omitempty"`
 }
 
 // SourceNamespace is a namespace for sources.
@@ -1126,12 +1126,12 @@ type SourceNamespace struct {
 // set as empty string (in which case the returned sources are only those for
 // which there is no tag/commit information).
 type SourceSpec struct {
-	ID        *string `json:"id"`
-	Type      *string `json:"type"`
-	Namespace *string `json:"namespace"`
-	Name      *string `json:"name"`
-	Tag       *string `json:"tag"`
-	Commit    *string `json:"commit"`
+	ID        *string `json:"id,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	Tag       *string `json:"tag,omitempty"`
+	Commit    *string `json:"commit,omitempty"`
 }
 
 // VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
