@@ -843,7 +843,7 @@ func (ec *executionContext) _OsvCveOrGhsa(ctx context.Context, sel ast.Selection
 
 // region    **************************** object.gotpl ****************************
 
-var certifyVulnImplementors = []string{"CertifyVuln", "Nodes"}
+var certifyVulnImplementors = []string{"CertifyVuln", "Node"}
 
 func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyVuln) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyVulnImplementors)

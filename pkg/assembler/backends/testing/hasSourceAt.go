@@ -39,6 +39,14 @@ type srcMapLink struct {
 
 func (n *srcMapLink) getID() uint32 { return n.id }
 
+func (n *srcMapLink) neighbors() []uint32 {
+	return []uint32{n.sourceID, n.packageID}
+}
+
+func (n *srcMapLink) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildHasSourceAt(n, nil, true)
+}
+
 // Ingest HasSourceAt
 func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
 	// Note: This assumes that the package and source have already been
@@ -103,7 +111,7 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	}
 
 	// build return GraphQL type
-	foundHasSourceAt, err := buildHasSourceAt(c, &collectedSrcMapLink, nil, true)
+	foundHasSourceAt, err := c.buildHasSourceAt(&collectedSrcMapLink, nil, true)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +133,7 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
 		if link, ok := node.(*srcMapLink); ok {
-			foundHasSourceAt, err := buildHasSourceAt(c, link, filter, true)
+			foundHasSourceAt, err := c.buildHasSourceAt(link, filter, true)
 			if err != nil {
 				return nil, err
 			}
@@ -149,7 +157,7 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
 			continue
 		}
-		foundHasSourceAt, err := buildHasSourceAt(c, link, filter, false)
+		foundHasSourceAt, err := c.buildHasSourceAt(link, filter, false)
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +170,7 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	return out, nil
 }
 
-func buildHasSourceAt(c *demoClient, link *srcMapLink, filter *model.HasSourceAtSpec, ingestOrIDProvided bool) (*model.HasSourceAt, error) {
+func (c *demoClient) buildHasSourceAt(link *srcMapLink, filter *model.HasSourceAtSpec, ingestOrIDProvided bool) (*model.HasSourceAt, error) {
 	var p *model.Package
 	var s *model.Source
 	var err error

@@ -26,17 +26,32 @@ import (
 
 type DemoCredentials struct{}
 
-// IDs: We have a global ID for all nodes that have references to/from.
-// Since we always ingest data and never remove, we can keep this global and
-// increment it as needed.
-// For fast retrieval, we also keep a map from ID from nodes that have it.
-// IDs are stored as string in graphql even though we ask for integers
-// See https://github.com/99designs/gqlgen/issues/2561
-type hasID interface {
+// node is the common interface of all backend nodes.
+type node interface {
+	// getID provides global IDs for all nodes that can be referenced from
+	// other places in GUAC.
+	//
+	// Since we always ingest data and never remove,
+	// we can keep this global and increment it as needed.
+	//
+	// For fast retrieval, we also keep a map from ID from nodes that have
+	// it.
+	//
+	// IDs are stored as string in graphql even though we ask for integers
+	// See https://github.com/99designs/gqlgen/issues/2561
 	getID() uint32
+
+	// neighbors allows retrieving neighbors of a node using the backlinks.
+	//
+	// This is useful for path related queries where the type of the node
+	// is not as relevant as its connections.
+	neighbors() []uint32
+
+	// buildModelNode builds a GraphQL return type for a backend node,
+	buildModelNode(c *demoClient) (model.Node, error)
 }
 
-type indexType map[uint32]hasID
+type indexType map[uint32]node
 
 // atomic add to ensure ID is not duplicated
 func (c *demoClient) getNextID() uint32 {

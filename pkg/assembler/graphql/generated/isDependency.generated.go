@@ -544,7 +544,7 @@ func (ec *executionContext) unmarshalInputPkgNameSpec(ctx context.Context, obj i
 
 // region    **************************** object.gotpl ****************************
 
-var isDependencyImplementors = []string{"IsDependency", "Nodes"}
+var isDependencyImplementors = []string{"IsDependency", "Node"}
 
 func (ec *executionContext) _IsDependency(ctx context.Context, sel ast.SelectionSet, obj *model.IsDependency) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, isDependencyImplementors)

@@ -128,6 +128,53 @@ func (n *pkgNameStruct) getID() uint32      { return n.id }
 func (n *pkgVersionStruct) getID() uint32   { return n.id }
 func (n *pkgVersionNode) getID() uint32     { return n.id }
 
+func (n *pkgNamespaceStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.namespaces))
+	for _, v := range n.namespaces {
+		out = append(out, v.id)
+	}
+	return out
+}
+func (n *pkgNameStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.names))
+	for _, v := range n.names {
+		out = append(out, v.id)
+	}
+	out = append(out, n.parent)
+	return out
+}
+func (n *pkgVersionStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLink)+len(n.isDependencyLink))
+	for _, v := range n.versions {
+		out = append(out, v.id)
+	}
+	out = append(out, n.srcMapLink...)
+	out = append(out, n.isDependencyLink...)
+	out = append(out, n.parent)
+	return out
+}
+func (n *pkgVersionNode) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.srcMapLink)+len(n.isDependencyLink)+len(n.occurrences))
+	out = append(out, n.srcMapLink...)
+	out = append(out, n.isDependencyLink...)
+	out = append(out, n.occurrences...)
+	out = append(out, n.parent)
+	return out
+}
+
+func (n *pkgNamespaceStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(n.id, nil)
+}
+func (n *pkgNameStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(n.id, nil)
+}
+func (n *pkgVersionStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(n.id, nil)
+}
+func (n *pkgVersionNode) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildPackageResponse(n.id, nil)
+}
+
 func (p *pkgVersionStruct) implementsPkgNameOrVersion() {}
 func (p *pkgVersionNode) implementsPkgNameOrVersion()   {}
 

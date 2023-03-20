@@ -71,6 +71,29 @@ type cveIDNode struct {
 func (n *cveIDNode) getID() uint32 { return n.id }
 func (n *cveNode) getID() uint32   { return n.id }
 
+func (n *cveNode) neighbors() []uint32 {
+	out := make([]uint32, 0, len(n.cveIDs))
+	for _, v := range n.cveIDs {
+		out = append(out, v.id)
+	}
+	return out
+}
+
+func (n *cveIDNode) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
+	out = append(out, n.certifyVulnLink...)
+	out = append(out, n.equalVulnLink...)
+	out = append(out, n.parent)
+	return out
+}
+
+func (n *cveIDNode) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildCveResponse(n.id, nil)
+}
+func (n *cveNode) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildCveResponse(n.id, nil)
+}
+
 // certifyVulnerability back edges
 func (n *cveIDNode) setVulnerabilityLink(id uint32) {
 	n.certifyVulnLink = append(n.certifyVulnLink, id)

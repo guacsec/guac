@@ -40,6 +40,17 @@ type artStruct struct {
 
 func (n *artStruct) getID() uint32 { return n.id }
 
+func (n *artStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences))
+	out = append(out, n.hashEquals...)
+	out = append(out, n.occurrences...)
+	return out
+}
+
+func (n *artStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.convArtifact(n), nil
+}
+
 func (n *artStruct) getHashEquals() []uint32 { return n.hashEquals }
 func (n *artStruct) setHashEquals(id uint32) { n.hashEquals = append(n.hashEquals, id) }
 
@@ -82,7 +93,7 @@ func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.Artifac
 		c.artifacts[strings.Join([]string{algorithm, digest}, ":")] = a
 	}
 
-	return convArtifact(a), nil
+	return c.convArtifact(a), nil
 }
 
 func (c *demoClient) artifactByID(id uint32) (*artStruct, error) {
@@ -143,7 +154,7 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 		return nil, gqlerror.Errorf("Artifacts :: invalid spec %s", err)
 	}
 	if a != nil {
-		return []*model.Artifact{convArtifact(a)}, nil
+		return []*model.Artifact{c.convArtifact(a)}, nil
 	}
 
 	algorithm := strings.ToLower(nilToEmpty(artifactSpec.Algorithm))
@@ -161,13 +172,13 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 		}
 
 		if matchDigest && matchAlgorithm {
-			rv = append(rv, convArtifact(a))
+			rv = append(rv, c.convArtifact(a))
 		}
 	}
 	return rv, nil
 }
 
-func convArtifact(a *artStruct) *model.Artifact {
+func (c *demoClient) convArtifact(a *artStruct) *model.Artifact {
 	return &model.Artifact{
 		ID:        nodeID(a.id),
 		Digest:    a.digest,

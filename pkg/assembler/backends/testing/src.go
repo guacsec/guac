@@ -89,6 +89,40 @@ func (n *srcNamespaceStruct) getID() uint32 { return n.id }
 func (n *srcNameStruct) getID() uint32      { return n.id }
 func (n *srcNameNode) getID() uint32        { return n.id }
 
+func (n *srcNamespaceStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, len(n.namespaces))
+	for _, v := range n.namespaces {
+		out = append(out, v.id)
+	}
+	return out
+}
+func (n *srcNameStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.names))
+	for _, v := range n.names {
+		out = append(out, v.id)
+	}
+	out = append(out, n.parent)
+	return out
+}
+func (n *srcNameNode) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.srcMapLink)+len(n.scorecardLink)+len(n.occurrences))
+	out = append(out, n.srcMapLink...)
+	out = append(out, n.scorecardLink...)
+	out = append(out, n.occurrences...)
+	out = append(out, n.parent)
+	return out
+}
+
+func (n *srcNamespaceStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildSourceResponse(n.id, nil)
+}
+func (n *srcNameStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildSourceResponse(n.id, nil)
+}
+func (n *srcNameNode) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildSourceResponse(n.id, nil)
+}
+
 // hasSourceAt back edges
 func (p *srcNameNode) setSrcMapLink(id uint32) { p.srcMapLink = append(p.srcMapLink, id) }
 func (p *srcNameNode) getSrcMapLink() []uint32 { return p.srcMapLink }

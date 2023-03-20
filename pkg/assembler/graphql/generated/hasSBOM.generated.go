@@ -311,7 +311,7 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 
 // region    **************************** object.gotpl ****************************
 
-var hasSBOMImplementors = []string{"HasSBOM", "Nodes"}
+var hasSBOMImplementors = []string{"HasSBOM", "Node"}
 
 func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, obj *model.HasSbom) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hasSBOMImplementors)

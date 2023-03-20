@@ -458,7 +458,7 @@ func (ec *executionContext) _PackageSourceOrArtifact(ctx context.Context, sel as
 
 // region    **************************** object.gotpl ****************************
 
-var certifyBadImplementors = []string{"CertifyBad", "Nodes"}
+var certifyBadImplementors = []string{"CertifyBad", "Node"}
 
 func (ec *executionContext) _CertifyBad(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyBad) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyBadImplementors)

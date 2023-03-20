@@ -45,6 +45,25 @@ type vulnerabilityLink struct {
 
 func (n *vulnerabilityLink) getID() uint32 { return n.id }
 
+func (n *vulnerabilityLink) neighbors() []uint32 {
+	out := make([]uint32, 0, 2)
+	out = append(out, n.packageID)
+	if n.osvID != 0 {
+		out = append(out, n.osvID)
+	}
+	if n.cveID != 0 {
+		out = append(out, n.cveID)
+	}
+	if n.ghsaID != 0 {
+		out = append(out, n.ghsaID)
+	}
+	return out
+}
+
+func (n *vulnerabilityLink) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildCertifyVulnerability(n, nil, true)
+}
+
 // Ingest CertifyVuln
 func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
@@ -163,7 +182,7 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 	}
 
 	// build return GraphQL type
-	builtCertifyVuln, err := buildCertifyVulnerability(c, &collectedCertifyVulnLink, nil, true)
+	builtCertifyVuln, err := c.buildCertifyVulnerability(&collectedCertifyVulnLink, nil, true)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +203,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
 		if link, ok := node.(*vulnerabilityLink); ok {
-			foundCertifyVuln, err := buildCertifyVulnerability(c, link, filter, true)
+			foundCertifyVuln, err := c.buildCertifyVulnerability(link, filter, true)
 			if err != nil {
 				return nil, err
 			}
@@ -218,7 +237,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			continue
 		}
 
-		foundCertifyVuln, err := buildCertifyVulnerability(c, link, filter, false)
+		foundCertifyVuln, err := c.buildCertifyVulnerability(link, filter, false)
 		if err != nil {
 			return nil, err
 		}
@@ -231,7 +250,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	return out, nil
 }
 
-func buildCertifyVulnerability(c *demoClient, link *vulnerabilityLink, filter *model.CertifyVulnSpec, ingestOrIDProvided bool) (*model.CertifyVuln, error) {
+func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *model.CertifyVulnSpec, ingestOrIDProvided bool) (*model.CertifyVuln, error) {
 	var p *model.Package
 	var osv *model.Osv
 	var cve *model.Cve

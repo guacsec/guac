@@ -39,7 +39,12 @@ type hashEqualStruct struct {
 	collector     string
 }
 
-func (n *hashEqualStruct) getID() uint32 { return n.id }
+func (n *hashEqualStruct) getID() uint32       { return n.id }
+func (n *hashEqualStruct) neighbors() []uint32 { return n.artifacts }
+
+func (n *hashEqualStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.convHashEqual(n), nil
+}
 
 // TODO convert to unit tests
 // func registerAllHashEqual(client *demoClient) {
@@ -207,7 +212,7 @@ func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
 	for _, id := range h.artifacts {
 		a, _ := c.artifactByID(id)
 		// TODO propagate error back
-		artifacts = append(artifacts, convArtifact(a))
+		artifacts = append(artifacts, c.convArtifact(a))
 	}
 	return &model.HashEqual{
 		ID:            nodeID(h.id),

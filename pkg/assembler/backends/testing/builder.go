@@ -33,6 +33,12 @@ type builderStruct struct {
 
 func (b *builderStruct) getID() uint32 { return b.id }
 
+func (b *builderStruct) neighbors() []uint32 { return b.hasSLSAs }
+
+func (b *builderStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.convBuilder(b), nil
+}
+
 func (n *builderStruct) getHasSLSAs() []uint32 { return n.hasSLSAs }
 func (n *builderStruct) setHasSLSAs(id uint32) { n.hasSLSAs = append(n.hasSLSAs, id) }
 
@@ -60,7 +66,7 @@ func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 		c.index[b.id] = b
 		c.builders[builder.URI] = b
 	}
-	return convBuilder(b), nil
+	return c.convBuilder(b), nil
 }
 
 // 	for _, b := range c.builders {
@@ -97,23 +103,23 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 		if err != nil {
 			return nil, nil
 		}
-		return []*model.Builder{convBuilder(b)}, nil
+		return []*model.Builder{c.convBuilder(b)}, nil
 	}
 	if builderSpec.URI != nil {
 		b, err := c.builderByKey(*builderSpec.URI)
 		if err != nil {
 			return nil, nil
 		}
-		return []*model.Builder{convBuilder(b)}, nil
+		return []*model.Builder{c.convBuilder(b)}, nil
 	}
 	var builders []*model.Builder
 	for _, b := range c.builders {
-		builders = append(builders, convBuilder(b))
+		builders = append(builders, c.convBuilder(b))
 	}
 	return builders, nil
 }
 
-func convBuilder(b *builderStruct) *model.Builder {
+func (c *demoClient) convBuilder(b *builderStruct) *model.Builder {
 	return &model.Builder{
 		ID:  nodeID(b.id),
 		URI: b.uri,

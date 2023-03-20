@@ -30,87 +30,11 @@ import (
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputPackageSourceArtifactBuilderOsvCveOrGhsaFilter(ctx context.Context, obj interface{}) (model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, error) {
-	var it model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"package", "source", "artifact", "builder", "osv", "cve", "ghsa"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "package":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-			it.Package, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "source":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-			it.Source, err = ec.unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "artifact":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-			it.Artifact, err = ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "builder":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builder"))
-			it.Builder, err = ec.unmarshalOBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "osv":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-			it.Osv, err = ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "cve":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-			it.Cve, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "ghsa":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-			it.Ghsa, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _Nodes(ctx context.Context, sel ast.SelectionSet, obj model.Nodes) graphql.Marshaler {
+func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj model.Node) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -260,17 +184,17 @@ func (ec *executionContext) _Nodes(ctx context.Context, sel ast.SelectionSet, ob
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNNodes2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodes(ctx context.Context, sel ast.SelectionSet, v model.Nodes) graphql.Marshaler {
+func (ec *executionContext) marshalNNode2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNode(ctx context.Context, sel ast.SelectionSet, v model.Node) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._Nodes(ctx, sel, v)
+	return ec._Node(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNNodes2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodesᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Nodes) graphql.Marshaler {
+func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Node) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -294,7 +218,7 @@ func (ec *executionContext) marshalNNodes2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNNodes2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodes(ctx, sel, v[i])
+			ret[i] = ec.marshalNNode2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNode(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -312,11 +236,6 @@ func (ec *executionContext) marshalNNodes2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkg
 	}
 
 	return ret
-}
-
-func (ec *executionContext) unmarshalNPackageSourceArtifactBuilderOsvCveOrGhsaFilter2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceArtifactBuilderOsvCveOrGhsaFilter(ctx context.Context, v interface{}) (model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, error) {
-	res, err := ec.unmarshalInputPackageSourceArtifactBuilderOsvCveOrGhsaFilter(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

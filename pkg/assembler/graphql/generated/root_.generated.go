@@ -244,9 +244,10 @@ type ComplexityRoot struct {
 		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
 		IsOccurrence        func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
+		Neighbors           func(childComplexity int, node string) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Path                func(childComplexity int, subject model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, target model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, maxPathLength int) int
+		Path                func(childComplexity int, subject string, target string, maxPathLength int) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
@@ -1392,6 +1393,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.IsVulnerability(childComplexity, args["isVulnerabilitySpec"].(*model.IsVulnerabilitySpec)), true
 
+	case "Query.neighbors":
+		if e.complexity.Query.Neighbors == nil {
+			break
+		}
+
+		args, err := ec.field_Query_neighbors_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string)), true
+
 	case "Query.osv":
 		if e.complexity.Query.Osv == nil {
 			break
@@ -1426,7 +1439,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Path(childComplexity, args["subject"].(model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter), args["target"].(model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter), args["maxPathLength"].(int)), true
+		return e.complexity.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -1760,7 +1773,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageOrSourceSpec,
 		ec.unmarshalInputPackageQualifierInputSpec,
 		ec.unmarshalInputPackageQualifierSpec,
-		ec.unmarshalInputPackageSourceArtifactBuilderOsvCveOrGhsaFilter,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
 		ec.unmarshalInputPkgInputSpec,
@@ -3589,36 +3601,51 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the artifact. It contains the algorithm and
-# digest fields
+# Defines a GraphQL schema for advanced queries over all GUAC nodes
 
 """
-Nodes is a union type of all the possible nodes. It encapsulates the software tree nodes along with the evidence nodes.
-In a path query, all connecting evidence nodes along with their intermediate subject nodes need to be returned
-in order to create a complete graph.
-"""
-union Nodes = Package | Source | Artifact | Builder | OSV | CVE | GHSA | IsOccurrence | IsDependency | IsVulnerability| CertifyVEXStatement | HashEqual | CertifyBad | CertifyPkg | CertifyScorecard | CertifyVuln | HasSourceAt | HasSBOM | HasSLSA
+Node is a union type of all the possible nodes.
 
-
+It encapsulates the software tree nodes along with the evidence nodes. In a
+path query, all connecting evidence nodes along with their intermediate subject
+nodes need to be returned in order to create a complete graph.
 """
-PackageSourceArtifactBuilderOsvCveOrGhsaFilter allows for all the software tree node types to be
-specified for the subject or the end target in a path query.
-
-Exactly one of the value must be set to non-nil.
-"""
-input PackageSourceArtifactBuilderOsvCveOrGhsaFilter {
-  package: PkgSpec
-  source: SourceSpec
-  artifact: ArtifactSpec
-  builder: BuilderSpec
-  osv: OSVSpec
-  cve: CVESpec
-  ghsa: GHSASpec
-}
+union Node
+  = Package
+  | Source
+  | Artifact
+  | Builder
+  | OSV
+  | CVE
+  | GHSA
+  | IsOccurrence
+  | IsDependency
+  | IsVulnerability
+  | CertifyVEXStatement
+  | HashEqual
+  | CertifyBad
+  | CertifyPkg
+  | CertifyScorecard
+  | CertifyVuln
+  | HasSourceAt
+  | HasSBOM
+  | HasSLSA
 
 extend type Query {
-  "path query is used to determine reachability between the subject and target. It returns the path to the target via a list of nodes"
-  path(subject: PackageSourceArtifactBuilderOsvCveOrGhsaFilter!, target: PackageSourceArtifactBuilderOsvCveOrGhsaFilter!, maxPathLength: Int!): [Nodes!]!
+  """
+  path query returns a path between subject and target, of a maximum length
+
+  Since we want to uniquely identify endpoints, nodes must be specified by
+  valid IDs only (instead of using filters/input spec structs).
+  """
+  path(subject: ID!, target: ID!, maxPathLength: Int!): [Node!]!
+
+  """
+  neighbors returns all the direct neighbors of a node
+
+  Similarly, the input is only specified by its ID.
+  """
+  neighbors(node: ID!): [Node!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
