@@ -66,39 +66,3 @@ mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
     ...allCertifyScorecard
   }
 }
-
-==== args for mutation ====
-{
-  "source": {
-    "type": "git",
-    "namespace": "github",
-    "name": "github.com/tensorflow/tensorflow",
-    "tag": "v2.12.0"
-  },
-  "scorecard": {
-    "timeScanned": "2023-03-06T10:55:55.804914034Z",
-    "aggregateScore": 2.9,
-    "checks": [
-      {
-        "check": "Binary_Artifacts",
-        "score": 4
-      },
-      {
-        "check": "Branch_Protection",
-        "score": 3
-      },
-      {
-        "check": "Code_Review",
-        "score": 2
-      },
-      {
-        "check": "Contributors",
-        "score": 1
-      }
-    ],
-    "scorecardVersion": "v4.10.2",
-    "scorecardCommit": "5e6a521",
-    "origin": "testing backend",
-    "collector": "testing backend"
-  }
-}
