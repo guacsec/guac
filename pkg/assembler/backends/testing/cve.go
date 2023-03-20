@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -122,7 +121,7 @@ func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.C
 			cveIDList := buildCveID(foundCveNode, filter)
 			if len(cveIDList) > 0 {
 				out = append(out, &model.Cve{
-					ID:     fmt.Sprintf("%d", foundCveNode.id),
+					ID:     nodeID(foundCveNode.id),
 					Year:   foundCveNode.year,
 					CveIds: cveIDList,
 				})
@@ -133,7 +132,7 @@ func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.C
 			cveIDList := buildCveID(cveNode, filter)
 			if len(cveIDList) > 0 {
 				out = append(out, &model.Cve{
-					ID:     fmt.Sprintf("%d", cveNode.id),
+					ID:     nodeID(cveNode.id),
 					Year:   cveNode.year,
 					CveIds: cveIDList,
 				})
@@ -149,14 +148,14 @@ func buildCveID(foundCveNode *cveNode, filter *model.CVESpec) []*model.CVEId {
 		cveIDNode, hasCveIDNode := foundCveNode.cveIDs[strings.ToLower(*filter.CveID)]
 		if hasCveIDNode {
 			cveIDList = append(cveIDList, &model.CVEId{
-				ID:    fmt.Sprintf("%d", cveIDNode.id),
+				ID:    nodeID(cveIDNode.id),
 				CveID: cveIDNode.cveID,
 			})
 		}
 	} else {
 		for _, cveIDNode := range foundCveNode.cveIDs {
 			cveIDList = append(cveIDList, &model.CVEId{
-				ID:    fmt.Sprintf("%d", cveIDNode.id),
+				ID:    nodeID(cveIDNode.id),
 				CveID: cveIDNode.cveID,
 			})
 		}
@@ -184,11 +183,11 @@ func (c *demoClient) buildCveResponse(id uint32, filter *model.CVESpec) (*model.
 
 	cveIDList := []*model.CVEId{}
 	if cveIDNode, ok := node.(*cveIDNode); ok {
-		if filter != nil && noMatchLowerCase(filter.CveID, cveIDNode.cveID) {
+		if filter != nil && noMatch(toLower(filter.CveID), cveIDNode.cveID) {
 			return nil, nil
 		}
 		cveIDList = append(cveIDList, &model.CVEId{
-			ID:    fmt.Sprintf("%d", cveIDNode.id),
+			ID:    nodeID(cveIDNode.id),
 			CveID: cveIDNode.cveID,
 		})
 		node = c.index[cveIDNode.parent]
@@ -199,7 +198,7 @@ func (c *demoClient) buildCveResponse(id uint32, filter *model.CVESpec) (*model.
 		return nil, gqlerror.Errorf("ID does not match expected node type for cve root")
 	}
 	s := model.Cve{
-		ID:     fmt.Sprintf("%d", cveNode.id),
+		ID:     nodeID(cveNode.id),
 		Year:   cveNode.year,
 		CveIds: cveIDList,
 	}

@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -54,8 +53,9 @@ const osv string = "osv"
 // Internal data: osv
 type osvMap map[string]*osvNode
 type osvNode struct {
-	id     uint32
-	osvIDs osvIDMap
+	id      uint32
+	typeKey string
+	osvIDs  osvIDMap
 }
 type osvIDMap map[string]*osvIDNode
 type osvIDNode struct {
@@ -73,8 +73,9 @@ func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (
 	osvStruct, hasOsv := c.osvs[osv]
 	if !hasOsv {
 		osvStruct = &osvNode{
-			id:     c.getNextID(),
-			osvIDs: osvIDMap{},
+			id:      c.getNextID(),
+			typeKey: osv,
+			osvIDs:  osvIDMap{},
 		}
 		c.index[osvStruct.id] = osvStruct
 		c.osvs[osv] = osvStruct
@@ -117,21 +118,21 @@ func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.O
 			osvIDNode, hasOsvIDNode := osvNode.osvIDs[strings.ToLower(*filter.OsvID)]
 			if hasOsvIDNode {
 				osvIDList = append(osvIDList, &model.OSVId{
-					ID:    fmt.Sprintf("%d", osvIDNode.id),
+					ID:    nodeID(osvIDNode.id),
 					OsvID: osvIDNode.osvID,
 				})
 			}
 		} else {
 			for _, osvIDNode := range osvNode.osvIDs {
 				osvIDList = append(osvIDList, &model.OSVId{
-					ID:    fmt.Sprintf("%d", osvIDNode.id),
+					ID:    nodeID(osvIDNode.id),
 					OsvID: osvIDNode.osvID,
 				})
 			}
 		}
 		if len(osvIDList) > 0 {
 			out = append(out, &model.Osv{
-				ID:     fmt.Sprintf("%d", osvNode.id),
+				ID:     nodeID(osvNode.id),
 				OsvIds: osvIDList,
 			})
 		}
@@ -159,11 +160,11 @@ func (c *demoClient) buildOsvResponse(id uint32, filter *model.OSVSpec) (*model.
 
 	osvIDList := []*model.OSVId{}
 	if osvIDNode, ok := node.(*osvIDNode); ok {
-		if filter != nil && noMatchLowerCase(filter.OsvID, osvIDNode.osvID) {
+		if filter != nil && noMatch(toLower(filter.OsvID), osvIDNode.osvID) {
 			return nil, nil
 		}
 		osvIDList = append(osvIDList, &model.OSVId{
-			ID:    fmt.Sprintf("%d", osvIDNode.id),
+			ID:    nodeID(osvIDNode.id),
 			OsvID: osvIDNode.osvID,
 		})
 		node = c.index[osvIDNode.parent]
@@ -174,10 +175,18 @@ func (c *demoClient) buildOsvResponse(id uint32, filter *model.OSVSpec) (*model.
 		return nil, gqlerror.Errorf("ID does not match expected node type for osv root")
 	}
 	s := model.Osv{
-		ID:     fmt.Sprintf("%d", osvNode.id),
+		ID:     nodeID(osvNode.id),
 		OsvIds: osvIDList,
 	}
 	return &s, nil
+}
+
+func toLower(filter *string) *string {
+	if filter != nil {
+		lower := strings.ToLower(*filter)
+		return &lower
+	}
+	return nil
 }
 
 // TODO: remove

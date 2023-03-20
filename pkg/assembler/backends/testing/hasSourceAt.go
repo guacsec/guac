@@ -89,7 +89,6 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	if err != nil {
 		return nil, err
 	}
-
 	return foundHasSourceAt, nil
 }
 

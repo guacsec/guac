@@ -17,7 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -51,6 +50,7 @@ const ghsa string = "ghsa"
 type ghsaMap map[string]*ghsaNode
 type ghsaNode struct {
 	id      uint32
+	typeKey string
 	ghsaIDs ghsaIDMap
 }
 type ghsaIDMap map[string]*ghsaIDNode
@@ -70,6 +70,7 @@ func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec)
 	if !hasGhsa {
 		ghsaStruct = &ghsaNode{
 			id:      c.getNextID(),
+			typeKey: ghsa,
 			ghsaIDs: ghsaIDMap{},
 		}
 		c.index[ghsaStruct.id] = ghsaStruct
@@ -113,21 +114,21 @@ func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model
 			ghsaIDNode, hasGhsaIDNode := ghsaNode.ghsaIDs[strings.ToLower(*filter.GhsaID)]
 			if hasGhsaIDNode {
 				ghsaIDList = append(ghsaIDList, &model.GHSAId{
-					ID:     fmt.Sprintf("%d", ghsaIDNode.id),
+					ID:     nodeID(ghsaIDNode.id),
 					GhsaID: ghsaIDNode.ghsaID,
 				})
 			}
 		} else {
 			for _, ghsaIDNode := range ghsaNode.ghsaIDs {
 				ghsaIDList = append(ghsaIDList, &model.GHSAId{
-					ID:     fmt.Sprintf("%d", ghsaIDNode.id),
+					ID:     nodeID(ghsaIDNode.id),
 					GhsaID: ghsaIDNode.ghsaID,
 				})
 			}
 		}
 		if len(ghsaIDList) > 0 {
 			out = append(out, &model.Ghsa{
-				ID:      fmt.Sprintf("%d", ghsaNode.id),
+				ID:      nodeID(ghsaNode.id),
 				GhsaIds: ghsaIDList,
 			})
 		}
@@ -155,11 +156,11 @@ func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*mode
 
 	ghsaIDList := []*model.GHSAId{}
 	if ghsaIDNode, ok := node.(*ghsaIDNode); ok {
-		if filter != nil && noMatchLowerCase(filter.GhsaID, ghsaIDNode.ghsaID) {
+		if filter != nil && noMatch(toLower(filter.GhsaID), ghsaIDNode.ghsaID) {
 			return nil, nil
 		}
 		ghsaIDList = append(ghsaIDList, &model.GHSAId{
-			ID:     fmt.Sprintf("%d", ghsaIDNode.id),
+			ID:     nodeID(ghsaIDNode.id),
 			GhsaID: ghsaIDNode.ghsaID,
 		})
 		node = c.index[ghsaIDNode.parent]
@@ -170,7 +171,7 @@ func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*mode
 		return nil, gqlerror.Errorf("ID does not match expected node type for ghsa root")
 	}
 	s := model.Ghsa{
-		ID:      fmt.Sprintf("%d", ghsaNode.id),
+		ID:      nodeID(ghsaNode.id),
 		GhsaIds: ghsaIDList,
 	}
 	return &s, nil

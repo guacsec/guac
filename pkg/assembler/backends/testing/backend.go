@@ -16,7 +16,7 @@
 package testing
 
 import (
-	"strings"
+	"fmt"
 	"sync/atomic"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -126,16 +126,13 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 	return client, nil
 }
 
+func nodeID(id uint32) string {
+	return fmt.Sprintf("%d", id)
+}
+
 func noMatch(filter *string, value string) bool {
 	if filter != nil {
 		return value != *filter
-	}
-	return false
-}
-
-func noMatchLowerCase(filter *string, value string) bool {
-	if filter != nil {
-		return value != strings.ToLower(*filter)
 	}
 	return false
 }
