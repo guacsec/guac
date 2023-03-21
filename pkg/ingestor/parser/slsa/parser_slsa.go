@@ -241,12 +241,10 @@ func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 
 	// Assemble materials
-	materials := []model.PackageSourceOrArtifactInput{}
+	materials := []model.ArtifactInputSpec{}
 	for _, o := range s.materials {
 		for _, a := range o.artifacts {
-			materials = append(materials, model.PackageSourceOrArtifactInput{
-				Artifact: &a,
-			})
+			materials = append(materials, a)
 		}
 	}
 

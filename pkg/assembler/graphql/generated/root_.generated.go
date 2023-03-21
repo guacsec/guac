@@ -45,6 +45,7 @@ type ComplexityRoot struct {
 	}
 
 	Builder struct {
+		ID  func(childComplexity int) int
 		URI func(childComplexity int) int
 	}
 
@@ -113,6 +114,7 @@ type ComplexityRoot struct {
 	}
 
 	HasSLSA struct {
+		ID      func(childComplexity int) int
 		Slsa    func(childComplexity int) int
 		Subject func(childComplexity int) int
 	}
@@ -176,11 +178,11 @@ type ComplexityRoot struct {
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
-		IngestMaterials       func(childComplexity int, materials []*model.PackageSourceOrArtifactInput) int
+		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
-		IngestSlsa            func(childComplexity int, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
+		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
@@ -346,6 +348,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Artifact.ID(childComplexity), true
+
+	case "Builder.id":
+		if e.complexity.Builder.ID == nil {
+			break
+		}
+
+		return e.complexity.Builder.ID(childComplexity), true
 
 	case "Builder.uri":
 		if e.complexity.Builder.URI == nil {
@@ -591,6 +600,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.URI(childComplexity), true
+
+	case "HasSLSA.id":
+		if e.complexity.HasSLSA.ID == nil {
+			break
+		}
+
+		return e.complexity.HasSLSA.ID(childComplexity), true
 
 	case "HasSLSA.slsa":
 		if e.complexity.HasSLSA.Slsa == nil {
@@ -977,7 +993,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestMaterials(childComplexity, args["materials"].([]*model.PackageSourceOrArtifactInput)), true
+		return e.complexity.Mutation.IngestMaterials(childComplexity, args["materials"].([]*model.ArtifactInputSpec)), true
 
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
@@ -1025,7 +1041,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestSlsa(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["builtFrom"].([]*model.PackageSourceOrArtifactInput), args["builtBy"].(model.BuilderInputSpec), args["slsa"].(model.SLSAInputSpec)), true
+		return e.complexity.Mutation.IngestSlsa(childComplexity, args["subject"].(model.ArtifactInputSpec), args["builtFrom"].([]*model.ArtifactInputSpec), args["builtBy"].(model.BuilderInputSpec), args["slsa"].(model.SLSAInputSpec)), true
 
 	case "Mutation.ingestSource":
 		if e.complexity.Mutation.IngestSource == nil {
@@ -1911,6 +1927,7 @@ Builder represents the builder such as (FRSCA or github actions).
 Currently builders are identified by the ` + "`" + `uri` + "`" + ` field, which is mandatory.
 """
 type Builder {
+  id: ID!
   uri: String!
 }
 
@@ -1918,6 +1935,7 @@ type Builder {
 BuilderSpec allows filtering the list of builders to return.
 """
 input BuilderSpec {
+  id: ID
   uri: String
 }
 
@@ -1957,6 +1975,33 @@ extend type Mutation {
 
 # Defines a GraphQL schema for the CertifyBad. It contains the subject (which can be either a package, source or artifact),
 #  justification, origin of the attestation, and collector
+"PackageSourceOrArtifact is a union of Package, Source, and Artifact."
+union PackageSourceOrArtifact = Package | Source | Artifact
+
+"""
+PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
+input type to be used in read queries.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceOrArtifactSpec {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+}
+
+"""
+PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
+input type to be used in mutations.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceOrArtifactInput {
+  package: PkgInputSpec
+  source: SourceInputSpec
+  artifact: ArtifactInputSpec
+}
+
 """
 CertifyBad is an attestation represents when a package, source or artifact is considered bad
 
@@ -2680,37 +2725,11 @@ extend type Mutation {
 
 # Defines a GraphQL schema for specifiying SLSA provenance.
 
-"PackageSourceOrArtifact is a union of Package, Source, and Artifact."
-union PackageSourceOrArtifact = Package | Source | Artifact
-
-"""
-PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
-input type to be used in read queries.
-
-Exactly one of the value must be set to non-nil.
-"""
-input PackageSourceOrArtifactSpec {
-  package: PkgSpec
-  source: SourceSpec
-  artifact: ArtifactSpec
-}
-
-"""
-PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
-input type to be used in mutations.
-
-Exactly one of the value must be set to non-nil.
-"""
-input PackageSourceOrArtifactInput {
-  package: PkgInputSpec
-  source: SourceInputSpec
-  artifact: ArtifactInputSpec
-}
-
 "HasSLSA records that a subject node has a SLSA attestation."
 type HasSLSA {
+  id: ID!
   "The subject of SLSA attestation: package, source, or artifact."
-  subject: PackageSourceOrArtifact!
+  subject: Artifact!
   "The SLSA attestation."
   slsa: SLSA
 }
@@ -2727,7 +2746,7 @@ included into GUAC (origin document and the collector for that document).
 """
 type SLSA {
   "Sources of the build resulting in subject (materials)"
-  builtFrom: [PackageSourceOrArtifact!]!
+  builtFrom: [Artifact!]!
   "Builder performing the build"
   builtBy: Builder!
   "Type of the builder"
@@ -2782,8 +2801,9 @@ type SLSAPredicate {
 
 "HasSLSASpec allows filtering the list of HasSLSA to return."
 input HasSLSASpec {
-  subject: PackageSourceOrArtifactSpec
-  builtFrom: [PackageSourceOrArtifactSpec!]
+  id: ID
+  subject: ArtifactSpec
+  builtFrom: [ArtifactSpec!]
   builtBy: BuilderSpec
   buildType: String
   predicate: [SLSAPredicateSpec!] = []
@@ -2837,7 +2857,7 @@ extend type Mutation {
   because this ingestion method assumes that the subject and the materials are
   already ingested and only creates the SLSA node.
   """
-  ingestSLSA(subject: PackageSourceOrArtifactInput!, builtFrom: [PackageSourceOrArtifactInput!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
+  ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
 
   """
   Ingests a set of packages, sources, and artifacts.
@@ -2846,7 +2866,7 @@ extend type Mutation {
   efficient to call this method to ingest a set materials instead of ingesting
   them one by one.
   """
-  ingestMaterials(materials: [PackageSourceOrArtifactInput!]!): [PackageSourceOrArtifact!]!
+  ingestMaterials(materials: [ArtifactInputSpec!]!): [Artifact!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSourceAt.graphql", Input: `#

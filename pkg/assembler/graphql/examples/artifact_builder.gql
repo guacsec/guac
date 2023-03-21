@@ -52,6 +52,7 @@ mutation ArtifactM2 {
 
 query BuilderQ1 {
   builders(builderSpec: {}) {
+    id
     uri
   }
 }
@@ -60,12 +61,14 @@ query BuilderQ2 {
   builders(
     builderSpec: {uri: "https://github.com/Attestations/GitHubHostedActions@v1"}
   ) {
+    id
     uri
   }
 }
 
 mutation BuilderM1 {
   ingestBuilder(builder: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"}) {
+    id
     uri
   }
 }

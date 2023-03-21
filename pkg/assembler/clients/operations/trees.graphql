@@ -141,31 +141,14 @@ fragment allIsDependencyTree on IsDependency {
 
 fragment allSLSATree on HasSLSA {
   subject {
-    __typename
-    ... on Package {
-      ...allPkgTree
-    }
-    ... on Source {
-      ...allSourceTree
-    }
-    ... on Artifact {
-      ...allArtifactTree
-    }
+    ...allArtifactTree
   }
   slsa {
     builtFrom {
-      __typename
-      ... on Package {
-        ...allPkgTree
-      }
-      ... on Source {
-        ...allSourceTree
-      }
-      ... on Artifact {
-        ...allArtifactTree
-      }
+      ...allArtifactTree
     }
     builtBy {
+      id
       uri
     }
     buildType

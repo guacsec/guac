@@ -11,12 +11,12 @@ import (
 )
 
 // IngestSlsa is the resolver for the ingestSLSA field.
-func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.PackageSourceOrArtifactInput, builtFrom []*model.PackageSourceOrArtifactInput, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
 	return r.Backend.IngestSLSA(ctx, subject, builtFrom, builtBy, slsa)
 }
 
 // IngestMaterials is the resolver for the ingestMaterials field.
-func (r *mutationResolver) IngestMaterials(ctx context.Context, materials []*model.PackageSourceOrArtifactInput) ([]model.PackageSourceOrArtifact, error) {
+func (r *mutationResolver) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
 	return r.Backend.IngestMaterials(ctx, materials)
 }
 
