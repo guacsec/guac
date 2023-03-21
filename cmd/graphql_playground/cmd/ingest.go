@@ -398,8 +398,8 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 }
 
 func ingestVulnerability(ctx context.Context, client graphql.Client) {
-
 	logger := logging.FromContext(ctx)
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
@@ -429,7 +429,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			CveId: "CVE-2019-13110",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
-			TimeScanned:    time.Now(),
+			TimeScanned:    tm,
 			DbUri:          "MITRE",
 			DbVersion:      "v1.0.0",
 			ScannerUri:     "osv.dev",
@@ -453,7 +453,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			OsvId: "CVE-2019-13110",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
-			TimeScanned:    time.Now(),
+			TimeScanned:    tm,
 			DbUri:          "MITRE",
 			DbVersion:      "v1.0.0",
 			ScannerUri:     "osv.dev",
@@ -477,7 +477,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			GhsaId: "GHSA-h45f-rjvw-2rv2",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
-			TimeScanned:    time.Now(),
+			TimeScanned:    tm,
 			DbUri:          "MITRE",
 			DbVersion:      "v1.0.0",
 			ScannerUri:     "osv.dev",
@@ -497,7 +497,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			CveId: "CVE-2018-12310",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
-			TimeScanned:    time.Now(),
+			TimeScanned:    tm,
 			DbUri:          "MITRE",
 			DbVersion:      "v1.2.0",
 			ScannerUri:     "osv.dev",
@@ -516,7 +516,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			OsvId: "CVE-2018-12310",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
-			TimeScanned:    time.Now(),
+			TimeScanned:    tm,
 			DbUri:          "MITRE",
 			DbVersion:      "v1.2.0",
 			ScannerUri:     "osv.dev",
@@ -535,9 +535,77 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			GhsaId: "GHSA-f45f-jj4w-2rv2",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
-			TimeScanned:    time.Now(),
+			TimeScanned:    tm,
 			DbUri:          "MITRE",
 			DbVersion:      "v1.2.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "cve openssl (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "user", Value: "bincrafters"},
+				{Key: "channel", Value: "stable"},
+			},
+		},
+		cve: &model.CVEInputSpec{
+			Year:  2019,
+			CveId: "CVE-2019-13110",
+		},
+		vulnerability: model.VulnerabilityMetaDataInput{
+			TimeScanned:    tm,
+			DbUri:          "MITRE",
+			DbVersion:      "v1.0.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "ghsa django (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNs,
+			Name:      "django",
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-f45f-jj4w-2rv2",
+		},
+		vulnerability: model.VulnerabilityMetaDataInput{
+			TimeScanned:    tm,
+			DbUri:          "MITRE",
+			DbVersion:      "v1.2.0",
+			ScannerUri:     "osv.dev",
+			ScannerVersion: "0.0.14",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+	}, {
+		name: "osv openssl (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:      "conan",
+			Namespace: &opensslNs,
+			Name:      "openssl",
+			Version:   &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{
+				{Key: "user", Value: "bincrafters"},
+				{Key: "channel", Value: "stable"},
+			},
+		},
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2019-13110",
+		},
+		vulnerability: model.VulnerabilityMetaDataInput{
+			TimeScanned:    tm,
+			DbUri:          "MITRE",
+			DbVersion:      "v1.0.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -555,7 +623,6 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
-
 		} else if ingest.ghsa != nil {
 			_, err := model.CertifyGHSA(context.Background(), client, *ingest.pkg, *ingest.ghsa, ingest.vulnerability)
 			if err != nil {
@@ -985,6 +1052,33 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 		},
 	}, {
 		name: "OSV maps to GHSA",
+		osv: &model.OSVInputSpec{
+			OsvId: "GHSA-h45f-rjvw-2rv2",
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-h45f-rjvw-2rv2",
+		},
+		isVulnerability: model.IsVulnerabilityInputSpec{
+			Justification: "OSV maps to GHSA",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "OSV maps to CVE (duplicate)",
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2019-13110",
+		},
+		cve: &model.CVEInputSpec{
+			Year:  2019,
+			CveId: "CVE-2019-13110",
+		},
+		isVulnerability: model.IsVulnerabilityInputSpec{
+			Justification: "OSV maps to CVE",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "OSV maps to GHSA (duplicate)",
 		osv: &model.OSVInputSpec{
 			OsvId: "GHSA-h45f-rjvw-2rv2",
 		},

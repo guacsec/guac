@@ -53,12 +53,12 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 	}
 
 	packageDependencies := []uint32{}
-	pkgVersionNode, ok := c.index[*packageID].(*pkgVersionNode)
+	pkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
 	if ok {
 		packageDependencies = append(packageDependencies, pkgVersionNode.isDependencyLink...)
 	}
 	depPackageDependencies := []uint32{}
-	pkgName, ok := c.index[*depPackageID].(*pkgVersionStruct)
+	pkgName, ok := c.index[depPackageID].(*pkgVersionStruct)
 	if ok {
 		depPackageDependencies = append(depPackageDependencies, pkgName.isDependencyLink...)
 	}
@@ -75,7 +75,7 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 	collectedIsDependencyLink := isDependencyLink{}
 	for _, id := range searchIDs {
 		v, _ := c.dependencyByID(id)
-		if *packageID == v.packageID && *depPackageID == v.depPackageID && dependency.Justification == v.justification &&
+		if packageID == v.packageID && depPackageID == v.depPackageID && dependency.Justification == v.justification &&
 			dependency.Origin == v.origin && dependency.Collector == v.collector && dependency.VersionRange == v.versionRange {
 
 			collectedIsDependencyLink = *v
@@ -87,8 +87,8 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 		// store the link
 		collectedIsDependencyLink = isDependencyLink{
 			id:            c.getNextID(),
-			packageID:     *packageID,
-			depPackageID:  *depPackageID,
+			packageID:     packageID,
+			depPackageID:  depPackageID,
 			versionRange:  dependency.VersionRange,
 			justification: dependency.Justification,
 			origin:        dependency.Origin,
@@ -97,8 +97,8 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 		c.index[collectedIsDependencyLink.id] = &collectedIsDependencyLink
 		c.isDependencies = append(c.isDependencies, &collectedIsDependencyLink)
 		// set the backlinks
-		c.index[*packageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
-		c.index[*depPackageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
+		c.index[packageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
+		c.index[depPackageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
 	}
 
 	// build return GraphQL type
@@ -134,6 +134,7 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 		}
 	}
 
+	// TODO if any of the pkg/dependent pkg are specified, ony search those backedges
 	for _, link := range c.isDependencies {
 		if filter != nil && noMatch(filter.Justification, link.justification) {
 			continue
@@ -170,30 +171,26 @@ func buildIsDependency(c *demoClient, link *isDependencyLink, filter *model.IsDe
 		if err != nil {
 			return nil, err
 		}
-		if filter.DependentPackage != nil {
-			depPkgFilter := &model.PkgSpec{Type: filter.DependentPackage.Type, Namespace: filter.DependentPackage.Namespace,
-				Name: filter.DependentPackage.Name}
-			dep, err = c.buildPackageResponse(link.depPackageID, depPkgFilter)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			dep, err = c.buildPackageResponse(link.depPackageID, nil)
-			if err != nil {
-				return nil, err
-			}
-		}
-
 	} else {
 		p, err = c.buildPackageResponse(link.packageID, nil)
 		if err != nil {
 			return nil, err
 		}
+	}
+	if filter != nil && filter.DependentPackage != nil {
+		depPkgFilter := &model.PkgSpec{Type: filter.DependentPackage.Type, Namespace: filter.DependentPackage.Namespace,
+			Name: filter.DependentPackage.Name}
+		dep, err = c.buildPackageResponse(link.depPackageID, depPkgFilter)
+		if err != nil {
+			return nil, err
+		}
+	} else {
 		dep, err = c.buildPackageResponse(link.depPackageID, nil)
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
 	if p == nil && ingestOrIDProvided {
 		return nil, gqlerror.Errorf("failed to retrieve package via packageID")
@@ -220,13 +217,13 @@ func buildIsDependency(c *demoClient, link *isDependencyLink, filter *model.IsDe
 }
 
 func (c *demoClient) dependencyByID(id uint32) (*isDependencyLink, error) {
-	o, ok := c.index[id]
+	node, ok := c.index[id]
 	if !ok {
 		return nil, errors.New("could not find isDependencyLink")
 	}
-	a, ok := o.(*isDependencyLink)
+	link, ok := node.(*isDependencyLink)
 	if !ok {
 		return nil, errors.New("not an isDependencyLink")
 	}
-	return a, nil
+	return link, nil
 }

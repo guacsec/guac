@@ -55,14 +55,27 @@ type ghsaNode struct {
 }
 type ghsaIDMap map[string]*ghsaIDNode
 type ghsaIDNode struct {
-	id     uint32
-	parent uint32
-	ghsaID string
-	//TODO: add other back edges
+	id              uint32
+	parent          uint32
+	ghsaID          string
+	certifyVulnLink []uint32
+	equalVulnLink   []uint32
 }
 
 func (n *ghsaIDNode) getID() uint32 { return n.id }
 func (n *ghsaNode) getID() uint32   { return n.id }
+
+// certifyVulnerability back edges
+func (n *ghsaIDNode) setVulnerabilityLink(id uint32) {
+	n.certifyVulnLink = append(n.certifyVulnLink, id)
+}
+func (n *ghsaIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
+
+// isVulnerability back edges
+func (n *ghsaIDNode) setEqualVulnLink(id uint32) {
+	n.equalVulnLink = append(n.equalVulnLink, id)
+}
+func (n *ghsaIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
 
 // Ingest GHSA
 func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec) (*model.Ghsa, error) {
@@ -175,6 +188,22 @@ func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*mode
 		GhsaIds: ghsaIDList,
 	}
 	return &s, nil
+}
+
+func getGhsaIDFromInput(c *demoClient, input model.GHSAInputSpec) (uint32, error) {
+	ghsaStruct, hasGhsa := c.ghsas[ghsa]
+	if !hasGhsa {
+		return 0, gqlerror.Errorf("ghsa type \"%s\" not found", ghsa)
+	}
+	ghsaIDs := ghsaStruct.ghsaIDs
+	ghsaID := strings.ToLower(input.GhsaID)
+
+	ghsaIDStruct, hasGhsaID := ghsaIDs[ghsaID]
+	if !hasGhsaID {
+		return 0, gqlerror.Errorf("ghsa id \"%s\" not found", input.GhsaID)
+	}
+
+	return ghsaIDStruct.id, nil
 }
 
 // TODO: remove

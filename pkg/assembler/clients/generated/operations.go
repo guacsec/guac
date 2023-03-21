@@ -753,6 +753,9 @@ type CertifyCVEIngestVulnerabilityCertifyVuln struct {
 	allCertifyVuln `json:"-"`
 }
 
+// GetId returns CertifyCVEIngestVulnerabilityCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetId() string { return v.allCertifyVuln.Id }
+
 // GetPackage returns CertifyCVEIngestVulnerabilityCertifyVuln.Package, and is useful for accessing the field via an interface.
 func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetPackage() allCertifyVulnPackage {
 	return v.allCertifyVuln.Package
@@ -794,6 +797,8 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) UnmarshalJSON(b []byte) error
 }
 
 type __premarshalCertifyCVEIngestVulnerabilityCertifyVuln struct {
+	Id string `json:"id"`
+
 	Package allCertifyVulnPackage `json:"package"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -812,6 +817,7 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) MarshalJSON() ([]byte, error)
 func (v *CertifyCVEIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premarshalCertifyCVEIngestVulnerabilityCertifyVuln, error) {
 	var retval __premarshalCertifyCVEIngestVulnerabilityCertifyVuln
 
+	retval.Id = v.allCertifyVuln.Id
 	retval.Package = v.allCertifyVuln.Package
 	{
 
@@ -1001,6 +1007,9 @@ type CertifyGHSAIngestVulnerabilityCertifyVuln struct {
 	allCertifyVuln `json:"-"`
 }
 
+// GetId returns CertifyGHSAIngestVulnerabilityCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetId() string { return v.allCertifyVuln.Id }
+
 // GetPackage returns CertifyGHSAIngestVulnerabilityCertifyVuln.Package, and is useful for accessing the field via an interface.
 func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetPackage() allCertifyVulnPackage {
 	return v.allCertifyVuln.Package
@@ -1042,6 +1051,8 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) UnmarshalJSON(b []byte) erro
 }
 
 type __premarshalCertifyGHSAIngestVulnerabilityCertifyVuln struct {
+	Id string `json:"id"`
+
 	Package allCertifyVulnPackage `json:"package"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -1060,6 +1071,7 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) MarshalJSON() ([]byte, error
 func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premarshalCertifyGHSAIngestVulnerabilityCertifyVuln, error) {
 	var retval __premarshalCertifyGHSAIngestVulnerabilityCertifyVuln
 
+	retval.Id = v.allCertifyVuln.Id
 	retval.Package = v.allCertifyVuln.Package
 	{
 
@@ -1249,6 +1261,9 @@ type CertifyOSVIngestVulnerabilityCertifyVuln struct {
 	allCertifyVuln `json:"-"`
 }
 
+// GetId returns CertifyOSVIngestVulnerabilityCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetId() string { return v.allCertifyVuln.Id }
+
 // GetPackage returns CertifyOSVIngestVulnerabilityCertifyVuln.Package, and is useful for accessing the field via an interface.
 func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetPackage() allCertifyVulnPackage {
 	return v.allCertifyVuln.Package
@@ -1290,6 +1305,8 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) UnmarshalJSON(b []byte) error
 }
 
 type __premarshalCertifyOSVIngestVulnerabilityCertifyVuln struct {
+	Id string `json:"id"`
+
 	Package allCertifyVulnPackage `json:"package"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -1308,6 +1325,7 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) MarshalJSON() ([]byte, error)
 func (v *CertifyOSVIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premarshalCertifyOSVIngestVulnerabilityCertifyVuln, error) {
 	var retval __premarshalCertifyOSVIngestVulnerabilityCertifyVuln
 
+	retval.Id = v.allCertifyVuln.Id
 	retval.Package = v.allCertifyVuln.Package
 	{
 
@@ -3590,6 +3608,9 @@ type IsVulnerabilityCVEIngestIsVulnerability struct {
 	allIsVulnerability `json:"-"`
 }
 
+// GetId returns IsVulnerabilityCVEIngestIsVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *IsVulnerabilityCVEIngestIsVulnerability) GetId() string { return v.allIsVulnerability.Id }
+
 // GetOsv returns IsVulnerabilityCVEIngestIsVulnerability.Osv, and is useful for accessing the field via an interface.
 func (v *IsVulnerabilityCVEIngestIsVulnerability) GetOsv() allIsVulnerabilityOsvOSV {
 	return v.allIsVulnerability.Osv
@@ -3641,6 +3662,8 @@ func (v *IsVulnerabilityCVEIngestIsVulnerability) UnmarshalJSON(b []byte) error 
 }
 
 type __premarshalIsVulnerabilityCVEIngestIsVulnerability struct {
+	Id string `json:"id"`
+
 	Osv allIsVulnerabilityOsvOSV `json:"osv"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -3663,6 +3686,7 @@ func (v *IsVulnerabilityCVEIngestIsVulnerability) MarshalJSON() ([]byte, error) 
 func (v *IsVulnerabilityCVEIngestIsVulnerability) __premarshalJSON() (*__premarshalIsVulnerabilityCVEIngestIsVulnerability, error) {
 	var retval __premarshalIsVulnerabilityCVEIngestIsVulnerability
 
+	retval.Id = v.allIsVulnerability.Id
 	retval.Osv = v.allIsVulnerability.Osv
 	{
 
@@ -3845,6 +3869,9 @@ type IsVulnerabilityGHSAIngestIsVulnerability struct {
 	allIsVulnerability `json:"-"`
 }
 
+// GetId returns IsVulnerabilityGHSAIngestIsVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *IsVulnerabilityGHSAIngestIsVulnerability) GetId() string { return v.allIsVulnerability.Id }
+
 // GetOsv returns IsVulnerabilityGHSAIngestIsVulnerability.Osv, and is useful for accessing the field via an interface.
 func (v *IsVulnerabilityGHSAIngestIsVulnerability) GetOsv() allIsVulnerabilityOsvOSV {
 	return v.allIsVulnerability.Osv
@@ -3896,6 +3923,8 @@ func (v *IsVulnerabilityGHSAIngestIsVulnerability) UnmarshalJSON(b []byte) error
 }
 
 type __premarshalIsVulnerabilityGHSAIngestIsVulnerability struct {
+	Id string `json:"id"`
+
 	Osv allIsVulnerabilityOsvOSV `json:"osv"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -3918,6 +3947,7 @@ func (v *IsVulnerabilityGHSAIngestIsVulnerability) MarshalJSON() ([]byte, error)
 func (v *IsVulnerabilityGHSAIngestIsVulnerability) __premarshalJSON() (*__premarshalIsVulnerabilityGHSAIngestIsVulnerability, error) {
 	var retval __premarshalIsVulnerabilityGHSAIngestIsVulnerability
 
+	retval.Id = v.allIsVulnerability.Id
 	retval.Osv = v.allIsVulnerability.Osv
 	{
 
@@ -9356,6 +9386,7 @@ func (v *allCertifyVEXStatementVulnerabilityGHSA) __premarshalJSON() (*__premars
 //
 // CertifyVuln is an attestation that represents when a package has a vulnerability
 type allCertifyVuln struct {
+	Id string `json:"id"`
 	// package (subject) - the package object type that represents the package
 	Package allCertifyVulnPackage `json:"package"`
 	// vulnerability (object) - union type that consists of osv, cve or ghsa
@@ -9363,6 +9394,9 @@ type allCertifyVuln struct {
 	// metadata (property) - contains all the vulnerability metadata
 	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
+
+// GetId returns allCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyVuln) GetId() string { return v.Id }
 
 // GetPackage returns allCertifyVuln.Package, and is useful for accessing the field via an interface.
 func (v *allCertifyVuln) GetPackage() allCertifyVulnPackage { return v.Package }
@@ -9409,6 +9443,8 @@ func (v *allCertifyVuln) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallCertifyVuln struct {
+	Id string `json:"id"`
+
 	Package allCertifyVulnPackage `json:"package"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -9427,6 +9463,7 @@ func (v *allCertifyVuln) MarshalJSON() ([]byte, error) {
 func (v *allCertifyVuln) __premarshalJSON() (*__premarshalallCertifyVuln, error) {
 	var retval __premarshalallCertifyVuln
 
+	retval.Id = v.Id
 	retval.Package = v.Package
 	{
 
@@ -11298,12 +11335,16 @@ func (v *allIsOccurrencesTreeSubjectSource) __premarshalJSON() (*__premarshalall
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type allIsVulnerability struct {
+	Id            string                                   `json:"id"`
 	Osv           allIsVulnerabilityOsvOSV                 `json:"osv"`
 	Vulnerability allIsVulnerabilityVulnerabilityCveOrGhsa `json:"-"`
 	Justification string                                   `json:"justification"`
 	Origin        string                                   `json:"origin"`
 	Collector     string                                   `json:"collector"`
 }
+
+// GetId returns allIsVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *allIsVulnerability) GetId() string { return v.Id }
 
 // GetOsv returns allIsVulnerability.Osv, and is useful for accessing the field via an interface.
 func (v *allIsVulnerability) GetOsv() allIsVulnerabilityOsvOSV { return v.Osv }
@@ -11356,6 +11397,8 @@ func (v *allIsVulnerability) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallIsVulnerability struct {
+	Id string `json:"id"`
+
 	Osv allIsVulnerabilityOsvOSV `json:"osv"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -11378,6 +11421,7 @@ func (v *allIsVulnerability) MarshalJSON() ([]byte, error) {
 func (v *allIsVulnerability) __premarshalJSON() (*__premarshalallIsVulnerability, error) {
 	var retval __premarshalallIsVulnerability
 
+	retval.Id = v.Id
 	retval.Osv = v.Osv
 	{
 
@@ -13314,6 +13358,7 @@ fragment allCveTree on CVE {
 	}
 }
 fragment allCertifyVuln on CertifyVuln {
+	id
 	package {
 		... allPkgTree
 	}
@@ -13424,6 +13469,7 @@ fragment allGHSATree on GHSA {
 	}
 }
 fragment allCertifyVuln on CertifyVuln {
+	id
 	package {
 		... allPkgTree
 	}
@@ -13535,6 +13581,7 @@ fragment allOSVTree on OSV {
 	}
 }
 fragment allCertifyVuln on CertifyVuln {
+	id
 	package {
 		... allPkgTree
 	}
@@ -14300,6 +14347,7 @@ fragment allCveTree on CVE {
 	}
 }
 fragment allIsVulnerability on IsVulnerability {
+	id
 	osv {
 		... allOSVTree
 	}
@@ -14380,6 +14428,7 @@ fragment allGHSATree on GHSA {
 	}
 }
 fragment allIsVulnerability on IsVulnerability {
+	id
 	osv {
 		... allOSVTree
 	}

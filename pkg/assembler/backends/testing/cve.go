@@ -61,14 +61,27 @@ type cveNode struct {
 }
 type cveIDMap map[string]*cveIDNode
 type cveIDNode struct {
-	id     uint32
-	parent uint32
-	cveID  string
-	//TODO: add other back edges
+	id              uint32
+	parent          uint32
+	cveID           string
+	certifyVulnLink []uint32
+	equalVulnLink   []uint32
 }
 
 func (n *cveIDNode) getID() uint32 { return n.id }
 func (n *cveNode) getID() uint32   { return n.id }
+
+// certifyVulnerability back edges
+func (n *cveIDNode) setVulnerabilityLink(id uint32) {
+	n.certifyVulnLink = append(n.certifyVulnLink, id)
+}
+func (n *cveIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
+
+// isVulnerability back edges
+func (n *cveIDNode) setEqualVulnLink(id uint32) {
+	n.equalVulnLink = append(n.equalVulnLink, id)
+}
+func (n *cveIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
 
 // Ingest CVE
 func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (*model.Cve, error) {
@@ -203,6 +216,22 @@ func (c *demoClient) buildCveResponse(id uint32, filter *model.CVESpec) (*model.
 		CveIds: cveIDList,
 	}
 	return &s, nil
+}
+
+func getCveIDFromInput(c *demoClient, input model.CVEInputSpec) (uint32, error) {
+	cveStruct, hasCve := c.cves[input.Year]
+	if !hasCve {
+		return 0, gqlerror.Errorf("cve year \"%d\" not found", input.Year)
+	}
+	cveIDs := cveStruct.cveIDs
+	cveID := strings.ToLower(input.CveID)
+
+	cveIDStruct, hasCveID := cveIDs[cveID]
+	if !hasCveID {
+		return 0, gqlerror.Errorf("cve id \"%s\" not found", input.CveID)
+	}
+
+	return cveIDStruct.id, nil
 }
 
 // TODO: remove

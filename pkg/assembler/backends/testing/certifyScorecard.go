@@ -17,6 +17,7 @@ package testing
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strconv"
 	"time"
@@ -48,13 +49,20 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 		return nil, err
 	}
 
+	searchIDs := []uint32{}
+	srcName, ok := c.index[sourceID].(*srcNameNode)
+	if ok {
+		searchIDs = append(searchIDs, srcName.scorecardLink...)
+	}
+
 	checksMap := getChecksFromInput(scorecard.Checks)
 
 	// Don't insert duplicates
 	duplicate := false
 	collectedScorecardLink := scorecardLink{}
-	for _, v := range c.scorecards {
-		if *sourceID == v.sourceID && scorecard.TimeScanned.UTC() == v.timeScanned && scorecard.AggregateScore == v.aggregateScore &&
+	for _, id := range searchIDs {
+		v, _ := c.certifyScorecardByID(id)
+		if sourceID == v.sourceID && scorecard.TimeScanned.UTC() == v.timeScanned && scorecard.AggregateScore == v.aggregateScore &&
 			scorecard.ScorecardVersion == v.scorecardVersion && scorecard.ScorecardCommit == v.scorecardCommit && scorecard.Origin == v.origin &&
 			scorecard.Collector == v.collector && reflect.DeepEqual(checksMap, v.checks) {
 
@@ -67,7 +75,7 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 		// store the link
 		collectedScorecardLink = scorecardLink{
 			id:               c.getNextID(),
-			sourceID:         *sourceID,
+			sourceID:         sourceID,
 			timeScanned:      scorecard.TimeScanned.UTC(),
 			aggregateScore:   scorecard.AggregateScore,
 			checks:           checksMap,
@@ -79,7 +87,7 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 		c.index[collectedScorecardLink.id] = &collectedScorecardLink
 		c.scorecards = append(c.scorecards, &collectedScorecardLink)
 		// set the backlinks
-		c.index[*sourceID].(*srcNameNode).setScorecardLink(collectedScorecardLink.id)
+		c.index[sourceID].(*srcNameNode).setScorecardLink(collectedScorecardLink.id)
 	}
 
 	// build return GraphQL type
@@ -115,8 +123,9 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 		}
 	}
 
+	// TODO if any of the source is specified, ony search those backedges
 	for _, link := range c.scorecards {
-		if filter != nil && filter.TimeScanned != nil && !reflect.DeepEqual(filter.TimeScanned.UTC(), link.timeScanned) {
+		if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
 			continue
 		}
 		if filter != nil && filter.AggregateScore != nil && *filter.AggregateScore != link.aggregateScore {
@@ -230,4 +239,16 @@ func noMatchChecks(checksFilter []*model.ScorecardCheckSpec, v map[string]int) b
 		return !reflect.DeepEqual(v, filterChecks)
 	}
 	return false
+}
+
+func (c *demoClient) certifyScorecardByID(id uint32) (*scorecardLink, error) {
+	node, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find scorecardLink")
+	}
+	link, ok := node.(*scorecardLink)
+	if !ok {
+		return nil, errors.New("not an scorecardLink")
+	}
+	return link, nil
 }

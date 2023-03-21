@@ -22,6 +22,7 @@ CertifyVuln is an attestation that represents when a package has a vulnerability
 
 """
 type CertifyVuln {
+  id: ID!
   "package (subject) - the package object type that represents the package"
   package: Package!
   "vulnerability (object) - union type that consists of osv, cve or ghsa"
@@ -70,6 +71,7 @@ Specifying just the package allows to query for all vulnerabilities associated w
 Only OSV, CVE or GHSA can be specified at once
 """
 input CertifyVulnSpec {
+  id: ID
   package: PkgSpec
   vulnerability: OsvCveOrGhsaSpec
   timeScanned: Time
