@@ -59,11 +59,11 @@ type osvNode struct {
 }
 type osvIDMap map[string]*osvIDNode
 type osvIDNode struct {
-	id              uint32
-	parent          uint32
-	osvID           string
-	certifyVulnLink []uint32
-	equalVulnLink   []uint32
+	id               uint32
+	parent           uint32
+	osvID            string
+	certifyVulnLinks []uint32
+	equalVulnLinks   []uint32
 }
 
 func (n *osvIDNode) getID() uint32 { return n.id }
@@ -93,16 +93,14 @@ func (n *osvNode) buildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // certifyVulnerability back edges
-func (n *osvIDNode) setVulnerabilityLink(id uint32) {
-	n.certifyVulnLink = append(n.certifyVulnLink, id)
+func (n *osvIDNode) setVulnerabilityLinks(id uint32) {
+	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
-func (n *osvIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
 
 // isVulnerability back edges
-func (n *osvIDNode) setEqualVulnLink(id uint32) {
-	n.equalVulnLink = append(n.equalVulnLink, id)
+func (n *osvIDNode) setEqualVulnLinks(id uint32) {
+	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
-func (n *osvIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
 
 // Ingest OSV
 func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (*model.Osv, error) {

@@ -36,6 +36,7 @@ type artStruct struct {
 	hashEquals  []uint32
 	occurrences []uint32
 	hasSLSAs    []uint32
+	vexLinks    []uint32
 }
 
 func (n *artStruct) getID() uint32 { return n.id }
@@ -55,11 +56,13 @@ func (n *artStruct) buildModelNode(c *demoClient) (model.Node, error) {
 func (n *artStruct) getHashEquals() []uint32 { return n.hashEquals }
 func (n *artStruct) setHashEquals(id uint32) { n.hashEquals = append(n.hashEquals, id) }
 
-func (n *artStruct) getOccurrences() []uint32 { return n.occurrences }
 func (n *artStruct) setOccurrences(id uint32) { n.occurrences = append(n.occurrences, id) }
 
 func (n *artStruct) getHasSLSAs() []uint32 { return n.hasSLSAs }
 func (n *artStruct) setHasSLSAs(id uint32) { n.hasSLSAs = append(n.hasSLSAs, id) }
+
+// certifyVexStatement back edges
+func (n *artStruct) setVexLinks(id uint32) { n.vexLinks = append(n.vexLinks, id) }
 
 // TODO convert to unit tests
 // func registerAllArtifacts(c *demoClient) {
@@ -185,4 +188,52 @@ func (c *demoClient) convArtifact(a *artStruct) *model.Artifact {
 		Digest:    a.digest,
 		Algorithm: a.algorithm,
 	}
+}
+
+// Builds a model.Source to send as GraphQL response, starting from id.
+// The optional filter allows restricting output (on selection operations).
+func (c *demoClient) buildArtifactResponse(id uint32, filter *model.ArtifactSpec) (*model.Artifact, error) {
+	if filter != nil && filter.ID != nil {
+		filteredID, err := strconv.Atoi(*filter.ID)
+		if err != nil {
+			return nil, err
+		}
+		if uint32(filteredID) != id {
+			return nil, nil
+		}
+	}
+
+	node, ok := c.index[id]
+	if !ok {
+		return nil, gqlerror.Errorf("ID does not match existing node")
+	}
+
+	artNode, ok := node.(*artStruct)
+	if !ok {
+		return nil, gqlerror.Errorf("ID does not match expected node type for artifact")
+	}
+
+	if filter != nil && noMatch(filter.Algorithm, artNode.algorithm) {
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.Digest, artNode.digest) {
+		return nil, nil
+	}
+	art := &model.Artifact{
+		// IDs are generated as string even though we ask for integers
+		// See https://github.com/99designs/gqlgen/issues/2561
+		ID:        nodeID(artNode.id),
+		Algorithm: artNode.algorithm,
+		Digest:    artNode.digest,
+	}
+
+	return art, nil
+}
+
+func getArtifactIDFromInput(c *demoClient, input model.ArtifactInputSpec) (uint32, error) {
+	a, err := c.artifactByKey(input.Algorithm, input.Digest)
+	if err != nil {
+		return 0, gqlerror.Errorf("artifact with algorithm \"%s\" and digest \"%s\" not found", input.Algorithm, input.Digest)
+	}
+	return a.id, nil
 }

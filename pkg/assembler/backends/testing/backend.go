@@ -83,6 +83,8 @@ type demoClient struct {
 	builders             builderMap
 	hasSLSAs             hasSLSAList
 	hasSBOMs             hasSBOMList
+	vexs                 vexList
+	certifyBads          badList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -110,6 +112,8 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		builders:             builderMap{},
 		hasSLSAs:             hasSLSAList{},
 		hasSBOMs:             hasSBOMList{},
+		vexs:                 vexList{},
+		certifyBads:          badList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -145,6 +149,8 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		builders:             builderMap{},
 		hasSLSAs:             hasSLSAList{},
 		hasSBOMs:             hasSBOMList{},
+		vexs:                 vexList{},
+		certifyBads:          badList{},
 	}
 	return client, nil
 }

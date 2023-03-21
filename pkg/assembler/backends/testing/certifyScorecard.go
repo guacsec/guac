@@ -60,7 +60,7 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 	searchIDs := []uint32{}
 	srcName, ok := c.index[sourceID].(*srcNameNode)
 	if ok {
-		searchIDs = append(searchIDs, srcName.scorecardLink...)
+		searchIDs = append(searchIDs, srcName.scorecardLinks...)
 	}
 
 	checksMap := getChecksFromInput(scorecard.Checks)
@@ -95,7 +95,7 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 		c.index[collectedScorecardLink.id] = &collectedScorecardLink
 		c.scorecards = append(c.scorecards, &collectedScorecardLink)
 		// set the backlinks
-		c.index[sourceID].(*srcNameNode).setScorecardLink(collectedScorecardLink.id)
+		c.index[sourceID].(*srcNameNode).setScorecardLinks(collectedScorecardLink.id)
 	}
 
 	// build return GraphQL type

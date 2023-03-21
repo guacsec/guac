@@ -17,8 +17,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -26,91 +24,21 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func registerAllCertifyBad(client *demoClient) error {
-	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
-	selectedType := "conan"
-	selectedNameSpace := "openssl.org"
-	selectedName := "openssl"
-	selectedVersion := "3.0.3"
-	qualifierA := "bincrafters"
-	qualifierB := "stable"
-	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
-	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
-	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
-	if err != nil {
-		return err
-	}
-	_, err = client.registerCertifyBad(selectedPackage[0], nil, nil, "this openssl package is a typosquatting", "testing backend", "testing backend")
-	if err != nil {
-		return err
-	}
-	// "git", "github", "github.com/guacsec/guac", "tag=v0.0.1"
-	selectedSourceType := "git"
-	selectedSourceNameSpace := "github"
-	selectedSourceName := "github.com/guacsec/guac"
-	selectedTag := "v0.0.1"
-	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
-	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
-	if err != nil {
-		return err
-	}
-	_, err = client.registerCertifyBad(nil, selectedSource[0], nil, "this source is associated with a bad author", "testing backend", "testing backend")
-	if err != nil {
-		return err
-	}
-
-	_, err = client.registerCertifyBad(nil, nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is associated with a bad package", "testing backend", "testing backend")
-	if err != nil {
-		return err
-	}
-
-	return nil
+// Internal data: link that a package/source/artifact is bad
+type badList []*badLink
+type badLink struct {
+	id            uint32
+	packageID     uint32
+	artifactID    uint32
+	sourceID      uint32
+	justification string
+	origin        string
+	collector     string
 }
+
+func (n *badLink) getID() uint32 { return n.id }
 
 // Ingest CertifyBad
-
-func (c *demoClient) registerCertifyBad(selectedPackage *model.Package, selectedSource *model.Source, selectedArtifact *model.Artifact, justification, origin, collector string) (*model.CertifyBad, error) {
-
-	if selectedPackage != nil && selectedSource != nil && selectedArtifact != nil {
-		return nil, fmt.Errorf("cannot specify package, source or artifact together for CertifyBad")
-	}
-
-	for _, bad := range c.certifyBad {
-		if bad.Justification == justification {
-			if val, ok := bad.Subject.(model.Package); ok {
-				if reflect.DeepEqual(val, *selectedPackage) {
-					return bad, nil
-				}
-			} else if val, ok := bad.Subject.(model.Source); ok {
-				if reflect.DeepEqual(val, *selectedSource) {
-					return bad, nil
-				}
-			} else if val, ok := bad.Subject.(model.Artifact); ok {
-				if reflect.DeepEqual(val, *selectedArtifact) {
-					return bad, nil
-				}
-			}
-		}
-	}
-
-	newCertifyBad := &model.CertifyBad{
-		Justification: justification,
-		Origin:        origin,
-		Collector:     collector,
-	}
-	if selectedPackage != nil {
-		newCertifyBad.Subject = selectedPackage
-	} else if selectedSource != nil {
-		newCertifyBad.Subject = selectedSource
-	} else {
-		newCertifyBad.Subject = selectedArtifact
-	}
-
-	c.certifyBad = append(c.certifyBad, newCertifyBad)
-	return newCertifyBad, nil
-}
-
 func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 
 	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject")
@@ -194,7 +122,7 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 
 func (c *demoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 
-	queryAll, err := helper.ValidatePackageSourceOrArtifactQueryInput(certifyBadSpec.Subject)
+	err := helper.ValidatePackageSourceOrArtifactQueryFilter(certifyBadSpec.Subject)
 	if err != nil {
 		return nil, err
 	}

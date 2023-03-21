@@ -33,10 +33,12 @@ func (c *neo4jClient) CertifyBad(ctx context.Context, certifyBadSpec *model.Cert
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	queryAll, err := helper.ValidatePackageSourceOrArtifactQueryInput(certifyBadSpec.Subject)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix validation
+	queryAll := true
+	// queryAll, err := helper.ValidatePackageSourceOrArtifactQueryInput(certifyBadSpec.Subject)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	aggregateCertifyBad := []*model.CertifyBad{}
 

@@ -182,7 +182,7 @@ func (c *demoClient) hasSBOMByID(id uint32) (*hasSBOMStruct, error) {
 
 func (c *demoClient) HasSBOM(ctx context.Context, hSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	_, err := helper.ValidatePackageOrSourceQueryInput(hSpec.Subject)
+	err := helper.ValidatePackageOrSourceQueryFilter(hSpec.Subject)
 	if err != nil {
 		return nil, err
 	}

@@ -155,10 +155,10 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 	a.setOccurrences(o.id)
 	if packageID != maxUint32 {
 		p, _ := c.pkgVersionByID(packageID)
-		p.setOccurrenceLink(o.id)
+		p.setOccurrenceLinks(o.id)
 	} else {
 		s, _ := c.sourceByID(sourceID)
-		s.setOccurrences(o.id)
+		s.setOccurrenceLinks(o.id)
 	}
 	c.occurrences = append(c.occurrences, o)
 
@@ -217,7 +217,7 @@ func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec)
 // Query IsOccurrence
 
 func (c *demoClient) IsOccurrence(ctx context.Context, ioSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	_, err := helper.ValidatePackageOrSourceQueryInput(ioSpec.Subject)
+	err := helper.ValidatePackageOrSourceQueryFilter(ioSpec.Subject)
 	if err != nil {
 		return nil, err
 	}

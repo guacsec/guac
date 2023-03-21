@@ -87,7 +87,7 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 		}
 		osvNode, ok := c.index[osvID].(*osvIDNode)
 		if ok {
-			vulnerabilityLinks = append(vulnerabilityLinks, osvNode.certifyVulnLink...)
+			vulnerabilityLinks = append(vulnerabilityLinks, osvNode.certifyVulnLinks...)
 		}
 	}
 
@@ -98,7 +98,7 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 		}
 		cveNode, ok := c.index[cveID].(*cveIDNode)
 		if ok {
-			vulnerabilityLinks = append(vulnerabilityLinks, cveNode.certifyVulnLink...)
+			vulnerabilityLinks = append(vulnerabilityLinks, cveNode.certifyVulnLinks...)
 		}
 	}
 
@@ -109,14 +109,14 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 		}
 		ghsaNode, ok := c.index[ghsaID].(*ghsaIDNode)
 		if ok {
-			vulnerabilityLinks = append(vulnerabilityLinks, ghsaNode.certifyVulnLink...)
+			vulnerabilityLinks = append(vulnerabilityLinks, ghsaNode.certifyVulnLinks...)
 		}
 	}
 
 	packageVulns := []uint32{}
 	foundPkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
 	if ok {
-		packageVulns = append(packageVulns, foundPkgVersionNode.certifyVulnLink...)
+		packageVulns = append(packageVulns, foundPkgVersionNode.certifyVulnLinks...)
 	}
 
 	searchIDs := []uint32{}
@@ -130,7 +130,7 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 	duplicate := false
 	collectedCertifyVulnLink := vulnerabilityLink{}
 	for _, id := range searchIDs {
-		v, _ := c.certifyVulnByID(id)
+		v, _ := c.vulnLinkByID(id)
 		vulnMatch := false
 		if osvID != 0 && osvID == v.osvID {
 			vulnMatch = true
@@ -158,7 +158,7 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 			osvID:          osvID,
 			cveID:          cveID,
 			ghsaID:         ghsaID,
-			timeScanned:    certifyVuln.TimeScanned,
+			timeScanned:    certifyVuln.TimeScanned.UTC(),
 			dbURI:          certifyVuln.DbURI,
 			dbVersion:      certifyVuln.DbVersion,
 			scannerURI:     certifyVuln.ScannerURI,
@@ -169,15 +169,15 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 		c.index[collectedCertifyVulnLink.id] = &collectedCertifyVulnLink
 		c.vulnerabilities = append(c.vulnerabilities, &collectedCertifyVulnLink)
 		// set the backlinks
-		c.index[packageID].(*pkgVersionNode).setVulnerabilityLink(collectedCertifyVulnLink.id)
+		c.index[packageID].(*pkgVersionNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		if osvID != 0 {
-			c.index[osvID].(*osvIDNode).setVulnerabilityLink(collectedCertifyVulnLink.id)
+			c.index[osvID].(*osvIDNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 		if cveID != 0 {
-			c.index[cveID].(*cveIDNode).setVulnerabilityLink(collectedCertifyVulnLink.id)
+			c.index[cveID].(*cveIDNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 		if ghsaID != 0 {
-			c.index[ghsaID].(*ghsaIDNode).setVulnerabilityLink(collectedCertifyVulnLink.id)
+			c.index[ghsaID].(*ghsaIDNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 	}
 
@@ -191,6 +191,10 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 
 // Query CertifyVuln
 func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
+	err := helper.ValidateOsvCveOrGhsaQueryFilter(filter.Vulnerability)
+	if err != nil {
+		return nil, err
+	}
 	out := []*model.CertifyVuln{}
 
 	if filter != nil && filter.ID != nil {
@@ -359,7 +363,7 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 	return &certifyVuln, nil
 }
 
-func (c *demoClient) certifyVulnByID(id uint32) (*vulnerabilityLink, error) {
+func (c *demoClient) vulnLinkByID(id uint32) (*vulnerabilityLink, error) {
 	node, ok := c.index[id]
 	if !ok {
 		return nil, errors.New("could not find vulnerabilityLink")

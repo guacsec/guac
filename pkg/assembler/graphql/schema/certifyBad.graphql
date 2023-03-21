@@ -55,6 +55,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 """
 type CertifyBad {
+  id: ID!
   subject: PackageSourceOrArtifact!
   justification: String!
   origin: String!
@@ -68,6 +69,7 @@ For package - a PackageName or PackageVersion must be specified (name or name, v
 For source - a SourceName must be specified (name, tag or commit)
 """
 input CertifyBadSpec {
+  id: ID
   subject: PackageSourceOrArtifactSpec
   justification: String
   origin: String

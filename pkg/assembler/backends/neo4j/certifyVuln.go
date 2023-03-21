@@ -41,10 +41,12 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	queryAll, err := helper.ValidateOsvCveOrGhsaQueryInput(certifyVulnSpec.Vulnerability)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix validation
+	queryAll := true
+	// queryAll, err := helper.ValidateOsvCveOrGhsaQueryInput(certifyVulnSpec.Vulnerability)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	aggregateCertifyVuln := []*model.CertifyVuln{}
 

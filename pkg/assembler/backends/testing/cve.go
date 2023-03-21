@@ -61,11 +61,12 @@ type cveNode struct {
 }
 type cveIDMap map[string]*cveIDNode
 type cveIDNode struct {
-	id              uint32
-	parent          uint32
-	cveID           string
-	certifyVulnLink []uint32
-	equalVulnLink   []uint32
+	id               uint32
+	parent           uint32
+	cveID            string
+	certifyVulnLinks []uint32
+	equalVulnLinks   []uint32
+	vexLinks         []uint32
 }
 
 func (n *cveIDNode) getID() uint32 { return n.id }
@@ -95,16 +96,19 @@ func (n *cveNode) buildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // certifyVulnerability back edges
-func (n *cveIDNode) setVulnerabilityLink(id uint32) {
-	n.certifyVulnLink = append(n.certifyVulnLink, id)
+func (n *cveIDNode) setVulnerabilityLinks(id uint32) {
+	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
-func (n *cveIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
 
 // isVulnerability back edges
-func (n *cveIDNode) setEqualVulnLink(id uint32) {
-	n.equalVulnLink = append(n.equalVulnLink, id)
+func (n *cveIDNode) setEqualVulnLinks(id uint32) {
+	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
-func (n *cveIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
+
+// certifyVexStatement back edges
+func (n *cveIDNode) setVexLinks(id uint32) {
+	n.vexLinks = append(n.vexLinks, id)
+}
 
 // Ingest CVE
 func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (*model.Cve, error) {

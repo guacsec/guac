@@ -44,6 +44,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVEXStatement {
+  id: ID!
   subject: PackageOrArtifact!
   vulnerability: CveOrGhsa!
   justification: String!
@@ -57,6 +58,7 @@ CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to retu
 Only package or artifact and CVE or GHSA can be specified at once.
 """
 input CertifyVEXStatementSpec {
+  id: ID
   subject: PackageOrArtifactSpec
   vulnerability: CveOrGhsaSpec
   justification: String

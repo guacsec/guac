@@ -75,15 +75,15 @@ type srcNameStruct struct {
 }
 type srcNameList []*srcNameNode
 type srcNameNode struct {
-	id            uint32
-	parent        uint32
-	name          string
-	tag           string
-	commit        string
-	srcMapLink    []uint32
-	scorecardLink []uint32
-	occurrences   []uint32
-	hasSBOMs      []uint32
+	id             uint32
+	parent         uint32
+	name           string
+	tag            string
+	commit         string
+	srcMapLinks    []uint32
+	scorecardLinks []uint32
+	occurrences    []uint32
+	hasSBOMs       []uint32
 }
 
 func (n *srcNamespaceStruct) getID() uint32 { return n.id }
@@ -125,15 +125,12 @@ func (n *srcNameNode) buildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // hasSourceAt back edges
-func (p *srcNameNode) setSrcMapLink(id uint32) { p.srcMapLink = append(p.srcMapLink, id) }
-func (p *srcNameNode) getSrcMapLink() []uint32 { return p.srcMapLink }
+func (p *srcNameNode) setSrcMapLinks(id uint32) { p.srcMapLinks = append(p.srcMapLinks, id) }
 
 // scorecard back edges
-func (p *srcNameNode) setScorecardLink(id uint32) { p.scorecardLink = append(p.scorecardLink, id) }
-func (p *srcNameNode) getScorecardLink() []uint32 { return p.scorecardLink }
+func (p *srcNameNode) setScorecardLinks(id uint32) { p.scorecardLinks = append(p.scorecardLinks, id) }
 
-func (p *srcNameNode) setOccurrences(id uint32) { p.occurrences = append(p.occurrences, id) }
-func (p *srcNameNode) getOccurrences() []uint32 { return p.occurrences }
+func (p *srcNameNode) setOccurrenceLinks(id uint32) { p.occurrences = append(p.occurrences, id) }
 
 func (p *srcNameNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
 func (p *srcNameNode) getHasSBOM() []uint32 { return p.hasSBOMs }

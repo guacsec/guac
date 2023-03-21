@@ -63,12 +63,12 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 	packageDependencies := []uint32{}
 	pkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
 	if ok {
-		packageDependencies = append(packageDependencies, pkgVersionNode.isDependencyLink...)
+		packageDependencies = append(packageDependencies, pkgVersionNode.isDependencyLinks...)
 	}
 	depPackageDependencies := []uint32{}
 	pkgName, ok := c.index[depPackageID].(*pkgVersionStruct)
 	if ok {
-		depPackageDependencies = append(depPackageDependencies, pkgName.isDependencyLink...)
+		depPackageDependencies = append(depPackageDependencies, pkgName.isDependencyLinks...)
 	}
 
 	searchIDs := []uint32{}
@@ -105,8 +105,8 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 		c.index[collectedIsDependencyLink.id] = &collectedIsDependencyLink
 		c.isDependencies = append(c.isDependencies, &collectedIsDependencyLink)
 		// set the backlinks
-		c.index[packageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
-		c.index[depPackageID].(pkgNameOrVersion).setIsDependencyLink(collectedIsDependencyLink.id)
+		c.index[packageID].(pkgNameOrVersion).setIsDependencyLinks(collectedIsDependencyLink.id)
+		c.index[depPackageID].(pkgNameOrVersion).setIsDependencyLinks(collectedIsDependencyLink.id)
 	}
 
 	// build return GraphQL type

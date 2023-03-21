@@ -55,11 +55,12 @@ type ghsaNode struct {
 }
 type ghsaIDMap map[string]*ghsaIDNode
 type ghsaIDNode struct {
-	id              uint32
-	parent          uint32
-	ghsaID          string
-	certifyVulnLink []uint32
-	equalVulnLink   []uint32
+	id               uint32
+	parent           uint32
+	ghsaID           string
+	certifyVulnLinks []uint32
+	equalVulnLinks   []uint32
+	vexLinks         []uint32
 }
 
 func (n *ghsaIDNode) getID() uint32 { return n.id }
@@ -89,16 +90,19 @@ func (n *ghsaNode) buildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // certifyVulnerability back edges
-func (n *ghsaIDNode) setVulnerabilityLink(id uint32) {
-	n.certifyVulnLink = append(n.certifyVulnLink, id)
+func (n *ghsaIDNode) setVulnerabilityLinks(id uint32) {
+	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
-func (n *ghsaIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
 
 // isVulnerability back edges
-func (n *ghsaIDNode) setEqualVulnLink(id uint32) {
-	n.equalVulnLink = append(n.equalVulnLink, id)
+func (n *ghsaIDNode) setEqualVulnLinks(id uint32) {
+	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
-func (n *ghsaIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
+
+// certifyVexStatement back edges
+func (n *ghsaIDNode) setVexLinks(id uint32) {
+	n.vexLinks = append(n.vexLinks, id)
+}
 
 // Ingest GHSA
 func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec) (*model.Ghsa, error) {
