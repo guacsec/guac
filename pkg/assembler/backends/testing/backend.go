@@ -44,7 +44,6 @@ func (c *demoClient) getNextID() uint32 {
 }
 
 type demoClient struct {
-	builders             []*model.Builder
 	hasSBOM              []*model.HasSbom
 	certifyPkg           []*model.CertifyPkg
 	certifyVuln          []*model.CertifyVuln
@@ -52,7 +51,6 @@ type demoClient struct {
 	certifyBad           []*model.CertifyBad
 	isVulnerability      []*model.IsVulnerability
 	certifyVEXStatement  []*model.CertifyVEXStatement
-	hasSLSA              []*model.HasSlsa
 	id                   uint32
 	index                indexType
 	packages             pkgTypeMap
@@ -68,11 +66,12 @@ type demoClient struct {
 	occurrences          isOccurrenceList
 	vulnerabilities      vulnerabilityList
 	equalVulnerabilities equalVulnerabilityList
+	builders             builderMap
+	hasSLSAs             hasSLSAList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		builders:             []*model.Builder{},
 		hasSBOM:              []*model.HasSbom{},
 		certifyPkg:           []*model.CertifyPkg{},
 		certifyVuln:          []*model.CertifyVuln{},
@@ -80,7 +79,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		certifyBad:           []*model.CertifyBad{},
 		isVulnerability:      []*model.IsVulnerability{},
 		certifyVEXStatement:  []*model.CertifyVEXStatement{},
-		hasSLSA:              []*model.HasSlsa{},
 		index:                indexType{},
 		packages:             pkgTypeMap{},
 		sources:              srcTypeMap{},
@@ -95,20 +93,20 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		occurrences:          isOccurrenceList{},
 		vulnerabilities:      vulnerabilityList{},
 		equalVulnerabilities: equalVulnerabilityList{},
+		builders:             builderMap{},
+		hasSLSAs:             hasSLSAList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
 	registerAllCVE(client)
 	registerAllGHSA(client)
 	registerAllOSV(client)
-	registerAllBuilders(client)
 
 	return client, nil
 }
 
 func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		builders:             []*model.Builder{},
 		hasSBOM:              []*model.HasSbom{},
 		certifyPkg:           []*model.CertifyPkg{},
 		certifyVuln:          []*model.CertifyVuln{},
@@ -116,7 +114,6 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		certifyBad:           []*model.CertifyBad{},
 		isVulnerability:      []*model.IsVulnerability{},
 		certifyVEXStatement:  []*model.CertifyVEXStatement{},
-		hasSLSA:              []*model.HasSlsa{},
 		index:                indexType{},
 		packages:             pkgTypeMap{},
 		sources:              srcTypeMap{},
@@ -131,6 +128,8 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		occurrences:          isOccurrenceList{},
 		vulnerabilities:      vulnerabilityList{},
 		equalVulnerabilities: equalVulnerabilityList{},
+		builders:             builderMap{},
+		hasSLSAs:             hasSLSAList{},
 	}
 	return client, nil
 }

@@ -54,9 +54,9 @@ type Artifact struct {
 	Digest    string `json:"digest"`
 }
 
-func (Artifact) IsPackageOrArtifact() {}
-
 func (Artifact) IsPackageSourceOrArtifact() {}
+
+func (Artifact) IsPackageOrArtifact() {}
 
 func (Artifact) IsNodes() {}
 
@@ -81,6 +81,7 @@ type ArtifactSpec struct {
 //
 // Currently builders are identified by the `uri` field, which is mandatory.
 type Builder struct {
+	ID  string `json:"id"`
 	URI string `json:"uri"`
 }
 
@@ -93,6 +94,7 @@ type BuilderInputSpec struct {
 
 // BuilderSpec allows filtering the list of builders to return.
 type BuilderSpec struct {
+	ID  *string `json:"id,omitempty"`
 	URI *string `json:"uri,omitempty"`
 }
 
@@ -386,8 +388,9 @@ type HasSBOMSpec struct {
 
 // HasSLSA records that a subject node has a SLSA attestation.
 type HasSlsa struct {
+	ID string `json:"id"`
 	// The subject of SLSA attestation: package, source, or artifact.
-	Subject PackageSourceOrArtifact `json:"subject"`
+	Subject *Artifact `json:"subject"`
 	// The SLSA attestation.
 	Slsa *Slsa `json:"slsa,omitempty"`
 }
@@ -396,16 +399,17 @@ func (HasSlsa) IsNodes() {}
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
-	Subject     *PackageSourceOrArtifactSpec   `json:"subject,omitempty"`
-	BuiltFrom   []*PackageSourceOrArtifactSpec `json:"builtFrom,omitempty"`
-	BuiltBy     *BuilderSpec                   `json:"builtBy,omitempty"`
-	BuildType   *string                        `json:"buildType,omitempty"`
-	Predicate   []*SLSAPredicateSpec           `json:"predicate,omitempty"`
-	SlsaVersion *string                        `json:"slsaVersion,omitempty"`
-	StartedOn   *time.Time                     `json:"startedOn,omitempty"`
-	FinishedOn  *time.Time                     `json:"finishedOn,omitempty"`
-	Origin      *string                        `json:"origin,omitempty"`
-	Collector   *string                        `json:"collector,omitempty"`
+	ID          *string              `json:"id,omitempty"`
+	Subject     *ArtifactSpec        `json:"subject,omitempty"`
+	BuiltFrom   []*ArtifactSpec      `json:"builtFrom,omitempty"`
+	BuiltBy     *BuilderSpec         `json:"builtBy,omitempty"`
+	BuildType   *string              `json:"buildType,omitempty"`
+	Predicate   []*SLSAPredicateSpec `json:"predicate,omitempty"`
+	SlsaVersion *string              `json:"slsaVersion,omitempty"`
+	StartedOn   *time.Time           `json:"startedOn,omitempty"`
+	FinishedOn  *time.Time           `json:"finishedOn,omitempty"`
+	Origin      *string              `json:"origin,omitempty"`
+	Collector   *string              `json:"collector,omitempty"`
 }
 
 // HasSourceAt is an attestation represents that a package object has a source object since a timestamp
@@ -687,9 +691,9 @@ type Package struct {
 	Namespaces []*PackageNamespace `json:"namespaces"`
 }
 
-func (Package) IsPackageOrArtifact() {}
-
 func (Package) IsPackageSourceOrArtifact() {}
+
+func (Package) IsPackageOrArtifact() {}
 
 func (Package) IsPackageOrSource() {}
 
@@ -912,7 +916,7 @@ type PkgSpec struct {
 // included into GUAC (origin document and the collector for that document).
 type Slsa struct {
 	// Sources of the build resulting in subject (materials)
-	BuiltFrom []PackageSourceOrArtifact `json:"builtFrom"`
+	BuiltFrom []*Artifact `json:"builtFrom"`
 	// Builder performing the build
 	BuiltBy *Builder `json:"builtBy"`
 	// Type of the builder

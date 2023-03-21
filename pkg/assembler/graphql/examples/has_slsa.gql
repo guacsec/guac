@@ -1,32 +1,18 @@
 fragment allSLSATree on HasSLSA {
+  id
   subject {
-    __typename
-    ... on Package {
-      ...allPkgTree
-    }
-    ... on Source {
-      ...allSrcTree
-    }
-    ... on Artifact {
+      id
       algorithm
       digest
-    }
   }
   slsa {
       builtFrom {
-        __typename
-        ... on Package {
-          ...allPkgTree
-        }
-        ... on Source {
-          ...allSrcTree
-        }
-        ... on Artifact {
+          id
           algorithm
           digest
-        }
       }
       builtBy {
+        id
         uri
       }
       buildType
@@ -49,13 +35,31 @@ query SLSAQ1 {
 }
 
 query SLSAQ2 {
-  HasSLSA(hasSLSASpec: {origin: "testing backend"}) {
+  HasSLSA(hasSLSASpec: {origin: "Demo ingestion"}) {
     ...allSLSATree
   }
 }
 
 query SLSAQ3 {
-  HasSLSA(hasSLSASpec: {subject: {package: {name: "django"}}}) {
+  HasSLSA(hasSLSASpec: {subject: {algorithm: "sha1"}}) {
+    ...allSLSATree
+  }
+}
+
+query SLSAQ4 {
+  HasSLSA(hasSLSASpec: {builtFrom: [{algorithm: "sha256"}]}) {
+    ...allSLSATree
+  }
+}
+
+query SLSAQ5 {
+  HasSLSA(hasSLSASpec: {id: "47"}) {
+    ...allSLSATree
+  }
+}
+
+query SLSAQ6 {
+  HasSLSA(hasSLSASpec: {predicate: { key:"buildDefinition.externalParameters.ref", value:"refs/heads/main"}}) {
     ...allSLSATree
   }
 }

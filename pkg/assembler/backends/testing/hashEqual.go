@@ -126,6 +126,9 @@ func (c *demoClient) matchArtifacts(filter []*model.ArtifactSpec, value []uint32
 	var matchID []uint32
 	var matchPartial []*model.ArtifactSpec
 	for _, aSpec := range filter {
+		if aSpec == nil {
+			continue
+		}
 		a, _ := c.artifactExact(aSpec)
 		// drop error here if ID is bad
 		if a != nil {

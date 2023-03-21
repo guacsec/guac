@@ -17,536 +17,228 @@ package testing
 
 import (
 	"context"
+	"errors"
+	"sort"
+	"strconv"
 	"strings"
+	"time"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/exp/slices"
 )
+
+type hasSLSAList []*hasSLSAStruct
+type hasSLSAStruct struct {
+	id         uint32
+	subject    uint32
+	builtFrom  []uint32
+	builtBy    uint32
+	buildType  string
+	predicates []*model.SLSAPredicate
+	version    string
+	start      time.Time
+	finish     time.Time
+	origin     string
+	collector  string
+}
+
+func (n *hasSLSAStruct) getID() uint32 { return n.id }
 
 // Query HasSlsa
 
-func (c *demoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	subjectsDefined := 0
-	// TODO(mihaimaruseac): Revisit e2e
-	if hasSLSASpec.Subject != nil {
-		if hasSLSASpec.Subject.Package != nil {
-			subjectsDefined = subjectsDefined + 1
+func (c *demoClient) HasSlsa(ctx context.Context, hSpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
+	if hSpec.ID != nil {
+		id64, err := strconv.ParseUint(*hSpec.ID, 10, 32)
+		if err != nil {
+			return nil, gqlerror.Errorf("HasSLSA :: invalid ID %s", err)
 		}
-		if hasSLSASpec.Subject.Source != nil {
-			subjectsDefined = subjectsDefined + 1
+		id := uint32(id64)
+		h, err := c.hasSLSAByID(id)
+		if err != nil {
+			// Not found
+			return nil, nil
 		}
-		if hasSLSASpec.Subject.Artifact != nil {
-			subjectsDefined = subjectsDefined + 1
-		}
-	}
-	if subjectsDefined > 1 {
-		return nil, gqlerror.Errorf("Must specify at most one subject (package, source, or artifact)")
+		// If found by id, ignore rest of fields in spec and return as a match
+		return []*model.HasSlsa{c.convSLSA(h)}, nil
 	}
 
-	var collectedHasSLSA []*model.HasSlsa
-
-	for _, h := range c.hasSLSA {
-		matchOrSkip := true
-
-		slsa := h.Slsa
-		if hasSLSASpec.BuildType != nil && slsa.BuildType != *hasSLSASpec.BuildType {
-			matchOrSkip = false
+	// TODO if subject, builtfrom, or builtby are provided, only search those
+	// backedges instead of all hasslsa here
+	var rv []*model.HasSlsa
+	for _, h := range c.hasSLSAs {
+		bb, _ := c.builderByID(h.builtBy)
+		if noMatch(hSpec.BuildType, h.buildType) ||
+			noMatch(hSpec.SlsaVersion, h.version) ||
+			noMatch(hSpec.Origin, h.origin) ||
+			noMatch(hSpec.Collector, h.collector) ||
+			(hSpec.StartedOn != nil && !hSpec.StartedOn.Equal(h.start)) ||
+			(hSpec.FinishedOn != nil && !hSpec.FinishedOn.Equal(h.finish)) ||
+			(hSpec.BuiltBy != nil && hSpec.BuiltBy.ID != nil && *hSpec.BuiltBy.ID != nodeID(bb.id)) ||
+			(hSpec.BuiltBy != nil && hSpec.BuiltBy.URI != nil && *hSpec.BuiltBy.URI != bb.uri) ||
+			!matchSLSAPreds(h.predicates, hSpec.Predicate) ||
+			!c.matchArtifacts([]*model.ArtifactSpec{hSpec.Subject}, []uint32{h.subject}) ||
+			!c.matchArtifacts(hSpec.BuiltFrom, h.builtFrom) {
+			continue
 		}
-		if hasSLSASpec.SlsaVersion != nil && slsa.SlsaVersion != *hasSLSASpec.SlsaVersion {
-			matchOrSkip = false
-		}
-		if hasSLSASpec.Collector != nil && slsa.Collector != *hasSLSASpec.Collector {
-			matchOrSkip = false
-		}
-		if hasSLSASpec.Origin != nil && slsa.Origin != *hasSLSASpec.Origin {
-			matchOrSkip = false
-		}
-
-		if hasSLSASpec.BuiltBy != nil && slsa.BuiltBy != nil {
-			if hasSLSASpec.BuiltBy.URI != nil && slsa.BuiltBy.URI != *hasSLSASpec.BuiltBy.URI {
-				matchOrSkip = false
-			}
-		}
-
-		if hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Package != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Package); ok {
-				if hasSLSASpec.Subject.Package.Type == nil || val.Type == *hasSLSASpec.Subject.Package.Type {
-					newPkg := filterPackageNamespace(val, hasSLSASpec.Subject.Package)
-					if newPkg == nil {
-						matchOrSkip = false
-					}
-				}
-			} else {
-				matchOrSkip = false
-			}
-		}
-
-		if hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Source != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Source); ok {
-				if hasSLSASpec.Subject.Source.Type == nil || val.Type == *hasSLSASpec.Subject.Source.Type {
-					newSource, err := filterSourceNamespace(val, hasSLSASpec.Subject.Source)
-					if err != nil {
-						return nil, err
-					}
-					if newSource == nil {
-						matchOrSkip = false
-					}
-				}
-			} else {
-				matchOrSkip = false
-			}
-		}
-
-		if hasSLSASpec.Subject != nil && hasSLSASpec.Subject.Artifact != nil && h.Subject != nil {
-			if val, ok := h.Subject.(*model.Artifact); ok {
-				queryArt := &model.Artifact{
-					Algorithm: strings.ToLower(*hasSLSASpec.Subject.Artifact.Algorithm),
-					Digest:    strings.ToLower(*hasSLSASpec.Subject.Artifact.Digest),
-				}
-				if *queryArt != *val {
-					matchOrSkip = false
-				}
-			} else {
-				matchOrSkip = false
-			}
-		}
-
-		if matchOrSkip {
-			collectedHasSLSA = append(collectedHasSLSA, h)
-		}
+		rv = append(rv, c.convSLSA(h))
 	}
 
-	return collectedHasSLSA, nil
+	return rv, nil
+}
+
+func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSpec) bool {
+	for _, want := range wants {
+		if !slices.ContainsFunc(haves, func(p *model.SLSAPredicate) bool {
+			return p.Key == want.Key && p.Value == want.Value
+		}) {
+			return false
+		}
+	}
+	return true
 }
 
 // Ingest HasSlsa
 
-func (c *demoClient) IngestMaterials(
-	ctx context.Context, materials []*model.PackageSourceOrArtifactInput,
-) ([]model.PackageSourceOrArtifact, error) {
-	output := []model.PackageSourceOrArtifact{}
+func (c *demoClient) IngestMaterials(ctx context.Context,
+	materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+	var output []*model.Artifact
 
 	// For this backend, there's no optimization we can do, we need to
 	// ingest everything sequentially
 	for _, material := range materials {
-		err := helper.ValidatePackageSourceOrArtifactInput(material, "each SLSA material")
+		artifact, err := c.IngestArtifact(ctx, material)
 		if err != nil {
 			return nil, err
 		}
-
-		if material.Package != nil {
-			pkg, err := c.IngestPackage(ctx, *material.Package)
-			if err != nil {
-				return nil, err
-			}
-			output = append(output, pkg)
-		} else if material.Source != nil {
-			source, err := c.IngestSource(ctx, *material.Source)
-			if err != nil {
-				return nil, err
-			}
-			output = append(output, source)
-		} else if material.Artifact != nil {
-			artifact, err := c.IngestArtifact(ctx, material.Artifact)
-			if err != nil {
-				return nil, err
-			}
-			output = append(output, artifact)
-		}
+		output = append(output, artifact)
 	}
 
 	return output, nil
 }
 
-func (c *demoClient) IngestSLSA(
-	ctx context.Context, subject model.PackageSourceOrArtifactInput,
-	builtFrom []*model.PackageSourceOrArtifactInput,
-	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec,
-) (*model.HasSlsa, error) {
-	// Since each mutation can also be called independently, we need to
-	// validate again subject and materials
-	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "SLSA subject")
-	if err != nil {
-		return nil, err
+func (c *demoClient) hasSLSAByID(id uint32) (*hasSLSAStruct, error) {
+	o, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find hasSLSA")
 	}
-	for _, material := range builtFrom {
-		err := helper.ValidatePackageSourceOrArtifactInput(material, "each SLSA material")
+	s, ok := o.(*hasSLSAStruct)
+	if !ok {
+		return nil, errors.New("not a hasSLSA")
+	}
+	return s, nil
+}
+
+func (c *demoClient) IngestSLSA(ctx context.Context,
+	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
+	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+
+	if len(builtFrom) < 1 {
+		return nil, gqlerror.Errorf("IngestSLSA :: Must have at least 1 builtFrom")
+	}
+
+	s, err := c.artifactByKey(subject.Algorithm, subject.Digest)
+	if err != nil {
+		return nil, gqlerror.Errorf("IngestSLSA :: Subject artifact not found")
+	}
+	var bfs []*artStruct
+	var bfIDs []uint32
+	for i, a := range builtFrom {
+		b, err := c.artifactByKey(a.Algorithm, a.Digest)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("IngestSLSA :: BuiltFrom %d artifact not found", i)
 		}
+		bfs = append(bfs, b)
+		bfIDs = append(bfIDs, b.id)
 	}
+	sort.Slice(bfIDs, func(i, j int) bool { return bfIDs[i] < bfIDs[j] })
 
-	if subject.Package != nil {
-		return c.ingestSLSAPackage(ctx, subject.Package, builtFrom, &builtBy, &slsa)
-	} else if subject.Source != nil {
-		return c.ingestSLSASource(ctx, subject.Source, builtFrom, &builtBy, &slsa)
-	} else if subject.Artifact != nil {
-		return c.ingestSLSAArtifact(ctx, subject.Artifact, builtFrom, &builtBy, &slsa)
-	}
-	return nil, gqlerror.Errorf("Impossible configuration for IngestSLSA")
-}
-
-func (c *demoClient) ingestSLSAPackage(
-	ctx context.Context, pkg *model.PkgInputSpec,
-	builtFrom []*model.PackageSourceOrArtifactInput,
-	builtBy *model.BuilderInputSpec, slsa *model.SLSAInputSpec,
-) (*model.HasSlsa, error) {
-	for _, attestation := range c.hasSLSA {
-		if p, ok := attestation.Subject.(*model.Package); ok {
-			if packageMatch(p, pkg) &&
-				slsaMatch(attestation.Slsa, builtFrom, builtBy, slsa) {
-				return attestation, nil
-			}
-		}
-	}
-
-	subjects, err := c.Packages(ctx, helper.ConvertPkgInputSpecToPkgSpec(pkg))
+	b, err := c.builderByKey(builtBy.URI)
 	if err != nil {
-		return nil, err
-	}
-	if len(subjects) != 1 {
-		return nil, gqlerror.Errorf("Found %d packages matching subject", len(subjects))
+		return nil, gqlerror.Errorf("IngestSLSA :: Builder not found")
 	}
 
-	newSlsa, err := c.buildSLSA(ctx, builtFrom, builtBy, slsa)
-	if err != nil {
-		return nil, err
-	}
+	preds := convSLSAP(slsa.SlsaPredicate)
 
-	newHasSlsa := &model.HasSlsa{
-		Subject: subjects[0],
-		Slsa:    newSlsa,
-	}
-	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
-	return newHasSlsa, nil
-}
-
-func (c *demoClient) ingestSLSASource(
-	ctx context.Context, source *model.SourceInputSpec,
-	builtFrom []*model.PackageSourceOrArtifactInput,
-	builtBy *model.BuilderInputSpec, slsa *model.SLSAInputSpec,
-) (*model.HasSlsa, error) {
-	for _, attestation := range c.hasSLSA {
-		if s, ok := attestation.Subject.(*model.Source); ok {
-			if sourceMatch(s, source) &&
-				slsaMatch(attestation.Slsa, builtFrom, builtBy, slsa) {
-				return attestation, nil
-			}
-		}
-	}
-
-	subjects, err := c.Sources(ctx, helper.ConvertSrcInputSpecToSrcSpec(source))
-	if err != nil {
-		return nil, err
-	}
-	if len(subjects) != 1 {
-		return nil, gqlerror.Errorf("Found %d sources matching subject", len(subjects))
-	}
-
-	newSlsa, err := c.buildSLSA(ctx, builtFrom, builtBy, slsa)
-	if err != nil {
-		return nil, err
-	}
-
-	newHasSlsa := &model.HasSlsa{
-		Subject: subjects[0],
-		Slsa:    newSlsa,
-	}
-	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
-	return newHasSlsa, nil
-}
-
-func (c *demoClient) ingestSLSAArtifact(
-	ctx context.Context, artifact *model.ArtifactInputSpec,
-	builtFrom []*model.PackageSourceOrArtifactInput,
-	builtBy *model.BuilderInputSpec, slsa *model.SLSAInputSpec,
-) (*model.HasSlsa, error) {
-	for _, attestation := range c.hasSLSA {
-		if a, ok := attestation.Subject.(*model.Artifact); ok {
-			if artifactMatch(a, artifact) &&
-				slsaMatch(attestation.Slsa, builtFrom, builtBy, slsa) {
-				return attestation, nil
-			}
-		}
-	}
-
-	subjects, err := c.Artifacts(ctx, helper.ConvertArtInputSpecToArtSpec(artifact))
-	if err != nil {
-		return nil, err
-	}
-	if len(subjects) != 1 {
-		return nil, gqlerror.Errorf("Found %d sources matching subject", len(subjects))
-	}
-
-	newSlsa, err := c.buildSLSA(ctx, builtFrom, builtBy, slsa)
-	if err != nil {
-		return nil, err
-	}
-
-	newHasSlsa := &model.HasSlsa{
-		Subject: subjects[0],
-		Slsa:    newSlsa,
-	}
-	c.hasSLSA = append(c.hasSLSA, newHasSlsa)
-	return newHasSlsa, nil
-}
-
-func (c *demoClient) buildSLSA(
-	ctx context.Context,
-	builtFrom []*model.PackageSourceOrArtifactInput,
-	builtBy *model.BuilderInputSpec, input *model.SLSAInputSpec,
-) (*model.Slsa, error) {
-	materials := []model.PackageSourceOrArtifact{}
-	for _, m := range builtFrom {
-		material, err := c.processMaterialInput(ctx, m)
+	// Just picking the first builtFrom found to search the backedges
+	for _, slID := range bfs[0].getHasSLSAs() {
+		sl, err := c.hasSLSAByID(slID)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("IngestSLSA :: Internal db error, bad backedge")
 		}
-		materials = append(materials, material)
-	}
-
-	builders, err := c.Builders(ctx, helper.ConvertBuilderInputSpecToBuilderSpec(builtBy))
-	if err != nil {
-		return nil, err
-	}
-	if len(builders) != 1 {
-		return nil, gqlerror.Errorf("Found %d matches for SLSA builder", len(builders))
-	}
-	builder := builders[0]
-
-	predicates := []*model.SLSAPredicate{}
-	for _, p := range input.SlsaPredicate {
-		predicate := model.SLSAPredicate{
-			Key:   p.Key,
-			Value: p.Value,
+		if sl.subject == s.id &&
+			slices.Equal(sl.builtFrom, bfIDs) &&
+			sl.builtBy == b.id &&
+			sl.buildType == slsa.BuildType &&
+			slices.Equal(sl.predicates, preds) &&
+			sl.version == slsa.SlsaVersion &&
+			sl.start == slsa.StartedOn &&
+			sl.finish == slsa.FinishedOn &&
+			sl.origin == slsa.Origin &&
+			sl.collector == slsa.Collector {
+			return c.convSLSA(sl), nil
 		}
-		predicates = append(predicates, &predicate)
 	}
 
-	slsa := model.Slsa{
-		BuiltFrom:     materials,
-		BuiltBy:       builder,
-		BuildType:     input.BuildType,
-		SlsaPredicate: predicates,
-		SlsaVersion:   input.SlsaVersion,
-		StartedOn:     input.StartedOn,
-		FinishedOn:    input.FinishedOn,
-		Origin:        input.Origin,
-		Collector:     input.Collector,
+	sl := &hasSLSAStruct{
+		id:         c.getNextID(),
+		subject:    s.id,
+		builtFrom:  bfIDs,
+		builtBy:    b.id,
+		buildType:  slsa.BuildType,
+		predicates: preds,
+		version:    slsa.SlsaVersion,
+		start:      slsa.StartedOn,
+		finish:     slsa.FinishedOn,
+		origin:     slsa.Origin,
+		collector:  slsa.Collector,
 	}
-	return &slsa, nil
+	c.index[sl.id] = sl
+	c.hasSLSAs = append(c.hasSLSAs, sl)
+	s.setHasSLSAs(sl.id)
+	for _, a := range bfs {
+		a.setHasSLSAs(sl.id)
+	}
+	b.setHasSLSAs(sl.id)
+
+	return c.convSLSA(sl), nil
 }
 
-func (c *demoClient) processMaterialInput(
-	ctx context.Context,
-	material *model.PackageSourceOrArtifactInput,
-) (model.PackageSourceOrArtifact, error) {
-	if material.Package != nil {
-		matches, err := c.Packages(ctx, helper.ConvertPkgInputSpecToPkgSpec(material.Package))
-		if err != nil {
-			return nil, err
-		}
-		if len(matches) != 1 {
-			return nil, gqlerror.Errorf("Found %d matches for one package material", len(matches))
-		}
-		return matches[0], nil
+func convSLSAP(in []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
+	var rv []*model.SLSAPredicate
+	for _, inp := range in {
+		rv = append(rv, &model.SLSAPredicate{
+			Key:   inp.Key,
+			Value: inp.Value,
+		})
 	}
-
-	if material.Source != nil {
-		matches, err := c.Sources(ctx, helper.ConvertSrcInputSpecToSrcSpec(material.Source))
-		if err != nil {
-			return nil, err
-		}
-		if len(matches) != 1 {
-			return nil, gqlerror.Errorf("Found %d matches for one source material", len(matches))
-		}
-		return matches[0], nil
-	}
-
-	if material.Artifact != nil {
-		matches, err := c.Artifacts(ctx, helper.ConvertArtInputSpecToArtSpec(material.Artifact))
-		if err != nil {
-			return nil, err
-		}
-		if len(matches) != 1 {
-			return nil, gqlerror.Errorf("Found %d matches for one artifact material", len(matches))
-		}
-		return matches[0], nil
-	}
-
-	// We should not reach this as validation already happened before call
-	return nil, gqlerror.Errorf("Impossible configuration")
+	sort.Slice(rv, func(i, j int) bool { return strings.Compare(rv[i].Key, rv[j].Key) < 0 })
+	return rv
 }
 
-func slsaMatch(
-	slsa *model.Slsa,
-	builtFrom []*model.PackageSourceOrArtifactInput,
-	builtBy *model.BuilderInputSpec, input *model.SLSAInputSpec,
-) bool {
-	// Do fast checks first
-	if slsa.Collector != input.Collector {
-		return false
+func (c *demoClient) convSLSA(in *hasSLSAStruct) *model.HasSlsa {
+	sub, _ := c.artifactByID(in.subject)
+	// TODO propagate errors back
+	var bfs []*model.Artifact
+	for _, id := range in.builtFrom {
+		a, _ := c.artifactByID(id)
+		bfs = append(bfs, convArtifact(a))
 	}
-	if slsa.Origin != input.Origin {
-		return false
-	}
-	if slsa.FinishedOn != input.FinishedOn {
-		return false
-	}
-	if slsa.StartedOn != input.StartedOn {
-		return false
-	}
-	if slsa.SlsaVersion != input.SlsaVersion {
-		return false
-	}
-	if slsa.BuildType != input.BuildType {
-		return false
-	}
-	if slsa.BuiltBy.URI != builtBy.URI {
-		return false
-	}
+	bb, _ := c.builderByID(in.builtBy)
 
-	// TODO(mihaimaruseac): O(n*m), could be made O(n+m)
-	for _, pred := range slsa.SlsaPredicate {
-		found := false
-		for _, inputPred := range input.SlsaPredicate {
-			if pred.Key == inputPred.Key && pred.Value == inputPred.Value {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
+	return &model.HasSlsa{
+		ID:      nodeID(in.id),
+		Subject: convArtifact(sub),
+		Slsa: &model.Slsa{
+			BuiltFrom:     bfs,
+			BuiltBy:       convBuilder(bb),
+			BuildType:     in.buildType,
+			SlsaPredicate: in.predicates,
+			SlsaVersion:   in.version,
+			StartedOn:     in.start,
+			FinishedOn:    in.finish,
+			Origin:        in.origin,
+			Collector:     in.collector,
+		},
 	}
-
-	// TODO(mihaimaruseac): O(n*m), could be made O(n+m)
-	for _, mat := range slsa.BuiltFrom {
-		found := false
-		if a, ok := mat.(*model.Artifact); ok {
-			for _, inputMat := range builtFrom {
-				if artifactMatch(a, inputMat.Artifact) {
-					found = true
-					break
-				}
-			}
-		} else if s, ok := mat.(*model.Source); ok {
-			for _, inputMat := range builtFrom {
-				if sourceMatch(s, inputMat.Source) {
-					found = true
-					break
-				}
-			}
-		} else if p, ok := mat.(*model.Package); ok {
-			for _, inputMat := range builtFrom {
-				if packageMatch(p, inputMat.Package) {
-					found = true
-					break
-				}
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-
-	return true
-}
-
-// TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
-func artifactMatch(artifact *model.Artifact, artifactInput *model.ArtifactInputSpec) bool {
-	if artifactInput == nil {
-		return false
-	}
-
-	if artifact.Algorithm != artifactInput.Algorithm {
-		return false
-	}
-	if artifact.Digest != artifactInput.Digest {
-		return false
-	}
-	return true
-}
-
-// TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
-func sourceMatch(source *model.Source, sourceInput *model.SourceInputSpec) bool {
-	if sourceInput == nil {
-		return false
-	}
-
-	if source.Type != sourceInput.Type {
-		return false
-	}
-	for _, ns := range source.Namespaces {
-		if ns.Namespace != sourceInput.Namespace {
-			continue
-		}
-		for _, n := range ns.Names {
-			if n.Name != sourceInput.Name {
-				continue
-			}
-			if !matchInputSpecWithDBField(sourceInput.Commit, n.Commit) {
-				continue
-			}
-			if !matchInputSpecWithDBField(sourceInput.Tag, n.Tag) {
-				continue
-			}
-			return true
-		}
-	}
-	return false
-}
-
-// TODO(mihaimaruseac): Also merge this with neo4j / extract to common.
-func packageMatch(pkg *model.Package, pkgInput *model.PkgInputSpec) bool {
-	if pkgInput == nil {
-		return false
-	}
-
-	if pkg.Type != pkgInput.Type {
-		return false
-	}
-	for _, ns := range pkg.Namespaces {
-		if !matchInputSpecWithDBField(pkgInput.Namespace, &ns.Namespace) {
-			continue
-		}
-		for _, n := range ns.Names {
-			if n.Name != pkgInput.Name {
-				continue
-			}
-			//TODO(mihaimaruseac): Test what happens here with version
-			if pkgInput.Version == nil {
-				return true
-			}
-			for _, v := range n.Versions {
-				if !matchInputSpecWithDBField(pkgInput.Version, &v.Version) {
-					continue
-				}
-				if !matchInputSpecWithDBField(pkgInput.Subpath, &v.Subpath) {
-					continue
-				}
-				// TODO(mihaimaruseac): Linearize, extract to generics
-				allQualifiersFound := true
-				for _, q := range v.Qualifiers {
-					qFound := false
-					for _, iq := range pkgInput.Qualifiers {
-						if q.Key == iq.Key && q.Value == iq.Value {
-							qFound = true
-							break
-						}
-					}
-					if !qFound {
-						allQualifiersFound = false
-						break
-					}
-				}
-				if allQualifiersFound {
-					return true
-				}
-			}
-			return false
-		}
-	}
-	return false
 }

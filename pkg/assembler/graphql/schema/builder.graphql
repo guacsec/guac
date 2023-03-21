@@ -23,6 +23,7 @@ Builder represents the builder such as (FRSCA or github actions).
 Currently builders are identified by the `uri` field, which is mandatory.
 """
 type Builder {
+  id: ID!
   uri: String!
 }
 
@@ -30,6 +31,7 @@ type Builder {
 BuilderSpec allows filtering the list of builders to return.
 """
 input BuilderSpec {
+  id: ID
   uri: String
 }
 

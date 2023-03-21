@@ -180,7 +180,7 @@ type IsOccurenceIngest struct {
 type HasSlsaIngest struct {
 	Artifact  *generated.ArtifactInputSpec
 	HasSlsa   *generated.SLSAInputSpec
-	Materials []generated.PackageSourceOrArtifactInput
+	Materials []generated.ArtifactInputSpec
 	Builder   *generated.BuilderInputSpec
 
 	// Unpon more investigation, seems like SLSA should

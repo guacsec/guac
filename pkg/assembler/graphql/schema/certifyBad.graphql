@@ -17,6 +17,33 @@
 
 # Defines a GraphQL schema for the CertifyBad. It contains the subject (which can be either a package, source or artifact),
 #  justification, origin of the attestation, and collector
+"PackageSourceOrArtifact is a union of Package, Source, and Artifact."
+union PackageSourceOrArtifact = Package | Source | Artifact
+
+"""
+PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
+input type to be used in read queries.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceOrArtifactSpec {
+  package: PkgSpec
+  source: SourceSpec
+  artifact: ArtifactSpec
+}
+
+"""
+PackageSourceOrArtifactInput allows using PackageSourceOrArtifact union as
+input type to be used in mutations.
+
+Exactly one of the value must be set to non-nil.
+"""
+input PackageSourceOrArtifactInput {
+  package: PkgInputSpec
+  source: SourceInputSpec
+  artifact: ArtifactInputSpec
+}
+
 """
 CertifyBad is an attestation represents when a package, source or artifact is considered bad
 

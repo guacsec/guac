@@ -35,6 +35,7 @@ type artStruct struct {
 	digest      string
 	hashEquals  []uint32
 	occurrences []uint32
+	hasSLSAs    []uint32
 }
 
 func (n *artStruct) getID() uint32 { return n.id }
@@ -44,6 +45,9 @@ func (n *artStruct) setHashEquals(id uint32) { n.hashEquals = append(n.hashEqual
 
 func (n *artStruct) getOccurrences() []uint32 { return n.occurrences }
 func (n *artStruct) setOccurrences(id uint32) { n.occurrences = append(n.occurrences, id) }
+
+func (n *artStruct) getHasSLSAs() []uint32 { return n.hasSLSAs }
+func (n *artStruct) setHasSLSAs(id uint32) { n.hasSLSAs = append(n.hasSLSAs, id) }
 
 // TODO convert to unit tests
 // func registerAllArtifacts(c *demoClient) {

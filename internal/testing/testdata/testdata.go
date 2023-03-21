@@ -256,12 +256,9 @@ var (
 						{Key: "slsa.materials.1.digest.sha1", Value: "0bcaaa161e719bca41b6d33fc02547c0f97d5397"},
 					},
 				},
-				Artifact: &art,
-				Builder:  &build,
-				Materials: []model.PackageSourceOrArtifactInput{
-					{Artifact: &mat1},
-					{Artifact: &mat2},
-				},
+				Artifact:  &art,
+				Builder:   &build,
+				Materials: []model.ArtifactInputSpec{mat1, mat2},
 			},
 		},
 	}
@@ -1125,7 +1122,7 @@ func packageQualifierInputSpecLess(e1, e2 generated.PackageQualifierInputSpec) b
 	return gLess(e1, e2)
 }
 
-func psaInputSpecLess(e1, e2 generated.PackageSourceOrArtifactInput) bool {
+func psaInputSpecLess(e1, e2 generated.ArtifactInputSpec) bool {
 	return gLess(e1, e2)
 }
 
