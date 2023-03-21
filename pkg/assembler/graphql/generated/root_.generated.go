@@ -108,6 +108,7 @@ type ComplexityRoot struct {
 
 	HasSBOM struct {
 		Collector func(childComplexity int) int
+		ID        func(childComplexity int) int
 		Origin    func(childComplexity int) int
 		Subject   func(childComplexity int) int
 		URI       func(childComplexity int) int
@@ -580,6 +581,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.Collector(childComplexity), true
+
+	case "HasSBOM.id":
+		if e.complexity.HasSBOM.ID == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.ID(childComplexity), true
 
 	case "HasSBOM.origin":
 		if e.complexity.HasSBOM.Origin == nil {
@@ -2677,6 +2685,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Only package object or source object can be defined. Not both.
 """
 type HasSBOM {
+  id: ID!
   subject: PackageOrSource!
   uri: String!
   origin: String!
@@ -2690,6 +2699,7 @@ Only the package or source can be added, not both. HasSourceAt will be used to c
 relationship.
 """
 input HasSBOMSpec {
+  id: ID
   subject: PackageOrSourceSpec
   uri: String
   origin: String
@@ -2716,7 +2726,6 @@ extend type Mutation {
   "Certifies that a package or a source has SBOM at the URI"
   ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
 }
-
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.

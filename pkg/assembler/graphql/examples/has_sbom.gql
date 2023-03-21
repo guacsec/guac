@@ -1,14 +1,19 @@
 fragment allHasSBOMTree on HasSBOM {
+  id
   uri
   subject {
     __typename
     ... on Package {
+      id
       type
       namespaces {
+        id
         namespace
         names {
+          id
           name
           versions {
+            id
             version
             qualifiers {
               key
@@ -20,10 +25,13 @@ fragment allHasSBOMTree on HasSBOM {
       }
     }
    ...on Source {
+      id
       type
       namespaces {
+        id
         namespace
         names {
+          id
           name
           tag
           commit

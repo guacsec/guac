@@ -17,195 +17,214 @@ package testing
 
 import (
 	"context"
-	"fmt"
-	"reflect"
+	"errors"
+	"strconv"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func registerAllhasSBOM(client *demoClient) error {
-	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
-	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
-	selectedType := "conan"
-	selectedNameSpace := "openssl.org"
-	selectedName := "openssl"
-	selectedVersion := "3.0.3"
-	qualifierA := "bincrafters"
-	qualifierB := "stable"
-	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
-	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
-	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
-	if err != nil {
-		return err
-	}
-	_, err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM", "testing backend", "testing backend")
-	if err != nil {
-		return err
-	}
-	// "git", "github", "github.com/guacsec/guac", "tag=v0.0.1"
-	selectedSourceType := "git"
-	selectedSourceNameSpace := "github"
-	selectedSourceName := "github.com/guacsec/guac"
-	selectedTag := "v0.0.1"
-	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
-	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
-	if err != nil {
-		return err
-	}
-	_, err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM", "testing backend", "testing backend")
-	if err != nil {
-		return err
-	}
-	return nil
+type hasSBOMList []*hasSBOMStruct
+type hasSBOMStruct struct {
+	id        uint32
+	pkg       uint32
+	src       uint32
+	uri       string
+	origin    string
+	collector string
 }
+
+func (n *hasSBOMStruct) getID() uint32 { return n.id }
+
+// TODO convert to unit tests
+// func registerAllhasSBOM(client *demoClient) error {
+// 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
+// 	// "conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable"
+// 	selectedType := "conan"
+// 	selectedNameSpace := "openssl.org"
+// 	selectedName := "openssl"
+// 	selectedVersion := "3.0.3"
+// 	qualifierA := "bincrafters"
+// 	qualifierB := "stable"
+// 	selectedQualifiers := []*model.PackageQualifierSpec{{Key: "user", Value: &qualifierA}, {Key: "channel", Value: &qualifierB}}
+// 	selectedPkgSpec := &model.PkgSpec{Type: &selectedType, Namespace: &selectedNameSpace, Name: &selectedName, Version: &selectedVersion, Qualifiers: selectedQualifiers}
+// 	selectedPackage, err := client.Packages(context.TODO(), selectedPkgSpec)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	_, err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM", "testing backend", "testing backend")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// "git", "github", "github.com/guacsec/guac", "tag=v0.0.1"
+// 	selectedSourceType := "git"
+// 	selectedSourceNameSpace := "github"
+// 	selectedSourceName := "github.com/guacsec/guac"
+// 	selectedTag := "v0.0.1"
+// 	selectedSourceSpec := &model.SourceSpec{Type: &selectedSourceType, Namespace: &selectedSourceNameSpace, Name: &selectedSourceName, Tag: &selectedTag}
+// 	selectedSource, err := client.Sources(context.TODO(), selectedSourceSpec)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	_, err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM", "testing backend", "testing backend")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 // Ingest HasSBOM
 
-func (c *demoClient) registerHasSBOM(selectedPackage *model.Package, selectedSource *model.Source, uri, origin, collector string) (*model.HasSbom, error) {
-
-	if selectedPackage != nil && selectedSource != nil {
-		return nil, fmt.Errorf("cannot specify both package and source for HasSBOM")
-	}
-	for _, h := range c.hasSBOM {
-		if h.URI == uri {
-			if val, ok := h.Subject.(model.Package); ok {
-				if reflect.DeepEqual(val, *selectedPackage) {
-					return h, nil
-				}
-			} else if val, ok := h.Subject.(model.Source); ok {
-				if reflect.DeepEqual(val, *selectedSource) {
-					return h, nil
-				}
-			}
-		}
-	}
-
-	newHasSBOM := &model.HasSbom{
-		URI:       uri,
-		Origin:    origin,
-		Collector: collector,
-	}
-	if selectedPackage != nil {
-		newHasSBOM.Subject = selectedPackage
-	} else {
-		newHasSBOM.Subject = selectedSource
-	}
-
-	c.hasSBOM = append(c.hasSBOM, newHasSBOM)
-	return newHasSBOM, nil
-}
-
-func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
+func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, input model.HasSBOMInputSpec) (*model.HasSbom, error) {
 	err := helper.ValidatePackageOrSourceInput(&subject, "IngestHasSbom")
 	if err != nil {
 		return nil, err
 	}
 
+	var search []uint32
+	var packageID uint32
+	var pkg *pkgVersionNode
 	if subject.Package != nil {
-		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
-
-		collectedPkg, err := c.Packages(ctx, selectedPkgSpec)
+		var pmt model.MatchFlags
+		pmt.Pkg = model.PkgMatchTypeSpecificVersion
+		pid, err := getPackageIDFromInput(c, *subject.Package, pmt)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("IngestHasSbom :: %v", err)
 		}
-
-		if len(collectedPkg) != 1 {
-			return nil, gqlerror.Errorf(
-				"IngestHasSbom :: multiple packages found")
-		}
-		return c.registerHasSBOM(
-			collectedPkg[0],
-			nil,
-			hasSbom.URI,
-			hasSbom.Origin,
-			hasSbom.Collector)
+		packageID = pid
+		pkg, _ = c.pkgVersionByID(pid)
+		search = pkg.getHasSBOM()
 	}
 
+	var sourceID uint32
+	var src *srcNameNode
 	if subject.Source != nil {
-		sourceSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
-
-		sources, err := c.Sources(ctx, sourceSpec)
+		sid, err := getSourceIDFromInput(c, *subject.Source)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("IngestHasSbom :: %v", err)
 		}
-		if len(sources) != 1 {
-			return nil, gqlerror.Errorf(
-				"IngestHasSbom :: source argument must match one"+
-					" single source repository, found %d",
-				len(sources))
-		}
-		return c.registerHasSBOM(
-			nil,
-			sources[0],
-			hasSbom.URI,
-			hasSbom.Origin,
-			hasSbom.Collector)
+		sourceID = sid
+		src, _ = c.sourceByID(sid)
+		search = src.getHasSBOM()
 	}
-	// it should never reach here else it failed
-	return nil, gqlerror.Errorf("IngestHasSBOM failed")
+
+	for _, id := range search {
+		h, _ := c.hasSBOMByID(id)
+		if h.pkg == packageID &&
+			h.src == sourceID &&
+			h.uri == input.URI &&
+			h.origin == input.Origin &&
+			h.collector == input.Collector {
+			return c.convHasSBOM(h), nil
+		}
+	}
+
+	h := &hasSBOMStruct{
+		id:        c.getNextID(),
+		pkg:       packageID,
+		src:       sourceID,
+		uri:       input.URI,
+		origin:    input.Origin,
+		collector: input.Collector,
+	}
+	c.index[h.id] = h
+	c.hasSBOMs = append(c.hasSBOMs, h)
+	if packageID != 0 {
+		pkg.setHasSBOM(h.id)
+	} else {
+		src.setHasSBOM(h.id)
+	}
+	return c.convHasSBOM(h), nil
+}
+
+func (c *demoClient) convHasSBOM(in *hasSBOMStruct) *model.HasSbom {
+	out := &model.HasSbom{
+		ID:        nodeID(in.id),
+		URI:       in.uri,
+		Origin:    in.origin,
+		Collector: in.collector,
+	}
+	if in.pkg != 0 {
+		p, _ := c.buildPackageResponse(in.pkg, nil)
+		out.Subject = p
+	} else {
+		s, _ := c.buildSourceResponse(in.src, nil)
+		out.Subject = s
+	}
+	return out
+}
+
+func (c *demoClient) hasSBOMByID(id uint32) (*hasSBOMStruct, error) {
+	o, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find hasSBOM")
+	}
+	h, ok := o.(*hasSBOMStruct)
+	if !ok {
+		return nil, errors.New("not a hasSBOM")
+	}
+	return h, nil
 }
 
 // Query HasSBOM
 
-func (c *demoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
+func (c *demoClient) HasSBOM(ctx context.Context, hSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	queryAll, err := helper.ValidatePackageOrSourceQueryInput(hasSBOMSpec.Subject)
+	_, err := helper.ValidatePackageOrSourceQueryInput(hSpec.Subject)
 	if err != nil {
 		return nil, err
 	}
 
-	var collectedHasSBOM []*model.HasSbom
-
-	for _, h := range c.hasSBOM {
-		matchOrSkip := true
-
-		if hasSBOMSpec.URI != nil && h.URI != *hasSBOMSpec.URI {
-			matchOrSkip = false
+	if hSpec.ID != nil {
+		id64, err := strconv.ParseUint(*hSpec.ID, 10, 32)
+		if err != nil {
+			return nil, gqlerror.Errorf("HasSBOM :: invalid ID %s", err)
 		}
-		if hasSBOMSpec.Collector != nil && h.Collector != *hasSBOMSpec.Collector {
-			matchOrSkip = false
+		id := uint32(id64)
+		h, err := c.hasSBOMByID(id)
+		if err != nil {
+			// Not found
+			return nil, nil
 		}
-		if hasSBOMSpec.Origin != nil && h.Origin != *hasSBOMSpec.Origin {
-			matchOrSkip = false
-		}
-
-		if !queryAll {
-			if hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Package != nil && h.Subject != nil {
-				if val, ok := h.Subject.(*model.Package); ok {
-					if hasSBOMSpec.Subject.Package.Type == nil || val.Type == *hasSBOMSpec.Subject.Package.Type {
-						newPkg := filterPackageNamespace(val, hasSBOMSpec.Subject.Package)
-						if newPkg == nil {
-							matchOrSkip = false
-						}
-					}
-				} else {
-					matchOrSkip = false
-				}
-			}
-
-			if hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Source != nil && h.Subject != nil {
-				if val, ok := h.Subject.(*model.Source); ok {
-					if hasSBOMSpec.Subject.Source.Type == nil || val.Type == *hasSBOMSpec.Subject.Source.Type {
-						newSource, err := filterSourceNamespace(val, hasSBOMSpec.Subject.Source)
-						if err != nil {
-							return nil, err
-						}
-						if newSource == nil {
-							matchOrSkip = false
-						}
-					}
-				} else {
-					matchOrSkip = false
-				}
-			}
-		}
-
-		if matchOrSkip {
-			collectedHasSBOM = append(collectedHasSBOM, h)
-		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		return []*model.HasSbom{c.convHasSBOM(h)}, nil
 	}
 
-	return collectedHasSBOM, nil
+	var rv []*model.HasSbom
+	// TODO if an exact pkg/src is specified in the subject, only search those backedges
+	for _, h := range c.hasSBOMs {
+		if noMatch(hSpec.URI, h.uri) ||
+			noMatch(hSpec.Origin, h.origin) ||
+			noMatch(hSpec.Collector, h.collector) {
+			continue
+		}
+		if hSpec.Subject != nil {
+			if hSpec.Subject.Package != nil {
+				if h.pkg == 0 {
+					continue
+				}
+				p, err := c.buildPackageResponse(h.pkg, hSpec.Subject.Package)
+				if err != nil {
+					return nil, err
+				}
+				if p == nil {
+					continue
+				}
+			} else if hSpec.Subject.Source != nil {
+				if h.src == 0 {
+					continue
+				}
+				s, err := c.buildSourceResponse(h.src, hSpec.Subject.Source)
+				if err != nil {
+					return nil, err
+				}
+				if s == nil {
+					continue
+				}
+			}
+		}
+		rv = append(rv, c.convHasSBOM(h))
+	}
+	return rv, nil
 }

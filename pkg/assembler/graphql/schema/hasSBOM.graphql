@@ -27,6 +27,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Only package object or source object can be defined. Not both.
 """
 type HasSBOM {
+  id: ID!
   subject: PackageOrSource!
   uri: String!
   origin: String!
@@ -40,6 +41,7 @@ Only the package or source can be added, not both. HasSourceAt will be used to c
 relationship.
 """
 input HasSBOMSpec {
+  id: ID
   subject: PackageOrSourceSpec
   uri: String
   origin: String
@@ -66,4 +68,3 @@ extend type Mutation {
   "Certifies that a package or a source has SBOM at the URI"
   ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
 }
-

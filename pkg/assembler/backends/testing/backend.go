@@ -59,7 +59,6 @@ func (c *demoClient) getNextID() uint32 {
 }
 
 type demoClient struct {
-	hasSBOM              []*model.HasSbom
 	certifyPkg           []*model.CertifyPkg
 	certifyVuln          []*model.CertifyVuln
 	certifyScorecard     []*model.CertifyScorecard
@@ -83,11 +82,11 @@ type demoClient struct {
 	equalVulnerabilities equalVulnerabilityList
 	builders             builderMap
 	hasSLSAs             hasSLSAList
+	hasSBOMs             hasSBOMList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		hasSBOM:              []*model.HasSbom{},
 		certifyPkg:           []*model.CertifyPkg{},
 		certifyVuln:          []*model.CertifyVuln{},
 		certifyScorecard:     []*model.CertifyScorecard{},
@@ -110,6 +109,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		equalVulnerabilities: equalVulnerabilityList{},
 		builders:             builderMap{},
 		hasSLSAs:             hasSLSAList{},
+		hasSBOMs:             hasSBOMList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -122,7 +122,6 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 
 func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		hasSBOM:              []*model.HasSbom{},
 		certifyPkg:           []*model.CertifyPkg{},
 		certifyVuln:          []*model.CertifyVuln{},
 		certifyScorecard:     []*model.CertifyScorecard{},
@@ -145,6 +144,7 @@ func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 		equalVulnerabilities: equalVulnerabilityList{},
 		builders:             builderMap{},
 		hasSLSAs:             hasSLSAList{},
+		hasSBOMs:             hasSBOMList{},
 	}
 	return client, nil
 }

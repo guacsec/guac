@@ -1684,6 +1684,9 @@ type HasSBOMPkgIngestHasSBOM struct {
 	allHasSBOMTree `json:"-"`
 }
 
+// GetId returns HasSBOMPkgIngestHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
+
 // GetUri returns HasSBOMPkgIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
 
@@ -1724,6 +1727,8 @@ func (v *HasSBOMPkgIngestHasSBOM) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalHasSBOMPkgIngestHasSBOM struct {
+	Id string `json:"id"`
+
 	Uri string `json:"uri"`
 
 	Subject json.RawMessage `json:"subject"`
@@ -1744,6 +1749,7 @@ func (v *HasSBOMPkgIngestHasSBOM) MarshalJSON() ([]byte, error) {
 func (v *HasSBOMPkgIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMPkgIngestHasSBOM, error) {
 	var retval __premarshalHasSBOMPkgIngestHasSBOM
 
+	retval.Id = v.allHasSBOMTree.Id
 	retval.Uri = v.allHasSBOMTree.Uri
 	{
 
@@ -1871,6 +1877,9 @@ type HasSBOMSrcIngestHasSBOM struct {
 	allHasSBOMTree `json:"-"`
 }
 
+// GetId returns HasSBOMSrcIngestHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
+
 // GetUri returns HasSBOMSrcIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
 func (v *HasSBOMSrcIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
 
@@ -1911,6 +1920,8 @@ func (v *HasSBOMSrcIngestHasSBOM) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalHasSBOMSrcIngestHasSBOM struct {
+	Id string `json:"id"`
+
 	Uri string `json:"uri"`
 
 	Subject json.RawMessage `json:"subject"`
@@ -1931,6 +1942,7 @@ func (v *HasSBOMSrcIngestHasSBOM) MarshalJSON() ([]byte, error) {
 func (v *HasSBOMSrcIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMSrcIngestHasSBOM, error) {
 	var retval __premarshalHasSBOMSrcIngestHasSBOM
 
+	retval.Id = v.allHasSBOMTree.Id
 	retval.Uri = v.allHasSBOMTree.Uri
 	{
 
@@ -8309,11 +8321,15 @@ func (v *allGHSATreeGhsaIdsGHSAId) GetGhsaId() string { return v.GhsaId }
 //
 // Note: Only package object or source object can be defined. Not both.
 type allHasSBOMTree struct {
+	Id        string                               `json:"id"`
 	Uri       string                               `json:"uri"`
 	Subject   allHasSBOMTreeSubjectPackageOrSource `json:"-"`
 	Origin    string                               `json:"origin"`
 	Collector string                               `json:"collector"`
 }
+
+// GetId returns allHasSBOMTree.Id, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTree) GetId() string { return v.Id }
 
 // GetUri returns allHasSBOMTree.Uri, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTree) GetUri() string { return v.Uri }
@@ -8361,6 +8377,8 @@ func (v *allHasSBOMTree) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallHasSBOMTree struct {
+	Id string `json:"id"`
+
 	Uri string `json:"uri"`
 
 	Subject json.RawMessage `json:"subject"`
@@ -8381,6 +8399,7 @@ func (v *allHasSBOMTree) MarshalJSON() ([]byte, error) {
 func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error) {
 	var retval __premarshalallHasSBOMTree
 
+	retval.Id = v.Id
 	retval.Uri = v.Uri
 	{
 
@@ -11317,6 +11336,7 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allHasSBOMTree on HasSBOM {
+	id
 	uri
 	subject {
 		__typename
@@ -11396,6 +11416,7 @@ fragment allSourceTree on Source {
 	}
 }
 fragment allHasSBOMTree on HasSBOM {
+	id
 	uri
 	subject {
 		__typename
