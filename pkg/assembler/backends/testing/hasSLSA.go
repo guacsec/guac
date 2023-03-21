@@ -89,11 +89,9 @@ func (c *demoClient) HasSlsa(ctx context.Context, hSpec *model.HasSLSASpec) ([]*
 
 func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSpec) bool {
 	for _, want := range wants {
-		w := &model.SLSAPredicate{
-			Key:   want.Key,
-			Value: want.Value,
-		}
-		if !slices.Contains(haves, w) {
+		if !slices.ContainsFunc(haves, func(p *model.SLSAPredicate) bool {
+			return p.Key == want.Key && p.Value == want.Value
+		}) {
 			return false
 		}
 	}

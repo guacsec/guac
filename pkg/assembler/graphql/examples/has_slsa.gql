@@ -57,3 +57,9 @@ query SLSAQ5 {
     ...allSLSATree
   }
 }
+
+query SLSAQ6 {
+  HasSLSA(hasSLSASpec: {predicate: { key:"buildDefinition.externalParameters.ref", value:"refs/heads/main"}}) {
+    ...allSLSATree
+  }
+}
