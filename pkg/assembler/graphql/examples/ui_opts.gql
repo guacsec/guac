@@ -1,46 +1,46 @@
-query QueryPkg ($spec: PkgSpec) {
+query GetPkg ($spec: PkgSpec) {
   packages(pkgSpec: $spec){
     ...allPkgTree
   }
 }
 
-query QuerySrc  ($spec: SourceSpec) {
+query GetSrc  ($spec: SourceSpec) {
   sources(sourceSpec: $spec){
     ...allSrcTree
   }
 }
 
-query QueryArtifact ($spec: ArtifactSpec) {
+query GetArtifact ($spec: ArtifactSpec) {
   artifacts(artifactSpec: $spec){
     ...allArtifactTree
   }
 }
 
-query QueryCve ($spec: CVESpec) {
+query GetCve ($spec: CVESpec) {
     cve(cveSpec: $spec) {
         ...allCveTree
     }
 }
 
-query QueryIsDepedency($spec: IsDependencySpec) {
+query GetIsDepedency($spec: IsDependencySpec) {
   IsDependency(isDependencySpec: $spec){
       ...allIsDependencyTree
   }
 }
 
-query QueryIsOccurrence($spec: IsOccurrenceSpec) {
+query GetIsOccurrence($spec: IsOccurrenceSpec) {
   IsOccurrence(isOccurrenceSpec: $spec){
       ...allIsOccurrencesTree
   }
 }
 
-query QueryHasSourceAt($spec: HasSourceAtSpec) {
+query GetHasSourceAt($spec: HasSourceAtSpec) {
   HasSourceAt(hasSourceAtSpec: $spec){
       ...allHasSourceAtTree
   }
 }
 
-query QueryCertifyVuln($spec: CertifyVulnSpec) {
+query GetCertifyVuln($spec: CertifyVulnSpec) {
   CertifyVuln(certifyVulnSpec: $spec){
       ...allCertifyVulnTree
   }
