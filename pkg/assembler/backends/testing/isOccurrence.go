@@ -101,7 +101,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
 		}
-		packageID = *pid
+		packageID = pid
 	}
 
 	sourceID := maxUint32
@@ -110,7 +110,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
 		}
-		sourceID = *sid
+		sourceID = sid
 	}
 
 	// could search backedges for pkg/src or artifiact, just do artifact

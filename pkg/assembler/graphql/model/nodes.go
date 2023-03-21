@@ -266,6 +266,7 @@ type CertifyVEXStatementSpec struct {
 
 // CertifyVuln is an attestation that represents when a package has a vulnerability
 type CertifyVuln struct {
+	ID string `json:"id"`
 	// package (subject) - the package object type that represents the package
 	Package *Package `json:"package"`
 	// vulnerability (object) - union type that consists of osv, cve or ghsa
@@ -281,6 +282,7 @@ func (CertifyVuln) IsNodes() {}
 // Specifying just the package allows to query for all vulnerabilities associated with the package.
 // Only OSV, CVE or GHSA can be specified at once
 type CertifyVulnSpec struct {
+	ID             *string           `json:"id,omitempty"`
 	Package        *PkgSpec          `json:"package,omitempty"`
 	Vulnerability  *OsvCveOrGhsaSpec `json:"vulnerability,omitempty"`
 	TimeScanned    *time.Time        `json:"timeScanned,omitempty"`
@@ -578,6 +580,7 @@ type IsOccurrenceSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type IsVulnerability struct {
+	ID            string    `json:"id"`
 	Osv           *Osv      `json:"osv"`
 	Vulnerability CveOrGhsa `json:"vulnerability"`
 	Justification string    `json:"justification"`
@@ -599,6 +602,7 @@ type IsVulnerabilityInputSpec struct {
 // IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
 // Only CVE or GHSA can be specified at once.
 type IsVulnerabilitySpec struct {
+	ID            *string        `json:"id,omitempty"`
 	Osv           *OSVSpec       `json:"osv,omitempty"`
 	Vulnerability *CveOrGhsaSpec `json:"vulnerability,omitempty"`
 	Justification *string        `json:"justification,omitempty"`

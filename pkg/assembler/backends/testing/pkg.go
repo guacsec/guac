@@ -111,6 +111,7 @@ type pkgVersionNode struct {
 	srcMapLink       []uint32
 	isDependencyLink []uint32
 	occurrences      []uint32
+	certifyVulnLink  []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -145,8 +146,16 @@ func (p *pkgVersionNode) setIsDependencyLink(id uint32) {
 }
 func (p *pkgVersionStruct) getIsDependencyLink() []uint32 { return p.isDependencyLink }
 func (p *pkgVersionNode) getIsDependencyLink() []uint32   { return p.isDependencyLink }
-func (p *pkgVersionNode) setOccurrenceLink(id uint32)     { p.occurrences = append(p.occurrences, id) }
-func (p *pkgVersionNode) getOccurrenceLink() []uint32     { return p.occurrences }
+
+// isOccurrence back edges
+func (p *pkgVersionNode) setOccurrenceLink(id uint32) { p.occurrences = append(p.occurrences, id) }
+func (p *pkgVersionNode) getOccurrenceLink() []uint32 { return p.occurrences }
+
+// certifyVulnerability back edges
+func (p *pkgVersionNode) setVulnerabilityLink(id uint32) {
+	p.certifyVulnLink = append(p.certifyVulnLink, id)
+}
+func (p *pkgVersionNode) getVulnerabilityLink() []uint32 { return p.certifyVulnLink }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
@@ -426,18 +435,18 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 	return &p, nil
 }
 
-func getPackageIDFromInput(c *demoClient, input model.PkgInputSpec, pkgMatchType model.MatchFlags) (*uint32, error) {
+func getPackageIDFromInput(c *demoClient, input model.PkgInputSpec, pkgMatchType model.MatchFlags) (uint32, error) {
 	pkgNamespace, pkgHasNamespace := c.packages[input.Type]
 	if !pkgHasNamespace {
-		return nil, gqlerror.Errorf("Package type \"%s\" not found", input.Type)
+		return 0, gqlerror.Errorf("Package type \"%s\" not found", input.Type)
 	}
 	pkgName, pkgHasName := pkgNamespace.namespaces[nilToEmpty(input.Namespace)]
 	if !pkgHasName {
-		return nil, gqlerror.Errorf("Package namespace \"%s\" not found", nilToEmpty(input.Namespace))
+		return 0, gqlerror.Errorf("Package namespace \"%s\" not found", nilToEmpty(input.Namespace))
 	}
 	pkgVersion, pkgHasVersion := pkgName.names[input.Name]
 	if !pkgHasVersion {
-		return nil, gqlerror.Errorf("Package name \"%s\" not found", input.Name)
+		return 0, gqlerror.Errorf("Package name \"%s\" not found", input.Name)
 	}
 	var packageID uint32
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
@@ -455,16 +464,16 @@ func getPackageIDFromInput(c *demoClient, input model.PkgInputSpec, pkgMatchType
 				continue
 			}
 			if found {
-				return nil, gqlerror.Errorf("More than one package matches input")
+				return 0, gqlerror.Errorf("More than one package matches input")
 			}
 			packageID = version.id
 			found = true
 		}
 		if !found {
-			return nil, gqlerror.Errorf("No package matches input")
+			return 0, gqlerror.Errorf("No package matches input")
 		}
 	}
-	return &packageID, nil
+	return packageID, nil
 }
 
 func getCollectedPackageQualifiers(qualifierMap map[string]string) []*model.PackageQualifier {

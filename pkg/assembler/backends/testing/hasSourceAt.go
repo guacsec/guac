@@ -17,7 +17,7 @@ package testing
 
 import (
 	"context"
-	"reflect"
+	"errors"
 	"strconv"
 	"time"
 
@@ -54,11 +54,30 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		return nil, err
 	}
 
+	packageHasSourceLinks := []uint32{}
+	pkgNameOrVersionNode, ok := c.index[packageID].(pkgNameOrVersion)
+	if ok {
+		packageHasSourceLinks = append(packageHasSourceLinks, pkgNameOrVersionNode.getSrcMapLink()...)
+	}
+	sourceHasSourceLinks := []uint32{}
+	srcName, ok := c.index[sourceID].(*srcNameNode)
+	if ok {
+		sourceHasSourceLinks = append(sourceHasSourceLinks, srcName.srcMapLink...)
+	}
+
+	searchIDs := []uint32{}
+	if len(packageHasSourceLinks) > len(sourceHasSourceLinks) {
+		searchIDs = append(searchIDs, sourceHasSourceLinks...)
+	} else {
+		searchIDs = append(searchIDs, packageHasSourceLinks...)
+	}
+
 	// Don't insert duplicates
 	duplicate := false
 	collectedSrcMapLink := srcMapLink{}
-	for _, v := range c.hasSources {
-		if *packageID == v.packageID && *sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
+	for _, id := range searchIDs {
+		v, _ := c.hasSourceAtByID(id)
+		if packageID == v.packageID && sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
 			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.UTC() == v.knownSince {
 			collectedSrcMapLink = *v
 			duplicate = true
@@ -69,8 +88,8 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		// store the link
 		collectedSrcMapLink = srcMapLink{
 			id:            c.getNextID(),
-			sourceID:      *sourceID,
-			packageID:     *packageID,
+			sourceID:      sourceID,
+			packageID:     packageID,
 			knownSince:    hasSourceAt.KnownSince.UTC(),
 			justification: hasSourceAt.Justification,
 			origin:        hasSourceAt.Origin,
@@ -79,8 +98,8 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		c.index[collectedSrcMapLink.id] = &collectedSrcMapLink
 		c.hasSources = append(c.hasSources, &collectedSrcMapLink)
 		// set the backlinks
-		c.index[*packageID].(pkgNameOrVersion).setSrcMapLink(collectedSrcMapLink.id)
-		c.index[*sourceID].(*srcNameNode).setSrcMapLink(collectedSrcMapLink.id)
+		c.index[packageID].(pkgNameOrVersion).setSrcMapLink(collectedSrcMapLink.id)
+		c.index[sourceID].(*srcNameNode).setSrcMapLink(collectedSrcMapLink.id)
 	}
 
 	// build return GraphQL type
@@ -116,6 +135,7 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		}
 	}
 
+	// TODO if any of the pkg/source are specified, ony search those backedges
 	for _, link := range c.hasSources {
 		if filter != nil && noMatch(filter.Justification, link.justification) {
 			continue
@@ -126,7 +146,7 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		if filter != nil && noMatch(filter.Collector, link.collector) {
 			continue
 		}
-		if filter != nil && filter.KnownSince != nil && !reflect.DeepEqual(filter.KnownSince.UTC(), link.knownSince) {
+		if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
 			continue
 		}
 		foundHasSourceAt, err := buildHasSourceAt(c, link, filter, false)
@@ -188,4 +208,16 @@ func buildHasSourceAt(c *demoClient, link *srcMapLink, filter *model.HasSourceAt
 		Collector:     link.collector,
 	}
 	return &newHSA, nil
+}
+
+func (c *demoClient) hasSourceAtByID(id uint32) (*srcMapLink, error) {
+	node, ok := c.index[id]
+	if !ok {
+		return nil, errors.New("could not find srcMapLink")
+	}
+	link, ok := node.(*srcMapLink)
+	if !ok {
+		return nil, errors.New("not an srcMapLink")
+	}
+	return link, nil
 }

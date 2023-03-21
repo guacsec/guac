@@ -44,53 +44,57 @@ func (c *demoClient) getNextID() uint32 {
 }
 
 type demoClient struct {
-	builders            []*model.Builder
-	hasSBOM             []*model.HasSbom
-	certifyPkg          []*model.CertifyPkg
-	certifyVuln         []*model.CertifyVuln
-	certifyScorecard    []*model.CertifyScorecard
-	certifyBad          []*model.CertifyBad
-	isVulnerability     []*model.IsVulnerability
-	certifyVEXStatement []*model.CertifyVEXStatement
-	hasSLSA             []*model.HasSlsa
-	id                  uint32
-	index               indexType
-	packages            pkgTypeMap
-	sources             srcTypeMap
-	osvs                osvMap
-	ghsas               ghsaMap
-	cves                cveMap
-	hasSources          hasSrcList
-	isDependencies      isDependencyList
-	scorecards          scorecardList
-	artifacts           artMap
-	hashEquals          hashEqualList
-	occurrences         isOccurrenceList
+	builders             []*model.Builder
+	hasSBOM              []*model.HasSbom
+	certifyPkg           []*model.CertifyPkg
+	certifyVuln          []*model.CertifyVuln
+	certifyScorecard     []*model.CertifyScorecard
+	certifyBad           []*model.CertifyBad
+	isVulnerability      []*model.IsVulnerability
+	certifyVEXStatement  []*model.CertifyVEXStatement
+	hasSLSA              []*model.HasSlsa
+	id                   uint32
+	index                indexType
+	packages             pkgTypeMap
+	sources              srcTypeMap
+	osvs                 osvMap
+	ghsas                ghsaMap
+	cves                 cveMap
+	hasSources           hasSrcList
+	isDependencies       isDependencyList
+	scorecards           scorecardList
+	artifacts            artMap
+	hashEquals           hashEqualList
+	occurrences          isOccurrenceList
+	vulnerabilities      vulnerabilityList
+	equalVulnerabilities equalVulnerabilityList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		builders:            []*model.Builder{},
-		hasSBOM:             []*model.HasSbom{},
-		certifyPkg:          []*model.CertifyPkg{},
-		certifyVuln:         []*model.CertifyVuln{},
-		certifyScorecard:    []*model.CertifyScorecard{},
-		certifyBad:          []*model.CertifyBad{},
-		isVulnerability:     []*model.IsVulnerability{},
-		certifyVEXStatement: []*model.CertifyVEXStatement{},
-		hasSLSA:             []*model.HasSlsa{},
-		index:               indexType{},
-		packages:            pkgTypeMap{},
-		sources:             srcTypeMap{},
-		osvs:                osvMap{},
-		ghsas:               ghsaMap{},
-		cves:                cveMap{},
-		hasSources:          hasSrcList{},
-		isDependencies:      isDependencyList{},
-		scorecards:          scorecardList{},
-		artifacts:           artMap{},
-		hashEquals:          hashEqualList{},
-		occurrences:         isOccurrenceList{},
+		builders:             []*model.Builder{},
+		hasSBOM:              []*model.HasSbom{},
+		certifyPkg:           []*model.CertifyPkg{},
+		certifyVuln:          []*model.CertifyVuln{},
+		certifyScorecard:     []*model.CertifyScorecard{},
+		certifyBad:           []*model.CertifyBad{},
+		isVulnerability:      []*model.IsVulnerability{},
+		certifyVEXStatement:  []*model.CertifyVEXStatement{},
+		hasSLSA:              []*model.HasSlsa{},
+		index:                indexType{},
+		packages:             pkgTypeMap{},
+		sources:              srcTypeMap{},
+		osvs:                 osvMap{},
+		ghsas:                ghsaMap{},
+		cves:                 cveMap{},
+		hasSources:           hasSrcList{},
+		isDependencies:       isDependencyList{},
+		scorecards:           scorecardList{},
+		artifacts:            artMap{},
+		hashEquals:           hashEqualList{},
+		occurrences:          isOccurrenceList{},
+		vulnerabilities:      vulnerabilityList{},
+		equalVulnerabilities: equalVulnerabilityList{},
 	}
 	registerAllPackages(client)
 	registerAllSources(client)
@@ -104,27 +108,29 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 
 func GetEmptyBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		builders:            []*model.Builder{},
-		hasSBOM:             []*model.HasSbom{},
-		certifyPkg:          []*model.CertifyPkg{},
-		certifyVuln:         []*model.CertifyVuln{},
-		certifyScorecard:    []*model.CertifyScorecard{},
-		certifyBad:          []*model.CertifyBad{},
-		isVulnerability:     []*model.IsVulnerability{},
-		certifyVEXStatement: []*model.CertifyVEXStatement{},
-		hasSLSA:             []*model.HasSlsa{},
-		index:               indexType{},
-		packages:            pkgTypeMap{},
-		sources:             srcTypeMap{},
-		osvs:                osvMap{},
-		ghsas:               ghsaMap{},
-		cves:                cveMap{},
-		hasSources:          hasSrcList{},
-		isDependencies:      isDependencyList{},
-		scorecards:          scorecardList{},
-		artifacts:           artMap{},
-		hashEquals:          hashEqualList{},
-		occurrences:         isOccurrenceList{},
+		builders:             []*model.Builder{},
+		hasSBOM:              []*model.HasSbom{},
+		certifyPkg:           []*model.CertifyPkg{},
+		certifyVuln:          []*model.CertifyVuln{},
+		certifyScorecard:     []*model.CertifyScorecard{},
+		certifyBad:           []*model.CertifyBad{},
+		isVulnerability:      []*model.IsVulnerability{},
+		certifyVEXStatement:  []*model.CertifyVEXStatement{},
+		hasSLSA:              []*model.HasSlsa{},
+		index:                indexType{},
+		packages:             pkgTypeMap{},
+		sources:              srcTypeMap{},
+		osvs:                 osvMap{},
+		ghsas:                ghsaMap{},
+		cves:                 cveMap{},
+		hasSources:           hasSrcList{},
+		isDependencies:       isDependencyList{},
+		scorecards:           scorecardList{},
+		artifacts:            artMap{},
+		hashEquals:           hashEqualList{},
+		occurrences:          isOccurrenceList{},
+		vulnerabilities:      vulnerabilityList{},
+		equalVulnerabilities: equalVulnerabilityList{},
 	}
 	return client, nil
 }

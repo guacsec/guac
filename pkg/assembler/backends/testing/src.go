@@ -332,14 +332,14 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 	return &s, nil
 }
 
-func getSourceIDFromInput(c *demoClient, input model.SourceInputSpec) (*uint32, error) {
+func getSourceIDFromInput(c *demoClient, input model.SourceInputSpec) (uint32, error) {
 	srcNamespace, srcHasNamespace := c.sources[input.Type]
 	if !srcHasNamespace {
-		return nil, gqlerror.Errorf("Source type \"%s\" not found", input.Type)
+		return 0, gqlerror.Errorf("Source type \"%s\" not found", input.Type)
 	}
 	srcName, srcHasName := srcNamespace.namespaces[input.Namespace]
 	if !srcHasName {
-		return nil, gqlerror.Errorf("Source namespace \"%s\" not found", input.Namespace)
+		return 0, gqlerror.Errorf("Source namespace \"%s\" not found", input.Namespace)
 	}
 	found := false
 	var sourceID uint32
@@ -354,15 +354,15 @@ func getSourceIDFromInput(c *demoClient, input model.SourceInputSpec) (*uint32, 
 			continue
 		}
 		if found {
-			return nil, gqlerror.Errorf("More than one source matches input")
+			return 0, gqlerror.Errorf("More than one source matches input")
 		}
 		sourceID = src.id
 		found = true
 	}
 	if !found {
-		return nil, gqlerror.Errorf("No source matches input")
+		return 0, gqlerror.Errorf("No source matches input")
 	}
-	return &sourceID, nil
+	return sourceID, nil
 }
 
 // TODO: remove these once the other components don't utilize it

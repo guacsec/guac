@@ -237,6 +237,7 @@ fragment allHasSourceAt on HasSourceAt {
 }
 
 fragment allCertifyVuln on CertifyVuln {
+  id
   package {
     ...allPkgTree
   }
@@ -264,6 +265,7 @@ fragment allCertifyVuln on CertifyVuln {
 }
 
 fragment allIsVulnerability on IsVulnerability {
+  id
   osv {
     ...allOSVTree
   }

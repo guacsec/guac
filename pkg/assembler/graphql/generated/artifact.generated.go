@@ -1479,6 +1479,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyVuln_id(ctx, field)
 			case "package":
 				return ec.fieldContext_CertifyVuln_package(ctx, field)
 			case "vulnerability":
@@ -2125,6 +2127,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestIsVulnerability(ctx cont
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsVulnerability_id(ctx, field)
 			case "osv":
 				return ec.fieldContext_IsVulnerability_osv(ctx, field)
 			case "vulnerability":
@@ -2763,6 +2767,8 @@ func (ec *executionContext) fieldContext_Query_CertifyVuln(ctx context.Context, 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyVuln_id(ctx, field)
 			case "package":
 				return ec.fieldContext_CertifyVuln_package(ctx, field)
 			case "vulnerability":
@@ -3354,6 +3360,8 @@ func (ec *executionContext) fieldContext_Query_IsVulnerability(ctx context.Conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsVulnerability_id(ctx, field)
 			case "osv":
 				return ec.fieldContext_IsVulnerability_osv(ctx, field)
 			case "vulnerability":

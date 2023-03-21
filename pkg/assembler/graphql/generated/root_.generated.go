@@ -89,6 +89,7 @@ type ComplexityRoot struct {
 	}
 
 	CertifyVuln struct {
+		ID            func(childComplexity int) int
 		Metadata      func(childComplexity int) int
 		Package       func(childComplexity int) int
 		Vulnerability func(childComplexity int) int
@@ -155,6 +156,7 @@ type ComplexityRoot struct {
 
 	IsVulnerability struct {
 		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Osv           func(childComplexity int) int
@@ -506,6 +508,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyVEXStatement.Vulnerability(childComplexity), true
 
+	case "CertifyVuln.id":
+		if e.complexity.CertifyVuln.ID == nil {
+			break
+		}
+
+		return e.complexity.CertifyVuln.ID(childComplexity), true
+
 	case "CertifyVuln.metadata":
 		if e.complexity.CertifyVuln.Metadata == nil {
 			break
@@ -778,6 +787,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsVulnerability.Collector(childComplexity), true
+
+	case "IsVulnerability.id":
+		if e.complexity.IsVulnerability.ID == nil {
+			break
+		}
+
+		return e.complexity.IsVulnerability.ID(childComplexity), true
 
 	case "IsVulnerability.justification":
 		if e.complexity.IsVulnerability.Justification == nil {
@@ -2334,6 +2350,7 @@ CertifyVuln is an attestation that represents when a package has a vulnerability
 
 """
 type CertifyVuln {
+  id: ID!
   "package (subject) - the package object type that represents the package"
   package: Package!
   "vulnerability (object) - union type that consists of osv, cve or ghsa"
@@ -2382,6 +2399,7 @@ Specifying just the package allows to query for all vulnerabilities associated w
 Only OSV, CVE or GHSA can be specified at once
 """
 input CertifyVulnSpec {
+  id: ID
   package: PkgSpec
   vulnerability: OsvCveOrGhsaSpec
   timeScanned: Time
@@ -3211,6 +3229,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type IsVulnerability {
+  id: ID!
   osv: OSV!
   vulnerability: CveOrGhsa!
   justification: String!
@@ -3223,6 +3242,7 @@ IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
 Only CVE or GHSA can be specified at once.
 """
 input IsVulnerabilitySpec {
+  id: ID
   osv: OSVSpec
   vulnerability: CveOrGhsaSpec
   justification: String
