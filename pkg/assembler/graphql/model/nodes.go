@@ -188,6 +188,7 @@ type CertifyBadSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type CertifyPkg struct {
+	ID            string     `json:"id"`
 	Packages      []*Package `json:"packages"`
 	Justification string     `json:"justification"`
 	Origin        string     `json:"origin"`
@@ -209,6 +210,7 @@ type CertifyPkgInputSpec struct {
 //
 // Specifying just the package allows to query for all similar packages (if they exist)
 type CertifyPkgSpec struct {
+	ID            *string    `json:"id,omitempty"`
 	Packages      []*PkgSpec `json:"packages,omitempty"`
 	Justification *string    `json:"justification,omitempty"`
 	Origin        *string    `json:"origin,omitempty"`

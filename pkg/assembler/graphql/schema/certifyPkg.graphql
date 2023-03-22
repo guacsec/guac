@@ -26,6 +26,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyPkg {
+  id: ID!
   packages: [Package!]!
   justification: String!
   origin: String!
@@ -38,6 +39,7 @@ CertifyPkgSpec allows filtering the list of CertifyPkg to return.
 Specifying just the package allows to query for all similar packages (if they exist)
 """
 input CertifyPkgSpec {
+  id: ID
   packages: [PkgSpec]
   justification: String
   origin: String
@@ -64,4 +66,3 @@ extend type Mutation {
   "Adds a certification that two packages are similar"
   ingestCertifyPkg(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, certifyPkg: CertifyPkgInputSpec!): CertifyPkg!
 }
-
