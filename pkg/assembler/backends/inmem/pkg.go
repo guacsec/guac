@@ -13,70 +13,70 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
-	"log"
 	"reflect"
 	"strconv"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // TODO: move this into a unit test for this file
-func registerAllPackages(client *demoClient) {
-	ctx := context.Background()
+// func registerAllPackages(client *demoClient) {
+// 	ctx := context.Background()
 
-	v11 := "2.11.1"
-	v12 := "2.12.0"
-	subpath1 := "saved_model_cli.py"
-	subpath2 := "__init__.py"
-	opensslNamespace := "openssl.org"
-	opensslVersion := "3.0.3"
+// 	v11 := "2.11.1"
+// 	v12 := "2.12.0"
+// 	subpath1 := "saved_model_cli.py"
+// 	subpath2 := "__init__.py"
+// 	opensslNamespace := "openssl.org"
+// 	opensslVersion := "3.0.3"
 
-	inputs := []model.PkgInputSpec{{
-		Type: "pypi",
-		Name: "tensorflow",
-	}, {
-		Type:    "pypi",
-		Name:    "tensorflow",
-		Version: &v11,
-	}, {
-		Type:    "pypi",
-		Name:    "tensorflow",
-		Version: &v12,
-	}, {
-		Type:    "pypi",
-		Name:    "tensorflow",
-		Version: &v12,
-		Subpath: &subpath1,
-	}, {
-		Type:    "pypi",
-		Name:    "tensorflow",
-		Version: &v12,
-		Subpath: &subpath2,
-	}, {
-		Type:    "pypi",
-		Name:    "tensorflow",
-		Version: &v12,
-		Subpath: &subpath1,
-	}, {
-		Type:      "conan",
-		Namespace: &opensslNamespace,
-		Name:      "openssl",
-		Version:   &opensslVersion,
-	}}
+// 	inputs := []model.PkgInputSpec{{
+// 		Type: "pypi",
+// 		Name: "tensorflow",
+// 	}, {
+// 		Type:    "pypi",
+// 		Name:    "tensorflow",
+// 		Version: &v11,
+// 	}, {
+// 		Type:    "pypi",
+// 		Name:    "tensorflow",
+// 		Version: &v12,
+// 	}, {
+// 		Type:    "pypi",
+// 		Name:    "tensorflow",
+// 		Version: &v12,
+// 		Subpath: &subpath1,
+// 	}, {
+// 		Type:    "pypi",
+// 		Name:    "tensorflow",
+// 		Version: &v12,
+// 		Subpath: &subpath2,
+// 	}, {
+// 		Type:    "pypi",
+// 		Name:    "tensorflow",
+// 		Version: &v12,
+// 		Subpath: &subpath1,
+// 	}, {
+// 		Type:      "conan",
+// 		Namespace: &opensslNamespace,
+// 		Name:      "openssl",
+// 		Version:   &opensslVersion,
+// 	}}
 
-	for _, input := range inputs {
-		_, err := client.IngestPackage(ctx, input)
-		if err != nil {
-			log.Printf("Error in ingesting: %v\n", err)
-		}
-	}
-}
+// 	for _, input := range inputs {
+// 		_, err := client.IngestPackage(ctx, input)
+// 		if err != nil {
+// 			log.Printf("Error in ingesting: %v\n", err)
+// 		}
+// 	}
+// }
 
 // Internal data: Packages
 type pkgTypeMap map[string]*pkgNamespaceStruct
@@ -130,19 +130,19 @@ type pkgNameOrVersion interface {
 	getCertifyBadLinks() []uint32
 }
 
-func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
-func (n *pkgNameStruct) getID() uint32      { return n.id }
-func (n *pkgVersionStruct) getID() uint32   { return n.id }
-func (n *pkgVersionNode) getID() uint32     { return n.id }
+func (n *pkgNamespaceStruct) ID() uint32 { return n.id }
+func (n *pkgNameStruct) ID() uint32      { return n.id }
+func (n *pkgVersionStruct) ID() uint32   { return n.id }
+func (n *pkgVersionNode) ID() uint32     { return n.id }
 
-func (n *pkgNamespaceStruct) neighbors() []uint32 {
+func (n *pkgNamespaceStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.namespaces))
 	for _, v := range n.namespaces {
 		out = append(out, v.id)
 	}
 	return out
 }
-func (n *pkgNameStruct) neighbors() []uint32 {
+func (n *pkgNameStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.names))
 	for _, v := range n.names {
 		out = append(out, v.id)
@@ -150,7 +150,7 @@ func (n *pkgNameStruct) neighbors() []uint32 {
 	out = append(out, n.parent)
 	return out
 }
-func (n *pkgVersionStruct) neighbors() []uint32 {
+func (n *pkgVersionStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.badLinks))
 	for _, v := range n.versions {
 		out = append(out, v.id)
@@ -161,7 +161,7 @@ func (n *pkgVersionStruct) neighbors() []uint32 {
 	out = append(out, n.parent)
 	return out
 }
-func (n *pkgVersionNode) neighbors() []uint32 {
+func (n *pkgVersionNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.certifyPkgs))
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.isDependencyLinks...)
@@ -175,16 +175,16 @@ func (n *pkgVersionNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *pkgNamespaceStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *pkgNamespaceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildPackageResponse(n.id, nil)
 }
-func (n *pkgNameStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *pkgNameStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildPackageResponse(n.id, nil)
 }
-func (n *pkgVersionStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *pkgVersionStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildPackageResponse(n.id, nil)
 }
-func (n *pkgVersionNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *pkgVersionNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildPackageResponse(n.id, nil)
 }
 
@@ -599,100 +599,6 @@ func noMatchQualifiers(filter *model.PkgSpec, v map[string]string) bool {
 		return !reflect.DeepEqual(v, filterQualifiers)
 	}
 	return false
-}
-
-// TODO: remove these once the other components don't utilize it
-func filterPackageNamespace(pkg *model.Package, pkgSpec *model.PkgSpec) *model.Package {
-	var namespaces []*model.PackageNamespace
-	for _, ns := range pkg.Namespaces {
-		if pkgSpec.Namespace == nil || ns.Namespace == *pkgSpec.Namespace {
-			newNs := filterPackageName(ns, pkgSpec)
-			if newNs != nil {
-				namespaces = append(namespaces, newNs)
-			}
-		}
-	}
-	if len(namespaces) == 0 {
-		return nil
-	}
-	return &model.Package{
-		Type:       pkg.Type,
-		Namespaces: namespaces,
-	}
-}
-
-// TODO: remove these once the other components don't utilize it
-func filterPackageName(ns *model.PackageNamespace, pkgSpec *model.PkgSpec) *model.PackageNamespace {
-	var names []*model.PackageName
-	for _, n := range ns.Names {
-		if pkgSpec.Name == nil || n.Name == *pkgSpec.Name {
-			newN := filterPackageVersion(n, pkgSpec)
-			if newN != nil {
-				names = append(names, newN)
-			}
-		}
-	}
-	if len(names) == 0 {
-		return nil
-	}
-	return &model.PackageNamespace{
-		Namespace: ns.Namespace,
-		Names:     names,
-	}
-}
-
-// TODO: remove these once the other components don't utilize it
-func filterPackageVersion(n *model.PackageName, pkgSpec *model.PkgSpec) *model.PackageName {
-	var versions []*model.PackageVersion
-	for _, v := range n.Versions {
-		if pkgSpec.Version == nil || v.Version == *pkgSpec.Version {
-			newV := filterQualifiersAndSubpath(v, pkgSpec)
-			if newV != nil {
-				versions = append(versions, newV)
-			}
-		}
-	}
-	if len(versions) == 0 {
-		return nil
-	}
-	return &model.PackageName{
-		Name:     n.Name,
-		Versions: versions,
-	}
-}
-
-// TODO: remove these once the other components don't utilize it
-func filterQualifiersAndSubpath(v *model.PackageVersion, pkgSpec *model.PkgSpec) *model.PackageVersion {
-	// First check for subpath matching
-	if pkgSpec.Subpath != nil && *pkgSpec.Subpath != v.Subpath {
-		return nil
-	}
-
-	// Allow matching on nodes with no qualifiers
-	if pkgSpec.MatchOnlyEmptyQualifiers != nil {
-		if *pkgSpec.MatchOnlyEmptyQualifiers && len(v.Qualifiers) != 0 {
-			return nil
-		}
-	}
-
-	// Because we operate on GraphQL-generated structs directly we cannot
-	// use a key-value map, so this is O(n^2). Production resolvers will
-	// run queries that match the qualifiers faster.
-	for _, specQualifier := range pkgSpec.Qualifiers {
-		found := false
-		for _, versionQualifier := range v.Qualifiers {
-			if specQualifier.Key == versionQualifier.Key {
-				if specQualifier.Value == nil || *specQualifier.Value == versionQualifier.Value {
-					found = true
-					break
-				}
-			}
-		}
-		if !found {
-			return nil
-		}
-	}
-	return v
 }
 
 func (c *demoClient) pkgVersionByID(id uint32) (*pkgVersionNode, error) {

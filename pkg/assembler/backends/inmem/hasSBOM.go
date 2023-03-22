@@ -13,16 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
 	"strconv"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
+
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type hasSBOMList []*hasSBOMStruct
@@ -35,16 +36,16 @@ type hasSBOMStruct struct {
 	collector string
 }
 
-func (n *hasSBOMStruct) getID() uint32 { return n.id }
+func (n *hasSBOMStruct) ID() uint32 { return n.id }
 
-func (n *hasSBOMStruct) neighbors() []uint32 {
+func (n *hasSBOMStruct) Neighbors() []uint32 {
 	if n.pkg != 0 {
 		return []uint32{n.pkg}
 	}
 	return []uint32{n.src}
 }
 
-func (n *hasSBOMStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convHasSBOM(n), nil
 }
 
@@ -64,7 +65,7 @@ func (n *hasSBOMStruct) buildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	_, err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM", "testing backend", "testing backend")
+// 	_, err = client.registerHasSBOM(selectedPackage[0], nil, "uri:location of SBOM", "inmem backend", "inmem backend")
 // 	if err != nil {
 // 		return err
 // 	}
@@ -78,7 +79,7 @@ func (n *hasSBOMStruct) buildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	_, err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM", "testing backend", "testing backend")
+// 	_, err = client.registerHasSBOM(nil, selectedSource[0], "uri:location of SBOM", "inmem backend", "inmem backend")
 // 	if err != nil {
 // 		return err
 // 	}
@@ -117,7 +118,7 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrS
 		}
 		sourceID = sid
 		src, _ = c.sourceByID(sid)
-		search = src.getHasSBOM()
+		search = src.hasSBOMs
 	}
 
 	for _, id := range search {

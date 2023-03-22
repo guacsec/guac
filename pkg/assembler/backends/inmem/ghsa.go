@@ -13,36 +13,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // TODO: convert to unit test
-func registerAllGHSA(client *demoClient) {
-	ctx := context.Background()
+// func registerAllGHSA(client *demoClient) {
+// 	ctx := context.Background()
 
-	inputs := []model.GHSAInputSpec{{
-		GhsaID: "GHSA-h45f-rjvw-2rv2",
-	}, {
-		GhsaID: "GHSA-xrw3-wqph-3fxg",
-	}, {
-		GhsaID: "GHSA-8v4j-7jgf-5rg9",
-	}}
-	for _, input := range inputs {
-		_, err := client.IngestGhsa(ctx, &input)
-		if err != nil {
-			log.Printf("Error in ingesting: %v\n", err)
-		}
-	}
-}
+// 	inputs := []model.GHSAInputSpec{{
+// 		GhsaID: "GHSA-h45f-rjvw-2rv2",
+// 	}, {
+// 		GhsaID: "GHSA-xrw3-wqph-3fxg",
+// 	}, {
+// 		GhsaID: "GHSA-8v4j-7jgf-5rg9",
+// 	}}
+// 	for _, input := range inputs {
+// 		_, err := client.IngestGhsa(ctx, &input)
+// 		if err != nil {
+// 			log.Printf("Error in ingesting: %v\n", err)
+// 		}
+// 	}
+// }
 
 const ghsa string = "ghsa"
 
@@ -63,10 +63,10 @@ type ghsaIDNode struct {
 	vexLinks         []uint32
 }
 
-func (n *ghsaIDNode) getID() uint32 { return n.id }
-func (n *ghsaNode) getID() uint32   { return n.id }
+func (n *ghsaIDNode) ID() uint32 { return n.id }
+func (n *ghsaNode) ID() uint32   { return n.id }
 
-func (n *ghsaNode) neighbors() []uint32 {
+func (n *ghsaNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, len(n.ghsaIDs))
 	for _, v := range n.ghsaIDs {
 		out = append(out, v.id)
@@ -74,7 +74,7 @@ func (n *ghsaNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *ghsaIDNode) neighbors() []uint32 {
+func (n *ghsaIDNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
 	out = append(out, n.certifyVulnLinks...)
 	out = append(out, n.equalVulnLinks...)
@@ -83,10 +83,10 @@ func (n *ghsaIDNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *ghsaIDNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *ghsaIDNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildGhsaResponse(n.id, nil)
 }
-func (n *ghsaNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *ghsaNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildGhsaResponse(n.id, nil)
 }
 

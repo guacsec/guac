@@ -13,12 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -39,17 +38,17 @@ type hashEqualStruct struct {
 	collector     string
 }
 
-func (n *hashEqualStruct) getID() uint32       { return n.id }
-func (n *hashEqualStruct) neighbors() []uint32 { return n.artifacts }
+func (n *hashEqualStruct) ID() uint32          { return n.id }
+func (n *hashEqualStruct) Neighbors() []uint32 { return n.artifacts }
 
-func (n *hashEqualStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convHashEqual(n), nil
 }
 
 // TODO convert to unit tests
 // func registerAllHashEqual(client *demoClient) {
 // 	strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
-// 	-client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "testing backend", "testing backend")
+// 	-client.registerHashEqual([]*model.Artifact{client.artifacts[0], client.artifacts[1], client.artifacts[2]}, "different algorithm for the same artifact", "inmem backend", "inmem backend")
 // 	client.IngestHashEqual(
 // 		context.Background(),
 // 		model.ArtifactInputSpec{
@@ -62,8 +61,8 @@ func (n *hashEqualStruct) buildModelNode(c *demoClient) (model.Node, error) {
 // 		},
 // 		model.HashEqualInputSpec{
 // 			Justification: "these two are the same",
-// 			Origin:        "testing backend",
-// 			Collector:     "testing backend",
+// 			Origin:        "inmem backend",
+// 			Collector:     "inmem backend",
 // 		})
 // }
 
@@ -91,7 +90,7 @@ func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.Artifac
 		return nil, gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}
 	artIDs := []uint32{aInt1.id, aInt2.id}
-	sort.Slice(artIDs, func(i, j int) bool { return artIDs[i] < artIDs[j] })
+	slices.Sort(artIDs)
 
 	// Search backedges for existing.
 	searchHEs := slices.Clone(aInt1.hashEquals)

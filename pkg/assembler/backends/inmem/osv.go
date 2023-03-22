@@ -13,40 +13,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // TODO: convert to unit test
-func registerAllOSV(client *demoClient) {
-	ctx := context.Background()
+// func registerAllOSV(client *demoClient) {
+// 	ctx := context.Background()
 
-	inputs := []model.OSVInputSpec{{
-		OsvID: "CVE-2019-13110",
-	}, {
-		OsvID: "CVE-2014-8139",
-	}, {
-		OsvID: "CVE-2014-8140",
-	}, {
-		OsvID: "CVE-2022-26499",
-	}, {
-		OsvID: "GHSA-h45f-rjvw-2rv2",
-	}}
-	for _, input := range inputs {
-		_, err := client.IngestOsv(ctx, &input)
-		if err != nil {
-			log.Printf("Error in ingesting: %v\n", err)
-		}
-	}
-}
+// 	inputs := []model.OSVInputSpec{{
+// 		OsvID: "CVE-2019-13110",
+// 	}, {
+// 		OsvID: "CVE-2014-8139",
+// 	}, {
+// 		OsvID: "CVE-2014-8140",
+// 	}, {
+// 		OsvID: "CVE-2022-26499",
+// 	}, {
+// 		OsvID: "GHSA-h45f-rjvw-2rv2",
+// 	}}
+// 	for _, input := range inputs {
+// 		_, err := client.IngestOsv(ctx, &input)
+// 		if err != nil {
+// 			log.Printf("Error in ingesting: %v\n", err)
+// 		}
+// 	}
+// }
 
 const osv string = "osv"
 
@@ -66,10 +66,10 @@ type osvIDNode struct {
 	equalVulnLinks   []uint32
 }
 
-func (n *osvIDNode) getID() uint32 { return n.id }
-func (n *osvNode) getID() uint32   { return n.id }
+func (n *osvIDNode) ID() uint32 { return n.id }
+func (n *osvNode) ID() uint32   { return n.id }
 
-func (n *osvNode) neighbors() []uint32 {
+func (n *osvNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, len(n.osvIDs))
 	for _, v := range n.osvIDs {
 		out = append(out, v.id)
@@ -77,7 +77,7 @@ func (n *osvNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *osvIDNode) neighbors() []uint32 {
+func (n *osvIDNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks))
 	out = append(out, n.certifyVulnLinks...)
 	out = append(out, n.equalVulnLinks...)
@@ -85,10 +85,10 @@ func (n *osvIDNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *osvIDNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *osvIDNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildOsvResponse(n.id, nil)
 }
-func (n *osvNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *osvNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildOsvResponse(n.id, nil)
 }
 

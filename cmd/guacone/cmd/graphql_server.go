@@ -23,13 +23,14 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	neo4j "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
-	"github.com/guacsec/guac/pkg/assembler/backends/testing"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -131,8 +132,8 @@ func getGraphqlServer(opts graphqlServerOptions) (*handler.Server, error) {
 
 		topResolver = resolvers.Resolver{Backend: backend}
 	case gqlBackendInmem:
-		args := testing.DemoCredentials{}
-		backend, err := testing.GetBackend(&args)
+		args := inmem.DemoCredentials{}
+		backend, err := inmem.GetBackend(&args)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating inmem backend: %w", err)
 		}

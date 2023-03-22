@@ -13,15 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
 	"strconv"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Internal data: link between packages and dependent packages (isDependency)
@@ -36,13 +37,13 @@ type isDependencyLink struct {
 	collector     string
 }
 
-func (n *isDependencyLink) getID() uint32 { return n.id }
+func (n *isDependencyLink) ID() uint32 { return n.id }
 
-func (n *isDependencyLink) neighbors() []uint32 {
+func (n *isDependencyLink) Neighbors() []uint32 {
 	return []uint32{n.packageID, n.depPackageID}
 }
 
-func (n *isDependencyLink) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildIsDependency(n, nil, true)
 }
 

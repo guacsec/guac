@@ -13,51 +13,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
-	"log"
 	"strconv"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // TODO: move this into a unit test for this file
-func registerAllSources(client *demoClient) {
-	ctx := context.Background()
-	v12 := "v2.12.0"
-	commit := "abcdef"
+// func registerAllSources(client *demoClient) {
+// 	ctx := context.Background()
+// 	v12 := "v2.12.0"
+// 	commit := "abcdef"
 
-	inputs := []model.SourceInputSpec{{
-		Type:      "git",
-		Namespace: "github.com",
-		Name:      "tensorflow",
-	}, {
-		Type:      "git",
-		Namespace: "github.com",
-		Name:      "build",
-	}, {
-		Type:      "git",
-		Namespace: "github.com",
-		Name:      "tensorflow",
-		Tag:       &v12,
-	}, {
-		Type:      "git",
-		Namespace: "github.com",
-		Name:      "tensorflow",
-		Commit:    &commit,
-	}}
+// 	inputs := []model.SourceInputSpec{{
+// 		Type:      "git",
+// 		Namespace: "github.com",
+// 		Name:      "tensorflow",
+// 	}, {
+// 		Type:      "git",
+// 		Namespace: "github.com",
+// 		Name:      "build",
+// 	}, {
+// 		Type:      "git",
+// 		Namespace: "github.com",
+// 		Name:      "tensorflow",
+// 		Tag:       &v12,
+// 	}, {
+// 		Type:      "git",
+// 		Namespace: "github.com",
+// 		Name:      "tensorflow",
+// 		Commit:    &commit,
+// 	}}
 
-	for _, input := range inputs {
-		_, err := client.IngestSource(ctx, input)
-		if err != nil {
-			log.Printf("Error in ingesting: %v\n", err)
-		}
-	}
-}
+// 	for _, input := range inputs {
+// 		_, err := client.IngestSource(ctx, input)
+// 		if err != nil {
+// 			log.Printf("Error in ingesting: %v\n", err)
+// 		}
+// 	}
+// }
 
 // Internal data: Sources
 type srcTypeMap map[string]*srcNamespaceStruct
@@ -87,18 +87,18 @@ type srcNameNode struct {
 	badLinks       []uint32
 }
 
-func (n *srcNamespaceStruct) getID() uint32 { return n.id }
-func (n *srcNameStruct) getID() uint32      { return n.id }
-func (n *srcNameNode) getID() uint32        { return n.id }
+func (n *srcNamespaceStruct) ID() uint32 { return n.id }
+func (n *srcNameStruct) ID() uint32      { return n.id }
+func (n *srcNameNode) ID() uint32        { return n.id }
 
-func (n *srcNamespaceStruct) neighbors() []uint32 {
+func (n *srcNamespaceStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, len(n.namespaces))
 	for _, v := range n.namespaces {
 		out = append(out, v.id)
 	}
 	return out
 }
-func (n *srcNameStruct) neighbors() []uint32 {
+func (n *srcNameStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.names))
 	for _, v := range n.names {
 		out = append(out, v.id)
@@ -106,7 +106,7 @@ func (n *srcNameStruct) neighbors() []uint32 {
 	out = append(out, n.parent)
 	return out
 }
-func (n *srcNameNode) neighbors() []uint32 {
+func (n *srcNameNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.scorecardLinks)+len(n.occurrences)+len(n.hasSBOMs)+len(n.badLinks))
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.scorecardLinks...)
@@ -117,29 +117,20 @@ func (n *srcNameNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *srcNamespaceStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *srcNamespaceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildSourceResponse(n.id, nil)
 }
-func (n *srcNameStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *srcNameStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildSourceResponse(n.id, nil)
 }
-func (n *srcNameNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *srcNameNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildSourceResponse(n.id, nil)
 }
 
-// hasSourceAt back edges
-func (p *srcNameNode) setSrcMapLinks(id uint32) { p.srcMapLinks = append(p.srcMapLinks, id) }
-
-// scorecard back edges
-func (p *srcNameNode) setScorecardLinks(id uint32) { p.scorecardLinks = append(p.scorecardLinks, id) }
-
-// occurrence back edges
+func (p *srcNameNode) setSrcMapLinks(id uint32)     { p.srcMapLinks = append(p.srcMapLinks, id) }
+func (p *srcNameNode) setScorecardLinks(id uint32)  { p.scorecardLinks = append(p.scorecardLinks, id) }
 func (p *srcNameNode) setOccurrenceLinks(id uint32) { p.occurrences = append(p.occurrences, id) }
-
-func (p *srcNameNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
-func (p *srcNameNode) getHasSBOM() []uint32 { return p.hasSBOMs }
-
-// occurrence back edges
+func (p *srcNameNode) setHasSBOM(id uint32)         { p.hasSBOMs = append(p.hasSBOMs, id) }
 func (p *srcNameNode) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
 
 // Ingest Source
@@ -405,84 +396,6 @@ func getSourceIDFromInput(c *demoClient, input model.SourceInputSpec) (uint32, e
 		return 0, gqlerror.Errorf("No source matches input")
 	}
 	return sourceID, nil
-}
-
-// TODO: remove these once the other components don't utilize it
-func filterSourceNamespace(src *model.Source, sourceSpec *model.SourceSpec) (*model.Source, error) {
-	var namespaces []*model.SourceNamespace
-	for _, ns := range src.Namespaces {
-		if sourceSpec.Namespace == nil || ns.Namespace == *sourceSpec.Namespace {
-			newNs, err := filterSourceName(ns, sourceSpec)
-			if err != nil {
-				return nil, err
-			}
-			if newNs != nil {
-				namespaces = append(namespaces, newNs)
-			}
-		}
-	}
-	if len(namespaces) == 0 {
-		return nil, nil
-	}
-	return &model.Source{
-		Type:       src.Type,
-		Namespaces: namespaces,
-	}, nil
-}
-
-// TODO: remove these once the other components don't utilize it
-func filterSourceName(ns *model.SourceNamespace, sourceSpec *model.SourceSpec) (*model.SourceNamespace, error) {
-	var names []*model.SourceName
-	for _, n := range ns.Names {
-		if sourceSpec.Name == nil || n.Name == *sourceSpec.Name {
-			n, err := filterSourceTagCommit(n, sourceSpec)
-			if err != nil {
-				return nil, err
-			}
-			if n != nil {
-				names = append(names, n)
-			}
-		}
-	}
-	if len(names) == 0 {
-		return nil, nil
-	}
-	return &model.SourceNamespace{
-		Namespace: ns.Namespace,
-		Names:     names,
-	}, nil
-}
-
-// TODO: remove these once the other components don't utilize it
-func filterSourceTagCommit(n *model.SourceName, sourceSpec *model.SourceSpec) (*model.SourceName, error) {
-	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
-		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
-			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
-		}
-	}
-
-	if !matchInputSpecWithDBField(sourceSpec.Commit, n.Commit) {
-		return nil, nil
-	}
-
-	if !matchInputSpecWithDBField(sourceSpec.Tag, n.Tag) {
-		return nil, nil
-	}
-
-	return n, nil
-}
-
-// TODO: remove these once the other components don't utilize it
-func matchInputSpecWithDBField(spec *string, dbField *string) bool {
-	if spec == nil {
-		return true
-	}
-
-	if *spec == "" {
-		return (dbField == nil || *dbField == "")
-	}
-
-	return (dbField != nil && *dbField == *spec)
 }
 
 func (c *demoClient) sourceByID(id uint32) (*srcNameNode, error) {

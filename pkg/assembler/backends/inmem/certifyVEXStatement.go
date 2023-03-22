@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
@@ -21,9 +21,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
+
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal data: link between a package or an artifact with its corresponding vulnerability VEX statement
@@ -40,9 +41,9 @@ type vexLink struct {
 	collector     string
 }
 
-func (n *vexLink) getID() uint32 { return n.id }
+func (n *vexLink) ID() uint32 { return n.id }
 
-func (n *vexLink) neighbors() []uint32 {
+func (n *vexLink) Neighbors() []uint32 {
 	out := make([]uint32, 0, 2)
 	if n.packageID != 0 {
 		out = append(out, n.packageID)
@@ -59,7 +60,7 @@ func (n *vexLink) neighbors() []uint32 {
 	return out
 }
 
-func (n *vexLink) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *vexLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildCertifyVEXStatement(n, nil, true)
 }
 

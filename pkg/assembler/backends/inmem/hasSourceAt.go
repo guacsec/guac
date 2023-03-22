@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
@@ -21,8 +21,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Internal data: link between sources and packages (HasSourceAt)
@@ -37,13 +38,13 @@ type srcMapLink struct {
 	collector     string
 }
 
-func (n *srcMapLink) getID() uint32 { return n.id }
+func (n *srcMapLink) ID() uint32 { return n.id }
 
-func (n *srcMapLink) neighbors() []uint32 {
+func (n *srcMapLink) Neighbors() []uint32 {
 	return []uint32{n.sourceID, n.packageID}
 }
 
-func (n *srcMapLink) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *srcMapLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildHasSourceAt(n, nil, true)
 }
 

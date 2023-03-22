@@ -23,8 +23,9 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	neo4j "github.com/guacsec/guac/pkg/assembler/backends/neo4j"
-	testing "github.com/guacsec/guac/pkg/assembler/backends/testing"
+
+	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/logging"
@@ -58,10 +59,10 @@ func startServer() {
 
 		topResolver = resolvers.Resolver{Backend: backend}
 	} else {
-		args := testing.DemoCredentials{}
-		backend, err := testing.GetBackend(&args)
+		args := inmem.DemoCredentials{}
+		backend, err := inmem.GetBackend(&args)
 		if err != nil {
-			fmt.Printf("Error creating testing backend: %v", err)
+			fmt.Printf("Error creating inmem backend: %v", err)
 			os.Exit(1)
 		}
 
