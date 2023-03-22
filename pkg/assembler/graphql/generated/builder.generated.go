@@ -191,7 +191,7 @@ func (ec *executionContext) unmarshalInputBuilderSpec(ctx context.Context, obj i
 
 // region    **************************** object.gotpl ****************************
 
-var builderImplementors = []string{"Builder", "Nodes"}
+var builderImplementors = []string{"Builder", "Node"}
 
 func (ec *executionContext) _Builder(ctx context.Context, sel ast.SelectionSet, obj *model.Builder) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, builderImplementors)

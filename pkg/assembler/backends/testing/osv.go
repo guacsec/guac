@@ -69,6 +69,29 @@ type osvIDNode struct {
 func (n *osvIDNode) getID() uint32 { return n.id }
 func (n *osvNode) getID() uint32   { return n.id }
 
+func (n *osvNode) neighbors() []uint32 {
+	out := make([]uint32, 0, len(n.osvIDs))
+	for _, v := range n.osvIDs {
+		out = append(out, v.id)
+	}
+	return out
+}
+
+func (n *osvIDNode) neighbors() []uint32 {
+	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
+	out = append(out, n.certifyVulnLink...)
+	out = append(out, n.equalVulnLink...)
+	out = append(out, n.parent)
+	return out
+}
+
+func (n *osvIDNode) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildOsvResponse(n.id, nil)
+}
+func (n *osvNode) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildOsvResponse(n.id, nil)
+}
+
 // certifyVulnerability back edges
 func (n *osvIDNode) setVulnerabilityLink(id uint32) {
 	n.certifyVulnLink = append(n.certifyVulnLink, id)

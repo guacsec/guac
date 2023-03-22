@@ -520,7 +520,7 @@ func (ec *executionContext) _PackageOrArtifact(ctx context.Context, sel ast.Sele
 
 // region    **************************** object.gotpl ****************************
 
-var certifyVEXStatementImplementors = []string{"CertifyVEXStatement", "Nodes"}
+var certifyVEXStatementImplementors = []string{"CertifyVEXStatement", "Node"}
 
 func (ec *executionContext) _CertifyVEXStatement(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyVEXStatement) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyVEXStatementImplementors)

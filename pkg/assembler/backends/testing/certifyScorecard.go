@@ -42,6 +42,14 @@ type scorecardLink struct {
 
 func (n *scorecardLink) getID() uint32 { return n.id }
 
+func (n *scorecardLink) neighbors() []uint32 {
+	return []uint32{n.sourceID}
+}
+
+func (n *scorecardLink) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildScorecard(n, nil, true)
+}
+
 // Ingest CertifyScorecard
 func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
 	sourceID, err := getSourceIDFromInput(c, source)
@@ -91,7 +99,7 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 	}
 
 	// build return GraphQL type
-	builtCertifyScorecard, err := buildScorecard(c, &collectedScorecardLink, nil, true)
+	builtCertifyScorecard, err := c.buildScorecard(&collectedScorecardLink, nil, true)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +121,7 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
 		if link, ok := node.(*scorecardLink); ok {
-			foundCertifyScorecard, err := buildScorecard(c, link, filter, true)
+			foundCertifyScorecard, err := c.buildScorecard(link, filter, true)
 			if err != nil {
 				return nil, err
 			}
@@ -147,7 +155,7 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 			continue
 		}
 
-		foundCertifyScorecard, err := buildScorecard(c, link, filter, false)
+		foundCertifyScorecard, err := c.buildScorecard(link, filter, false)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +168,7 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	return out, nil
 }
 
-func buildScorecard(c *demoClient, link *scorecardLink, filter *model.CertifyScorecardSpec, ingestOrIDProvided bool) (*model.CertifyScorecard, error) {
+func (c *demoClient) buildScorecard(link *scorecardLink, filter *model.CertifyScorecardSpec, ingestOrIDProvided bool) (*model.CertifyScorecard, error) {
 	var s *model.Source
 	var err error
 	if filter != nil {

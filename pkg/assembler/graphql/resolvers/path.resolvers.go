@@ -6,12 +6,16 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Path is the resolver for the path field.
-func (r *queryResolver) Path(ctx context.Context, subject model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, target model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, maxPathLength int) ([]model.Nodes, error) {
-	panic(fmt.Errorf("not implemented: Path - path"))
+func (r *queryResolver) Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error) {
+	return r.Backend.Path(ctx, subject, target, maxPathLength)
+}
+
+// Neighbors is the resolver for the neighbors field.
+func (r *queryResolver) Neighbors(ctx context.Context, node string) ([]model.Node, error) {
+	return r.Backend.Neighbors(ctx, node)
 }

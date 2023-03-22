@@ -45,6 +45,18 @@ type hasSLSAStruct struct {
 
 func (n *hasSLSAStruct) getID() uint32 { return n.id }
 
+func (n *hasSLSAStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, 2+len(n.builtFrom))
+	out = append(out, n.subject)
+	out = append(out, n.builtBy)
+	out = append(out, n.builtFrom...)
+	return out
+}
+
+func (n *hasSLSAStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.convSLSA(n), nil
+}
+
 // Query HasSlsa
 
 func (c *demoClient) HasSlsa(ctx context.Context, hSpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
@@ -222,16 +234,16 @@ func (c *demoClient) convSLSA(in *hasSLSAStruct) *model.HasSlsa {
 	var bfs []*model.Artifact
 	for _, id := range in.builtFrom {
 		a, _ := c.artifactByID(id)
-		bfs = append(bfs, convArtifact(a))
+		bfs = append(bfs, c.convArtifact(a))
 	}
 	bb, _ := c.builderByID(in.builtBy)
 
 	return &model.HasSlsa{
 		ID:      nodeID(in.id),
-		Subject: convArtifact(sub),
+		Subject: c.convArtifact(sub),
 		Slsa: &model.Slsa{
 			BuiltFrom:     bfs,
-			BuiltBy:       convBuilder(bb),
+			BuiltBy:       c.convBuilder(bb),
 			BuildType:     in.buildType,
 			SlsaPredicate: in.predicates,
 			SlsaVersion:   in.version,

@@ -38,6 +38,14 @@ type isDependencyLink struct {
 
 func (n *isDependencyLink) getID() uint32 { return n.id }
 
+func (n *isDependencyLink) neighbors() []uint32 {
+	return []uint32{n.packageID, n.depPackageID}
+}
+
+func (n *isDependencyLink) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildIsDependency(n, nil, true)
+}
+
 // Ingest IsDependency
 func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
@@ -102,7 +110,7 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 	}
 
 	// build return GraphQL type
-	foundIsDependency, err := buildIsDependency(c, &collectedIsDependencyLink, nil, true)
+	foundIsDependency, err := c.buildIsDependency(&collectedIsDependencyLink, nil, true)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +132,7 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
 		if link, ok := node.(*isDependencyLink); ok {
-			foundIsDependency, err := buildIsDependency(c, link, filter, true)
+			foundIsDependency, err := c.buildIsDependency(link, filter, true)
 			if err != nil {
 				return nil, err
 			}
@@ -149,7 +157,7 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			continue
 		}
 
-		foundIsDependency, err := buildIsDependency(c, link, filter, false)
+		foundIsDependency, err := c.buildIsDependency(link, filter, false)
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +170,7 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 	return out, nil
 }
 
-func buildIsDependency(c *demoClient, link *isDependencyLink, filter *model.IsDependencySpec, ingestOrIDProvided bool) (*model.IsDependency, error) {
+func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsDependencySpec, ingestOrIDProvided bool) (*model.IsDependency, error) {
 	var p *model.Package
 	var dep *model.Package
 	var err error

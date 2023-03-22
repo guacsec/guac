@@ -59,7 +59,8 @@ type QueryResolver interface {
 	IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
 	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
-	Path(ctx context.Context, subject model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, target model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter, maxPathLength int) ([]model.Nodes, error)
+	Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error)
+	Neighbors(ctx context.Context, node string) ([]model.Node, error)
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
 }
 
@@ -823,6 +824,21 @@ func (ec *executionContext) field_Query_ghsa_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["node"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["node"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_osv_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -856,19 +872,19 @@ func (ec *executionContext) field_Query_packages_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter
+	var arg0 string
 	if tmp, ok := rawArgs["subject"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageSourceArtifactBuilderOsvCveOrGhsaFilter2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceArtifactBuilderOsvCveOrGhsaFilter(ctx, tmp)
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["subject"] = arg0
-	var arg1 model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter
+	var arg1 string
 	if tmp, ok := rawArgs["target"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
-		arg1, err = ec.unmarshalNPackageSourceArtifactBuilderOsvCveOrGhsaFilter2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceArtifactBuilderOsvCveOrGhsaFilter(ctx, tmp)
+		arg1, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3544,7 +3560,7 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Path(rctx, fc.Args["subject"].(model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter), fc.Args["target"].(model.PackageSourceArtifactBuilderOsvCveOrGhsaFilter), fc.Args["maxPathLength"].(int))
+		return ec.resolvers.Query().Path(rctx, fc.Args["subject"].(string), fc.Args["target"].(string), fc.Args["maxPathLength"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3556,9 +3572,9 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]model.Nodes)
+	res := resTmp.([]model.Node)
 	fc.Result = res
-	return ec.marshalNNodes2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodesᚄ(ctx, field.Selections, res)
+	return ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_path(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3568,7 +3584,7 @@ func (ec *executionContext) fieldContext_Query_path(ctx context.Context, field g
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Nodes does not have child fields")
+			return nil, errors.New("field of type Node does not have child fields")
 		},
 	}
 	defer func() {
@@ -3579,6 +3595,61 @@ func (ec *executionContext) fieldContext_Query_path(ctx context.Context, field g
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_path_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_neighbors(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_neighbors(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Neighbors(rctx, fc.Args["node"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]model.Node)
+	fc.Result = res
+	return ec.marshalNNode2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNodeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_neighbors(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Node does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_neighbors_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3869,7 +3940,7 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 
 // region    **************************** object.gotpl ****************************
 
-var artifactImplementors = []string{"Artifact", "PackageSourceOrArtifact", "PackageOrArtifact", "Nodes"}
+var artifactImplementors = []string{"Artifact", "PackageSourceOrArtifact", "PackageOrArtifact", "Node"}
 
 func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet, obj *model.Artifact) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, artifactImplementors)
@@ -4564,6 +4635,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_path(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "neighbors":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_neighbors(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

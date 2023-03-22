@@ -44,6 +44,23 @@ type isOccurrenceStruct struct {
 
 func (n *isOccurrenceStruct) getID() uint32 { return n.id }
 
+func (n *isOccurrenceStruct) neighbors() []uint32 {
+	out := make([]uint32, 0, 3)
+	// TODO: replace maxUint32 with 0
+	if n.pkg != maxUint32 {
+		out = append(out, n.pkg)
+	}
+	if n.source != maxUint32 {
+		out = append(out, n.source)
+	}
+	out = append(out, n.artifact)
+	return out
+}
+
+func (n *isOccurrenceStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.convOccurrence(n), nil
+}
+
 // TODO convert to unit tests
 // func registerAllIsOccurrence(client *demoClient) error {
 // 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
@@ -164,7 +181,7 @@ func (c *demoClient) convOccurrence(in *isOccurrenceStruct) *model.IsOccurrence 
 	a, _ := c.artifactByID(in.artifact)
 	o := &model.IsOccurrence{
 		ID:            nodeID(in.id),
-		Artifact:      convArtifact(a),
+		Artifact:      c.convArtifact(a),
 		Justification: in.justification,
 		Origin:        in.origin,
 		Collector:     in.collector,
