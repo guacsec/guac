@@ -37,6 +37,17 @@ type hasSBOMStruct struct {
 
 func (n *hasSBOMStruct) getID() uint32 { return n.id }
 
+func (n *hasSBOMStruct) neighbors() []uint32 {
+	if n.pkg != 0 {
+		return []uint32{n.pkg}
+	}
+	return []uint32{n.src}
+}
+
+func (n *hasSBOMStruct) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.convHasSBOM(n), nil
+}
+
 // TODO convert to unit tests
 // func registerAllhasSBOM(client *demoClient) error {
 // 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
