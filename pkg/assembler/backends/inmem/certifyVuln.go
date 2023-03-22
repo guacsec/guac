@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"time"
 
@@ -131,7 +130,7 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 	duplicate := false
 	collectedCertifyVulnLink := vulnerabilityLink{}
 	for _, id := range searchIDs {
-		v, _ := c.vulnLinkByID(id)
+		v, _ := byID[*vulnerabilityLink](id, c)
 		vulnMatch := false
 		if osvID != 0 && osvID == v.osvID {
 			vulnMatch = true
@@ -192,67 +191,132 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 
 // Query CertifyVuln
 func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	err := helper.ValidateOsvCveOrGhsaQueryFilter(filter.Vulnerability)
-	if err != nil {
+	funcName := "CertifyVuln"
+	if err := helper.ValidateOsvCveOrGhsaQueryFilter(filter.Vulnerability); err != nil {
 		return nil, err
 	}
-	out := []*model.CertifyVuln{}
 
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
-		node, ok := c.index[uint32(id)]
-		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+		id := uint32(id64)
+		link, err := byID[*vulnerabilityLink](id, c)
+		if err != nil {
+			// Not found
+			return nil, nil
 		}
-		if link, ok := node.(*vulnerabilityLink); ok {
-			foundCertifyVuln, err := c.buildCertifyVulnerability(link, filter, true)
-			if err != nil {
-				return nil, err
-			}
-			return []*model.CertifyVuln{foundCertifyVuln}, nil
-		} else {
-			return nil, gqlerror.Errorf("ID does not match expected node type for certifyVuln")
+		// If found by id, ignore rest of fields in spec and return as a match
+		foundCertifyVuln, err := c.buildCertifyVulnerability(link, filter, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.CertifyVuln{foundCertifyVuln}, nil
+	}
+
+	var search []uint32
+	foundOne := false
+	if filter != nil && filter.Package != nil {
+		exactPackage, err := c.exactPackageVersion(filter.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactPackage != nil {
+			search = append(search, exactPackage.certifyVulnLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Osv != nil {
+		exactOSV, err := c.exactOSV(filter.Vulnerability.Osv)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactOSV != nil {
+			search = append(search, exactOSV.certifyVulnLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Cve != nil {
+		exactCVE, err := c.exactCVE(filter.Vulnerability.Cve)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactCVE != nil {
+			search = append(search, exactCVE.certifyVulnLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Ghsa != nil {
+		exactGHSA, err := c.exactGHSA(filter.Vulnerability.Ghsa)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactGHSA != nil {
+			search = append(search, exactGHSA.certifyVulnLinks...)
+			foundOne = true
 		}
 	}
 
-	// TODO if any of the pkg/vulnerabilities are specified, ony search those backedges
-	for _, link := range c.vulnerabilities {
-		if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
-			continue
+	var out []*model.CertifyVuln
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*vulnerabilityLink](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addCVIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && noMatch(filter.DbURI, link.dbURI) {
-			continue
+	} else {
+		for _, link := range c.vulnerabilities {
+			var err error
+			out, err = c.addCVIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && noMatch(filter.DbVersion, link.dbVersion) {
-			continue
-		}
-		if filter != nil && noMatch(filter.ScannerURI, link.scannerURI) {
-			continue
-		}
-		if filter != nil && noMatch(filter.ScannerVersion, link.scannerVersion) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Collector, link.collector) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Origin, link.origin) {
-			continue
-		}
-
-		foundCertifyVuln, err := c.buildCertifyVulnerability(link, filter, false)
-		if err != nil {
-			return nil, err
-		}
-		if foundCertifyVuln == nil {
-			continue
-		}
-		out = append(out, foundCertifyVuln)
 	}
 
 	return out, nil
+}
+
+func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
+	filter *model.CertifyVulnSpec, link *vulnerabilityLink) (
+	[]*model.CertifyVuln, error) {
+
+	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.DbURI, link.dbURI) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.DbVersion, link.dbVersion) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.ScannerURI, link.scannerURI) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.ScannerVersion, link.scannerVersion) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Origin, link.origin) {
+		return out, nil
+	}
+
+	foundCertifyVuln, err := c.buildCertifyVulnerability(link, filter, false)
+	if err != nil {
+		return nil, err
+	}
+	if foundCertifyVuln == nil {
+		return out, nil
+	}
+	return append(out, foundCertifyVuln), nil
 }
 
 func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *model.CertifyVulnSpec, ingestOrIDProvided bool) (*model.CertifyVuln, error) {
@@ -362,16 +426,4 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 		Metadata:      metadata,
 	}
 	return &certifyVuln, nil
-}
-
-func (c *demoClient) vulnLinkByID(id uint32) (*vulnerabilityLink, error) {
-	node, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find vulnerabilityLink")
-	}
-	link, ok := node.(*vulnerabilityLink)
-	if !ok {
-		return nil, errors.New("not an vulnerabilityLink")
-	}
-	return link, nil
 }

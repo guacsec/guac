@@ -69,28 +69,6 @@ func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 	return c.convBuilder(b), nil
 }
 
-// 	for _, b := range c.builders {
-// 		if b.URI == uri {
-// 			return b
-// 		}
-// 	}
-// 	newBuilder := &model.Builder{URI: uri}
-// 	c.builders = append(c.builders, newBuilder)
-// 	return newBuilder
-// }
-
-func (c *demoClient) builderByID(id uint32) (*builderStruct, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find builder")
-	}
-	b, ok := o.(*builderStruct)
-	if !ok {
-		return nil, errors.New("not a builder")
-	}
-	return b, nil
-}
-
 // Query Builder
 func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	if builderSpec.ID != nil {
@@ -99,7 +77,7 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 			return nil, gqlerror.Errorf("Builders :: couldn't parse id %v", err)
 		}
 		id := uint32(id64)
-		b, err := c.builderByID(id)
+		b, err := byID[*builderStruct](id, c)
 		if err != nil {
 			return nil, nil
 		}
@@ -124,4 +102,28 @@ func (c *demoClient) convBuilder(b *builderStruct) *model.Builder {
 		ID:  nodeID(b.id),
 		URI: b.uri,
 	}
+}
+
+func (c *demoClient) exactBuilder(filter *model.BuilderSpec) (*builderStruct, error) {
+	if filter == nil {
+		return nil, nil
+	}
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		id := uint32(id64)
+		if node, ok := c.index[id]; ok {
+			if b, ok := node.(*builderStruct); ok {
+				return b, nil
+			}
+		}
+	}
+	if filter.URI != nil {
+		if b, ok := c.builders[*filter.URI]; ok {
+			return b, nil
+		}
+	}
+	return nil, nil
 }

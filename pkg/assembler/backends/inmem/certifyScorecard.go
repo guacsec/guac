@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"reflect"
 	"strconv"
 	"time"
@@ -70,7 +69,7 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 	duplicate := false
 	collectedScorecardLink := scorecardLink{}
 	for _, id := range searchIDs {
-		v, _ := c.certifyScorecardByID(id)
+		v, _ := byID[*scorecardLink](id, c)
 		if sourceID == v.sourceID && scorecard.TimeScanned.UTC() == v.timeScanned && scorecard.AggregateScore == v.aggregateScore &&
 			scorecard.ScorecardVersion == v.scorecardVersion && scorecard.ScorecardCommit == v.scorecardCommit && scorecard.Origin == v.origin &&
 			scorecard.Collector == v.collector && reflect.DeepEqual(checksMap, v.checks) {
@@ -110,63 +109,97 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 
 // Query CertifyScorecard
 func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	out := []*model.CertifyScorecard{}
+	funcName := "Scorecards"
 
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
-		node, ok := c.index[uint32(id)]
-		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+		id := uint32(id64)
+		link, err := byID[*scorecardLink](id, c)
+		if err != nil {
+			// Not found
+			return nil, nil
 		}
-		if link, ok := node.(*scorecardLink); ok {
-			foundCertifyScorecard, err := c.buildScorecard(link, filter, true)
-			if err != nil {
-				return nil, err
-			}
-			return []*model.CertifyScorecard{foundCertifyScorecard}, nil
-		} else {
-			return nil, gqlerror.Errorf("ID does not match expected node type for CertifyScorecard")
+		foundCertifyScorecard, err := c.buildScorecard(link, filter, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.CertifyScorecard{foundCertifyScorecard}, nil
+	}
+
+	var search []uint32
+	foundOne := false
+	if filter != nil && filter.Source != nil {
+		exactSource, err := c.exactSource(filter.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.scorecardLinks...)
+			foundOne = true
 		}
 	}
 
-	// TODO if any of the source is specified, ony search those backedges
-	for _, link := range c.scorecards {
-		if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
-			continue
+	var out []*model.CertifyScorecard
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*scorecardLink](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addSCIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && filter.AggregateScore != nil && *filter.AggregateScore != link.aggregateScore {
-			continue
+	} else {
+		for _, link := range c.scorecards {
+			var err error
+			out, err = c.addSCIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && noMatchChecks(filter.Checks, link.checks) {
-			continue
-		}
-		if filter != nil && noMatch(filter.ScorecardVersion, link.scorecardVersion) {
-			continue
-		}
-		if filter != nil && noMatch(filter.ScorecardCommit, link.scorecardCommit) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Origin, link.origin) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Collector, link.collector) {
-			continue
-		}
-
-		foundCertifyScorecard, err := c.buildScorecard(link, filter, false)
-		if err != nil {
-			return nil, err
-		}
-		if foundCertifyScorecard == nil {
-			continue
-		}
-		out = append(out, foundCertifyScorecard)
 	}
 
 	return out, nil
+}
+
+func (c *demoClient) addSCIfMatch(out []*model.CertifyScorecard,
+	filter *model.CertifyScorecardSpec, link *scorecardLink) (
+	[]*model.CertifyScorecard, error) {
+	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
+		return out, nil
+	}
+	if filter != nil && filter.AggregateScore != nil && *filter.AggregateScore != link.aggregateScore {
+		return out, nil
+	}
+	if filter != nil && noMatchChecks(filter.Checks, link.checks) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.ScorecardVersion, link.scorecardVersion) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.ScorecardCommit, link.scorecardCommit) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Origin, link.origin) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+
+	foundCertifyScorecard, err := c.buildScorecard(link, filter, false)
+	if err != nil {
+		return nil, err
+	}
+	if foundCertifyScorecard == nil {
+		return out, nil
+	}
+	return append(out, foundCertifyScorecard), nil
 }
 
 func (c *demoClient) buildScorecard(link *scorecardLink, filter *model.CertifyScorecardSpec, ingestOrIDProvided bool) (*model.CertifyScorecard, error) {
@@ -248,16 +281,4 @@ func noMatchChecks(checksFilter []*model.ScorecardCheckSpec, v map[string]int) b
 		return !reflect.DeepEqual(v, filterChecks)
 	}
 	return false
-}
-
-func (c *demoClient) certifyScorecardByID(id uint32) (*scorecardLink, error) {
-	node, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find scorecardLink")
-	}
-	link, ok := node.(*scorecardLink)
-	if !ok {
-		return nil, errors.New("not an scorecardLink")
-	}
-	return link, nil
 }

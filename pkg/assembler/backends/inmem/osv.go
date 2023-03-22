@@ -135,7 +135,7 @@ func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (
 // Query OSV
 func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.Osv, error) {
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -174,11 +174,37 @@ func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.O
 	return out, nil
 }
 
+func (c *demoClient) exactOSV(filter *model.OSVSpec) (*osvIDNode, error) {
+	if filter == nil {
+		return nil, nil
+	}
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		id := uint32(id64)
+		if node, ok := c.index[id]; ok {
+			if o, ok := node.(*osvIDNode); ok {
+				return o, nil
+			}
+		}
+	}
+	if filter.OsvID != nil {
+		if root, ok := c.osvs[osv]; ok {
+			if node, ok := root.osvIDs[*filter.OsvID]; ok {
+				return node, nil
+			}
+		}
+	}
+	return nil, nil
+}
+
 // Builds a model.osv to send as GraphQL response, starting from id.
 // The optional filter allows restricting output (on selection operations).
 func (c *demoClient) buildOsvResponse(id uint32, filter *model.OSVSpec) (*model.Osv, error) {
 	if filter != nil && filter.ID != nil {
-		filteredID, err := strconv.Atoi(*filter.ID)
+		filteredID, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}

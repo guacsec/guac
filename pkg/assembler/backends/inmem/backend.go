@@ -16,6 +16,7 @@
 package inmem
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"sync/atomic"
@@ -141,4 +142,17 @@ func toLower(filter *string) *string {
 		return &lower
 	}
 	return nil
+}
+
+func byID[E node](id uint32, c *demoClient) (E, error) {
+	var nl E
+	o, ok := c.index[id]
+	if !ok {
+		return nl, errors.New("could not find node")
+	}
+	s, ok := o.(E)
+	if !ok {
+		return nl, fmt.Errorf("not a %T", nl)
+	}
+	return s, nil
 }

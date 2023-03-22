@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -102,7 +101,7 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 	duplicate := false
 	collectedCertifyBadLink := badLink{}
 	for _, id := range searchIDs {
-		v, _ := c.badLinkByID(id)
+		v, _ := byID[*badLink](id, c)
 		subjectMatch := false
 		if packageID != 0 && packageID == v.packageID {
 			subjectMatch = true
@@ -157,56 +156,100 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 
 // Query CertifyBad
 func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
+	funcName := "CertifyBad"
+	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject); err != nil {
+		return nil, err
+	}
 
-	err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject)
+	if filter != nil && filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
+		}
+		id := uint32(id64)
+		link, err := byID[*badLink](id, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		foundCertifyBad, err := c.buildCertifyBad(link, filter, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.CertifyBad{foundCertifyBad}, nil
+	}
+
+	// Cant really search for an exact Pkg, as these can be linked to either
+	// names or versions, and version could be empty.
+	var search []uint32
+	foundOne := false
+	if filter != nil && filter.Subject != nil && filter.Subject.Artifact != nil {
+		exactArtifact, err := c.artifactExact(filter.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.badLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
+		exactSource, err := c.exactSource(filter.Subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.badLinks...)
+			foundOne = true
+		}
+	}
+
+	var out []*model.CertifyBad
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*badLink](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addCBIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	} else {
+		for _, link := range c.certifyBads {
+			var err error
+			out, err = c.addCBIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	}
+	return out, nil
+}
+
+func (c *demoClient) addCBIfMatch(out []*model.CertifyBad,
+	filter *model.CertifyBadSpec, link *badLink) (
+	[]*model.CertifyBad, error) {
+
+	if filter != nil && noMatch(filter.Justification, link.justification) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Origin, link.origin) {
+		return out, nil
+	}
+
+	foundCertifyBad, err := c.buildCertifyBad(link, filter, false)
 	if err != nil {
 		return nil, err
 	}
-	out := []*model.CertifyBad{}
-
-	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
-		if err != nil {
-			return nil, err
-		}
-		node, ok := c.index[uint32(id)]
-		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
-		}
-		if link, ok := node.(*badLink); ok {
-			foundCertifyBad, err := c.buildCertifyBad(link, filter, true)
-			if err != nil {
-				return nil, err
-			}
-			return []*model.CertifyBad{foundCertifyBad}, nil
-		} else {
-			return nil, gqlerror.Errorf("ID does not match expected node type for certifyBad")
-		}
+	if foundCertifyBad == nil {
+		return out, nil
 	}
-
-	// TODO if any of the pkg/source/artifact are specified, ony search those backedges
-	for _, link := range c.certifyBads {
-		if filter != nil && noMatch(filter.Justification, link.justification) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Collector, link.collector) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Origin, link.origin) {
-			continue
-		}
-
-		foundCertifyBad, err := c.buildCertifyBad(link, filter, false)
-		if err != nil {
-			return nil, err
-		}
-		if foundCertifyBad == nil {
-			continue
-		}
-		out = append(out, foundCertifyBad)
-	}
-
-	return out, nil
+	return append(out, foundCertifyBad), nil
 }
 
 func (c *demoClient) buildCertifyBad(link *badLink, filter *model.CertifyBadSpec, ingestOrIDProvided bool) (*model.CertifyBad, error) {
@@ -288,16 +331,4 @@ func (c *demoClient) buildCertifyBad(link *badLink, filter *model.CertifyBadSpec
 		Collector:     link.collector,
 	}
 	return &certifyBad, nil
-}
-
-func (c *demoClient) badLinkByID(id uint32) (*badLink, error) {
-	node, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find badLink")
-	}
-	link, ok := node.(*badLink)
-	if !ok {
-		return nil, errors.New("not an badLink")
-	}
-	return link, nil
 }

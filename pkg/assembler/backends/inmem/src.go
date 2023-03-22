@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -207,7 +206,7 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 		}
 	}
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -301,7 +300,7 @@ func buildSourceName(srcNameStruct *srcNameStruct, filter *model.SourceSpec) []*
 // The optional filter allows restricting output (on selection operations).
 func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*model.Source, error) {
 	if filter != nil && filter.ID != nil {
-		filteredID, err := strconv.Atoi(*filter.ID)
+		filteredID, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -398,14 +397,39 @@ func getSourceIDFromInput(c *demoClient, input model.SourceInputSpec) (uint32, e
 	return sourceID, nil
 }
 
-func (c *demoClient) sourceByID(id uint32) (*srcNameNode, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find source")
+func (c *demoClient) exactSource(filter *model.SourceSpec) (*srcNameNode, error) {
+	if filter == nil {
+		return nil, nil
 	}
-	a, ok := o.(*srcNameNode)
-	if !ok {
-		return nil, errors.New("not a source")
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		id := uint32(id64)
+		if node, ok := c.index[id]; ok {
+			if s, ok := node.(*srcNameNode); ok {
+				return s, nil
+			}
+		}
 	}
-	return a, nil
+	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil && (filter.Tag != nil || filter.Commit != nil) {
+		tp, ok := c.sources[*filter.Type]
+		if !ok {
+			return nil, nil
+		}
+		ns, ok := tp.namespaces[*filter.Namespace]
+		if !ok {
+			return nil, nil
+		}
+		for _, n := range ns.names {
+			if *filter.Name != n.name ||
+				noMatchInput(filter.Tag, n.tag) ||
+				noMatchInput(filter.Commit, n.commit) {
+				return nil, nil
+			}
+			return n, nil
+		}
+	}
+	return nil, nil
 }

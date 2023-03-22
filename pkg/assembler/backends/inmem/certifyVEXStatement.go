@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"time"
 
@@ -134,7 +133,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 	duplicate := false
 	collectedCertifyVexLink := vexLink{}
 	for _, id := range searchIDs {
-		v, _ := c.vexLinkByID(id)
+		v, _ := byID[*vexLink](id, c)
 		vulnMatch := false
 		subjectMatch := false
 		if cveID != 0 && cveID == v.cveID {
@@ -197,62 +196,127 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 
 // Query CertifyVex
 func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject)
-	if err != nil {
+	funcName := "CertifyVEXStatement"
+	if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
 		return nil, err
 	}
-	err = helper.ValidateCveOrGhsaQueryFilter(filter.Vulnerability)
-	if err != nil {
+	if err := helper.ValidateCveOrGhsaQueryFilter(filter.Vulnerability); err != nil {
 		return nil, err
 	}
-	out := []*model.CertifyVEXStatement{}
 
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
-		node, ok := c.index[uint32(id)]
-		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+		id := uint32(id64)
+		link, err := byID[*vexLink](id, c)
+		if err != nil {
+			// Not found
+			return nil, nil
 		}
-		if link, ok := node.(*vexLink); ok {
-			foundCertifyVex, err := c.buildCertifyVEXStatement(link, filter, true)
+		// If found by id, ignore rest of fields in spec and return as a match
+		foundCertifyVex, err := c.buildCertifyVEXStatement(link, filter, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.CertifyVEXStatement{foundCertifyVex}, nil
+	}
+
+	var search []uint32
+	foundOne := false
+
+	if filter != nil && filter.Subject != nil && filter.Subject.Artifact != nil {
+		exactArtifact, err := c.artifactExact(filter.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.vexLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
+		exactPackage, err := c.exactPackageVersion(filter.Subject.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactPackage != nil {
+			search = append(search, exactPackage.vexLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Cve != nil {
+		exactCVE, err := c.exactCVE(filter.Vulnerability.Cve)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactCVE != nil {
+			search = append(search, exactCVE.vexLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Vulnerability != nil && filter.Vulnerability.Ghsa != nil {
+		exactGHSA, err := c.exactGHSA(filter.Vulnerability.Ghsa)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactGHSA != nil {
+			search = append(search, exactGHSA.vexLinks...)
+			foundOne = true
+		}
+	}
+
+	var out []*model.CertifyVEXStatement
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*vexLink](id, c)
 			if err != nil {
-				return nil, err
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			return []*model.CertifyVEXStatement{foundCertifyVex}, nil
-		} else {
-			return nil, gqlerror.Errorf("ID does not match expected node type for certifyVex")
+			out, err = c.addVexIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	} else {
+		for _, link := range c.vexs {
+			var err error
+			out, err = c.addVexIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
 	}
-
-	// TODO if any of the pkg/artifact/vulnerabilities are specified, ony search those backedges
-	for _, link := range c.vexs {
-		if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
-			continue
-		}
-		if filter != nil && noMatch(filter.Justification, link.justification) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Collector, link.collector) {
-			continue
-		}
-		if filter != nil && noMatch(filter.Origin, link.origin) {
-			continue
-		}
-
-		foundCertifyVex, err := c.buildCertifyVEXStatement(link, filter, false)
-		if err != nil {
-			return nil, err
-		}
-		if foundCertifyVex == nil {
-			continue
-		}
-		out = append(out, foundCertifyVex)
-	}
-
 	return out, nil
+}
+
+func (c *demoClient) addVexIfMatch(out []*model.CertifyVEXStatement,
+	filter *model.CertifyVEXStatementSpec, link *vexLink) (
+	[]*model.CertifyVEXStatement, error) {
+
+	if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Justification, link.justification) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Origin, link.origin) {
+		return out, nil
+	}
+
+	foundCertifyVex, err := c.buildCertifyVEXStatement(link, filter, false)
+	if err != nil {
+		return nil, err
+	}
+	if foundCertifyVex == nil {
+		return out, nil
+	}
+	return append(out, foundCertifyVex), nil
+
 }
 
 func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.CertifyVEXStatementSpec, ingestOrIDProvided bool) (*model.CertifyVEXStatement, error) {
@@ -363,16 +427,4 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 		Collector:     link.collector,
 	}
 	return &certifyVuln, nil
-}
-
-func (c *demoClient) vexLinkByID(id uint32) (*vexLink, error) {
-	node, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find vexLink")
-	}
-	link, ok := node.(*vexLink)
-	if !ok {
-		return nil, errors.New("not an vexLink")
-	}
-	return link, nil
 }

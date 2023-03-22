@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"strings"
 
@@ -66,18 +65,6 @@ func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // 		})
 // }
 
-func (c *demoClient) hashEqualByID(id uint32) (*hashEqualStruct, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find hashEqual")
-	}
-	a, ok := o.(*hashEqualStruct)
-	if !ok {
-		return nil, errors.New("not a hashEqual")
-	}
-	return a, nil
-}
-
 // Ingest HashEqual
 func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 
@@ -97,7 +84,7 @@ func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.Artifac
 	searchHEs = append(searchHEs, aInt2.hashEquals...)
 
 	for _, he := range searchHEs {
-		h, err := c.hashEqualByID(he)
+		h, err := byID[*hashEqualStruct](he, c)
 		if err != nil {
 			return nil, gqlerror.Errorf(
 				"IngestHashEqual :: Bad hashEqual id stored on existing artifact: %s", err)
@@ -151,7 +138,7 @@ func (c *demoClient) matchArtifacts(filter []*model.ArtifactSpec, value []uint32
 		match := false
 		remove := -1
 		for i, v := range val {
-			a, _ := c.artifactByID(v)
+			a, _ := byID[*artStruct](v, c)
 			if (m.Algorithm == nil || strings.ToLower(*m.Algorithm) == a.algorithm) &&
 				(m.Digest == nil || strings.ToLower(*m.Digest) == a.digest) {
 				match = true
@@ -169,47 +156,72 @@ func (c *demoClient) matchArtifacts(filter []*model.ArtifactSpec, value []uint32
 
 // Query HashEqual
 
-func (c *demoClient) HashEqual(ctx context.Context, hSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
-	if len(hSpec.Artifacts) > 2 {
+func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec) ([]*model.HashEqual, error) {
+	funcName := "HashEqual"
+	if len(filter.Artifacts) > 2 {
 		return nil, gqlerror.Errorf(
-			"HashEqual :: Provided spec has too many Artifacts")
+			"%v :: Provided spec has too many Artifacts", funcName)
 	}
 
-	// If ID is provided, try to look up, then check if rest matches
-	if hSpec.ID != nil {
-		id64, err := strconv.ParseUint(*hSpec.ID, 10, 32)
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, gqlerror.Errorf("HashEqual :: invalid ID %s", err)
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
 		id := uint32(id64)
-		h, err := c.hashEqualByID(id)
+		link, err := byID[*hashEqualStruct](id, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.HashEqual{c.convHashEqual(h)}, nil
+		return []*model.HashEqual{c.convHashEqual(link)}, nil
 	}
 
-	var hashEquals []*model.HashEqual
-	// TODO if any artifacts are exact matches only search those backedges
-	for _, h := range c.hashEquals {
-		if noMatch(hSpec.Justification, h.justification) ||
-			noMatch(hSpec.Origin, h.origin) ||
-			noMatch(hSpec.Collector, h.collector) ||
-			!c.matchArtifacts(hSpec.Artifacts, h.artifacts) {
-			continue
+	var search []uint32
+	foundOne := false
+	for _, a := range filter.Artifacts {
+		if !foundOne && a != nil {
+			exactArtifact, err := c.artifactExact(a)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if exactArtifact != nil {
+				search = append(search, exactArtifact.hashEquals...)
+				foundOne = true
+				break
+			}
 		}
-		hashEquals = append(hashEquals, c.convHashEqual(h))
 	}
 
-	return hashEquals, nil
+	var out []*model.HashEqual
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*hashEqualStruct](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addHEIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	} else {
+		for _, link := range c.hashEquals {
+			var err error
+			out, err = c.addHEIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	}
+	return out, nil
 }
 
 func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
 	var artifacts []*model.Artifact
 	for _, id := range h.artifacts {
-		a, _ := c.artifactByID(id)
+		a, _ := byID[*artStruct](id, c)
 		// TODO propagate error back
 		artifacts = append(artifacts, c.convArtifact(a))
 	}
@@ -220,4 +232,16 @@ func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
 		Origin:        h.origin,
 		Collector:     h.collector,
 	}
+}
+
+func (c *demoClient) addHEIfMatch(out []*model.HashEqual,
+	filter *model.HashEqualSpec, link *hashEqualStruct) (
+	[]*model.HashEqual, error) {
+	if noMatch(filter.Justification, link.justification) ||
+		noMatch(filter.Origin, link.origin) ||
+		noMatch(filter.Collector, link.collector) ||
+		!c.matchArtifacts(filter.Artifacts, link.artifacts) {
+		return out, nil
+	}
+	return append(out, c.convHashEqual(link)), nil
 }

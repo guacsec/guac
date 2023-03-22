@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"time"
 
@@ -85,7 +84,7 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	duplicate := false
 	collectedSrcMapLink := srcMapLink{}
 	for _, id := range searchIDs {
-		v, _ := c.hasSourceAtByID(id)
+		v, _ := byID[*srcMapLink](id, c)
 		if packageID == v.packageID && sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
 			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.UTC() == v.knownSince {
 			collectedSrcMapLink = *v
@@ -120,52 +119,61 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 }
 
 // Query HasSourceAt
-
 func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	out := []*model.HasSourceAt{}
-
+	funcName := "HasSourceAt"
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
-		node, ok := c.index[uint32(id)]
-		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+		id := uint32(id64)
+		link, err := byID[*srcMapLink](id, c)
+		if err != nil {
+			// Not found
+			return nil, nil
 		}
-		if link, ok := node.(*srcMapLink); ok {
-			foundHasSourceAt, err := c.buildHasSourceAt(link, filter, true)
-			if err != nil {
-				return nil, err
-			}
-			return []*model.HasSourceAt{foundHasSourceAt}, nil
-		} else {
-			return nil, gqlerror.Errorf("ID does not match expected node type for hasSourceAt")
+		foundHasSourceAt, err := c.buildHasSourceAt(link, filter, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.HasSourceAt{foundHasSourceAt}, nil
+	}
+
+	// Cant really search for an exact Pkg, as these can be linked to either
+	// names or versions, only search Source backedges.
+	var search []uint32
+	foundOne := false
+	if filter != nil && filter.Source != nil {
+		exactSource, err := c.exactSource(filter.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.srcMapLinks...)
+			foundOne = true
 		}
 	}
 
-	// TODO if any of the pkg/source are specified, ony search those backedges
-	for _, link := range c.hasSources {
-		if filter != nil && noMatch(filter.Justification, link.justification) {
-			continue
+	var out []*model.HasSourceAt
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*srcMapLink](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addSrcIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && noMatch(filter.Origin, link.origin) {
-			continue
+	} else {
+		for _, link := range c.hasSources {
+			var err error
+			out, err = c.addSrcIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && noMatch(filter.Collector, link.collector) {
-			continue
-		}
-		if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
-			continue
-		}
-		foundHasSourceAt, err := c.buildHasSourceAt(link, filter, false)
-		if err != nil {
-			return nil, err
-		}
-		if foundHasSourceAt == nil {
-			continue
-		}
-		out = append(out, foundHasSourceAt)
 	}
 
 	return out, nil
@@ -219,14 +227,27 @@ func (c *demoClient) buildHasSourceAt(link *srcMapLink, filter *model.HasSourceA
 	return &newHSA, nil
 }
 
-func (c *demoClient) hasSourceAtByID(id uint32) (*srcMapLink, error) {
-	node, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find srcMapLink")
+func (c *demoClient) addSrcIfMatch(out []*model.HasSourceAt,
+	filter *model.HasSourceAtSpec, link *srcMapLink) (
+	[]*model.HasSourceAt, error) {
+	if filter != nil && noMatch(filter.Justification, link.justification) {
+		return out, nil
 	}
-	link, ok := node.(*srcMapLink)
-	if !ok {
-		return nil, errors.New("not an srcMapLink")
+	if filter != nil && noMatch(filter.Origin, link.origin) {
+		return out, nil
 	}
-	return link, nil
+	if filter != nil && noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+	if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
+		return out, nil
+	}
+	foundHasSourceAt, err := c.buildHasSourceAt(link, filter, false)
+	if err != nil {
+		return nil, err
+	}
+	if foundHasSourceAt == nil {
+		return out, nil
+	}
+	return append(out, foundHasSourceAt), nil
 }

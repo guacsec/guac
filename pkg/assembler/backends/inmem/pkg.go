@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"reflect"
 	"strconv"
 
@@ -313,7 +312,7 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 // Query Package
 func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*model.Package, error) {
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -436,7 +435,7 @@ func buildPkgVersion(pkgVersionStruct *pkgVersionStruct, filter *model.PkgSpec) 
 // The optional filter allows restricting output (on selection operations).
 func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*model.Package, error) {
 	if filter != nil && filter.ID != nil {
-		filteredID, err := strconv.Atoi(*filter.ID)
+		filteredID, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -601,13 +600,76 @@ func noMatchQualifiers(filter *model.PkgSpec, v map[string]string) bool {
 	return false
 }
 
-func (c *demoClient) pkgVersionByID(id uint32) (*pkgVersionNode, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find pkg")
+func (c *demoClient) exactPackageVersion(filter *model.PkgSpec) (*pkgVersionNode, error) {
+	if filter == nil {
+		return nil, nil
 	}
-	if a, ok := o.(*pkgVersionNode); ok {
-		return a, nil
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		id := uint32(id64)
+		if node, ok := c.index[id]; ok {
+			if c, ok := node.(*pkgVersionNode); ok {
+				return c, nil
+			}
+		}
 	}
-	return nil, errors.New("not a pkg")
+	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil && filter.Version != nil {
+		tp, ok := c.packages[*filter.Type]
+		if !ok {
+			return nil, nil
+		}
+		ns, ok := tp.namespaces[*filter.Namespace]
+		if !ok {
+			return nil, nil
+		}
+		nm, ok := ns.names[*filter.Name]
+		if !ok {
+			return nil, nil
+		}
+		for _, v := range nm.versions {
+			if *filter.Version != v.version ||
+				noMatchInput(filter.Subpath, v.subpath) ||
+				noMatchQualifiers(filter, v.qualifiers) {
+				return nil, nil
+			}
+			return v, nil
+		}
+	}
+	return nil, nil
+}
+
+func (c *demoClient) exactPackageName(filter *model.PkgNameSpec) (*pkgVersionStruct, error) {
+	if filter == nil {
+		return nil, nil
+	}
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		id := uint32(id64)
+		if node, ok := c.index[id]; ok {
+			if c, ok := node.(*pkgVersionStruct); ok {
+				return c, nil
+			}
+		}
+	}
+	if filter.Type != nil && filter.Namespace != nil && filter.Name != nil {
+		tp, ok := c.packages[*filter.Type]
+		if !ok {
+			return nil, nil
+		}
+		ns, ok := tp.namespaces[*filter.Namespace]
+		if !ok {
+			return nil, nil
+		}
+		nm, ok := ns.names[*filter.Name]
+		if !ok {
+			return nm, nil
+		}
+	}
+	return nil, nil
 }
