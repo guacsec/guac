@@ -360,6 +360,7 @@ type GHSASpec struct {
 //
 // Note: Only package object or source object can be defined. Not both.
 type HasSbom struct {
+	ID        string          `json:"id"`
 	Subject   PackageOrSource `json:"subject"`
 	URI       string          `json:"uri"`
 	Origin    string          `json:"origin"`
@@ -382,6 +383,7 @@ type HasSBOMInputSpec struct {
 // Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
 // relationship.
 type HasSBOMSpec struct {
+	ID        *string              `json:"id,omitempty"`
 	Subject   *PackageOrSourceSpec `json:"subject,omitempty"`
 	URI       *string              `json:"uri,omitempty"`
 	Origin    *string              `json:"origin,omitempty"`

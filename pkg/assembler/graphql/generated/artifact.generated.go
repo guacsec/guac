@@ -1686,6 +1686,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestHasSBOM(ctx context.Cont
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_HasSBOM_id(ctx, field)
 			case "subject":
 				return ec.fieldContext_HasSBOM_subject(ctx, field)
 			case "uri":
@@ -2986,6 +2988,8 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_HasSBOM_id(ctx, field)
 			case "subject":
 				return ec.fieldContext_HasSBOM_subject(ctx, field)
 			case "uri":

@@ -112,6 +112,7 @@ type pkgVersionNode struct {
 	isDependencyLink []uint32
 	occurrences      []uint32
 	certifyVulnLink  []uint32
+	hasSBOMs         []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -203,6 +204,10 @@ func (p *pkgVersionNode) setVulnerabilityLink(id uint32) {
 	p.certifyVulnLink = append(p.certifyVulnLink, id)
 }
 func (p *pkgVersionNode) getVulnerabilityLink() []uint32 { return p.certifyVulnLink }
+
+// hasSBOM back edges
+func (p *pkgVersionNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
+func (p *pkgVersionNode) getHasSBOM() []uint32 { return p.hasSBOMs }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {

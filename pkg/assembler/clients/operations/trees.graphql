@@ -191,6 +191,7 @@ fragment allHashEqualTree on HashEqual {
 }
 
 fragment allHasSBOMTree on HasSBOM {
+  id
   uri
   subject {
     __typename

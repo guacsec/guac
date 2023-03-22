@@ -83,6 +83,7 @@ type srcNameNode struct {
 	srcMapLink    []uint32
 	scorecardLink []uint32
 	occurrences   []uint32
+	hasSBOMs      []uint32
 }
 
 func (n *srcNamespaceStruct) getID() uint32 { return n.id }
@@ -133,6 +134,9 @@ func (p *srcNameNode) getScorecardLink() []uint32 { return p.scorecardLink }
 
 func (p *srcNameNode) setOccurrences(id uint32) { p.occurrences = append(p.occurrences, id) }
 func (p *srcNameNode) getOccurrences() []uint32 { return p.occurrences }
+
+func (p *srcNameNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
+func (p *srcNameNode) getHasSBOM() []uint32 { return p.hasSBOMs }
 
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
