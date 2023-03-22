@@ -70,6 +70,7 @@ type ComplexityRoot struct {
 
 	CertifyPkg struct {
 		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Packages      func(childComplexity int) int
@@ -443,6 +444,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyPkg.Collector(childComplexity), true
+
+	case "CertifyPkg.id":
+		if e.complexity.CertifyPkg.ID == nil {
+			break
+		}
+
+		return e.complexity.CertifyPkg.ID(childComplexity), true
 
 	case "CertifyPkg.justification":
 		if e.complexity.CertifyPkg.Justification == nil {
@@ -2133,6 +2141,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyPkg {
+  id: ID!
   packages: [Package!]!
   justification: String!
   origin: String!
@@ -2145,6 +2154,7 @@ CertifyPkgSpec allows filtering the list of CertifyPkg to return.
 Specifying just the package allows to query for all similar packages (if they exist)
 """
 input CertifyPkgSpec {
+  id: ID
   packages: [PkgSpec]
   justification: String
   origin: String
@@ -2171,7 +2181,6 @@ extend type Mutation {
   "Adds a certification that two packages are similar"
   ingestCertifyPkg(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, certifyPkg: CertifyPkgInputSpec!): CertifyPkg!
 }
-
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.

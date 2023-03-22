@@ -1,12 +1,17 @@
 fragment allCertifyPkgTree on CertifyPkg {
+  id
   justification
   packages {
+    id
     type
     namespaces {
+      id
       namespace
       names {
+        id
         name
         versions {
+          id
           version
           qualifiers {
             key

@@ -255,6 +255,7 @@ fragment allCertifyVuln on CertifyVuln {
 }
 
 fragment allCertifyPkg on CertifyPkg {
+  id
   justification
   packages {
     ...allPkgTree

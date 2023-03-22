@@ -132,7 +132,7 @@ func getGraphqlServer(opts graphqlServerOptions) (*handler.Server, error) {
 		topResolver = resolvers.Resolver{Backend: backend}
 	case gqlBackendInmem:
 		args := testing.DemoCredentials{}
-		backend, err := testing.GetEmptyBackend(&args)
+		backend, err := testing.GetBackend(&args)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating inmem backend: %w", err)
 		}

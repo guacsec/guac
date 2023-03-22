@@ -1475,6 +1475,9 @@ type CertifyPkgIngestCertifyPkg struct {
 	allCertifyPkg `json:"-"`
 }
 
+// GetId returns CertifyPkgIngestCertifyPkg.Id, and is useful for accessing the field via an interface.
+func (v *CertifyPkgIngestCertifyPkg) GetId() string { return v.allCertifyPkg.Id }
+
 // GetJustification returns CertifyPkgIngestCertifyPkg.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyPkgIngestCertifyPkg) GetJustification() string { return v.allCertifyPkg.Justification }
 
@@ -1515,6 +1518,8 @@ func (v *CertifyPkgIngestCertifyPkg) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyPkgIngestCertifyPkg struct {
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Packages []allCertifyPkgPackagesPackage `json:"packages"`
@@ -1535,6 +1540,7 @@ func (v *CertifyPkgIngestCertifyPkg) MarshalJSON() ([]byte, error) {
 func (v *CertifyPkgIngestCertifyPkg) __premarshalJSON() (*__premarshalCertifyPkgIngestCertifyPkg, error) {
 	var retval __premarshalCertifyPkgIngestCertifyPkg
 
+	retval.Id = v.allCertifyPkg.Id
 	retval.Justification = v.allCertifyPkg.Justification
 	retval.Packages = v.allCertifyPkg.Packages
 	retval.Origin = v.allCertifyPkg.Origin
@@ -4454,6 +4460,9 @@ type NeighborsNeighborsCertifyPkg struct {
 // GetTypename returns NeighborsNeighborsCertifyPkg.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyPkg) GetTypename() *string { return v.Typename }
 
+// GetId returns NeighborsNeighborsCertifyPkg.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyPkg) GetId() string { return v.allCertifyPkg.Id }
+
 // GetJustification returns NeighborsNeighborsCertifyPkg.Justification, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyPkg) GetJustification() string {
 	return v.allCertifyPkg.Justification
@@ -4498,6 +4507,8 @@ func (v *NeighborsNeighborsCertifyPkg) UnmarshalJSON(b []byte) error {
 type __premarshalNeighborsNeighborsCertifyPkg struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Packages []allCertifyPkgPackagesPackage `json:"packages"`
@@ -4519,6 +4530,7 @@ func (v *NeighborsNeighborsCertifyPkg) __premarshalJSON() (*__premarshalNeighbor
 	var retval __premarshalNeighborsNeighborsCertifyPkg
 
 	retval.Typename = v.Typename
+	retval.Id = v.allCertifyPkg.Id
 	retval.Justification = v.allCertifyPkg.Justification
 	retval.Packages = v.allCertifyPkg.Packages
 	retval.Origin = v.allCertifyPkg.Origin
@@ -6822,6 +6834,9 @@ type PathPathCertifyPkg struct {
 // GetTypename returns PathPathCertifyPkg.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyPkg) GetTypename() *string { return v.Typename }
 
+// GetId returns PathPathCertifyPkg.Id, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyPkg) GetId() string { return v.allCertifyPkg.Id }
+
 // GetJustification returns PathPathCertifyPkg.Justification, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyPkg) GetJustification() string { return v.allCertifyPkg.Justification }
 
@@ -6864,6 +6879,8 @@ func (v *PathPathCertifyPkg) UnmarshalJSON(b []byte) error {
 type __premarshalPathPathCertifyPkg struct {
 	Typename *string `json:"__typename"`
 
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Packages []allCertifyPkgPackagesPackage `json:"packages"`
@@ -6885,6 +6902,7 @@ func (v *PathPathCertifyPkg) __premarshalJSON() (*__premarshalPathPathCertifyPkg
 	var retval __premarshalPathPathCertifyPkg
 
 	retval.Typename = v.Typename
+	retval.Id = v.allCertifyPkg.Id
 	retval.Justification = v.allCertifyPkg.Justification
 	retval.Packages = v.allCertifyPkg.Packages
 	retval.Origin = v.allCertifyPkg.Origin
@@ -11593,11 +11611,15 @@ func (v *allCertifyBadSubjectSource) __premarshalJSON() (*__premarshalallCertify
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type allCertifyPkg struct {
+	Id            string                         `json:"id"`
 	Justification string                         `json:"justification"`
 	Packages      []allCertifyPkgPackagesPackage `json:"packages"`
 	Origin        string                         `json:"origin"`
 	Collector     string                         `json:"collector"`
 }
+
+// GetId returns allCertifyPkg.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyPkg) GetId() string { return v.Id }
 
 // GetJustification returns allCertifyPkg.Justification, and is useful for accessing the field via an interface.
 func (v *allCertifyPkg) GetJustification() string { return v.Justification }
@@ -16103,6 +16125,7 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allCertifyPkg on CertifyPkg {
+	id
 	justification
 	packages {
 		... allPkgTree
@@ -17051,6 +17074,7 @@ fragment allCertifyScorecard on CertifyScorecard {
 	}
 }
 fragment allCertifyPkg on CertifyPkg {
+	id
 	justification
 	packages {
 		... allPkgTree
@@ -17468,6 +17492,7 @@ fragment allCertifyScorecard on CertifyScorecard {
 	}
 }
 fragment allCertifyPkg on CertifyPkg {
+	id
 	justification
 	packages {
 		... allPkgTree

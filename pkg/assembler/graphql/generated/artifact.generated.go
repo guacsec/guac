@@ -1302,6 +1302,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestCertifyPkg(ctx context.C
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyPkg_id(ctx, field)
 			case "packages":
 				return ec.fieldContext_CertifyPkg_packages(ctx, field)
 			case "justification":
@@ -2608,6 +2610,8 @@ func (ec *executionContext) fieldContext_Query_CertifyPkg(ctx context.Context, f
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyPkg_id(ctx, field)
 			case "packages":
 				return ec.fieldContext_CertifyPkg_packages(ctx, field)
 			case "justification":
