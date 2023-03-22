@@ -15,16 +15,10 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest certification that two packages are similar into GUAC
+# Exposes GraphQL queries to retrieve GUAC packages
 
-mutation CertifyPkg($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $certifyPkg: CertifyPkgInputSpec!) {
-  pkg: ingestPackage(pkg: $pkg) {
+query Packages($filter: PkgSpec) {
+  packages(pkgSpec: $filter) {
     ...allPkgTree
-  }
-  dependentPkg: ingestPackage(pkg: $depPkg) {
-    ...allPkgTree
-  }
-  ingestCertifyPkg(pkg: $pkg, depPkg: $depPkg, certifyPkg: $certifyPkg) {
-    ...allCertifyPkg
   }
 }
