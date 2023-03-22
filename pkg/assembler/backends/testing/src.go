@@ -107,10 +107,11 @@ func (n *srcNameStruct) neighbors() []uint32 {
 	return out
 }
 func (n *srcNameNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.scorecardLinks)+len(n.occurrences)+len(n.badLinks))
+	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.scorecardLinks)+len(n.occurrences)+len(n.hasSBOMs)+len(n.badLinks))
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.scorecardLinks...)
 	out = append(out, n.occurrences...)
+	out = append(out, n.hasSBOMs...)
 	out = append(out, n.badLinks...)
 	out = append(out, n.parent)
 	return out
