@@ -20,14 +20,12 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/guacsec/guac/pkg/certifier"
-
+	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/ossf/scorecard/v4/docs/checks"
 	"github.com/ossf/scorecard/v4/log"
 
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -48,27 +46,24 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		return fmt.Errorf("rootComponent cannot be nil")
 	}
 
-	var artifactNode *assembler.ArtifactNode
+	var sourceNode *source.SourceNode
 
-	if component, ok := rootComponent.(*assembler.ArtifactNode); ok {
-		artifactNode = component
+	if component, ok := rootComponent.(*source.SourceNode); ok {
+		sourceNode = component
 	} else {
 		return ErrArtifactNodeTypeMismatch
 	}
 
-	// Remove the git+ prefix from the artifact name
-	repoName := strings.TrimLeft(artifactNode.Name, "git+")
-
 	// s.artifact.Digest is the commit SHA
-	if artifactNode.Digest == "" {
-		return fmt.Errorf("artifact digest cannot be empty")
+	if sourceNode.Commit == "" {
+		return fmt.Errorf("source commit cannot be empty")
 	}
 
-	if repoName == "" {
-		return fmt.Errorf("artifact name cannot be empty")
+	if sourceNode.Repo == "" {
+		return fmt.Errorf("source repo cannot be empty")
 	}
 
-	score, err := s.scorecard.GetScore(repoName, artifactNode.Digest)
+	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit)
 	if err != nil {
 		return fmt.Errorf("error getting scorecard result: %w", err)
 	}
@@ -89,7 +84,7 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		Type:   processor.DocumentScorecard,
 		SourceInformation: processor.SourceInformation{
 			Collector: "scorecard",
-			Source:    artifactNode.Name + "@" + artifactNode.Digest,
+			Source:    sourceNode.Repo + "@" + sourceNode.Commit,
 		},
 	}
 
