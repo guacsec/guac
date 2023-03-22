@@ -75,9 +75,10 @@ func (n *ghsaNode) neighbors() []uint32 {
 }
 
 func (n *ghsaIDNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
-	out = append(out, n.certifyVulnLink...)
-	out = append(out, n.equalVulnLink...)
+	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.equalVulnLinks...)
+	out = append(out, n.vexLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -231,20 +232,4 @@ func getGhsaIDFromInput(c *demoClient, input model.GHSAInputSpec) (uint32, error
 	}
 
 	return ghsaIDStruct.id, nil
-}
-
-// TODO: remove
-func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, error) {
-	var ghsaID []*model.GHSAId
-	for _, id := range ghsa.GhsaIds {
-		if ghsaSpec.GhsaID == nil || id.ID == strings.ToLower(*ghsaSpec.GhsaID) {
-			ghsaID = append(ghsaID, id)
-		}
-	}
-	if len(ghsaID) == 0 {
-		return nil, nil
-	}
-	return &model.Ghsa{
-		GhsaIds: ghsaID,
-	}, nil
 }

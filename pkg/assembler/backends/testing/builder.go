@@ -39,7 +39,6 @@ func (b *builderStruct) buildModelNode(c *demoClient) (model.Node, error) {
 	return c.convBuilder(b), nil
 }
 
-func (n *builderStruct) getHasSLSAs() []uint32 { return n.hasSLSAs }
 func (n *builderStruct) setHasSLSAs(id uint32) { n.hasSLSAs = append(n.hasSLSAs, id) }
 
 // TODO make these into test cases

@@ -78,9 +78,9 @@ func (n *osvNode) neighbors() []uint32 {
 }
 
 func (n *osvIDNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
-	out = append(out, n.certifyVulnLink...)
-	out = append(out, n.equalVulnLink...)
+	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks))
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.equalVulnLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -229,20 +229,4 @@ func getOsvIDFromInput(c *demoClient, input model.OSVInputSpec) (uint32, error) 
 	}
 
 	return osvIDStruct.id, nil
-}
-
-// TODO: remove
-func filterOSVID(osv *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
-	var osvID []*model.OSVId
-	for _, id := range osv.OsvIds {
-		if osvSpec.OsvID == nil || id.OsvID == strings.ToLower(*osvSpec.OsvID) {
-			osvID = append(osvID, id)
-		}
-	}
-	if len(osvID) == 0 {
-		return nil, nil
-	}
-	return &model.Osv{
-		OsvIds: osvID,
-	}, nil
 }

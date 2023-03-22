@@ -150,20 +150,24 @@ func (n *pkgNameStruct) neighbors() []uint32 {
 	return out
 }
 func (n *pkgVersionStruct) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLink)+len(n.isDependencyLink))
+	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.badLinks))
 	for _, v := range n.versions {
 		out = append(out, v.id)
 	}
-	out = append(out, n.srcMapLink...)
-	out = append(out, n.isDependencyLink...)
+	out = append(out, n.srcMapLinks...)
+	out = append(out, n.isDependencyLinks...)
+	out = append(out, n.badLinks...)
 	out = append(out, n.parent)
 	return out
 }
 func (n *pkgVersionNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLink)+len(n.isDependencyLink)+len(n.occurrences))
-	out = append(out, n.srcMapLink...)
-	out = append(out, n.isDependencyLink...)
+	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.vexLinks)+len(n.badLinks))
+	out = append(out, n.srcMapLinks...)
+	out = append(out, n.isDependencyLinks...)
 	out = append(out, n.occurrences...)
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.vexLinks...)
+	out = append(out, n.badLinks...)
 	out = append(out, n.parent)
 	return out
 }

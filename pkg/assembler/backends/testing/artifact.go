@@ -43,10 +43,12 @@ type artStruct struct {
 func (n *artStruct) getID() uint32 { return n.id }
 
 func (n *artStruct) neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences)+len(n.hasSLSAs))
+	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences)+len(n.hasSLSAs)+len(n.vexLinks)+len(n.badLinks))
 	out = append(out, n.hashEquals...)
 	out = append(out, n.occurrences...)
 	out = append(out, n.hasSLSAs...)
+	out = append(out, n.vexLinks...)
+	out = append(out, n.badLinks...)
 	return out
 }
 
@@ -54,7 +56,6 @@ func (n *artStruct) buildModelNode(c *demoClient) (model.Node, error) {
 	return c.convArtifact(n), nil
 }
 
-func (n *artStruct) getHashEquals() []uint32 { return n.hashEquals }
 func (n *artStruct) setHashEquals(id uint32) { n.hashEquals = append(n.hashEquals, id) }
 
 func (n *artStruct) setOccurrences(id uint32) { n.occurrences = append(n.occurrences, id) }

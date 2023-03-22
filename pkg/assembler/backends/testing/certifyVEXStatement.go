@@ -42,6 +42,27 @@ type vexLink struct {
 
 func (n *vexLink) getID() uint32 { return n.id }
 
+func (n *vexLink) neighbors() []uint32 {
+	out := make([]uint32, 0, 2)
+	if n.packageID != 0 {
+		out = append(out, n.packageID)
+	}
+	if n.artifactID != 0 {
+		out = append(out, n.artifactID)
+	}
+	if n.cveID != 0 {
+		out = append(out, n.cveID)
+	}
+	if n.ghsaID != 0 {
+		out = append(out, n.ghsaID)
+	}
+	return out
+}
+
+func (n *vexLink) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildCertifyVEXStatement(n, nil, true)
+}
+
 // Ingest CertifyVex
 func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
@@ -166,7 +187,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 	}
 
 	// build return GraphQL type
-	builtCertifyVex, err := buildCertifyVEXStatement(c, &collectedCertifyVexLink, nil, true)
+	builtCertifyVex, err := c.buildCertifyVEXStatement(&collectedCertifyVexLink, nil, true)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +216,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
 		if link, ok := node.(*vexLink); ok {
-			foundCertifyVex, err := buildCertifyVEXStatement(c, link, filter, true)
+			foundCertifyVex, err := c.buildCertifyVEXStatement(link, filter, true)
 			if err != nil {
 				return nil, err
 			}
@@ -220,7 +241,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			continue
 		}
 
-		foundCertifyVex, err := buildCertifyVEXStatement(c, link, filter, false)
+		foundCertifyVex, err := c.buildCertifyVEXStatement(link, filter, false)
 		if err != nil {
 			return nil, err
 		}
@@ -233,7 +254,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 	return out, nil
 }
 
-func buildCertifyVEXStatement(c *demoClient, link *vexLink, filter *model.CertifyVEXStatementSpec, ingestOrIDProvided bool) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.CertifyVEXStatementSpec, ingestOrIDProvided bool) (*model.CertifyVEXStatement, error) {
 	var p *model.Package
 	var a *model.Artifact
 	var cve *model.Cve

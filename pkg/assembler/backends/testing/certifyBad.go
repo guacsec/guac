@@ -39,6 +39,24 @@ type badLink struct {
 
 func (n *badLink) getID() uint32 { return n.id }
 
+func (n *badLink) neighbors() []uint32 {
+	out := make([]uint32, 0, 1)
+	if n.packageID != 0 {
+		out = append(out, n.packageID)
+	}
+	if n.artifactID != 0 {
+		out = append(out, n.artifactID)
+	}
+	if n.sourceID != 0 {
+		out = append(out, n.sourceID)
+	}
+	return out
+}
+
+func (n *badLink) buildModelNode(c *demoClient) (model.Node, error) {
+	return c.buildCertifyBad(n, nil, true)
+}
+
 // Ingest CertifyBad
 func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject")
@@ -129,7 +147,7 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 	}
 
 	// build return GraphQL type
-	builtCertifyBad, err := buildCertifyBad(c, &collectedCertifyBadLink, nil, true)
+	builtCertifyBad, err := c.buildCertifyBad(&collectedCertifyBadLink, nil, true)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +173,7 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 			return nil, gqlerror.Errorf("ID does not match existing node")
 		}
 		if link, ok := node.(*badLink); ok {
-			foundCertifyBad, err := buildCertifyBad(c, link, filter, true)
+			foundCertifyBad, err := c.buildCertifyBad(link, filter, true)
 			if err != nil {
 				return nil, err
 			}
@@ -177,7 +195,7 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 			continue
 		}
 
-		foundCertifyBad, err := buildCertifyBad(c, link, filter, false)
+		foundCertifyBad, err := c.buildCertifyBad(link, filter, false)
 		if err != nil {
 			return nil, err
 		}
@@ -190,7 +208,7 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 	return out, nil
 }
 
-func buildCertifyBad(c *demoClient, link *badLink, filter *model.CertifyBadSpec, ingestOrIDProvided bool) (*model.CertifyBad, error) {
+func (c *demoClient) buildCertifyBad(link *badLink, filter *model.CertifyBadSpec, ingestOrIDProvided bool) (*model.CertifyBad, error) {
 	var p *model.Package
 	var a *model.Artifact
 	var s *model.Source

@@ -81,9 +81,10 @@ func (n *cveNode) neighbors() []uint32 {
 }
 
 func (n *cveIDNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
-	out = append(out, n.certifyVulnLink...)
-	out = append(out, n.equalVulnLink...)
+	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.equalVulnLinks...)
+	out = append(out, n.vexLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -259,21 +260,4 @@ func getCveIDFromInput(c *demoClient, input model.CVEInputSpec) (uint32, error) 
 	}
 
 	return cveIDStruct.id, nil
-}
-
-// TODO: remove
-func filterCVEID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
-	var cveID []*model.CVEId
-	for _, id := range cve.CveIds {
-		if cveSpec.CveID == nil || id.ID == strings.ToLower(*cveSpec.CveID) {
-			cveID = append(cveID, id)
-		}
-	}
-	if len(cveID) == 0 {
-		return nil, nil
-	}
-	return &model.Cve{
-		Year:   cve.Year,
-		CveIds: cveID,
-	}, nil
 }
