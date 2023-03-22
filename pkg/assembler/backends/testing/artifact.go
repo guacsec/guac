@@ -37,6 +37,7 @@ type artStruct struct {
 	occurrences []uint32
 	hasSLSAs    []uint32
 	vexLinks    []uint32
+	badLinks    []uint32
 }
 
 func (n *artStruct) getID() uint32 { return n.id }
@@ -63,6 +64,9 @@ func (n *artStruct) setHasSLSAs(id uint32) { n.hasSLSAs = append(n.hasSLSAs, id)
 
 // certifyVexStatement back edges
 func (n *artStruct) setVexLinks(id uint32) { n.vexLinks = append(n.vexLinks, id) }
+
+// occurrence back edges
+func (p *artStruct) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
 
 // TODO convert to unit tests
 // func registerAllArtifacts(c *demoClient) {
@@ -190,7 +194,7 @@ func (c *demoClient) convArtifact(a *artStruct) *model.Artifact {
 	}
 }
 
-// Builds a model.Source to send as GraphQL response, starting from id.
+// Builds a model.Artifact to send as GraphQL response, starting from id.
 // The optional filter allows restricting output (on selection operations).
 func (c *demoClient) buildArtifactResponse(id uint32, filter *model.ArtifactSpec) (*model.Artifact, error) {
 	if filter != nil && filter.ID != nil {

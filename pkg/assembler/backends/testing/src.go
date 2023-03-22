@@ -84,6 +84,7 @@ type srcNameNode struct {
 	scorecardLinks []uint32
 	occurrences    []uint32
 	hasSBOMs       []uint32
+	badLinks       []uint32
 }
 
 func (n *srcNamespaceStruct) getID() uint32 { return n.id }
@@ -130,10 +131,14 @@ func (p *srcNameNode) setSrcMapLinks(id uint32) { p.srcMapLinks = append(p.srcMa
 // scorecard back edges
 func (p *srcNameNode) setScorecardLinks(id uint32) { p.scorecardLinks = append(p.scorecardLinks, id) }
 
+// occurrence back edges
 func (p *srcNameNode) setOccurrenceLinks(id uint32) { p.occurrences = append(p.occurrences, id) }
 
 func (p *srcNameNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
 func (p *srcNameNode) getHasSBOM() []uint32 { return p.hasSBOMs }
+
+// occurrence back edges
+func (p *srcNameNode) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
 
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {

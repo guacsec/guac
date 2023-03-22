@@ -42,7 +42,7 @@ type vexLink struct {
 
 func (n *vexLink) getID() uint32 { return n.id }
 
-// Ingest CertifyPkg
+// Ingest CertifyVex
 func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
 	if err != nil {
@@ -155,7 +155,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 			c.index[packageID].(*pkgVersionNode).setVexLinks(collectedCertifyVexLink.id)
 		}
 		if artifactID != 0 {
-			c.index[packageID].(*pkgVersionNode).setVexLinks(collectedCertifyVexLink.id)
+			c.index[artifactID].(*artStruct).setVexLinks(collectedCertifyVexLink.id)
 		}
 		if cveID != 0 {
 			c.index[cveID].(*cveIDNode).setVexLinks(collectedCertifyVexLink.id)
@@ -173,7 +173,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 	return builtCertifyVex, nil
 }
 
-// Query CertifyPkg
+// Query CertifyVex
 func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject)
 	if err != nil {
@@ -240,22 +240,30 @@ func buildCertifyVEXStatement(c *demoClient, link *vexLink, filter *model.Certif
 	var ghsa *model.Ghsa
 	var err error
 	if filter != nil && filter.Subject != nil {
-		p, err = c.buildPackageResponse(link.packageID, filter.Subject.Package)
-		if err != nil {
-			return nil, err
+		if filter.Subject.Package != nil && link.packageID != 0 {
+			p, err = c.buildPackageResponse(link.packageID, filter.Subject.Package)
+			if err != nil {
+				return nil, err
+			}
 		}
-		a, err = c.buildArtifactResponse(link.artifactID, filter.Subject.Artifact)
-		if err != nil {
-			return nil, err
+		if filter.Subject.Artifact != nil && link.artifactID != 0 {
+			a, err = c.buildArtifactResponse(link.artifactID, filter.Subject.Artifact)
+			if err != nil {
+				return nil, err
+			}
 		}
 	} else {
-		p, err = c.buildPackageResponse(link.packageID, nil)
-		if err != nil {
-			return nil, err
+		if link.packageID != 0 {
+			p, err = c.buildPackageResponse(link.packageID, nil)
+			if err != nil {
+				return nil, err
+			}
 		}
-		a, err = c.buildArtifactResponse(link.artifactID, nil)
-		if err != nil {
-			return nil, err
+		if link.artifactID != 0 {
+			a, err = c.buildArtifactResponse(link.artifactID, nil)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 

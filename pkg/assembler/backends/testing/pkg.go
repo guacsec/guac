@@ -100,6 +100,7 @@ type pkgVersionStruct struct {
 	versions          pkgVersionList
 	srcMapLinks       []uint32
 	isDependencyLinks []uint32
+	badLinks          []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
@@ -114,6 +115,7 @@ type pkgVersionNode struct {
 	certifyVulnLinks  []uint32
 	hasSBOMs          []uint32
 	vexLinks          []uint32
+	badLinks          []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -123,6 +125,8 @@ type pkgNameOrVersion interface {
 	getSrcMapLinks() []uint32
 	setIsDependencyLinks(id uint32)
 	getIsDependencyLinks() []uint32
+	setCertifyBadLinks(id uint32)
+	getCertifyBadLinks() []uint32
 }
 
 func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
@@ -212,6 +216,12 @@ func (p *pkgVersionNode) setVexLinks(id uint32) {
 // hasSBOM back edges
 func (p *pkgVersionNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
 func (p *pkgVersionNode) getHasSBOM() []uint32 { return p.hasSBOMs }
+
+// certifyBad back edges
+func (p *pkgVersionStruct) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
+func (p *pkgVersionNode) setCertifyBadLinks(id uint32)   { p.badLinks = append(p.badLinks, id) }
+func (p *pkgVersionStruct) getCertifyBadLinks() []uint32 { return p.badLinks }
+func (p *pkgVersionNode) getCertifyBadLinks() []uint32   { return p.badLinks }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
