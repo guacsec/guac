@@ -35,7 +35,7 @@ type scorecard struct {
 	ghToken   string
 }
 
-var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *assembler.ArtifactNode")
+var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *source.SourceNode")
 
 // CertifyComponent is a certifier that generates scorecard attestations
 func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {

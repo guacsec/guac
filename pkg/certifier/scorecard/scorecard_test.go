@@ -214,8 +214,8 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 			return &pkg.ScorecardResult{}, nil
 		}).AnyTimes()
 
-	// Create a mock ArtifactNode to use as input
-	artifact := &source.SourceNode{
+	// Create a mock source.SourceNode to use as input
+	source := &source.SourceNode{
 		Repo:   "git+myrepo",
 		Commit: "abc123",
 	}
@@ -230,7 +230,7 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	// valid input
 	docChannel := make(chan *processor.Document, 2)
 
-	err := sc.CertifyComponent(ctx, artifact, docChannel)
+	err := sc.CertifyComponent(ctx, source, docChannel)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

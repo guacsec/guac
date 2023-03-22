@@ -19,13 +19,16 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/certifier"
 )
 
 type sourceArtifacts struct {
-	client graphql.Client
+	client            graphql.Client
+	daysSinceLastScan int
 }
 
 type SourceNode struct {
@@ -40,21 +43,43 @@ func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- inte
 		return fmt.Errorf("compChan cannot be nil")
 	}
 	// TODO: specify scorecard time-scanned to determine when they are out of data and need to be re-scanned again.
-	response, err := generated.sources(ctx, s.client, nil)
+	response, err := generated.Sources(ctx, s.client, nil)
 	if err != nil {
-		return fmt.Errorf("failed to read query: %w", err)
+		return fmt.Errorf("failed sources query: %w", err)
 	}
-	sources := response.GetSourcesRequiringScorecard()
+	sources := response.GetSources()
 
 	for _, src := range sources {
 		for _, namespace := range src.Namespaces {
 			for _, names := range namespace.Names {
-				sourceNode := SourceNode{
-					Repo:   namespace.Namespace + "/" + names.Name,
-					Commit: trimAlgorithm(nilOrEmpty(names.Commit)),
-					Tag:    nilOrEmpty(names.Tag),
+				response, err := generated.Neighbors(ctx, s.client, names.Id)
+				if err != nil {
+					return fmt.Errorf("failed neighbors query: %w", err)
 				}
-				compChan <- &sourceNode
+				scoreCardFound := false
+				for _, neighbor := range response.Neighbors {
+					scorecardNode, ok := neighbor.(*generated.NeighborsNeighborsCertifyScorecard)
+					if ok {
+						if s.daysSinceLastScan != 0 {
+							now := time.Now()
+							difference := scorecardNode.Scorecard.TimeScanned.Sub(now)
+							if difference.Hours() < float64(s.daysSinceLastScan*24) {
+								scoreCardFound = true
+							}
+						} else {
+							scoreCardFound = true
+						}
+						break
+					}
+				}
+				if !scoreCardFound {
+					sourceNode := SourceNode{
+						Repo:   namespace.Namespace + "/" + names.Name,
+						Commit: trimAlgorithm(nilOrEmpty(names.Commit)),
+						Tag:    nilOrEmpty(names.Tag),
+					}
+					compChan <- &sourceNode
+				}
 			}
 		}
 	}
@@ -80,11 +105,12 @@ func trimAlgorithm(commit string) string {
 }
 
 // NewCertifier returns a new sourceArtifacts certifier
-func NewCertifier(client graphql.Client) (certifier.QueryComponents, error) {
+func NewCertifier(client graphql.Client, daysSinceLastScan int) (certifier.QueryComponents, error) {
 	if client == nil {
 		return nil, fmt.Errorf("client cannot be nil")
 	}
 	return &sourceArtifacts{
-		client: client,
+		client:            client,
+		daysSinceLastScan: daysSinceLastScan,
 	}, nil
 }
