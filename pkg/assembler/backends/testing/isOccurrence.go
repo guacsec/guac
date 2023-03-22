@@ -53,9 +53,7 @@ func (n *isOccurrenceStruct) neighbors() []uint32 {
 	if n.source != maxUint32 {
 		out = append(out, n.source)
 	}
-	if n.artifact != maxUint32 {
-		out = append(out, n.artifact)
-	}
+	out = append(out, n.artifact)
 	return out
 }
 

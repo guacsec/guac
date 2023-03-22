@@ -41,9 +41,10 @@ type artStruct struct {
 func (n *artStruct) getID() uint32 { return n.id }
 
 func (n *artStruct) neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences))
+	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences)+len(n.hasSLSAs))
 	out = append(out, n.hashEquals...)
 	out = append(out, n.occurrences...)
+	out = append(out, n.hasSLSAs...)
 	return out
 }
 
