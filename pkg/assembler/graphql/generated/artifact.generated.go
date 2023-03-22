@@ -1235,6 +1235,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestCertifyBad(ctx context.C
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyBad_id(ctx, field)
 			case "subject":
 				return ec.fieldContext_CertifyBad_subject(ctx, field)
 			case "justification":
@@ -1428,6 +1430,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestVEXStatement(ctx context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyVEXStatement_id(ctx, field)
 			case "subject":
 				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
 			case "vulnerability":
@@ -2537,6 +2541,8 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyBad_id(ctx, field)
 			case "subject":
 				return ec.fieldContext_CertifyBad_subject(ctx, field)
 			case "justification":
@@ -2730,6 +2736,8 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.C
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyVEXStatement_id(ctx, field)
 			case "subject":
 				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
 			case "vulnerability":

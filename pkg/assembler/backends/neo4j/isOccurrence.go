@@ -33,10 +33,12 @@ func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
-	queryAll, err := helper.ValidatePackageOrSourceQueryInput(isOccurrenceSpec.Subject)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix validation
+	queryAll := true
+	// queryAll, err := helper.ValidatePackageOrSourceQueryInput(isOccurrenceSpec.Subject)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	aggregateIsOccurrence := []*model.IsOccurrence{}
 

@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j/dbtype"
@@ -33,10 +32,12 @@ const (
 
 func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
-	queryAll, err := helper.ValidatePackageOrSourceQueryInput(hasSBOMSpec.Subject)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix validation
+	queryAll := true
+	// queryAll, err := helper.ValidatePackageOrSourceQueryInput(hasSBOMSpec.Subject)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()

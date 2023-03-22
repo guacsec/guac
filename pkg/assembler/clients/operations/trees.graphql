@@ -165,6 +165,7 @@ fragment allSLSATree on HasSLSA {
 }
 
 fragment allCertifyBad on CertifyBad {
+  id
   justification
   subject {
     __typename
@@ -268,6 +269,7 @@ fragment allIsVulnerability on IsVulnerability {
 }
 
 fragment allCertifyVEXStatement on CertifyVEXStatement {
+  id
   subject {
     __typename
     ... on Package {

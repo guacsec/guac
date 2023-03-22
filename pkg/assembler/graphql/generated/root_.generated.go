@@ -62,6 +62,7 @@ type ComplexityRoot struct {
 
 	CertifyBad struct {
 		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
@@ -82,6 +83,7 @@ type ComplexityRoot struct {
 
 	CertifyVEXStatement struct {
 		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
@@ -407,6 +409,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyBad.Collector(childComplexity), true
 
+	case "CertifyBad.id":
+		if e.complexity.CertifyBad.ID == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.ID(childComplexity), true
+
 	case "CertifyBad.justification":
 		if e.complexity.CertifyBad.Justification == nil {
 			break
@@ -483,6 +492,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVEXStatement.Collector(childComplexity), true
+
+	case "CertifyVEXStatement.id":
+		if e.complexity.CertifyVEXStatement.ID == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.ID(childComplexity), true
 
 	case "CertifyVEXStatement.justification":
 		if e.complexity.CertifyVEXStatement.Justification == nil {
@@ -2033,6 +2049,7 @@ collector (property) - the GUAC collector that collected the document that gener
 Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 """
 type CertifyBad {
+  id: ID!
   subject: PackageSourceOrArtifact!
   justification: String!
   origin: String!
@@ -2046,6 +2063,7 @@ For package - a PackageName or PackageVersion must be specified (name or name, v
 For source - a SourceName must be specified (name, tag or commit)
 """
 input CertifyBadSpec {
+  id: ID
   subject: PackageSourceOrArtifactSpec
   justification: String
   origin: String
@@ -2338,6 +2356,7 @@ origin (property) - where this attestation was generated from (based on which do
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
 type CertifyVEXStatement {
+  id: ID!
   subject: PackageOrArtifact!
   vulnerability: CveOrGhsa!
   justification: String!
@@ -2351,6 +2370,7 @@ CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to retu
 Only package or artifact and CVE or GHSA can be specified at once.
 """
 input CertifyVEXStatementSpec {
+  id: ID
   subject: PackageOrArtifactSpec
   vulnerability: CveOrGhsaSpec
   justification: String

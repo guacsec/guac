@@ -55,11 +55,12 @@ type ghsaNode struct {
 }
 type ghsaIDMap map[string]*ghsaIDNode
 type ghsaIDNode struct {
-	id              uint32
-	parent          uint32
-	ghsaID          string
-	certifyVulnLink []uint32
-	equalVulnLink   []uint32
+	id               uint32
+	parent           uint32
+	ghsaID           string
+	certifyVulnLinks []uint32
+	equalVulnLinks   []uint32
+	vexLinks         []uint32
 }
 
 func (n *ghsaIDNode) getID() uint32 { return n.id }
@@ -74,9 +75,10 @@ func (n *ghsaNode) neighbors() []uint32 {
 }
 
 func (n *ghsaIDNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
-	out = append(out, n.certifyVulnLink...)
-	out = append(out, n.equalVulnLink...)
+	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.equalVulnLinks...)
+	out = append(out, n.vexLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -89,16 +91,19 @@ func (n *ghsaNode) buildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // certifyVulnerability back edges
-func (n *ghsaIDNode) setVulnerabilityLink(id uint32) {
-	n.certifyVulnLink = append(n.certifyVulnLink, id)
+func (n *ghsaIDNode) setVulnerabilityLinks(id uint32) {
+	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
-func (n *ghsaIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
 
 // isVulnerability back edges
-func (n *ghsaIDNode) setEqualVulnLink(id uint32) {
-	n.equalVulnLink = append(n.equalVulnLink, id)
+func (n *ghsaIDNode) setEqualVulnLinks(id uint32) {
+	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
-func (n *ghsaIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
+
+// certifyVexStatement back edges
+func (n *ghsaIDNode) setVexLinks(id uint32) {
+	n.vexLinks = append(n.vexLinks, id)
+}
 
 // Ingest GHSA
 func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec) (*model.Ghsa, error) {
@@ -227,20 +232,4 @@ func getGhsaIDFromInput(c *demoClient, input model.GHSAInputSpec) (uint32, error
 	}
 
 	return ghsaIDStruct.id, nil
-}
-
-// TODO: remove
-func filterGHSAID(ghsa *model.Ghsa, ghsaSpec *model.GHSASpec) (*model.Ghsa, error) {
-	var ghsaID []*model.GHSAId
-	for _, id := range ghsa.GhsaIds {
-		if ghsaSpec.GhsaID == nil || id.ID == strings.ToLower(*ghsaSpec.GhsaID) {
-			ghsaID = append(ghsaID, id)
-		}
-	}
-	if len(ghsaID) == 0 {
-		return nil, nil
-	}
-	return &model.Ghsa{
-		GhsaIds: ghsaID,
-	}, nil
 }

@@ -61,11 +61,12 @@ type cveNode struct {
 }
 type cveIDMap map[string]*cveIDNode
 type cveIDNode struct {
-	id              uint32
-	parent          uint32
-	cveID           string
-	certifyVulnLink []uint32
-	equalVulnLink   []uint32
+	id               uint32
+	parent           uint32
+	cveID            string
+	certifyVulnLinks []uint32
+	equalVulnLinks   []uint32
+	vexLinks         []uint32
 }
 
 func (n *cveIDNode) getID() uint32 { return n.id }
@@ -80,9 +81,10 @@ func (n *cveNode) neighbors() []uint32 {
 }
 
 func (n *cveIDNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
-	out = append(out, n.certifyVulnLink...)
-	out = append(out, n.equalVulnLink...)
+	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.equalVulnLinks...)
+	out = append(out, n.vexLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -95,16 +97,19 @@ func (n *cveNode) buildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // certifyVulnerability back edges
-func (n *cveIDNode) setVulnerabilityLink(id uint32) {
-	n.certifyVulnLink = append(n.certifyVulnLink, id)
+func (n *cveIDNode) setVulnerabilityLinks(id uint32) {
+	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
-func (n *cveIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
 
 // isVulnerability back edges
-func (n *cveIDNode) setEqualVulnLink(id uint32) {
-	n.equalVulnLink = append(n.equalVulnLink, id)
+func (n *cveIDNode) setEqualVulnLinks(id uint32) {
+	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
-func (n *cveIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
+
+// certifyVexStatement back edges
+func (n *cveIDNode) setVexLinks(id uint32) {
+	n.vexLinks = append(n.vexLinks, id)
+}
 
 // Ingest CVE
 func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (*model.Cve, error) {
@@ -255,21 +260,4 @@ func getCveIDFromInput(c *demoClient, input model.CVEInputSpec) (uint32, error) 
 	}
 
 	return cveIDStruct.id, nil
-}
-
-// TODO: remove
-func filterCVEID(cve *model.Cve, cveSpec *model.CVESpec) (*model.Cve, error) {
-	var cveID []*model.CVEId
-	for _, id := range cve.CveIds {
-		if cveSpec.CveID == nil || id.ID == strings.ToLower(*cveSpec.CveID) {
-			cveID = append(cveID, id)
-		}
-	}
-	if len(cveID) == 0 {
-		return nil, nil
-	}
-	return &model.Cve{
-		Year:   cve.Year,
-		CveIds: cveID,
-	}, nil
 }

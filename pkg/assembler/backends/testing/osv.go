@@ -59,11 +59,11 @@ type osvNode struct {
 }
 type osvIDMap map[string]*osvIDNode
 type osvIDNode struct {
-	id              uint32
-	parent          uint32
-	osvID           string
-	certifyVulnLink []uint32
-	equalVulnLink   []uint32
+	id               uint32
+	parent           uint32
+	osvID            string
+	certifyVulnLinks []uint32
+	equalVulnLinks   []uint32
 }
 
 func (n *osvIDNode) getID() uint32 { return n.id }
@@ -78,9 +78,9 @@ func (n *osvNode) neighbors() []uint32 {
 }
 
 func (n *osvIDNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLink)+len(n.equalVulnLink))
-	out = append(out, n.certifyVulnLink...)
-	out = append(out, n.equalVulnLink...)
+	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks))
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.equalVulnLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -93,16 +93,14 @@ func (n *osvNode) buildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // certifyVulnerability back edges
-func (n *osvIDNode) setVulnerabilityLink(id uint32) {
-	n.certifyVulnLink = append(n.certifyVulnLink, id)
+func (n *osvIDNode) setVulnerabilityLinks(id uint32) {
+	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
-func (n *osvIDNode) getVulnerabilityLink() []uint32 { return n.certifyVulnLink }
 
 // isVulnerability back edges
-func (n *osvIDNode) setEqualVulnLink(id uint32) {
-	n.equalVulnLink = append(n.equalVulnLink, id)
+func (n *osvIDNode) setEqualVulnLinks(id uint32) {
+	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
-func (n *osvIDNode) gettEqualVulnLink() []uint32 { return n.equalVulnLink }
 
 // Ingest OSV
 func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (*model.Osv, error) {
@@ -231,20 +229,4 @@ func getOsvIDFromInput(c *demoClient, input model.OSVInputSpec) (uint32, error) 
 	}
 
 	return osvIDStruct.id, nil
-}
-
-// TODO: remove
-func filterOSVID(osv *model.Osv, osvSpec *model.OSVSpec) (*model.Osv, error) {
-	var osvID []*model.OSVId
-	for _, id := range osv.OsvIds {
-		if osvSpec.OsvID == nil || id.OsvID == strings.ToLower(*osvSpec.OsvID) {
-			osvID = append(osvID, id)
-		}
-	}
-	if len(osvID) == 0 {
-		return nil, nil
-	}
-	return &model.Osv{
-		OsvIds: osvID,
-	}, nil
 }

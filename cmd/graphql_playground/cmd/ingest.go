@@ -737,7 +737,63 @@ func ingestCertifyBad(ctx context.Context, client graphql.Client) {
 			Collector:     "Demo ingestion",
 		},
 	}, {
-		name: "these two dpkg packages are the same",
+		name: "artifact is associated with a malware package",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this artifact is associated with a malware package",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this package as this specific version has a malware (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		pkgMatchType: &model.MatchFlags{
+			Pkg: model.PkgMatchTypeSpecificVersion,
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this package as this specific version has a malware",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this package (all versions) is a known typo-squat (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:      "pypi",
+			Namespace: &djangoNameSpace,
+			Name:      "django",
+		},
+		pkgMatchType: &model.MatchFlags{
+			Pkg: model.PkgMatchTypeAllVersions,
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this package (all versions) is a known typo-squat",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this source repo is owned by a known attacker (duplicate)",
+		source: &model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "github.com/guacsec/guac",
+			Tag:       &sourceTag,
+		},
+		certifyBad: model.CertifyBadInputSpec{
+			Justification: "this source repo is owned by a known attacker",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "artifact is associated with a malware package (duplicate)",
 		artifact: &model.ArtifactInputSpec{
 			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 			Algorithm: "sha256",
@@ -1052,7 +1108,7 @@ func ingestIsVulnerability(ctx context.Context, client graphql.Client) {
 
 func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
-
+	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
 
@@ -1078,7 +1134,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		},
 		vexStatement: model.VexStatementInputSpec{
 			Justification: "this package is not vulnerable to this CVE",
-			KnownSince:    time.Now(),
+			KnownSince:    tm,
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
 		},
@@ -1096,7 +1152,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		},
 		vexStatement: model.VexStatementInputSpec{
 			Justification: "this package is not vulnerable to this GHSA",
-			KnownSince:    time.Now(),
+			KnownSince:    tm,
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
 		},
@@ -1112,7 +1168,7 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		},
 		vexStatement: model.VexStatementInputSpec{
 			Justification: "this artifact is not vulnerable to this CVE",
-			KnownSince:    time.Now(),
+			KnownSince:    tm,
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
 		},
@@ -1127,7 +1183,75 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		},
 		vexStatement: model.VexStatementInputSpec{
 			Justification: "this artifact is not vulnerable to this GHSA",
-			KnownSince:    time.Now(),
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this package is not vulnerable to this CVE (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		cve: &model.CVEInputSpec{
+			Year:  2019,
+			CveId: "CVE-2019-13110",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this package is not vulnerable to this CVE",
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this package is not vulnerable to this GHSA (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-h45f-rjvw-2rv2",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this package is not vulnerable to this GHSA",
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this artifact is not vulnerable to this CVE (duplicate)",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		cve: &model.CVEInputSpec{
+			Year:  2018,
+			CveId: "CVE-2018-43610",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this artifact is not vulnerable to this CVE",
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this artifact is not vulnerable to this GHSA (duplicate)",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		ghsa: &model.GHSAInputSpec{
+			GhsaId: "GHSA-hj5f-4gvw-4rv2",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this artifact is not vulnerable to this GHSA",
+			KnownSince:    tm,
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
 		},

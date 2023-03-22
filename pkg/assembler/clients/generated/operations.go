@@ -133,6 +133,9 @@ type CertifyBadArtifactIngestCertifyBad struct {
 	allCertifyBad `json:"-"`
 }
 
+// GetId returns CertifyBadArtifactIngestCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadArtifactIngestCertifyBad) GetId() string { return v.allCertifyBad.Id }
+
 // GetJustification returns CertifyBadArtifactIngestCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyBadArtifactIngestCertifyBad) GetJustification() string {
 	return v.allCertifyBad.Justification
@@ -169,6 +172,8 @@ func (v *CertifyBadArtifactIngestCertifyBad) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyBadArtifactIngestCertifyBad struct {
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
@@ -185,6 +190,7 @@ func (v *CertifyBadArtifactIngestCertifyBad) MarshalJSON() ([]byte, error) {
 func (v *CertifyBadArtifactIngestCertifyBad) __premarshalJSON() (*__premarshalCertifyBadArtifactIngestCertifyBad, error) {
 	var retval __premarshalCertifyBadArtifactIngestCertifyBad
 
+	retval.Id = v.allCertifyBad.Id
 	retval.Justification = v.allCertifyBad.Justification
 	{
 
@@ -252,6 +258,9 @@ type CertifyBadPkgIngestCertifyBad struct {
 	allCertifyBad `json:"-"`
 }
 
+// GetId returns CertifyBadPkgIngestCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadPkgIngestCertifyBad) GetId() string { return v.allCertifyBad.Id }
+
 // GetJustification returns CertifyBadPkgIngestCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyBadPkgIngestCertifyBad) GetJustification() string {
 	return v.allCertifyBad.Justification
@@ -288,6 +297,8 @@ func (v *CertifyBadPkgIngestCertifyBad) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyBadPkgIngestCertifyBad struct {
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
@@ -304,6 +315,7 @@ func (v *CertifyBadPkgIngestCertifyBad) MarshalJSON() ([]byte, error) {
 func (v *CertifyBadPkgIngestCertifyBad) __premarshalJSON() (*__premarshalCertifyBadPkgIngestCertifyBad, error) {
 	var retval __premarshalCertifyBadPkgIngestCertifyBad
 
+	retval.Id = v.allCertifyBad.Id
 	retval.Justification = v.allCertifyBad.Justification
 	{
 
@@ -431,6 +443,9 @@ type CertifyBadSrcIngestCertifyBad struct {
 	allCertifyBad `json:"-"`
 }
 
+// GetId returns CertifyBadSrcIngestCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadSrcIngestCertifyBad) GetId() string { return v.allCertifyBad.Id }
+
 // GetJustification returns CertifyBadSrcIngestCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyBadSrcIngestCertifyBad) GetJustification() string {
 	return v.allCertifyBad.Justification
@@ -467,6 +482,8 @@ func (v *CertifyBadSrcIngestCertifyBad) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalCertifyBadSrcIngestCertifyBad struct {
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
@@ -483,6 +500,7 @@ func (v *CertifyBadSrcIngestCertifyBad) MarshalJSON() ([]byte, error) {
 func (v *CertifyBadSrcIngestCertifyBad) __premarshalJSON() (*__premarshalCertifyBadSrcIngestCertifyBad, error) {
 	var retval __premarshalCertifyBadSrcIngestCertifyBad
 
+	retval.Id = v.allCertifyBad.Id
 	retval.Justification = v.allCertifyBad.Justification
 	{
 
@@ -4873,6 +4891,11 @@ type VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
 
+// GetId returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetId() string {
+	return v.allCertifyVEXStatement.Id
+}
+
 // GetSubject returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
 func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
 	return v.allCertifyVEXStatement.Subject
@@ -4929,6 +4952,8 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(b
 }
 
 type __premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement struct {
+	Id string `json:"id"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -4953,6 +4978,7 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) MarshalJSON() (
 func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement, error) {
 	var retval __premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement
 
+	retval.Id = v.allCertifyVEXStatement.Id
 	{
 
 		dst := &retval.Subject
@@ -5168,6 +5194,11 @@ type VexArtifactAndCveIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
 
+// GetId returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetId() string {
+	return v.allCertifyVEXStatement.Id
+}
+
 // GetSubject returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
 	return v.allCertifyVEXStatement.Subject
@@ -5224,6 +5255,8 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(b
 }
 
 type __premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement struct {
+	Id string `json:"id"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -5248,6 +5281,7 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) MarshalJSON() (
 func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement, error) {
 	var retval __premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement
 
+	retval.Id = v.allCertifyVEXStatement.Id
 	{
 
 		dst := &retval.Subject
@@ -5455,6 +5489,11 @@ type VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
 
+// GetId returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetId() string {
+	return v.allCertifyVEXStatement.Id
+}
+
 // GetSubject returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
 	return v.allCertifyVEXStatement.Subject
@@ -5511,6 +5550,8 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(
 }
 
 type __premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement struct {
+	Id string `json:"id"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -5535,6 +5576,7 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) MarshalJSON() 
 func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement, error) {
 	var retval __premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement
 
+	retval.Id = v.allCertifyVEXStatement.Id
 	{
 
 		dst := &retval.Subject
@@ -5759,6 +5801,11 @@ type VexPackageAndCveIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
 
+// GetId returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetId() string {
+	return v.allCertifyVEXStatement.Id
+}
+
 // GetSubject returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
 func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
 	return v.allCertifyVEXStatement.Subject
@@ -5815,6 +5862,8 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) UnmarshalJSON(b 
 }
 
 type __premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement struct {
+	Id string `json:"id"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -5839,6 +5888,7 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) MarshalJSON() ([
 func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON() (*__premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement, error) {
 	var retval __premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement
 
+	retval.Id = v.allCertifyVEXStatement.Id
 	{
 
 		dst := &retval.Subject
@@ -6330,9 +6380,13 @@ func (v *allArtifactTree) GetDigest() string { return v.Digest }
 //
 // Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 type allCertifyBad struct {
+	Id            string                                      `json:"id"`
 	Justification string                                      `json:"justification"`
 	Subject       allCertifyBadSubjectPackageSourceOrArtifact `json:"-"`
 }
+
+// GetId returns allCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyBad) GetId() string { return v.Id }
 
 // GetJustification returns allCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *allCertifyBad) GetJustification() string { return v.Justification }
@@ -6374,6 +6428,8 @@ func (v *allCertifyBad) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallCertifyBad struct {
+	Id string `json:"id"`
+
 	Justification string `json:"justification"`
 
 	Subject json.RawMessage `json:"subject"`
@@ -6390,6 +6446,7 @@ func (v *allCertifyBad) MarshalJSON() ([]byte, error) {
 func (v *allCertifyBad) __premarshalJSON() (*__premarshalallCertifyBad, error) {
 	var retval __premarshalallCertifyBad
 
+	retval.Id = v.Id
 	retval.Justification = v.Justification
 	{
 
@@ -7054,6 +7111,7 @@ func (v *allCertifyScorecardSource) __premarshalJSON() (*__premarshalallCertifyS
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type allCertifyVEXStatement struct {
+	Id            string                                         `json:"id"`
 	Subject       allCertifyVEXStatementSubjectPackageOrArtifact `json:"-"`
 	Vulnerability allCertifyVEXStatementVulnerabilityCveOrGhsa   `json:"-"`
 	Justification string                                         `json:"justification"`
@@ -7061,6 +7119,9 @@ type allCertifyVEXStatement struct {
 	Origin        string                                         `json:"origin"`
 	Collector     string                                         `json:"collector"`
 }
+
+// GetId returns allCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetId() string { return v.Id }
 
 // GetSubject returns allCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
@@ -7132,6 +7193,8 @@ func (v *allCertifyVEXStatement) UnmarshalJSON(b []byte) error {
 }
 
 type __premarshalallCertifyVEXStatement struct {
+	Id string `json:"id"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
@@ -7156,6 +7219,7 @@ func (v *allCertifyVEXStatement) MarshalJSON() ([]byte, error) {
 func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXStatement, error) {
 	var retval __premarshalallCertifyVEXStatement
 
+	retval.Id = v.Id
 	{
 
 		dst := &retval.Subject
@@ -10635,6 +10699,7 @@ fragment allArtifactTree on Artifact {
 	digest
 }
 fragment allCertifyBad on CertifyBad {
+	id
 	justification
 	subject {
 		__typename
@@ -10744,6 +10809,7 @@ fragment allPkgTree on Package {
 	}
 }
 fragment allCertifyBad on CertifyBad {
+	id
 	justification
 	subject {
 		__typename
@@ -10830,6 +10896,7 @@ fragment allSourceTree on Source {
 	}
 }
 fragment allCertifyBad on CertifyBad {
+	id
 	justification
 	subject {
 		__typename
@@ -12254,6 +12321,7 @@ fragment allGHSATree on GHSA {
 	}
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
+	id
 	subject {
 		__typename
 		... on Package {
@@ -12346,6 +12414,7 @@ fragment allCveTree on CVE {
 	}
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
+	id
 	subject {
 		__typename
 		... on Package {
@@ -12452,6 +12521,7 @@ fragment allGHSATree on GHSA {
 	}
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
+	id
 	subject {
 		__typename
 		... on Package {
@@ -12576,6 +12646,7 @@ fragment allCveTree on CVE {
 	}
 }
 fragment allCertifyVEXStatement on CertifyVEXStatement {
+	id
 	subject {
 		__typename
 		... on Package {

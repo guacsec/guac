@@ -94,34 +94,39 @@ type pkgNameStruct struct {
 }
 type pkgNameMap map[string]*pkgVersionStruct
 type pkgVersionStruct struct {
-	id               uint32
-	parent           uint32
-	name             string
-	versions         pkgVersionList
-	srcMapLink       []uint32
-	isDependencyLink []uint32
+	id                uint32
+	parent            uint32
+	name              string
+	versions          pkgVersionList
+	srcMapLinks       []uint32
+	isDependencyLinks []uint32
+	badLinks          []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
-	id               uint32
-	parent           uint32
-	version          string
-	subpath          string
-	qualifiers       map[string]string
-	srcMapLink       []uint32
-	isDependencyLink []uint32
-	occurrences      []uint32
-	certifyVulnLink  []uint32
-	hasSBOMs         []uint32
+	id                uint32
+	parent            uint32
+	version           string
+	subpath           string
+	qualifiers        map[string]string
+	srcMapLinks       []uint32
+	isDependencyLinks []uint32
+	occurrences       []uint32
+	certifyVulnLinks  []uint32
+	hasSBOMs          []uint32
+	vexLinks          []uint32
+	badLinks          []uint32
 }
 
 // Be type safe, don't use any / interface{}
 type pkgNameOrVersion interface {
 	implementsPkgNameOrVersion()
-	setSrcMapLink(id uint32)
-	getSrcMapLink() []uint32
-	setIsDependencyLink(id uint32)
-	getIsDependencyLink() []uint32
+	setSrcMapLinks(id uint32)
+	getSrcMapLinks() []uint32
+	setIsDependencyLinks(id uint32)
+	getIsDependencyLinks() []uint32
+	setCertifyBadLinks(id uint32)
+	getCertifyBadLinks() []uint32
 }
 
 func (n *pkgNamespaceStruct) getID() uint32 { return n.id }
@@ -145,20 +150,25 @@ func (n *pkgNameStruct) neighbors() []uint32 {
 	return out
 }
 func (n *pkgVersionStruct) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLink)+len(n.isDependencyLink))
+	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.badLinks))
 	for _, v := range n.versions {
 		out = append(out, v.id)
 	}
-	out = append(out, n.srcMapLink...)
-	out = append(out, n.isDependencyLink...)
+	out = append(out, n.srcMapLinks...)
+	out = append(out, n.isDependencyLinks...)
+	out = append(out, n.badLinks...)
 	out = append(out, n.parent)
 	return out
 }
 func (n *pkgVersionNode) neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLink)+len(n.isDependencyLink)+len(n.occurrences))
-	out = append(out, n.srcMapLink...)
-	out = append(out, n.isDependencyLink...)
+	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks))
+	out = append(out, n.srcMapLinks...)
+	out = append(out, n.isDependencyLinks...)
 	out = append(out, n.occurrences...)
+	out = append(out, n.certifyVulnLinks...)
+	out = append(out, n.hasSBOMs...)
+	out = append(out, n.vexLinks...)
+	out = append(out, n.badLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -180,34 +190,43 @@ func (p *pkgVersionStruct) implementsPkgNameOrVersion() {}
 func (p *pkgVersionNode) implementsPkgNameOrVersion()   {}
 
 // hasSourceAt back edges
-func (p *pkgVersionStruct) setSrcMapLink(id uint32) { p.srcMapLink = append(p.srcMapLink, id) }
-func (p *pkgVersionNode) setSrcMapLink(id uint32)   { p.srcMapLink = append(p.srcMapLink, id) }
-func (p *pkgVersionStruct) getSrcMapLink() []uint32 { return p.srcMapLink }
-func (p *pkgVersionNode) getSrcMapLink() []uint32   { return p.srcMapLink }
+func (p *pkgVersionStruct) setSrcMapLinks(id uint32) { p.srcMapLinks = append(p.srcMapLinks, id) }
+func (p *pkgVersionNode) setSrcMapLinks(id uint32)   { p.srcMapLinks = append(p.srcMapLinks, id) }
+func (p *pkgVersionStruct) getSrcMapLinks() []uint32 { return p.srcMapLinks }
+func (p *pkgVersionNode) getSrcMapLinks() []uint32   { return p.srcMapLinks }
 
 // isDependency back edges
-func (p *pkgVersionStruct) setIsDependencyLink(id uint32) {
-	p.isDependencyLink = append(p.isDependencyLink, id)
+func (p *pkgVersionStruct) setIsDependencyLinks(id uint32) {
+	p.isDependencyLinks = append(p.isDependencyLinks, id)
 }
-func (p *pkgVersionNode) setIsDependencyLink(id uint32) {
-	p.isDependencyLink = append(p.isDependencyLink, id)
+func (p *pkgVersionNode) setIsDependencyLinks(id uint32) {
+	p.isDependencyLinks = append(p.isDependencyLinks, id)
 }
-func (p *pkgVersionStruct) getIsDependencyLink() []uint32 { return p.isDependencyLink }
-func (p *pkgVersionNode) getIsDependencyLink() []uint32   { return p.isDependencyLink }
+func (p *pkgVersionStruct) getIsDependencyLinks() []uint32 { return p.isDependencyLinks }
+func (p *pkgVersionNode) getIsDependencyLinks() []uint32   { return p.isDependencyLinks }
 
 // isOccurrence back edges
-func (p *pkgVersionNode) setOccurrenceLink(id uint32) { p.occurrences = append(p.occurrences, id) }
-func (p *pkgVersionNode) getOccurrenceLink() []uint32 { return p.occurrences }
+func (p *pkgVersionNode) setOccurrenceLinks(id uint32) { p.occurrences = append(p.occurrences, id) }
 
 // certifyVulnerability back edges
-func (p *pkgVersionNode) setVulnerabilityLink(id uint32) {
-	p.certifyVulnLink = append(p.certifyVulnLink, id)
+func (p *pkgVersionNode) setVulnerabilityLinks(id uint32) {
+	p.certifyVulnLinks = append(p.certifyVulnLinks, id)
 }
-func (p *pkgVersionNode) getVulnerabilityLink() []uint32 { return p.certifyVulnLink }
+
+// certifyVexStatement back edges
+func (p *pkgVersionNode) setVexLinks(id uint32) {
+	p.vexLinks = append(p.vexLinks, id)
+}
 
 // hasSBOM back edges
 func (p *pkgVersionNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
 func (p *pkgVersionNode) getHasSBOM() []uint32 { return p.hasSBOMs }
+
+// certifyBad back edges
+func (p *pkgVersionStruct) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
+func (p *pkgVersionNode) setCertifyBadLinks(id uint32)   { p.badLinks = append(p.badLinks, id) }
+func (p *pkgVersionStruct) getCertifyBadLinks() []uint32 { return p.badLinks }
+func (p *pkgVersionNode) getCertifyBadLinks() []uint32   { return p.badLinks }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {

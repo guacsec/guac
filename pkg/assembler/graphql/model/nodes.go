@@ -151,6 +151,7 @@ type CVESpec struct {
 //
 // Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 type CertifyBad struct {
+	ID            string                  `json:"id"`
 	Subject       PackageSourceOrArtifact `json:"subject"`
 	Justification string                  `json:"justification"`
 	Origin        string                  `json:"origin"`
@@ -173,6 +174,7 @@ type CertifyBadInputSpec struct {
 // For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
 // For source - a SourceName must be specified (name, tag or commit)
 type CertifyBadSpec struct {
+	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
@@ -247,6 +249,7 @@ type CertifyScorecardSpec struct {
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type CertifyVEXStatement struct {
+	ID            string            `json:"id"`
 	Subject       PackageOrArtifact `json:"subject"`
 	Vulnerability CveOrGhsa         `json:"vulnerability"`
 	Justification string            `json:"justification"`
@@ -260,6 +263,7 @@ func (CertifyVEXStatement) IsNode() {}
 // CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
 // Only package or artifact and CVE or GHSA can be specified at once.
 type CertifyVEXStatementSpec struct {
+	ID            *string                `json:"id,omitempty"`
 	Subject       *PackageOrArtifactSpec `json:"subject,omitempty"`
 	Vulnerability *CveOrGhsaSpec         `json:"vulnerability,omitempty"`
 	Justification *string                `json:"justification,omitempty"`

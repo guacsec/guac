@@ -30,15 +30,19 @@ import (
 
 func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 
-	querySubjectAll, err := helper.ValidatePackageOrArtifactQueryInput(certifyVEXStatementSpec.Subject)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix validation
+	querySubjectAll := true
+	// querySubjectAll, err := helper.ValidatePackageOrArtifactQueryInput(certifyVEXStatementSpec.Subject)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	queryVulnAll, err := helper.ValidateCveOrGhsaQueryInput(certifyVEXStatementSpec.Vulnerability)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix validation
+	queryVulnAll := true
+	// queryVulnAll, err := helper.ValidateCveOrGhsaQueryInput(certifyVEXStatementSpec.Vulnerability)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	queryAll := false
 	if querySubjectAll && queryVulnAll {

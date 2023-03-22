@@ -1,13 +1,18 @@
 fragment allCertifyVEXStatementTree on CertifyVEXStatement {
+  id
   subject {
     __typename
     ... on Package {
+      id
       type
       namespaces {
+        id
         namespace
         names {
+          id
           name
           versions {
+            id
             version
             qualifiers {
               key
@@ -19,6 +24,7 @@ fragment allCertifyVEXStatementTree on CertifyVEXStatement {
       }
     }
     ... on Artifact {
+      id
       algorithm
       digest
     }
@@ -26,14 +32,18 @@ fragment allCertifyVEXStatementTree on CertifyVEXStatement {
   vulnerability {
     __typename
     ... on CVE {
+      id
       year
       cveIds {
         id
+        cveId
       }
     }
     ... on GHSA {
+      id
       ghsaIds {
         id
+        ghsaId
       }
     }
   }

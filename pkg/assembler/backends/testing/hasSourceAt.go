@@ -65,12 +65,12 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	packageHasSourceLinks := []uint32{}
 	pkgNameOrVersionNode, ok := c.index[packageID].(pkgNameOrVersion)
 	if ok {
-		packageHasSourceLinks = append(packageHasSourceLinks, pkgNameOrVersionNode.getSrcMapLink()...)
+		packageHasSourceLinks = append(packageHasSourceLinks, pkgNameOrVersionNode.getSrcMapLinks()...)
 	}
 	sourceHasSourceLinks := []uint32{}
 	srcName, ok := c.index[sourceID].(*srcNameNode)
 	if ok {
-		sourceHasSourceLinks = append(sourceHasSourceLinks, srcName.srcMapLink...)
+		sourceHasSourceLinks = append(sourceHasSourceLinks, srcName.srcMapLinks...)
 	}
 
 	searchIDs := []uint32{}
@@ -106,8 +106,8 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		c.index[collectedSrcMapLink.id] = &collectedSrcMapLink
 		c.hasSources = append(c.hasSources, &collectedSrcMapLink)
 		// set the backlinks
-		c.index[packageID].(pkgNameOrVersion).setSrcMapLink(collectedSrcMapLink.id)
-		c.index[sourceID].(*srcNameNode).setSrcMapLink(collectedSrcMapLink.id)
+		c.index[packageID].(pkgNameOrVersion).setSrcMapLinks(collectedSrcMapLink.id)
+		c.index[sourceID].(*srcNameNode).setSrcMapLinks(collectedSrcMapLink.id)
 	}
 
 	// build return GraphQL type

@@ -94,8 +94,8 @@ func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.Artifac
 	sort.Slice(artIDs, func(i, j int) bool { return artIDs[i] < artIDs[j] })
 
 	// Search backedges for existing.
-	searchHEs := slices.Clone(aInt1.getHashEquals())
-	searchHEs = append(searchHEs, aInt2.getHashEquals()...)
+	searchHEs := slices.Clone(aInt1.hashEquals)
+	searchHEs = append(searchHEs, aInt2.hashEquals...)
 
 	for _, he := range searchHEs {
 		h, err := c.hashEqualByID(he)

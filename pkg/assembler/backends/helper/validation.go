@@ -37,9 +37,9 @@ func ValidateOsvCveOrGhsaIngestionInput(vulnerability model.OsvCveOrGhsaInput) e
 	return nil
 }
 
-func ValidateOsvCveOrGhsaQueryInput(vulnerability *model.OsvCveOrGhsaSpec) (bool, error) {
+func ValidateOsvCveOrGhsaQueryFilter(vulnerability *model.OsvCveOrGhsaSpec) error {
 	if vulnerability == nil {
-		return true, nil
+		return nil
 	} else {
 		vulnDefined := 0
 		if vulnerability.Osv != nil {
@@ -52,10 +52,10 @@ func ValidateOsvCveOrGhsaQueryInput(vulnerability *model.OsvCveOrGhsaSpec) (bool
 			vulnDefined = vulnDefined + 1
 		}
 		if vulnDefined != 1 {
-			return false, gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
+			return gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")
 		}
 	}
-	return false, nil
+	return nil
 }
 
 func ValidateCveOrGhsaIngestionInput(cveOrGhsa model.CveOrGhsaInput, path string) error {
@@ -72,9 +72,9 @@ func ValidateCveOrGhsaIngestionInput(cveOrGhsa model.CveOrGhsaInput, path string
 	return nil
 }
 
-func ValidateCveOrGhsaQueryInput(cveOrGhsa *model.CveOrGhsaSpec) (bool, error) {
+func ValidateCveOrGhsaQueryFilter(cveOrGhsa *model.CveOrGhsaSpec) error {
 	if cveOrGhsa == nil {
-		return true, nil
+		return nil
 	} else {
 		vulnDefined := 0
 		if cveOrGhsa.Ghsa != nil {
@@ -84,15 +84,15 @@ func ValidateCveOrGhsaQueryInput(cveOrGhsa *model.CveOrGhsaSpec) (bool, error) {
 			vulnDefined = vulnDefined + 1
 		}
 		if vulnDefined != 1 {
-			return false, gqlerror.Errorf("Must specify at most one vulnerability (cve, or ghsa)")
+			return gqlerror.Errorf("Must specify at most one vulnerability (cve, or ghsa)")
 		}
 	}
-	return false, nil
+	return nil
 }
 
-func ValidatePackageSourceOrArtifactQueryInput(subject *model.PackageSourceOrArtifactSpec) (bool, error) {
+func ValidatePackageSourceOrArtifactQueryFilter(subject *model.PackageSourceOrArtifactSpec) error {
 	if subject == nil {
-		return true, nil
+		return nil
 	} else {
 		subjectDefined := 0
 		if subject.Package != nil {
@@ -105,10 +105,10 @@ func ValidatePackageSourceOrArtifactQueryInput(subject *model.PackageSourceOrArt
 			subjectDefined = subjectDefined + 1
 		}
 		if subjectDefined != 1 {
-			return false, gqlerror.Errorf("must specify at most one subject (package, source, or artifact)")
+			return gqlerror.Errorf("must specify at most one subject (package, source, or artifact)")
 		}
 	}
-	return false, nil
+	return nil
 }
 
 func ValidatePackageSourceOrArtifactInput(item *model.PackageSourceOrArtifactInput, path string) error {
@@ -144,9 +144,9 @@ func ValidatePackageOrSourceInput(item *model.PackageOrSourceInput, path string)
 	return nil
 }
 
-func ValidatePackageOrSourceQueryInput(subject *model.PackageOrSourceSpec) (bool, error) {
+func ValidatePackageOrSourceQueryFilter(subject *model.PackageOrSourceSpec) error {
 	if subject == nil {
-		return true, nil
+		return nil
 	} else {
 		subjectDefined := 0
 		if subject.Package != nil {
@@ -156,10 +156,10 @@ func ValidatePackageOrSourceQueryInput(subject *model.PackageOrSourceSpec) (bool
 			subjectDefined = subjectDefined + 1
 		}
 		if subjectDefined != 1 {
-			return false, gqlerror.Errorf("must specify at most one subject (package or source)")
+			return gqlerror.Errorf("must specify at most one subject (package or source)")
 		}
 	}
-	return false, nil
+	return nil
 }
 
 func ValidatePackageOrArtifactInput(item *model.PackageOrArtifactInput, path string) error {
@@ -177,9 +177,9 @@ func ValidatePackageOrArtifactInput(item *model.PackageOrArtifactInput, path str
 	return nil
 }
 
-func ValidatePackageOrArtifactQueryInput(subject *model.PackageOrArtifactSpec) (bool, error) {
+func ValidatePackageOrArtifactQueryFilter(subject *model.PackageOrArtifactSpec) error {
 	if subject == nil {
-		return true, nil
+		return nil
 	} else {
 		subjectDefined := 0
 		if subject.Package != nil {
@@ -189,8 +189,8 @@ func ValidatePackageOrArtifactQueryInput(subject *model.PackageOrArtifactSpec) (
 			subjectDefined = subjectDefined + 1
 		}
 		if subjectDefined != 1 {
-			return false, gqlerror.Errorf("must specify at most one subject (package or artifact)")
+			return gqlerror.Errorf("must specify at most one subject (package or artifact)")
 		}
 	}
-	return false, nil
+	return nil
 }
