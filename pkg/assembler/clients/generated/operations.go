@@ -4111,6 +4111,2238 @@ type MatchFlags struct {
 // GetPkg returns MatchFlags.Pkg, and is useful for accessing the field via an interface.
 func (v *MatchFlags) GetPkg() PkgMatchType { return v.Pkg }
 
+// NeighborsNeighborsArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type NeighborsNeighborsArtifact struct {
+	Typename        *string `json:"__typename"`
+	allArtifactTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsArtifact.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsArtifact) GetId() string { return v.allArtifactTree.Id }
+
+// GetAlgorithm returns NeighborsNeighborsArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns NeighborsNeighborsArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *NeighborsNeighborsArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *NeighborsNeighborsArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsArtifact) __premarshalJSON() (*__premarshalNeighborsNeighborsArtifact, error) {
+	var retval __premarshalNeighborsNeighborsArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// NeighborsNeighborsBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder such as (FRSCA or github actions).
+//
+// Currently builders are identified by the `uri` field, which is mandatory.
+type NeighborsNeighborsBuilder struct {
+	Typename       *string `json:"__typename"`
+	allBuilderTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsBuilder.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsBuilder) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsBuilder.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsBuilder) GetId() string { return v.allBuilderTree.Id }
+
+// GetUri returns NeighborsNeighborsBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsBuilder) GetUri() string { return v.allBuilderTree.Uri }
+
+func (v *NeighborsNeighborsBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsBuilder struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *NeighborsNeighborsBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsBuilder) __premarshalJSON() (*__premarshalNeighborsNeighborsBuilder, error) {
+	var retval __premarshalNeighborsNeighborsBuilder
+
+	retval.Typename = v.Typename
+	retval.Id = v.allBuilderTree.Id
+	retval.Uri = v.allBuilderTree.Uri
+	return &retval, nil
+}
+
+// NeighborsNeighborsCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// The year is mandatory.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `year` value.
+type NeighborsNeighborsCVE struct {
+	Typename   *string `json:"__typename"`
+	allCveTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsCVE.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCVE) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsCVE.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCVE) GetId() string { return v.allCveTree.Id }
+
+// GetYear returns NeighborsNeighborsCVE.Year, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCVE) GetYear() int { return v.allCveTree.Year }
+
+// GetCveIds returns NeighborsNeighborsCVE.CveIds, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCVE) GetCveIds() []allCveTreeCveIdsCVEId { return v.allCveTree.CveIds }
+
+func (v *NeighborsNeighborsCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsCVE struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Year int `json:"year"`
+
+	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
+}
+
+func (v *NeighborsNeighborsCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsCVE) __premarshalJSON() (*__premarshalNeighborsNeighborsCVE, error) {
+	var retval __premarshalNeighborsNeighborsCVE
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCveTree.Id
+	retval.Year = v.allCveTree.Year
+	retval.CveIds = v.allCveTree.CveIds
+	return &retval, nil
+}
+
+// NeighborsNeighborsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// # CertifyBad is an attestation represents when a package, source or artifact is considered bad
+//
+// subject - union type that can be either a package, source or artifact object type
+// justification (property) - string value representing why the subject is considered bad
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+type NeighborsNeighborsCertifyBad struct {
+	Typename      *string `json:"__typename"`
+	allCertifyBad `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsCertifyBad.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyBad) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyBad) GetId() string { return v.allCertifyBad.Id }
+
+// GetJustification returns NeighborsNeighborsCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyBad) GetJustification() string {
+	return v.allCertifyBad.Justification
+}
+
+// GetSubject returns NeighborsNeighborsCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyBad) GetSubject() allCertifyBadSubjectPackageSourceOrArtifact {
+	return v.allCertifyBad.Subject
+}
+
+func (v *NeighborsNeighborsCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsCertifyBad struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+}
+
+func (v *NeighborsNeighborsCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsCertifyBad) __premarshalJSON() (*__premarshalNeighborsNeighborsCertifyBad, error) {
+	var retval __premarshalNeighborsNeighborsCertifyBad
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyBad.Id
+	retval.Justification = v.allCertifyBad.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyBad.Subject
+		var err error
+		*dst, err = __marshalallCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsCertifyBad.allCertifyBad.Subject: %w", err)
+		}
+	}
+	return &retval, nil
+}
+
+// NeighborsNeighborsCertifyPkg includes the requested fields of the GraphQL type CertifyPkg.
+// The GraphQL type's documentation follows.
+//
+// # CertifyPkg is an attestation that represents when a package objects are similar
+//
+// packages (subject) - list of package objects
+// justification (property) - string value representing why the packages are similar
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type NeighborsNeighborsCertifyPkg struct {
+	Typename      *string `json:"__typename"`
+	allCertifyPkg `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsCertifyPkg.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyPkg) GetTypename() *string { return v.Typename }
+
+// GetJustification returns NeighborsNeighborsCertifyPkg.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyPkg) GetJustification() string {
+	return v.allCertifyPkg.Justification
+}
+
+// GetPackages returns NeighborsNeighborsCertifyPkg.Packages, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyPkg) GetPackages() []allCertifyPkgPackagesPackage {
+	return v.allCertifyPkg.Packages
+}
+
+// GetOrigin returns NeighborsNeighborsCertifyPkg.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyPkg) GetOrigin() string { return v.allCertifyPkg.Origin }
+
+// GetCollector returns NeighborsNeighborsCertifyPkg.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyPkg) GetCollector() string { return v.allCertifyPkg.Collector }
+
+func (v *NeighborsNeighborsCertifyPkg) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsCertifyPkg
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsCertifyPkg = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyPkg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsCertifyPkg struct {
+	Typename *string `json:"__typename"`
+
+	Justification string `json:"justification"`
+
+	Packages []allCertifyPkgPackagesPackage `json:"packages"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsCertifyPkg) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsCertifyPkg) __premarshalJSON() (*__premarshalNeighborsNeighborsCertifyPkg, error) {
+	var retval __premarshalNeighborsNeighborsCertifyPkg
+
+	retval.Typename = v.Typename
+	retval.Justification = v.allCertifyPkg.Justification
+	retval.Packages = v.allCertifyPkg.Packages
+	retval.Origin = v.allCertifyPkg.Origin
+	retval.Collector = v.allCertifyPkg.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecard is an attestation which represents the scorecard of a
+// particular source repository.
+type NeighborsNeighborsCertifyScorecard struct {
+	Typename            *string `json:"__typename"`
+	allCertifyScorecard `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsCertifyScorecard.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyScorecard) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyScorecard) GetId() string { return v.allCertifyScorecard.Id }
+
+// GetSource returns NeighborsNeighborsCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyScorecard) GetSource() allCertifyScorecardSource {
+	return v.allCertifyScorecard.Source
+}
+
+// GetScorecard returns NeighborsNeighborsCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyScorecard) GetScorecard() allCertifyScorecardScorecard {
+	return v.allCertifyScorecard.Scorecard
+}
+
+func (v *NeighborsNeighborsCertifyScorecard) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsCertifyScorecard
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsCertifyScorecard = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyScorecard)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsCertifyScorecard struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Source allCertifyScorecardSource `json:"source"`
+
+	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
+}
+
+func (v *NeighborsNeighborsCertifyScorecard) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsCertifyScorecard) __premarshalJSON() (*__premarshalNeighborsNeighborsCertifyScorecard, error) {
+	var retval __premarshalNeighborsNeighborsCertifyScorecard
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyScorecard.Id
+	retval.Source = v.allCertifyScorecard.Source
+	retval.Scorecard = v.allCertifyScorecard.Scorecard
+	return &retval, nil
+}
+
+// NeighborsNeighborsCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// subject - union type that represents a package or artifact
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - justification for VEX
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type NeighborsNeighborsCertifyVEXStatement struct {
+	Typename               *string `json:"__typename"`
+	allCertifyVEXStatement `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsCertifyVEXStatement.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetId() string { return v.allCertifyVEXStatement.Id }
+
+// GetSubject returns NeighborsNeighborsCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.allCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns NeighborsNeighborsCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityCveOrGhsa {
+	return v.allCertifyVEXStatement.Vulnerability
+}
+
+// GetJustification returns NeighborsNeighborsCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetJustification() string {
+	return v.allCertifyVEXStatement.Justification
+}
+
+// GetKnownSince returns NeighborsNeighborsCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.allCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns NeighborsNeighborsCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetOrigin() string {
+	return v.allCertifyVEXStatement.Origin
+}
+
+// GetCollector returns NeighborsNeighborsCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetCollector() string {
+	return v.allCertifyVEXStatement.Collector
+}
+
+func (v *NeighborsNeighborsCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsCertifyVEXStatement struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsCertifyVEXStatement) __premarshalJSON() (*__premarshalNeighborsNeighborsCertifyVEXStatement, error) {
+	var retval __premarshalNeighborsNeighborsCertifyVEXStatement
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVEXStatement.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
+	retval.Origin = v.allCertifyVEXStatement.Origin
+	retval.Collector = v.allCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation that represents when a package has a vulnerability
+type NeighborsNeighborsCertifyVuln struct {
+	Typename       *string `json:"__typename"`
+	allCertifyVuln `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsCertifyVuln.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVuln) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVuln) GetId() string { return v.allCertifyVuln.Id }
+
+// GetPackage returns NeighborsNeighborsCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVuln) GetPackage() allCertifyVulnPackage {
+	return v.allCertifyVuln.Package
+}
+
+// GetVulnerability returns NeighborsNeighborsCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveOrGhsa {
+	return v.allCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns NeighborsNeighborsCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVuln) GetMetadata() allCertifyVulnMetadataVulnerabilityMetaData {
+	return v.allCertifyVuln.Metadata
+}
+
+func (v *NeighborsNeighborsCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsCertifyVuln struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Package allCertifyVulnPackage `json:"package"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+}
+
+func (v *NeighborsNeighborsCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsCertifyVuln) __premarshalJSON() (*__premarshalNeighborsNeighborsCertifyVuln, error) {
+	var retval __premarshalNeighborsNeighborsCertifyVuln
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyVuln.Id
+	retval.Package = v.allCertifyVuln.Package
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVuln.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsCertifyVuln.allCertifyVuln.Vulnerability: %w", err)
+		}
+	}
+	retval.Metadata = v.allCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// NeighborsNeighborsGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// We create a separate node to allow retrieving all GHSAs.
+type NeighborsNeighborsGHSA struct {
+	Typename    *string `json:"__typename"`
+	allGHSATree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsGHSA.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsGHSA) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsGHSA.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsGHSA) GetId() string { return v.allGHSATree.Id }
+
+// GetGhsaIds returns NeighborsNeighborsGHSA.GhsaIds, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsGHSA) GetGhsaIds() []allGHSATreeGhsaIdsGHSAId {
+	return v.allGHSATree.GhsaIds
+}
+
+func (v *NeighborsNeighborsGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsGHSA struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	GhsaIds []allGHSATreeGhsaIdsGHSAId `json:"ghsaIds"`
+}
+
+func (v *NeighborsNeighborsGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsGHSA) __premarshalJSON() (*__premarshalNeighborsNeighborsGHSA, error) {
+	var retval __premarshalNeighborsNeighborsGHSA
+
+	retval.Typename = v.Typename
+	retval.Id = v.allGHSATree.Id
+	retval.GhsaIds = v.allGHSATree.GhsaIds
+	return &retval, nil
+}
+
+// NeighborsNeighborsHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+// The GraphQL type's documentation follows.
+//
+// # HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+//
+// subject - union type that can be either a package or source object type
+// uri (property) - identifier string for the SBOM
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Only package object or source object can be defined. Not both.
+type NeighborsNeighborsHasSBOM struct {
+	Typename       *string `json:"__typename"`
+	allHasSBOMTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsHasSBOM.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
+
+// GetUri returns NeighborsNeighborsHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
+
+// GetSubject returns NeighborsNeighborsHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+	return v.allHasSBOMTree.Subject
+}
+
+// GetOrigin returns NeighborsNeighborsHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
+
+// GetCollector returns NeighborsNeighborsHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetCollector() string { return v.allHasSBOMTree.Collector }
+
+func (v *NeighborsNeighborsHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsHasSBOM struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNeighborsHasSBOM, error) {
+	var retval __premarshalNeighborsNeighborsHasSBOM
+
+	retval.Typename = v.Typename
+	retval.Id = v.allHasSBOMTree.Id
+	retval.Uri = v.allHasSBOMTree.Uri
+	{
+
+		dst := &retval.Subject
+		src := v.allHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsHasSBOM.allHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.allHasSBOMTree.Origin
+	retval.Collector = v.allHasSBOMTree.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsHasSLSA includes the requested fields of the GraphQL type HasSLSA.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type NeighborsNeighborsHasSLSA struct {
+	Typename    *string `json:"__typename"`
+	allSLSATree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsHasSLSA.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSLSA) GetTypename() *string { return v.Typename }
+
+// GetSubject returns NeighborsNeighborsHasSLSA.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSLSA) GetSubject() allSLSATreeSubjectArtifact {
+	return v.allSLSATree.Subject
+}
+
+// GetSlsa returns NeighborsNeighborsHasSLSA.Slsa, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSLSA) GetSlsa() *allSLSATreeSlsaSLSA { return v.allSLSATree.Slsa }
+
+func (v *NeighborsNeighborsHasSLSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsHasSLSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsHasSLSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSLSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsHasSLSA struct {
+	Typename *string `json:"__typename"`
+
+	Subject allSLSATreeSubjectArtifact `json:"subject"`
+
+	Slsa *allSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+func (v *NeighborsNeighborsHasSLSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsHasSLSA) __premarshalJSON() (*__premarshalNeighborsNeighborsHasSLSA, error) {
+	var retval __premarshalNeighborsNeighborsHasSLSA
+
+	retval.Typename = v.Typename
+	retval.Subject = v.allSLSATree.Subject
+	retval.Slsa = v.allSLSATree.Slsa
+	return &retval, nil
+}
+
+// NeighborsNeighborsHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// # HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+//
+// package (subject) - the package object type that represents the package
+// source (object) - the source object type that represents the source
+// knownSince (property) - timestamp when this was last checked (exact time)
+// justification (property) - string value representing why the package has a source specified
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type NeighborsNeighborsHasSourceAt struct {
+	Typename       *string `json:"__typename"`
+	allHasSourceAt `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsHasSourceAt.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetId() string { return v.allHasSourceAt.Id }
+
+// GetJustification returns NeighborsNeighborsHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetJustification() string {
+	return v.allHasSourceAt.Justification
+}
+
+// GetKnownSince returns NeighborsNeighborsHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetKnownSince() time.Time { return v.allHasSourceAt.KnownSince }
+
+// GetPackage returns NeighborsNeighborsHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetPackage() allHasSourceAtPackage {
+	return v.allHasSourceAt.Package
+}
+
+// GetSource returns NeighborsNeighborsHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetSource() allHasSourceAtSource {
+	return v.allHasSourceAt.Source
+}
+
+// GetOrigin returns NeighborsNeighborsHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetOrigin() string { return v.allHasSourceAt.Origin }
+
+// GetCollector returns NeighborsNeighborsHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSourceAt) GetCollector() string { return v.allHasSourceAt.Collector }
+
+func (v *NeighborsNeighborsHasSourceAt) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsHasSourceAt
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsHasSourceAt = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSourceAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsHasSourceAt struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Package allHasSourceAtPackage `json:"package"`
+
+	Source allHasSourceAtSource `json:"source"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsHasSourceAt) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsHasSourceAt) __premarshalJSON() (*__premarshalNeighborsNeighborsHasSourceAt, error) {
+	var retval __premarshalNeighborsNeighborsHasSourceAt
+
+	retval.Typename = v.Typename
+	retval.Id = v.allHasSourceAt.Id
+	retval.Justification = v.allHasSourceAt.Justification
+	retval.KnownSince = v.allHasSourceAt.KnownSince
+	retval.Package = v.allHasSourceAt.Package
+	retval.Source = v.allHasSourceAt.Source
+	retval.Origin = v.allHasSourceAt.Origin
+	retval.Collector = v.allHasSourceAt.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsHashEqual includes the requested fields of the GraphQL type HashEqual.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
+//
+// artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type NeighborsNeighborsHashEqual struct {
+	Typename         *string `json:"__typename"`
+	allHashEqualTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsHashEqual.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHashEqual) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsHashEqual.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHashEqual) GetId() string { return v.allHashEqualTree.Id }
+
+// GetJustification returns NeighborsNeighborsHashEqual.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHashEqual) GetJustification() string {
+	return v.allHashEqualTree.Justification
+}
+
+// GetArtifacts returns NeighborsNeighborsHashEqual.Artifacts, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHashEqual) GetArtifacts() []allHashEqualTreeArtifactsArtifact {
+	return v.allHashEqualTree.Artifacts
+}
+
+// GetOrigin returns NeighborsNeighborsHashEqual.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHashEqual) GetOrigin() string { return v.allHashEqualTree.Origin }
+
+// GetCollector returns NeighborsNeighborsHashEqual.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHashEqual) GetCollector() string { return v.allHashEqualTree.Collector }
+
+func (v *NeighborsNeighborsHashEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsHashEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsHashEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHashEqualTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsHashEqual struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Artifacts []allHashEqualTreeArtifactsArtifact `json:"artifacts"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsHashEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsHashEqual) __premarshalJSON() (*__premarshalNeighborsNeighborsHashEqual, error) {
+	var retval __premarshalNeighborsNeighborsHashEqual
+
+	retval.Typename = v.Typename
+	retval.Id = v.allHashEqualTree.Id
+	retval.Justification = v.allHashEqualTree.Justification
+	retval.Artifacts = v.allHashEqualTree.Artifacts
+	retval.Origin = v.allHashEqualTree.Origin
+	retval.Collector = v.allHashEqualTree.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// # IsDependency is an attestation that represents when a package is dependent on another package
+//
+// package (subject) - the package object type that represents the package
+// dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
+// versionRange (property) - string value for version range that applies to the dependent package
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type NeighborsNeighborsIsDependency struct {
+	Typename            *string `json:"__typename"`
+	allIsDependencyTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsIsDependency.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetId() string { return v.allIsDependencyTree.Id }
+
+// GetJustification returns NeighborsNeighborsIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetJustification() string {
+	return v.allIsDependencyTree.Justification
+}
+
+// GetPackage returns NeighborsNeighborsIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetPackage() allIsDependencyTreePackage {
+	return v.allIsDependencyTree.Package
+}
+
+// GetDependentPackage returns NeighborsNeighborsIsDependency.DependentPackage, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
+	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetVersionRange returns NeighborsNeighborsIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetVersionRange() string {
+	return v.allIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns NeighborsNeighborsIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetOrigin() string { return v.allIsDependencyTree.Origin }
+
+// GetCollector returns NeighborsNeighborsIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetCollector() string {
+	return v.allIsDependencyTree.Collector
+}
+
+func (v *NeighborsNeighborsIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsIsDependency struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package allIsDependencyTreePackage `json:"package"`
+
+	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsIsDependency) __premarshalJSON() (*__premarshalNeighborsNeighborsIsDependency, error) {
+	var retval __premarshalNeighborsNeighborsIsDependency
+
+	retval.Typename = v.Typename
+	retval.Id = v.allIsDependencyTree.Id
+	retval.Justification = v.allIsDependencyTree.Justification
+	retval.Package = v.allIsDependencyTree.Package
+	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.VersionRange = v.allIsDependencyTree.VersionRange
+	retval.Origin = v.allIsDependencyTree.Origin
+	retval.Collector = v.allIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// # IsOccurrence is an attestation represents when either a package or source is represented by an artifact
+//
+// Note: Package or Source must be specified but not both at the same time.
+// Attestation must occur at the PackageVersion or at the SourceName.
+type NeighborsNeighborsIsOccurrence struct {
+	Typename             *string `json:"__typename"`
+	allIsOccurrencesTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsIsOccurrence.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsOccurrence) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsOccurrence) GetId() string { return v.allIsOccurrencesTree.Id }
+
+// GetSubject returns NeighborsNeighborsIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsOccurrence) GetSubject() allIsOccurrencesTreeSubjectPackageOrSource {
+	return v.allIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns NeighborsNeighborsIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsOccurrence) GetArtifact() allIsOccurrencesTreeArtifact {
+	return v.allIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns NeighborsNeighborsIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsOccurrence) GetJustification() string {
+	return v.allIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns NeighborsNeighborsIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsOccurrence) GetOrigin() string { return v.allIsOccurrencesTree.Origin }
+
+// GetCollector returns NeighborsNeighborsIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsOccurrence) GetCollector() string {
+	return v.allIsOccurrencesTree.Collector
+}
+
+func (v *NeighborsNeighborsIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsIsOccurrence struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact allIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsIsOccurrence) __premarshalJSON() (*__premarshalNeighborsNeighborsIsOccurrence, error) {
+	var retval __premarshalNeighborsNeighborsIsOccurrence
+
+	retval.Typename = v.Typename
+	retval.Id = v.allIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalallIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsIsOccurrence.allIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.allIsOccurrencesTree.Artifact
+	retval.Justification = v.allIsOccurrencesTree.Justification
+	retval.Origin = v.allIsOccurrencesTree.Origin
+	retval.Collector = v.allIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsIsVulnerability includes the requested fields of the GraphQL type IsVulnerability.
+// The GraphQL type's documentation follows.
+//
+// # IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
+//
+// osv (subject) - the osv object type that represents OSV and its ID
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - the reason why the osv ID represents the cve or ghsa
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type NeighborsNeighborsIsVulnerability struct {
+	Typename           *string `json:"__typename"`
+	allIsVulnerability `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsIsVulnerability.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsVulnerability) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsIsVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsVulnerability) GetId() string { return v.allIsVulnerability.Id }
+
+// GetOsv returns NeighborsNeighborsIsVulnerability.Osv, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsVulnerability) GetOsv() allIsVulnerabilityOsvOSV {
+	return v.allIsVulnerability.Osv
+}
+
+// GetVulnerability returns NeighborsNeighborsIsVulnerability.Vulnerability, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsVulnerability) GetVulnerability() allIsVulnerabilityVulnerabilityCveOrGhsa {
+	return v.allIsVulnerability.Vulnerability
+}
+
+// GetJustification returns NeighborsNeighborsIsVulnerability.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsVulnerability) GetJustification() string {
+	return v.allIsVulnerability.Justification
+}
+
+// GetOrigin returns NeighborsNeighborsIsVulnerability.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsVulnerability) GetOrigin() string { return v.allIsVulnerability.Origin }
+
+// GetCollector returns NeighborsNeighborsIsVulnerability.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsVulnerability) GetCollector() string {
+	return v.allIsVulnerability.Collector
+}
+
+func (v *NeighborsNeighborsIsVulnerability) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsIsVulnerability
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsIsVulnerability = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsVulnerability)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsIsVulnerability struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Osv allIsVulnerabilityOsvOSV `json:"osv"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsIsVulnerability) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsIsVulnerability) __premarshalJSON() (*__premarshalNeighborsNeighborsIsVulnerability, error) {
+	var retval __premarshalNeighborsNeighborsIsVulnerability
+
+	retval.Typename = v.Typename
+	retval.Id = v.allIsVulnerability.Id
+	retval.Osv = v.allIsVulnerability.Osv
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allIsVulnerability.Vulnerability
+		var err error
+		*dst, err = __marshalallIsVulnerabilityVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allIsVulnerability.Justification
+	retval.Origin = v.allIsVulnerability.Origin
+	retval.Collector = v.allIsVulnerability.Collector
+	return &retval, nil
+}
+
+// NeighborsNeighborsNode includes the requested fields of the GraphQL interface Node.
+//
+// NeighborsNeighborsNode is implemented by the following types:
+// NeighborsNeighborsPackage
+// NeighborsNeighborsSource
+// NeighborsNeighborsArtifact
+// NeighborsNeighborsBuilder
+// NeighborsNeighborsOSV
+// NeighborsNeighborsCVE
+// NeighborsNeighborsGHSA
+// NeighborsNeighborsIsOccurrence
+// NeighborsNeighborsIsDependency
+// NeighborsNeighborsIsVulnerability
+// NeighborsNeighborsCertifyVEXStatement
+// NeighborsNeighborsHashEqual
+// NeighborsNeighborsCertifyBad
+// NeighborsNeighborsCertifyPkg
+// NeighborsNeighborsCertifyScorecard
+// NeighborsNeighborsCertifyVuln
+// NeighborsNeighborsHasSourceAt
+// NeighborsNeighborsHasSBOM
+// NeighborsNeighborsHasSLSA
+// The GraphQL type's documentation follows.
+//
+// Node is a union type of all the possible nodes.
+//
+// It encapsulates the software tree nodes along with the evidence nodes. In a
+// path query, all connecting evidence nodes along with their intermediate subject
+// nodes need to be returned in order to create a complete graph.
+type NeighborsNeighborsNode interface {
+	implementsGraphQLInterfaceNeighborsNeighborsNode()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *NeighborsNeighborsPackage) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
+func (v *NeighborsNeighborsSource) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
+func (v *NeighborsNeighborsArtifact) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
+func (v *NeighborsNeighborsBuilder) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
+func (v *NeighborsNeighborsOSV) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
+func (v *NeighborsNeighborsCVE) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
+func (v *NeighborsNeighborsGHSA) implementsGraphQLInterfaceNeighborsNeighborsNode()                {}
+func (v *NeighborsNeighborsIsOccurrence) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
+func (v *NeighborsNeighborsIsDependency) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
+func (v *NeighborsNeighborsIsVulnerability) implementsGraphQLInterfaceNeighborsNeighborsNode()     {}
+func (v *NeighborsNeighborsCertifyVEXStatement) implementsGraphQLInterfaceNeighborsNeighborsNode() {}
+func (v *NeighborsNeighborsHashEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()           {}
+func (v *NeighborsNeighborsCertifyBad) implementsGraphQLInterfaceNeighborsNeighborsNode()          {}
+func (v *NeighborsNeighborsCertifyPkg) implementsGraphQLInterfaceNeighborsNeighborsNode()          {}
+func (v *NeighborsNeighborsCertifyScorecard) implementsGraphQLInterfaceNeighborsNeighborsNode()    {}
+func (v *NeighborsNeighborsCertifyVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
+func (v *NeighborsNeighborsHasSourceAt) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
+func (v *NeighborsNeighborsHasSBOM) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
+func (v *NeighborsNeighborsHasSLSA) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
+
+func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(NeighborsNeighborsPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(NeighborsNeighborsSource)
+		return json.Unmarshal(b, *v)
+	case "Artifact":
+		*v = new(NeighborsNeighborsArtifact)
+		return json.Unmarshal(b, *v)
+	case "Builder":
+		*v = new(NeighborsNeighborsBuilder)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(NeighborsNeighborsOSV)
+		return json.Unmarshal(b, *v)
+	case "CVE":
+		*v = new(NeighborsNeighborsCVE)
+		return json.Unmarshal(b, *v)
+	case "GHSA":
+		*v = new(NeighborsNeighborsGHSA)
+		return json.Unmarshal(b, *v)
+	case "IsOccurrence":
+		*v = new(NeighborsNeighborsIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "IsDependency":
+		*v = new(NeighborsNeighborsIsDependency)
+		return json.Unmarshal(b, *v)
+	case "IsVulnerability":
+		*v = new(NeighborsNeighborsIsVulnerability)
+		return json.Unmarshal(b, *v)
+	case "CertifyVEXStatement":
+		*v = new(NeighborsNeighborsCertifyVEXStatement)
+		return json.Unmarshal(b, *v)
+	case "HashEqual":
+		*v = new(NeighborsNeighborsHashEqual)
+		return json.Unmarshal(b, *v)
+	case "CertifyBad":
+		*v = new(NeighborsNeighborsCertifyBad)
+		return json.Unmarshal(b, *v)
+	case "CertifyPkg":
+		*v = new(NeighborsNeighborsCertifyPkg)
+		return json.Unmarshal(b, *v)
+	case "CertifyScorecard":
+		*v = new(NeighborsNeighborsCertifyScorecard)
+		return json.Unmarshal(b, *v)
+	case "CertifyVuln":
+		*v = new(NeighborsNeighborsCertifyVuln)
+		return json.Unmarshal(b, *v)
+	case "HasSourceAt":
+		*v = new(NeighborsNeighborsHasSourceAt)
+		return json.Unmarshal(b, *v)
+	case "HasSBOM":
+		*v = new(NeighborsNeighborsHasSBOM)
+		return json.Unmarshal(b, *v)
+	case "HasSLSA":
+		*v = new(NeighborsNeighborsHasSLSA)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing Node.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for NeighborsNeighborsNode: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *NeighborsNeighborsPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsBuilder:
+		typename = "Builder"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsBuilder
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCVE:
+		typename = "CVE"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsCVE
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsGHSA:
+		typename = "GHSA"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsGHSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsIsOccurrence:
+		typename = "IsOccurrence"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsIsOccurrence
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsIsDependency:
+		typename = "IsDependency"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsIsDependency
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsIsVulnerability:
+		typename = "IsVulnerability"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsIsVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCertifyVEXStatement:
+		typename = "CertifyVEXStatement"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsCertifyVEXStatement
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHashEqual:
+		typename = "HashEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsHashEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCertifyBad:
+		typename = "CertifyBad"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsCertifyBad
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCertifyPkg:
+		typename = "CertifyPkg"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsCertifyPkg
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCertifyScorecard:
+		typename = "CertifyScorecard"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsCertifyScorecard
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCertifyVuln:
+		typename = "CertifyVuln"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsCertifyVuln
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHasSourceAt:
+		typename = "HasSourceAt"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsHasSourceAt
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHasSBOM:
+		typename = "HasSBOM"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsHasSBOM
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHasSLSA:
+		typename = "HasSLSA"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsHasSLSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for NeighborsNeighborsNode: "%T"`, v)
+	}
+}
+
+// NeighborsNeighborsOSV includes the requested fields of the GraphQL type OSV.
+// The GraphQL type's documentation follows.
+//
+// OSV represents an Open Source Vulnerability.
+//
+// We create a separate node to allow retrieving all OSVs.
+type NeighborsNeighborsOSV struct {
+	Typename   *string `json:"__typename"`
+	allOSVTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsOSV.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsOSV) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsOSV.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsOSV) GetId() string { return v.allOSVTree.Id }
+
+// GetOsvIds returns NeighborsNeighborsOSV.OsvIds, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsOSV) GetOsvIds() []allOSVTreeOsvIdsOSVId { return v.allOSVTree.OsvIds }
+
+func (v *NeighborsNeighborsOSV) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsOSV
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsOSV = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allOSVTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsOSV struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	OsvIds []allOSVTreeOsvIdsOSVId `json:"osvIds"`
+}
+
+func (v *NeighborsNeighborsOSV) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsOSV) __premarshalJSON() (*__premarshalNeighborsNeighborsOSV, error) {
+	var retval __premarshalNeighborsNeighborsOSV
+
+	retval.Typename = v.Typename
+	retval.Id = v.allOSVTree.Id
+	retval.OsvIds = v.allOSVTree.OsvIds
+	return &retval, nil
+}
+
+// NeighborsNeighborsPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type NeighborsNeighborsPackage struct {
+	Typename   *string `json:"__typename"`
+	allPkgTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsPackage.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPackage) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsPackage.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPackage) GetId() string { return v.allPkgTree.Id }
+
+// GetType returns NeighborsNeighborsPackage.Type, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns NeighborsNeighborsPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *NeighborsNeighborsPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsPackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *NeighborsNeighborsPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsPackage) __premarshalJSON() (*__premarshalNeighborsNeighborsPackage, error) {
+	var retval __premarshalNeighborsNeighborsPackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// NeighborsNeighborsSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type NeighborsNeighborsSource struct {
+	Typename      *string `json:"__typename"`
+	allSourceTree `json:"-"`
+}
+
+// GetTypename returns NeighborsNeighborsSource.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsSource) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsSource.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsSource) GetId() string { return v.allSourceTree.Id }
+
+// GetType returns NeighborsNeighborsSource.Type, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns NeighborsNeighborsSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *NeighborsNeighborsSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *NeighborsNeighborsSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsSource) __premarshalJSON() (*__premarshalNeighborsNeighborsSource, error) {
+	var retval __premarshalNeighborsNeighborsSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
+// NeighborsResponse is returned by Neighbors on success.
+type NeighborsResponse struct {
+	// neighbors returns all the direct neighbors of a node
+	//
+	// Similarly, the input is only specified by its ID.
+	Neighbors []NeighborsNeighborsNode `json:"-"`
+}
+
+// GetNeighbors returns NeighborsResponse.Neighbors, and is useful for accessing the field via an interface.
+func (v *NeighborsResponse) GetNeighbors() []NeighborsNeighborsNode { return v.Neighbors }
+
+func (v *NeighborsResponse) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsResponse
+		Neighbors []json.RawMessage `json:"neighbors"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsResponse = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Neighbors
+		src := firstPass.Neighbors
+		*dst = make(
+			[]NeighborsNeighborsNode,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalNeighborsNeighborsNode(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"Unable to unmarshal NeighborsResponse.Neighbors: %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalNeighborsResponse struct {
+	Neighbors []json.RawMessage `json:"neighbors"`
+}
+
+func (v *NeighborsResponse) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, error) {
+	var retval __premarshalNeighborsResponse
+
+	{
+
+		dst := &retval.Neighbors
+		src := v.Neighbors
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalNeighborsNeighborsNode(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Unable to marshal NeighborsResponse.Neighbors: %w", err)
+			}
+		}
+	}
+	return &retval, nil
+}
+
 // OSVInputSpec is the same as OSVSpec, but used for mutation ingestion.
 type OSVInputSpec struct {
 	OsvId string `json:"osvId"`
@@ -4137,6 +6369,2316 @@ func (v *PackageQualifierInputSpec) GetKey() string { return v.Key }
 
 // GetValue returns PackageQualifierInputSpec.Value, and is useful for accessing the field via an interface.
 func (v *PackageQualifierInputSpec) GetValue() string { return v.Value }
+
+// PackageQualifierSpec is the same as PackageQualifier, but usable as query
+// input.
+//
+// GraphQL does not allow input types to contain composite types and does not allow
+// composite types to contain input types. So, although in this case these two
+// types are semantically the same, we have to duplicate the definition.
+//
+// Keys are mandatory, but values could also be `null` if we want to match all
+// values for a specific key.
+//
+// TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
+type PackageQualifierSpec struct {
+	Key   string  `json:"key"`
+	Value *string `json:"value"`
+}
+
+// GetKey returns PackageQualifierSpec.Key, and is useful for accessing the field via an interface.
+func (v *PackageQualifierSpec) GetKey() string { return v.Key }
+
+// GetValue returns PackageQualifierSpec.Value, and is useful for accessing the field via an interface.
+func (v *PackageQualifierSpec) GetValue() *string { return v.Value }
+
+// PackagesPackagesPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type PackagesPackagesPackage struct {
+	allPkgTree `json:"-"`
+}
+
+// GetId returns PackagesPackagesPackage.Id, and is useful for accessing the field via an interface.
+func (v *PackagesPackagesPackage) GetId() string { return v.allPkgTree.Id }
+
+// GetType returns PackagesPackagesPackage.Type, and is useful for accessing the field via an interface.
+func (v *PackagesPackagesPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns PackagesPackagesPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *PackagesPackagesPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *PackagesPackagesPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PackagesPackagesPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PackagesPackagesPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPackagesPackagesPackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *PackagesPackagesPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PackagesPackagesPackage) __premarshalJSON() (*__premarshalPackagesPackagesPackage, error) {
+	var retval __premarshalPackagesPackagesPackage
+
+	retval.Id = v.allPkgTree.Id
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// PackagesResponse is returned by Packages on success.
+type PackagesResponse struct {
+	// Returns all packages
+	Packages []PackagesPackagesPackage `json:"packages"`
+}
+
+// GetPackages returns PackagesResponse.Packages, and is useful for accessing the field via an interface.
+func (v *PackagesResponse) GetPackages() []PackagesPackagesPackage { return v.Packages }
+
+// PathPathArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type PathPathArtifact struct {
+	Typename        *string `json:"__typename"`
+	allArtifactTree `json:"-"`
+}
+
+// GetTypename returns PathPathArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathArtifact.Id, and is useful for accessing the field via an interface.
+func (v *PathPathArtifact) GetId() string { return v.allArtifactTree.Id }
+
+// GetAlgorithm returns PathPathArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *PathPathArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns PathPathArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *PathPathArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *PathPathArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *PathPathArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathArtifact) __premarshalJSON() (*__premarshalPathPathArtifact, error) {
+	var retval __premarshalPathPathArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// PathPathBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder such as (FRSCA or github actions).
+//
+// Currently builders are identified by the `uri` field, which is mandatory.
+type PathPathBuilder struct {
+	Typename       *string `json:"__typename"`
+	allBuilderTree `json:"-"`
+}
+
+// GetTypename returns PathPathBuilder.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathBuilder) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathBuilder.Id, and is useful for accessing the field via an interface.
+func (v *PathPathBuilder) GetId() string { return v.allBuilderTree.Id }
+
+// GetUri returns PathPathBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *PathPathBuilder) GetUri() string { return v.allBuilderTree.Uri }
+
+func (v *PathPathBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathBuilder struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *PathPathBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathBuilder) __premarshalJSON() (*__premarshalPathPathBuilder, error) {
+	var retval __premarshalPathPathBuilder
+
+	retval.Typename = v.Typename
+	retval.Id = v.allBuilderTree.Id
+	retval.Uri = v.allBuilderTree.Uri
+	return &retval, nil
+}
+
+// PathPathCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// The year is mandatory.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `year` value.
+type PathPathCVE struct {
+	Typename   *string `json:"__typename"`
+	allCveTree `json:"-"`
+}
+
+// GetTypename returns PathPathCVE.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathCVE) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathCVE.Id, and is useful for accessing the field via an interface.
+func (v *PathPathCVE) GetId() string { return v.allCveTree.Id }
+
+// GetYear returns PathPathCVE.Year, and is useful for accessing the field via an interface.
+func (v *PathPathCVE) GetYear() int { return v.allCveTree.Year }
+
+// GetCveIds returns PathPathCVE.CveIds, and is useful for accessing the field via an interface.
+func (v *PathPathCVE) GetCveIds() []allCveTreeCveIdsCVEId { return v.allCveTree.CveIds }
+
+func (v *PathPathCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathCVE struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Year int `json:"year"`
+
+	CveIds []allCveTreeCveIdsCVEId `json:"cveIds"`
+}
+
+func (v *PathPathCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathCVE) __premarshalJSON() (*__premarshalPathPathCVE, error) {
+	var retval __premarshalPathPathCVE
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCveTree.Id
+	retval.Year = v.allCveTree.Year
+	retval.CveIds = v.allCveTree.CveIds
+	return &retval, nil
+}
+
+// PathPathCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// # CertifyBad is an attestation represents when a package, source or artifact is considered bad
+//
+// subject - union type that can be either a package, source or artifact object type
+// justification (property) - string value representing why the subject is considered bad
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+type PathPathCertifyBad struct {
+	Typename      *string `json:"__typename"`
+	allCertifyBad `json:"-"`
+}
+
+// GetTypename returns PathPathCertifyBad.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyBad) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyBad) GetId() string { return v.allCertifyBad.Id }
+
+// GetJustification returns PathPathCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyBad) GetJustification() string { return v.allCertifyBad.Justification }
+
+// GetSubject returns PathPathCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyBad) GetSubject() allCertifyBadSubjectPackageSourceOrArtifact {
+	return v.allCertifyBad.Subject
+}
+
+func (v *PathPathCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathCertifyBad struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+}
+
+func (v *PathPathCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathCertifyBad) __premarshalJSON() (*__premarshalPathPathCertifyBad, error) {
+	var retval __premarshalPathPathCertifyBad
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyBad.Id
+	retval.Justification = v.allCertifyBad.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyBad.Subject
+		var err error
+		*dst, err = __marshalallCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathCertifyBad.allCertifyBad.Subject: %w", err)
+		}
+	}
+	return &retval, nil
+}
+
+// PathPathCertifyPkg includes the requested fields of the GraphQL type CertifyPkg.
+// The GraphQL type's documentation follows.
+//
+// # CertifyPkg is an attestation that represents when a package objects are similar
+//
+// packages (subject) - list of package objects
+// justification (property) - string value representing why the packages are similar
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type PathPathCertifyPkg struct {
+	Typename      *string `json:"__typename"`
+	allCertifyPkg `json:"-"`
+}
+
+// GetTypename returns PathPathCertifyPkg.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyPkg) GetTypename() *string { return v.Typename }
+
+// GetJustification returns PathPathCertifyPkg.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyPkg) GetJustification() string { return v.allCertifyPkg.Justification }
+
+// GetPackages returns PathPathCertifyPkg.Packages, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyPkg) GetPackages() []allCertifyPkgPackagesPackage {
+	return v.allCertifyPkg.Packages
+}
+
+// GetOrigin returns PathPathCertifyPkg.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyPkg) GetOrigin() string { return v.allCertifyPkg.Origin }
+
+// GetCollector returns PathPathCertifyPkg.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyPkg) GetCollector() string { return v.allCertifyPkg.Collector }
+
+func (v *PathPathCertifyPkg) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathCertifyPkg
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathCertifyPkg = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyPkg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathCertifyPkg struct {
+	Typename *string `json:"__typename"`
+
+	Justification string `json:"justification"`
+
+	Packages []allCertifyPkgPackagesPackage `json:"packages"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathCertifyPkg) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathCertifyPkg) __premarshalJSON() (*__premarshalPathPathCertifyPkg, error) {
+	var retval __premarshalPathPathCertifyPkg
+
+	retval.Typename = v.Typename
+	retval.Justification = v.allCertifyPkg.Justification
+	retval.Packages = v.allCertifyPkg.Packages
+	retval.Origin = v.allCertifyPkg.Origin
+	retval.Collector = v.allCertifyPkg.Collector
+	return &retval, nil
+}
+
+// PathPathCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecard is an attestation which represents the scorecard of a
+// particular source repository.
+type PathPathCertifyScorecard struct {
+	Typename            *string `json:"__typename"`
+	allCertifyScorecard `json:"-"`
+}
+
+// GetTypename returns PathPathCertifyScorecard.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyScorecard) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyScorecard) GetId() string { return v.allCertifyScorecard.Id }
+
+// GetSource returns PathPathCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyScorecard) GetSource() allCertifyScorecardSource {
+	return v.allCertifyScorecard.Source
+}
+
+// GetScorecard returns PathPathCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyScorecard) GetScorecard() allCertifyScorecardScorecard {
+	return v.allCertifyScorecard.Scorecard
+}
+
+func (v *PathPathCertifyScorecard) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathCertifyScorecard
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathCertifyScorecard = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyScorecard)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathCertifyScorecard struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Source allCertifyScorecardSource `json:"source"`
+
+	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
+}
+
+func (v *PathPathCertifyScorecard) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathCertifyScorecard) __premarshalJSON() (*__premarshalPathPathCertifyScorecard, error) {
+	var retval __premarshalPathPathCertifyScorecard
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyScorecard.Id
+	retval.Source = v.allCertifyScorecard.Source
+	retval.Scorecard = v.allCertifyScorecard.Scorecard
+	return &retval, nil
+}
+
+// PathPathCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
+// The GraphQL type's documentation follows.
+//
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+//
+// subject - union type that represents a package or artifact
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - justification for VEX
+// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type PathPathCertifyVEXStatement struct {
+	Typename               *string `json:"__typename"`
+	allCertifyVEXStatement `json:"-"`
+}
+
+// GetTypename returns PathPathCertifyVEXStatement.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetId() string { return v.allCertifyVEXStatement.Id }
+
+// GetSubject returns PathPathCertifyVEXStatement.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPackageOrArtifact {
+	return v.allCertifyVEXStatement.Subject
+}
+
+// GetVulnerability returns PathPathCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityCveOrGhsa {
+	return v.allCertifyVEXStatement.Vulnerability
+}
+
+// GetJustification returns PathPathCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetJustification() string {
+	return v.allCertifyVEXStatement.Justification
+}
+
+// GetKnownSince returns PathPathCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetKnownSince() time.Time {
+	return v.allCertifyVEXStatement.KnownSince
+}
+
+// GetOrigin returns PathPathCertifyVEXStatement.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetOrigin() string { return v.allCertifyVEXStatement.Origin }
+
+// GetCollector returns PathPathCertifyVEXStatement.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetCollector() string {
+	return v.allCertifyVEXStatement.Collector
+}
+
+func (v *PathPathCertifyVEXStatement) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathCertifyVEXStatement
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathCertifyVEXStatement = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVEXStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathCertifyVEXStatement struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathCertifyVEXStatement) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathCertifyVEXStatement) __premarshalJSON() (*__premarshalPathPathCertifyVEXStatement, error) {
+	var retval __premarshalPathPathCertifyVEXStatement
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyVEXStatement.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyVEXStatement.Subject
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+		}
+	}
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVEXStatement.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVEXStatementVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
+	retval.Origin = v.allCertifyVEXStatement.Origin
+	retval.Collector = v.allCertifyVEXStatement.Collector
+	return &retval, nil
+}
+
+// PathPathCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation that represents when a package has a vulnerability
+type PathPathCertifyVuln struct {
+	Typename       *string `json:"__typename"`
+	allCertifyVuln `json:"-"`
+}
+
+// GetTypename returns PathPathCertifyVuln.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVuln) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVuln) GetId() string { return v.allCertifyVuln.Id }
+
+// GetPackage returns PathPathCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVuln) GetPackage() allCertifyVulnPackage { return v.allCertifyVuln.Package }
+
+// GetVulnerability returns PathPathCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVuln) GetVulnerability() allCertifyVulnVulnerabilityOsvCveOrGhsa {
+	return v.allCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns PathPathCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVuln) GetMetadata() allCertifyVulnMetadataVulnerabilityMetaData {
+	return v.allCertifyVuln.Metadata
+}
+
+func (v *PathPathCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathCertifyVuln struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Package allCertifyVulnPackage `json:"package"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Metadata allCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+}
+
+func (v *PathPathCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathCertifyVuln) __premarshalJSON() (*__premarshalPathPathCertifyVuln, error) {
+	var retval __premarshalPathPathCertifyVuln
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyVuln.Id
+	retval.Package = v.allCertifyVuln.Package
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allCertifyVuln.Vulnerability
+		var err error
+		*dst, err = __marshalallCertifyVulnVulnerabilityOsvCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathCertifyVuln.allCertifyVuln.Vulnerability: %w", err)
+		}
+	}
+	retval.Metadata = v.allCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// PathPathGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// We create a separate node to allow retrieving all GHSAs.
+type PathPathGHSA struct {
+	Typename    *string `json:"__typename"`
+	allGHSATree `json:"-"`
+}
+
+// GetTypename returns PathPathGHSA.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathGHSA) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathGHSA.Id, and is useful for accessing the field via an interface.
+func (v *PathPathGHSA) GetId() string { return v.allGHSATree.Id }
+
+// GetGhsaIds returns PathPathGHSA.GhsaIds, and is useful for accessing the field via an interface.
+func (v *PathPathGHSA) GetGhsaIds() []allGHSATreeGhsaIdsGHSAId { return v.allGHSATree.GhsaIds }
+
+func (v *PathPathGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathGHSA struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	GhsaIds []allGHSATreeGhsaIdsGHSAId `json:"ghsaIds"`
+}
+
+func (v *PathPathGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathGHSA) __premarshalJSON() (*__premarshalPathPathGHSA, error) {
+	var retval __premarshalPathPathGHSA
+
+	retval.Typename = v.Typename
+	retval.Id = v.allGHSATree.Id
+	retval.GhsaIds = v.allGHSATree.GhsaIds
+	return &retval, nil
+}
+
+// PathPathHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+// The GraphQL type's documentation follows.
+//
+// # HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+//
+// subject - union type that can be either a package or source object type
+// uri (property) - identifier string for the SBOM
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Only package object or source object can be defined. Not both.
+type PathPathHasSBOM struct {
+	Typename       *string `json:"__typename"`
+	allHasSBOMTree `json:"-"`
+}
+
+// GetTypename returns PathPathHasSBOM.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
+
+// GetUri returns PathPathHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
+
+// GetSubject returns PathPathHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+	return v.allHasSBOMTree.Subject
+}
+
+// GetOrigin returns PathPathHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
+
+// GetCollector returns PathPathHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetCollector() string { return v.allHasSBOMTree.Collector }
+
+func (v *PathPathHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathHasSBOM struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, error) {
+	var retval __premarshalPathPathHasSBOM
+
+	retval.Typename = v.Typename
+	retval.Id = v.allHasSBOMTree.Id
+	retval.Uri = v.allHasSBOMTree.Uri
+	{
+
+		dst := &retval.Subject
+		src := v.allHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathHasSBOM.allHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.allHasSBOMTree.Origin
+	retval.Collector = v.allHasSBOMTree.Collector
+	return &retval, nil
+}
+
+// PathPathHasSLSA includes the requested fields of the GraphQL type HasSLSA.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type PathPathHasSLSA struct {
+	Typename    *string `json:"__typename"`
+	allSLSATree `json:"-"`
+}
+
+// GetTypename returns PathPathHasSLSA.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathHasSLSA) GetTypename() *string { return v.Typename }
+
+// GetSubject returns PathPathHasSLSA.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathHasSLSA) GetSubject() allSLSATreeSubjectArtifact { return v.allSLSATree.Subject }
+
+// GetSlsa returns PathPathHasSLSA.Slsa, and is useful for accessing the field via an interface.
+func (v *PathPathHasSLSA) GetSlsa() *allSLSATreeSlsaSLSA { return v.allSLSATree.Slsa }
+
+func (v *PathPathHasSLSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathHasSLSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathHasSLSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSLSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathHasSLSA struct {
+	Typename *string `json:"__typename"`
+
+	Subject allSLSATreeSubjectArtifact `json:"subject"`
+
+	Slsa *allSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+func (v *PathPathHasSLSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathHasSLSA) __premarshalJSON() (*__premarshalPathPathHasSLSA, error) {
+	var retval __premarshalPathPathHasSLSA
+
+	retval.Typename = v.Typename
+	retval.Subject = v.allSLSATree.Subject
+	retval.Slsa = v.allSLSATree.Slsa
+	return &retval, nil
+}
+
+// PathPathHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// # HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+//
+// package (subject) - the package object type that represents the package
+// source (object) - the source object type that represents the source
+// knownSince (property) - timestamp when this was last checked (exact time)
+// justification (property) - string value representing why the package has a source specified
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type PathPathHasSourceAt struct {
+	Typename       *string `json:"__typename"`
+	allHasSourceAt `json:"-"`
+}
+
+// GetTypename returns PathPathHasSourceAt.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetId() string { return v.allHasSourceAt.Id }
+
+// GetJustification returns PathPathHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetJustification() string { return v.allHasSourceAt.Justification }
+
+// GetKnownSince returns PathPathHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetKnownSince() time.Time { return v.allHasSourceAt.KnownSince }
+
+// GetPackage returns PathPathHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetPackage() allHasSourceAtPackage { return v.allHasSourceAt.Package }
+
+// GetSource returns PathPathHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetSource() allHasSourceAtSource { return v.allHasSourceAt.Source }
+
+// GetOrigin returns PathPathHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetOrigin() string { return v.allHasSourceAt.Origin }
+
+// GetCollector returns PathPathHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathHasSourceAt) GetCollector() string { return v.allHasSourceAt.Collector }
+
+func (v *PathPathHasSourceAt) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathHasSourceAt
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathHasSourceAt = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSourceAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathHasSourceAt struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Package allHasSourceAtPackage `json:"package"`
+
+	Source allHasSourceAtSource `json:"source"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathHasSourceAt) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathHasSourceAt) __premarshalJSON() (*__premarshalPathPathHasSourceAt, error) {
+	var retval __premarshalPathPathHasSourceAt
+
+	retval.Typename = v.Typename
+	retval.Id = v.allHasSourceAt.Id
+	retval.Justification = v.allHasSourceAt.Justification
+	retval.KnownSince = v.allHasSourceAt.KnownSince
+	retval.Package = v.allHasSourceAt.Package
+	retval.Source = v.allHasSourceAt.Source
+	retval.Origin = v.allHasSourceAt.Origin
+	retval.Collector = v.allHasSourceAt.Collector
+	return &retval, nil
+}
+
+// PathPathHashEqual includes the requested fields of the GraphQL type HashEqual.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
+//
+// artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type PathPathHashEqual struct {
+	Typename         *string `json:"__typename"`
+	allHashEqualTree `json:"-"`
+}
+
+// GetTypename returns PathPathHashEqual.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathHashEqual) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathHashEqual.Id, and is useful for accessing the field via an interface.
+func (v *PathPathHashEqual) GetId() string { return v.allHashEqualTree.Id }
+
+// GetJustification returns PathPathHashEqual.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathHashEqual) GetJustification() string { return v.allHashEqualTree.Justification }
+
+// GetArtifacts returns PathPathHashEqual.Artifacts, and is useful for accessing the field via an interface.
+func (v *PathPathHashEqual) GetArtifacts() []allHashEqualTreeArtifactsArtifact {
+	return v.allHashEqualTree.Artifacts
+}
+
+// GetOrigin returns PathPathHashEqual.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathHashEqual) GetOrigin() string { return v.allHashEqualTree.Origin }
+
+// GetCollector returns PathPathHashEqual.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathHashEqual) GetCollector() string { return v.allHashEqualTree.Collector }
+
+func (v *PathPathHashEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathHashEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathHashEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHashEqualTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathHashEqual struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Artifacts []allHashEqualTreeArtifactsArtifact `json:"artifacts"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathHashEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathHashEqual) __premarshalJSON() (*__premarshalPathPathHashEqual, error) {
+	var retval __premarshalPathPathHashEqual
+
+	retval.Typename = v.Typename
+	retval.Id = v.allHashEqualTree.Id
+	retval.Justification = v.allHashEqualTree.Justification
+	retval.Artifacts = v.allHashEqualTree.Artifacts
+	retval.Origin = v.allHashEqualTree.Origin
+	retval.Collector = v.allHashEqualTree.Collector
+	return &retval, nil
+}
+
+// PathPathIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// # IsDependency is an attestation that represents when a package is dependent on another package
+//
+// package (subject) - the package object type that represents the package
+// dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
+// versionRange (property) - string value for version range that applies to the dependent package
+// justification (property) - string value representing why the artifacts are the equal
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type PathPathIsDependency struct {
+	Typename            *string `json:"__typename"`
+	allIsDependencyTree `json:"-"`
+}
+
+// GetTypename returns PathPathIsDependency.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetId() string { return v.allIsDependencyTree.Id }
+
+// GetJustification returns PathPathIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetJustification() string { return v.allIsDependencyTree.Justification }
+
+// GetPackage returns PathPathIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetPackage() allIsDependencyTreePackage {
+	return v.allIsDependencyTree.Package
+}
+
+// GetDependentPackage returns PathPathIsDependency.DependentPackage, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
+	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetVersionRange returns PathPathIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetVersionRange() string { return v.allIsDependencyTree.VersionRange }
+
+// GetOrigin returns PathPathIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetOrigin() string { return v.allIsDependencyTree.Origin }
+
+// GetCollector returns PathPathIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetCollector() string { return v.allIsDependencyTree.Collector }
+
+func (v *PathPathIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathIsDependency struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package allIsDependencyTreePackage `json:"package"`
+
+	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathIsDependency) __premarshalJSON() (*__premarshalPathPathIsDependency, error) {
+	var retval __premarshalPathPathIsDependency
+
+	retval.Typename = v.Typename
+	retval.Id = v.allIsDependencyTree.Id
+	retval.Justification = v.allIsDependencyTree.Justification
+	retval.Package = v.allIsDependencyTree.Package
+	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.VersionRange = v.allIsDependencyTree.VersionRange
+	retval.Origin = v.allIsDependencyTree.Origin
+	retval.Collector = v.allIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// PathPathIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// # IsOccurrence is an attestation represents when either a package or source is represented by an artifact
+//
+// Note: Package or Source must be specified but not both at the same time.
+// Attestation must occur at the PackageVersion or at the SourceName.
+type PathPathIsOccurrence struct {
+	Typename             *string `json:"__typename"`
+	allIsOccurrencesTree `json:"-"`
+}
+
+// GetTypename returns PathPathIsOccurrence.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathIsOccurrence) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *PathPathIsOccurrence) GetId() string { return v.allIsOccurrencesTree.Id }
+
+// GetSubject returns PathPathIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathIsOccurrence) GetSubject() allIsOccurrencesTreeSubjectPackageOrSource {
+	return v.allIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns PathPathIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *PathPathIsOccurrence) GetArtifact() allIsOccurrencesTreeArtifact {
+	return v.allIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns PathPathIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathIsOccurrence) GetJustification() string { return v.allIsOccurrencesTree.Justification }
+
+// GetOrigin returns PathPathIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathIsOccurrence) GetOrigin() string { return v.allIsOccurrencesTree.Origin }
+
+// GetCollector returns PathPathIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathIsOccurrence) GetCollector() string { return v.allIsOccurrencesTree.Collector }
+
+func (v *PathPathIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathIsOccurrence struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact allIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathIsOccurrence) __premarshalJSON() (*__premarshalPathPathIsOccurrence, error) {
+	var retval __premarshalPathPathIsOccurrence
+
+	retval.Typename = v.Typename
+	retval.Id = v.allIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalallIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathIsOccurrence.allIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.allIsOccurrencesTree.Artifact
+	retval.Justification = v.allIsOccurrencesTree.Justification
+	retval.Origin = v.allIsOccurrencesTree.Origin
+	retval.Collector = v.allIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// PathPathIsVulnerability includes the requested fields of the GraphQL type IsVulnerability.
+// The GraphQL type's documentation follows.
+//
+// # IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
+//
+// osv (subject) - the osv object type that represents OSV and its ID
+// vulnerability (object) - union type that consists of cve or ghsa
+// justification (property) - the reason why the osv ID represents the cve or ghsa
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type PathPathIsVulnerability struct {
+	Typename           *string `json:"__typename"`
+	allIsVulnerability `json:"-"`
+}
+
+// GetTypename returns PathPathIsVulnerability.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathIsVulnerability) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathIsVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *PathPathIsVulnerability) GetId() string { return v.allIsVulnerability.Id }
+
+// GetOsv returns PathPathIsVulnerability.Osv, and is useful for accessing the field via an interface.
+func (v *PathPathIsVulnerability) GetOsv() allIsVulnerabilityOsvOSV { return v.allIsVulnerability.Osv }
+
+// GetVulnerability returns PathPathIsVulnerability.Vulnerability, and is useful for accessing the field via an interface.
+func (v *PathPathIsVulnerability) GetVulnerability() allIsVulnerabilityVulnerabilityCveOrGhsa {
+	return v.allIsVulnerability.Vulnerability
+}
+
+// GetJustification returns PathPathIsVulnerability.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathIsVulnerability) GetJustification() string {
+	return v.allIsVulnerability.Justification
+}
+
+// GetOrigin returns PathPathIsVulnerability.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathIsVulnerability) GetOrigin() string { return v.allIsVulnerability.Origin }
+
+// GetCollector returns PathPathIsVulnerability.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathIsVulnerability) GetCollector() string { return v.allIsVulnerability.Collector }
+
+func (v *PathPathIsVulnerability) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathIsVulnerability
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathIsVulnerability = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allIsVulnerability)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathIsVulnerability struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Osv allIsVulnerabilityOsvOSV `json:"osv"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathIsVulnerability) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathIsVulnerability) __premarshalJSON() (*__premarshalPathPathIsVulnerability, error) {
+	var retval __premarshalPathPathIsVulnerability
+
+	retval.Typename = v.Typename
+	retval.Id = v.allIsVulnerability.Id
+	retval.Osv = v.allIsVulnerability.Osv
+	{
+
+		dst := &retval.Vulnerability
+		src := v.allIsVulnerability.Vulnerability
+		var err error
+		*dst, err = __marshalallIsVulnerabilityVulnerabilityCveOrGhsa(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+		}
+	}
+	retval.Justification = v.allIsVulnerability.Justification
+	retval.Origin = v.allIsVulnerability.Origin
+	retval.Collector = v.allIsVulnerability.Collector
+	return &retval, nil
+}
+
+// PathPathNode includes the requested fields of the GraphQL interface Node.
+//
+// PathPathNode is implemented by the following types:
+// PathPathPackage
+// PathPathSource
+// PathPathArtifact
+// PathPathBuilder
+// PathPathOSV
+// PathPathCVE
+// PathPathGHSA
+// PathPathIsOccurrence
+// PathPathIsDependency
+// PathPathIsVulnerability
+// PathPathCertifyVEXStatement
+// PathPathHashEqual
+// PathPathCertifyBad
+// PathPathCertifyPkg
+// PathPathCertifyScorecard
+// PathPathCertifyVuln
+// PathPathHasSourceAt
+// PathPathHasSBOM
+// PathPathHasSLSA
+// The GraphQL type's documentation follows.
+//
+// Node is a union type of all the possible nodes.
+//
+// It encapsulates the software tree nodes along with the evidence nodes. In a
+// path query, all connecting evidence nodes along with their intermediate subject
+// nodes need to be returned in order to create a complete graph.
+type PathPathNode interface {
+	implementsGraphQLInterfacePathPathNode()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()             {}
+func (v *PathPathSource) implementsGraphQLInterfacePathPathNode()              {}
+func (v *PathPathArtifact) implementsGraphQLInterfacePathPathNode()            {}
+func (v *PathPathBuilder) implementsGraphQLInterfacePathPathNode()             {}
+func (v *PathPathOSV) implementsGraphQLInterfacePathPathNode()                 {}
+func (v *PathPathCVE) implementsGraphQLInterfacePathPathNode()                 {}
+func (v *PathPathGHSA) implementsGraphQLInterfacePathPathNode()                {}
+func (v *PathPathIsOccurrence) implementsGraphQLInterfacePathPathNode()        {}
+func (v *PathPathIsDependency) implementsGraphQLInterfacePathPathNode()        {}
+func (v *PathPathIsVulnerability) implementsGraphQLInterfacePathPathNode()     {}
+func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode() {}
+func (v *PathPathHashEqual) implementsGraphQLInterfacePathPathNode()           {}
+func (v *PathPathCertifyBad) implementsGraphQLInterfacePathPathNode()          {}
+func (v *PathPathCertifyPkg) implementsGraphQLInterfacePathPathNode()          {}
+func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()    {}
+func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()         {}
+func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()         {}
+func (v *PathPathHasSBOM) implementsGraphQLInterfacePathPathNode()             {}
+func (v *PathPathHasSLSA) implementsGraphQLInterfacePathPathNode()             {}
+
+func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Package":
+		*v = new(PathPathPackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(PathPathSource)
+		return json.Unmarshal(b, *v)
+	case "Artifact":
+		*v = new(PathPathArtifact)
+		return json.Unmarshal(b, *v)
+	case "Builder":
+		*v = new(PathPathBuilder)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(PathPathOSV)
+		return json.Unmarshal(b, *v)
+	case "CVE":
+		*v = new(PathPathCVE)
+		return json.Unmarshal(b, *v)
+	case "GHSA":
+		*v = new(PathPathGHSA)
+		return json.Unmarshal(b, *v)
+	case "IsOccurrence":
+		*v = new(PathPathIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "IsDependency":
+		*v = new(PathPathIsDependency)
+		return json.Unmarshal(b, *v)
+	case "IsVulnerability":
+		*v = new(PathPathIsVulnerability)
+		return json.Unmarshal(b, *v)
+	case "CertifyVEXStatement":
+		*v = new(PathPathCertifyVEXStatement)
+		return json.Unmarshal(b, *v)
+	case "HashEqual":
+		*v = new(PathPathHashEqual)
+		return json.Unmarshal(b, *v)
+	case "CertifyBad":
+		*v = new(PathPathCertifyBad)
+		return json.Unmarshal(b, *v)
+	case "CertifyPkg":
+		*v = new(PathPathCertifyPkg)
+		return json.Unmarshal(b, *v)
+	case "CertifyScorecard":
+		*v = new(PathPathCertifyScorecard)
+		return json.Unmarshal(b, *v)
+	case "CertifyVuln":
+		*v = new(PathPathCertifyVuln)
+		return json.Unmarshal(b, *v)
+	case "HasSourceAt":
+		*v = new(PathPathHasSourceAt)
+		return json.Unmarshal(b, *v)
+	case "HasSBOM":
+		*v = new(PathPathHasSBOM)
+		return json.Unmarshal(b, *v)
+	case "HasSLSA":
+		*v = new(PathPathHasSLSA)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing Node.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for PathPathNode: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *PathPathPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathBuilder:
+		typename = "Builder"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathBuilder
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCVE:
+		typename = "CVE"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathCVE
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathGHSA:
+		typename = "GHSA"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathGHSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathIsOccurrence:
+		typename = "IsOccurrence"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathIsOccurrence
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathIsDependency:
+		typename = "IsDependency"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathIsDependency
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathIsVulnerability:
+		typename = "IsVulnerability"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathIsVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCertifyVEXStatement:
+		typename = "CertifyVEXStatement"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathCertifyVEXStatement
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHashEqual:
+		typename = "HashEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathHashEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCertifyBad:
+		typename = "CertifyBad"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathCertifyBad
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCertifyPkg:
+		typename = "CertifyPkg"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathCertifyPkg
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCertifyScorecard:
+		typename = "CertifyScorecard"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathCertifyScorecard
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCertifyVuln:
+		typename = "CertifyVuln"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathCertifyVuln
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHasSourceAt:
+		typename = "HasSourceAt"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathHasSourceAt
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHasSBOM:
+		typename = "HasSBOM"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathHasSBOM
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHasSLSA:
+		typename = "HasSLSA"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathHasSLSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for PathPathNode: "%T"`, v)
+	}
+}
+
+// PathPathOSV includes the requested fields of the GraphQL type OSV.
+// The GraphQL type's documentation follows.
+//
+// OSV represents an Open Source Vulnerability.
+//
+// We create a separate node to allow retrieving all OSVs.
+type PathPathOSV struct {
+	Typename   *string `json:"__typename"`
+	allOSVTree `json:"-"`
+}
+
+// GetTypename returns PathPathOSV.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathOSV) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathOSV.Id, and is useful for accessing the field via an interface.
+func (v *PathPathOSV) GetId() string { return v.allOSVTree.Id }
+
+// GetOsvIds returns PathPathOSV.OsvIds, and is useful for accessing the field via an interface.
+func (v *PathPathOSV) GetOsvIds() []allOSVTreeOsvIdsOSVId { return v.allOSVTree.OsvIds }
+
+func (v *PathPathOSV) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathOSV
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathOSV = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allOSVTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathOSV struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	OsvIds []allOSVTreeOsvIdsOSVId `json:"osvIds"`
+}
+
+func (v *PathPathOSV) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathOSV) __premarshalJSON() (*__premarshalPathPathOSV, error) {
+	var retval __premarshalPathPathOSV
+
+	retval.Typename = v.Typename
+	retval.Id = v.allOSVTree.Id
+	retval.OsvIds = v.allOSVTree.OsvIds
+	return &retval, nil
+}
+
+// PathPathPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type PathPathPackage struct {
+	Typename   *string `json:"__typename"`
+	allPkgTree `json:"-"`
+}
+
+// GetTypename returns PathPathPackage.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathPackage) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathPackage.Id, and is useful for accessing the field via an interface.
+func (v *PathPathPackage) GetId() string { return v.allPkgTree.Id }
+
+// GetType returns PathPathPackage.Type, and is useful for accessing the field via an interface.
+func (v *PathPathPackage) GetType() string { return v.allPkgTree.Type }
+
+// GetNamespaces returns PathPathPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *PathPathPackage) GetNamespaces() []allPkgTreeNamespacesPackageNamespace {
+	return v.allPkgTree.Namespaces
+}
+
+func (v *PathPathPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathPackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []allPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *PathPathPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathPackage) __premarshalJSON() (*__premarshalPathPathPackage, error) {
+	var retval __premarshalPathPathPackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.allPkgTree.Id
+	retval.Type = v.allPkgTree.Type
+	retval.Namespaces = v.allPkgTree.Namespaces
+	return &retval, nil
+}
+
+// PathPathSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type PathPathSource struct {
+	Typename      *string `json:"__typename"`
+	allSourceTree `json:"-"`
+}
+
+// GetTypename returns PathPathSource.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathSource) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathSource.Id, and is useful for accessing the field via an interface.
+func (v *PathPathSource) GetId() string { return v.allSourceTree.Id }
+
+// GetType returns PathPathSource.Type, and is useful for accessing the field via an interface.
+func (v *PathPathSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns PathPathSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *PathPathSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *PathPathSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *PathPathSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathSource) __premarshalJSON() (*__premarshalPathPathSource, error) {
+	var retval __premarshalPathPathSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.allSourceTree.Id
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
+
+// PathResponse is returned by Path on success.
+type PathResponse struct {
+	// path query returns a path between subject and target, of a maximum length
+	//
+	// Since we want to uniquely identify endpoints, nodes must be specified by
+	// valid IDs only (instead of using filters/input spec structs).
+	Path []PathPathNode `json:"-"`
+}
+
+// GetPath returns PathResponse.Path, and is useful for accessing the field via an interface.
+func (v *PathResponse) GetPath() []PathPathNode { return v.Path }
+
+func (v *PathResponse) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathResponse
+		Path []json.RawMessage `json:"path"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathResponse = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.Path
+		src := firstPass.Path
+		*dst = make(
+			[]PathPathNode,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalPathPathNode(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"Unable to unmarshal PathResponse.Path: %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalPathResponse struct {
+	Path []json.RawMessage `json:"path"`
+}
+
+func (v *PathResponse) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathResponse) __premarshalJSON() (*__premarshalPathResponse, error) {
+	var retval __premarshalPathResponse
+
+	{
+
+		dst := &retval.Path
+		src := v.Path
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalPathPathNode(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Unable to marshal PathResponse.Path: %w", err)
+			}
+		}
+	}
+	return &retval, nil
+}
 
 // PkgInputSpec specifies a package for a mutation.
 //
@@ -4177,6 +8719,53 @@ const (
 	PkgMatchTypeAllVersions     PkgMatchType = "ALL_VERSIONS"
 	PkgMatchTypeSpecificVersion PkgMatchType = "SPECIFIC_VERSION"
 )
+
+// PkgSpec allows filtering the list of packages to return.
+//
+// Each field matches a qualifier from pURL. Use `null` to match on all values at
+// that level. For example, to get all packages in GUAC backend, use a PkgSpec
+// where every field is `null`.
+//
+// Empty string at a field means matching with the empty string. If passing in
+// qualifiers, all of the values in the list must match. Since we want to return
+// nodes with any number of qualifiers if no qualifiers are passed in the input, we
+// must also return the same set of nodes it the qualifiers list is empty. To match
+// on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
+// true. If this field is true, then the qualifiers argument is ignored.
+type PkgSpec struct {
+	Id                       *string                `json:"id"`
+	Type                     *string                `json:"type"`
+	Namespace                *string                `json:"namespace"`
+	Name                     *string                `json:"name"`
+	Version                  *string                `json:"version"`
+	Qualifiers               []PackageQualifierSpec `json:"qualifiers"`
+	MatchOnlyEmptyQualifiers *bool                  `json:"matchOnlyEmptyQualifiers"`
+	Subpath                  *string                `json:"subpath"`
+}
+
+// GetId returns PkgSpec.Id, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetId() *string { return v.Id }
+
+// GetType returns PkgSpec.Type, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetType() *string { return v.Type }
+
+// GetNamespace returns PkgSpec.Namespace, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetNamespace() *string { return v.Namespace }
+
+// GetName returns PkgSpec.Name, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetName() *string { return v.Name }
+
+// GetVersion returns PkgSpec.Version, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetVersion() *string { return v.Version }
+
+// GetQualifiers returns PkgSpec.Qualifiers, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetQualifiers() []PackageQualifierSpec { return v.Qualifiers }
+
+// GetMatchOnlyEmptyQualifiers returns PkgSpec.MatchOnlyEmptyQualifiers, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetMatchOnlyEmptyQualifiers() *bool { return v.MatchOnlyEmptyQualifiers }
+
+// GetSubpath returns PkgSpec.Subpath, and is useful for accessing the field via an interface.
+func (v *PkgSpec) GetSubpath() *string { return v.Subpath }
 
 // SLSAForArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
@@ -4730,6 +9319,127 @@ func (v *SourceInputSpec) GetTag() *string { return v.Tag }
 
 // GetCommit returns SourceInputSpec.Commit, and is useful for accessing the field via an interface.
 func (v *SourceInputSpec) GetCommit() *string { return v.Commit }
+
+// SourceSpec allows filtering the list of sources to return.
+//
+// Empty string at a field means matching with the empty string. Missing field
+// means retrieving all possible matches.
+//
+// It is an error to specify both `tag` and `commit` fields, except it both are
+// set as empty string (in which case the returned sources are only those for
+// which there is no tag/commit information).
+type SourceSpec struct {
+	Id        *string `json:"id"`
+	Type      *string `json:"type"`
+	Namespace *string `json:"namespace"`
+	Name      *string `json:"name"`
+	Tag       *string `json:"tag"`
+	Commit    *string `json:"commit"`
+}
+
+// GetId returns SourceSpec.Id, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetId() *string { return v.Id }
+
+// GetType returns SourceSpec.Type, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetType() *string { return v.Type }
+
+// GetNamespace returns SourceSpec.Namespace, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetNamespace() *string { return v.Namespace }
+
+// GetName returns SourceSpec.Name, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetName() *string { return v.Name }
+
+// GetTag returns SourceSpec.Tag, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetTag() *string { return v.Tag }
+
+// GetCommit returns SourceSpec.Commit, and is useful for accessing the field via an interface.
+func (v *SourceSpec) GetCommit() *string { return v.Commit }
+
+// SourcesResponse is returned by Sources on success.
+type SourcesResponse struct {
+	// Returns all sources
+	Sources []SourcesSourcesSource `json:"sources"`
+}
+
+// GetSources returns SourcesResponse.Sources, and is useful for accessing the field via an interface.
+func (v *SourcesResponse) GetSources() []SourcesSourcesSource { return v.Sources }
+
+// SourcesSourcesSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type SourcesSourcesSource struct {
+	allSourceTree `json:"-"`
+}
+
+// GetId returns SourcesSourcesSource.Id, and is useful for accessing the field via an interface.
+func (v *SourcesSourcesSource) GetId() string { return v.allSourceTree.Id }
+
+// GetType returns SourcesSourcesSource.Type, and is useful for accessing the field via an interface.
+func (v *SourcesSourcesSource) GetType() string { return v.allSourceTree.Type }
+
+// GetNamespaces returns SourcesSourcesSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *SourcesSourcesSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
+	return v.allSourceTree.Namespaces
+}
+
+func (v *SourcesSourcesSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*SourcesSourcesSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.SourcesSourcesSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalSourcesSourcesSource struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *SourcesSourcesSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *SourcesSourcesSource) __premarshalJSON() (*__premarshalSourcesSourcesSource, error) {
+	var retval __premarshalSourcesSourcesSource
+
+	retval.Id = v.allSourceTree.Id
+	retval.Type = v.allSourceTree.Type
+	retval.Namespaces = v.allSourceTree.Namespaces
+	return &retval, nil
+}
 
 // VEXPackageAndGhsaIngestGHSA includes the requested fields of the GraphQL type GHSA.
 // The GraphQL type's documentation follows.
@@ -6247,6 +10957,38 @@ func (v *__IsVulnerabilityGHSAInput) GetIsVulnerability() IsVulnerabilityInputSp
 	return v.IsVulnerability
 }
 
+// __NeighborsInput is used internally by genqlient
+type __NeighborsInput struct {
+	Node string `json:"node"`
+}
+
+// GetNode returns __NeighborsInput.Node, and is useful for accessing the field via an interface.
+func (v *__NeighborsInput) GetNode() string { return v.Node }
+
+// __PackagesInput is used internally by genqlient
+type __PackagesInput struct {
+	Filter *PkgSpec `json:"filter"`
+}
+
+// GetFilter returns __PackagesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PackagesInput) GetFilter() *PkgSpec { return v.Filter }
+
+// __PathInput is used internally by genqlient
+type __PathInput struct {
+	Subject       string `json:"subject"`
+	Target        string `json:"target"`
+	MaxPathLength int    `json:"maxPathLength"`
+}
+
+// GetSubject returns __PathInput.Subject, and is useful for accessing the field via an interface.
+func (v *__PathInput) GetSubject() string { return v.Subject }
+
+// GetTarget returns __PathInput.Target, and is useful for accessing the field via an interface.
+func (v *__PathInput) GetTarget() string { return v.Target }
+
+// GetMaxPathLength returns __PathInput.MaxPathLength, and is useful for accessing the field via an interface.
+func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
+
 // __SLSAForArtifactInput is used internally by genqlient
 type __SLSAForArtifactInput struct {
 	Artifact  ArtifactInputSpec   `json:"artifact"`
@@ -6278,6 +11020,14 @@ func (v *__ScorecardInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetScorecard returns __ScorecardInput.Scorecard, and is useful for accessing the field via an interface.
 func (v *__ScorecardInput) GetScorecard() ScorecardInputSpec { return v.Scorecard }
+
+// __SourcesInput is used internally by genqlient
+type __SourcesInput struct {
+	Filter *SourceSpec `json:"filter"`
+}
+
+// GetFilter returns __SourcesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__SourcesInput) GetFilter() *SourceSpec { return v.Filter }
 
 // __VEXPackageAndGhsaInput is used internally by genqlient
 type __VEXPackageAndGhsaInput struct {
@@ -6367,6 +11117,23 @@ func (v *allArtifactTree) GetAlgorithm() string { return v.Algorithm }
 
 // GetDigest returns allArtifactTree.Digest, and is useful for accessing the field via an interface.
 func (v *allArtifactTree) GetDigest() string { return v.Digest }
+
+// allBuilderTree includes the GraphQL fields of Builder requested by the fragment allBuilderTree.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder such as (FRSCA or github actions).
+//
+// Currently builders are identified by the `uri` field, which is mandatory.
+type allBuilderTree struct {
+	Id  string `json:"id"`
+	Uri string `json:"uri"`
+}
+
+// GetId returns allBuilderTree.Id, and is useful for accessing the field via an interface.
+func (v *allBuilderTree) GetId() string { return v.Id }
+
+// GetUri returns allBuilderTree.Uri, and is useful for accessing the field via an interface.
+func (v *allBuilderTree) GetUri() string { return v.Uri }
 
 // allCertifyBad includes the GraphQL fields of CertifyBad requested by the fragment allCertifyBad.
 // The GraphQL type's documentation follows.
@@ -12126,6 +16893,787 @@ fragment allCveTree on CVE {
 	return &data, err
 }
 
+func Neighbors(
+	ctx context.Context,
+	client graphql.Client,
+	node string,
+) (*NeighborsResponse, error) {
+	req := &graphql.Request{
+		OpName: "Neighbors",
+		Query: `
+query Neighbors ($node: ID!) {
+	neighbors(node: $node) {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+		... on Builder {
+			... allBuilderTree
+		}
+		... on OSV {
+			... allOSVTree
+		}
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+		... on CertifyScorecard {
+			... allCertifyScorecard
+		}
+		... on CertifyPkg {
+			... allCertifyPkg
+		}
+		... on IsOccurrence {
+			... allIsOccurrencesTree
+		}
+		... on IsDependency {
+			... allIsDependencyTree
+		}
+		... on HasSLSA {
+			... allSLSATree
+		}
+		... on CertifyBad {
+			... allCertifyBad
+		}
+		... on HashEqual {
+			... allHashEqualTree
+		}
+		... on HasSBOM {
+			... allHasSBOMTree
+		}
+		... on HasSourceAt {
+			... allHasSourceAt
+		}
+		... on CertifyVuln {
+			... allCertifyVuln
+		}
+		... on IsVulnerability {
+			... allIsVulnerability
+		}
+		... on CertifyVEXStatement {
+			... allCertifyVEXStatement
+		}
+		... on Builder {
+			... allBuilderTree
+		}
+	}
+}
+fragment allPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment allArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment allBuilderTree on Builder {
+	id
+	uri
+}
+fragment allOSVTree on OSV {
+	id
+	osvIds {
+		id
+		osvId
+	}
+}
+fragment allCveTree on CVE {
+	id
+	year
+	cveIds {
+		id
+		cveId
+	}
+}
+fragment allGHSATree on GHSA {
+	id
+	ghsaIds {
+		id
+		ghsaId
+	}
+}
+fragment allCertifyScorecard on CertifyScorecard {
+	id
+	source {
+		... allSourceTree
+	}
+	scorecard {
+		timeScanned
+		aggregateScore
+		checks {
+			check
+			score
+		}
+		scorecardVersion
+		scorecardCommit
+		origin
+		collector
+	}
+}
+fragment allCertifyPkg on CertifyPkg {
+	justification
+	packages {
+		... allPkgTree
+	}
+	origin
+	collector
+}
+fragment allIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+	}
+	artifact {
+		... allArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment allIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... allPkgTree
+	}
+	dependentPackage {
+		... allPkgTree
+	}
+	versionRange
+	origin
+	collector
+}
+fragment allSLSATree on HasSLSA {
+	subject {
+		... allArtifactTree
+	}
+	slsa {
+		builtFrom {
+			... allArtifactTree
+		}
+		builtBy {
+			id
+			uri
+		}
+		buildType
+		slsaPredicate {
+			key
+			value
+		}
+		slsaVersion
+		startedOn
+		finishedOn
+		origin
+		collector
+	}
+}
+fragment allCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+}
+fragment allHashEqualTree on HashEqual {
+	id
+	justification
+	artifacts {
+		... allArtifactTree
+	}
+	origin
+	collector
+}
+fragment allHasSBOMTree on HasSBOM {
+	id
+	uri
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+	}
+	origin
+	collector
+}
+fragment allHasSourceAt on HasSourceAt {
+	id
+	justification
+	knownSince
+	package {
+		... allPkgTree
+	}
+	source {
+		... allSourceTree
+	}
+	origin
+	collector
+}
+fragment allCertifyVuln on CertifyVuln {
+	id
+	package {
+		... allPkgTree
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on OSV {
+			... allOSVTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment allIsVulnerability on IsVulnerability {
+	id
+	osv {
+		... allOSVTree
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	origin
+	collector
+}
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	knownSince
+	origin
+	collector
+}
+`,
+		Variables: &__NeighborsInput{
+			Node: node,
+		},
+	}
+	var err error
+
+	var data NeighborsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func Packages(
+	ctx context.Context,
+	client graphql.Client,
+	filter *PkgSpec,
+) (*PackagesResponse, error) {
+	req := &graphql.Request{
+		OpName: "Packages",
+		Query: `
+query Packages ($filter: PkgSpec) {
+	packages(pkgSpec: $filter) {
+		... allPkgTree
+	}
+}
+fragment allPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`,
+		Variables: &__PackagesInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data PackagesResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func Path(
+	ctx context.Context,
+	client graphql.Client,
+	subject string,
+	target string,
+	maxPathLength int,
+) (*PathResponse, error) {
+	req := &graphql.Request{
+		OpName: "Path",
+		Query: `
+query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
+	path(subject: $subject, target: $target, maxPathLength: $maxPathLength) {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+		... on Builder {
+			... allBuilderTree
+		}
+		... on OSV {
+			... allOSVTree
+		}
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+		... on CertifyScorecard {
+			... allCertifyScorecard
+		}
+		... on CertifyPkg {
+			... allCertifyPkg
+		}
+		... on IsOccurrence {
+			... allIsOccurrencesTree
+		}
+		... on IsDependency {
+			... allIsDependencyTree
+		}
+		... on HasSLSA {
+			... allSLSATree
+		}
+		... on CertifyBad {
+			... allCertifyBad
+		}
+		... on HashEqual {
+			... allHashEqualTree
+		}
+		... on HasSBOM {
+			... allHasSBOMTree
+		}
+		... on HasSourceAt {
+			... allHasSourceAt
+		}
+		... on CertifyVuln {
+			... allCertifyVuln
+		}
+		... on IsVulnerability {
+			... allIsVulnerability
+		}
+		... on CertifyVEXStatement {
+			... allCertifyVEXStatement
+		}
+		... on Builder {
+			... allBuilderTree
+		}
+	}
+}
+fragment allPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment allSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment allArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment allBuilderTree on Builder {
+	id
+	uri
+}
+fragment allOSVTree on OSV {
+	id
+	osvIds {
+		id
+		osvId
+	}
+}
+fragment allCveTree on CVE {
+	id
+	year
+	cveIds {
+		id
+		cveId
+	}
+}
+fragment allGHSATree on GHSA {
+	id
+	ghsaIds {
+		id
+		ghsaId
+	}
+}
+fragment allCertifyScorecard on CertifyScorecard {
+	id
+	source {
+		... allSourceTree
+	}
+	scorecard {
+		timeScanned
+		aggregateScore
+		checks {
+			check
+			score
+		}
+		scorecardVersion
+		scorecardCommit
+		origin
+		collector
+	}
+}
+fragment allCertifyPkg on CertifyPkg {
+	justification
+	packages {
+		... allPkgTree
+	}
+	origin
+	collector
+}
+fragment allIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+	}
+	artifact {
+		... allArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment allIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... allPkgTree
+	}
+	dependentPackage {
+		... allPkgTree
+	}
+	versionRange
+	origin
+	collector
+}
+fragment allSLSATree on HasSLSA {
+	subject {
+		... allArtifactTree
+	}
+	slsa {
+		builtFrom {
+			... allArtifactTree
+		}
+		builtBy {
+			id
+			uri
+		}
+		buildType
+		slsaPredicate {
+			key
+			value
+		}
+		slsaVersion
+		startedOn
+		finishedOn
+		origin
+		collector
+	}
+}
+fragment allCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+}
+fragment allHashEqualTree on HashEqual {
+	id
+	justification
+	artifacts {
+		... allArtifactTree
+	}
+	origin
+	collector
+}
+fragment allHasSBOMTree on HasSBOM {
+	id
+	uri
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Source {
+			... allSourceTree
+		}
+	}
+	origin
+	collector
+}
+fragment allHasSourceAt on HasSourceAt {
+	id
+	justification
+	knownSince
+	package {
+		... allPkgTree
+	}
+	source {
+		... allSourceTree
+	}
+	origin
+	collector
+}
+fragment allCertifyVuln on CertifyVuln {
+	id
+	package {
+		... allPkgTree
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on OSV {
+			... allOSVTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment allIsVulnerability on IsVulnerability {
+	id
+	osv {
+		... allOSVTree
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	origin
+	collector
+}
+fragment allCertifyVEXStatement on CertifyVEXStatement {
+	id
+	subject {
+		__typename
+		... on Package {
+			... allPkgTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+	}
+	justification
+	knownSince
+	origin
+	collector
+}
+`,
+		Variables: &__PathInput{
+			Subject:       subject,
+			Target:        target,
+			MaxPathLength: maxPathLength,
+		},
+	}
+	var err error
+
+	var data PathResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 func SLSAForArtifact(
 	ctx context.Context,
 	client graphql.Client,
@@ -12260,6 +17808,52 @@ fragment allCertifyScorecard on CertifyScorecard {
 	var err error
 
 	var data ScorecardResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func Sources(
+	ctx context.Context,
+	client graphql.Client,
+	filter *SourceSpec,
+) (*SourcesResponse, error) {
+	req := &graphql.Request{
+		OpName: "Sources",
+		Query: `
+query Sources ($filter: SourceSpec) {
+	sources(sourceSpec: $filter) {
+		... allSourceTree
+	}
+}
+fragment allSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`,
+		Variables: &__SourcesInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data SourcesResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

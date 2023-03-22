@@ -62,6 +62,11 @@ fragment allArtifactTree on Artifact {
   digest
 }
 
+fragment allBuilderTree on Builder {
+  id
+  uri
+}
+
 fragment allCveTree on CVE {
   id
   year
@@ -247,6 +252,15 @@ fragment allCertifyVuln on CertifyVuln {
     origin
     collector
   }
+}
+
+fragment allCertifyPkg on CertifyPkg {
+  justification
+  packages {
+    ...allPkgTree
+  }
+  origin
+  collector
 }
 
 fragment allIsVulnerability on IsVulnerability {
