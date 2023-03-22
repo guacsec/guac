@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
@@ -22,8 +22,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // Internal data: link between source and scorecard (certifyScorecard)
@@ -40,13 +41,13 @@ type scorecardLink struct {
 	collector        string
 }
 
-func (n *scorecardLink) getID() uint32 { return n.id }
+func (n *scorecardLink) ID() uint32 { return n.id }
 
-func (n *scorecardLink) neighbors() []uint32 {
+func (n *scorecardLink) Neighbors() []uint32 {
 	return []uint32{n.sourceID}
 }
 
-func (n *scorecardLink) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *scorecardLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildScorecard(n, nil, true)
 }
 

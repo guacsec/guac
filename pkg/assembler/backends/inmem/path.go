@@ -13,14 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"strconv"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (c *demoClient) Path(ctx context.Context, source string, target string, maxPathLength int) ([]model.Node, error) {
@@ -63,7 +64,7 @@ func (c *demoClient) buildModelNodes(nodeIDs []uint32) ([]model.Node, error) {
 		}
 		var err error
 
-		out[i], err = node.buildModelNode(c)
+		out[i], err = node.BuildModelNode(c)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +78,7 @@ func (c *demoClient) neighborsFromId(id uint32) ([]uint32, error) {
 	if !ok {
 		return nil, gqlerror.Errorf("ID does not match existing node")
 	}
-	return node.neighbors(), nil
+	return node.Neighbors(), nil
 }
 
 func (c *demoClient) bfs(from, to uint32, maxLength int) ([]model.Node, error) {

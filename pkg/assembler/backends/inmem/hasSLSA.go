@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
@@ -23,9 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/exp/slices"
 )
 
 type hasSLSAList []*hasSLSAStruct
@@ -43,9 +44,9 @@ type hasSLSAStruct struct {
 	collector  string
 }
 
-func (n *hasSLSAStruct) getID() uint32 { return n.id }
+func (n *hasSLSAStruct) ID() uint32 { return n.id }
 
-func (n *hasSLSAStruct) neighbors() []uint32 {
+func (n *hasSLSAStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, 2+len(n.builtFrom))
 	out = append(out, n.subject)
 	out = append(out, n.builtBy)
@@ -53,7 +54,7 @@ func (n *hasSLSAStruct) neighbors() []uint32 {
 	return out
 }
 
-func (n *hasSLSAStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *hasSLSAStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convSLSA(n), nil
 }
 
@@ -163,7 +164,7 @@ func (c *demoClient) IngestSLSA(ctx context.Context,
 		bfs = append(bfs, b)
 		bfIDs = append(bfIDs, b.id)
 	}
-	sort.Slice(bfIDs, func(i, j int) bool { return bfIDs[i] < bfIDs[j] })
+	slices.Sort(bfIDs)
 
 	b, err := c.builderByKey(builtBy.URI)
 	if err != nil {
@@ -173,7 +174,7 @@ func (c *demoClient) IngestSLSA(ctx context.Context,
 	preds := convSLSAP(slsa.SlsaPredicate)
 
 	// Just picking the first builtFrom found to search the backedges
-	for _, slID := range bfs[0].getHasSLSAs() {
+	for _, slID := range bfs[0].hasSLSAs {
 		sl, err := c.hasSLSAByID(slID)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestSLSA :: Internal db error, bad backedge")

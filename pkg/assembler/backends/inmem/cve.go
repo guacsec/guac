@@ -13,44 +13,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
-	"log"
 	"strconv"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func registerAllCVE(client *demoClient) {
-	ctx := context.Background()
+// func registerAllCVE(client *demoClient) {
+// 	ctx := context.Background()
 
-	inputs := []model.CVEInputSpec{{
-		Year:  2019,
-		CveID: "CVE-2019-13110",
-	}, {
-		Year:  2014,
-		CveID: "CVE-2014-8139",
-	}, {
-		Year:  2014,
-		CveID: "CVE-2014-8140",
-	}, {
-		Year:  2022,
-		CveID: "CVE-2022-26499",
-	}, {
-		Year:  2014,
-		CveID: "CVE-2014-8140",
-	}}
-	for _, input := range inputs {
-		_, err := client.IngestCve(ctx, &input)
-		if err != nil {
-			log.Printf("Error in ingesting: %v\n", err)
-		}
-	}
-}
+// 	inputs := []model.CVEInputSpec{{
+// 		Year:  2019,
+// 		CveID: "CVE-2019-13110",
+// 	}, {
+// 		Year:  2014,
+// 		CveID: "CVE-2014-8139",
+// 	}, {
+// 		Year:  2014,
+// 		CveID: "CVE-2014-8140",
+// 	}, {
+// 		Year:  2022,
+// 		CveID: "CVE-2022-26499",
+// 	}, {
+// 		Year:  2014,
+// 		CveID: "CVE-2014-8140",
+// 	}}
+// 	for _, input := range inputs {
+// 		_, err := client.IngestCve(ctx, &input)
+// 		if err != nil {
+// 			log.Printf("Error in ingesting: %v\n", err)
+// 		}
+// 	}
+// }
 
 // Internal data: osv
 type cveMap map[int]*cveNode
@@ -69,10 +69,10 @@ type cveIDNode struct {
 	vexLinks         []uint32
 }
 
-func (n *cveIDNode) getID() uint32 { return n.id }
-func (n *cveNode) getID() uint32   { return n.id }
+func (n *cveIDNode) ID() uint32 { return n.id }
+func (n *cveNode) ID() uint32   { return n.id }
 
-func (n *cveNode) neighbors() []uint32 {
+func (n *cveNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, len(n.cveIDs))
 	for _, v := range n.cveIDs {
 		out = append(out, v.id)
@@ -80,7 +80,7 @@ func (n *cveNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *cveIDNode) neighbors() []uint32 {
+func (n *cveIDNode) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
 	out = append(out, n.certifyVulnLinks...)
 	out = append(out, n.equalVulnLinks...)
@@ -89,10 +89,10 @@ func (n *cveIDNode) neighbors() []uint32 {
 	return out
 }
 
-func (n *cveIDNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *cveIDNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildCveResponse(n.id, nil)
 }
-func (n *cveNode) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *cveNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildCveResponse(n.id, nil)
 }
 

@@ -13,16 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
 	"strconv"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
+
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal data: link that a package/source/artifact is bad
@@ -37,9 +38,9 @@ type badLink struct {
 	collector     string
 }
 
-func (n *badLink) getID() uint32 { return n.id }
+func (n *badLink) ID() uint32 { return n.id }
 
-func (n *badLink) neighbors() []uint32 {
+func (n *badLink) Neighbors() []uint32 {
 	out := make([]uint32, 0, 1)
 	if n.packageID != 0 {
 		out = append(out, n.packageID)
@@ -53,7 +54,7 @@ func (n *badLink) neighbors() []uint32 {
 	return out
 }
 
-func (n *badLink) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *badLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildCertifyBad(n, nil, true)
 }
 

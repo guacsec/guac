@@ -13,15 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
 	"strconv"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 type builderMap map[string]*builderStruct
@@ -31,11 +32,11 @@ type builderStruct struct {
 	hasSLSAs []uint32
 }
 
-func (b *builderStruct) getID() uint32 { return b.id }
+func (b *builderStruct) ID() uint32 { return b.id }
 
-func (b *builderStruct) neighbors() []uint32 { return b.hasSLSAs }
+func (b *builderStruct) Neighbors() []uint32 { return b.hasSLSAs }
 
-func (b *builderStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (b *builderStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convBuilder(b), nil
 }
 

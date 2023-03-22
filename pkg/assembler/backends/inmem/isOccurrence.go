@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
@@ -26,8 +26,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
-
-const maxUint32 = ^uint32(0)
 
 // Internal isOccurrence
 
@@ -42,22 +40,21 @@ type isOccurrenceStruct struct {
 	collector     string
 }
 
-func (n *isOccurrenceStruct) getID() uint32 { return n.id }
+func (n *isOccurrenceStruct) ID() uint32 { return n.id }
 
-func (n *isOccurrenceStruct) neighbors() []uint32 {
+func (n *isOccurrenceStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, 3)
-	// TODO: replace maxUint32 with 0
-	if n.pkg != maxUint32 {
+	if n.pkg != 0 {
 		out = append(out, n.pkg)
 	}
-	if n.source != maxUint32 {
+	if n.source != 0 {
 		out = append(out, n.source)
 	}
 	out = append(out, n.artifact)
 	return out
 }
 
-func (n *isOccurrenceStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *isOccurrenceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convOccurrence(n), nil
 }
 
@@ -77,7 +74,7 @@ func (n *isOccurrenceStruct) buildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	_, err = client.registerIsOccurrence(selectedPackage[0], nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is an occurrence of this package", "testing backend", "testing backend")
+// 	_, err = client.registerIsOccurrence(selectedPackage[0], nil, &model.Artifact{Digest: "5a787865sd676dacb0142afa0b83029cd7befd9", Algorithm: "sha1"}, "this artifact is an occurrence of this package", "inmem backend", "inmem backend")
 // 	if err != nil {
 // 		return err
 // 	}
@@ -92,7 +89,7 @@ func (n *isOccurrenceStruct) buildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	//_, err = client.registerIsOccurrence(nil, selectedSource[0], client.artifacts[0], "this artifact is an occurrence of this source", "testing backend", "testing backend")
+// 	//_, err = client.registerIsOccurrence(nil, selectedSource[0], client.artifacts[0], "this artifact is an occurrence of this source", "inmem backend", "inmem backend")
 // 	if err != nil {
 // 		return err
 // 	}
@@ -110,7 +107,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 		return nil, gqlerror.Errorf("IngestOccurrence :: Artifact not found")
 	}
 
-	packageID := maxUint32
+	var packageID uint32
 	if subject.Package != nil {
 		var pmt model.MatchFlags
 		pmt.Pkg = model.PkgMatchTypeSpecificVersion
@@ -121,7 +118,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 		packageID = pid
 	}
 
-	sourceID := maxUint32
+	var sourceID uint32
 	if subject.Source != nil {
 		sid, err := getSourceIDFromInput(c, *subject.Source)
 		if err != nil {
@@ -153,7 +150,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 	}
 	c.index[o.id] = o
 	a.setOccurrences(o.id)
-	if packageID != maxUint32 {
+	if packageID != 0 {
 		p, _ := c.pkgVersionByID(packageID)
 		p.setOccurrenceLinks(o.id)
 	} else {
@@ -186,7 +183,7 @@ func (c *demoClient) convOccurrence(in *isOccurrenceStruct) *model.IsOccurrence 
 		Origin:        in.origin,
 		Collector:     in.collector,
 	}
-	if in.pkg != maxUint32 {
+	if in.pkg != 0 {
 		p, _ := c.buildPackageResponse(in.pkg, nil)
 		o.Subject = p
 	} else {
@@ -250,7 +247,7 @@ func (c *demoClient) IsOccurrence(ctx context.Context, ioSpec *model.IsOccurrenc
 		}
 		if ioSpec.Subject != nil {
 			if ioSpec.Subject.Package != nil {
-				if o.pkg == maxUint32 {
+				if o.pkg == 0 {
 					continue
 				}
 				p, err := c.buildPackageResponse(o.pkg, ioSpec.Subject.Package)
@@ -261,7 +258,7 @@ func (c *demoClient) IsOccurrence(ctx context.Context, ioSpec *model.IsOccurrenc
 					continue
 				}
 			} else if ioSpec.Subject.Source != nil {
-				if o.source == maxUint32 {
+				if o.source == 0 {
 					continue
 				}
 				s, err := c.buildSourceResponse(o.source, ioSpec.Subject.Source)

@@ -13,16 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
 	"errors"
 	"strconv"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"golang.org/x/exp/slices"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 type certifyPkgList []*certifyPkgStruct
@@ -34,10 +35,10 @@ type certifyPkgStruct struct {
 	collector     string
 }
 
-func (n *certifyPkgStruct) getID() uint32       { return n.id }
-func (n *certifyPkgStruct) neighbors() []uint32 { return n.pkgs }
+func (n *certifyPkgStruct) ID() uint32          { return n.id }
+func (n *certifyPkgStruct) Neighbors() []uint32 { return n.pkgs }
 
-func (n *certifyPkgStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *certifyPkgStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convCertifyPkg(n), nil
 }
 
@@ -72,7 +73,7 @@ func (n *certifyPkgStruct) buildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	client.registerCertifyPkg([]*model.Package{selectedPackage1[0], selectedPackage2[0]}, "these two opnessl packages are the same", "testing backend", "testing backend")
+// 	client.registerCertifyPkg([]*model.Package{selectedPackage1[0], selectedPackage2[0]}, "these two opnessl packages are the same", "inmem backend", "inmem backend")
 
 // 	// pkg:pypi/django@1.11.1
 // 	// client.registerPackage("pypi", "", "django", "1.11.1", "")
@@ -101,7 +102,7 @@ func (n *certifyPkgStruct) buildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	client.registerCertifyPkg([]*model.Package{selectedPackage3[0], selectedPackage4[0]}, "these two pypi packages are the same", "testing backend", "testing backend")
+// 	client.registerCertifyPkg([]*model.Package{selectedPackage3[0], selectedPackage4[0]}, "these two pypi packages are the same", "inmem backend", "inmem backend")
 
 // 	return nil
 // }

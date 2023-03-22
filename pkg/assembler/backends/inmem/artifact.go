@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"context"
@@ -40,9 +40,9 @@ type artStruct struct {
 	badLinks    []uint32
 }
 
-func (n *artStruct) getID() uint32 { return n.id }
+func (n *artStruct) ID() uint32 { return n.id }
 
-func (n *artStruct) neighbors() []uint32 {
+func (n *artStruct) Neighbors() []uint32 {
 	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences)+len(n.hasSLSAs)+len(n.vexLinks)+len(n.badLinks))
 	out = append(out, n.hashEquals...)
 	out = append(out, n.occurrences...)
@@ -52,22 +52,15 @@ func (n *artStruct) neighbors() []uint32 {
 	return out
 }
 
-func (n *artStruct) buildModelNode(c *demoClient) (model.Node, error) {
+func (n *artStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convArtifact(n), nil
 }
 
-func (n *artStruct) setHashEquals(id uint32) { n.hashEquals = append(n.hashEquals, id) }
-
-func (n *artStruct) setOccurrences(id uint32) { n.occurrences = append(n.occurrences, id) }
-
-func (n *artStruct) getHasSLSAs() []uint32 { return n.hasSLSAs }
-func (n *artStruct) setHasSLSAs(id uint32) { n.hasSLSAs = append(n.hasSLSAs, id) }
-
-// certifyVexStatement back edges
-func (n *artStruct) setVexLinks(id uint32) { n.vexLinks = append(n.vexLinks, id) }
-
-// occurrence back edges
-func (p *artStruct) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
+func (n *artStruct) setHashEquals(id uint32)      { n.hashEquals = append(n.hashEquals, id) }
+func (n *artStruct) setOccurrences(id uint32)     { n.occurrences = append(n.occurrences, id) }
+func (n *artStruct) setHasSLSAs(id uint32)        { n.hasSLSAs = append(n.hasSLSAs, id) }
+func (n *artStruct) setVexLinks(id uint32)        { n.vexLinks = append(n.vexLinks, id) }
+func (n *artStruct) setCertifyBadLinks(id uint32) { n.badLinks = append(n.badLinks, id) }
 
 // TODO convert to unit tests
 // func registerAllArtifacts(c *demoClient) {

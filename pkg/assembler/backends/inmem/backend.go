@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testing
+package inmem
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ type DemoCredentials struct{}
 
 // node is the common interface of all backend nodes.
 type node interface {
-	// getID provides global IDs for all nodes that can be referenced from
+	// ID provides global IDs for all nodes that can be referenced from
 	// other places in GUAC.
 	//
 	// Since we always ingest data and never remove,
@@ -39,16 +39,16 @@ type node interface {
 	//
 	// IDs are stored as string in graphql even though we ask for integers
 	// See https://github.com/99designs/gqlgen/issues/2561
-	getID() uint32
+	ID() uint32
 
-	// neighbors allows retrieving neighbors of a node using the backlinks.
+	// Neighbors allows retrieving neighbors of a node using the backlinks.
 	//
 	// This is useful for path related queries where the type of the node
 	// is not as relevant as its connections.
-	neighbors() []uint32
+	Neighbors() []uint32
 
-	// buildModelNode builds a GraphQL return type for a backend node,
-	buildModelNode(c *demoClient) (model.Node, error)
+	// BuildModelNode builds a GraphQL return type for a backend node,
+	BuildModelNode(c *demoClient) (model.Node, error)
 }
 
 type indexType map[uint32]node
