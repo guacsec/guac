@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	mocks "github.com/guacsec/guac/internal/testing/mock"
+	mock_scorecard "github.com/guacsec/guac/internal/testing/mock"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -32,7 +32,7 @@ import (
 
 type mockScorecard struct{}
 
-func (m mockScorecard) GetScore(repoName, commitSHA string) (*pkg.ScorecardResult, error) {
+func (m mockScorecard) GetScore(repoName, commitSHA, tag string) (*pkg.ScorecardResult, error) {
 	return &pkg.ScorecardResult{}, nil
 }
 
@@ -126,7 +126,7 @@ func Test_CertifyComponent(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "root component is not an artifact node",
+			name: "root component is not an source.SourceNode",
 			fields: fields{
 				ghToken:    "",
 				sourceNode: &source.SourceNode{},
@@ -138,7 +138,7 @@ func Test_CertifyComponent(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "artifactNode.Digest error",
+			name: "SourceNode.Digest error",
 			fields: fields{
 				ghToken:    "",
 				sourceNode: &source.SourceNode{},
@@ -183,9 +183,9 @@ func Test_CertifyComponent(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			sc := mocks.NewMockScorecard(ctrl)
-			sc.EXPECT().GetScore(gomock.Any(), gomock.Any()).
-				DoAndReturn(func(a, b string) (*pkg.ScorecardResult, error) {
+			sc := mock_scorecard.NewMockScorecard(ctrl)
+			sc.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
+				DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
 					if test.getScoreShouldReturnErr {
 						return nil, fmt.Errorf("error")
 					}
@@ -208,16 +208,17 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	defer cancel()
 
 	ctrl := gomock.NewController(t)
-	scMock := mocks.NewMockScorecard(ctrl)
-	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(a, b string) (*pkg.ScorecardResult, error) {
+	scMock := mock_scorecard.NewMockScorecard(ctrl)
+	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
+		DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
 			return &pkg.ScorecardResult{}, nil
 		}).AnyTimes()
 
 	// Create a mock source.SourceNode to use as input
 	source := &source.SourceNode{
-		Repo:   "git+myrepo",
+		Repo:   "myrepo",
 		Commit: "abc123",
+		Tag:    "",
 	}
 
 	// Create a mock Scorecard instance to use

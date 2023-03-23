@@ -35,7 +35,7 @@ type scorecard struct {
 	ghToken   string
 }
 
-var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *source.SourceNode")
+var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not source.SourceNode")
 
 // CertifyComponent is a certifier that generates scorecard attestations
 func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
@@ -54,15 +54,15 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		return ErrArtifactNodeTypeMismatch
 	}
 
-	// if sourceNode.Commit == "" {
-	// 	return fmt.Errorf("source commit cannot be empty")
-	// }
+	if sourceNode.Commit == "" {
+		sourceNode.Commit = "HEAD"
+	}
 
 	if sourceNode.Repo == "" {
 		return fmt.Errorf("source repo cannot be empty")
 	}
 
-	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit)
+	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit, sourceNode.Tag)
 	if err != nil {
 		return fmt.Errorf("error getting scorecard result: %w", err)
 	}
@@ -83,8 +83,12 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		Type:   processor.DocumentScorecard,
 		SourceInformation: processor.SourceInformation{
 			Collector: "scorecard",
-			Source:    sourceNode.Repo + "@" + sourceNode.Commit,
 		},
+	}
+	if sourceNode.Commit != "" {
+		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Commit
+	} else {
+		res.SourceInformation.Source = sourceNode.Repo + "@" + sourceNode.Tag
 	}
 
 	docChannel <- &res

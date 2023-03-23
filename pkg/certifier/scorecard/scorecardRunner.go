@@ -30,7 +30,7 @@ type scorecardRunner struct {
 	ctx context.Context
 }
 
-func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResult, error) {
+func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error) {
 	// Can't use guacs standard logger because scorecard uses a different logger.
 	defaultLogger := log.NewLogger(log.DefaultLevel)
 	repo, repoClient, ossFuzzClient, ciiClient, vulnsClient, err := checker.GetClients(s.ctx, repoName, "", defaultLogger)
@@ -58,6 +58,24 @@ func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResu
 		checks.CheckSignedReleases:       {Fn: checks.SignedReleases},
 		checks.CheckTokenPermissions:     {Fn: checks.TokenPermissions},
 		checks.CheckWebHooks:             {Fn: checks.WebHooks},
+	}
+	if tag != "" {
+		if err := repoClient.InitRepo(repo, commitSHA, 0); err != nil {
+			return nil, fmt.Errorf("error, failed to initialize repoClient: %w", err)
+		}
+		defer repoClient.Close()
+
+		releases, err := repoClient.ListReleases()
+		if err != nil {
+			return nil, fmt.Errorf("error, failed to run releases: %w", err)
+
+		}
+
+		for _, release := range releases {
+			if release.TagName == tag {
+				commitSHA = release.TargetCommitish
+			}
+		}
 	}
 
 	res, err := sc.RunScorecard(s.ctx, repo, commitSHA, 0, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)

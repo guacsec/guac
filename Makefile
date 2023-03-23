@@ -94,6 +94,7 @@ fmt-md:
 .PHONY: generate
 generate:
 	go generate ./...
+	mockgen -source=pkg/certifier/scorecard/types.go -destination=internal/testing/mock/scorecard.go mocks
 
 .PHONY: container
 container: check-docker-tool-check
@@ -139,6 +140,14 @@ check-golangci-lint-tool-check:
 		exit 1; \
 	fi
 
+# Check that mockgen is installed.
+.PHONY: check-mockgen-tool-check
+check-mockgen-tool-check:
+	@if ! command -v mockgen &> /dev/null; then \
+		echo "mockgen is not installed. Please install mockgen and try again."; \
+		exit 1; \
+	fi
+
 # Check that all the tools are installed.
 .PHONY: check-tools
-check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check
+check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check

@@ -45,7 +45,7 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 				t.Errorf("GITHUB_AUTH_TOKEN is not set")
 			}
 			t.Setenv("GITHUB_AUTH_TOKEN", ghToken)
-			got, err := test.sc.GetScore("github.com/ossf/scorecard", "HEAD")
+			got, err := test.sc.GetScore("github.com/ossf/scorecard", "HEAD", "")
 			if (err != nil) != test.wantErr {
 				t.Errorf("GetScore() error = %v, wantErr %v", err, test.wantErr)
 				return
