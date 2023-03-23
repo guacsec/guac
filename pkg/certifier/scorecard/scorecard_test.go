@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	mock_scorecard "github.com/guacsec/guac/internal/testing/mock"
+	"github.com/guacsec/guac/internal/testing/mocks"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -183,7 +183,7 @@ func Test_CertifyComponent(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			sc := mock_scorecard.NewMockScorecard(ctrl)
+			sc := mocks.NewMockScorecard(ctrl)
 			sc.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
 				DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
 					if test.getScoreShouldReturnErr {
@@ -208,7 +208,7 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	defer cancel()
 
 	ctrl := gomock.NewController(t)
-	scMock := mock_scorecard.NewMockScorecard(ctrl)
+	scMock := mocks.NewMockScorecard(ctrl)
 	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
 		DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
 			return &pkg.ScorecardResult{}, nil

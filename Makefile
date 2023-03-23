@@ -90,11 +90,10 @@ format: fmt-md
 fmt-md:
 	npx --yes prettier --write --prose-wrap always **/*.md
 
-# generate code from autogen tools (gqlgen, genqlclient)
+# generate code from autogen tools (gqlgen, genqlclient, mockgen)
 .PHONY: generate
 generate:
 	go generate ./...
-	mockgen -source=pkg/certifier/scorecard/types.go -destination=internal/testing/mock/scorecard.go mocks
 
 .PHONY: container
 container: check-docker-tool-check
