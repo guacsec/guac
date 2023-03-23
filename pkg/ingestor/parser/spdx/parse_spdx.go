@@ -257,10 +257,6 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	return preds
 }
 
-func getIsDep(packNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) {
-	panic("unimplemented")
-}
-
 func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }

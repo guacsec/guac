@@ -176,7 +176,7 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 			for _, depPkg := range *deps.Dependencies {
 				if depPkg, exist := c.packagePackages[depPkg]; exist {
 					for _, packNode := range currPkg {
-						p, err := common.GetIsDep(packNode, depPkg, []model.PkgInputSpec{}, "BOM Dependency")
+						p, err := common.GetIsDep(packNode, depPkg, []model.PkgInputSpec{}, "CDX BOM Dependency")
 						if err != nil {
 							logger.Errorf("error generating CycloneDX edge %v", err)
 							continue

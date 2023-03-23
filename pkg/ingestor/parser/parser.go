@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
@@ -177,31 +176,4 @@ func parseHelper(ctx context.Context, doc *processor.Document) (*common.GraphBui
 	graphBuilder := common.NewGenericGraphBuilder(p, p.GetIdentities(ctx))
 
 	return graphBuilder, nil
-}
-
-func getIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
-	if len(relatedFileNodes) > 0 {
-		for _, rfileNode := range relatedFileNodes {
-			// TODO: Check is this always just expected to be one?
-			return &assembler.IsDependencyIngest{
-				Pkg:    &foundNode,
-				DepPkg: &rfileNode,
-				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-				},
-			}, nil
-		}
-	} else if len(relatedPackNodes) > 0 {
-		for _, rpackNode := range relatedPackNodes {
-			return &assembler.IsDependencyIngest{
-				Pkg:    &foundNode,
-				DepPkg: &rpackNode,
-				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-				},
-			}, nil
-
-		}
-	}
-	return nil, nil
 }

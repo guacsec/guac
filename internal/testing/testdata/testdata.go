@@ -325,7 +325,7 @@ var (
 		Justification: "Derived from SPDX DEPENDS_ON relationship",
 	}
 	isCDXDepJustifyDepends = &model.IsDependencyInputSpec{
-		Justification: "BOM Dependency",
+		Justification: "CDX BOM Dependency",
 	}
 
 	isOccJustifyFile = &model.IsOccurrenceInputSpec{
