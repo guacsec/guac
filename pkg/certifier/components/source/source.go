@@ -55,19 +55,25 @@ func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- inte
 				if err != nil {
 					return fmt.Errorf("failed neighbors query: %w", err)
 				}
+				scorecardList := []*generated.NeighborsNeighborsCertifyScorecard{}
 				scoreCardFound := false
 				for _, neighbor := range response.Neighbors {
 					scorecardNode, ok := neighbor.(*generated.NeighborsNeighborsCertifyScorecard)
 					if ok {
-						if s.daysSinceLastScan != 0 {
-							now := time.Now()
-							difference := scorecardNode.Scorecard.TimeScanned.Sub(now)
-							if difference.Hours() < float64(s.daysSinceLastScan*24) {
-								scoreCardFound = true
-							}
-						} else {
+						scorecardList = append(scorecardList, scorecardNode)
+					}
+				}
+				// collect all scorecardNodes and then check timestamp else if not checking timestamp,
+				// if a scorecard is found break out
+				for _, scorecardNode := range scorecardList {
+					if s.daysSinceLastScan != 0 {
+						now := time.Now()
+						difference := scorecardNode.Scorecard.TimeScanned.Sub(now)
+						if difference.Hours() < float64(s.daysSinceLastScan*24) {
 							scoreCardFound = true
 						}
+					} else {
+						scoreCardFound = true
 						break
 					}
 				}
@@ -99,7 +105,11 @@ func trimAlgorithm(commit string) string {
 		return commit
 	} else {
 		commitSplit := strings.Split(commit, ":")
-		return commitSplit[1]
+		if len(commitSplit) == 2 {
+			return commitSplit[1]
+		} else {
+			return commitSplit[0]
+		}
 	}
 }
 
