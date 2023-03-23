@@ -201,7 +201,7 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 // Query Source
 
 func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
-	if filter.Commit != nil && filter.Tag != nil {
+	if filter != nil && filter.Commit != nil && filter.Tag != nil {
 		if *filter.Commit != "" && *filter.Tag != "" {
 			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
 		}

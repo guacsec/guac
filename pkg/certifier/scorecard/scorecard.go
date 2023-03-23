@@ -54,10 +54,9 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		return ErrArtifactNodeTypeMismatch
 	}
 
-	// s.artifact.Digest is the commit SHA
-	if sourceNode.Commit == "" {
-		return fmt.Errorf("source commit cannot be empty")
-	}
+	// if sourceNode.Commit == "" {
+	// 	return fmt.Errorf("source commit cannot be empty")
+	// }
 
 	if sourceNode.Repo == "" {
 		return fmt.Errorf("source repo cannot be empty")

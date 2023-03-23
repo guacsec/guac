@@ -37,12 +37,11 @@ type SourceNode struct {
 	Tag    string
 }
 
+// TODO: Add integration tests, have not added it yet because the code needs data to be present in the graphdb to test it
 func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
-	// TODO: Add integration tests, have not added it yet because the code needs data to be present in the graphdb to test it
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
 	}
-	// TODO: specify scorecard time-scanned to determine when they are out of data and need to be re-scanned again.
 	response, err := generated.Sources(ctx, s.client, nil)
 	if err != nil {
 		return fmt.Errorf("failed sources query: %w", err)
@@ -74,7 +73,7 @@ func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- inte
 				}
 				if !scoreCardFound {
 					sourceNode := SourceNode{
-						Repo:   namespace.Namespace + "/" + names.Name,
+						Repo:   names.Name,
 						Commit: trimAlgorithm(nilOrEmpty(names.Commit)),
 						Tag:    nilOrEmpty(names.Tag),
 					}
