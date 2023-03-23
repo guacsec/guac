@@ -90,7 +90,7 @@ format: fmt-md
 fmt-md:
 	npx --yes prettier --write --prose-wrap always **/*.md
 
-# generate code from autogen tools (gqlgen, genqlclient)
+# generate code from autogen tools (gqlgen, genqlclient, mockgen)
 .PHONY: generate
 generate:
 	go generate ./...
@@ -139,6 +139,14 @@ check-golangci-lint-tool-check:
 		exit 1; \
 	fi
 
+# Check that mockgen is installed.
+.PHONY: check-mockgen-tool-check
+check-mockgen-tool-check:
+	@if ! command -v mockgen &> /dev/null; then \
+		echo "mockgen is not installed. Please install mockgen and try again."; \
+		exit 1; \
+	fi
+
 # Check that all the tools are installed.
 .PHONY: check-tools
-check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check
+check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check

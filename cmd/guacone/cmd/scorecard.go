@@ -18,15 +18,16 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
-	sc "github.com/guacsec/guac/pkg/certifier/components/source_artifact"
+	"github.com/Khan/genqlient/graphql"
+	sc "github.com/guacsec/guac/pkg/certifier/components/source"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"
 
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -46,6 +47,7 @@ var scorecardCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
+			viper.GetString("gql-endpoint"),
 		)
 
 		if err != nil {
@@ -61,12 +63,9 @@ var scorecardCmd = &cobra.Command{
 			_ = cmd.Help()
 			os.Exit(1)
 		}
-		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
-		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+
+		httpClient := http.Client{}
+		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		// running and getting the scorecard checks
 		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner)
@@ -77,8 +76,9 @@ var scorecardCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// scorecard certifier is the certifier that gets the scorecard data from the graph
-		query, err := sc.NewCertifier(client)
+		// scorecard certifier is the certifier that gets the scorecard data graphQL
+		// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
+		query, err := sc.NewCertifier(gqlclient, 0)
 
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
@@ -160,12 +160,13 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(user string, pass string, dbAddr string, realm string) (options, error) {
+func validateScorecardFlags(user string, pass string, dbAddr string, realm string, graphqlEndpoint string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.graphqlEndpoint = graphqlEndpoint
 
 	return opts, nil
 }

@@ -32,13 +32,15 @@ type PackageComponent struct {
 }
 
 type packageQuery struct {
-	client graphdb.Client
+	client            graphdb.Client
+	daysSinceLastScan int
 }
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
-func NewPackageQuery(client graphdb.Client) certifier.QueryComponents {
+func NewPackageQuery(client graphdb.Client, daysSinceLastScan int) certifier.QueryComponents {
 	return &packageQuery{
-		client: client,
+		client:            client,
+		daysSinceLastScan: daysSinceLastScan,
 	}
 }
 

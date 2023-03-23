@@ -13,13 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build tools
-// +build tools
+package mocks
 
-package tools
+//go:generate go run github.com/golang/mock/mockgen -source=../../../pkg/certifier/scorecard/types.go -destination=../../../internal/testing/mocks/scorecard.go -package mocks
 
-import (
-	_ "github.com/99designs/gqlgen"
-	_ "github.com/Khan/genqlient"
-	_ "github.com/golang/mock/mockgen"
-)
+// This file is currently empty and used only to allow generating the mocked code via mockgen
+// by executing `go generate ./...`.

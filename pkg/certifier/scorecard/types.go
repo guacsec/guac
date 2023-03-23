@@ -21,5 +21,5 @@ import (
 
 // Scorecard is an interface for the scorecard library. This can also be mocked for testing.
 type Scorecard interface {
-	GetScore(repoName, commitSHA string) (*sc.ScorecardResult, error)
+	GetScore(repoName, commitSHA, tag string) (*sc.ScorecardResult, error)
 }

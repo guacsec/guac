@@ -202,7 +202,7 @@ func getCertifierPublish(ctx context.Context) (func(*processor.Document) error, 
 
 func getPackageQuery(client neo4j.Driver) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client)
+		packageQuery := root_package.NewPackageQuery(client, 0)
 		return packageQuery
 	}, nil
 }
