@@ -60,7 +60,7 @@ func (s scorecardRunner) GetScore(repoName, commitSHA string) (*sc.ScorecardResu
 		checks.CheckWebHooks:             {Fn: checks.WebHooks},
 	}
 
-	res, err := sc.RunScorecards(s.ctx, repo, commitSHA, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)
+	res, err := sc.RunScorecard(s.ctx, repo, commitSHA, 0, enabledChecks, repoClient, ossFuzzClient, ciiClient, vulnsClient)
 	if err != nil {
 		return nil, fmt.Errorf("error, failed to run scorecard: %w", err)
 	}
