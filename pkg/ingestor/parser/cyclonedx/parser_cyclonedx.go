@@ -122,6 +122,7 @@ func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 					return err
 				}
 				c.packagePackages[string(comp.BOMRef)] = append(c.packagePackages[string(comp.BOMRef)], *pkg)
+				//TODO(dejanb): Parse hashes and create artifact nodes and isOccurence relations https://github.com/guacsec/guac/issues/632
 			}
 		}
 	}
