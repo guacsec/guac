@@ -37,7 +37,7 @@ type SourceNode struct {
 	Tag    string
 }
 
-// TODO: Add integration tests, have not added it yet because the code needs data to be present in the graphdb to test it
+// TODO: Add tests (either mocked unit or integration) to ensure query functionality
 func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")

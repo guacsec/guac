@@ -74,6 +74,7 @@ func (s scorecardRunner) GetScore(repoName, commitSHA, tag string) (*sc.Scorecar
 		for _, release := range releases {
 			if release.TagName == tag {
 				commitSHA = release.TargetCommitish
+				break
 			}
 		}
 	}
