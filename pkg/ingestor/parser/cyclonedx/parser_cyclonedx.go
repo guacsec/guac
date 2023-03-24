@@ -69,6 +69,7 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 		purl := cdxBom.Metadata.Component.PackageURL
 		if cdxBom.Metadata.Component.PackageURL == "" {
 			if cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
+				//TODO(dejanb): Change prefix to pkg:guac/cdx and align it with spdx implementation
 				splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
 
 				const (
