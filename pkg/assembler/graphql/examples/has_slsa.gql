@@ -1,4 +1,4 @@
-fragment allSLSATree on HasSLSA {
+fragment allHasSLSATree on HasSLSA {
   id
   subject {
       id
@@ -30,36 +30,36 @@ fragment allSLSATree on HasSLSA {
 
 query SLSAQ1 {
   HasSLSA(hasSLSASpec: {}) {
-    ...allSLSATree
+    ...allHasSLSATree
   }
 }
 
 query SLSAQ2 {
   HasSLSA(hasSLSASpec: {origin: "Demo ingestion"}) {
-    ...allSLSATree
+    ...allHasSLSATree
   }
 }
 
 query SLSAQ3 {
   HasSLSA(hasSLSASpec: {subject: {algorithm: "sha1"}}) {
-    ...allSLSATree
+    ...allHasSLSATree
   }
 }
 
 query SLSAQ4 {
   HasSLSA(hasSLSASpec: {builtFrom: [{algorithm: "sha256"}]}) {
-    ...allSLSATree
+    ...allHasSLSATree
   }
 }
 
 query SLSAQ5 {
   HasSLSA(hasSLSASpec: {id: "47"}) {
-    ...allSLSATree
+    ...allHasSLSATree
   }
 }
 
 query SLSAQ6 {
   HasSLSA(hasSLSASpec: {predicate: { key:"buildDefinition.externalParameters.ref", value:"refs/heads/main"}}) {
-    ...allSLSATree
+    ...allHasSLSATree
   }
 }
