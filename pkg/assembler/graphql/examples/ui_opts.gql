@@ -46,6 +46,70 @@ query GetCertifyVuln($spec: CertifyVulnSpec) {
   }
 }
 
+query GetNeighbors ($nodeId: ID!) {
+  neighbors(node: $nodeId) {
+    __typename
+    ... on Package{
+      ...allPkgTree
+    }
+    ... on Source {
+        ...allSrcTree
+    }
+    ... on Artifact {
+        ...allArtifactTree
+    }
+    ... on Builder {
+        ...allBuilderTree
+    }
+    ... on OSV {
+        ...allOSVTree
+    }
+    ... on CVE {
+        ...allCveTree
+    }
+    ... on GHSA {
+        ...allGHSATree
+    }
+    ... on IsOccurrence {
+        ...allIsOccurrencesTree
+    }
+    ... on IsDependency {
+        ...allIsDependencyTree
+    }
+    ... on IsVulnerability {
+        ...allIsVulnerabilityTree
+    }
+    ... on CertifyVEXStatement {
+        ...allCertifyVEXStatementTree
+    }
+    ... on HashEqual {
+        ...allHashEqualTree
+    }
+    ... on CertifyBad {
+        ...allCertifyBadTree
+    }
+    ... on CertifyPkg {
+        ...allCertifyPkgTree
+    }
+    ... on CertifyScorecard {
+        ...allCertifyScorecardTree
+    }
+    ... on CertifyVuln {
+        ...allCertifyVulnTree
+    }
+    ... on HasSourceAt {
+        ...allHasSourceAtTree
+    }
+    ... on HasSBOM {
+        ...allHasSBOMTree
+    }
+    ... on HasSLSA {
+        ...allHasSLSATree
+    }
+  }
+}
+
+
 query ReachQ1 {
   packages(pkgSpec: {
     type:"deb",
