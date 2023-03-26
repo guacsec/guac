@@ -256,7 +256,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			getPackages = tt.getPackages
 			getNeighbors = tt.getNeighbors
 
-			// docChan to collect artifacts
+			// compChan to collect query components
 			compChan := make(chan interface{}, 1)
 			// errChan to receive error from collectors
 			errChan := make(chan error, 1)

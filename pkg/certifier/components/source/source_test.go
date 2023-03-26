@@ -297,7 +297,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 			getSources = tt.getSources
 			getNeighbors = tt.getNeighbors
 
-			// docChan to collect artifacts
+			// compChan to collect query components
 			compChan := make(chan interface{}, 1)
 			// errChan to receive error from collectors
 			errChan := make(chan error, 1)
