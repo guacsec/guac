@@ -41,6 +41,7 @@ import (
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type parser struct {
@@ -70,7 +71,7 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	c.packages = ps
 	c.isOccs = ios
 	c.vulnData = parseMetadata(statement)
-	vs, ivs, err := parseVulns(statement)
+	vs, ivs, err := parseVulns(ctx, statement)
 	if err != nil {
 		return fmt.Errorf("unable to parse vulns of statement: %w", err)
 	}
@@ -125,8 +126,9 @@ func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.Vulner
 	}
 }
 
-func parseVulns(s *attestation_vuln.VulnerabilityStatement) ([]*generated.OSVInputSpec,
+func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement) ([]*generated.OSVInputSpec,
 	[]assembler.IsVulnIngest, error) {
+	logger := logging.FromContext(ctx)
 	var vs []*generated.OSVInputSpec
 	var ivs []assembler.IsVulnIngest
 	for _, id := range s.Predicate.Scanner.Result {
@@ -136,7 +138,9 @@ func parseVulns(s *attestation_vuln.VulnerabilityStatement) ([]*generated.OSVInp
 		vs = append(vs, v)
 		cve, ghsa, err := helpers.OSVToGHSACVE(id.VulnerabilityId)
 		if err != nil {
-			return nil, nil, fmt.Errorf("could not parse vuln id in attestation: %w", err)
+			// TODO: should this return an error?
+			logger.Errorf("could not parse vuln id in attestation: %w", err)
+			continue
 		}
 		iv := assembler.IsVulnIngest{
 			OSV:  v,

@@ -21,13 +21,13 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
   path(subject: $subject, target: $target, maxPathLength: $maxPathLength) {
     __typename
     ... on Package {
-      ... allPkgTree
+      ... AllPkgTree
     }
     ... on Source {
       ... allSourceTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
     ... on Builder {
       ...allBuilderTree
@@ -48,7 +48,7 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
       ...allCertifyPkg
     }
     ... on IsOccurrence {
-      ...allIsOccurrencesTree
+      ...AllIsOccurrencesTree
     }
     ... on IsDependency {
       ...allIsDependencyTree
@@ -69,7 +69,7 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
       ...allHasSourceAt
     }
     ... on CertifyVuln {
-      ...allCertifyVuln
+      ...AllCertifyVuln
     }
     ... on IsVulnerability {
       ...allIsVulnerability
@@ -87,13 +87,13 @@ query Neighbors($node: ID!) {
   neighbors(node: $node) {
     __typename
     ... on Package {
-      ... allPkgTree
+      ... AllPkgTree
     }
     ... on Source {
       ... allSourceTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
     ... on Builder {
       ...allBuilderTree
@@ -114,7 +114,7 @@ query Neighbors($node: ID!) {
       ...allCertifyPkg
     }
     ... on IsOccurrence {
-      ...allIsOccurrencesTree
+      ...AllIsOccurrencesTree
     }
     ... on IsDependency {
       ...allIsDependencyTree
@@ -135,7 +135,7 @@ query Neighbors($node: ID!) {
       ...allHasSourceAt
     }
     ... on CertifyVuln {
-      ...allCertifyVuln
+      ...AllCertifyVuln
     }
     ... on IsVulnerability {
       ...allIsVulnerability

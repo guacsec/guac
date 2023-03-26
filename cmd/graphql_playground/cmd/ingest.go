@@ -41,11 +41,11 @@ func ingestData(port int) {
 
 	start := time.Now()
 	logger.Infof("Ingesting test data into backend server")
-	ingestScorecards(ctx, gqlclient)
+	//ingestScorecards(ctx, gqlclient)
 	ingestSLSA(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
-	ingestVulnerability(ctx, gqlclient)
+	//ingestVulnerability(ctx, gqlclient)
 	ingestCertifyPkg(ctx, gqlclient)
 	ingestCertifyBad(ctx, gqlclient)
 	ingestHashEqual(ctx, gqlclient)
@@ -53,7 +53,7 @@ func ingestData(port int) {
 	ingestHasSourceAt(ctx, gqlclient)
 	ingestIsVulnerability(ctx, gqlclient)
 	ingestVEXStatement(ctx, gqlclient)
-	ingestReachabilityTestData(ctx, gqlclient)
+	//ingestReachabilityTestData(ctx, gqlclient)
 	time := time.Now().Sub(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }

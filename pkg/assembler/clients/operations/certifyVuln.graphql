@@ -19,36 +19,36 @@
 
 mutation CertifyOSV($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
    ingestOSV(osv: $osv) {
     ...allOSVTree
   }
   ingestVulnerability(pkg: $pkg, vulnerability: {osv: $osv}, certifyVuln: $certifyVuln) {
-    ...allCertifyVuln
+    ...AllCertifyVuln
   }
 }
 
 mutation CertifyCVE($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestCVE(cve: $cve) {
     ...allCveTree
   }
   ingestVulnerability(pkg: $pkg, vulnerability: {cve: $cve}, certifyVuln: $certifyVuln) {
-    ...allCertifyVuln
+    ...AllCertifyVuln
   }
 }
 
 mutation CertifyGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestGHSA(ghsa: $ghsa) {
     ...allGHSATree
   }
   ingestVulnerability(pkg: $pkg, vulnerability: {ghsa: $ghsa}, certifyVuln: $certifyVuln) {
-    ...allCertifyVuln
+    ...AllCertifyVuln
   }
 }

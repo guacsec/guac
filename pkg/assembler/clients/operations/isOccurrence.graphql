@@ -19,13 +19,13 @@
 
 mutation IsOccurrencePkg($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   ingestOccurrence(subject: {package: $pkg}, artifact: $artifact, occurrence: $occurrence) {
-    ...allIsOccurrencesTree
+    ...AllIsOccurrencesTree
   }
 }
 
@@ -34,9 +34,9 @@ mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec
     ...allSourceTree
   }
   ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   ingestOccurrence(subject: {source: $source}, artifact: $artifact, occurrence: $occurrence) {
-    ...allIsOccurrencesTree
+    ...AllIsOccurrencesTree
   }
 }

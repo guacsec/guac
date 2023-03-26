@@ -19,11 +19,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"sync"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -32,7 +33,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -62,12 +62,9 @@ var certifierCmd = &cobra.Command{
 			logger.Fatalf("unable to register certifier: %w", err)
 		}
 
-		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
-		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+		// TODO: Fix this with the graphQL endpoint
+		httpClient := http.Client{}
+		gqlclient := graphql.NewClient("", &httpClient)
 
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
@@ -129,7 +126,7 @@ var certifierCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		packageQueryFunc, err := getPackageQuery(client)
+		packageQueryFunc, err := getPackageQuery(gqlclient)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -200,7 +197,7 @@ func getCertifierPublish(ctx context.Context) (func(*processor.Document) error, 
 	}, nil
 }
 
-func getPackageQuery(client neo4j.Driver) (func() certifier.QueryComponents, error) {
+func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
 		packageQuery := root_package.NewPackageQuery(client, 0)
 		return packageQuery

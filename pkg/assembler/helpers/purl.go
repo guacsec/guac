@@ -36,6 +36,21 @@ func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 	return purlConvert(p)
 }
 
+func PkgToPurl(purlType, namespace, name, version, subpath string, qualifiersList []string) string {
+	collectedQualifiers := []purl.Qualifier{}
+	for i := range qualifiersList {
+		if i%2 == 0 {
+			qualifier := purl.Qualifier{
+				Key:   qualifiersList[i],
+				Value: qualifiersList[i+1],
+			}
+			collectedQualifiers = append(collectedQualifiers, qualifier)
+		}
+	}
+	pkg := purl.NewPackageURL(purlType, namespace, name, version, collectedQualifiers, subpath)
+	return pkg.ToString()
+}
+
 func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 	switch p.Type {
 
@@ -132,6 +147,19 @@ func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]st
 
 	return p
 }
+
+// func NewPackageURL(purlType, namespace, name, version string,
+// 	qualifiers Qualifiers, subpath string) *PackageURL {
+
+// 	return &PackageURL{
+// 		Type:       purlType,
+// 		Namespace:  namespace,
+// 		Name:       name,
+// 		Version:    version,
+// 		Qualifiers: qualifiers,
+// 		Subpath:    subpath,
+// 	}
+// }
 
 func GuacPkgPurl(pkgName string, pkgVersion *string) string {
 	if pkgVersion == nil {

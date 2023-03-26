@@ -19,7 +19,7 @@
 
 mutation HasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestHasSBOM(subject: {package: $pkg}, hasSBOM: $hasSBOM) {
     ...allHasSBOMTree

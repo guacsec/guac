@@ -19,6 +19,6 @@
 
 query Packages($filter: PkgSpec) {
   packages(pkgSpec: $filter) {
-    ...allPkgTree
+    ...AllPkgTree
   }
 }
