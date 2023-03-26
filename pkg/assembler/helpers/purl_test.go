@@ -63,7 +63,7 @@ func TestPurlConvert(t *testing.T) {
 				"channel": "stable",
 			}),
 		}, {
-			purlUri: "pkg:conda/absl-py@0.4.1?subdir=linux-64&type=tar.bz2&build=py36h06a4308_0&channel=main",
+			purlUri: "pkg:conda/absl-py@0.4.1?build=py36h06a4308_0&channel=main&subdir=linux-64&type=tar.bz2",
 			expected: pkg("conda", "", "absl-py", "0.4.1", "", map[string]string{
 				"build":   "py36h06a4308_0",
 				"channel": "main",
@@ -81,11 +81,11 @@ func TestPurlConvert(t *testing.T) {
 			}),
 		}, {
 			// The following are for docker PURLs
-			// TODO: docker PURLs are really weird and potentially not well specified
+			// TODO(lumjjb): docker PURLs are really weird and potentially not well specified
 			// due to the namespace indicating it may contain registry but the use of
 			// repository_url in the examples. In addition, the versions use in the examples
 			// use tags and potentially indicate truncated hashes.
-			purlUri:  "pkg:docker/gcr.io/customer/dockerimage@sha256:244fd47e07d10",
+			purlUri:  "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io",
 			expected: pkg("docker", "gcr.io/customer", "dockerimage", "sha256:244fd47e07d10", "", map[string]string{}),
 		}, {
 			purlUri:  "pkg:docker/smartentry/debian@dc437cc87d10",
@@ -154,13 +154,13 @@ func TestPurlConvert(t *testing.T) {
 			expected: pkg("qpkg", "blackberry", "com.qnx.sdp", "7.0.0.SGA201702151847", "", map[string]string{}),
 		}, {
 			// Special OCI case
-			purlUri: "pkg:oci/docker.io/library/debian@sha256:244fd47e07d10?tag=latest&arch=amd64",
+			purlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=docker.io/library/debian&arch=amd64&tag=latest",
 			expected: pkg("oci", "docker.io/library", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"arch": "amd64",
 				"tag":  "latest",
 			}),
 		}, {
-			purlUri: "pkg:oci/docker.io/library/debian@sha256:244fd47e07d10?tag=latest&arch=amd64",
+			purlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye",
 			expected: pkg("oci", "ghcr.io", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"tag": "bullseye",
 			}),

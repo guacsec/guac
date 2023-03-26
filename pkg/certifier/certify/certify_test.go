@@ -28,6 +28,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -45,7 +46,7 @@ func newMockQuery() certifier.QueryComponents {
 
 // GetComponents returns components for test
 func (q *mockQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
-	compChan <- testdata.RootComponent
+	compChan <- []*root_package.PackageNode{&testdata.Text4ShelPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage}
 	return nil
 }
 

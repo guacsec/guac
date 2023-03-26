@@ -148,19 +148,6 @@ func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]st
 	return p
 }
 
-// func NewPackageURL(purlType, namespace, name, version string,
-// 	qualifiers Qualifiers, subpath string) *PackageURL {
-
-// 	return &PackageURL{
-// 		Type:       purlType,
-// 		Namespace:  namespace,
-// 		Name:       name,
-// 		Version:    version,
-// 		Qualifiers: qualifiers,
-// 		Subpath:    subpath,
-// 	}
-// }
-
 func GuacPkgPurl(pkgName string, pkgVersion *string) string {
 	if pkgVersion == nil {
 		return fmt.Sprintf("pkg:guac/%s", pkgName)
