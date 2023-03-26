@@ -11,30 +11,180 @@ import (
 	"github.com/Khan/genqlient/graphql"
 )
 
-// AllArtifactTree includes the GraphQL fields of Artifact requested by the fragment AllArtifactTree.
+// AllCertifyScorecard includes the GraphQL fields of CertifyScorecard requested by the fragment AllCertifyScorecard.
 // The GraphQL type's documentation follows.
 //
-// # Artifact represents the artifact and contains a digest field
-//
-// Both field are mandatory and canonicalized to be lowercase.
-//
-// If having a `checksum` Go object, `algorithm` can be
-// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
-// `checksum.Value`.
-type AllArtifactTree struct {
-	Id        string `json:"id"`
-	Algorithm string `json:"algorithm"`
-	Digest    string `json:"digest"`
+// CertifyScorecard is an attestation which represents the scorecard of a
+// particular source repository.
+type AllCertifyScorecard struct {
+	Id string `json:"id"`
+	// The source repository that is being scanned (attestation subject)
+	Source AllCertifyScorecardSource `json:"source"`
+	// The Scorecard attached to the repository (attestation object)
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
 }
 
-// GetId returns AllArtifactTree.Id, and is useful for accessing the field via an interface.
-func (v *AllArtifactTree) GetId() string { return v.Id }
+// GetId returns AllCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecard) GetId() string { return v.Id }
 
-// GetAlgorithm returns AllArtifactTree.Algorithm, and is useful for accessing the field via an interface.
-func (v *AllArtifactTree) GetAlgorithm() string { return v.Algorithm }
+// GetSource returns AllCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecard) GetSource() AllCertifyScorecardSource { return v.Source }
 
-// GetDigest returns AllArtifactTree.Digest, and is useful for accessing the field via an interface.
-func (v *AllArtifactTree) GetDigest() string { return v.Digest }
+// GetScorecard returns AllCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard { return v.Scorecard }
+
+// AllCertifyScorecardScorecard includes the requested fields of the GraphQL type Scorecard.
+// The GraphQL type's documentation follows.
+//
+// Scorecard contains all of the fields present in a Scorecard attestation.
+//
+// We also include fields to specify under what conditions the check was performed
+// (time of scan, version of scanners, etc.) as well as how this information got
+// included into GUAC (origin document and the collector for that document).
+type AllCertifyScorecardScorecard struct {
+	// Exact timestamp when the source was last scanned (in RFC 3339 format)
+	TimeScanned time.Time `json:"timeScanned"`
+	// Overall Scorecard score for the source
+	AggregateScore float64 `json:"aggregateScore"`
+	// Individual Scorecard check scores (Branch-Protection, Code-Review, ...)
+	Checks []AllCertifyScorecardScorecardChecksScorecardCheck `json:"checks"`
+	// Version of the Scorecard scanner used to analyze the source
+	ScorecardVersion string `json:"scorecardVersion"`
+	// Commit of the Scorecards repository at the time of scanning the source
+	ScorecardCommit string `json:"scorecardCommit"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+}
+
+// GetTimeScanned returns AllCertifyScorecardScorecard.TimeScanned, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecard) GetTimeScanned() time.Time { return v.TimeScanned }
+
+// GetAggregateScore returns AllCertifyScorecardScorecard.AggregateScore, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecard) GetAggregateScore() float64 { return v.AggregateScore }
+
+// GetChecks returns AllCertifyScorecardScorecard.Checks, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecard) GetChecks() []AllCertifyScorecardScorecardChecksScorecardCheck {
+	return v.Checks
+}
+
+// GetScorecardVersion returns AllCertifyScorecardScorecard.ScorecardVersion, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecard) GetScorecardVersion() string { return v.ScorecardVersion }
+
+// GetScorecardCommit returns AllCertifyScorecardScorecard.ScorecardCommit, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecard) GetScorecardCommit() string { return v.ScorecardCommit }
+
+// GetOrigin returns AllCertifyScorecardScorecard.Origin, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecard) GetOrigin() string { return v.Origin }
+
+// GetCollector returns AllCertifyScorecardScorecard.Collector, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecard) GetCollector() string { return v.Collector }
+
+// AllCertifyScorecardScorecardChecksScorecardCheck includes the requested fields of the GraphQL type ScorecardCheck.
+// The GraphQL type's documentation follows.
+//
+// ScorecardCheck are the individual checks from scorecard and their values as a
+// key-value pair.
+//
+// For example:  Branch-Protection, Code-Review...etc
+//
+// Based off scorecard's:
+// type jsonCheckResultV2 struct {
+// Details []string                 `json:"details"`
+// Score   int                      `json:"score"`
+// Reason  string                   `json:"reason"`
+// Name    string                   `json:"name"`
+// Doc     jsonCheckDocumentationV2 `json:"documentation"`
+// }
+// This node cannot be directly referred by other parts of GUAC.
+type AllCertifyScorecardScorecardChecksScorecardCheck struct {
+	Check string `json:"check"`
+	Score int    `json:"score"`
+}
+
+// GetCheck returns AllCertifyScorecardScorecardChecksScorecardCheck.Check, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecardChecksScorecardCheck) GetCheck() string { return v.Check }
+
+// GetScore returns AllCertifyScorecardScorecardChecksScorecardCheck.Score, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardScorecardChecksScorecardCheck) GetScore() int { return v.Score }
+
+// AllCertifyScorecardSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type AllCertifyScorecardSource struct {
+	AllSourceTree `json:"-"`
+}
+
+// GetId returns AllCertifyScorecardSource.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns AllCertifyScorecardSource.Type, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns AllCertifyScorecardSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllCertifyScorecardSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *AllCertifyScorecardSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllCertifyScorecardSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllCertifyScorecardSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllCertifyScorecardSource struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *AllCertifyScorecardSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllCertifyScorecardSource) __premarshalJSON() (*__premarshalAllCertifyScorecardSource, error) {
+	var retval __premarshalAllCertifyScorecardSource
+
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
 
 // AllCertifyVuln includes the GraphQL fields of CertifyVuln requested by the fragment AllCertifyVuln.
 // The GraphQL type's documentation follows.
@@ -717,17 +867,17 @@ func (v *AllIsOccurrencesTree) __premarshalJSON() (*__premarshalAllIsOccurrences
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type AllIsOccurrencesTreeArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns AllIsOccurrencesTreeArtifact.Id, and is useful for accessing the field via an interface.
-func (v *AllIsOccurrencesTreeArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *AllIsOccurrencesTreeArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns AllIsOccurrencesTreeArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *AllIsOccurrencesTreeArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *AllIsOccurrencesTreeArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns AllIsOccurrencesTreeArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *AllIsOccurrencesTreeArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *AllIsOccurrencesTreeArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *AllIsOccurrencesTreeArtifact) UnmarshalJSON(b []byte) error {
 
@@ -747,7 +897,7 @@ func (v *AllIsOccurrencesTreeArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -773,9 +923,9 @@ func (v *AllIsOccurrencesTreeArtifact) MarshalJSON() ([]byte, error) {
 func (v *AllIsOccurrencesTreeArtifact) __premarshalJSON() (*__premarshalAllIsOccurrencesTreeArtifact, error) {
 	var retval __premarshalAllIsOccurrencesTreeArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -964,21 +1114,21 @@ func __marshalAllIsOccurrencesTreeSubjectPackageOrSource(v *AllIsOccurrencesTree
 // queries more readable.
 type AllIsOccurrencesTreeSubjectSource struct {
 	Typename      *string `json:"__typename"`
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetTypename returns AllIsOccurrencesTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *AllIsOccurrencesTreeSubjectSource) GetTypename() *string { return v.Typename }
 
 // GetId returns AllIsOccurrencesTreeSubjectSource.Id, and is useful for accessing the field via an interface.
-func (v *AllIsOccurrencesTreeSubjectSource) GetId() string { return v.allSourceTree.Id }
+func (v *AllIsOccurrencesTreeSubjectSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns AllIsOccurrencesTreeSubjectSource.Type, and is useful for accessing the field via an interface.
-func (v *AllIsOccurrencesTreeSubjectSource) GetType() string { return v.allSourceTree.Type }
+func (v *AllIsOccurrencesTreeSubjectSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns AllIsOccurrencesTreeSubjectSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *AllIsOccurrencesTreeSubjectSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *AllIsOccurrencesTreeSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *AllIsOccurrencesTreeSubjectSource) UnmarshalJSON(b []byte) error {
@@ -999,7 +1149,7 @@ func (v *AllIsOccurrencesTreeSubjectSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -1013,7 +1163,7 @@ type __premarshalAllIsOccurrencesTreeSubjectSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *AllIsOccurrencesTreeSubjectSource) MarshalJSON() ([]byte, error) {
@@ -1028,9 +1178,9 @@ func (v *AllIsOccurrencesTreeSubjectSource) __premarshalJSON() (*__premarshalAll
 	var retval __premarshalAllIsOccurrencesTreeSubjectSource
 
 	retval.Typename = v.Typename
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -1194,6 +1344,87 @@ func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVers
 	return v.Value
 }
 
+// AllSourceTree includes the GraphQL fields of Source requested by the fragment AllSourceTree.
+// The GraphQL type's documentation follows.
+//
+// Source represents a source.
+//
+// This can be the version control system that is being used.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Source`, not `SourceType`. This is only to make
+// queries more readable.
+type AllSourceTree struct {
+	Id         string                                   `json:"id"`
+	Type       string                                   `json:"type"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+// GetId returns AllSourceTree.Id, and is useful for accessing the field via an interface.
+func (v *AllSourceTree) GetId() string { return v.Id }
+
+// GetType returns AllSourceTree.Type, and is useful for accessing the field via an interface.
+func (v *AllSourceTree) GetType() string { return v.Type }
+
+// GetNamespaces returns AllSourceTree.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllSourceTree) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace { return v.Namespaces }
+
+// AllSourceTreeNamespacesSourceNamespace includes the requested fields of the GraphQL type SourceNamespace.
+// The GraphQL type's documentation follows.
+//
+// SourceNamespace is a namespace for sources.
+//
+// This is the location of the repository (such as github/gitlab/bitbucket).
+//
+// The `namespace` field is mandatory.
+type AllSourceTreeNamespacesSourceNamespace struct {
+	Id        string                                                  `json:"id"`
+	Namespace string                                                  `json:"namespace"`
+	Names     []AllSourceTreeNamespacesSourceNamespaceNamesSourceName `json:"names"`
+}
+
+// GetId returns AllSourceTreeNamespacesSourceNamespace.Id, and is useful for accessing the field via an interface.
+func (v *AllSourceTreeNamespacesSourceNamespace) GetId() string { return v.Id }
+
+// GetNamespace returns AllSourceTreeNamespacesSourceNamespace.Namespace, and is useful for accessing the field via an interface.
+func (v *AllSourceTreeNamespacesSourceNamespace) GetNamespace() string { return v.Namespace }
+
+// GetNames returns AllSourceTreeNamespacesSourceNamespace.Names, and is useful for accessing the field via an interface.
+func (v *AllSourceTreeNamespacesSourceNamespace) GetNames() []AllSourceTreeNamespacesSourceNamespaceNamesSourceName {
+	return v.Names
+}
+
+// AllSourceTreeNamespacesSourceNamespaceNamesSourceName includes the requested fields of the GraphQL type SourceName.
+// The GraphQL type's documentation follows.
+//
+// SourceName is a url of the repository and its tag or commit.
+//
+// The `name` field is mandatory. The `tag` and `commit` fields are optional, but
+// it is an error to specify both.
+//
+// This is the only source trie node that can be referenced by other parts of
+// GUAC.
+type AllSourceTreeNamespacesSourceNamespaceNamesSourceName struct {
+	Id     string  `json:"id"`
+	Name   string  `json:"name"`
+	Tag    *string `json:"tag"`
+	Commit *string `json:"commit"`
+}
+
+// GetId returns AllSourceTreeNamespacesSourceNamespaceNamesSourceName.Id, and is useful for accessing the field via an interface.
+func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetId() string { return v.Id }
+
+// GetName returns AllSourceTreeNamespacesSourceNamespaceNamesSourceName.Name, and is useful for accessing the field via an interface.
+func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetName() string { return v.Name }
+
+// GetTag returns AllSourceTreeNamespacesSourceNamespaceNamesSourceName.Tag, and is useful for accessing the field via an interface.
+func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetTag() *string { return v.Tag }
+
+// GetCommit returns AllSourceTreeNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
+func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() *string { return v.Commit }
+
 // ArtifactInputSpec is the same as Artifact, but used as mutation input.
 //
 // Both arguments will be canonicalized to lowercase.
@@ -1239,17 +1470,17 @@ func (v *CVEInputSpec) GetCveId() string { return v.CveId }
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type CertifyBadArtifactIngestArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns CertifyBadArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *CertifyBadArtifactIngestArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns CertifyBadArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *CertifyBadArtifactIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns CertifyBadArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *CertifyBadArtifactIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *CertifyBadArtifactIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *CertifyBadArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
 
@@ -1269,7 +1500,7 @@ func (v *CertifyBadArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -1295,9 +1526,9 @@ func (v *CertifyBadArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
 func (v *CertifyBadArtifactIngestArtifact) __premarshalJSON() (*__premarshalCertifyBadArtifactIngestArtifact, error) {
 	var retval __premarshalCertifyBadArtifactIngestArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -1713,18 +1944,18 @@ func (v *CertifyBadSrcIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type CertifyBadSrcIngestSource struct {
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetId returns CertifyBadSrcIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestSource) GetId() string { return v.allSourceTree.Id }
+func (v *CertifyBadSrcIngestSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns CertifyBadSrcIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestSource) GetType() string { return v.allSourceTree.Type }
+func (v *CertifyBadSrcIngestSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns CertifyBadSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyBadSrcIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *CertifyBadSrcIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *CertifyBadSrcIngestSource) UnmarshalJSON(b []byte) error {
@@ -1745,7 +1976,7 @@ func (v *CertifyBadSrcIngestSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -1757,7 +1988,7 @@ type __premarshalCertifyBadSrcIngestSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *CertifyBadSrcIngestSource) MarshalJSON() ([]byte, error) {
@@ -1771,9 +2002,9 @@ func (v *CertifyBadSrcIngestSource) MarshalJSON() ([]byte, error) {
 func (v *CertifyBadSrcIngestSource) __premarshalJSON() (*__premarshalCertifyBadSrcIngestSource, error) {
 	var retval __premarshalCertifyBadSrcIngestSource
 
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -3181,18 +3412,18 @@ func (v *HasSBOMSrcIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMSrcIng
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type HasSBOMSrcIngestSource struct {
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetId returns HasSBOMSrcIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestSource) GetId() string { return v.allSourceTree.Id }
+func (v *HasSBOMSrcIngestSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns HasSBOMSrcIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestSource) GetType() string { return v.allSourceTree.Type }
+func (v *HasSBOMSrcIngestSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns HasSBOMSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *HasSBOMSrcIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *HasSBOMSrcIngestSource) UnmarshalJSON(b []byte) error {
@@ -3213,7 +3444,7 @@ func (v *HasSBOMSrcIngestSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -3225,7 +3456,7 @@ type __premarshalHasSBOMSrcIngestSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *HasSBOMSrcIngestSource) MarshalJSON() ([]byte, error) {
@@ -3239,9 +3470,9 @@ func (v *HasSBOMSrcIngestSource) MarshalJSON() ([]byte, error) {
 func (v *HasSBOMSrcIngestSource) __premarshalJSON() (*__premarshalHasSBOMSrcIngestSource, error) {
 	var retval __premarshalHasSBOMSrcIngestSource
 
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -3456,18 +3687,18 @@ func (v *HasSourceAtIngestPackage) __premarshalJSON() (*__premarshalHasSourceAtI
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type HasSourceAtIngestSource struct {
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetId returns HasSourceAtIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestSource) GetId() string { return v.allSourceTree.Id }
+func (v *HasSourceAtIngestSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns HasSourceAtIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestSource) GetType() string { return v.allSourceTree.Type }
+func (v *HasSourceAtIngestSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns HasSourceAtIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *HasSourceAtIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *HasSourceAtIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *HasSourceAtIngestSource) UnmarshalJSON(b []byte) error {
@@ -3488,7 +3719,7 @@ func (v *HasSourceAtIngestSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -3500,7 +3731,7 @@ type __premarshalHasSourceAtIngestSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *HasSourceAtIngestSource) MarshalJSON() ([]byte, error) {
@@ -3514,9 +3745,9 @@ func (v *HasSourceAtIngestSource) MarshalJSON() ([]byte, error) {
 func (v *HasSourceAtIngestSource) __premarshalJSON() (*__premarshalHasSourceAtIngestSource, error) {
 	var retval __premarshalHasSourceAtIngestSource
 
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -3574,17 +3805,17 @@ func (v *HasSourceAtResponse) GetIngestHasSourceAt() HasSourceAtIngestHasSourceA
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type HashEqualArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns HashEqualArtifact.Id, and is useful for accessing the field via an interface.
-func (v *HashEqualArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *HashEqualArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns HashEqualArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *HashEqualArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *HashEqualArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns HashEqualArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *HashEqualArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *HashEqualArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *HashEqualArtifact) UnmarshalJSON(b []byte) error {
 
@@ -3604,7 +3835,7 @@ func (v *HashEqualArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -3630,9 +3861,9 @@ func (v *HashEqualArtifact) MarshalJSON() ([]byte, error) {
 func (v *HashEqualArtifact) __premarshalJSON() (*__premarshalHashEqualArtifact, error) {
 	var retval __premarshalHashEqualArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -3647,17 +3878,17 @@ func (v *HashEqualArtifact) __premarshalJSON() (*__premarshalHashEqualArtifact, 
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type HashEqualEqualArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns HashEqualEqualArtifact.Id, and is useful for accessing the field via an interface.
-func (v *HashEqualEqualArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *HashEqualEqualArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns HashEqualEqualArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *HashEqualEqualArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *HashEqualEqualArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns HashEqualEqualArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *HashEqualEqualArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *HashEqualEqualArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *HashEqualEqualArtifact) UnmarshalJSON(b []byte) error {
 
@@ -3677,7 +3908,7 @@ func (v *HashEqualEqualArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -3703,9 +3934,9 @@ func (v *HashEqualEqualArtifact) MarshalJSON() ([]byte, error) {
 func (v *HashEqualEqualArtifact) __premarshalJSON() (*__premarshalHashEqualEqualArtifact, error) {
 	var retval __premarshalHashEqualEqualArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -4176,17 +4407,17 @@ func (v *IsOccurrenceInputSpec) GetCollector() string { return v.Collector }
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type IsOccurrencePkgIngestArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns IsOccurrencePkgIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *IsOccurrencePkgIngestArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns IsOccurrencePkgIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *IsOccurrencePkgIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns IsOccurrencePkgIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *IsOccurrencePkgIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *IsOccurrencePkgIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *IsOccurrencePkgIngestArtifact) UnmarshalJSON(b []byte) error {
 
@@ -4206,7 +4437,7 @@ func (v *IsOccurrencePkgIngestArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -4232,9 +4463,9 @@ func (v *IsOccurrencePkgIngestArtifact) MarshalJSON() ([]byte, error) {
 func (v *IsOccurrencePkgIngestArtifact) __premarshalJSON() (*__premarshalIsOccurrencePkgIngestArtifact, error) {
 	var retval __premarshalIsOccurrencePkgIngestArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -4465,17 +4696,17 @@ func (v *IsOccurrencePkgResponse) GetIngestOccurrence() IsOccurrencePkgIngestOcc
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type IsOccurrenceSrcIngestArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns IsOccurrenceSrcIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *IsOccurrenceSrcIngestArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns IsOccurrenceSrcIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *IsOccurrenceSrcIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns IsOccurrenceSrcIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *IsOccurrenceSrcIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *IsOccurrenceSrcIngestArtifact) UnmarshalJSON(b []byte) error {
 
@@ -4495,7 +4726,7 @@ func (v *IsOccurrenceSrcIngestArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -4521,9 +4752,9 @@ func (v *IsOccurrenceSrcIngestArtifact) MarshalJSON() ([]byte, error) {
 func (v *IsOccurrenceSrcIngestArtifact) __premarshalJSON() (*__premarshalIsOccurrenceSrcIngestArtifact, error) {
 	var retval __premarshalIsOccurrenceSrcIngestArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -4651,18 +4882,18 @@ func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) __premarshalJSON() (*__pre
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type IsOccurrenceSrcIngestSource struct {
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetId returns IsOccurrenceSrcIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestSource) GetId() string { return v.allSourceTree.Id }
+func (v *IsOccurrenceSrcIngestSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns IsOccurrenceSrcIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestSource) GetType() string { return v.allSourceTree.Type }
+func (v *IsOccurrenceSrcIngestSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns IsOccurrenceSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceSrcIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *IsOccurrenceSrcIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *IsOccurrenceSrcIngestSource) UnmarshalJSON(b []byte) error {
@@ -4683,7 +4914,7 @@ func (v *IsOccurrenceSrcIngestSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -4695,7 +4926,7 @@ type __premarshalIsOccurrenceSrcIngestSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *IsOccurrenceSrcIngestSource) MarshalJSON() ([]byte, error) {
@@ -4709,9 +4940,9 @@ func (v *IsOccurrenceSrcIngestSource) MarshalJSON() ([]byte, error) {
 func (v *IsOccurrenceSrcIngestSource) __premarshalJSON() (*__premarshalIsOccurrenceSrcIngestSource, error) {
 	var retval __premarshalIsOccurrenceSrcIngestSource
 
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -5312,20 +5543,20 @@ func (v *MatchFlags) GetPkg() PkgMatchType { return v.Pkg }
 // `checksum.Value`.
 type NeighborsNeighborsArtifact struct {
 	Typename        *string `json:"__typename"`
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsArtifact.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsArtifact) GetTypename() *string { return v.Typename }
 
 // GetId returns NeighborsNeighborsArtifact.Id, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *NeighborsNeighborsArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns NeighborsNeighborsArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *NeighborsNeighborsArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns NeighborsNeighborsArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *NeighborsNeighborsArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *NeighborsNeighborsArtifact) UnmarshalJSON(b []byte) error {
 
@@ -5345,7 +5576,7 @@ func (v *NeighborsNeighborsArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -5374,9 +5605,9 @@ func (v *NeighborsNeighborsArtifact) __premarshalJSON() (*__premarshalNeighborsN
 	var retval __premarshalNeighborsNeighborsArtifact
 
 	retval.Typename = v.Typename
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -5728,23 +5959,23 @@ func (v *NeighborsNeighborsCertifyPkg) __premarshalJSON() (*__premarshalNeighbor
 // particular source repository.
 type NeighborsNeighborsCertifyScorecard struct {
 	Typename            *string `json:"__typename"`
-	allCertifyScorecard `json:"-"`
+	AllCertifyScorecard `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsCertifyScorecard.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyScorecard) GetTypename() *string { return v.Typename }
 
 // GetId returns NeighborsNeighborsCertifyScorecard.Id, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyScorecard) GetId() string { return v.allCertifyScorecard.Id }
+func (v *NeighborsNeighborsCertifyScorecard) GetId() string { return v.AllCertifyScorecard.Id }
 
 // GetSource returns NeighborsNeighborsCertifyScorecard.Source, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyScorecard) GetSource() allCertifyScorecardSource {
-	return v.allCertifyScorecard.Source
+func (v *NeighborsNeighborsCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
 }
 
 // GetScorecard returns NeighborsNeighborsCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyScorecard) GetScorecard() allCertifyScorecardScorecard {
-	return v.allCertifyScorecard.Scorecard
+func (v *NeighborsNeighborsCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
 }
 
 func (v *NeighborsNeighborsCertifyScorecard) UnmarshalJSON(b []byte) error {
@@ -5765,7 +5996,7 @@ func (v *NeighborsNeighborsCertifyScorecard) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCertifyScorecard)
+		b, &v.AllCertifyScorecard)
 	if err != nil {
 		return err
 	}
@@ -5777,9 +6008,9 @@ type __premarshalNeighborsNeighborsCertifyScorecard struct {
 
 	Id string `json:"id"`
 
-	Source allCertifyScorecardSource `json:"source"`
+	Source AllCertifyScorecardSource `json:"source"`
 
-	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
 }
 
 func (v *NeighborsNeighborsCertifyScorecard) MarshalJSON() ([]byte, error) {
@@ -5794,9 +6025,9 @@ func (v *NeighborsNeighborsCertifyScorecard) __premarshalJSON() (*__premarshalNe
 	var retval __premarshalNeighborsNeighborsCertifyScorecard
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCertifyScorecard.Id
-	retval.Source = v.allCertifyScorecard.Source
-	retval.Scorecard = v.allCertifyScorecard.Scorecard
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
 	return &retval, nil
 }
 
@@ -7382,21 +7613,21 @@ func (v *NeighborsNeighborsPackage) __premarshalJSON() (*__premarshalNeighborsNe
 // queries more readable.
 type NeighborsNeighborsSource struct {
 	Typename      *string `json:"__typename"`
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsSource.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsSource) GetTypename() *string { return v.Typename }
 
 // GetId returns NeighborsNeighborsSource.Id, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsSource) GetId() string { return v.allSourceTree.Id }
+func (v *NeighborsNeighborsSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns NeighborsNeighborsSource.Type, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsSource) GetType() string { return v.allSourceTree.Type }
+func (v *NeighborsNeighborsSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns NeighborsNeighborsSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *NeighborsNeighborsSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *NeighborsNeighborsSource) UnmarshalJSON(b []byte) error {
@@ -7417,7 +7648,7 @@ func (v *NeighborsNeighborsSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -7431,7 +7662,7 @@ type __premarshalNeighborsNeighborsSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *NeighborsNeighborsSource) MarshalJSON() ([]byte, error) {
@@ -7446,9 +7677,9 @@ func (v *NeighborsNeighborsSource) __premarshalJSON() (*__premarshalNeighborsNei
 	var retval __premarshalNeighborsNeighborsSource
 
 	retval.Typename = v.Typename
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -7688,20 +7919,20 @@ func (v *PackagesResponse) GetPackages() []PackagesPackagesPackage { return v.Pa
 // `checksum.Value`.
 type PathPathArtifact struct {
 	Typename        *string `json:"__typename"`
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetTypename returns PathPathArtifact.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathArtifact) GetTypename() *string { return v.Typename }
 
 // GetId returns PathPathArtifact.Id, and is useful for accessing the field via an interface.
-func (v *PathPathArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *PathPathArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns PathPathArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *PathPathArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *PathPathArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns PathPathArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *PathPathArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *PathPathArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *PathPathArtifact) UnmarshalJSON(b []byte) error {
 
@@ -7721,7 +7952,7 @@ func (v *PathPathArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -7750,9 +7981,9 @@ func (v *PathPathArtifact) __premarshalJSON() (*__premarshalPathPathArtifact, er
 	var retval __premarshalPathPathArtifact
 
 	retval.Typename = v.Typename
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -8100,23 +8331,23 @@ func (v *PathPathCertifyPkg) __premarshalJSON() (*__premarshalPathPathCertifyPkg
 // particular source repository.
 type PathPathCertifyScorecard struct {
 	Typename            *string `json:"__typename"`
-	allCertifyScorecard `json:"-"`
+	AllCertifyScorecard `json:"-"`
 }
 
 // GetTypename returns PathPathCertifyScorecard.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyScorecard) GetTypename() *string { return v.Typename }
 
 // GetId returns PathPathCertifyScorecard.Id, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyScorecard) GetId() string { return v.allCertifyScorecard.Id }
+func (v *PathPathCertifyScorecard) GetId() string { return v.AllCertifyScorecard.Id }
 
 // GetSource returns PathPathCertifyScorecard.Source, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyScorecard) GetSource() allCertifyScorecardSource {
-	return v.allCertifyScorecard.Source
+func (v *PathPathCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
 }
 
 // GetScorecard returns PathPathCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyScorecard) GetScorecard() allCertifyScorecardScorecard {
-	return v.allCertifyScorecard.Scorecard
+func (v *PathPathCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
 }
 
 func (v *PathPathCertifyScorecard) UnmarshalJSON(b []byte) error {
@@ -8137,7 +8368,7 @@ func (v *PathPathCertifyScorecard) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCertifyScorecard)
+		b, &v.AllCertifyScorecard)
 	if err != nil {
 		return err
 	}
@@ -8149,9 +8380,9 @@ type __premarshalPathPathCertifyScorecard struct {
 
 	Id string `json:"id"`
 
-	Source allCertifyScorecardSource `json:"source"`
+	Source AllCertifyScorecardSource `json:"source"`
 
-	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
 }
 
 func (v *PathPathCertifyScorecard) MarshalJSON() ([]byte, error) {
@@ -8166,9 +8397,9 @@ func (v *PathPathCertifyScorecard) __premarshalJSON() (*__premarshalPathPathCert
 	var retval __premarshalPathPathCertifyScorecard
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCertifyScorecard.Id
-	retval.Source = v.allCertifyScorecard.Source
-	retval.Scorecard = v.allCertifyScorecard.Scorecard
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
 	return &retval, nil
 }
 
@@ -9724,21 +9955,21 @@ func (v *PathPathPackage) __premarshalJSON() (*__premarshalPathPathPackage, erro
 // queries more readable.
 type PathPathSource struct {
 	Typename      *string `json:"__typename"`
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetTypename returns PathPathSource.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathSource) GetTypename() *string { return v.Typename }
 
 // GetId returns PathPathSource.Id, and is useful for accessing the field via an interface.
-func (v *PathPathSource) GetId() string { return v.allSourceTree.Id }
+func (v *PathPathSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns PathPathSource.Type, and is useful for accessing the field via an interface.
-func (v *PathPathSource) GetType() string { return v.allSourceTree.Type }
+func (v *PathPathSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns PathPathSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *PathPathSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *PathPathSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *PathPathSource) UnmarshalJSON(b []byte) error {
@@ -9759,7 +9990,7 @@ func (v *PathPathSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -9773,7 +10004,7 @@ type __premarshalPathPathSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *PathPathSource) MarshalJSON() ([]byte, error) {
@@ -9788,9 +10019,9 @@ func (v *PathPathSource) __premarshalJSON() (*__premarshalPathPathSource, error)
 	var retval __premarshalPathPathSource
 
 	retval.Typename = v.Typename
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -9979,17 +10210,17 @@ func (v *PkgSpec) GetSubpath() *string { return v.Subpath }
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type SLSAForArtifactIngestArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns SLSAForArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *SLSAForArtifactIngestArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns SLSAForArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *SLSAForArtifactIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns SLSAForArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *SLSAForArtifactIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *SLSAForArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
 
@@ -10009,7 +10240,7 @@ func (v *SLSAForArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -10035,9 +10266,9 @@ func (v *SLSAForArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
 func (v *SLSAForArtifactIngestArtifact) __premarshalJSON() (*__premarshalSLSAForArtifactIngestArtifact, error) {
 	var retval __premarshalSLSAForArtifactIngestArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -10065,19 +10296,19 @@ func (v *SLSAForArtifactIngestBuilder) GetUri() string { return v.Uri }
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type SLSAForArtifactIngestMaterialsArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns SLSAForArtifactIngestMaterialsArtifact.Id, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestMaterialsArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *SLSAForArtifactIngestMaterialsArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns SLSAForArtifactIngestMaterialsArtifact.Algorithm, and is useful for accessing the field via an interface.
 func (v *SLSAForArtifactIngestMaterialsArtifact) GetAlgorithm() string {
-	return v.AllArtifactTree.Algorithm
+	return v.allArtifactTree.Algorithm
 }
 
 // GetDigest returns SLSAForArtifactIngestMaterialsArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *SLSAForArtifactIngestMaterialsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *SLSAForArtifactIngestMaterialsArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *SLSAForArtifactIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
 
@@ -10097,7 +10328,7 @@ func (v *SLSAForArtifactIngestMaterialsArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -10123,9 +10354,9 @@ func (v *SLSAForArtifactIngestMaterialsArtifact) MarshalJSON() ([]byte, error) {
 func (v *SLSAForArtifactIngestMaterialsArtifact) __premarshalJSON() (*__premarshalSLSAForArtifactIngestMaterialsArtifact, error) {
 	var retval __premarshalSLSAForArtifactIngestMaterialsArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -10285,20 +10516,20 @@ func (v *SLSAPredicateInputSpec) GetValue() string { return v.Value }
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
 type ScorecardCertifyScorecard struct {
-	allCertifyScorecard `json:"-"`
+	AllCertifyScorecard `json:"-"`
 }
 
 // GetId returns ScorecardCertifyScorecard.Id, and is useful for accessing the field via an interface.
-func (v *ScorecardCertifyScorecard) GetId() string { return v.allCertifyScorecard.Id }
+func (v *ScorecardCertifyScorecard) GetId() string { return v.AllCertifyScorecard.Id }
 
 // GetSource returns ScorecardCertifyScorecard.Source, and is useful for accessing the field via an interface.
-func (v *ScorecardCertifyScorecard) GetSource() allCertifyScorecardSource {
-	return v.allCertifyScorecard.Source
+func (v *ScorecardCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
 }
 
 // GetScorecard returns ScorecardCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
-func (v *ScorecardCertifyScorecard) GetScorecard() allCertifyScorecardScorecard {
-	return v.allCertifyScorecard.Scorecard
+func (v *ScorecardCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
 }
 
 func (v *ScorecardCertifyScorecard) UnmarshalJSON(b []byte) error {
@@ -10319,7 +10550,7 @@ func (v *ScorecardCertifyScorecard) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCertifyScorecard)
+		b, &v.AllCertifyScorecard)
 	if err != nil {
 		return err
 	}
@@ -10329,9 +10560,9 @@ func (v *ScorecardCertifyScorecard) UnmarshalJSON(b []byte) error {
 type __premarshalScorecardCertifyScorecard struct {
 	Id string `json:"id"`
 
-	Source allCertifyScorecardSource `json:"source"`
+	Source AllCertifyScorecardSource `json:"source"`
 
-	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
 }
 
 func (v *ScorecardCertifyScorecard) MarshalJSON() ([]byte, error) {
@@ -10345,9 +10576,9 @@ func (v *ScorecardCertifyScorecard) MarshalJSON() ([]byte, error) {
 func (v *ScorecardCertifyScorecard) __premarshalJSON() (*__premarshalScorecardCertifyScorecard, error) {
 	var retval __premarshalScorecardCertifyScorecard
 
-	retval.Id = v.allCertifyScorecard.Id
-	retval.Source = v.allCertifyScorecard.Source
-	retval.Scorecard = v.allCertifyScorecard.Scorecard
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
 	return &retval, nil
 }
 
@@ -10376,18 +10607,18 @@ func (v *ScorecardCheckInputSpec) GetScore() int { return v.Score }
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type ScorecardIngestSource struct {
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetId returns ScorecardIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *ScorecardIngestSource) GetId() string { return v.allSourceTree.Id }
+func (v *ScorecardIngestSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns ScorecardIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *ScorecardIngestSource) GetType() string { return v.allSourceTree.Type }
+func (v *ScorecardIngestSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns ScorecardIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *ScorecardIngestSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *ScorecardIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *ScorecardIngestSource) UnmarshalJSON(b []byte) error {
@@ -10408,7 +10639,7 @@ func (v *ScorecardIngestSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -10420,7 +10651,7 @@ type __premarshalScorecardIngestSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *ScorecardIngestSource) MarshalJSON() ([]byte, error) {
@@ -10434,9 +10665,9 @@ func (v *ScorecardIngestSource) MarshalJSON() ([]byte, error) {
 func (v *ScorecardIngestSource) __premarshalJSON() (*__premarshalScorecardIngestSource, error) {
 	var retval __premarshalScorecardIngestSource
 
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -10578,18 +10809,18 @@ func (v *SourcesResponse) GetSources() []SourcesSourcesSource { return v.Sources
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type SourcesSourcesSource struct {
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetId returns SourcesSourcesSource.Id, and is useful for accessing the field via an interface.
-func (v *SourcesSourcesSource) GetId() string { return v.allSourceTree.Id }
+func (v *SourcesSourcesSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns SourcesSourcesSource.Type, and is useful for accessing the field via an interface.
-func (v *SourcesSourcesSource) GetType() string { return v.allSourceTree.Type }
+func (v *SourcesSourcesSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns SourcesSourcesSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *SourcesSourcesSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *SourcesSourcesSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *SourcesSourcesSource) UnmarshalJSON(b []byte) error {
@@ -10610,7 +10841,7 @@ func (v *SourcesSourcesSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -10622,7 +10853,7 @@ type __premarshalSourcesSourcesSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *SourcesSourcesSource) MarshalJSON() ([]byte, error) {
@@ -10636,9 +10867,9 @@ func (v *SourcesSourcesSource) MarshalJSON() ([]byte, error) {
 func (v *SourcesSourcesSource) __premarshalJSON() (*__premarshalSourcesSourcesSource, error) {
 	var retval __premarshalSourcesSourcesSource
 
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -10955,17 +11186,17 @@ func (v *VEXPackageAndGhsaResponse) GetIngestVEXStatement() VEXPackageAndGhsaIng
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type VexArtifactAndCveIngestArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns VexArtifactAndCveIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *VexArtifactAndCveIngestArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns VexArtifactAndCveIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *VexArtifactAndCveIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns VexArtifactAndCveIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *VexArtifactAndCveIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *VexArtifactAndCveIngestArtifact) UnmarshalJSON(b []byte) error {
 
@@ -10985,7 +11216,7 @@ func (v *VexArtifactAndCveIngestArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -11011,9 +11242,9 @@ func (v *VexArtifactAndCveIngestArtifact) MarshalJSON() ([]byte, error) {
 func (v *VexArtifactAndCveIngestArtifact) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestArtifact, error) {
 	var retval __premarshalVexArtifactAndCveIngestArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -11258,17 +11489,17 @@ func (v *VexArtifactAndCveResponse) GetIngestVEXStatement() VexArtifactAndCveIng
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type VexArtifactAndGhsaIngestArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns VexArtifactAndGhsaIngestArtifact.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *VexArtifactAndGhsaIngestArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns VexArtifactAndGhsaIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *VexArtifactAndGhsaIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns VexArtifactAndGhsaIngestArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *VexArtifactAndGhsaIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *VexArtifactAndGhsaIngestArtifact) UnmarshalJSON(b []byte) error {
 
@@ -11288,7 +11519,7 @@ func (v *VexArtifactAndGhsaIngestArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -11314,9 +11545,9 @@ func (v *VexArtifactAndGhsaIngestArtifact) MarshalJSON() ([]byte, error) {
 func (v *VexArtifactAndGhsaIngestArtifact) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestArtifact, error) {
 	var retval __premarshalVexArtifactAndGhsaIngestArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -12294,6 +12525,31 @@ func (v *__VexPackageAndCveInput) GetCve() CVEInputSpec { return v.Cve }
 // GetVexStatement returns __VexPackageAndCveInput.VexStatement, and is useful for accessing the field via an interface.
 func (v *__VexPackageAndCveInput) GetVexStatement() VexStatementInputSpec { return v.VexStatement }
 
+// allArtifactTree includes the GraphQL fields of Artifact requested by the fragment allArtifactTree.
+// The GraphQL type's documentation follows.
+//
+// # Artifact represents the artifact and contains a digest field
+//
+// Both field are mandatory and canonicalized to be lowercase.
+//
+// If having a `checksum` Go object, `algorithm` can be
+// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
+// `checksum.Value`.
+type allArtifactTree struct {
+	Id        string `json:"id"`
+	Algorithm string `json:"algorithm"`
+	Digest    string `json:"digest"`
+}
+
+// GetId returns allArtifactTree.Id, and is useful for accessing the field via an interface.
+func (v *allArtifactTree) GetId() string { return v.Id }
+
+// GetAlgorithm returns allArtifactTree.Algorithm, and is useful for accessing the field via an interface.
+func (v *allArtifactTree) GetAlgorithm() string { return v.Algorithm }
+
+// GetDigest returns allArtifactTree.Digest, and is useful for accessing the field via an interface.
+func (v *allArtifactTree) GetDigest() string { return v.Digest }
+
 // allBuilderTree includes the GraphQL fields of Builder requested by the fragment allBuilderTree.
 // The GraphQL type's documentation follows.
 //
@@ -12418,20 +12674,20 @@ func (v *allCertifyBad) __premarshalJSON() (*__premarshalallCertifyBad, error) {
 // `checksum.Value`.
 type allCertifyBadSubjectArtifact struct {
 	Typename        *string `json:"__typename"`
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetTypename returns allCertifyBadSubjectArtifact.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyBadSubjectArtifact) GetTypename() *string { return v.Typename }
 
 // GetId returns allCertifyBadSubjectArtifact.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyBadSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *allCertifyBadSubjectArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns allCertifyBadSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *allCertifyBadSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *allCertifyBadSubjectArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns allCertifyBadSubjectArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *allCertifyBadSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *allCertifyBadSubjectArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *allCertifyBadSubjectArtifact) UnmarshalJSON(b []byte) error {
 
@@ -12451,7 +12707,7 @@ func (v *allCertifyBadSubjectArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -12480,9 +12736,9 @@ func (v *allCertifyBadSubjectArtifact) __premarshalJSON() (*__premarshalallCerti
 	var retval __premarshalallCertifyBadSubjectArtifact
 
 	retval.Typename = v.Typename
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -12689,21 +12945,21 @@ func __marshalallCertifyBadSubjectPackageSourceOrArtifact(v *allCertifyBadSubjec
 // queries more readable.
 type allCertifyBadSubjectSource struct {
 	Typename      *string `json:"__typename"`
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetTypename returns allCertifyBadSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyBadSubjectSource) GetTypename() *string { return v.Typename }
 
 // GetId returns allCertifyBadSubjectSource.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyBadSubjectSource) GetId() string { return v.allSourceTree.Id }
+func (v *allCertifyBadSubjectSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns allCertifyBadSubjectSource.Type, and is useful for accessing the field via an interface.
-func (v *allCertifyBadSubjectSource) GetType() string { return v.allSourceTree.Type }
+func (v *allCertifyBadSubjectSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns allCertifyBadSubjectSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *allCertifyBadSubjectSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *allCertifyBadSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *allCertifyBadSubjectSource) UnmarshalJSON(b []byte) error {
@@ -12724,7 +12980,7 @@ func (v *allCertifyBadSubjectSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -12738,7 +12994,7 @@ type __premarshalallCertifyBadSubjectSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *allCertifyBadSubjectSource) MarshalJSON() ([]byte, error) {
@@ -12753,9 +13009,9 @@ func (v *allCertifyBadSubjectSource) __premarshalJSON() (*__premarshalallCertify
 	var retval __premarshalallCertifyBadSubjectSource
 
 	retval.Typename = v.Typename
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -12868,181 +13124,6 @@ func (v *allCertifyPkgPackagesPackage) __premarshalJSON() (*__premarshalallCerti
 	retval.Id = v.AllPkgTree.Id
 	retval.Type = v.AllPkgTree.Type
 	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
-// allCertifyScorecard includes the GraphQL fields of CertifyScorecard requested by the fragment allCertifyScorecard.
-// The GraphQL type's documentation follows.
-//
-// CertifyScorecard is an attestation which represents the scorecard of a
-// particular source repository.
-type allCertifyScorecard struct {
-	Id string `json:"id"`
-	// The source repository that is being scanned (attestation subject)
-	Source allCertifyScorecardSource `json:"source"`
-	// The Scorecard attached to the repository (attestation object)
-	Scorecard allCertifyScorecardScorecard `json:"scorecard"`
-}
-
-// GetId returns allCertifyScorecard.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecard) GetId() string { return v.Id }
-
-// GetSource returns allCertifyScorecard.Source, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecard) GetSource() allCertifyScorecardSource { return v.Source }
-
-// GetScorecard returns allCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecard) GetScorecard() allCertifyScorecardScorecard { return v.Scorecard }
-
-// allCertifyScorecardScorecard includes the requested fields of the GraphQL type Scorecard.
-// The GraphQL type's documentation follows.
-//
-// Scorecard contains all of the fields present in a Scorecard attestation.
-//
-// We also include fields to specify under what conditions the check was performed
-// (time of scan, version of scanners, etc.) as well as how this information got
-// included into GUAC (origin document and the collector for that document).
-type allCertifyScorecardScorecard struct {
-	// Exact timestamp when the source was last scanned (in RFC 3339 format)
-	TimeScanned time.Time `json:"timeScanned"`
-	// Overall Scorecard score for the source
-	AggregateScore float64 `json:"aggregateScore"`
-	// Individual Scorecard check scores (Branch-Protection, Code-Review, ...)
-	Checks []allCertifyScorecardScorecardChecksScorecardCheck `json:"checks"`
-	// Version of the Scorecard scanner used to analyze the source
-	ScorecardVersion string `json:"scorecardVersion"`
-	// Commit of the Scorecards repository at the time of scanning the source
-	ScorecardCommit string `json:"scorecardCommit"`
-	// Document from which this attestation is generated from
-	Origin string `json:"origin"`
-	// GUAC collector for the document
-	Collector string `json:"collector"`
-}
-
-// GetTimeScanned returns allCertifyScorecardScorecard.TimeScanned, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecard) GetTimeScanned() time.Time { return v.TimeScanned }
-
-// GetAggregateScore returns allCertifyScorecardScorecard.AggregateScore, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecard) GetAggregateScore() float64 { return v.AggregateScore }
-
-// GetChecks returns allCertifyScorecardScorecard.Checks, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecard) GetChecks() []allCertifyScorecardScorecardChecksScorecardCheck {
-	return v.Checks
-}
-
-// GetScorecardVersion returns allCertifyScorecardScorecard.ScorecardVersion, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecard) GetScorecardVersion() string { return v.ScorecardVersion }
-
-// GetScorecardCommit returns allCertifyScorecardScorecard.ScorecardCommit, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecard) GetScorecardCommit() string { return v.ScorecardCommit }
-
-// GetOrigin returns allCertifyScorecardScorecard.Origin, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecard) GetOrigin() string { return v.Origin }
-
-// GetCollector returns allCertifyScorecardScorecard.Collector, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecard) GetCollector() string { return v.Collector }
-
-// allCertifyScorecardScorecardChecksScorecardCheck includes the requested fields of the GraphQL type ScorecardCheck.
-// The GraphQL type's documentation follows.
-//
-// ScorecardCheck are the individual checks from scorecard and their values as a
-// key-value pair.
-//
-// For example:  Branch-Protection, Code-Review...etc
-//
-// Based off scorecard's:
-// type jsonCheckResultV2 struct {
-// Details []string                 `json:"details"`
-// Score   int                      `json:"score"`
-// Reason  string                   `json:"reason"`
-// Name    string                   `json:"name"`
-// Doc     jsonCheckDocumentationV2 `json:"documentation"`
-// }
-// This node cannot be directly referred by other parts of GUAC.
-type allCertifyScorecardScorecardChecksScorecardCheck struct {
-	Check string `json:"check"`
-	Score int    `json:"score"`
-}
-
-// GetCheck returns allCertifyScorecardScorecardChecksScorecardCheck.Check, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecardChecksScorecardCheck) GetCheck() string { return v.Check }
-
-// GetScore returns allCertifyScorecardScorecardChecksScorecardCheck.Score, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardScorecardChecksScorecardCheck) GetScore() int { return v.Score }
-
-// allCertifyScorecardSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents a source.
-//
-// This can be the version control system that is being used.
-//
-// This node is a singleton: backends guarantee that there is exactly one node
-// with the same `type` value.
-//
-// Also note that this is named `Source`, not `SourceType`. This is only to make
-// queries more readable.
-type allCertifyScorecardSource struct {
-	allSourceTree `json:"-"`
-}
-
-// GetId returns allCertifyScorecardSource.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardSource) GetId() string { return v.allSourceTree.Id }
-
-// GetType returns allCertifyScorecardSource.Type, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardSource) GetType() string { return v.allSourceTree.Type }
-
-// GetNamespaces returns allCertifyScorecardSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *allCertifyScorecardSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
-}
-
-func (v *allCertifyScorecardSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*allCertifyScorecardSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.allCertifyScorecardSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.allSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalallCertifyScorecardSource struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *allCertifyScorecardSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *allCertifyScorecardSource) __premarshalJSON() (*__premarshalallCertifyScorecardSource, error) {
-	var retval __premarshalallCertifyScorecardSource
-
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -13210,22 +13291,22 @@ func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXS
 // `checksum.Value`.
 type allCertifyVEXStatementSubjectArtifact struct {
 	Typename        *string `json:"__typename"`
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetTypename returns allCertifyVEXStatementSubjectArtifact.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementSubjectArtifact) GetTypename() *string { return v.Typename }
 
 // GetId returns allCertifyVEXStatementSubjectArtifact.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *allCertifyVEXStatementSubjectArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns allCertifyVEXStatementSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementSubjectArtifact) GetAlgorithm() string {
-	return v.AllArtifactTree.Algorithm
+	return v.allArtifactTree.Algorithm
 }
 
 // GetDigest returns allCertifyVEXStatementSubjectArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *allCertifyVEXStatementSubjectArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *allCertifyVEXStatementSubjectArtifact) UnmarshalJSON(b []byte) error {
 
@@ -13245,7 +13326,7 @@ func (v *allCertifyVEXStatementSubjectArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -13274,9 +13355,9 @@ func (v *allCertifyVEXStatementSubjectArtifact) __premarshalJSON() (*__premarsha
 	var retval __premarshalallCertifyVEXStatementSubjectArtifact
 
 	retval.Typename = v.Typename
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -14063,21 +14144,21 @@ func __marshalallHasSBOMTreeSubjectPackageOrSource(v *allHasSBOMTreeSubjectPacka
 // queries more readable.
 type allHasSBOMTreeSubjectSource struct {
 	Typename      *string `json:"__typename"`
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetTypename returns allHasSBOMTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeSubjectSource) GetTypename() *string { return v.Typename }
 
 // GetId returns allHasSBOMTreeSubjectSource.Id, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetId() string { return v.allSourceTree.Id }
+func (v *allHasSBOMTreeSubjectSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns allHasSBOMTreeSubjectSource.Type, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetType() string { return v.allSourceTree.Type }
+func (v *allHasSBOMTreeSubjectSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns allHasSBOMTreeSubjectSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *allHasSBOMTreeSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *allHasSBOMTreeSubjectSource) UnmarshalJSON(b []byte) error {
@@ -14098,7 +14179,7 @@ func (v *allHasSBOMTreeSubjectSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -14112,7 +14193,7 @@ type __premarshalallHasSBOMTreeSubjectSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *allHasSBOMTreeSubjectSource) MarshalJSON() ([]byte, error) {
@@ -14127,9 +14208,9 @@ func (v *allHasSBOMTreeSubjectSource) __premarshalJSON() (*__premarshalallHasSBO
 	var retval __premarshalallHasSBOMTreeSubjectSource
 
 	retval.Typename = v.Typename
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -14268,18 +14349,18 @@ func (v *allHasSourceAtPackage) __premarshalJSON() (*__premarshalallHasSourceAtP
 // Also note that this is named `Source`, not `SourceType`. This is only to make
 // queries more readable.
 type allHasSourceAtSource struct {
-	allSourceTree `json:"-"`
+	AllSourceTree `json:"-"`
 }
 
 // GetId returns allHasSourceAtSource.Id, and is useful for accessing the field via an interface.
-func (v *allHasSourceAtSource) GetId() string { return v.allSourceTree.Id }
+func (v *allHasSourceAtSource) GetId() string { return v.AllSourceTree.Id }
 
 // GetType returns allHasSourceAtSource.Type, and is useful for accessing the field via an interface.
-func (v *allHasSourceAtSource) GetType() string { return v.allSourceTree.Type }
+func (v *allHasSourceAtSource) GetType() string { return v.AllSourceTree.Type }
 
 // GetNamespaces returns allHasSourceAtSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *allHasSourceAtSource) GetNamespaces() []allSourceTreeNamespacesSourceNamespace {
-	return v.allSourceTree.Namespaces
+func (v *allHasSourceAtSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
 }
 
 func (v *allHasSourceAtSource) UnmarshalJSON(b []byte) error {
@@ -14300,7 +14381,7 @@ func (v *allHasSourceAtSource) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allSourceTree)
+		b, &v.AllSourceTree)
 	if err != nil {
 		return err
 	}
@@ -14312,7 +14393,7 @@ type __premarshalallHasSourceAtSource struct {
 
 	Type string `json:"type"`
 
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
 }
 
 func (v *allHasSourceAtSource) MarshalJSON() ([]byte, error) {
@@ -14326,9 +14407,9 @@ func (v *allHasSourceAtSource) MarshalJSON() ([]byte, error) {
 func (v *allHasSourceAtSource) __premarshalJSON() (*__premarshalallHasSourceAtSource, error) {
 	var retval __premarshalallHasSourceAtSource
 
-	retval.Id = v.allSourceTree.Id
-	retval.Type = v.allSourceTree.Type
-	retval.Namespaces = v.allSourceTree.Namespaces
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
 	return &retval, nil
 }
 
@@ -14375,17 +14456,17 @@ func (v *allHashEqualTree) GetCollector() string { return v.Collector }
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type allHashEqualTreeArtifactsArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns allHashEqualTreeArtifactsArtifact.Id, and is useful for accessing the field via an interface.
-func (v *allHashEqualTreeArtifactsArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *allHashEqualTreeArtifactsArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns allHashEqualTreeArtifactsArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *allHashEqualTreeArtifactsArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *allHashEqualTreeArtifactsArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns allHashEqualTreeArtifactsArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *allHashEqualTreeArtifactsArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *allHashEqualTreeArtifactsArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *allHashEqualTreeArtifactsArtifact) UnmarshalJSON(b []byte) error {
 
@@ -14405,7 +14486,7 @@ func (v *allHashEqualTreeArtifactsArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -14431,9 +14512,9 @@ func (v *allHashEqualTreeArtifactsArtifact) MarshalJSON() ([]byte, error) {
 func (v *allHashEqualTreeArtifactsArtifact) __premarshalJSON() (*__premarshalallHashEqualTreeArtifactsArtifact, error) {
 	var retval __premarshalallHashEqualTreeArtifactsArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -15206,19 +15287,19 @@ func (v *allSLSATreeSlsaSLSABuiltByBuilder) GetUri() string { return v.Uri }
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type allSLSATreeSlsaSLSABuiltFromArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns allSLSATreeSlsaSLSABuiltFromArtifact.Id, and is useful for accessing the field via an interface.
-func (v *allSLSATreeSlsaSLSABuiltFromArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *allSLSATreeSlsaSLSABuiltFromArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns allSLSATreeSlsaSLSABuiltFromArtifact.Algorithm, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSlsaSLSABuiltFromArtifact) GetAlgorithm() string {
-	return v.AllArtifactTree.Algorithm
+	return v.allArtifactTree.Algorithm
 }
 
 // GetDigest returns allSLSATreeSlsaSLSABuiltFromArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *allSLSATreeSlsaSLSABuiltFromArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *allSLSATreeSlsaSLSABuiltFromArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *allSLSATreeSlsaSLSABuiltFromArtifact) UnmarshalJSON(b []byte) error {
 
@@ -15238,7 +15319,7 @@ func (v *allSLSATreeSlsaSLSABuiltFromArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -15264,9 +15345,9 @@ func (v *allSLSATreeSlsaSLSABuiltFromArtifact) MarshalJSON() ([]byte, error) {
 func (v *allSLSATreeSlsaSLSABuiltFromArtifact) __premarshalJSON() (*__premarshalallSLSATreeSlsaSLSABuiltFromArtifact, error) {
 	var retval __premarshalallSLSATreeSlsaSLSABuiltFromArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
 
@@ -15322,17 +15403,17 @@ func (v *allSLSATreeSlsaSLSASlsaPredicateSLSAPredicate) GetValue() string { retu
 // `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
 // `checksum.Value`.
 type allSLSATreeSubjectArtifact struct {
-	AllArtifactTree `json:"-"`
+	allArtifactTree `json:"-"`
 }
 
 // GetId returns allSLSATreeSubjectArtifact.Id, and is useful for accessing the field via an interface.
-func (v *allSLSATreeSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+func (v *allSLSATreeSubjectArtifact) GetId() string { return v.allArtifactTree.Id }
 
 // GetAlgorithm returns allSLSATreeSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
-func (v *allSLSATreeSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+func (v *allSLSATreeSubjectArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
 
 // GetDigest returns allSLSATreeSubjectArtifact.Digest, and is useful for accessing the field via an interface.
-func (v *allSLSATreeSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+func (v *allSLSATreeSubjectArtifact) GetDigest() string { return v.allArtifactTree.Digest }
 
 func (v *allSLSATreeSubjectArtifact) UnmarshalJSON(b []byte) error {
 
@@ -15352,7 +15433,7 @@ func (v *allSLSATreeSubjectArtifact) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.AllArtifactTree)
+		b, &v.allArtifactTree)
 	if err != nil {
 		return err
 	}
@@ -15378,92 +15459,11 @@ func (v *allSLSATreeSubjectArtifact) MarshalJSON() ([]byte, error) {
 func (v *allSLSATreeSubjectArtifact) __premarshalJSON() (*__premarshalallSLSATreeSubjectArtifact, error) {
 	var retval __premarshalallSLSATreeSubjectArtifact
 
-	retval.Id = v.AllArtifactTree.Id
-	retval.Algorithm = v.AllArtifactTree.Algorithm
-	retval.Digest = v.AllArtifactTree.Digest
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
 	return &retval, nil
 }
-
-// allSourceTree includes the GraphQL fields of Source requested by the fragment allSourceTree.
-// The GraphQL type's documentation follows.
-//
-// Source represents a source.
-//
-// This can be the version control system that is being used.
-//
-// This node is a singleton: backends guarantee that there is exactly one node
-// with the same `type` value.
-//
-// Also note that this is named `Source`, not `SourceType`. This is only to make
-// queries more readable.
-type allSourceTree struct {
-	Id         string                                   `json:"id"`
-	Type       string                                   `json:"type"`
-	Namespaces []allSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-// GetId returns allSourceTree.Id, and is useful for accessing the field via an interface.
-func (v *allSourceTree) GetId() string { return v.Id }
-
-// GetType returns allSourceTree.Type, and is useful for accessing the field via an interface.
-func (v *allSourceTree) GetType() string { return v.Type }
-
-// GetNamespaces returns allSourceTree.Namespaces, and is useful for accessing the field via an interface.
-func (v *allSourceTree) GetNamespaces() []allSourceTreeNamespacesSourceNamespace { return v.Namespaces }
-
-// allSourceTreeNamespacesSourceNamespace includes the requested fields of the GraphQL type SourceNamespace.
-// The GraphQL type's documentation follows.
-//
-// SourceNamespace is a namespace for sources.
-//
-// This is the location of the repository (such as github/gitlab/bitbucket).
-//
-// The `namespace` field is mandatory.
-type allSourceTreeNamespacesSourceNamespace struct {
-	Id        string                                                  `json:"id"`
-	Namespace string                                                  `json:"namespace"`
-	Names     []allSourceTreeNamespacesSourceNamespaceNamesSourceName `json:"names"`
-}
-
-// GetId returns allSourceTreeNamespacesSourceNamespace.Id, and is useful for accessing the field via an interface.
-func (v *allSourceTreeNamespacesSourceNamespace) GetId() string { return v.Id }
-
-// GetNamespace returns allSourceTreeNamespacesSourceNamespace.Namespace, and is useful for accessing the field via an interface.
-func (v *allSourceTreeNamespacesSourceNamespace) GetNamespace() string { return v.Namespace }
-
-// GetNames returns allSourceTreeNamespacesSourceNamespace.Names, and is useful for accessing the field via an interface.
-func (v *allSourceTreeNamespacesSourceNamespace) GetNames() []allSourceTreeNamespacesSourceNamespaceNamesSourceName {
-	return v.Names
-}
-
-// allSourceTreeNamespacesSourceNamespaceNamesSourceName includes the requested fields of the GraphQL type SourceName.
-// The GraphQL type's documentation follows.
-//
-// SourceName is a url of the repository and its tag or commit.
-//
-// The `name` field is mandatory. The `tag` and `commit` fields are optional, but
-// it is an error to specify both.
-//
-// This is the only source trie node that can be referenced by other parts of
-// GUAC.
-type allSourceTreeNamespacesSourceNamespaceNamesSourceName struct {
-	Id     string  `json:"id"`
-	Name   string  `json:"name"`
-	Tag    *string `json:"tag"`
-	Commit *string `json:"commit"`
-}
-
-// GetId returns allSourceTreeNamespacesSourceNamespaceNamesSourceName.Id, and is useful for accessing the field via an interface.
-func (v *allSourceTreeNamespacesSourceNamespaceNamesSourceName) GetId() string { return v.Id }
-
-// GetName returns allSourceTreeNamespacesSourceNamespaceNamesSourceName.Name, and is useful for accessing the field via an interface.
-func (v *allSourceTreeNamespacesSourceNamespaceNamesSourceName) GetName() string { return v.Name }
-
-// GetTag returns allSourceTreeNamespacesSourceNamespaceNamesSourceName.Tag, and is useful for accessing the field via an interface.
-func (v *allSourceTreeNamespacesSourceNamespaceNamesSourceName) GetTag() *string { return v.Tag }
-
-// GetCommit returns allSourceTreeNamespacesSourceNamespaceNamesSourceName.Commit, and is useful for accessing the field via an interface.
-func (v *allSourceTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() *string { return v.Commit }
 
 func CertifyBadArtifact(
 	ctx context.Context,
@@ -15476,13 +15476,13 @@ func CertifyBadArtifact(
 		Query: `
 mutation CertifyBadArtifact ($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestCertifyBad(subject: {artifact:$artifact}, certifyBad: $certifyBad) {
 		... allCertifyBad
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -15496,10 +15496,10 @@ fragment allCertifyBad on CertifyBad {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 }
@@ -15524,7 +15524,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -15606,14 +15606,14 @@ fragment allCertifyBad on CertifyBad {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -15627,7 +15627,7 @@ fragment allSourceTree on Source {
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -15664,13 +15664,13 @@ func CertifyBadSrc(
 		Query: `
 mutation CertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
 	ingestSource(source: $source) {
-		... allSourceTree
+		... AllSourceTree
 	}
 	ingestCertifyBad(subject: {source:$source}, certifyBad: $certifyBad) {
 		... allCertifyBad
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -15693,10 +15693,10 @@ fragment allCertifyBad on CertifyBad {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 }
@@ -15721,7 +15721,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -16201,13 +16201,13 @@ fragment allHasSBOMTree on HasSBOM {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	origin
 	collector
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -16252,13 +16252,13 @@ func HasSBOMSrc(
 		Query: `
 mutation HasSBOMSrc ($source: SourceInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 	ingestSource(source: $source) {
-		... allSourceTree
+		... AllSourceTree
 	}
 	ingestHasSBOM(subject: {source:$source}, hasSBOM: $hasSBOM) {
 		... allHasSBOMTree
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -16281,7 +16281,7 @@ fragment allHasSBOMTree on HasSBOM {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	origin
@@ -16344,7 +16344,7 @@ mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: 
 		... AllPkgTree
 	}
 	ingestSource(source: $source) {
-		... allSourceTree
+		... AllSourceTree
 	}
 	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt) {
 		... allHasSourceAt
@@ -16371,7 +16371,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -16393,7 +16393,7 @@ fragment allHasSourceAt on HasSourceAt {
 		... AllPkgTree
 	}
 	source {
-		... allSourceTree
+		... AllSourceTree
 	}
 	origin
 	collector
@@ -16432,16 +16432,16 @@ func HashEqual(
 		Query: `
 mutation HashEqual ($artifact: ArtifactInputSpec!, $equalArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
 	artifact: ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	equalArtifact: ingestArtifact(artifact: $equalArtifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestHashEqual(artifact: $artifact, equalArtifact: $equalArtifact, hashEqual: $hashEqual) {
 		... allHashEqualTree
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -16450,7 +16450,7 @@ fragment allHashEqualTree on HashEqual {
 	id
 	justification
 	artifacts {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	origin
 	collector
@@ -16567,7 +16567,7 @@ mutation IsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $o
 		... AllPkgTree
 	}
 	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestOccurrence(subject: {package:$pkg}, artifact: $artifact, occurrence: $occurrence) {
 		... AllIsOccurrencesTree
@@ -16594,7 +16594,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -16607,17 +16607,17 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	artifact {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	justification
 	origin
 	collector
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -16664,16 +16664,16 @@ func IsOccurrenceSrc(
 		Query: `
 mutation IsOccurrenceSrc ($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
 	ingestSource(source: $source) {
-		... allSourceTree
+		... AllSourceTree
 	}
 	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestOccurrence(subject: {source:$source}, artifact: $artifact, occurrence: $occurrence) {
 		... AllIsOccurrencesTree
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -16687,7 +16687,7 @@ fragment allSourceTree on Source {
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -16700,11 +16700,11 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	artifact {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	justification
 	origin
@@ -16931,10 +16931,10 @@ query Neighbors ($node: ID!) {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 		... on Builder {
 			... allBuilderTree
@@ -16949,7 +16949,7 @@ query Neighbors ($node: ID!) {
 			... allGHSATree
 		}
 		... on CertifyScorecard {
-			... allCertifyScorecard
+			... AllCertifyScorecard
 		}
 		... on CertifyPkg {
 			... allCertifyPkg
@@ -17010,7 +17010,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -17024,7 +17024,7 @@ fragment allSourceTree on Source {
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -17055,10 +17055,10 @@ fragment allGHSATree on GHSA {
 		ghsaId
 	}
 }
-fragment allCertifyScorecard on CertifyScorecard {
+fragment AllCertifyScorecard on CertifyScorecard {
 	id
 	source {
-		... allSourceTree
+		... AllSourceTree
 	}
 	scorecard {
 		timeScanned
@@ -17090,11 +17090,11 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	artifact {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	justification
 	origin
@@ -17115,11 +17115,11 @@ fragment allIsDependencyTree on IsDependency {
 }
 fragment allSLSATree on HasSLSA {
 	subject {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	slsa {
 		builtFrom {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 		builtBy {
 			id
@@ -17146,10 +17146,10 @@ fragment allCertifyBad on CertifyBad {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 }
@@ -17157,7 +17157,7 @@ fragment allHashEqualTree on HashEqual {
 	id
 	justification
 	artifacts {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	origin
 	collector
@@ -17171,7 +17171,7 @@ fragment allHasSBOMTree on HasSBOM {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	origin
@@ -17185,7 +17185,7 @@ fragment allHasSourceAt on HasSourceAt {
 		... AllPkgTree
 	}
 	source {
-		... allSourceTree
+		... AllSourceTree
 	}
 	origin
 	collector
@@ -17243,7 +17243,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllPkgTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 	vulnerability {
@@ -17349,10 +17349,10 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 		... on Builder {
 			... allBuilderTree
@@ -17367,7 +17367,7 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
 			... allGHSATree
 		}
 		... on CertifyScorecard {
-			... allCertifyScorecard
+			... AllCertifyScorecard
 		}
 		... on CertifyPkg {
 			... allCertifyPkg
@@ -17428,7 +17428,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -17442,7 +17442,7 @@ fragment allSourceTree on Source {
 		}
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -17473,10 +17473,10 @@ fragment allGHSATree on GHSA {
 		ghsaId
 	}
 }
-fragment allCertifyScorecard on CertifyScorecard {
+fragment AllCertifyScorecard on CertifyScorecard {
 	id
 	source {
-		... allSourceTree
+		... AllSourceTree
 	}
 	scorecard {
 		timeScanned
@@ -17508,11 +17508,11 @@ fragment AllIsOccurrencesTree on IsOccurrence {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	artifact {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	justification
 	origin
@@ -17533,11 +17533,11 @@ fragment allIsDependencyTree on IsDependency {
 }
 fragment allSLSATree on HasSLSA {
 	subject {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	slsa {
 		builtFrom {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 		builtBy {
 			id
@@ -17564,10 +17564,10 @@ fragment allCertifyBad on CertifyBad {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 }
@@ -17575,7 +17575,7 @@ fragment allHashEqualTree on HashEqual {
 	id
 	justification
 	artifacts {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	origin
 	collector
@@ -17589,7 +17589,7 @@ fragment allHasSBOMTree on HasSBOM {
 			... AllPkgTree
 		}
 		... on Source {
-			... allSourceTree
+			... AllSourceTree
 		}
 	}
 	origin
@@ -17603,7 +17603,7 @@ fragment allHasSourceAt on HasSourceAt {
 		... AllPkgTree
 	}
 	source {
-		... allSourceTree
+		... AllSourceTree
 	}
 	origin
 	collector
@@ -17661,7 +17661,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllPkgTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 	vulnerability {
@@ -17712,10 +17712,10 @@ func SLSAForArtifact(
 		Query: `
 mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestMaterials(materials: $materials) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestBuilder(builder: $builder) {
 		uri
@@ -17724,18 +17724,18 @@ mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [ArtifactIn
 		... allSLSATree
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
 }
 fragment allSLSATree on HasSLSA {
 	subject {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	slsa {
 		builtFrom {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 		builtBy {
 			id
@@ -17786,13 +17786,13 @@ func Scorecard(
 		Query: `
 mutation Scorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
 	ingestSource(source: $source) {
-		... allSourceTree
+		... AllSourceTree
 	}
 	certifyScorecard(source: $source, scorecard: $scorecard) {
-		... allCertifyScorecard
+		... AllCertifyScorecard
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -17806,10 +17806,10 @@ fragment allSourceTree on Source {
 		}
 	}
 }
-fragment allCertifyScorecard on CertifyScorecard {
+fragment AllCertifyScorecard on CertifyScorecard {
 	id
 	source {
-		... allSourceTree
+		... AllSourceTree
 	}
 	scorecard {
 		timeScanned
@@ -17854,10 +17854,10 @@ func Sources(
 		Query: `
 query Sources ($filter: SourceSpec) {
 	sources(sourceSpec: $filter) {
-		... allSourceTree
+		... AllSourceTree
 	}
 }
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
 	id
 	type
 	namespaces {
@@ -17947,7 +17947,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllPkgTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 	vulnerability {
@@ -17964,7 +17964,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -18010,7 +18010,7 @@ func VexArtifactAndCve(
 		Query: `
 mutation VexArtifactAndCve ($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestCVE(cve: $cve) {
 		... allCveTree
@@ -18019,7 +18019,7 @@ mutation VexArtifactAndCve ($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, 
 		... allCertifyVEXStatement
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -18040,7 +18040,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllPkgTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 	vulnerability {
@@ -18118,7 +18118,7 @@ func VexArtifactAndGhsa(
 		Query: `
 mutation VexArtifactAndGhsa ($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
-		... AllArtifactTree
+		... allArtifactTree
 	}
 	ingestGHSA(ghsa: $ghsa) {
 		... allGHSATree
@@ -18127,7 +18127,7 @@ mutation VexArtifactAndGhsa ($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec
 		... allCertifyVEXStatement
 	}
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest
@@ -18147,7 +18147,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllPkgTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 	vulnerability {
@@ -18272,7 +18272,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllPkgTree
 		}
 		... on Artifact {
-			... AllArtifactTree
+			... allArtifactTree
 		}
 	}
 	vulnerability {
@@ -18289,7 +18289,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
 	id
 	algorithm
 	digest

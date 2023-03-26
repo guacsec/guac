@@ -28,7 +28,7 @@ mutation HasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 
 mutation HasSBOMSrc($source: SourceInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
   ingestSource(source: $source) {
-    ...allSourceTree
+    ...AllSourceTree
   }
   ingestHasSBOM(subject: {source: $source}, hasSBOM: $hasSBOM) {
     ...allHasSBOMTree

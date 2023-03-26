@@ -19,6 +19,6 @@
 
 query Sources($filter: SourceSpec) {
   sources(sourceSpec: $filter) {
-    ...allSourceTree
+    ...AllSourceTree
   }
 }

@@ -18,6 +18,7 @@ package root_package
 import (
 	"context"
 	"fmt"
+	"math"
 	"sort"
 	"time"
 
@@ -55,8 +56,7 @@ func NewPackageQuery(client graphql.Client, daysSinceLastScan int) certifier.Que
 	}
 }
 
-// GetComponents runs as a goroutine to query for root level and dependent packages to scan and passes them
-// to the compChan as they are found. The interface will be type "*PackageComponent"
+// GetComponents get all the packages that do not have a certify vulnerability attached or last scanned is more than daysSinceLastScan
 func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
@@ -148,7 +148,7 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, response *generated.
 						if p.daysSinceLastScan != 0 {
 							now := time.Now()
 							difference := vulns.Metadata.TimeScanned.Sub(now)
-							if difference.Hours() < float64(p.daysSinceLastScan*24) {
+							if math.Abs(difference.Hours()) < float64(p.daysSinceLastScan*24) {
 								certifyVulnFound = true
 							}
 						} else {

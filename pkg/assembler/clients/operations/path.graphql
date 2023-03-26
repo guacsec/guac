@@ -24,10 +24,10 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
       ... AllPkgTree
     }
     ... on Source {
-      ... allSourceTree
+      ... AllSourceTree
     }
     ... on Artifact {
-      ...AllArtifactTree
+      ...allArtifactTree
     }
     ... on Builder {
       ...allBuilderTree
@@ -42,7 +42,7 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
       ...allGHSATree
     }
     ... on CertifyScorecard {
-      ...allCertifyScorecard
+      ...AllCertifyScorecard
     }
     ... on CertifyPkg {
       ...allCertifyPkg
@@ -90,10 +90,10 @@ query Neighbors($node: ID!) {
       ... AllPkgTree
     }
     ... on Source {
-      ... allSourceTree
+      ... AllSourceTree
     }
     ... on Artifact {
-      ...AllArtifactTree
+      ...allArtifactTree
     }
     ... on Builder {
       ...allBuilderTree
@@ -108,7 +108,7 @@ query Neighbors($node: ID!) {
       ...allGHSATree
     }
     ... on CertifyScorecard {
-      ...allCertifyScorecard
+      ...AllCertifyScorecard
     }
     ... on CertifyPkg {
       ...allCertifyPkg

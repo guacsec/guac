@@ -41,7 +41,7 @@ fragment AllPkgTree on Package {
   }
 }
 
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
   id
   type
   namespaces {
@@ -56,7 +56,7 @@ fragment allSourceTree on Source {
   }
 }
 
-fragment AllArtifactTree on Artifact {
+fragment allArtifactTree on Artifact {
   id
   algorithm
   digest
@@ -92,10 +92,10 @@ fragment allOSVTree on OSV {
   }
 }
 
-fragment allCertifyScorecard on CertifyScorecard {
+fragment AllCertifyScorecard on CertifyScorecard {
   id
   source {
-    ...allSourceTree
+    ...AllSourceTree
   }
   scorecard {
     timeScanned
@@ -119,11 +119,11 @@ fragment AllIsOccurrencesTree on IsOccurrence {
       ...AllPkgTree
     }
    ...on Source {
-      ...allSourceTree
+      ...AllSourceTree
     }
   }
   artifact {
-    ...AllArtifactTree
+    ...allArtifactTree
   }
   justification
   origin
@@ -146,11 +146,11 @@ fragment allIsDependencyTree on IsDependency {
 
 fragment allSLSATree on HasSLSA {
   subject {
-    ...AllArtifactTree
+    ...allArtifactTree
   }
   slsa {
     builtFrom {
-      ...AllArtifactTree
+      ...allArtifactTree
     }
     builtBy {
       id
@@ -178,10 +178,10 @@ fragment allCertifyBad on CertifyBad {
       ...AllPkgTree
     }
     ... on Source {
-      ...allSourceTree
+      ...AllSourceTree
     }
     ... on Artifact {
-      ...AllArtifactTree
+      ...allArtifactTree
     }
   }
 }
@@ -190,7 +190,7 @@ fragment allHashEqualTree on HashEqual {
   id
   justification
   artifacts {
-    ...AllArtifactTree
+    ...allArtifactTree
   }
   origin
   collector
@@ -205,7 +205,7 @@ fragment allHasSBOMTree on HasSBOM {
       ...AllPkgTree
     }
     ... on Source {
-      ...allSourceTree
+      ...AllSourceTree
       }
   }
   origin
@@ -220,7 +220,7 @@ fragment allHasSourceAt on HasSourceAt {
     ...AllPkgTree
   }
   source {
-    ...allSourceTree
+    ...AllSourceTree
   }
   origin
   collector
@@ -291,7 +291,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
       ...AllPkgTree
     }
     ... on Artifact {
-      ...AllArtifactTree
+      ...allArtifactTree
     }
   }
   vulnerability {

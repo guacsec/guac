@@ -17,20 +17,54 @@ package root_package
 
 import (
 	"context"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/certifier"
 )
+
+func TestNewPackageQuery(t *testing.T) {
+	httpClient := http.Client{}
+	gqlclient := graphql.NewClient("inmemeory", &httpClient)
+
+	type args struct {
+		client            graphql.Client
+		daysSinceLastScan int
+	}
+	tests := []struct {
+		name string
+		args args
+		want certifier.QueryComponents
+	}{{
+		name: "newPackageQuery",
+		args: args{
+			client:            gqlclient,
+			daysSinceLastScan: 0,
+		},
+		want: &packageQuery{
+			client:            gqlclient,
+			daysSinceLastScan: 0,
+		},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NewPackageQuery(tt.args.client, tt.args.daysSinceLastScan); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewPackageQuery() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
 func Test_packageQuery_GetComponents(t *testing.T) {
 	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
-	testPackage := generated.PackagesPackagesPackage{}
+	testPypiPackage := generated.PackagesPackagesPackage{}
 
-	testPackage.Type = "pypi"
-	testPackage.Namespaces = append(testPackage.Namespaces, generated.AllPkgTreeNamespacesPackageNamespace{
+	testPypiPackage.Type = "pypi"
+	testPypiPackage.Namespaces = append(testPypiPackage.Namespaces, generated.AllPkgTreeNamespacesPackageNamespace{
 		Id:        "",
 		Namespace: "",
 		Names: []generated.AllPkgTreeNamespacesPackageNamespaceNamesPackageName{
@@ -45,10 +79,36 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		},
 	})
 
+	testOpenSSLPackage := generated.PackagesPackagesPackage{}
+	testOpenSSLPackage.Type = "conan"
+	testOpenSSLPackage.Namespaces = append(testOpenSSLPackage.Namespaces, generated.AllPkgTreeNamespacesPackageNamespace{
+		Id:        "",
+		Namespace: "openssl.org",
+		Names: []generated.AllPkgTreeNamespacesPackageNamespaceNamesPackageName{
+			{
+				Name: "openssl",
+				Versions: []generated.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion{
+					{
+						Version: "3.0.3",
+					},
+				},
+			},
+		},
+	})
+
 	neighborCertifyVulnTimeStamp := generated.NeighborsNeighborsCertifyVuln{}
 	neighborCertifyVulnTimeStamp.Metadata = generated.AllCertifyVulnMetadataVulnerabilityMetaData{
-		TimeScanned: tm,
+		TimeScanned: tm.UTC(),
 	}
+
+	neighborCertifyVulnTimeNow := generated.NeighborsNeighborsCertifyVuln{}
+	neighborCertifyVulnTimeNow.Metadata = generated.AllCertifyVulnMetadataVulnerabilityMetaData{
+		TimeScanned: time.Now().UTC(),
+	}
+
+	neighborIsOccurrence := generated.NeighborsNeighborsIsOccurrence{}
+	neighborIsOccurrence.Artifact.Algorithm = "sha256"
+	neighborIsOccurrence.Artifact.Digest = "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
 
 	tests := []struct {
 		name              string
@@ -59,11 +119,11 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		wantErr           bool
 	}{
 		{
-			name:              "django",
+			name:              "django: daysSinceLastScan=0",
 			daysSinceLastScan: 0,
 			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
-					Packages: []generated.PackagesPackagesPackage{testPackage},
+					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
@@ -79,13 +139,12 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 				},
 			},
 			wantErr: false,
-		},
-		{
+		}, {
 			name:              "django with certifyVuln",
 			daysSinceLastScan: 0,
 			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
 				return &generated.PackagesResponse{
-					Packages: []generated.PackagesPackagesPackage{testPackage},
+					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
@@ -95,8 +154,98 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			},
 			wantPackNode: []*PackageNode{},
 			wantErr:      false,
-		},
-	}
+		}, {
+			name:              "django with certifyVuln, daysSinceLastScan=30",
+			daysSinceLastScan: 30,
+			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+				return &generated.PackagesResponse{
+					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+				return &generated.NeighborsResponse{
+					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp},
+				}, nil
+			},
+			wantPackNode: []*PackageNode{{
+				Purl:      "pkg:pypi/django@1.11.1",
+				Algorithm: "",
+				Digest:    "",
+			}},
+			wantErr: false,
+		}, {
+			name:              "django with certifyVuln, timestamp: time now, daysSinceLastScan=30",
+			daysSinceLastScan: 30,
+			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+				return &generated.PackagesResponse{
+					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+				return &generated.NeighborsResponse{
+					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeNow},
+				}, nil
+			},
+			wantPackNode: []*PackageNode{},
+			wantErr:      false,
+		}, {
+			name:              "django with certifyVuln, daysSinceLastScan=0, IsOccurrence",
+			daysSinceLastScan: 0,
+			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+				return &generated.PackagesResponse{
+					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+				return &generated.NeighborsResponse{
+					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp, &neighborIsOccurrence},
+				}, nil
+			},
+			wantPackNode: []*PackageNode{},
+			wantErr:      false,
+		}, {
+			name:              "django, daysSinceLastScan=0, IsOccurrence",
+			daysSinceLastScan: 0,
+			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+				return &generated.PackagesResponse{
+					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+				return &generated.NeighborsResponse{
+					Neighbors: []generated.NeighborsNeighborsNode{&neighborIsOccurrence},
+				}, nil
+			},
+			wantPackNode: []*PackageNode{{
+				Purl:      "pkg:pypi/django@1.11.1",
+				Algorithm: "sha256",
+				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			}},
+			wantErr: false,
+		}, {
+			name:              "multiple packages",
+			daysSinceLastScan: 0,
+			getPackages: func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error) {
+				return &generated.PackagesResponse{
+					Packages: []generated.PackagesPackagesPackage{testPypiPackage, testOpenSSLPackage},
+				}, nil
+			},
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+				return &generated.NeighborsResponse{
+					Neighbors: []generated.NeighborsNeighborsNode{},
+				}, nil
+			},
+			wantPackNode: []*PackageNode{{
+				Purl:      "pkg:pypi/django@1.11.1",
+				Algorithm: "",
+				Digest:    "",
+			}, {
+				Purl:      "pkg:conan/openssl.org/openssl@3.0.3",
+				Algorithm: "",
+				Digest:    "",
+			}},
+			wantErr: false,
+		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
@@ -139,37 +288,6 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			}
 			if !reflect.DeepEqual(pnList, tt.wantPackNode) {
 				t.Errorf("packageQuery.GetComponents() got = %v, want %v", pnList, tt.wantPackNode)
-			}
-		})
-	}
-}
-
-func Test_packageQuery_getPackageNodes(t *testing.T) {
-	type fields struct {
-		client            graphql.Client
-		daysSinceLastScan int
-	}
-	type args struct {
-		ctx      context.Context
-		response *generated.PackagesResponse
-		nodeChan chan<- *PackageNode
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := &packageQuery{
-				client:            tt.fields.client,
-				daysSinceLastScan: tt.fields.daysSinceLastScan,
-			}
-			if err := p.getPackageNodes(tt.args.ctx, tt.args.response, tt.args.nodeChan); (err != nil) != tt.wantErr {
-				t.Errorf("packageQuery.getPackageNodes() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
