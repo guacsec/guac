@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"strings"
 
@@ -129,7 +128,7 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 
 	// could search backedges for pkg/src or artifiact, just do artifact
 	for _, id := range a.occurrences {
-		o, _ := c.occurrenceByID(id)
+		o, _ := byID[*isOccurrenceStruct](id, c)
 		if o.pkg == packageID &&
 			o.source == sourceID &&
 			o.artifact == a.id &&
@@ -151,10 +150,10 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 	c.index[o.id] = o
 	a.setOccurrences(o.id)
 	if packageID != 0 {
-		p, _ := c.pkgVersionByID(packageID)
+		p, _ := byID[*pkgVersionNode](packageID, c)
 		p.setOccurrenceLinks(o.id)
 	} else {
-		s, _ := c.sourceByID(sourceID)
+		s, _ := byID[*srcNameNode](sourceID, c)
 		s.setOccurrenceLinks(o.id)
 	}
 	c.occurrences = append(c.occurrences, o)
@@ -162,20 +161,8 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 	return c.convOccurrence(o), nil
 }
 
-func (c *demoClient) occurrenceByID(id uint32) (*isOccurrenceStruct, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find occurrence")
-	}
-	a, ok := o.(*isOccurrenceStruct)
-	if !ok {
-		return nil, errors.New("not an occurrence")
-	}
-	return a, nil
-}
-
 func (c *demoClient) convOccurrence(in *isOccurrenceStruct) *model.IsOccurrence {
-	a, _ := c.artifactByID(in.artifact)
+	a, _ := byID[*artStruct](in.artifact, c)
 	o := &model.IsOccurrence{
 		ID:            nodeID(in.id),
 		Artifact:      c.convArtifact(a),
@@ -201,7 +188,7 @@ func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec)
 	if a != nil && a.id == aID {
 		return true
 	}
-	m, _ := c.artifactByID(aID)
+	m, _ := byID[*artStruct](aID, c)
 	if artifactSpec.Digest != nil && strings.ToLower(*artifactSpec.Digest) == m.digest {
 		return true
 	}
@@ -213,65 +200,120 @@ func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec)
 
 // Query IsOccurrence
 
-func (c *demoClient) IsOccurrence(ctx context.Context, ioSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	err := helper.ValidatePackageOrSourceQueryFilter(ioSpec.Subject)
-	if err != nil {
+func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	funcName := "IsOccurrence"
+	if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
 		return nil, err
 	}
 
-	if ioSpec.ID != nil {
-		id64, err := strconv.ParseUint(*ioSpec.ID, 10, 32)
+	if filter != nil && filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, gqlerror.Errorf("IsOccurrence :: invalid ID %s", err)
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
 		id := uint32(id64)
-		o, err := c.occurrenceByID(id)
+		link, err := byID[*isOccurrenceStruct](id, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.IsOccurrence{c.convOccurrence(o)}, nil
+		return []*model.IsOccurrence{c.convOccurrence(link)}, nil
 	}
 
-	var rv []*model.IsOccurrence
-	// TODO if any of the pkg/src/artifact are specified, ony search those backedges
-	for _, o := range c.occurrences {
-		if noMatch(ioSpec.Justification, o.justification) ||
-			noMatch(ioSpec.Origin, o.origin) ||
-			noMatch(ioSpec.Collector, o.collector) {
-			continue
+	var search []uint32
+	foundOne := false
+	if filter != nil && filter.Artifact != nil {
+		exactArtifact, err := c.artifactExact(filter.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
-		if ioSpec.Artifact != nil && !c.artifactMatch(o.artifact, ioSpec.Artifact) {
-			continue
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.occurrences...)
+			foundOne = true
 		}
-		if ioSpec.Subject != nil {
-			if ioSpec.Subject.Package != nil {
-				if o.pkg == 0 {
-					continue
-				}
-				p, err := c.buildPackageResponse(o.pkg, ioSpec.Subject.Package)
-				if err != nil {
-					return nil, err
-				}
-				if p == nil {
-					continue
-				}
-			} else if ioSpec.Subject.Source != nil {
-				if o.source == 0 {
-					continue
-				}
-				s, err := c.buildSourceResponse(o.source, ioSpec.Subject.Source)
-				if err != nil {
-					return nil, err
-				}
-				if s == nil {
-					continue
-				}
+	}
+	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Package != nil {
+		exactPackage, err := c.exactPackageVersion(filter.Subject.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactPackage != nil {
+			search = append(search, exactPackage.occurrences...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.Subject != nil && filter.Subject.Source != nil {
+		exactSource, err := c.exactSource(filter.Subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.occurrences...)
+			foundOne = true
+		}
+	}
+
+	var out []*model.IsOccurrence
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*isOccurrenceStruct](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addOccIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 		}
-		rv = append(rv, c.convOccurrence(o))
+	} else {
+		for _, link := range c.occurrences {
+			var err error
+			out, err = c.addOccIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
 	}
+	return out, nil
+}
 
-	return rv, nil
+func (c *demoClient) addOccIfMatch(out []*model.IsOccurrence,
+	filter *model.IsOccurrenceSpec, link *isOccurrenceStruct) (
+	[]*model.IsOccurrence, error) {
+
+	if noMatch(filter.Justification, link.justification) ||
+		noMatch(filter.Origin, link.origin) ||
+		noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+	if filter.Artifact != nil && !c.artifactMatch(link.artifact, filter.Artifact) {
+		return out, nil
+	}
+	if filter.Subject != nil {
+		if filter.Subject.Package != nil {
+			if link.pkg == 0 {
+				return out, nil
+			}
+			p, err := c.buildPackageResponse(link.pkg, filter.Subject.Package)
+			if err != nil {
+				return nil, err
+			}
+			if p == nil {
+				return out, nil
+			}
+		} else if filter.Subject.Source != nil {
+			if link.source == 0 {
+				return out, nil
+			}
+			s, err := c.buildSourceResponse(link.source, filter.Subject.Source)
+			if err != nil {
+				return nil, err
+			}
+			if s == nil {
+				return out, nil
+			}
+		}
+	}
+	return append(out, c.convOccurrence(link)), nil
 }

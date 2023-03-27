@@ -138,7 +138,7 @@ func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec)
 // Query GHSA
 func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model.Ghsa, error) {
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -181,7 +181,7 @@ func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model
 // The optional filter allows restricting output (on selection operations).
 func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*model.Ghsa, error) {
 	if filter != nil && filter.ID != nil {
-		filteredID, err := strconv.Atoi(*filter.ID)
+		filteredID, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -216,6 +216,32 @@ func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*mode
 		GhsaIds: ghsaIDList,
 	}
 	return &s, nil
+}
+
+func (c *demoClient) exactGHSA(filter *model.GHSASpec) (*ghsaIDNode, error) {
+	if filter == nil {
+		return nil, nil
+	}
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		id := uint32(id64)
+		if node, ok := c.index[id]; ok {
+			if g, ok := node.(*ghsaIDNode); ok {
+				return g, nil
+			}
+		}
+	}
+	if filter.GhsaID != nil {
+		if root, ok := c.ghsas[ghsa]; ok {
+			if node, ok := root.ghsaIDs[*filter.GhsaID]; ok {
+				return node, nil
+			}
+		}
+	}
+	return nil, nil
 }
 
 func getGhsaIDFromInput(c *demoClient, input model.GHSAInputSpec) (uint32, error) {

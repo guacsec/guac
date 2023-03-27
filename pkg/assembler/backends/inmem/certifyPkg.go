@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -109,18 +108,6 @@ func (n *certifyPkgStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest CertifyPkg
 
-func (c *demoClient) certifyPkgByID(id uint32) (*certifyPkgStruct, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find certifyPackage")
-	}
-	cp, ok := o.(*certifyPkgStruct)
-	if !ok {
-		return nil, errors.New("not a certifyPackage")
-	}
-	return cp, nil
-}
-
 func (c *demoClient) convCertifyPkg(in *certifyPkgStruct) *model.CertifyPkg {
 	out := &model.CertifyPkg{
 		ID:            nodeID(in.id),
@@ -151,12 +138,12 @@ func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 
 	ps := make([]*pkgVersionNode, 0, 2)
 	for _, pID := range pIDs {
-		p, _ := c.pkgVersionByID(pID)
+		p, _ := byID[*pkgVersionNode](pID, c)
 		ps = append(ps, p)
 	}
 
 	for _, id := range ps[0].certifyPkgs {
-		cp, _ := c.certifyPkgByID(id)
+		cp, _ := byID[*certifyPkgStruct](id, c)
 		if slices.Equal(cp.pkgs, pIDs) &&
 			cp.justification == certifyPkg.Justification &&
 			cp.origin == certifyPkg.Origin &&
@@ -183,53 +170,89 @@ func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 
 // Query CertifyPkg
 
-func (c *demoClient) CertifyPkg(ctx context.Context, cpSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
-	if cpSpec.ID != nil {
-		id64, err := strconv.ParseUint(*cpSpec.ID, 10, 32)
+func (c *demoClient) CertifyPkg(ctx context.Context, filter *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
+	funcName := "CertifyPkg"
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, gqlerror.Errorf("CertifyPkg :: invalid ID %s", err)
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
 		id := uint32(id64)
-		cp, err := c.certifyPkgByID(id)
+		link, err := byID[*certifyPkgStruct](id, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.CertifyPkg{c.convCertifyPkg(cp)}, nil
+		return []*model.CertifyPkg{c.convCertifyPkg(link)}, nil
 	}
 
-	var rv []*model.CertifyPkg
-	// TODO if any of the cpSpec.Packages are specified, ony search those backedges
-	for _, cp := range c.certifyPkgs {
-		if noMatch(cpSpec.Justification, cp.justification) ||
-			noMatch(cpSpec.Origin, cp.origin) ||
-			noMatch(cpSpec.Collector, cp.collector) {
-			continue
-		}
-		cont := false
-		for _, ps := range cpSpec.Packages {
-			if ps == nil {
-				continue
+	var search []uint32
+	foundOne := false
+	for _, p := range filter.Packages {
+		if !foundOne {
+			exactPackage, err := c.exactPackageVersion(p)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			found := false
-			for _, pid := range cp.pkgs {
-				p, err := c.buildPackageResponse(pid, ps)
-				if err != nil {
-					return nil, err
-				}
-				if p != nil {
-					found = true
-				}
-			}
-			if !found {
-				cont = true
+			if exactPackage != nil {
+				search = append(search, exactPackage.certifyPkgs...)
+				foundOne = true
+				break
 			}
 		}
-		if cont {
-			continue
-		}
-		rv = append(rv, c.convCertifyPkg(cp))
 	}
-	return rv, nil
+
+	var out []*model.CertifyPkg
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*certifyPkgStruct](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addCPIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	} else {
+		for _, link := range c.certifyPkgs {
+			var err error
+			out, err = c.addCPIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	}
+	return out, nil
+}
+
+func (c *demoClient) addCPIfMatch(out []*model.CertifyPkg,
+	filter *model.CertifyPkgSpec, link *certifyPkgStruct) (
+	[]*model.CertifyPkg, error) {
+
+	if noMatch(filter.Justification, link.justification) ||
+		noMatch(filter.Origin, link.origin) ||
+		noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+	for _, ps := range filter.Packages {
+		if ps == nil {
+			continue
+		}
+		found := false
+		for _, pid := range link.pkgs {
+			p, err := c.buildPackageResponse(pid, ps)
+			if err != nil {
+				return nil, err
+			}
+			if p != nil {
+				found = true
+			}
+		}
+		if !found {
+			return out, nil
+		}
+	}
+	return append(out, c.convCertifyPkg(link)), nil
 }

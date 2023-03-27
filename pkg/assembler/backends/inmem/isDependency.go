@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -83,7 +82,7 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 	duplicate := false
 	collectedIsDependencyLink := isDependencyLink{}
 	for _, id := range searchIDs {
-		v, _ := c.dependencyByID(id)
+		v, _ := byID[*isDependencyLink](id, c)
 		if packageID == v.packageID && depPackageID == v.depPackageID && dependency.Justification == v.justification &&
 			dependency.Origin == v.origin && dependency.Collector == v.collector && dependency.VersionRange == v.versionRange {
 
@@ -121,51 +120,68 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 
 // Query IsDependency
 func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	out := []*model.IsDependency{}
-
+	funcName := "IsDependency"
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
-		node, ok := c.index[uint32(id)]
-		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+		id := uint32(id64)
+		link, err := byID[*isDependencyLink](id, c)
+		if err != nil {
+			// Not found
+			return nil, nil
 		}
-		if link, ok := node.(*isDependencyLink); ok {
-			foundIsDependency, err := c.buildIsDependency(link, filter, true)
-			if err != nil {
-				return nil, err
-			}
-			return []*model.IsDependency{foundIsDependency}, nil
-		} else {
-			return nil, gqlerror.Errorf("ID does not match expected node type for isDependency")
+		foundIsDependency, err := c.buildIsDependency(link, filter, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.IsDependency{foundIsDependency}, nil
+	}
+
+	var search []uint32
+	foundOne := false
+	if filter != nil && filter.Package != nil {
+		exactPackage, err := c.exactPackageVersion(filter.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactPackage != nil {
+			search = append(search, exactPackage.isDependencyLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && filter != nil && filter.DependentPackage != nil {
+		exactPackage, err := c.exactPackageName(filter.DependentPackage)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactPackage != nil {
+			search = append(search, exactPackage.isDependencyLinks...)
+			foundOne = true
 		}
 	}
 
-	// TODO if any of the pkg/dependent pkg are specified, ony search those backedges
-	for _, link := range c.isDependencies {
-		if filter != nil && noMatch(filter.Justification, link.justification) {
-			continue
+	var out []*model.IsDependency
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*isDependencyLink](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addDepIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && noMatch(filter.Origin, link.origin) {
-			continue
+	} else {
+		for _, link := range c.isDependencies {
+			var err error
+			out, err = c.addDepIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
 		}
-		if filter != nil && noMatch(filter.Collector, link.collector) {
-			continue
-		}
-		if filter != nil && noMatch(filter.VersionRange, link.versionRange) {
-			continue
-		}
-
-		foundIsDependency, err := c.buildIsDependency(link, filter, false)
-		if err != nil {
-			return nil, err
-		}
-		if foundIsDependency == nil {
-			continue
-		}
-		out = append(out, foundIsDependency)
 	}
 
 	return out, nil
@@ -225,14 +241,28 @@ func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsD
 	return &foundIsDependency, nil
 }
 
-func (c *demoClient) dependencyByID(id uint32) (*isDependencyLink, error) {
-	node, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find isDependencyLink")
+func (c *demoClient) addDepIfMatch(out []*model.IsDependency,
+	filter *model.IsDependencySpec, link *isDependencyLink) (
+	[]*model.IsDependency, error) {
+	if filter != nil && noMatch(filter.Justification, link.justification) {
+		return out, nil
 	}
-	link, ok := node.(*isDependencyLink)
-	if !ok {
-		return nil, errors.New("not an isDependencyLink")
+	if filter != nil && noMatch(filter.Origin, link.origin) {
+		return out, nil
 	}
-	return link, nil
+	if filter != nil && noMatch(filter.Collector, link.collector) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.VersionRange, link.versionRange) {
+		return out, nil
+	}
+
+	foundIsDependency, err := c.buildIsDependency(link, filter, false)
+	if err != nil {
+		return nil, err
+	}
+	if foundIsDependency == nil {
+		return out, nil
+	}
+	return append(out, foundIsDependency), nil
 }

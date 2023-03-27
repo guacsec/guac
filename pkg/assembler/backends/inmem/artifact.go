@@ -98,18 +98,6 @@ func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.Artifac
 	return c.convArtifact(a), nil
 }
 
-func (c *demoClient) artifactByID(id uint32) (*artStruct, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find artifact")
-	}
-	a, ok := o.(*artStruct)
-	if !ok {
-		return nil, errors.New("not an artifact")
-	}
-	return a, nil
-}
-
 func (c *demoClient) artifactByKey(alg, dig string) (*artStruct, error) {
 	algorithm := strings.ToLower(alg)
 	digest := strings.ToLower(dig)
@@ -130,7 +118,7 @@ func (c *demoClient) artifactExact(artifactSpec *model.ArtifactSpec) (*artStruct
 			return nil, fmt.Errorf("couldn't parse id %w", err)
 		}
 		id := uint32(id64)
-		a, err := c.artifactByID(id)
+		a, err := byID[*artStruct](id, c)
 		if err != nil {
 			// Not found
 			return nil, nil
@@ -192,7 +180,7 @@ func (c *demoClient) convArtifact(a *artStruct) *model.Artifact {
 // The optional filter allows restricting output (on selection operations).
 func (c *demoClient) buildArtifactResponse(id uint32, filter *model.ArtifactSpec) (*model.Artifact, error) {
 	if filter != nil && filter.ID != nil {
-		filteredID, err := strconv.Atoi(*filter.ID)
+		filteredID, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}

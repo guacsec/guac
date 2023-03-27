@@ -28,11 +28,12 @@ func (c *demoClient) Path(ctx context.Context, source string, target string, max
 	if maxPathLength <= 0 {
 		return nil, gqlerror.Errorf("maxPathLength argument must be positive, got %d", maxPathLength)
 	}
-	sourceID, err := strconv.Atoi(source)
+
+	sourceID, err := strconv.ParseUint(source, 10, 32)
 	if err != nil {
 		return nil, err
 	}
-	targetID, err := strconv.Atoi(target)
+	targetID, err := strconv.ParseUint(target, 10, 32)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func (c *demoClient) Path(ctx context.Context, source string, target string, max
 }
 
 func (c *demoClient) Neighbors(ctx context.Context, source string) ([]model.Node, error) {
-	id, err := strconv.Atoi(source)
+	id, err := strconv.ParseUint(source, 10, 32)
 	if err != nil {
 		return nil, err
 	}

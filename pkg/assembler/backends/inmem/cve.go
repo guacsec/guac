@@ -144,7 +144,7 @@ func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (
 // Query CVE
 func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.Cve, error) {
 	if filter != nil && filter.ID != nil {
-		id, err := strconv.Atoi(*filter.ID)
+		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}
@@ -183,6 +183,32 @@ func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.C
 	return out, nil
 }
 
+func (c *demoClient) exactCVE(filter *model.CVESpec) (*cveIDNode, error) {
+	if filter == nil {
+		return nil, nil
+	}
+	if filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		id := uint32(id64)
+		if node, ok := c.index[id]; ok {
+			if c, ok := node.(*cveIDNode); ok {
+				return c, nil
+			}
+		}
+	}
+	if filter.Year != nil && filter.CveID != nil {
+		if year, ok := c.cves[*filter.Year]; ok {
+			if node, ok := year.cveIDs[*filter.CveID]; ok {
+				return node, nil
+			}
+		}
+	}
+	return nil, nil
+}
+
 func buildCveID(foundCveNode *cveNode, filter *model.CVESpec) []*model.CVEId {
 	cveIDList := []*model.CVEId{}
 	if filter != nil && filter.CveID != nil {
@@ -208,7 +234,7 @@ func buildCveID(foundCveNode *cveNode, filter *model.CVESpec) []*model.CVEId {
 // The optional filter allows restricting output (on selection operations).
 func (c *demoClient) buildCveResponse(id uint32, filter *model.CVESpec) (*model.Cve, error) {
 	if filter != nil && filter.ID != nil {
-		filteredID, err := strconv.Atoi(*filter.ID)
+		filteredID, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, err
 		}

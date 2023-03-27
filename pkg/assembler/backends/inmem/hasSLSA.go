@@ -17,7 +17,6 @@ package inmem
 
 import (
 	"context"
-	"errors"
 	"sort"
 	"strconv"
 	"strings"
@@ -60,44 +59,77 @@ func (n *hasSLSAStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Query HasSlsa
 
-func (c *demoClient) HasSlsa(ctx context.Context, hSpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	if hSpec.ID != nil {
-		id64, err := strconv.ParseUint(*hSpec.ID, 10, 32)
+func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]*model.HasSlsa, error) {
+	funcName := "HasSlsa"
+	if filter != nil && filter.ID != nil {
+		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
-			return nil, gqlerror.Errorf("HasSLSA :: invalid ID %s", err)
+			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
 		id := uint32(id64)
-		h, err := c.hasSLSAByID(id)
+		link, err := byID[*hasSLSAStruct](id, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.HasSlsa{c.convSLSA(h)}, nil
+		return []*model.HasSlsa{c.convSLSA(link)}, nil
 	}
 
-	// TODO if subject, builtfrom, or builtby are provided, only search those
-	// backedges instead of all hasslsa here
-	var rv []*model.HasSlsa
-	for _, h := range c.hasSLSAs {
-		bb, _ := c.builderByID(h.builtBy)
-		if noMatch(hSpec.BuildType, h.buildType) ||
-			noMatch(hSpec.SlsaVersion, h.version) ||
-			noMatch(hSpec.Origin, h.origin) ||
-			noMatch(hSpec.Collector, h.collector) ||
-			(hSpec.StartedOn != nil && !hSpec.StartedOn.Equal(h.start)) ||
-			(hSpec.FinishedOn != nil && !hSpec.FinishedOn.Equal(h.finish)) ||
-			(hSpec.BuiltBy != nil && hSpec.BuiltBy.ID != nil && *hSpec.BuiltBy.ID != nodeID(bb.id)) ||
-			(hSpec.BuiltBy != nil && hSpec.BuiltBy.URI != nil && *hSpec.BuiltBy.URI != bb.uri) ||
-			!matchSLSAPreds(h.predicates, hSpec.Predicate) ||
-			!c.matchArtifacts([]*model.ArtifactSpec{hSpec.Subject}, []uint32{h.subject}) ||
-			!c.matchArtifacts(hSpec.BuiltFrom, h.builtFrom) {
-			continue
+	var search []uint32
+	foundOne := false
+	var arts []*model.ArtifactSpec
+	if filter != nil {
+		arts = append(arts, filter.Subject)
+		arts = append(arts, filter.BuiltFrom...)
+	}
+	for _, a := range arts {
+		if !foundOne && a != nil {
+			exactArtifact, err := c.artifactExact(a)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if exactArtifact != nil {
+				search = append(search, exactArtifact.hasSLSAs...)
+				foundOne = true
+				break
+			}
 		}
-		rv = append(rv, c.convSLSA(h))
+	}
+	if !foundOne && filter != nil && filter.BuiltBy != nil {
+		exactBuilder, err := c.exactBuilder(filter.BuiltBy)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactBuilder != nil {
+			search = append(search, exactBuilder.hasSLSAs...)
+			foundOne = true
+		}
 	}
 
-	return rv, nil
+	var out []*model.HasSlsa
+	if foundOne {
+		for _, id := range search {
+			link, err := byID[*hasSLSAStruct](id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addSLSAIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	} else {
+		for _, link := range c.hasSLSAs {
+			var err error
+			out, err = c.addSLSAIfMatch(out, filter, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+		}
+	}
+
+	return out, nil
 }
 
 func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSpec) bool {
@@ -128,18 +160,6 @@ func (c *demoClient) IngestMaterials(ctx context.Context,
 	}
 
 	return output, nil
-}
-
-func (c *demoClient) hasSLSAByID(id uint32) (*hasSLSAStruct, error) {
-	o, ok := c.index[id]
-	if !ok {
-		return nil, errors.New("could not find hasSLSA")
-	}
-	s, ok := o.(*hasSLSAStruct)
-	if !ok {
-		return nil, errors.New("not a hasSLSA")
-	}
-	return s, nil
 }
 
 func (c *demoClient) IngestSLSA(ctx context.Context,
@@ -175,7 +195,7 @@ func (c *demoClient) IngestSLSA(ctx context.Context,
 
 	// Just picking the first builtFrom found to search the backedges
 	for _, slID := range bfs[0].hasSLSAs {
-		sl, err := c.hasSLSAByID(slID)
+		sl, err := byID[*hasSLSAStruct](slID, c)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestSLSA :: Internal db error, bad backedge")
 		}
@@ -230,14 +250,14 @@ func convSLSAP(in []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
 }
 
 func (c *demoClient) convSLSA(in *hasSLSAStruct) *model.HasSlsa {
-	sub, _ := c.artifactByID(in.subject)
+	sub, _ := byID[*artStruct](in.subject, c)
 	// TODO propagate errors back
 	var bfs []*model.Artifact
 	for _, id := range in.builtFrom {
-		a, _ := c.artifactByID(id)
+		a, _ := byID[*artStruct](id, c)
 		bfs = append(bfs, c.convArtifact(a))
 	}
-	bb, _ := c.builderByID(in.builtBy)
+	bb, _ := byID[*builderStruct](in.builtBy, c)
 
 	return &model.HasSlsa{
 		ID:      nodeID(in.id),
@@ -254,4 +274,27 @@ func (c *demoClient) convSLSA(in *hasSLSAStruct) *model.HasSlsa {
 			Collector:     in.collector,
 		},
 	}
+}
+
+func (c *demoClient) addSLSAIfMatch(out []*model.HasSlsa,
+	filter *model.HasSLSASpec, link *hasSLSAStruct) (
+	[]*model.HasSlsa, error) {
+	bb, err := byID[*builderStruct](link.builtBy, c)
+	if err != nil {
+		return nil, err
+	}
+	if noMatch(filter.BuildType, link.buildType) ||
+		noMatch(filter.SlsaVersion, link.version) ||
+		noMatch(filter.Origin, link.origin) ||
+		noMatch(filter.Collector, link.collector) ||
+		(filter.StartedOn != nil && !filter.StartedOn.Equal(link.start)) ||
+		(filter.FinishedOn != nil && !filter.FinishedOn.Equal(link.finish)) ||
+		(filter.BuiltBy != nil && filter.BuiltBy.ID != nil && *filter.BuiltBy.ID != nodeID(bb.id)) ||
+		(filter.BuiltBy != nil && filter.BuiltBy.URI != nil && *filter.BuiltBy.URI != bb.uri) ||
+		!matchSLSAPreds(link.predicates, filter.Predicate) ||
+		!c.matchArtifacts([]*model.ArtifactSpec{filter.Subject}, []uint32{link.subject}) ||
+		!c.matchArtifacts(filter.BuiltFrom, link.builtFrom) {
+		return out, nil
+	}
+	return append(out, c.convSLSA(link)), nil
 }
