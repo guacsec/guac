@@ -111,6 +111,12 @@ func (n *osvIDNode) setVexLinks(id uint32) {
 
 // Ingest OSV
 func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (*model.Osv, error) {
+	return c.ingestOsv(ctx, input, true)
+}
+
+func (c *demoClient) ingestOsv(ctx context.Context, input *model.OSVInputSpec, readOnly bool) (*model.Osv, error) {
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
 	osvStruct, hasOsv := c.osvs[osv]
 	if !hasOsv {
 		osvStruct = &osvNode{
@@ -126,6 +132,12 @@ func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (
 
 	osvIDStruct, hasOsvID := osvIDs[osvID]
 	if !hasOsvID {
+		if readOnly {
+			c.m.RUnlock()
+			o, err := c.ingestOsv(ctx, input, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return o, err
+		}
 		osvIDStruct = &osvIDNode{
 			id:     c.getNextID(),
 			parent: osvStruct.id,
@@ -141,6 +153,8 @@ func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (
 
 // Query OSV
 func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.Osv, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
 		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {

@@ -113,6 +113,12 @@ func (n *cveIDNode) setVexLinks(id uint32) {
 
 // Ingest CVE
 func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (*model.Cve, error) {
+	return c.ingestCve(ctx, input, true)
+}
+
+func (c *demoClient) ingestCve(ctx context.Context, input *model.CVEInputSpec, readOnly bool) (*model.Cve, error) {
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
 	cveStruct, hasCve := c.cves[input.Year]
 	if !hasCve {
 		cveStruct = &cveNode{
@@ -128,6 +134,12 @@ func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (
 
 	cveIDStruct, hasCveID := cveIDs[cveID]
 	if !hasCveID {
+		if readOnly {
+			c.m.RUnlock()
+			cve, err := c.ingestCve(ctx, input, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return cve, err
+		}
 		cveIDStruct = &cveIDNode{
 			id:     c.getNextID(),
 			parent: cveStruct.id,
@@ -143,6 +155,8 @@ func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (
 
 // Query CVE
 func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.Cve, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
 		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {

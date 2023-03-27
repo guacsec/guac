@@ -68,20 +68,27 @@ func (n *vexLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest CertifyVex
+
 func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
-	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
-	if err != nil {
+	return c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
+}
+
+func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
+	if err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement"); err != nil {
 		return nil, err
 	}
-	err = helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVEXStatement")
-	if err != nil {
+	if err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVEXStatement"); err != nil {
 		return nil, err
 	}
+
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
 
 	var packageID uint32
 	var artifactID uint32
 	subjectVexLinks := []uint32{}
 	if subject.Package != nil {
+		var err error
 		packageID, err = getPackageIDFromInput(c, *subject.Package, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 		if err != nil {
 			return nil, err
@@ -91,6 +98,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 			subjectVexLinks = append(subjectVexLinks, foundPkgVersionNode.vexLinks...)
 		}
 	} else {
+		var err error
 		artifactID, err = getArtifactIDFromInput(c, *subject.Artifact)
 		if err != nil {
 			return nil, err
@@ -107,6 +115,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 	vulnerabilityVexLinks := []uint32{}
 
 	if vulnerability.Osv != nil {
+		var err error
 		osvID, err = getOsvIDFromInput(c, *vulnerability.Osv)
 		if err != nil {
 			return nil, err
@@ -118,6 +127,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 	}
 
 	if vulnerability.Cve != nil {
+		var err error
 		cveID, err = getCveIDFromInput(c, *vulnerability.Cve)
 		if err != nil {
 			return nil, err
@@ -129,6 +139,7 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 	}
 
 	if vulnerability.Ghsa != nil {
+		var err error
 		ghsaID, err = getGhsaIDFromInput(c, *vulnerability.Ghsa)
 		if err != nil {
 			return nil, err
@@ -177,6 +188,12 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 		}
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			v, err := c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return v, err
+		}
 		// store the link
 		collectedCertifyVexLink = vexLink{
 			id:            c.getNextID(),
@@ -220,6 +237,8 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 
 // Query CertifyVex
 func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	funcName := "CertifyVEXStatement"
 	if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
 		return nil, err

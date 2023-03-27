@@ -49,8 +49,12 @@ func (n *srcMapLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest HasSourceAt
 func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
-	// Note: This assumes that the package and source have already been
-	// ingested (and should error otherwise).
+	return c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, true)
+}
+
+func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (*model.HasSourceAt, error) {
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
 
 	sourceID, err := getSourceIDFromInput(c, source)
 	if err != nil {
@@ -93,6 +97,12 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		}
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			s, err := c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return s, err
+		}
 		// store the link
 		collectedSrcMapLink = srcMapLink{
 			id:            c.getNextID(),
@@ -120,6 +130,8 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 
 // Query HasSourceAt
 func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	funcName := "HasSourceAt"
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)

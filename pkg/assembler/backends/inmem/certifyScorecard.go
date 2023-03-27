@@ -52,6 +52,12 @@ func (n *scorecardLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest CertifyScorecard
 func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+	return c.certifyScorecard(ctx, source, scorecard, true)
+}
+
+func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (*model.CertifyScorecard, error) {
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
 	sourceID, err := getSourceIDFromInput(c, source)
 	if err != nil {
 		return nil, err
@@ -80,6 +86,12 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 		}
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			s, err := c.certifyScorecard(ctx, source, scorecard, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return s, err
+		}
 		// store the link
 		collectedScorecardLink = scorecardLink{
 			id:               c.getNextID(),
@@ -109,6 +121,8 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 
 // Query CertifyScorecard
 func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	funcName := "Scorecards"
 
 	if filter != nil && filter.ID != nil {

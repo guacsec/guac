@@ -66,16 +66,21 @@ func (n *vulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest CertifyVuln
 func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+	return c.ingestVulnerability(ctx, packageArg, vulnerability, certifyVuln, true)
+}
 
-	err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVulnerability")
-	if err != nil {
+func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.CertifyVuln, error) {
+	if err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVulnerability"); err != nil {
 		return nil, err
 	}
+
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
+
 	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 	if err != nil {
 		return nil, err
 	}
-
 	var osvID uint32
 	var cveID uint32
 	var ghsaID uint32
@@ -151,6 +156,12 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 		}
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			cv, err := c.ingestVulnerability(ctx, packageArg, vulnerability, certifyVuln, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return cv, err
+		}
 		// store the link
 		collectedCertifyVulnLink = vulnerabilityLink{
 			id:             c.getNextID(),
@@ -191,6 +202,8 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 
 // Query CertifyVuln
 func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	funcName := "CertifyVuln"
 	if err := helper.ValidateOsvCveOrGhsaQueryFilter(filter.Vulnerability); err != nil {
 		return nil, err

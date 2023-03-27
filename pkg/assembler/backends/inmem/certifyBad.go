@@ -59,16 +59,22 @@ func (n *badLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest CertifyBad
 func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject")
-	if err != nil {
+	return c.ingestCertifyBad(ctx, subject, pkgMatchType, certifyBad, true)
+}
+func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec, readOnly bool) (*model.CertifyBad, error) {
+	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "bad subject"); err != nil {
 		return nil, err
 	}
+
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
 
 	var packageID uint32
 	var artifactID uint32
 	var sourceID uint32
 	searchIDs := []uint32{}
 	if subject.Package != nil {
+		var err error
 		packageID, err = getPackageIDFromInput(c, *subject.Package, *pkgMatchType)
 		if err != nil {
 			return nil, err
@@ -78,6 +84,7 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 			searchIDs = append(searchIDs, foundPkgNameorVersionNode.getCertifyBadLinks()...)
 		}
 	} else if subject.Artifact != nil {
+		var err error
 		artifactID, err = getArtifactIDFromInput(c, *subject.Artifact)
 		if err != nil {
 			return nil, err
@@ -87,6 +94,7 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 			searchIDs = append(searchIDs, foundArtStrct.badLinks...)
 		}
 	} else {
+		var err error
 		sourceID, err = getSourceIDFromInput(c, *subject.Source)
 		if err != nil {
 			return nil, err
@@ -121,6 +129,12 @@ func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.Package
 		}
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			b, err := c.ingestCertifyBad(ctx, subject, pkgMatchType, certifyBad, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return b, err
+		}
 		// store the link
 		collectedCertifyBadLink = badLink{
 			id:            c.getNextID(),

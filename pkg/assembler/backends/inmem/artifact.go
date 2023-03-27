@@ -81,11 +81,24 @@ func (n *artStruct) setCertifyBadLinks(id uint32) { n.badLinks = append(n.badLin
 // Ingest Artifacts
 
 func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+	return c.ingestArtifact(ctx, artifact, true)
+}
+
+func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (*model.Artifact, error) {
 	algorithm := strings.ToLower(artifact.Algorithm)
 	digest := strings.ToLower(artifact.Digest)
-	a, err := c.artifactByKey(algorithm, digest)
 
+	c.lock(readOnly)
+	defer c.unlock(readOnly)
+
+	a, err := c.artifactByKey(algorithm, digest)
 	if err != nil {
+		if readOnly {
+			c.m.RUnlock()
+			a, err := c.ingestArtifact(ctx, artifact, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return a, err
+		}
 		a = &artStruct{
 			id:        c.getNextID(),
 			algorithm: algorithm,
@@ -139,6 +152,8 @@ func (c *demoClient) artifactExact(artifactSpec *model.ArtifactSpec) (*artStruct
 // Query Artifacts
 
 func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	a, err := c.artifactExact(artifactSpec)
 	if err != nil {
 		return nil, gqlerror.Errorf("Artifacts :: invalid spec %s", err)
