@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.12
-// source: pkg/handler/collector/deps.dev/internal/api.proto
+// source: pkg/handler/collector/deps_dev/internal/api.proto
 
-package deps_dev
+package v3alpha
 
 import (
 	context "context"
@@ -22,31 +22,28 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InsightsClient interface {
-	// Packages returns a list of all known packages, in a batched stream.
-	Packages(ctx context.Context, in *PackagesRequest, opts ...grpc.CallOption) (Insights_PackagesClient, error)
-	// Versions returns the versions of a package.
-	Versions(ctx context.Context, in *VersionsRequest, opts ...grpc.CallOption) (Insights_VersionsClient, error)
-	// Version returns information about specific package versions. If the
-	// request matches more than one version, multiple responses are returned.
-	Version(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (Insights_VersionClient, error)
-	// Dependencies returns the full dependency graph of a package version, as a
-	// stream of messages containing nodes and edges. The first node in the
-	// stream is the root of the graph. Edges do not appear before their
-	// referenced nodes. If the request matches more than one version, an error
-	// is returned.
-	Dependencies(ctx context.Context, in *DependenciesRequest, opts ...grpc.CallOption) (Insights_DependenciesClient, error)
-	// DependentInfo returns information about the dependents of a package
-	// version. If the request matches more than one version, an error is
-	// returned.
-	DependentInfo(ctx context.Context, in *DependentInfoRequest, opts ...grpc.CallOption) (*DependentInfoResponse, error)
-	// Advisory returns information about a security advisory.
-	Advisory(ctx context.Context, in *AdvisoryRequest, opts ...grpc.CallOption) (*AdvisoryResponse, error)
-	// Project returns information about the specified project.
-	Project(ctx context.Context, in *ProjectRequest, opts ...grpc.CallOption) (*ProjectResponse, error)
-	// ProjectPackageVersions returns a list of versions that reference the
-	// specified project.
-	// The links are not confirmed.
-	ProjectPackageVersions(ctx context.Context, in *ProjectPackageVersionsRequest, opts ...grpc.CallOption) (Insights_ProjectPackageVersionsClient, error)
+	// GetPackage returns information about a package, including a list of its
+	// available versions, with the default version marked if known.
+	GetPackage(ctx context.Context, in *GetPackageRequest, opts ...grpc.CallOption) (*Package, error)
+	// GetVersion returns information about a specific package version, including
+	// its licenses and any security advisories known to affect it.
+	GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*Version, error)
+	// GetDependencies returns a resolved dependency graph for the given package
+	// version.
+	//
+	// The dependency graph should be similar to one produced by installing the
+	// package version on a generic 64-bit Linux system, with no other
+	// dependencies present. The precise meaning of this varies from system to
+	// system.
+	GetDependencies(ctx context.Context, in *GetDependenciesRequest, opts ...grpc.CallOption) (*Dependencies, error)
+	// GetProject returns information about projects hosted by GitHub, GitLab, or
+	// BitBucket, when known to us.
+	GetProject(ctx context.Context, in *GetProjectRequest, opts ...grpc.CallOption) (*Project, error)
+	// GetAdvisory returns information about security advisories hosted by OSV.
+	GetAdvisory(ctx context.Context, in *GetAdvisoryRequest, opts ...grpc.CallOption) (*Advisory, error)
+	// Query returns information about multiple package versions, which can be
+	// specified by name, content hash, or both.
+	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResult, error)
 }
 
 type insightsClient struct {
@@ -57,222 +54,86 @@ func NewInsightsClient(cc grpc.ClientConnInterface) InsightsClient {
 	return &insightsClient{cc}
 }
 
-func (c *insightsClient) Packages(ctx context.Context, in *PackagesRequest, opts ...grpc.CallOption) (Insights_PackagesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Insights_ServiceDesc.Streams[0], "/deps_dev.v2alpha.Insights/Packages", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &insightsPackagesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Insights_PackagesClient interface {
-	Recv() (*PackagesResponse, error)
-	grpc.ClientStream
-}
-
-type insightsPackagesClient struct {
-	grpc.ClientStream
-}
-
-func (x *insightsPackagesClient) Recv() (*PackagesResponse, error) {
-	m := new(PackagesResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *insightsClient) Versions(ctx context.Context, in *VersionsRequest, opts ...grpc.CallOption) (Insights_VersionsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Insights_ServiceDesc.Streams[1], "/deps_dev.v2alpha.Insights/Versions", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &insightsVersionsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Insights_VersionsClient interface {
-	Recv() (*VersionsResponse, error)
-	grpc.ClientStream
-}
-
-type insightsVersionsClient struct {
-	grpc.ClientStream
-}
-
-func (x *insightsVersionsClient) Recv() (*VersionsResponse, error) {
-	m := new(VersionsResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *insightsClient) Version(ctx context.Context, in *VersionRequest, opts ...grpc.CallOption) (Insights_VersionClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Insights_ServiceDesc.Streams[2], "/deps_dev.v2alpha.Insights/Version", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &insightsVersionClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Insights_VersionClient interface {
-	Recv() (*VersionResponse, error)
-	grpc.ClientStream
-}
-
-type insightsVersionClient struct {
-	grpc.ClientStream
-}
-
-func (x *insightsVersionClient) Recv() (*VersionResponse, error) {
-	m := new(VersionResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *insightsClient) Dependencies(ctx context.Context, in *DependenciesRequest, opts ...grpc.CallOption) (Insights_DependenciesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Insights_ServiceDesc.Streams[3], "/deps_dev.v2alpha.Insights/Dependencies", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &insightsDependenciesClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Insights_DependenciesClient interface {
-	Recv() (*DependenciesResponse, error)
-	grpc.ClientStream
-}
-
-type insightsDependenciesClient struct {
-	grpc.ClientStream
-}
-
-func (x *insightsDependenciesClient) Recv() (*DependenciesResponse, error) {
-	m := new(DependenciesResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *insightsClient) DependentInfo(ctx context.Context, in *DependentInfoRequest, opts ...grpc.CallOption) (*DependentInfoResponse, error) {
-	out := new(DependentInfoResponse)
-	err := c.cc.Invoke(ctx, "/deps_dev.v2alpha.Insights/DependentInfo", in, out, opts...)
+func (c *insightsClient) GetPackage(ctx context.Context, in *GetPackageRequest, opts ...grpc.CallOption) (*Package, error) {
+	out := new(Package)
+	err := c.cc.Invoke(ctx, "/deps_dev.v3alpha.Insights/GetPackage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *insightsClient) Advisory(ctx context.Context, in *AdvisoryRequest, opts ...grpc.CallOption) (*AdvisoryResponse, error) {
-	out := new(AdvisoryResponse)
-	err := c.cc.Invoke(ctx, "/deps_dev.v2alpha.Insights/Advisory", in, out, opts...)
+func (c *insightsClient) GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*Version, error) {
+	out := new(Version)
+	err := c.cc.Invoke(ctx, "/deps_dev.v3alpha.Insights/GetVersion", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *insightsClient) Project(ctx context.Context, in *ProjectRequest, opts ...grpc.CallOption) (*ProjectResponse, error) {
-	out := new(ProjectResponse)
-	err := c.cc.Invoke(ctx, "/deps_dev.v2alpha.Insights/Project", in, out, opts...)
+func (c *insightsClient) GetDependencies(ctx context.Context, in *GetDependenciesRequest, opts ...grpc.CallOption) (*Dependencies, error) {
+	out := new(Dependencies)
+	err := c.cc.Invoke(ctx, "/deps_dev.v3alpha.Insights/GetDependencies", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *insightsClient) ProjectPackageVersions(ctx context.Context, in *ProjectPackageVersionsRequest, opts ...grpc.CallOption) (Insights_ProjectPackageVersionsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Insights_ServiceDesc.Streams[4], "/deps_dev.v2alpha.Insights/ProjectPackageVersions", opts...)
+func (c *insightsClient) GetProject(ctx context.Context, in *GetProjectRequest, opts ...grpc.CallOption) (*Project, error) {
+	out := new(Project)
+	err := c.cc.Invoke(ctx, "/deps_dev.v3alpha.Insights/GetProject", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &insightsProjectPackageVersionsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
+	return out, nil
 }
 
-type Insights_ProjectPackageVersionsClient interface {
-	Recv() (*ProjectPackageVersionsResponse, error)
-	grpc.ClientStream
-}
-
-type insightsProjectPackageVersionsClient struct {
-	grpc.ClientStream
-}
-
-func (x *insightsProjectPackageVersionsClient) Recv() (*ProjectPackageVersionsResponse, error) {
-	m := new(ProjectPackageVersionsResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
+func (c *insightsClient) GetAdvisory(ctx context.Context, in *GetAdvisoryRequest, opts ...grpc.CallOption) (*Advisory, error) {
+	out := new(Advisory)
+	err := c.cc.Invoke(ctx, "/deps_dev.v3alpha.Insights/GetAdvisory", in, out, opts...)
+	if err != nil {
 		return nil, err
 	}
-	return m, nil
+	return out, nil
+}
+
+func (c *insightsClient) Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResult, error) {
+	out := new(QueryResult)
+	err := c.cc.Invoke(ctx, "/deps_dev.v3alpha.Insights/Query", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // InsightsServer is the server API for Insights service.
 // All implementations must embed UnimplementedInsightsServer
 // for forward compatibility
 type InsightsServer interface {
-	// Packages returns a list of all known packages, in a batched stream.
-	Packages(*PackagesRequest, Insights_PackagesServer) error
-	// Versions returns the versions of a package.
-	Versions(*VersionsRequest, Insights_VersionsServer) error
-	// Version returns information about specific package versions. If the
-	// request matches more than one version, multiple responses are returned.
-	Version(*VersionRequest, Insights_VersionServer) error
-	// Dependencies returns the full dependency graph of a package version, as a
-	// stream of messages containing nodes and edges. The first node in the
-	// stream is the root of the graph. Edges do not appear before their
-	// referenced nodes. If the request matches more than one version, an error
-	// is returned.
-	Dependencies(*DependenciesRequest, Insights_DependenciesServer) error
-	// DependentInfo returns information about the dependents of a package
-	// version. If the request matches more than one version, an error is
-	// returned.
-	DependentInfo(context.Context, *DependentInfoRequest) (*DependentInfoResponse, error)
-	// Advisory returns information about a security advisory.
-	Advisory(context.Context, *AdvisoryRequest) (*AdvisoryResponse, error)
-	// Project returns information about the specified project.
-	Project(context.Context, *ProjectRequest) (*ProjectResponse, error)
-	// ProjectPackageVersions returns a list of versions that reference the
-	// specified project.
-	// The links are not confirmed.
-	ProjectPackageVersions(*ProjectPackageVersionsRequest, Insights_ProjectPackageVersionsServer) error
+	// GetPackage returns information about a package, including a list of its
+	// available versions, with the default version marked if known.
+	GetPackage(context.Context, *GetPackageRequest) (*Package, error)
+	// GetVersion returns information about a specific package version, including
+	// its licenses and any security advisories known to affect it.
+	GetVersion(context.Context, *GetVersionRequest) (*Version, error)
+	// GetDependencies returns a resolved dependency graph for the given package
+	// version.
+	//
+	// The dependency graph should be similar to one produced by installing the
+	// package version on a generic 64-bit Linux system, with no other
+	// dependencies present. The precise meaning of this varies from system to
+	// system.
+	GetDependencies(context.Context, *GetDependenciesRequest) (*Dependencies, error)
+	// GetProject returns information about projects hosted by GitHub, GitLab, or
+	// BitBucket, when known to us.
+	GetProject(context.Context, *GetProjectRequest) (*Project, error)
+	// GetAdvisory returns information about security advisories hosted by OSV.
+	GetAdvisory(context.Context, *GetAdvisoryRequest) (*Advisory, error)
+	// Query returns information about multiple package versions, which can be
+	// specified by name, content hash, or both.
+	Query(context.Context, *QueryRequest) (*QueryResult, error)
 	mustEmbedUnimplementedInsightsServer()
 }
 
@@ -280,29 +141,23 @@ type InsightsServer interface {
 type UnimplementedInsightsServer struct {
 }
 
-func (UnimplementedInsightsServer) Packages(*PackagesRequest, Insights_PackagesServer) error {
-	return status.Errorf(codes.Unimplemented, "method Packages not implemented")
+func (UnimplementedInsightsServer) GetPackage(context.Context, *GetPackageRequest) (*Package, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPackage not implemented")
 }
-func (UnimplementedInsightsServer) Versions(*VersionsRequest, Insights_VersionsServer) error {
-	return status.Errorf(codes.Unimplemented, "method Versions not implemented")
+func (UnimplementedInsightsServer) GetVersion(context.Context, *GetVersionRequest) (*Version, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
 }
-func (UnimplementedInsightsServer) Version(*VersionRequest, Insights_VersionServer) error {
-	return status.Errorf(codes.Unimplemented, "method Version not implemented")
+func (UnimplementedInsightsServer) GetDependencies(context.Context, *GetDependenciesRequest) (*Dependencies, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDependencies not implemented")
 }
-func (UnimplementedInsightsServer) Dependencies(*DependenciesRequest, Insights_DependenciesServer) error {
-	return status.Errorf(codes.Unimplemented, "method Dependencies not implemented")
+func (UnimplementedInsightsServer) GetProject(context.Context, *GetProjectRequest) (*Project, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProject not implemented")
 }
-func (UnimplementedInsightsServer) DependentInfo(context.Context, *DependentInfoRequest) (*DependentInfoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DependentInfo not implemented")
+func (UnimplementedInsightsServer) GetAdvisory(context.Context, *GetAdvisoryRequest) (*Advisory, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAdvisory not implemented")
 }
-func (UnimplementedInsightsServer) Advisory(context.Context, *AdvisoryRequest) (*AdvisoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Advisory not implemented")
-}
-func (UnimplementedInsightsServer) Project(context.Context, *ProjectRequest) (*ProjectResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Project not implemented")
-}
-func (UnimplementedInsightsServer) ProjectPackageVersions(*ProjectPackageVersionsRequest, Insights_ProjectPackageVersionsServer) error {
-	return status.Errorf(codes.Unimplemented, "method ProjectPackageVersions not implemented")
+func (UnimplementedInsightsServer) Query(context.Context, *QueryRequest) (*QueryResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
 func (UnimplementedInsightsServer) mustEmbedUnimplementedInsightsServer() {}
 
@@ -317,211 +172,146 @@ func RegisterInsightsServer(s grpc.ServiceRegistrar, srv InsightsServer) {
 	s.RegisterService(&Insights_ServiceDesc, srv)
 }
 
-func _Insights_Packages_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(PackagesRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(InsightsServer).Packages(m, &insightsPackagesServer{stream})
-}
-
-type Insights_PackagesServer interface {
-	Send(*PackagesResponse) error
-	grpc.ServerStream
-}
-
-type insightsPackagesServer struct {
-	grpc.ServerStream
-}
-
-func (x *insightsPackagesServer) Send(m *PackagesResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _Insights_Versions_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(VersionsRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(InsightsServer).Versions(m, &insightsVersionsServer{stream})
-}
-
-type Insights_VersionsServer interface {
-	Send(*VersionsResponse) error
-	grpc.ServerStream
-}
-
-type insightsVersionsServer struct {
-	grpc.ServerStream
-}
-
-func (x *insightsVersionsServer) Send(m *VersionsResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _Insights_Version_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(VersionRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(InsightsServer).Version(m, &insightsVersionServer{stream})
-}
-
-type Insights_VersionServer interface {
-	Send(*VersionResponse) error
-	grpc.ServerStream
-}
-
-type insightsVersionServer struct {
-	grpc.ServerStream
-}
-
-func (x *insightsVersionServer) Send(m *VersionResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _Insights_Dependencies_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(DependenciesRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(InsightsServer).Dependencies(m, &insightsDependenciesServer{stream})
-}
-
-type Insights_DependenciesServer interface {
-	Send(*DependenciesResponse) error
-	grpc.ServerStream
-}
-
-type insightsDependenciesServer struct {
-	grpc.ServerStream
-}
-
-func (x *insightsDependenciesServer) Send(m *DependenciesResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _Insights_DependentInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DependentInfoRequest)
+func _Insights_GetPackage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPackageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InsightsServer).DependentInfo(ctx, in)
+		return srv.(InsightsServer).GetPackage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/deps_dev.v2alpha.Insights/DependentInfo",
+		FullMethod: "/deps_dev.v3alpha.Insights/GetPackage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InsightsServer).DependentInfo(ctx, req.(*DependentInfoRequest))
+		return srv.(InsightsServer).GetPackage(ctx, req.(*GetPackageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Insights_Advisory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AdvisoryRequest)
+func _Insights_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVersionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InsightsServer).Advisory(ctx, in)
+		return srv.(InsightsServer).GetVersion(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/deps_dev.v2alpha.Insights/Advisory",
+		FullMethod: "/deps_dev.v3alpha.Insights/GetVersion",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InsightsServer).Advisory(ctx, req.(*AdvisoryRequest))
+		return srv.(InsightsServer).GetVersion(ctx, req.(*GetVersionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Insights_Project_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProjectRequest)
+func _Insights_GetDependencies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDependenciesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InsightsServer).Project(ctx, in)
+		return srv.(InsightsServer).GetDependencies(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/deps_dev.v2alpha.Insights/Project",
+		FullMethod: "/deps_dev.v3alpha.Insights/GetDependencies",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InsightsServer).Project(ctx, req.(*ProjectRequest))
+		return srv.(InsightsServer).GetDependencies(ctx, req.(*GetDependenciesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Insights_ProjectPackageVersions_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ProjectPackageVersionsRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _Insights_GetProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(InsightsServer).ProjectPackageVersions(m, &insightsProjectPackageVersionsServer{stream})
+	if interceptor == nil {
+		return srv.(InsightsServer).GetProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/deps_dev.v3alpha.Insights/GetProject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InsightsServer).GetProject(ctx, req.(*GetProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-type Insights_ProjectPackageVersionsServer interface {
-	Send(*ProjectPackageVersionsResponse) error
-	grpc.ServerStream
+func _Insights_GetAdvisory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAdvisoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InsightsServer).GetAdvisory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/deps_dev.v3alpha.Insights/GetAdvisory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InsightsServer).GetAdvisory(ctx, req.(*GetAdvisoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-type insightsProjectPackageVersionsServer struct {
-	grpc.ServerStream
-}
-
-func (x *insightsProjectPackageVersionsServer) Send(m *ProjectPackageVersionsResponse) error {
-	return x.ServerStream.SendMsg(m)
+func _Insights_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InsightsServer).Query(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/deps_dev.v3alpha.Insights/Query",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InsightsServer).Query(ctx, req.(*QueryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // Insights_ServiceDesc is the grpc.ServiceDesc for Insights service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Insights_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "deps_dev.v2alpha.Insights",
+	ServiceName: "deps_dev.v3alpha.Insights",
 	HandlerType: (*InsightsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "DependentInfo",
-			Handler:    _Insights_DependentInfo_Handler,
+			MethodName: "GetPackage",
+			Handler:    _Insights_GetPackage_Handler,
 		},
 		{
-			MethodName: "Advisory",
-			Handler:    _Insights_Advisory_Handler,
+			MethodName: "GetVersion",
+			Handler:    _Insights_GetVersion_Handler,
 		},
 		{
-			MethodName: "Project",
-			Handler:    _Insights_Project_Handler,
+			MethodName: "GetDependencies",
+			Handler:    _Insights_GetDependencies_Handler,
+		},
+		{
+			MethodName: "GetProject",
+			Handler:    _Insights_GetProject_Handler,
+		},
+		{
+			MethodName: "GetAdvisory",
+			Handler:    _Insights_GetAdvisory_Handler,
+		},
+		{
+			MethodName: "Query",
+			Handler:    _Insights_Query_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Packages",
-			Handler:       _Insights_Packages_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "Versions",
-			Handler:       _Insights_Versions_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "Version",
-			Handler:       _Insights_Version_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "Dependencies",
-			Handler:       _Insights_Dependencies_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "ProjectPackageVersions",
-			Handler:       _Insights_ProjectPackageVersions_Handler,
-			ServerStreams: true,
-		},
-	},
-	Metadata: "pkg/handler/collector/deps.dev/internal/api.proto",
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/handler/collector/deps_dev/internal/api.proto",
 }
