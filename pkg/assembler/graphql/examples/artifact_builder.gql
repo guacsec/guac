@@ -50,6 +50,11 @@ mutation ArtifactM2 {
   }
 }
 
+fragment allBuilderTree on Builder {
+    id
+    uri
+}
+
 query BuilderQ1 {
   builders(builderSpec: {}) {
     id
