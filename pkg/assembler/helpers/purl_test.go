@@ -81,7 +81,7 @@ func TestPurlConvert(t *testing.T) {
 			}),
 		}, {
 			// The following are for docker PURLs
-			// TODO(lumjjb): docker PURLs are really weird and potentially not well specified
+			// TODO(lumjjb) (Issue #635): docker PURLs are really weird and potentially not well specified
 			// due to the namespace indicating it may contain registry but the use of
 			// repository_url in the examples. In addition, the versions use in the examples
 			// use tags and potentially indicate truncated hashes.
@@ -298,7 +298,7 @@ func TestPkgToPurl(t *testing.T) {
 			qualifiers:      []string{"arch", "amd64", "distro", "stretch"},
 		}, {
 			// The following are for docker PURLs
-			// TODO: docker PURLs are really weird and potentially not well specified
+			// TODO (Issue #635): docker PURLs are really weird and potentially not well specified
 			// due to the namespace indicating it may contain registry but the use of
 			// repository_url in the examples. In addition, the versions use in the examples
 			// use tags and potentially indicate truncated hashes.
@@ -336,7 +336,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{},
 		}, {
-			// TODO: url path escapes here? Will this be an issue when searching via purl in osv or deps.dev?
+			// TODO (Issue #635): url path escapes here? Will this be an issue when searching via purl in osv or deps.dev?
 			expectedPurlUri: "pkg:generic/openssl@1.1.10g?download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da",
 			pkgType:         "generic",
 			namespace:       "",
@@ -450,7 +450,7 @@ func TestPkgToPurl(t *testing.T) {
 			qualifiers:      []string{},
 		}, {
 			// Special OCI case
-			//TODO: similar issue to above.
+			//TODO (Issue #635): similar issue to above.
 
 			//expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=docker.io/library/debian&arch=amd64&tag=latest",
 			expectedPurlUri: "pkg:oci/docker.io/library/debian@sha256:244fd47e07d10?arch=amd64&tag=latest",
