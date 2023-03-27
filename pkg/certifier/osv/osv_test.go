@@ -47,7 +47,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		errMessage    error
 	}{{
 		name:          "query and generate attestation for OSV",
-		rootComponent: testdata.RootComponent,
+		rootComponent: []*root_package.PackageNode{&testdata.Text4ShelPackage, &testdata.SecondLevelPackage, &testdata.Log4JPackage, &testdata.RootPackage},
 		want: []*processor.Document{
 			{
 				Blob:   []byte(testdata.Text4ShellVulAttestation),
@@ -94,7 +94,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 		errMessage:    ErrOSVComponenetTypeMismatch,
 	}, {
 		name:          "ensure intermediate vulnerabilities are reported",
-		rootComponent: testdata.VertxWeb,
+		rootComponent: []*root_package.PackageNode{&testdata.VertxWebCommonPackage, &testdata.VertxAuthCommonPackage, &testdata.VertxBridgeCommonPackage, &testdata.VertxCoreCommonPackage, &testdata.VertxWebPackage},
 		want: []*processor.Document{
 			{
 				Blob:   []byte(testdata.VertxWebCommonAttestation),
@@ -200,9 +200,8 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 func Test_createAttestation(t *testing.T) {
 	currentTime := time.Now()
 	type args struct {
-		packageURL string
-		digests    []string
-		vulns      []osv_scanner.MinimalVulnerability
+		packageNode root_package.PackageNode
+		vulns       []osv_scanner.MinimalVulnerability
 	}
 	tests := []struct {
 		name string
@@ -212,6 +211,11 @@ func Test_createAttestation(t *testing.T) {
 		{
 			name: "default",
 			args: args{
+				packageNode: root_package.PackageNode{
+					Purl:      "",
+					Algorithm: "",
+					Digest:    "",
+				},
 				vulns: []osv_scanner.MinimalVulnerability{
 					{
 						ID: "testId",
@@ -243,8 +247,11 @@ func Test_createAttestation(t *testing.T) {
 		{
 			name: "has digests",
 			args: args{
-				digests: []string{"test:Digest"},
-			},
+				packageNode: root_package.PackageNode{
+					Purl:      "",
+					Algorithm: "test",
+					Digest:    "Digest",
+				}},
 			want: &attestation_vuln.VulnerabilityStatement{
 				StatementHeader: intoto.StatementHeader{
 					Type:          intoto.StatementInTotoV01,
@@ -276,7 +283,7 @@ func Test_createAttestation(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := createAttestation(test.args.packageURL, test.args.digests, test.args.vulns)
+			got := createAttestation(&test.args.packageNode, test.args.vulns)
 			if !deepEqualIgnoreTimestamp(got, test.want) {
 				t.Errorf("createAttestation() = %v, want %v", got, test.want)
 			}
@@ -293,42 +300,4 @@ func deepEqualIgnoreTimestamp(a, b *attestation_vuln.VulnerabilityStatement) boo
 
 	// use DeepEqual to compare the copies
 	return reflect.DeepEqual(aCopy, bCopy)
-}
-
-func TestCertifyHelperStackOverflow(t *testing.T) {
-	var A, B, C *root_package.PackageComponent
-	// Create a cyclical dependency between two components
-	A = &root_package.PackageComponent{
-		Package: assembler.PackageNode{
-			Purl: "pkg:example.com/A",
-		},
-	}
-
-	B = &root_package.PackageComponent{
-		Package: assembler.PackageNode{
-			Purl: "pkg:example.com/B",
-		},
-	}
-	C = &root_package.PackageComponent{
-		Package: assembler.PackageNode{
-			Purl: "pkg:example.com/C",
-		},
-	}
-	A.DepPackages = []*root_package.PackageComponent{B, C}
-	B.DepPackages = []*root_package.PackageComponent{C, A}
-	C.DepPackages = []*root_package.PackageComponent{A, B}
-	// Create a channel to receive the generated documents
-	docChannel := make(chan *processor.Document, 10)
-	o := NewOSVCertificationParser()
-	// Create a context to cancel the function if it takes too long
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	err := o.CertifyComponent(ctx, A, docChannel)
-	// Call certifyHelper with the cyclical dependency
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-	if err == context.DeadlineExceeded {
-		t.Errorf("Function did not return an error, but it took too long to execute, which indicates stack overflow")
-	}
 }

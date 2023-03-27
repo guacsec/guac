@@ -18,6 +18,7 @@ package source
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -26,7 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 )
 
-type sourceArtifacts struct {
+type sourceQuery struct {
 	client            graphql.Client
 	daysSinceLastScan int
 }
@@ -37,12 +38,15 @@ type SourceNode struct {
 	Tag    string
 }
 
-// TODO: Add tests (either mocked unit or integration) to ensure query functionality
-func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
+var getSources func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error)
+var getNeighbors func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error)
+
+// GetComponents get all the sources that do not have a certify scorecard attached or last scanned is more than daysSinceLastScan
+func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
 	}
-	response, err := generated.Sources(ctx, s.client, nil)
+	response, err := getSources(ctx, s.client, nil)
 	if err != nil {
 		return fmt.Errorf("failed sources query: %w", err)
 	}
@@ -51,23 +55,29 @@ func (s sourceArtifacts) GetComponents(ctx context.Context, compChan chan<- inte
 	for _, src := range sources {
 		for _, namespace := range src.Namespaces {
 			for _, names := range namespace.Names {
-				response, err := generated.Neighbors(ctx, s.client, names.Id)
+				response, err := getNeighbors(ctx, s.client, names.Id)
 				if err != nil {
 					return fmt.Errorf("failed neighbors query: %w", err)
 				}
+				scorecardList := []*generated.NeighborsNeighborsCertifyScorecard{}
 				scoreCardFound := false
 				for _, neighbor := range response.Neighbors {
 					scorecardNode, ok := neighbor.(*generated.NeighborsNeighborsCertifyScorecard)
 					if ok {
-						if s.daysSinceLastScan != 0 {
-							now := time.Now()
-							difference := scorecardNode.Scorecard.TimeScanned.Sub(now)
-							if difference.Hours() < float64(s.daysSinceLastScan*24) {
-								scoreCardFound = true
-							}
-						} else {
+						scorecardList = append(scorecardList, scorecardNode)
+					}
+				}
+				// collect all scorecardNodes and then check timestamp else if not checking timestamp,
+				// if a scorecard is found break out
+				for _, scorecardNode := range scorecardList {
+					if s.daysSinceLastScan != 0 {
+						now := time.Now()
+						difference := scorecardNode.Scorecard.TimeScanned.Sub(now)
+						if math.Abs(difference.Hours()) < float64(s.daysSinceLastScan*24) {
 							scoreCardFound = true
 						}
+					} else {
+						scoreCardFound = true
 						break
 					}
 				}
@@ -99,7 +109,11 @@ func trimAlgorithm(commit string) string {
 		return commit
 	} else {
 		commitSplit := strings.Split(commit, ":")
-		return commitSplit[1]
+		if len(commitSplit) == 2 {
+			return commitSplit[1]
+		} else {
+			return commitSplit[0]
+		}
 	}
 }
 
@@ -108,7 +122,9 @@ func NewCertifier(client graphql.Client, daysSinceLastScan int) (certifier.Query
 	if client == nil {
 		return nil, fmt.Errorf("client cannot be nil")
 	}
-	return &sourceArtifacts{
+	getSources = generated.Sources
+	getNeighbors = generated.Neighbors
+	return &sourceQuery{
 		client:            client,
 		daysSinceLastScan: daysSinceLastScan,
 	}, nil

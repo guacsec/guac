@@ -19,7 +19,7 @@
 
 # TODO(mihaimaruseac): Clean this up: do we want all of these to be returned?
 
-fragment allPkgTree on Package {
+fragment AllPkgTree on Package {
   id
   type
   namespaces {
@@ -41,7 +41,7 @@ fragment allPkgTree on Package {
   }
 }
 
-fragment allSourceTree on Source {
+fragment AllSourceTree on Source {
   id
   type
   namespaces {
@@ -92,10 +92,10 @@ fragment allOSVTree on OSV {
   }
 }
 
-fragment allCertifyScorecard on CertifyScorecard {
+fragment AllCertifyScorecard on CertifyScorecard {
   id
   source {
-    ...allSourceTree
+    ...AllSourceTree
   }
   scorecard {
     timeScanned
@@ -111,15 +111,15 @@ fragment allCertifyScorecard on CertifyScorecard {
   }
 }
 
-fragment allIsOccurrencesTree on IsOccurrence {
+fragment AllIsOccurrencesTree on IsOccurrence {
   id
   subject {
     __typename
     ...on Package {
-      ...allPkgTree
+      ...AllPkgTree
     }
    ...on Source {
-      ...allSourceTree
+      ...AllSourceTree
     }
   }
   artifact {
@@ -134,10 +134,10 @@ fragment allIsDependencyTree on IsDependency {
   id
   justification
   package {
-    ...allPkgTree
+    ...AllPkgTree
   }
   dependentPackage {
-    ...allPkgTree
+    ...AllPkgTree
   }
   versionRange
   origin
@@ -175,10 +175,10 @@ fragment allCertifyBad on CertifyBad {
   subject {
     __typename
     ... on Package {
-      ...allPkgTree
+      ...AllPkgTree
     }
     ... on Source {
-      ...allSourceTree
+      ...AllSourceTree
     }
     ... on Artifact {
       ...allArtifactTree
@@ -202,10 +202,10 @@ fragment allHasSBOMTree on HasSBOM {
   subject {
     __typename
     ... on Package {
-      ...allPkgTree
+      ...AllPkgTree
     }
     ... on Source {
-      ...allSourceTree
+      ...AllSourceTree
       }
   }
   origin
@@ -217,19 +217,19 @@ fragment allHasSourceAt on HasSourceAt {
   justification
   knownSince
   package {
-    ...allPkgTree
+    ...AllPkgTree
   }
   source {
-    ...allSourceTree
+    ...AllSourceTree
   }
   origin
   collector
 }
 
-fragment allCertifyVuln on CertifyVuln {
+fragment AllCertifyVuln on CertifyVuln {
   id
   package {
-    ...allPkgTree
+    ...AllPkgTree
   }
   vulnerability {
     __typename
@@ -258,7 +258,7 @@ fragment allCertifyPkg on CertifyPkg {
   id
   justification
   packages {
-    ...allPkgTree
+    ...AllPkgTree
   }
   origin
   collector
@@ -288,7 +288,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
   subject {
     __typename
     ... on Package {
-      ...allPkgTree
+      ...AllPkgTree
     }
     ... on Artifact {
       ...allArtifactTree

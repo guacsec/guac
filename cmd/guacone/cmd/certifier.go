@@ -18,17 +18,17 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
+	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -45,6 +45,7 @@ var certifierCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
+			viper.GetString("gql-endpoint"),
 		)
 
 		if err != nil {
@@ -57,12 +58,8 @@ var certifierCmd = &cobra.Command{
 			logger.Fatalf("unable to register certifier: %w", err)
 		}
 
-		authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(opts.user, opts.pass, opts.realm)
-		client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+		httpClient := http.Client{}
+		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		processorFunc, err := getProcessor(ctx)
 		if err != nil {
@@ -81,7 +78,7 @@ var certifierCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		packageQueryFunc, err := getPackageQuery(client)
+		packageQueryFunc, err := getPackageQuery(gqlclient)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -138,17 +135,18 @@ var certifierCmd = &cobra.Command{
 	},
 }
 
-func validateCertifierFlags(user string, pass string, dbAddr string, realm string) (options, error) {
+func validateCertifierFlags(user string, pass string, dbAddr string, realm string, graphqlEndpoint string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
+	opts.graphqlEndpoint = graphqlEndpoint
 
 	return opts, nil
 }
 
-func getPackageQuery(client neo4j.Driver) (func() certifier.QueryComponents, error) {
+func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, error) {
 	return func() certifier.QueryComponents {
 		packageQuery := root_package.NewPackageQuery(client, 0)
 		return packageQuery

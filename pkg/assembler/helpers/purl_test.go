@@ -81,7 +81,7 @@ func TestPurlConvert(t *testing.T) {
 			}),
 		}, {
 			// The following are for docker PURLs
-			// TODO(lumjjb): docker PURLs are really weird and potentially not well specified
+			// TODO(lumjjb) (Issue #635): docker PURLs are really weird and potentially not well specified
 			// due to the namespace indicating it may contain registry but the use of
 			// repository_url in the examples. In addition, the versions use in the examples
 			// use tags and potentially indicate truncated hashes.
@@ -201,6 +201,328 @@ func TestPurlConvert(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.expected, got, cmpOpts...); diff != "" {
 				t.Errorf("model Package mismatch (-want +got):\n%s", diff)
+				return
+			}
+		})
+	}
+}
+
+func TestPkgToPurl(t *testing.T) {
+	testCases := []struct {
+		expectedPurlUri string
+		pkgType         string
+		namespace       string
+		name            string
+		version         string
+		subpath         string
+		qualifiers      []string
+	}{
+		{
+			// alpine
+			expectedPurlUri: "pkg:alpm/arch/pacman@6.0.1-1?arch=x86_64",
+			pkgType:         "alpm",
+			namespace:       "arch",
+			name:            "pacman",
+			version:         "6.0.1-1",
+			subpath:         "",
+			qualifiers:      []string{"arch", "x86_64"},
+		}, {
+			expectedPurlUri: "pkg:apk/alpine/curl@7.83.0-r0?arch=x86",
+			pkgType:         "apk",
+			namespace:       "alpine",
+			name:            "curl",
+			version:         "7.83.0-r0",
+			qualifiers:      []string{"arch", "x86"},
+		}, {
+			expectedPurlUri: "pkg:bitbucket/birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
+			pkgType:         "bitbucket",
+			namespace:       "birkenfeld",
+			name:            "pygments-main",
+			version:         "244fd47e07d1014f0aed9c",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:cocoapods/ShareKit@2.0#Twitter",
+			pkgType:         "cocoapods",
+			namespace:       "",
+			name:            "ShareKit",
+			version:         "2.0",
+			subpath:         "Twitter",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:cargo/rand@0.7.2",
+			pkgType:         "cargo",
+			namespace:       "",
+			name:            "rand",
+			version:         "0.7.2",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:composer/laravel/laravel@5.5.0",
+			pkgType:         "composer",
+			namespace:       "laravel",
+			name:            "laravel",
+			version:         "5.5.0",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:conan/openssl.org/openssl@3.0.3?channel=stable&user=bincrafters",
+			pkgType:         "conan",
+			namespace:       "openssl.org",
+			name:            "openssl",
+			version:         "3.0.3",
+			subpath:         "",
+			qualifiers:      []string{"channel", "stable", "user", "bincrafters"},
+		}, {
+			expectedPurlUri: "pkg:conda/absl-py@0.4.1?build=py36h06a4308_0&channel=main&subdir=linux-64&type=tar.bz2",
+			pkgType:         "conda",
+			namespace:       "",
+			name:            "absl-py",
+			version:         "0.4.1",
+			subpath:         "",
+			qualifiers:      []string{"build", "py36h06a4308_0", "channel", "main", "subdir", "linux-64", "type", "tar.bz2"},
+		}, {
+			expectedPurlUri: "pkg:cran/A3@1.0.0",
+			pkgType:         "cran",
+			namespace:       "",
+			name:            "A3",
+			version:         "1.0.0",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch",
+			pkgType:         "deb",
+			namespace:       "debian",
+			name:            "dpkg",
+			version:         "1.19.0.4",
+			subpath:         "",
+			qualifiers:      []string{"arch", "amd64", "distro", "stretch"},
+		}, {
+			// The following are for docker PURLs
+			// TODO (Issue #635): docker PURLs are really weird and potentially not well specified
+			// due to the namespace indicating it may contain registry but the use of
+			// repository_url in the examples. In addition, the versions use in the examples
+			// use tags and potentially indicate truncated hashes.
+
+			//expectedPurlUri: "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io",
+			expectedPurlUri: "pkg:docker/gcr.io/customer/dockerimage@sha256:244fd47e07d10",
+			pkgType:         "docker",
+			namespace:       "gcr.io/customer",
+			name:            "dockerimage",
+			version:         "sha256:244fd47e07d10",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:docker/smartentry/debian@dc437cc87d10",
+			pkgType:         "docker",
+			namespace:       "smartentry",
+			name:            "debian",
+			version:         "dc437cc87d10",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:docker/cassandra@latest",
+			pkgType:         "docker",
+			namespace:       "",
+			name:            "cassandra",
+			version:         "latest",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:gem/ruby-advisory-db-check@0.12.4",
+			pkgType:         "gem",
+			namespace:       "",
+			name:            "ruby-advisory-db-check",
+			version:         "0.12.4",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			// TODO (Issue #635): url path escapes here? Will this be an issue when searching via purl in osv or deps.dev?
+			expectedPurlUri: "pkg:generic/openssl@1.1.10g?download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz&checksum=sha256:de4d501267da",
+			pkgType:         "generic",
+			namespace:       "",
+			name:            "openssl",
+			version:         "1.1.10g",
+			subpath:         "",
+			qualifiers:      []string{"download_url", "https://openssl.org/source/openssl-1.1.0g.tar.gz", "checksum", "sha256:de4d501267da"},
+		}, {
+			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git+https:%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl@cc55108da32",
+			pkgType:         "generic",
+			namespace:       "",
+			name:            "bitwarderl",
+			version:         "",
+			subpath:         "",
+			qualifiers:      []string{"vcs_url", "git+https://git.fsfe.org/dxtr/bitwarderl@cc55108da32"},
+		}, {
+			expectedPurlUri: "pkg:github/package-url/purl-spec@244fd47e07d1004#everybody/loves/dogs",
+			pkgType:         "github",
+			namespace:       "package-url",
+			name:            "purl-spec",
+			version:         "244fd47e07d1004",
+			subpath:         "everybody/loves/dogs",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c#api",
+			pkgType:         "golang",
+			namespace:       "github.com/gorilla",
+			name:            "context",
+			version:         "234fd47e07d1004f0aed9c",
+			subpath:         "api",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:hackage/3d-graphics-examples@0.0.0.2",
+			pkgType:         "hackage",
+			namespace:       "",
+			name:            "3d-graphics-examples",
+			version:         "0.0.0.2",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https:%2F%2Fmyrepo.example.com",
+			pkgType:         "hex",
+			namespace:       "",
+			name:            "bar",
+			version:         "1.2.3",
+			subpath:         "",
+			qualifiers:      []string{"repository_url", "https://myrepo.example.com"},
+		}, {
+			expectedPurlUri: "pkg:hex/jason@1.1.2",
+			pkgType:         "hex",
+			namespace:       "",
+			name:            "jason",
+			version:         "1.1.2",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:huggingface/distilbert-base-uncased@043235d6088ecd3dd5fb5ca3592b6913fd516027",
+			pkgType:         "huggingface",
+			namespace:       "",
+			name:            "distilbert-base-uncased",
+			version:         "043235d6088ecd3dd5fb5ca3592b6913fd516027",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?type=zip&classifier=dist",
+			pkgType:         "maven",
+			namespace:       "org.apache.xmlgraphics",
+			name:            "batik-anim",
+			version:         "1.9.1",
+			subpath:         "",
+			qualifiers:      []string{"type", "zip", "classifier", "dist"},
+		}, {
+			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a&repository_url=https:%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow",
+			pkgType:         "mlflow",
+			namespace:       "",
+			name:            "trafficsigns",
+			version:         "10",
+			subpath:         "",
+			qualifiers:      []string{"model_uuid", "36233173b22f4c89b451f1228d700d49", "run_id", "410a3121-2709-4f88-98dd-dba0ef056b0a", "repository_url", "https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow"},
+		}, {
+			expectedPurlUri: "pkg:npm/foobar@12.3.1",
+			pkgType:         "npm",
+			namespace:       "",
+			name:            "foobar",
+			version:         "12.3.1",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:npm/%40angular/animation@12.3.1",
+			pkgType:         "npm",
+			namespace:       "@angular",
+			name:            "animation",
+			version:         "12.3.1",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:nuget/EnterpriseLibrary.Common@6.0.1304",
+			pkgType:         "nuget",
+			namespace:       "",
+			name:            "EnterpriseLibrary.Common",
+			version:         "6.0.1304",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:qpkg/blackberry/com.qnx.sdp@7.0.0.SGA201702151847",
+			pkgType:         "qpkg",
+			namespace:       "blackberry",
+			name:            "com.qnx.sdp",
+			version:         "7.0.0.SGA201702151847",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			// Special OCI case
+			//TODO (Issue #635): similar issue to above.
+
+			//expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=docker.io/library/debian&arch=amd64&tag=latest",
+			expectedPurlUri: "pkg:oci/docker.io/library/debian@sha256:244fd47e07d10?arch=amd64&tag=latest",
+			pkgType:         "oci",
+			namespace:       "docker.io/library",
+			name:            "debian",
+			version:         "sha256:244fd47e07d10",
+			subpath:         "",
+			qualifiers:      []string{"arch", "amd64", "tag", "latest"},
+		}, {
+			expectedPurlUri: "pkg:oci/ghcr.io/debian@sha256:244fd47e07d10?tag=bullseye",
+			pkgType:         "oci",
+			namespace:       "ghcr.io",
+			name:            "debian",
+			version:         "sha256:244fd47e07d10",
+			subpath:         "",
+			qualifiers:      []string{"tag", "bullseye"},
+		}, {
+			expectedPurlUri: "pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1",
+			pkgType:         "oci",
+			namespace:       "",
+			name:            "hello-wasm",
+			version:         "sha256:244fd47e07d10",
+			subpath:         "",
+			qualifiers:      []string{"tag", "v1"},
+		}, {
+			expectedPurlUri: "pkg:pub/characters@1.2.0",
+			pkgType:         "pub",
+			namespace:       "",
+			name:            "characters",
+			version:         "1.2.0",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:pypi/django-allauth@12.23",
+			pkgType:         "pypi",
+			namespace:       "",
+			name:            "django-allauth",
+			version:         "12.23",
+			subpath:         "",
+			qualifiers:      []string{},
+		}, {
+			expectedPurlUri: "pkg:rpm/fedora/curl@7.50.3-1.fc25?arch=i386&distro=fedora-25",
+			pkgType:         "rpm",
+			namespace:       "fedora",
+			name:            "curl",
+			version:         "7.50.3-1.fc25",
+			subpath:         "",
+			qualifiers:      []string{"arch", "i386", "distro", "fedora-25"},
+		}, {
+			expectedPurlUri: "pkg:swid/Acme/example.com/Enterprise%2BServer@1.0.0?tag_id=75b8c285-fa7b-485b-b199-4745e3004d0d",
+			pkgType:         "swid",
+			namespace:       "Acme/example.com",
+			name:            "Enterprise+Server",
+			version:         "1.0.0",
+			subpath:         "",
+			qualifiers:      []string{"tag_id", "75b8c285-fa7b-485b-b199-4745e3004d0d"},
+		}, {
+			expectedPurlUri: "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
+			pkgType:         "swift",
+			namespace:       "github.com/RxSwiftCommunity",
+			name:            "RxFlow",
+			version:         "2.12.4",
+			subpath:         "",
+			qualifiers:      []string{},
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("processing %v", tt.expectedPurlUri), func(t *testing.T) {
+			got := PkgToPurl(tt.pkgType, tt.namespace, tt.name, tt.version, tt.subpath, tt.qualifiers)
+			if got != tt.expectedPurlUri {
+				t.Errorf("purl mismatch wanted: %s, got: %s", tt.expectedPurlUri, got)
 				return
 			}
 		})

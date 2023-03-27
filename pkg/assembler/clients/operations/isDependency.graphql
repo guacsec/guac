@@ -19,10 +19,10 @@
 
 mutation IsDependency($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
   pkg: ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   dependentPkg: ingestPackage(pkg: $depPkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
     ...allIsDependencyTree

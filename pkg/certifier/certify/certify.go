@@ -54,7 +54,7 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 // it generates new nodes and attestations.
 func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 
-	// docChan to collect artifacts
+	// compChan to collect query components
 	compChan := make(chan interface{}, BufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, 1)

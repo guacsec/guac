@@ -26,9 +26,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/guacsec/guac/internal/testing/keyutil"
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -185,21 +183,21 @@ var (
 		Digest:    "3a2bd2c5cc4c978e8aefd8bd0ef335fb42ee31d1",
 	}
 
-	artPkg, _ = helpers.PurlToPkg(helpers.GuacGenericPurl("helloworld"))
+	artPkg, _ = asmhelpers.PurlToPkg(asmhelpers.GuacGenericPurl("helloworld"))
 
 	mat1 = model.ArtifactInputSpec{
 		Algorithm: "sha1",
 		Digest:    "24279c5185ddc042896e3748f47fa89b48c1c14e",
 	}
 
-	mat1Src, _ = helpers.VcsToSrc("git+https://github.com/curl/curl-docker@master")
+	mat1Src, _ = asmhelpers.VcsToSrc("git+https://github.com/curl/curl-docker@master")
 
 	mat2 = model.ArtifactInputSpec{
 		Algorithm: "sha1",
 		Digest:    "0bcaaa161e719bca41b6d33fc02547c0f97d5397",
 	}
 
-	mat2Pkg, _ = helpers.PurlToPkg(helpers.GuacGenericPurl("github_hosted_vm:ubuntu-18.04:20210123.1"))
+	mat2Pkg, _ = asmhelpers.PurlToPkg(asmhelpers.GuacGenericPurl("github_hosted_vm:ubuntu-18.04:20210123.1"))
 
 	build = model.BuilderInputSpec{
 		Uri: "https://github.com/Attestations/GitHubHostedActions@v1",
@@ -235,11 +233,11 @@ var (
 		},
 		HasSlsa: []assembler.HasSlsaIngest{
 			{
-				HasSlsa: &generated.SLSAInputSpec{
+				HasSlsa: &model.SLSAInputSpec{
 					BuildType:   "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 					SlsaVersion: "https://slsa.dev/provenance/v0.2",
 					StartedOn:   slsaStartTime,
-					SlsaPredicate: []generated.SLSAPredicateInputSpec{
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
 						{Key: "slsa.metadata.completeness.environment", Value: "true"},
 						{Key: "slsa.metadata.buildStartedOn", Value: "2020-08-19T08:38:00Z"},
 						{Key: "slsa.metadata.completeness.materials", Value: "false"},
@@ -658,16 +656,10 @@ var (
 			  "uri":"guac",
 			  "producer_id":"guacsec/guac"
 		   },
-		   "scanner":{
-			  "uri":"osv.dev",
-			  "version":"0.0.14",
-			  "db":{
-			  },
-			  "result":[
-				 {
-					"vulnerability_id":"GHSA-599f-7c49-w659"
-				 }
-			  ]
+		   "scanner": {
+			"uri": "osv.dev",
+			"version": "0.0.14",
+			"db": {}
 		   },
 		   "metadata":{
 			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
@@ -688,34 +680,10 @@ var (
 			  "uri":"guac",
 			  "producer_id":"guacsec/guac"
 		   },
-		   "scanner":{
-			  "uri":"osv.dev",
-			  "version":"0.0.14",
-			  "db":{
-			  },
-			  "result":[
-				 {
-					"vulnerability_id":"GHSA-599f-7c49-w659"
-				 },
-				 {
-					"vulnerability_id":"GHSA-7rjr-3q55-vv33"
-				 },
-				 {
-					"vulnerability_id":"GHSA-8489-44mv-ggj8"
-				 },
-				 {
-					"vulnerability_id":"GHSA-fxph-q3j8-mv87"
-				 },
-				 {
-					"vulnerability_id":"GHSA-jfh8-c2jp-5v3q"
-				 },
-				 {
-					"vulnerability_id":"GHSA-p6xc-xr62-6r2g"
-				 },
-				 {
-					"vulnerability_id":"GHSA-vwqq-5vrc-xw9h"
-				 }
-			  ]
+		   "scanner": {
+			"uri": "osv.dev",
+			"version": "0.0.14",
+			"db": {}
 		   },
 		   "metadata":{
 			  "scannedOn":"2022-11-22T13:19:18.825699-05:00"
@@ -768,41 +736,22 @@ var (
 		}
 	 }`
 
-	rootPackage = assembler.PackageNode{
+	RootPackage = root_package.PackageNode{
 		Purl: "pkg:oci/vul-image-latest?repository_url=grc.io",
 	}
 
-	secondLevelPackage = assembler.PackageNode{
-		Purl:   "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
-		Digest: []string{"sha256:fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1"},
+	SecondLevelPackage = root_package.PackageNode{
+		Purl:      "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
+		Algorithm: "sha256",
+		Digest:    "fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1",
 	}
 
-	log4JPackage = assembler.PackageNode{
+	Log4JPackage = root_package.PackageNode{
 		Purl: "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
 	}
 
-	text4ShelPackage = assembler.PackageNode{
+	Text4ShelPackage = root_package.PackageNode{
 		Purl: "pkg:maven/org.apache.commons/commons-text@1.9",
-	}
-
-	text4shell = &root_package.PackageComponent{
-		Package:     text4ShelPackage,
-		DepPackages: []*root_package.PackageComponent{},
-	}
-
-	log4j = &root_package.PackageComponent{
-		Package:     log4JPackage,
-		DepPackages: []*root_package.PackageComponent{},
-	}
-
-	secondLevel = &root_package.PackageComponent{
-		Package:     secondLevelPackage,
-		DepPackages: []*root_package.PackageComponent{text4shell},
-	}
-
-	RootComponent = &root_package.PackageComponent{
-		Package:     rootPackage,
-		DepPackages: []*root_package.PackageComponent{secondLevel, log4j},
 	}
 
 	VertxWebCommonAttestation = `{
@@ -935,53 +884,24 @@ var (
 		}
 	}`
 
-	vertxWebCommonPackage = assembler.PackageNode{
+	VertxWebCommonPackage = root_package.PackageNode{
 		Purl: "pkg:maven/io.vertx/vertx-web-common@4.3.7?type=jar",
 	}
 
-	vertxAuthCommonPackage = assembler.PackageNode{
+	VertxAuthCommonPackage = root_package.PackageNode{
 		Purl: "pkg:maven/io.vertx/vertx-auth-common@4.3.7?type=jar",
 	}
 
-	vertxBridgeCommonPackage = assembler.PackageNode{
+	VertxBridgeCommonPackage = root_package.PackageNode{
 		Purl: "pkg:maven/io.vertx/vertx-bridge-common@4.3.7?type=jar",
 	}
 
-	vertxCoreCommonPackage = assembler.PackageNode{
+	VertxCoreCommonPackage = root_package.PackageNode{
 		Purl: "pkg:maven/io.vertx/vertx-core@4.3.7?type=jar",
 	}
 
-	vertxWebPackage = assembler.PackageNode{
+	VertxWebPackage = root_package.PackageNode{
 		Purl: "pkg:maven/io.vertx/vertx-web@4.3.7?type=jar",
-	}
-
-	// ignore dependencies for the test
-	vertxWebCommon = &root_package.PackageComponent{
-		Package:     vertxWebCommonPackage,
-		DepPackages: []*root_package.PackageComponent{},
-	}
-
-	// ignore dependencies for the test
-	vertxAuthCommon = &root_package.PackageComponent{
-		Package:     vertxAuthCommonPackage,
-		DepPackages: []*root_package.PackageComponent{},
-	}
-
-	// ignore dependencies for the test
-	vertxBridgeCommon = &root_package.PackageComponent{
-		Package:     vertxBridgeCommonPackage,
-		DepPackages: []*root_package.PackageComponent{},
-	}
-
-	// ignore dependencies for the test
-	vertxCore = &root_package.PackageComponent{
-		Package:     vertxCoreCommonPackage,
-		DepPackages: []*root_package.PackageComponent{},
-	}
-
-	VertxWeb = &root_package.PackageComponent{
-		Package:     vertxWebPackage,
-		DepPackages: []*root_package.PackageComponent{vertxWebCommon, vertxAuthCommon, vertxBridgeCommon, vertxCore},
 	}
 )
 
@@ -1118,15 +1038,15 @@ func isOccurenceLess(e1, e2 assembler.IsOccurenceIngest) bool {
 	return gLess(e1, e2)
 }
 
-func packageQualifierInputSpecLess(e1, e2 generated.PackageQualifierInputSpec) bool {
+func packageQualifierInputSpecLess(e1, e2 model.PackageQualifierInputSpec) bool {
 	return gLess(e1, e2)
 }
 
-func psaInputSpecLess(e1, e2 generated.ArtifactInputSpec) bool {
+func psaInputSpecLess(e1, e2 model.ArtifactInputSpec) bool {
 	return gLess(e1, e2)
 }
 
-func slsaPredicateInputSpecLess(e1, e2 generated.SLSAPredicateInputSpec) bool {
+func slsaPredicateInputSpecLess(e1, e2 model.SLSAPredicateInputSpec) bool {
 	return gLess(e1, e2)
 }
 

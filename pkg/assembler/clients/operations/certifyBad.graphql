@@ -19,7 +19,7 @@
 
 mutation CertifyBadPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestCertifyBad(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
     ...allCertifyBad
@@ -28,7 +28,7 @@ mutation CertifyBadPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyB
 
 mutation CertifyBadSrc($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
   ingestSource(source: $source) {
-    ...allSourceTree
+    ...AllSourceTree
   }
   ingestCertifyBad(subject: {source: $source}, certifyBad: $certifyBad) {
     ...allCertifyBad

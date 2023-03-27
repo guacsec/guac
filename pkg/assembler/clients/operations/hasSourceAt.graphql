@@ -19,10 +19,10 @@
 
 mutation HasSourceAt($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestSource(source: $source) {
-    ...allSourceTree
+    ...AllSourceTree
   }
   ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt) {
     ...allHasSourceAt

@@ -19,7 +19,7 @@
 
 mutation VexPackageAndCve($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestCVE(cve: $cve) {
     ...allCveTree
@@ -31,7 +31,7 @@ mutation VexPackageAndCve($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatemen
 
 mutation VEXPackageAndGhsa($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestPackage(pkg: $pkg) {
-    ...allPkgTree
+    ...AllPkgTree
   }
   ingestGHSA(ghsa: $ghsa) {
     ...allGHSATree

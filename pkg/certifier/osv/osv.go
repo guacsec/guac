@@ -19,11 +19,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
-	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
@@ -39,10 +37,10 @@ const (
 	PRODUCER_ID string = "guacsec/guac"
 )
 
-var ErrOSVComponenetTypeMismatch error = fmt.Errorf("rootComponent type is not *root_package.PackageComponent")
+var ErrOSVComponenetTypeMismatch error = fmt.Errorf("rootComponent type is not []*root_package.PackageNode")
 
 type osvCertifier struct {
-	rootComponents *root_package.PackageComponent
+	packageNodes []*root_package.PackageNode
 }
 
 // NewOSVCertificationParser initializes the OSVCertifier
@@ -53,139 +51,74 @@ func NewOSVCertificationParser() certifier.Certifier {
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
 func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
-	if component, ok := rootComponent.(*root_package.PackageComponent); ok {
-		o.rootComponents = component
+	if component, ok := rootComponent.([]*root_package.PackageNode); ok {
+		o.packageNodes = component
 	} else {
 		return ErrOSVComponenetTypeMismatch
 	}
-	m := make(map[string]bool)
-	_, err := o.certifyHelper(ctx, o.rootComponents, docChannel, m)
+
+	err := o.certifyHelper(ctx, docChannel)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// certifyHelper recursively checks each component for dependencies.
-// If it has dependencies, certifyHelper is re-called until no more dependencies are found.
-// The dependency node is appended to the package node array and sent to be queried by OSV
-// Once the vulnerabilities are found, an attestation is generated for that package node
-// All the vulnerabilities for each dependent package node are collected and the parent package node's
-// attestation is generated containing all the vulnerabilities of its dependencies
-// these vulnerabilities are passed up until it reaches the root level node which contains an attestation
-// with all the aggregate vulnerabilities. The visited map is used to prevent infinite recursion.
-func (o *osvCertifier) certifyHelper(ctx context.Context, topLevel *root_package.PackageComponent, docChannel chan<- *processor.Document,
-	visited map[string]bool) ([]osv_scanner.MinimalVulnerability, error) {
-	if visited == nil {
-		return nil, fmt.Errorf("visited map is nil")
-	}
-	packNodes := []assembler.PackageNode{}
-	totalDepVul := []osv_scanner.MinimalVulnerability{}
-	if visited[topLevel.Package.Purl] {
-		return nil, nil
-	}
-	visited[topLevel.Package.Purl] = true
-	for _, depPack := range topLevel.DepPackages {
-		if len(depPack.DepPackages) > 0 {
-			depVulns, err := o.certifyHelper(ctx, depPack, docChannel, visited)
-			if err != nil {
-				return nil, err
-			}
-			if depVulns != nil {
-				totalDepVul = append(totalDepVul, depVulns...)
-			}
-		} else {
-			packNodes = append(packNodes, depPack.Package)
-		}
-	}
-
-	packNodes = append(packNodes, topLevel.Package)
-	topLevelPurl := topLevel.Package.Purl
-
-	packDigest := map[string][]string{}
-	i := 0
-	for i < len(packNodes) {
-		query, lastIndex := getQuery(i, packNodes, packDigest)
-		vulns, err := getVulnerabilities(query, packDigest, topLevelPurl, docChannel)
-		if err != nil {
-			return nil, err
-		}
-		i = lastIndex
-		totalDepVul = append(totalDepVul, vulns...)
-	}
-
-	doc, err := generateDocument(topLevel.Package.Purl, topLevel.Package.Digest, totalDepVul)
-	if err != nil {
-		return nil, err
-	}
-	if doc != nil {
-		docChannel <- doc
-	}
-	return totalDepVul, nil
-}
-
-func getQuery(lastIndex int, packNodes []assembler.PackageNode, packDigest map[string][]string) (osv_scanner.BatchedQuery, int) {
+func (o *osvCertifier) certifyHelper(ctx context.Context, docChannel chan<- *processor.Document) error {
 	var query osv_scanner.BatchedQuery
-	var stoppedIndex int
-	j := 1
-	// limit of 1000 per batch query
-	for i := lastIndex; i < len(packNodes); i++ {
-		purlQuery := osv_scanner.MakePURLRequest(packNodes[i].Purl)
-		packDigest[packNodes[i].Purl] = packNodes[i].Digest
-		query.Queries = append(query.Queries, purlQuery)
-		j++
-		if j == 1000 {
-			stoppedIndex = i
-			return query, stoppedIndex
+	packMap := map[string][]*root_package.PackageNode{}
+	for _, node := range o.packageNodes {
+		if _, ok := packMap[node.Purl]; !ok {
+			purlQuery := osv_scanner.MakePURLRequest(node.Purl)
+			query.Queries = append(query.Queries, purlQuery)
 		}
+		packMap[node.Purl] = append(packMap[node.Purl], node)
 	}
-	stoppedIndex = len(packNodes)
-	return query, stoppedIndex
+	err := getVulnerabilities(query, packMap, docChannel)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func getVulnerabilities(query osv_scanner.BatchedQuery, packDigest map[string][]string, topLevelPurl string, docChannel chan<- *processor.Document) ([]osv_scanner.MinimalVulnerability, error) {
-
+func getVulnerabilities(query osv_scanner.BatchedQuery, packMap map[string][]*root_package.PackageNode, docChannel chan<- *processor.Document) error {
 	resp, err := osv_scanner.MakeRequest(query)
 	if err != nil {
-		return nil, fmt.Errorf("scan failed: %v", err)
+		return fmt.Errorf("scan failed: %v", err)
 	}
-	totalDepVul := []osv_scanner.MinimalVulnerability{}
 	for i, query := range query.Queries {
 		response := resp.Results[i]
-		totalDepVul = append(totalDepVul, response.Vulns...)
 		purl := query.Package.PURL
-		doc, err := generateDocument(purl, packDigest[purl], response.Vulns)
+		err := generateDocument(packMap[purl], response.Vulns, docChannel)
 		if err != nil {
-			return nil, err
-		}
-		// Do not emit a doc for the top level package as a combined doc will be emitted to include information from all transitive dependencies
-		if topLevelPurl != purl {
-			docChannel <- doc
+			return err
 		}
 	}
-	return totalDepVul, nil
+	return nil
 }
 
-func generateDocument(purl string, digest []string, vulns []osv_scanner.MinimalVulnerability) (*processor.Document, error) {
-	payload, err := json.Marshal(createAttestation(purl, digest, vulns))
-	if err != nil {
-		return nil, err
+func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability, docChannel chan<- *processor.Document) error {
+	for _, node := range packNodes {
+		payload, err := json.Marshal(createAttestation(node, vulns))
+		if err != nil {
+			return err
+		}
+		doc := &processor.Document{
+			Blob:   payload,
+			Type:   processor.DocumentITE6Vul,
+			Format: processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{
+				Collector: INVOC_URI,
+				Source:    INVOC_URI,
+			},
+		}
+		docChannel <- doc
 	}
-	doc := &processor.Document{
-		Blob:   payload,
-		Type:   processor.DocumentITE6Vul,
-		Format: processor.FormatJSON,
-		SourceInformation: processor.SourceInformation{
-			Collector: INVOC_URI,
-			Source:    INVOC_URI,
-		},
-	}
-	return doc, nil
+	return nil
 }
 
-func createAttestation(packageURL string, digests []string, vulns []osv_scanner.MinimalVulnerability) *attestation_vuln.VulnerabilityStatement {
+func createAttestation(packageNode *root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability) *attestation_vuln.VulnerabilityStatement {
 	currentTime := time.Now()
-	var subjects []intoto.Subject
 
 	attestation := &attestation_vuln.VulnerabilityStatement{
 		StatementHeader: intoto.StatementHeader{
@@ -207,22 +140,15 @@ func createAttestation(packageURL string, digests []string, vulns []osv_scanner.
 		},
 	}
 
-	for _, digest := range digests {
-		digestSplit := strings.Split(digest, ":")
-		subjects = append(subjects, intoto.Subject{
-			Name: packageURL,
-			Digest: common.DigestSet{
-				digestSplit[0]: digestSplit[1],
-			},
-		})
-	}
-	if len(digests) == 0 {
-		subjects = append(subjects, intoto.Subject{
-			Name: packageURL,
-		})
+	subject := intoto.Subject{Name: packageNode.Purl}
+
+	if packageNode.Algorithm != "" && packageNode.Digest != "" {
+		subject.Digest = common.DigestSet{
+			packageNode.Algorithm: packageNode.Digest,
+		}
 	}
 
-	attestation.StatementHeader.Subject = subjects
+	attestation.StatementHeader.Subject = []intoto.Subject{subject}
 
 	for _, vuln := range vulns {
 		attestation.Predicate.Scanner.Result = append(attestation.Predicate.Scanner.Result, attestation_vuln.Result{
