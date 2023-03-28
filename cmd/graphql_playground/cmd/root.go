@@ -63,14 +63,14 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	cmdFlags := rootCmd.Flags()
 
-	cmdFlags.BoolVar(&flags.neo4jBackend, "neo4j", true, "Use Neo4J backend")
-	cmdFlags.BoolVar(&flags.inMemoryBackend, "memory", false, "Use in-memory backend")
+	cmdFlags.BoolVar(&flags.neo4jBackend, "neo4j", false, "Use Neo4J backend")
+	cmdFlags.BoolVar(&flags.inMemoryBackend, "memory", true, "Use in-memory backend")
 
 	cmdFlags.StringVar(&flags.dbAddr, "gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
 	cmdFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
 	cmdFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
 	cmdFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
-	cmdFlags.BoolVar(&flags.addTestData, "testdata", false, "Populate Neo4J database with test data")
+	cmdFlags.BoolVar(&flags.addTestData, "testdata", false, "Populate backend with test data")
 
 	cmdFlags.IntVar(&flags.playgroundPort, "port", 8080, "Port to listen on for the GraphQL playground")
 

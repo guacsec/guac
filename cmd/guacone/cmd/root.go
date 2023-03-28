@@ -66,7 +66,7 @@ func init() {
 	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
 
 	// graphql server flags
-	persistentFlags.StringVar(&flags.graphqlBackend, "gql-backend", "neo4j", "backend used for graphql api server: [neo4j | inmem]")
+	persistentFlags.StringVar(&flags.graphqlBackend, "gql-backend", "inmem", "backend used for graphql api server: [neo4j | inmem]")
 	persistentFlags.IntVar(&flags.graphqlPort, "gql-port", 8080, "port used for graphql api server")
 	persistentFlags.BoolVar(&flags.graphqlDebug, "gql-debug", false, "debug flag which enables the graphQL playground")
 
