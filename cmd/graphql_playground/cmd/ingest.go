@@ -1118,8 +1118,27 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		artifact     *model.ArtifactInputSpec
 		cve          *model.CVEInputSpec
 		ghsa         *model.GHSAInputSpec
+		osv          *model.OSVInputSpec
 		vexStatement model.VexStatementInputSpec
 	}{{
+		name: "this package is not vulnerable to this OSV",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2019-14750",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this package is not vulnerable to this OSV",
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
 		name: "this package is not vulnerable to this CVE",
 		pkg: &model.PkgInputSpec{
 			Type:       "conan",
@@ -1157,6 +1176,21 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			Collector:     "Demo ingestion",
 		},
 	}, {
+		name: "this artifact is not vulnerable to this OSV",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2018-15710",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this artifact is not vulnerable to this OSV",
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
 		name: "this artifact is not vulnerable to this CVE",
 		artifact: &model.ArtifactInputSpec{
 			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
@@ -1183,6 +1217,24 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		},
 		vexStatement: model.VexStatementInputSpec{
 			Justification: "this artifact is not vulnerable to this GHSA",
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this package is not vulnerable to this OSV (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2019-14750",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this package is not vulnerable to this OSV",
 			KnownSince:    tm,
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
@@ -1220,6 +1272,21 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 		},
 		vexStatement: model.VexStatementInputSpec{
 			Justification: "this package is not vulnerable to this GHSA",
+			KnownSince:    tm,
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	}, {
+		name: "this artifact is not vulnerable to this OSV (duplicate)",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
+		},
+		osv: &model.OSVInputSpec{
+			OsvId: "CVE-2018-15710",
+		},
+		vexStatement: model.VexStatementInputSpec{
+			Justification: "this artifact is not vulnerable to this OSV",
 			KnownSince:    tm,
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
@@ -1268,8 +1335,13 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				if err != nil {
 					logger.Errorf("Error in ingesting: %v\n", err)
 				}
+			} else if ingest.osv != nil {
+				_, err := model.VexPackageAndOsv(context.Background(), client, *ingest.pkg, *ingest.osv, ingest.vexStatement)
+				if err != nil {
+					logger.Errorf("Error in ingesting: %v\n", err)
+				}
 			} else {
-				fmt.Printf("input missing for cve or ghsa")
+				fmt.Printf("input missing for cve, ghsa or osv")
 			}
 		} else if ingest.artifact != nil {
 			if ingest.cve != nil {
@@ -1282,8 +1354,13 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 				if err != nil {
 					logger.Errorf("Error in ingesting: %v\n", err)
 				}
+			} else if ingest.osv != nil {
+				_, err := model.VexArtifactAndOsv(context.Background(), client, *ingest.artifact, *ingest.osv, ingest.vexStatement)
+				if err != nil {
+					logger.Errorf("Error in ingesting: %v\n", err)
+				}
 			} else {
-				fmt.Printf("input missing for cve or ghsa")
+				fmt.Printf("input missing for cve, ghsa or osv")
 			}
 		} else {
 			fmt.Printf("input missing for package or artifact")

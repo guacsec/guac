@@ -41,6 +41,18 @@ mutation VEXPackageAndGhsa($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexState
   }
 }
 
+mutation VexPackageAndOsv($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestPackage(pkg: $pkg) {
+    ...AllPkgTree
+  }
+  ingestOSV(osv: $osv) {
+    ...allOSVTree
+  }
+  ingestVEXStatement(subject: {package: $pkg}, vulnerability: {osv: $osv}, vexStatement: $vexStatement) {
+    ...allCertifyVEXStatement
+  }
+}
+
 mutation VexArtifactAndCve($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestArtifact(artifact: $artifact) {
     ...allArtifactTree
@@ -61,6 +73,18 @@ mutation VexArtifactAndGhsa($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!
     ...allGHSATree
   }
   ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: {ghsa: $ghsa}, vexStatement: $vexStatement) {
+    ...allCertifyVEXStatement
+  }
+}
+
+mutation VexArtifactAndOsv($artifact: ArtifactInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
+  ingestArtifact(artifact: $artifact) {
+    ...allArtifactTree
+  }
+  ingestOSV(osv: $osv) {
+    ...allOSVTree
+  }
+  ingestVEXStatement(subject: {artifact: $artifact}, vulnerability: {osv: $osv}, vexStatement: $vexStatement) {
     ...allCertifyVEXStatement
   }
 }

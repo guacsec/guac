@@ -23,7 +23,7 @@ type HasSLSA {
   "The subject of SLSA attestation: package, source, or artifact."
   subject: Artifact!
   "The SLSA attestation."
-  slsa: SLSA
+  slsa: SLSA!
 }
 
 """

@@ -67,7 +67,7 @@ func (n *vulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest CertifyVuln
 func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability)
+	err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVulnerability")
 	if err != nil {
 		return nil, err
 	}
