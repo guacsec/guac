@@ -24,35 +24,38 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier"
 	pb "github.com/guacsec/guac/pkg/handler/collector/deps_dev/internal"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/logging"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 )
 
 const (
-	DepsCollector = "DepsCollector"
+	DepsCollector = "deps.dev"
 )
 
-type currentPackage struct {
-	purl    string
-	system  string
-	name    string
-	version string
+type PackageComponent struct {
+	currentPackage  *model.PkgInputSpec
+	source          *model.SourceInputSpec
+	vulnerabilities []*model.OSVInputSpec
+	scorecard       *model.ScorecardInputSpec
+	DepPackages     []*PackageComponent
 }
 
 type depsCollector struct {
-	packages    []*currentPackage
+	packages    []string
 	apiKey      string
 	client      pb.InsightsClient
 	lastChecked time.Time
-	poll        bool
 	interval    time.Duration
 }
 
-func NewDepsCollector(ctx context.Context, token string, packages []string, poll bool, interval time.Duration) *depsCollector {
+func NewDepsCollector(ctx context.Context, token string, packages []string, interval time.Duration) *depsCollector {
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
@@ -73,7 +76,6 @@ func NewDepsCollector(ctx context.Context, token string, packages []string, poll
 		packages: packages,
 		apiKey:   token,
 		client:   client,
-		poll:     poll,
 		interval: interval,
 	}
 }
@@ -124,83 +126,155 @@ pkg:rpm/opensuse/curl@7.56.1-1.1.?arch=i386&distro=opensuse-tumbleweed
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	ctx = metadata.AppendToOutgoingContext(ctx, "X-DepsDev-APIKey", d.apiKey)
-	if d.poll {
-		for {
-			for _, pack := range d.packages {
-				if pack.version != "" {
-					err := d.fetchDependencies(ctx, pack, docChannel)
-					if err != nil {
-						return err
-					}
-					// set interval to about 5 mins or more
-					time.Sleep(d.interval)
-				} else {
-					pack.version = defaultVersion(ctx, d.client, parseSystem(pack.system), pack.name)
-					err := d.fetchDependencies(ctx, pack, docChannel)
-					if err != nil {
-						return err
-					}
-				}
-			}
-		}
-	} else {
-		for _, pack := range d.packages {
-			if pack.version != "" {
-				err := d.fetchDependencies(ctx, pack, docChannel)
-				if err != nil {
-					return err
-				}
-				// set interval to about 5 mins or more
-				time.Sleep(d.interval)
-			} else {
-				pack.version = defaultVersion(ctx, d.client, parseSystem(pack.system), pack.name)
-				err := d.fetchDependencies(ctx, pack, docChannel)
-				if err != nil {
-					return err
-				}
-			}
+
+	for _, purl := range d.packages {
+		err := d.fetchDependencies(ctx, purl, docChannel)
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
 }
 
-func (d *depsCollector) fetchDependencies(ctx context.Context, pack *currentPackage, docChannel chan<- *processor.Document) error {
+func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docChannel chan<- *processor.Document) error {
+	logger := logging.FromContext(ctx)
 
-	component := certifier.Component{
-		Package: assembler.PackageNode{
-			Purl: pack.purl,
-		},
+	component := &PackageComponent{}
+	packageInput, err := helpers.PurlToPkg(purl)
+	if err != nil {
+		return err
 	}
 
-	// Make an RPC Request. The returned result is a stream of
-	// DependenciesResponse structs.
-	req := &pb.DependenciesRequest{
+	// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
+	if *packageInput.Version == "" {
+		logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
+		return nil
+	}
+
+	component.currentPackage = packageInput
+
+	versionReq := &pb.GetVersionRequest{
 		VersionKey: &pb.VersionKey{
-			System:  parseSystem(pack.system),
-			Name:    pack.name,
-			Version: pack.version,
+			System:  parseSystem(packageInput.Type),
+			Name:    packageInput.Name,
+			Version: *packageInput.Version,
 		},
 	}
-	stream, err := d.client.Dependencies(ctx, req)
+
+	version, err := d.client.GetVersion(ctx, versionReq)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Drain the stream until we hit EOF.
-	for {
-		resp, err := stream.Recv()
-		if err == io.EOF {
-			break
+	for _, link := range version.Links {
+		if link.Label == "REPO" {
+			src, err := helpers.VcsToSrc(link.Url)
+			if err != nil {
+				continue
+			}
+			component.source = src
+
+			projectReq := &pb.GetProjectRequest{
+				ProjectKey: &pb.ProjectKey{
+					Id: link.Label,
+				},
+			}
+
+			project, err := d.client.GetProject(ctx, projectReq)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if project.Scorecard != nil {
+				component.scorecard.AggregateScore = float64(project.Scorecard.OverallScore)
+				component.scorecard.ScorecardCommit = project.Scorecard.Scorecard.Commit
+				component.scorecard.ScorecardVersion = project.Scorecard.Scorecard.Version
+				component.scorecard.TimeScanned = project.Scorecard.Date.AsTime().UTC()
+				component.scorecard.Origin = DepsCollector
+				component.scorecard.Collector = DepsCollector
+				inputChecks := []model.ScorecardCheckInputSpec{}
+				for _, check := range project.Scorecard.Checks {
+					inputCheck := model.ScorecardCheckInputSpec{
+						Check: check.Name,
+						Score: int(check.Score),
+					}
+					inputChecks = append(inputChecks, inputCheck)
+				}
+				component.scorecard.Checks = inputChecks
+			}
 		}
-		if err != nil {
-			log.Fatal(err)
+	}
+
+	vulnerabilities := []*model.OSVInputSpec{}
+	for _, vuln := range version.AdvisoryKeys {
+		advisory, err := d.client.GetAdvisory()
+		if e
+		vuln := model.OSVInputSpec{
+			OsvId: vuln.Id,
 		}
-		for _, node := range resp.Nodes {
-			// pkg:pypi/django@1.11.1
-			purl := "pkg:" + pack.system + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
-			component.DepPackages = append(component.DepPackages, &certifier.Component{Package: assembler.PackageNode{Purl: purl}})
-		}
+		vulnerabilities = append(vulnerabilities, &vuln)
+	}
+
+	// Make an RPC Request. The returned result is a stream of
+	// DependenciesResponse structs.
+	dependenciesReq := &pb.GetDependenciesRequest{
+		VersionKey: &pb.VersionKey{
+			System:  parseSystem(packageInput.Type),
+			Name:    packageInput.Name,
+			Version: *packageInput.Version,
+		},
+	}
+
+	packageReq := &pb.GetPackageRequest{
+		VersionKey: &pb.PackageKey{
+			System:  parseSystem(packageInput.Type),
+			Name:    packageInput.Name,
+			Version: *packageInput.Version,
+		},
+	}
+
+	advisoryReq := &pb.GetAdvisoryRequest{
+		VersionKey: &pb.AdvisoryKey{
+			System:  parseSystem(packageInput.Type),
+			Name:    packageInput.Name,
+			Version: *packageInput.Version,
+		},
+	}
+
+	versionReq := &pb.GetVersionRequest{
+		VersionKey: &pb.VersionKey{
+			System:  parseSystem(packageInput.Type),
+			Name:    packageInput.Name,
+			Version: *packageInput.Version,
+		},
+	}
+
+	req := &pb.VersionsRequest{
+		PackageKey: &pb.PackageKey{
+			System: sys,
+			Name:   pkg,
+		},
+	}
+
+	deps, err := d.client.GetDependencies(ctx, req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	projects, err := d.client.GetProject()
+
+	packs, err := d.client.GetPackage()
+
+	
+	version, err := d.client.GetVersion()
+
+	vulnKeys := version.AdvisoryKeys[0].Id
+	source := version.Links[0].Url
+
+	for _, node := range deps.Nodes {
+		// pkg:pypi/django@1.11.1
+		purl := "pkg:" + pack.system + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
+		component.DepPackages = append(component.DepPackages, &certifier.Component{Package: assembler.PackageNode{Purl: purl}})
 	}
 
 	blob, err := json.Marshal(component)
