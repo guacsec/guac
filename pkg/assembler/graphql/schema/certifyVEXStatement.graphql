@@ -34,10 +34,10 @@ input PackageOrArtifactSpec {
 }
 
 """
-CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
 
 subject - union type that represents a package or artifact
-vulnerability (object) - union type that consists of cve or ghsa
+vulnerability (object) - union type that consists of cve, ghsa or osv
 justification (property) - justification for VEX
 knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
 origin (property) - where this attestation was generated from (based on which document)
@@ -46,7 +46,7 @@ collector (property) - the GUAC collector that collected the document that gener
 type CertifyVEXStatement {
   id: ID!
   subject: PackageOrArtifact!
-  vulnerability: CveOrGhsa!
+  vulnerability: OsvCveOrGhsa!
   justification: String!
   knownSince: Time!
   origin: String!
@@ -55,12 +55,12 @@ type CertifyVEXStatement {
 
 """
 CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
-Only package or artifact and CVE or GHSA can be specified at once.
+Only package or artifact and CVE, GHSA or OSV can be specified at once.
 """
 input CertifyVEXStatementSpec {
   id: ID
   subject: PackageOrArtifactSpec
-  vulnerability: CveOrGhsaSpec
+  vulnerability: OsvCveOrGhsaSpec
   justification: String
   knownSince: Time
   origin: String
@@ -95,6 +95,6 @@ extend type Query {
 }
 
 extend type Mutation {
-  "certify that an either a package or artifact has an associated VEX for a CVE or GHSA"
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  "certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV"
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: OsvCveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }

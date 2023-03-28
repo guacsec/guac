@@ -116,7 +116,7 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrS
 			return nil, gqlerror.Errorf("IngestHasSbom :: %v", err)
 		}
 		sourceID = sid
-		src, _ := byID[*srcNameNode](sid, c)
+		src, _ = byID[*srcNameNode](sid, c)
 		search = src.hasSBOMs
 	}
 

@@ -188,7 +188,7 @@ type ComplexityRoot struct {
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
-		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
+		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
 	}
 
@@ -1098,7 +1098,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.CveOrGhsaInput), args["vexStatement"].(model.VexStatementInputSpec)), true
+		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.OsvCveOrGhsaInput), args["vexStatement"].(model.VexStatementInputSpec)), true
 
 	case "Mutation.ingestVulnerability":
 		if e.complexity.Mutation.IngestVulnerability == nil {
@@ -2355,10 +2355,10 @@ input PackageOrArtifactSpec {
 }
 
 """
-CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
 
 subject - union type that represents a package or artifact
-vulnerability (object) - union type that consists of cve or ghsa
+vulnerability (object) - union type that consists of cve, ghsa or osv
 justification (property) - justification for VEX
 knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
 origin (property) - where this attestation was generated from (based on which document)
@@ -2367,7 +2367,7 @@ collector (property) - the GUAC collector that collected the document that gener
 type CertifyVEXStatement {
   id: ID!
   subject: PackageOrArtifact!
-  vulnerability: CveOrGhsa!
+  vulnerability: OsvCveOrGhsa!
   justification: String!
   knownSince: Time!
   origin: String!
@@ -2376,12 +2376,12 @@ type CertifyVEXStatement {
 
 """
 CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
-Only package or artifact and CVE or GHSA can be specified at once.
+Only package or artifact and CVE, GHSA or OSV can be specified at once.
 """
 input CertifyVEXStatementSpec {
   id: ID
   subject: PackageOrArtifactSpec
-  vulnerability: CveOrGhsaSpec
+  vulnerability: OsvCveOrGhsaSpec
   justification: String
   knownSince: Time
   origin: String
@@ -2416,8 +2416,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "certify that an either a package or artifact has an associated VEX for a CVE or GHSA"
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: CveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  "certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV"
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: OsvCveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
@@ -2781,7 +2781,7 @@ type HasSLSA {
   "The subject of SLSA attestation: package, source, or artifact."
   subject: Artifact!
   "The SLSA attestation."
-  slsa: SLSA
+  slsa: SLSA!
 }
 
 """

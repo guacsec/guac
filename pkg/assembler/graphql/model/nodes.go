@@ -242,10 +242,10 @@ type CertifyScorecardSpec struct {
 	Collector        *string               `json:"collector,omitempty"`
 }
 
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE or GHSA)
+// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
 //
 // subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve or ghsa
+// vulnerability (object) - union type that consists of cve, ghsa or osv
 // justification (property) - justification for VEX
 // knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
 // origin (property) - where this attestation was generated from (based on which document)
@@ -253,7 +253,7 @@ type CertifyScorecardSpec struct {
 type CertifyVEXStatement struct {
 	ID            string            `json:"id"`
 	Subject       PackageOrArtifact `json:"subject"`
-	Vulnerability CveOrGhsa         `json:"vulnerability"`
+	Vulnerability OsvCveOrGhsa      `json:"vulnerability"`
 	Justification string            `json:"justification"`
 	KnownSince    time.Time         `json:"knownSince"`
 	Origin        string            `json:"origin"`
@@ -263,11 +263,11 @@ type CertifyVEXStatement struct {
 func (CertifyVEXStatement) IsNode() {}
 
 // CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
-// Only package or artifact and CVE or GHSA can be specified at once.
+// Only package or artifact and CVE, GHSA or OSV can be specified at once.
 type CertifyVEXStatementSpec struct {
 	ID            *string                `json:"id,omitempty"`
 	Subject       *PackageOrArtifactSpec `json:"subject,omitempty"`
-	Vulnerability *CveOrGhsaSpec         `json:"vulnerability,omitempty"`
+	Vulnerability *OsvCveOrGhsaSpec      `json:"vulnerability,omitempty"`
 	Justification *string                `json:"justification,omitempty"`
 	KnownSince    *time.Time             `json:"knownSince,omitempty"`
 	Origin        *string                `json:"origin,omitempty"`
@@ -402,7 +402,7 @@ type HasSlsa struct {
 	// The subject of SLSA attestation: package, source, or artifact.
 	Subject *Artifact `json:"subject"`
 	// The SLSA attestation.
-	Slsa *Slsa `json:"slsa,omitempty"`
+	Slsa *Slsa `json:"slsa"`
 }
 
 func (HasSlsa) IsNode() {}

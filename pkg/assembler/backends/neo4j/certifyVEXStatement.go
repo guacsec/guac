@@ -207,6 +207,83 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		}
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
+
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil) ||
+		(queryVulnAll && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil) ||
+		(certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil &&
+			certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil) {
+
+		var sb strings.Builder
+		var firstMatch bool = true
+		queryValues := map[string]any{}
+
+		// query ghsa
+		returnValue := " RETURN type.type, namespace.namespace, name.name, version.version, version.subpath, " +
+			"version.qualifier_list, certifyVuln, osvID.id"
+
+		// query with pkgVersion
+		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
+			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion)" +
+			"-[:subject]-(certifyVEXStatement:CertifyVEXStatement)-[:about]-(osvID:OsvID)<-[:OsvHasID]" +
+			"-(rootOsv:Osv)"
+		sb.WriteString(query)
+
+		if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil {
+			setPkgMatchValues(&sb, certifyVEXStatementSpec.Subject.Package, false, &firstMatch, queryValues)
+		}
+		if certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil {
+			setOSVMatchValues(&sb, certifyVEXStatementSpec.Vulnerability.Osv, &firstMatch, queryValues)
+		}
+		setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
+		sb.WriteString(returnValue)
+
+		result, err := session.ReadTransaction(
+			func(tx neo4j.Transaction) (interface{}, error) {
+
+				result, err := tx.Run(sb.String(), queryValues)
+				if err != nil {
+					return nil, err
+				}
+
+				collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
+
+				for result.Next() {
+					pkgQualifiers := result.Record().Values[5]
+					subPath := result.Record().Values[4]
+					version := result.Record().Values[3]
+					nameString := result.Record().Values[2].(string)
+					namespaceString := result.Record().Values[1].(string)
+					typeString := result.Record().Values[0].(string)
+
+					pkg := generateModelPackage(typeString, namespaceString, nameString, version, subPath, pkgQualifiers)
+
+					id := result.Record().Values[7].(string)
+					osv := generateModelOsv(id)
+
+					certifyVEXStatementNode := dbtype.Node{}
+					if result.Record().Values[1] != nil {
+						certifyVEXStatementNode = result.Record().Values[6].(dbtype.Node)
+					} else {
+						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
+					}
+
+					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, osv, certifyVEXStatementNode.Props[justification].(string),
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
+
+					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
+				}
+				if err = result.Err(); err != nil {
+					return nil, err
+				}
+
+				return collectedCertifyVEXStatement, nil
+			})
+		if err != nil {
+			return nil, err
+		}
+		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
+	}
+
 	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Cve != nil) ||
 		(queryVulnAll && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil) ||
 		(certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil &&
@@ -345,6 +422,76 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 		}
 		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
 	}
+
+	if queryAll || (querySubjectAll && certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil) ||
+		(queryVulnAll && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil) ||
+		(certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil &&
+			certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil) {
+
+		var sb strings.Builder
+		var firstMatch bool = true
+		queryValues := map[string]any{}
+
+		// query ghsa
+		returnValue := " RETURN a.algorithm, a.digest, certifyVEXStatement, osvID.id"
+
+		// query artifact
+		query := "MATCH (a:Artifact)" +
+			"-[:subject]-(certifyVEXStatement:CertifyVEXStatement)-[:about]-(osvID:OsvID)<-[:OsvHasID]" +
+			"-(rootOsv:Osv)"
+		sb.WriteString(query)
+
+		if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil {
+			setArtifactMatchValues(&sb, certifyVEXStatementSpec.Subject.Artifact, false, &firstMatch, queryValues)
+		}
+		if certifyVEXStatementSpec.Vulnerability != nil && certifyVEXStatementSpec.Vulnerability.Osv != nil {
+			setOSVMatchValues(&sb, certifyVEXStatementSpec.Vulnerability.Osv, &firstMatch, queryValues)
+		}
+		setCertifyVEXStatementValues(&sb, certifyVEXStatementSpec, &firstMatch, queryValues)
+		sb.WriteString(returnValue)
+
+		result, err := session.ReadTransaction(
+			func(tx neo4j.Transaction) (interface{}, error) {
+
+				result, err := tx.Run(sb.String(), queryValues)
+				if err != nil {
+					return nil, err
+				}
+
+				collectedCertifyVEXStatement := []*model.CertifyVEXStatement{}
+
+				for result.Next() {
+					algorithm := result.Record().Values[0].(string)
+					digest := result.Record().Values[1].(string)
+					artifact := generateModelArtifact(algorithm, digest)
+
+					id := result.Record().Values[7].(string)
+					osv := generateModelOsv(id)
+
+					certifyVEXStatementNode := dbtype.Node{}
+					if result.Record().Values[1] != nil {
+						certifyVEXStatementNode = result.Record().Values[2].(dbtype.Node)
+					} else {
+						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
+					}
+
+					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, osv, certifyVEXStatementNode.Props[justification].(string),
+						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
+
+					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
+				}
+				if err = result.Err(); err != nil {
+					return nil, err
+				}
+
+				return collectedCertifyVEXStatement, nil
+			})
+		if err != nil {
+			return nil, err
+		}
+		aggregateCertifyVEXStatement = append(aggregateCertifyVEXStatement, result.([]*model.CertifyVEXStatement)...)
+	}
+
 	return aggregateCertifyVEXStatement, nil
 }
 
@@ -371,7 +518,7 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	}
 }
 
-func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln model.CveOrGhsa, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
+func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln model.OsvCveOrGhsa, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
 	certifyVEXStatement := model.CertifyVEXStatement{
 		Subject:       subject,
 		Vulnerability: vuln,
@@ -383,13 +530,13 @@ func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln mode
 	return &certifyVEXStatement
 }
 
-func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 
 	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
 	if err != nil {
 		return nil, err
 	}
-	err = helper.ValidateCveOrGhsaIngestionInput(vulnerability, "IngestVEXStatement")
+	err = helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVEXStatement")
 	if err != nil {
 		return nil, err
 	}

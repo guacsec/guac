@@ -64,6 +64,7 @@ type osvIDNode struct {
 	osvID            string
 	certifyVulnLinks []uint32
 	equalVulnLinks   []uint32
+	vexLinks         []uint32
 }
 
 func (n *osvIDNode) ID() uint32 { return n.id }
@@ -78,9 +79,10 @@ func (n *osvNode) Neighbors() []uint32 {
 }
 
 func (n *osvIDNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks))
+	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
 	out = append(out, n.certifyVulnLinks...)
 	out = append(out, n.equalVulnLinks...)
+	out = append(out, n.vexLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -100,6 +102,11 @@ func (n *osvIDNode) setVulnerabilityLinks(id uint32) {
 // isVulnerability back edges
 func (n *osvIDNode) setEqualVulnLinks(id uint32) {
 	n.equalVulnLinks = append(n.equalVulnLinks, id)
+}
+
+// certifyVexStatement back edges
+func (n *osvIDNode) setVexLinks(id uint32) {
+	n.vexLinks = append(n.vexLinks, id)
 }
 
 // Ingest OSV

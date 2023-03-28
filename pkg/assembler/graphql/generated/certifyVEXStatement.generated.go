@@ -143,9 +143,9 @@ func (ec *executionContext) _CertifyVEXStatement_vulnerability(ctx context.Conte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.CveOrGhsa)
+	res := resTmp.(model.OsvCveOrGhsa)
 	fc.Result = res
-	return ec.marshalNCveOrGhsa2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveOrGhsa(ctx, field.Selections, res)
+	return ec.marshalNOsvCveOrGhsa2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsa(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyVEXStatement_vulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -155,7 +155,7 @@ func (ec *executionContext) fieldContext_CertifyVEXStatement_vulnerability(ctx c
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type CveOrGhsa does not have child fields")
+			return nil, errors.New("field of type OsvCveOrGhsa does not have child fields")
 		},
 	}
 	return fc, nil
@@ -375,7 +375,7 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-			it.Vulnerability, err = ec.unmarshalOCveOrGhsaSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveOrGhsaSpec(ctx, v)
+			it.Vulnerability, err = ec.unmarshalOOsvCveOrGhsaSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}

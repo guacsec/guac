@@ -21,7 +21,7 @@ mutation CertifyOSV($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: Vuln
   ingestPackage(pkg: $pkg) {
     ...AllPkgTree
   }
-   ingestOSV(osv: $osv) {
+  ingestOSV(osv: $osv) {
     ...allOSVTree
   }
   ingestVulnerability(pkg: $pkg, vulnerability: {osv: $osv}, certifyVuln: $certifyVuln) {

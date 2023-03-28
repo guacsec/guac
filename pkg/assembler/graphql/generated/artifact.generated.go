@@ -24,7 +24,7 @@ type MutationResolver interface {
 	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
 	IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
-	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.CveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
+	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
@@ -530,10 +530,10 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.C
 		}
 	}
 	args["subject"] = arg0
-	var arg1 model.CveOrGhsaInput
+	var arg1 model.OsvCveOrGhsaInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCveOrGhsaInput(ctx, tmp)
+		arg1, err = ec.unmarshalNOsvCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1407,7 +1407,7 @@ func (ec *executionContext) _Mutation_ingestVEXStatement(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.CveOrGhsaInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
+		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.OsvCveOrGhsaInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

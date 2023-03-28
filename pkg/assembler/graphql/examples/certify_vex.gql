@@ -39,6 +39,13 @@ fragment allCertifyVEXStatementTree on CertifyVEXStatement {
         cveId
       }
     }
+    ... on OSV {
+      id
+      osvIds{
+        id
+        osvId
+      }
+    }
     ... on GHSA {
       id
       ghsaIds {
@@ -98,6 +105,18 @@ query CertifyVEXStatementQ7 {
 
 query CertifyVEXStatementQ8 {
   CertifyVEXStatement(certifyVEXStatementSpec: {vulnerability: {ghsa: {ghsaId: "GHSA-hj5f-4gvw-4rv2"}}}) {
+    ...allCertifyVEXStatementTree
+  }
+}
+
+query CertifyVEXStatementQ9 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {vulnerability: {osv: {osvId: "cve-2019-14750"}}}) {
+    ...allCertifyVEXStatementTree
+  }
+}
+
+query CertifyVEXStatementQ10 {
+  CertifyVEXStatement(certifyVEXStatementSpec: {vulnerability: {osv: {osvId: "cve-2018-15710"}}}) {
     ...allCertifyVEXStatementTree
   }
 }

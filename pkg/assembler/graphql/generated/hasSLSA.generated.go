@@ -146,11 +146,14 @@ func (ec *executionContext) _HasSLSA_slsa(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.Slsa)
 	fc.Result = res
-	return ec.marshalOSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx, field.Selections, res)
+	return ec.marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HasSLSA_slsa(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -990,6 +993,9 @@ func (ec *executionContext) _HasSLSA(ctx context.Context, sel ast.SelectionSet, 
 
 			out.Values[i] = ec._HasSLSA_slsa(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1182,6 +1188,16 @@ func (ec *executionContext) marshalNHasSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 	return ec._HasSLSA(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx context.Context, sel ast.SelectionSet, v *model.Slsa) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SLSA(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNSLSAInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAInputSpec(ctx context.Context, v interface{}) (model.SLSAInputSpec, error) {
 	res, err := ec.unmarshalInputSLSAInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -1274,13 +1290,6 @@ func (ec *executionContext) unmarshalOHasSLSASpec2ᚖgithubᚗcomᚋguacsecᚋgu
 	}
 	res, err := ec.unmarshalInputHasSLSASpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOSLSA2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSlsa(ctx context.Context, sel ast.SelectionSet, v *model.Slsa) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SLSA(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOSLSAPredicateSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSLSAPredicateSpecᚄ(ctx context.Context, v interface{}) ([]*model.SLSAPredicateSpec, error) {
