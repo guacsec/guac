@@ -20,60 +20,28 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"reflect"
 	"strings"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type cyclonedxParser struct {
-	doc           *processor.Document
-	rootComponent component
-	pkgMap        map[string]*component
-}
+	doc             *processor.Document
+	packagePackages map[string][]model.PkgInputSpec
 
-type component struct {
-	curPackage  assembler.PackageNode
-	depPackages []*component
+	cdxBom *cdx.BOM
 }
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
-		rootComponent: component{},
-		pkgMap:        map[string]*component{},
-	}
-}
-
-// TODO(bulldozer): replace with GetPredicates
-// func (c *cyclonedxParser) CreateNodes(ctx context.Context) []assembler.GuacNode {
-// 	nodes := []assembler.GuacNode{}
-// 	nodes = append(nodes, c.rootComponent.curPackage)
-// 	for _, p := range c.rootComponent.depPackages {
-// 		nodes = append(nodes, p.curPackage)
-// 	}
-// 	return nodes
-// }
-
-func addEdges(curPkg component, edges *[]assembler.GuacEdge, visited map[string]bool) {
-	// this could happen if we image purl creation fails for rootPackage
-	// we need better solution to support different image name formats in SBOM
-	if curPkg.curPackage.Name == "" {
-		return
-	}
-	// Exit the function if the package has already been visited
-	if visited[curPkg.curPackage.Name] {
-		return
-	}
-	visited[curPkg.curPackage.Name] = true
-
-	for _, dep := range curPkg.depPackages {
-		// Append the dependency edge to the edges slice
-		*edges = append(*edges, assembler.DependsOnEdge{PackageNode: curPkg.curPackage, PackageDependency: dep.curPackage})
-
-		// Recursively call addEdges for each dependent package
-		addEdges(*dep, edges, visited)
+		packagePackages: map[string][]model.PkgInputSpec{},
 	}
 }
 
@@ -84,8 +52,9 @@ func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) er
 	if err != nil {
 		return fmt.Errorf("failed to parse cyclonedx BOM: %w", err)
 	}
-	c.addRootPackage(cdxBom)
-	c.addPackages(cdxBom)
+	c.cdxBom = cdxBom
+	c.getTopLevelPackage(cdxBom)
+	c.getPackages(cdxBom)
 
 	return nil
 }
@@ -95,108 +64,70 @@ func (c *cyclonedxParser) GetIdentities(ctx context.Context) []common.TrustInfor
 	return nil
 }
 
-// TODO(bulldozer): replace with GetPredicates
-// func (c *cyclonedxParser) CreateEdges(ctx context.Context, foundIdentities []common.TrustInformation) []assembler.GuacEdge {
-// 	edges := []assembler.GuacEdge{}
-// 	visited := make(map[string]bool)
-// 	addEdges(c.rootComponent, &edges, visited)
-// 	return edges
-// }
-
-func (c *cyclonedxParser) addRootPackage(cdxBom *cdx.BOM) {
-	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
+func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 	if cdxBom.Metadata.Component != nil {
-		rootPackage := assembler.PackageNode{}
-		rootPackage.Name = cdxBom.Metadata.Component.Name
-		rootPackage.NodeData = *assembler.NewObjectMetadata(c.doc.SourceInformation)
-		if cdxBom.Metadata.Component.PackageURL != "" {
-			rootPackage.Purl = cdxBom.Metadata.Component.PackageURL
-			rootPackage.Version = cdxBom.Metadata.Component.Version
-			rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
-		} else {
+		purl := cdxBom.Metadata.Component.PackageURL
+		if cdxBom.Metadata.Component.PackageURL == "" {
 			if cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
+				//TODO(dejanb): Change prefix to pkg:guac/cdx and align it with spdx implementation
 				splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
-				if len(splitImage) == 3 {
-					// example: gcr.io/distroless/static:nonroot
-					splitTag := strings.Split(splitImage[2], ":")
-					if len(splitTag) == 2 {
-						rootPackage.Purl = "pkg:oci/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "/" + splitTag[0] + "&tag=" + splitTag[1]
-					} else {
-						// no tag specified
-						rootPackage.Purl = "pkg:oci/" + splitImage[2] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "/" + splitImage[2] + "&tag="
-					}
-				} else if len(splitImage) == 2 {
-					// example: library/debian:latest
-					splitTag := strings.Split(splitImage[1], ":")
-					if len(splitTag) == 2 {
-						rootPackage.Purl = "pkg:oci/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitTag[0] + "&tag=" + splitTag[1]
-					} else {
-						// no tag specified
-						rootPackage.Purl = "pkg:oci/" + splitImage[1] + "@" + cdxBom.Metadata.Component.Version +
-							"?repository_url=" + splitImage[0] + "/" + splitImage[1] + "&tag="
-					}
+
+				const (
+					ociPrefix        = "pkg:oci/"
+					repositoryURLKey = "?repository_url="
+					tagKey           = "&tag="
+				)
+
+				splitTag := strings.Split(splitImage[len(splitImage)-1], ":")
+				var repositoryURL string
+				var tag string
+
+				switch len(splitImage) {
+				case 3:
+					repositoryURL = splitImage[0] + "/" + splitImage[1] + "/" + splitTag[0]
+				case 2:
+					repositoryURL = splitImage[0] + "/" + splitTag[0]
+				default:
+					repositoryURL = ""
 				}
+
+				if len(splitTag) == 2 {
+					tag = splitTag[1]
+				}
+
+				purl = fmt.Sprintf("%s%s@%s%s%s%s%s", ociPrefix, splitTag[0],
+					cdxBom.Metadata.Component.Version, repositoryURLKey, repositoryURL, tagKey, tag)
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")
-				rootPackage.Purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
+				purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
 			}
-			rootPackage.Version = cdxBom.Metadata.Component.Version
-			rootPackage.Digest = append(rootPackage.Digest, cdxBom.Metadata.Component.Version)
-			rootPackage.Tags = []string{string(cdxBom.Metadata.Component.Type)}
 		}
-		c.rootComponent = component{
-			curPackage:  rootPackage,
-			depPackages: []*component{},
+		topPackage, err := asmhelpers.PurlToPkg(purl)
+		if err != nil {
+			return err
 		}
+		c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)] = append(c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)], *topPackage)
 	}
+	return nil
 }
 
-func (c *cyclonedxParser) addPackages(cdxBom *cdx.BOM) {
+func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 	if cdxBom.Components != nil {
 		for _, comp := range *cdxBom.Components {
 			// skipping over the "operating-system" type as it does not contain
 			// the required purl for package node. Currently there is no use-case
 			// to capture OS for GUAC.
 			if comp.Type != cdx.ComponentTypeOS {
-				curPkg := assembler.PackageNode{
-					Name: comp.Name,
-					// Digest: []string{comp.Version},
-					Purl:     comp.PackageURL,
-					Version:  comp.Version,
-					NodeData: *assembler.NewObjectMetadata(c.doc.SourceInformation),
+				pkg, err := asmhelpers.PurlToPkg(comp.PackageURL)
+				if err != nil {
+					return err
 				}
-				if comp.CPE != "" {
-					curPkg.CPEs = []string{comp.CPE}
-				}
-				parentPkg := component{
-					curPackage:  curPkg,
-					depPackages: []*component{},
-				}
-				c.rootComponent.depPackages = append(c.rootComponent.depPackages, &parentPkg)
-				c.pkgMap[comp.BOMRef] = &parentPkg
+				c.packagePackages[string(comp.BOMRef)] = append(c.packagePackages[string(comp.BOMRef)], *pkg)
+				//TODO(dejanb): Parse hashes and create artifact nodes and isOccurence relations https://github.com/guacsec/guac/issues/632
 			}
 		}
 	}
-
-	if cdxBom.Dependencies == nil {
-		return
-	}
-	for _, deps := range *cdxBom.Dependencies {
-		currPkg, found := c.pkgMap[deps.Ref]
-		if !found {
-			continue
-		}
-		if deps.Dependencies != nil {
-			for _, depPkg := range *deps.Dependencies {
-				if depPkg, exist := c.pkgMap[depPkg]; exist {
-					currPkg.depPackages = append(currPkg.depPackages, depPkg)
-				}
-			}
-		}
-	}
+	return nil
 }
 
 func parseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
@@ -221,5 +152,52 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 }
 
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
+	logger := logging.FromContext(ctx)
+
+	preds := &assembler.IngestPredicates{}
+
+	toplevel := c.getPackageElement(string(c.cdxBom.Metadata.Component.BOMRef))
+	// adding top level package edge manually for all depends on package
+	if toplevel != nil {
+		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
+	}
+
+	if c.cdxBom.Dependencies == nil {
+		return preds
+	}
+
+	for _, deps := range *c.cdxBom.Dependencies {
+		currPkg, found := c.packagePackages[deps.Ref]
+		if !found {
+			continue
+		}
+		if reflect.DeepEqual(currPkg, toplevel) {
+			continue
+		}
+		if deps.Dependencies != nil {
+			for _, depPkg := range *deps.Dependencies {
+				if depPkg, exist := c.packagePackages[depPkg]; exist {
+					for _, packNode := range currPkg {
+						p, err := common.GetIsDep(packNode, depPkg, []model.PkgInputSpec{}, "CDX BOM Dependency")
+						if err != nil {
+							logger.Errorf("error generating CycloneDX edge %v", err)
+							continue
+						}
+						if p != nil {
+							preds.IsDependency = append(preds.IsDependency, *p)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return preds
+}
+
+func (s *cyclonedxParser) getPackageElement(elementID string) []model.PkgInputSpec {
+	if packNode, ok := s.packagePackages[string(elementID)]; ok {
+		return packNode
+	}
 	return nil
 }

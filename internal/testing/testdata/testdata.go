@@ -319,6 +319,9 @@ var (
 	isDepJustifyDepends = &model.IsDependencyInputSpec{
 		Justification: "Derived from SPDX DEPENDS_ON relationship",
 	}
+	isCDXDepJustifyDepends = &model.IsDependencyInputSpec{
+		Justification: "CDX BOM Dependency",
+	}
 
 	isOccJustifyFile = &model.IsOccurrenceInputSpec{
 		Justification: "spdx file with checksum",
@@ -415,200 +418,81 @@ var (
 	}
 
 	// CycloneDX Testdata
+	cdxTopLevelPack, _ = asmhelpers.PurlToPkg("pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot")
 
-	cdxTopLevelPack = assembler.PackageNode{
-		Name:    "gcr.io/distroless/static:nonroot",
-		Digest:  []string{"sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388"},
-		Version: "sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388",
-		Purl:    "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
-		Tags:    []string{"container"},
-		CPEs:    nil,
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
+	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11")
 
-	cdxTzdataPack = assembler.PackageNode{
-		Name:    "tzdata",
-		Digest:  nil,
-		Version: "2021a-1+deb11u6",
-		Purl:    "pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11",
-		CPEs: []string{
-			"cpe:2.3:a:tzdata:tzdata:2021a-1\\+deb11u6:*:*:*:*:*:*:*"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
+	cdxNetbasePack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11")
 
-	cdxNetbasePack = assembler.PackageNode{
-		Name:    "netbase",
-		Digest:  nil,
-		Version: "6.3",
-		Purl:    "pkg:deb/debian/netbase@6.3?arch=all&distro=debian-11",
-		CPEs: []string{
-			"cpe:2.3:a:netbase:netbase:6.3:*:*:*:*:*:*:*"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
+	cdxBasefilesPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11")
 
-	cdxBasefilesPack = assembler.PackageNode{
-		Name:    "base-files",
-		Digest:  nil,
-		Version: "11.1+deb11u5",
-		Purl:    "pkg:deb/debian/base-files@11.1+deb11u5?arch=amd64&distro=debian-11",
-		CPEs: []string{
-			"cpe:2.3:a:base-files:base-files:11.1\\+deb11u5:*:*:*:*:*:*:*"},
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
-
-	CycloneDXNodes = []assembler.GuacNode{cdxTopLevelPack, cdxBasefilesPack, cdxNetbasePack, cdxTzdataPack}
-	CyloneDXEdges  = []assembler.GuacEdge{
-		assembler.DependsOnEdge{
-			PackageDependency: cdxBasefilesPack,
-			PackageNode:       cdxTopLevelPack,
+	CdxDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:          cdxTopLevelPack,
+			DepPkg:       cdxBasefilesPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageDependency: cdxNetbasePack,
-			PackageNode:       cdxTopLevelPack,
+		{
+			Pkg:          cdxTopLevelPack,
+			DepPkg:       cdxNetbasePack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageDependency: cdxTzdataPack,
-			PackageNode:       cdxTopLevelPack,
+		{
+			Pkg:          cdxTopLevelPack,
+			DepPkg:       cdxTzdataPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
 	}
 
-	// CycloneDX Testdata with package dependencies
-	cdxTopQuarkusPack = assembler.PackageNode{
-		Name:    "getting-started",
-		Version: "1.0.0-SNAPSHOT",
-		Purl:    "pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar",
-		Tags:    []string{"library"},
-		CPEs:    nil,
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	CdxIngestionPredicates = assembler.IngestPredicates{
+		IsDependency: CdxDeps,
 	}
 
-	cdxResteasyPack = assembler.PackageNode{
-		Name:    "quarkus-resteasy-reactive",
-		Digest:  nil,
-		Version: "2.13.4.Final",
-		Purl:    "pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar",
-		CPEs:    nil,
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
+	cdxTopQuarkusPack, _ = asmhelpers.PurlToPkg("pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar")
 
-	cdxReactiveCommonPack = assembler.PackageNode{
-		Name:    "quarkus-resteasy-reactive-common",
-		Digest:  nil,
-		Version: "2.13.4.Final",
-		Purl:    "pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar",
-		CPEs:    nil,
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
+	cdxResteasyPack, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-resteasy-reactive@2.13.4.Final?type=jar")
 
-	CycloneDXQuarkusNodes = []assembler.GuacNode{cdxTopQuarkusPack, cdxResteasyPack, cdxReactiveCommonPack}
-	CyloneDXQuarkusEdges  = []assembler.GuacEdge{
-		assembler.DependsOnEdge{
-			PackageDependency: cdxResteasyPack,
-			PackageNode:       cdxTopQuarkusPack,
+	cdxReactiveCommonPack, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-resteasy-reactive-common@2.13.4.Final?type=jar")
+
+	CdxQuarkusDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:          cdxTopQuarkusPack,
+			DepPkg:       cdxResteasyPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageDependency: cdxReactiveCommonPack,
-			PackageNode:       cdxTopQuarkusPack,
+		{
+			Pkg:          cdxTopQuarkusPack,
+			DepPkg:       cdxReactiveCommonPack,
+			IsDependency: isDepJustifyTopPkg,
 		},
-		assembler.DependsOnEdge{
-			PackageDependency: cdxReactiveCommonPack,
-			PackageNode:       cdxResteasyPack,
+		{
+			Pkg:          cdxResteasyPack,
+			DepPkg:       cdxReactiveCommonPack,
+			IsDependency: isCDXDepJustifyDepends,
 		},
 	}
 
-	cdxWebAppPackage = assembler.PackageNode{
-		Name:    "web-app",
-		Digest:  nil,
-		Version: "1.0.0",
-		Purl:    "pkg:npm/web-app@1.0.0",
-		Tags:    []string{"application"},
-		CPEs:    nil,
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
-	}
-	cdxBootstrapPackage = assembler.PackageNode{
-		Name:    "bootstrap",
-		Digest:  nil,
-		Version: "4.0.0-beta.2",
-		Purl:    "pkg:npm/bootstrap@4.0.0-beta.2",
-		CPEs:    nil,
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	CdxQuarkusIngestionPredicates = assembler.IngestPredicates{
+		IsDependency: CdxQuarkusDeps,
 	}
 
-	NpmMissingDependsOnCycloneDXNodes = []assembler.GuacNode{
-		cdxWebAppPackage,
-		cdxBootstrapPackage,
-	}
-	NpmMissingDependsOnCycloneDXEdges = []assembler.GuacEdge{
-		assembler.DependsOnEdge{
-			PackageDependency: cdxBootstrapPackage,
-			PackageNode:       cdxWebAppPackage,
+	cdxWebAppPackage, _ = asmhelpers.PurlToPkg("pkg:npm/web-app@1.0.0")
+
+	cdxBootstrapPackage, _ = asmhelpers.PurlToPkg("pkg:npm/bootstrap@4.0.0-beta.2")
+
+	CdxNpmDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg:          cdxWebAppPackage,
+			DepPkg:       cdxBootstrapPackage,
+			IsDependency: isDepJustifyTopPkg,
 		},
 	}
 
-	cdxQuarkusParentPackage = assembler.PackageNode{
-		Name:    "quarkus-parent",
-		Digest:  nil,
-		Version: "999-SNAPSHOT",
-		Purl:    "pkg:maven/io.quarkus/quarkus-parent@999-SNAPSHOT?type=pom",
-		Tags:    []string{"library"},
-		CPEs:    nil,
-		NodeData: *assembler.NewObjectMetadata(
-			processor.SourceInformation{
-				Collector: "TestCollector",
-				Source:    "TestSource",
-			},
-		),
+	CdxNpmIngestionPredicates = assembler.IngestPredicates{
+		IsDependency: CdxNpmDeps,
 	}
 
-	CycloneDXNoDependentComponentsNodes = []assembler.GuacNode{
-		cdxQuarkusParentPackage,
-	}
-	CyloneDXNoDependentComponentsEdges = []assembler.GuacEdge{}
+	CdxEmptyIngestionPredicates = assembler.IngestPredicates{}
 
 	// ceritifer testdata
 

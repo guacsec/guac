@@ -16,15 +16,16 @@
 package cyclonedx
 
 // TODO(bulldozer): freeze test
-/*
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	cdx "github.com/CycloneDX/cyclonedx-go"
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -32,11 +33,10 @@ import (
 func Test_cyclonedxParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name      string
-		doc       *processor.Document
-		wantNodes []assembler.GuacNode
-		wantEdges []assembler.GuacEdge
-		wantErr   bool
+		name           string
+		doc            *processor.Document
+		wantPredicates *assembler.IngestPredicates
+		wantErr        bool
 	}{{
 		name: "valid small CycloneDX document",
 		doc: &processor.Document{
@@ -48,9 +48,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.CycloneDXNodes,
-		wantEdges: testdata.CyloneDXEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxIngestionPredicates,
+		wantErr:        false,
 	}, {
 		name: "valid small CycloneDX document with package dependencies",
 		doc: &processor.Document{
@@ -62,9 +61,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.CycloneDXQuarkusNodes,
-		wantEdges: testdata.CyloneDXQuarkusEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxQuarkusIngestionPredicates,
+		wantErr:        false,
 	}, {
 		name: "valid CycloneDX document where dependencies are missing dependsOn properties",
 		doc: &processor.Document{
@@ -76,9 +74,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.NpmMissingDependsOnCycloneDXNodes,
-		wantEdges: testdata.NpmMissingDependsOnCycloneDXEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxNpmIngestionPredicates,
+		wantErr:        false,
 	}, {
 		name: "valid CycloneDX document with no package dependencies",
 		doc: &processor.Document{
@@ -90,9 +87,8 @@ func Test_cyclonedxParser(t *testing.T) {
 				Source:    "TestSource",
 			},
 		},
-		wantNodes: testdata.CycloneDXNoDependentComponentsNodes,
-		wantEdges: testdata.CyloneDXNoDependentComponentsEdges,
-		wantErr:   false,
+		wantPredicates: &testdata.CdxEmptyIngestionPredicates,
+		wantErr:        false,
 	},
 	}
 	for _, tt := range tests {
@@ -106,53 +102,13 @@ func Test_cyclonedxParser(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if nodes := s.CreateNodes(ctx); !testdata.GuacNodeSliceEqual(nodes, tt.wantNodes) {
-				t.Errorf("cyclonedxParser.CreateNodes() = %v, want %v", nodes, tt.wantNodes)
-			}
-			if edges := s.CreateEdges(ctx, nil); !testdata.GuacEdgeSliceEqual(edges, tt.wantEdges) {
-				t.Errorf("cyclonedxParser.CreateEdges() = %v, want %v", edges, tt.wantEdges)
+
+			preds := s.GetPredicates(ctx)
+			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+				t.Errorf("cyclondx.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
-}
-func Test_addEdgesRecursive(t *testing.T) {
-	packageA := component{curPackage: assembler.PackageNode{Name: "A"}}
-	packageB := component{curPackage: assembler.PackageNode{Name: "B"}}
-	packageC := component{curPackage: assembler.PackageNode{Name: "C"}}
-	packageD := component{curPackage: assembler.PackageNode{Name: "D"}}
-
-	packageA.depPackages = []*component{&packageB}
-	packageB.depPackages = []*component{&packageC}
-	packageC.depPackages = []*component{&packageD}
-	packageD.depPackages = []*component{&packageA}
-	//
-	// 	  A -> B -> C -> D -> A
-	// 	  This should result in a cycle, and it shouldn't blow up the stack.
-	//
-	var edges []assembler.GuacEdge
-	visited := make(map[string]bool)
-	addEdges(packageA, &edges, visited)
-
-	packageE := component{curPackage: assembler.PackageNode{Name: "E"}}
-	packageF := component{curPackage: assembler.PackageNode{Name: "F"}}
-	packageG := component{curPackage: assembler.PackageNode{Name: "G"}}
-	//
-	// This test case creates seven packages: A, B, C, D, E, F, and G.
-	// It sets up a cycle in the dependencies such that D, E, F, and G depend on A, B and C depend on D, E, F, and G.
-	// Calling addEdges(packageA, &edges) should not cause the function to recursively call itself indefinitely,
-	// leading to a stack overflow.
-	//
-	packageA.depPackages = []*component{&packageB, &packageC}
-	packageB.depPackages = []*component{&packageD, &packageE}
-	packageC.depPackages = []*component{&packageF, &packageG}
-	packageD.depPackages = []*component{&packageA}
-	packageE.depPackages = []*component{&packageA}
-	packageF.depPackages = []*component{&packageA}
-	packageG.depPackages = []*component{&packageA}
-
-	var e []assembler.GuacEdge
-	visited = make(map[string]bool)
-	addEdges(packageA, &e, visited)
 }
 
 func Test_cyclonedxParser_addRootPackage(t *testing.T) {
@@ -274,17 +230,17 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 						Source:    "test",
 					},
 				},
-				rootComponent: component{},
-				pkgMap:        map[string]*component{},
+				packagePackages: map[string][]model.PkgInputSpec{},
 			}
-			c.addRootPackage(tt.cdxBom)
-			if !reflect.DeepEqual(c.rootComponent.curPackage.Purl, tt.wantPurl) {
-				t.Errorf("addRootPackage failed to produce expected purl = %v, want %v", c.rootComponent.curPackage.Purl, tt.wantPurl)
+			c.cdxBom = tt.cdxBom
+			c.getTopLevelPackage(tt.cdxBom)
+			wantPackage, err := asmhelpers.PurlToPkg(tt.wantPurl)
+			if err != nil {
+				t.Errorf("Failed to parse purl %v", tt.wantPurl)
 			}
-			if !reflect.DeepEqual(c.rootComponent.curPackage.Tags[0], tt.wantTag) {
-				t.Errorf("addRootPackage failed to produce expected tag = %v, want %v", c.rootComponent.curPackage.Tags[0], tt.wantTag)
+			if d := cmp.Diff(*wantPackage, c.packagePackages[tt.cdxBom.Metadata.Component.BOMRef][0]); len(d) != 0 {
+				t.Errorf("addRootPackage failed to produce expected package for %v", tt.name)
 			}
 		})
 	}
 }
-*/
