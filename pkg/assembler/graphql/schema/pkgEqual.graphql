@@ -15,17 +15,17 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyPkg. It contains a list of packages that are similar
+# Defines a GraphQL schema for the PkgEqual. It contains a list of packages that are similar
 # along with the justification, origin and collector.
 """
-CertifyPkg is an attestation that represents when a package objects are similar
+PkgEqual is an attestation that represents when a package objects are similar
 
 packages (subject) - list of package objects
 justification (property) - string value representing why the packages are similar
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
 """
-type CertifyPkg {
+type PkgEqual {
   id: ID!
   packages: [Package!]!
   justification: String!
@@ -34,11 +34,11 @@ type CertifyPkg {
 }
 
 """
-CertifyPkgSpec allows filtering the list of CertifyPkg to return.
+PkgEqualSpec allows filtering the list of PkgEqual to return.
 
 Specifying just the package allows to query for all similar packages (if they exist)
 """
-input CertifyPkgSpec {
+input PkgEqualSpec {
   id: ID
   packages: [PkgSpec]
   justification: String
@@ -47,22 +47,22 @@ input CertifyPkgSpec {
 }
 
 """
-CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
+PkgEqualInputSpec is the same as PkgEqual but for mutation input.
 
 All fields are required.
 """
-input CertifyPkgInputSpec {
+input PkgEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
 }
 
 extend type Query {
-  "Returns all CertifyPkg"
-  CertifyPkg(certifyPkgSpec: CertifyPkgSpec): [CertifyPkg!]!
+  "Returns all PkgEqual"
+  PkgEqual(pkgEqualSpec: PkgEqualSpec): [PkgEqual!]!
 }
 
 extend type Mutation {
   "Adds a certification that two packages are similar"
-  ingestCertifyPkg(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, certifyPkg: CertifyPkgInputSpec!): CertifyPkg!
+  ingestPkgEqual(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
 }

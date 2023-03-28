@@ -46,7 +46,7 @@ func ingestData(port int) {
 	ingestDependency(ctx, gqlclient)
 	ingestOccurrence(ctx, gqlclient)
 	ingestVulnerability(ctx, gqlclient)
-	ingestCertifyPkg(ctx, gqlclient)
+	ingestPkgEqual(ctx, gqlclient)
 	ingestCertifyBad(ctx, gqlclient)
 	ingestHashEqual(ctx, gqlclient)
 	ingestHasSBOM(ctx, gqlclient)
@@ -576,7 +576,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client) {
 	}
 }
 
-func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
+func ingestPkgEqual(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
 	opensslNs := "openssl.org"
@@ -588,11 +588,11 @@ func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
 	ubuntuNs := "ubuntu"
 	attrVersion := "1:2.4.47-2"
 
-	ingestCertifyPkg := []struct {
-		name       string
-		pkg        model.PkgInputSpec
-		depPkg     model.PkgInputSpec
-		certifyPkg model.CertifyPkgInputSpec
+	ingestPkgEqual := []struct {
+		name     string
+		pkg      model.PkgInputSpec
+		depPkg   model.PkgInputSpec
+		pkgEqual model.PkgEqualInputSpec
 	}{{
 		name: "these two openssl packages are the same",
 		pkg: model.PkgInputSpec{
@@ -608,7 +608,7 @@ func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
 			Name:      "openssl",
 			Version:   &opensslVersion,
 		},
-		certifyPkg: model.CertifyPkgInputSpec{
+		pkgEqual: model.PkgEqualInputSpec{
 			Justification: "these two openssl packages are the same",
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
@@ -627,7 +627,7 @@ func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
 			Version:   &djangoVersion,
 			Subpath:   &djangoSubPath,
 		},
-		certifyPkg: model.CertifyPkgInputSpec{
+		pkgEqual: model.PkgEqualInputSpec{
 			Justification: "these two pypi packages are the same",
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
@@ -645,7 +645,7 @@ func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
 			Namespace: &debianNs,
 			Name:      "attr",
 		},
-		certifyPkg: model.CertifyPkgInputSpec{
+		pkgEqual: model.PkgEqualInputSpec{
 			Justification: "these two debian packages are the same",
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
@@ -662,14 +662,14 @@ func ingestCertifyPkg(ctx context.Context, client graphql.Client) {
 			Namespace: &ubuntuNs,
 			Name:      "attr",
 		},
-		certifyPkg: model.CertifyPkgInputSpec{
+		pkgEqual: model.PkgEqualInputSpec{
 			Justification: "these two dpkg packages are the same",
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
 		},
 	}}
-	for _, ingest := range ingestCertifyPkg {
-		_, err := model.CertifyPkg(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.certifyPkg)
+	for _, ingest := range ingestPkgEqual {
+		_, err := model.PkgEqual(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.pkgEqual)
 		if err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}

@@ -22,7 +22,6 @@ type MutationResolver interface {
 	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error)
 	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error)
 	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
-	IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
 	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
@@ -38,13 +37,13 @@ type MutationResolver interface {
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
+	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error)
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
 }
 type QueryResolver interface {
 	Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error)
 	Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error)
 	CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error)
-	CertifyPkg(ctx context.Context, certifyPkgSpec *model.CertifyPkgSpec) ([]*model.CertifyPkg, error)
 	Scorecards(ctx context.Context, scorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
@@ -61,6 +60,7 @@ type QueryResolver interface {
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error)
 	Neighbors(ctx context.Context, node string) ([]model.Node, error)
+	PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error)
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
 }
 
@@ -167,39 +167,6 @@ func (ec *executionContext) field_Mutation_ingestCertifyBad_args(ctx context.Con
 		}
 	}
 	args["certifyBad"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_ingestCertifyPkg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.PkgInputSpec
-	if tmp, ok := rawArgs["pkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["pkg"] = arg0
-	var arg1 model.PkgInputSpec
-	if tmp, ok := rawArgs["depPkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
-		arg1, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["depPkg"] = arg1
-	var arg2 model.CertifyPkgInputSpec
-	if tmp, ok := rawArgs["certifyPkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyPkg"))
-		arg2, err = ec.unmarshalNCertifyPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgInputSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["certifyPkg"] = arg2
 	return args, nil
 }
 
@@ -461,6 +428,39 @@ func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PkgInputSpec
+	if tmp, ok := rawArgs["pkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkg"] = arg0
+	var arg1 model.PkgInputSpec
+	if tmp, ok := rawArgs["depPkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
+		arg1, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["depPkg"] = arg1
+	var arg2 model.PkgEqualInputSpec
+	if tmp, ok := rawArgs["pkgEqual"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqual"))
+		arg2, err = ec.unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkgEqual"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -599,21 +599,6 @@ func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, raw
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_CertifyPkg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.CertifyPkgSpec
-	if tmp, ok := rawArgs["certifyPkgSpec"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyPkgSpec"))
-		arg0, err = ec.unmarshalOCertifyPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgSpec(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["certifyPkgSpec"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -746,6 +731,21 @@ func (ec *executionContext) field_Query_IsVulnerability_args(ctx context.Context
 		}
 	}
 	args["isVulnerabilitySpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.PkgEqualSpec
+	if tmp, ok := rawArgs["pkgEqualSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqualSpec"))
+		arg0, err = ec.unmarshalOPkgEqualSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkgEqualSpec"] = arg0
 	return args, nil
 }
 
@@ -1257,73 +1257,6 @@ func (ec *executionContext) fieldContext_Mutation_ingestCertifyBad(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestCertifyBad_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ingestCertifyPkg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ingestCertifyPkg(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyPkg(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["depPkg"].(model.PkgInputSpec), fc.Args["certifyPkg"].(model.CertifyPkgInputSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.CertifyPkg)
-	fc.Result = res
-	return ec.marshalNCertifyPkg2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkg(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ingestCertifyPkg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyPkg_id(ctx, field)
-			case "packages":
-				return ec.fieldContext_CertifyPkg_packages(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyPkg_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyPkg_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyPkg_collector(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyPkg", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ingestCertifyPkg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2317,6 +2250,73 @@ func (ec *executionContext) fieldContext_Mutation_ingestPackage(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_ingestPkgEqual(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestPkgEqual(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestPkgEqual(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["depPkg"].(model.PkgInputSpec), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PkgEqual)
+	fc.Result = res
+	return ec.marshalNPkgEqual2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqual(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestPkgEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PkgEqual_id(ctx, field)
+			case "packages":
+				return ec.fieldContext_PkgEqual_packages(ctx, field)
+			case "justification":
+				return ec.fieldContext_PkgEqual_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_PkgEqual_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_PkgEqual_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PkgEqual", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestPkgEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_ingestSource(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_ingestSource(ctx, field)
 	if err != nil {
@@ -2565,73 +2565,6 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_CertifyBad_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_CertifyPkg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_CertifyPkg(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CertifyPkg(rctx, fc.Args["certifyPkgSpec"].(*model.CertifyPkgSpec))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.CertifyPkg)
-	fc.Result = res
-	return ec.marshalNCertifyPkg2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_CertifyPkg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CertifyPkg_id(ctx, field)
-			case "packages":
-				return ec.fieldContext_CertifyPkg_packages(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyPkg_justification(ctx, field)
-			case "origin":
-				return ec.fieldContext_CertifyPkg_origin(ctx, field)
-			case "collector":
-				return ec.fieldContext_CertifyPkg_collector(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CertifyPkg", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_CertifyPkg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3672,6 +3605,73 @@ func (ec *executionContext) fieldContext_Query_neighbors(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_PkgEqual(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_PkgEqual(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PkgEqual(rctx, fc.Args["pkgEqualSpec"].(*model.PkgEqualSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PkgEqual)
+	fc.Result = res
+	return ec.marshalNPkgEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_PkgEqual(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_PkgEqual_id(ctx, field)
+			case "packages":
+				return ec.fieldContext_PkgEqual_packages(ctx, field)
+			case "justification":
+				return ec.fieldContext_PkgEqual_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_PkgEqual_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_PkgEqual_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PkgEqual", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_PkgEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_sources(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_sources(ctx, field)
 	if err != nil {
@@ -4044,15 +4044,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "ingestCertifyPkg":
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ingestCertifyPkg(ctx, field)
-			})
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "certifyScorecard":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -4188,6 +4179,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "ingestPkgEqual":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestPkgEqual(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "ingestSource":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -4283,29 +4283,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_CertifyBad(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
-		case "CertifyPkg":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_CertifyPkg(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4674,6 +4651,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_neighbors(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "PkgEqual":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_PkgEqual(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

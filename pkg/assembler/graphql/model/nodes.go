@@ -181,42 +181,6 @@ type CertifyBadSpec struct {
 	Collector     *string                      `json:"collector,omitempty"`
 }
 
-// CertifyPkg is an attestation that represents when a package objects are similar
-//
-// packages (subject) - list of package objects
-// justification (property) - string value representing why the packages are similar
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
-type CertifyPkg struct {
-	ID            string     `json:"id"`
-	Packages      []*Package `json:"packages"`
-	Justification string     `json:"justification"`
-	Origin        string     `json:"origin"`
-	Collector     string     `json:"collector"`
-}
-
-func (CertifyPkg) IsNode() {}
-
-// CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
-//
-// All fields are required.
-type CertifyPkgInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
-}
-
-// CertifyPkgSpec allows filtering the list of CertifyPkg to return.
-//
-// Specifying just the package allows to query for all similar packages (if they exist)
-type CertifyPkgSpec struct {
-	ID            *string    `json:"id,omitempty"`
-	Packages      []*PkgSpec `json:"packages,omitempty"`
-	Justification *string    `json:"justification,omitempty"`
-	Origin        *string    `json:"origin,omitempty"`
-	Collector     *string    `json:"collector,omitempty"`
-}
-
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
 type CertifyScorecard struct {
@@ -854,6 +818,42 @@ type PackageVersion struct {
 	Version    string              `json:"version"`
 	Qualifiers []*PackageQualifier `json:"qualifiers"`
 	Subpath    string              `json:"subpath"`
+}
+
+// PkgEqual is an attestation that represents when a package objects are similar
+//
+// packages (subject) - list of package objects
+// justification (property) - string value representing why the packages are similar
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+type PkgEqual struct {
+	ID            string     `json:"id"`
+	Packages      []*Package `json:"packages"`
+	Justification string     `json:"justification"`
+	Origin        string     `json:"origin"`
+	Collector     string     `json:"collector"`
+}
+
+func (PkgEqual) IsNode() {}
+
+// PkgEqualInputSpec is the same as PkgEqual but for mutation input.
+//
+// All fields are required.
+type PkgEqualInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
+// PkgEqualSpec allows filtering the list of PkgEqual to return.
+//
+// Specifying just the package allows to query for all similar packages (if they exist)
+type PkgEqualSpec struct {
+	ID            *string    `json:"id,omitempty"`
+	Packages      []*PkgSpec `json:"packages,omitempty"`
+	Justification *string    `json:"justification,omitempty"`
+	Origin        *string    `json:"origin,omitempty"`
+	Collector     *string    `json:"collector,omitempty"`
 }
 
 // PkgInputSpec specifies a package for a mutation.

@@ -115,7 +115,7 @@ type pkgVersionNode struct {
 	hasSBOMs          []uint32
 	vexLinks          []uint32
 	badLinks          []uint32
-	certifyPkgs       []uint32
+	pkgEquals         []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -161,7 +161,7 @@ func (n *pkgVersionStruct) Neighbors() []uint32 {
 	return out
 }
 func (n *pkgVersionNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.certifyPkgs))
+	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.pkgEquals))
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.isDependencyLinks...)
 	out = append(out, n.occurrences...)
@@ -169,7 +169,7 @@ func (n *pkgVersionNode) Neighbors() []uint32 {
 	out = append(out, n.hasSBOMs...)
 	out = append(out, n.vexLinks...)
 	out = append(out, n.badLinks...)
-	out = append(out, n.certifyPkgs...)
+	out = append(out, n.pkgEquals...)
 	out = append(out, n.parent)
 	return out
 }
@@ -229,8 +229,8 @@ func (p *pkgVersionNode) setCertifyBadLinks(id uint32)   { p.badLinks = append(p
 func (p *pkgVersionStruct) getCertifyBadLinks() []uint32 { return p.badLinks }
 func (p *pkgVersionNode) getCertifyBadLinks() []uint32   { return p.badLinks }
 
-// certifyPkg back edges
-func (p *pkgVersionNode) setCertifyPkgs(id uint32) { p.certifyPkgs = append(p.certifyPkgs, id) }
+// pkgEqual back edges
+func (p *pkgVersionNode) setPkgEquals(id uint32) { p.pkgEquals = append(p.pkgEquals, id) }
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {

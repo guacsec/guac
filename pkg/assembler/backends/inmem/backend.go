@@ -67,7 +67,7 @@ type demoClient struct {
 	artifacts            artMap
 	builders             builderMap
 	certifyBads          badList
-	certifyPkgs          certifyPkgList
+	pkgEquals            pkgEqualList
 	cves                 cveMap
 	equalVulnerabilities equalVulnerabilityList
 	ghsas                ghsaMap
@@ -91,7 +91,7 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		artifacts:            artMap{},
 		builders:             builderMap{},
 		certifyBads:          badList{},
-		certifyPkgs:          certifyPkgList{},
+		pkgEquals:            pkgEqualList{},
 		cves:                 cveMap{},
 		equalVulnerabilities: equalVulnerabilityList{},
 		ghsas:                ghsaMap{},
