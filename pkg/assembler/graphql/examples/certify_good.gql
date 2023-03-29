@@ -1,0 +1,130 @@
+fragment allArtifactTree on Artifact {
+  id
+  algorithm
+  digest
+}
+
+fragment allCertifyGoodTree on CertifyGood {
+  id
+  justification
+  subject {
+    __typename
+    ... on Package {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          versions {
+            id
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    ... on Source {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          tag
+          commit
+        }
+      }
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  origin
+  collector
+}
+
+
+query CertifactGoodQ1 {
+  CertifyGood(certifyGoodSpec: {}) {
+    ...allCertifyGoodTree
+  }
+}
+
+query CertifactGoodQ2 {
+  CertifyGood(certifyGoodSpec: {origin: "testing backend"}) {
+    ...allCertifyGoodTree
+  }
+}
+
+query CertifactGoodQ3 {
+  CertifyGood(certifyGoodSpec: {subject: {package: {name: "openssl"}}}) {
+    ...allCertifyGoodTree
+  }
+}
+
+query CertifactGoodQ4 {
+  CertifyGood(certifyGoodSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
+    ...allCertifyGoodTree
+  }
+}
+
+query CertifactGoodQ5 {
+  CertifyGood(certifyGoodSpec: {subject: {artifact: {digest: "2b00042f7481c7b056c4b410d28f33cf"}}}) {
+    ...allCertifyGoodTree
+  }
+}
+
+query CertifactGoodQ6 {
+  CertifyGood(
+    certifyGoodSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}
+  ) {
+    ...allCertifyGoodTree
+  }
+}
+
+mutation ArtifactM1 {
+  ingestArtifact(artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}) {
+    ...allArtifactTree
+  }
+}
+
+mutation ArtifactM2 {
+  ingestArtifact(artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}) {
+    ...allArtifactTree
+  }
+}
+
+mutation CertifyGoodM1 {
+  ingestCertifyGood(
+    subject: {artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}},
+    certifyGood: {
+      justification: "why",
+      origin: "testing backend",
+      collector: "there"
+    }
+  ) {
+    ...allCertifyGoodTree
+  }
+}
+
+mutation CertifyGoodM2 {
+  ingestCertifyGood(
+    subject: {artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}},
+    certifyGood: {
+      justification: "why2",
+      origin: "testing backend",
+      collector: "there"
+    }
+  ) {
+    ...allCertifyGoodTree
+  }
+}

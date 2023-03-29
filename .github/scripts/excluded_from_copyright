@@ -32,6 +32,8 @@
 ./pkg/assembler/graphql/resolvers/hasSourceAt.resolvers.go
 ./pkg/assembler/graphql/generated/certifyBad.generated.go
 ./pkg/assembler/graphql/resolvers/certifyBad.resolvers.go
+./pkg/assembler/graphql/generated/certifyGood.generated.go
+./pkg/assembler/graphql/resolvers/certifyGood.resolvers.go
 ./pkg/assembler/graphql/generated/certifyScorecard.generated.go
 ./pkg/assembler/graphql/resolvers/certifyScorecard.resolvers.go
 ./pkg/assembler/graphql/generated/certifyVuln.generated.go

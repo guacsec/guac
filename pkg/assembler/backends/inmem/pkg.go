@@ -100,6 +100,7 @@ type pkgVersionStruct struct {
 	srcMapLinks       []uint32
 	isDependencyLinks []uint32
 	badLinks          []uint32
+	goodLinks         []uint32
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
@@ -115,6 +116,7 @@ type pkgVersionNode struct {
 	hasSBOMs          []uint32
 	vexLinks          []uint32
 	badLinks          []uint32
+	goodLinks         []uint32
 	pkgEquals         []uint32
 }
 
@@ -127,6 +129,8 @@ type pkgNameOrVersion interface {
 	getIsDependencyLinks() []uint32
 	setCertifyBadLinks(id uint32)
 	getCertifyBadLinks() []uint32
+	setCertifyGoodLinks(id uint32)
+	getCertifyGoodLinks() []uint32
 }
 
 func (n *pkgNamespaceStruct) ID() uint32 { return n.id }
@@ -150,18 +154,19 @@ func (n *pkgNameStruct) Neighbors() []uint32 {
 	return out
 }
 func (n *pkgVersionStruct) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.badLinks))
+	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.badLinks)+len(n.goodLinks))
 	for _, v := range n.versions {
 		out = append(out, v.id)
 	}
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.isDependencyLinks...)
 	out = append(out, n.badLinks...)
+	out = append(out, n.goodLinks...)
 	out = append(out, n.parent)
 	return out
 }
 func (n *pkgVersionNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.pkgEquals))
+	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.goodLinks)+len(n.pkgEquals))
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.isDependencyLinks...)
 	out = append(out, n.occurrences...)
@@ -169,6 +174,7 @@ func (n *pkgVersionNode) Neighbors() []uint32 {
 	out = append(out, n.hasSBOMs...)
 	out = append(out, n.vexLinks...)
 	out = append(out, n.badLinks...)
+	out = append(out, n.goodLinks...)
 	out = append(out, n.pkgEquals...)
 	out = append(out, n.parent)
 	return out
@@ -228,6 +234,12 @@ func (p *pkgVersionStruct) setCertifyBadLinks(id uint32) { p.badLinks = append(p
 func (p *pkgVersionNode) setCertifyBadLinks(id uint32)   { p.badLinks = append(p.badLinks, id) }
 func (p *pkgVersionStruct) getCertifyBadLinks() []uint32 { return p.badLinks }
 func (p *pkgVersionNode) getCertifyBadLinks() []uint32   { return p.badLinks }
+
+// certifyGood back edges
+func (p *pkgVersionStruct) setCertifyGoodLinks(id uint32) { p.goodLinks = append(p.goodLinks, id) }
+func (p *pkgVersionNode) setCertifyGoodLinks(id uint32)   { p.goodLinks = append(p.goodLinks, id) }
+func (p *pkgVersionStruct) getCertifyGoodLinks() []uint32 { return p.goodLinks }
+func (p *pkgVersionNode) getCertifyGoodLinks() []uint32   { return p.goodLinks }
 
 // pkgEqual back edges
 func (p *pkgVersionNode) setPkgEquals(id uint32) { p.pkgEquals = append(p.pkgEquals, id) }
