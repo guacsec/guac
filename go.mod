@@ -160,6 +160,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-git/go-git/v5 v5.6.1
 	github.com/gobwas/glob v0.2.3
+	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v50 v50.2.0
 	github.com/google/osv-scanner v1.2.1-0.20230302232134-592acbc2539b
@@ -172,7 +173,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
 	github.com/regclient/regclient v0.4.7
-	github.com/satori/go.uuid v1.2.0
 	github.com/sigstore/sigstore v1.6.0
 	github.com/spdx/tools-golang v0.4.0
 	github.com/spf13/viper v1.15.0

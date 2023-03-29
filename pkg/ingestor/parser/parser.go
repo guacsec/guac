@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -31,7 +32,6 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/logging"
-	uuid "github.com/satori/go.uuid"
 )
 
 func init() {
@@ -73,8 +73,12 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*common.IdentifierStrings) error) error {
 	logger := logging.FromContext(ctx)
 
-	id := uuid.NewV4().String()
-	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to get uuid with the following error: %w", err)
+	}
+	uuidString := uuid.String()
+	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}
@@ -83,25 +87,25 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredica
 		docNode := processor.DocumentNode{}
 		err := json.Unmarshal(d, &docNode)
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %w", id, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return err
 		}
 		assemblerInputs, idStrings, err := ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %w", id, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
 
 		err = transportFunc(assemblerInputs, idStrings)
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed transportFunc: %w", id, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed transportFunc: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
 
-		logger.Infof("[ingestor: %s] ingested docTree: %+v", id, processor.DocumentTree(&docNode).Document.SourceInformation)
+		logger.Infof("[ingestor: %s] ingested docTree: %+v", uuidString, processor.DocumentTree(&docNode).Document.SourceInformation)
 		return nil
 	}
 

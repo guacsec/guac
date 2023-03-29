@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/cyclonedx"
@@ -29,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor/scorecard"
 	"github.com/guacsec/guac/pkg/handler/processor/spdx"
 	"github.com/guacsec/guac/pkg/logging"
-	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -60,41 +60,45 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
 	logger := logging.FromContext(ctx)
 
-	id := uuid.NewV4().String()
-	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	uuid, err := uuid.NewV4()
 	if err != nil {
-		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", id, err)
+		return fmt.Errorf("failed to get uuid with the following error: %w", err)
+	}
+	uuidString := uuid.String()
+	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	if err != nil {
+		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
 
 	processFunc := func(d []byte) error {
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %w", id, err)
+			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return err
 		}
 		docTree, err := Process(ctx, &doc)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed process document: %w", id, err)
+			fmtErr := fmt.Errorf("[processor: %s] failed process document: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
 
 		err = transportFunc(docTree)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %w", id, err)
+			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
 
-		logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
+		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
 		return nil
 	}
 
 	err = psub.GetDataFromNats(ctx, processFunc)
 	if err != nil {
-		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", id, err)
+		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", uuidString, err)
 	}
 	return nil
 }
