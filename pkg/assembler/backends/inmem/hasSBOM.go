@@ -96,8 +96,8 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 	if err != nil {
 		return nil, err
 	}
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	var search []uint32
 	var packageID uint32

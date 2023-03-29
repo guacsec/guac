@@ -238,8 +238,8 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 }
 
 func (c *demoClient) ingestPackage(ctx context.Context, input model.PkgInputSpec, readOnly bool) (*model.Package, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	namespacesStruct, hasNamespace := c.packages[input.Type]
 	if !hasNamespace {

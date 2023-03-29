@@ -138,8 +138,8 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 }
 
 func (c *demoClient) ingestSource(ctx context.Context, input model.SourceInputSpec, readOnly bool) (*model.Source, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	namespacesStruct, hasNamespace := c.sources[input.Type]
 	if !hasNamespace {

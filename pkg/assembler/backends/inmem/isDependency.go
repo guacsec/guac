@@ -52,8 +52,8 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 }
 
 func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec, readOnly bool) (*model.IsDependency, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 	if err != nil {
 		return nil, err

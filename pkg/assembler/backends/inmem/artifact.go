@@ -88,8 +88,8 @@ func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.Artifac
 	algorithm := strings.ToLower(artifact.Algorithm)
 	digest := strings.ToLower(artifact.Digest)
 
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	a, err := c.artifactByKey(algorithm, digest)
 	if err != nil {

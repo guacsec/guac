@@ -61,8 +61,8 @@ func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 }
 
 func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderInputSpec, readOnly bool) (*model.Builder, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	b, err := c.builderByKey(builder.URI)
 	if err != nil {

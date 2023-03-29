@@ -117,8 +117,8 @@ func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (
 }
 
 func (c *demoClient) ingestCve(ctx context.Context, input *model.CVEInputSpec, readOnly bool) (*model.Cve, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 	cveStruct, hasCve := c.cves[input.Year]
 	if !hasCve {
 		cveStruct = &cveNode{

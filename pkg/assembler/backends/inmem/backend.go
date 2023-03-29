@@ -159,18 +159,18 @@ func byID[E node](id uint32, c *demoClient) (E, error) {
 	return s, nil
 }
 
-func (c *demoClient) lock(readOnly bool) {
+func lock(m *sync.RWMutex, readOnly bool) {
 	if readOnly {
-		c.m.RLock()
+		m.RLock()
 	} else {
-		c.m.Lock()
+		m.Lock()
 	}
 }
 
-func (c *demoClient) unlock(readOnly bool) {
+func unlock(m *sync.RWMutex, readOnly bool) {
 	if readOnly {
-		c.m.RUnlock()
+		m.RUnlock()
 	} else {
-		c.m.Unlock()
+		m.Unlock()
 	}
 }

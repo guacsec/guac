@@ -71,8 +71,8 @@ func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.Artifac
 }
 
 func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec, readOnly bool) (*model.HashEqual, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	aInt1, err := c.artifactByKey(artifact.Algorithm, artifact.Digest)
 	if err != nil {

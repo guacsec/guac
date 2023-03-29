@@ -56,8 +56,8 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 }
 
 func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (*model.CertifyScorecard, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 	sourceID, err := getSourceIDFromInput(c, source)
 	if err != nil {
 		return nil, err

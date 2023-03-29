@@ -81,8 +81,8 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		return nil, err
 	}
 
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	var packageID uint32
 	var artifactID uint32

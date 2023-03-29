@@ -104,8 +104,8 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 		return nil, err
 	}
 
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	a, err := c.artifactByKey(artifact.Algorithm, artifact.Digest)
 	if err != nil {

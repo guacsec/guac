@@ -179,8 +179,8 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	if len(builtFrom) < 1 {
 		return nil, gqlerror.Errorf("IngestSLSA :: Must have at least 1 builtFrom")
 	}
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	s, err := c.artifactByKey(subject.Algorithm, subject.Digest)
 	if err != nil {

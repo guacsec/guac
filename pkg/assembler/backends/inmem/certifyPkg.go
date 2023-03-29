@@ -127,8 +127,8 @@ func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 }
 
 func (c *demoClient) ingestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec, readOnly bool) (*model.CertifyPkg, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	pIDs := make([]uint32, 0, 2)
 	for _, pi := range []model.PkgInputSpec{pkg, depPkg} {

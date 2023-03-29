@@ -115,8 +115,8 @@ func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (
 }
 
 func (c *demoClient) ingestOsv(ctx context.Context, input *model.OSVInputSpec, readOnly bool) (*model.Osv, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 	osvStruct, hasOsv := c.osvs[osv]
 	if !hasOsv {
 		osvStruct = &osvNode{

@@ -53,8 +53,8 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 }
 
 func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (*model.HasSourceAt, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	sourceID, err := getSourceIDFromInput(c, source)
 	if err != nil {

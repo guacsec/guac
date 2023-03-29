@@ -74,8 +74,8 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		return nil, err
 	}
 
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 	if err != nil {

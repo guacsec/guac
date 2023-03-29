@@ -111,8 +111,8 @@ func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec)
 }
 
 func (c *demoClient) ingestGhsa(ctx context.Context, input *model.GHSAInputSpec, readOnly bool) (*model.Ghsa, error) {
-	c.lock(readOnly)
-	defer c.unlock(readOnly)
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 	ghsaStruct, hasGhsa := c.ghsas[ghsa]
 	if !hasGhsa {
 		ghsaStruct = &ghsaNode{
