@@ -13,12 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build e2e
+
 package deps_dev
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
 	"testing"
 	"time"
 
@@ -59,19 +62,16 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	ctx := context.Background()
 	tests := []struct {
 		name     string
-		token    string
 		packages []string
 		want     []*processor.Document
 		wantErr  bool
 	}{{
 		name:     "no packages",
-		token:    "9d9bbf75-7557-4f69-bb5f-8541fd005216",
 		packages: []string{},
 		want:     []*processor.Document{},
 		wantErr:  false,
 	}, {
 		name:     "yargs-parser package",
-		token:    "9d9bbf75-7557-4f69-bb5f-8541fd005216",
 		packages: []string{"pkg:npm/yargs-parser@4.2.1"},
 		want: []*processor.Document{
 			{
@@ -87,7 +87,6 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		wantErr: false,
 	}, {
 		name:     "foreign-types package",
-		token:    "9d9bbf75-7557-4f69-bb5f-8541fd005216",
 		packages: []string{"pkg:cargo/foreign-types@0.3.2"},
 		want: []*processor.Document{
 			{
@@ -104,7 +103,14 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := NewDepsCollector(ctx, tt.token, toPurlSource(tt.packages))
+			if os.Getenv("DEPS_DEV_TOKEN") == "" {
+				t.Errorf("DEPS_DEV_TOKEN is not set")
+			}
+			depsToken := os.Getenv("DEPS_DEV_TOKEN")
+			if depsToken == "" {
+				t.Errorf("DEPS_DEV_TOKEN is not set")
+			}
+			c, err := NewDepsCollector(ctx, depsToken, toPurlSource(tt.packages))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
