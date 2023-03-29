@@ -33,6 +33,11 @@ endif
 e2e-test: generate check-env
 	go test -tags=e2e ./...
 
+# To run the tests locally, run `DEPS_DEV_TOKEN=<deps.dev token> make deps-test`
+.PHONY: deps-test
+deps-test: generate check-env
+	go test -tags=deps ./...
+
 # Run all the tests and opens the coverage report
 .PHONY: cover
 cover: test
