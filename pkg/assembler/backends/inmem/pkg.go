@@ -234,6 +234,13 @@ func (p *pkgVersionNode) setCertifyPkgs(id uint32) { p.certifyPkgs = append(p.ce
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
+	return c.ingestPackage(ctx, input, true)
+}
+
+func (c *demoClient) ingestPackage(ctx context.Context, input model.PkgInputSpec, readOnly bool) (*model.Package, error) {
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
+
 	namespacesStruct, hasNamespace := c.packages[input.Type]
 	if !hasNamespace {
 		namespacesStruct = &pkgNamespaceStruct{
@@ -289,6 +296,12 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 		break
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			p, err := c.ingestPackage(ctx, input, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return p, err
+		}
 		collectedVersion = pkgVersionNode{
 			id:         c.getNextID(),
 			parent:     versionStruct.id,
@@ -311,6 +324,8 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 
 // Query Package
 func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*model.Package, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
 		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {

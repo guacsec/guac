@@ -123,12 +123,16 @@ func (c *demoClient) convCertifyPkg(in *certifyPkgStruct) *model.CertifyPkg {
 }
 
 func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error) {
-	var pmt model.MatchFlags
-	pmt.Pkg = model.PkgMatchTypeSpecificVersion
+	return c.ingestCertifyPkg(ctx, pkg, depPkg, certifyPkg, true)
+}
+
+func (c *demoClient) ingestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec, readOnly bool) (*model.CertifyPkg, error) {
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	pIDs := make([]uint32, 0, 2)
 	for _, pi := range []model.PkgInputSpec{pkg, depPkg} {
-		pid, err := getPackageIDFromInput(c, pi, pmt)
+		pid, err := getPackageIDFromInput(c, pi, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestCertifyPkg :: %v", err)
 		}
@@ -152,6 +156,13 @@ func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 		}
 	}
 
+	if readOnly {
+		c.m.RUnlock()
+		cp, err := c.ingestCertifyPkg(ctx, pkg, depPkg, certifyPkg, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return cp, err
+	}
+
 	cp := &certifyPkgStruct{
 		id:            c.getNextID(),
 		pkgs:          pIDs,
@@ -171,6 +182,8 @@ func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 // Query CertifyPkg
 
 func (c *demoClient) CertifyPkg(ctx context.Context, filter *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	funcName := "CertifyPkg"
 	if filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)

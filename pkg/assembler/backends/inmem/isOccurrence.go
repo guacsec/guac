@@ -96,10 +96,16 @@ func (n *isOccurrenceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest IsOccurrence
 func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
-	err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence")
-	if err != nil {
+	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
+}
+
+func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (*model.IsOccurrence, error) {
+	if err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence"); err != nil {
 		return nil, err
 	}
+
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	a, err := c.artifactByKey(artifact.Algorithm, artifact.Digest)
 	if err != nil {
@@ -137,6 +143,12 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 			o.collector == occurrence.Collector {
 			return c.convOccurrence(o), nil
 		}
+	}
+	if readOnly {
+		c.m.RUnlock()
+		o, err := c.ingestOccurrence(ctx, subject, artifact, occurrence, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return o, err
 	}
 	o := &isOccurrenceStruct{
 		id:            c.getNextID(),
@@ -205,6 +217,9 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 	if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
 		return nil, err
 	}
+
+	c.m.RLock()
+	defer c.m.RUnlock()
 
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)

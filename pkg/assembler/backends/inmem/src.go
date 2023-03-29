@@ -134,6 +134,13 @@ func (p *srcNameNode) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badL
 
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
+	return c.ingestSource(ctx, input, true)
+}
+
+func (c *demoClient) ingestSource(ctx context.Context, input model.SourceInputSpec, readOnly bool) (*model.Source, error) {
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
+
 	namespacesStruct, hasNamespace := c.sources[input.Type]
 	if !hasNamespace {
 		namespacesStruct = &srcNamespaceStruct{
@@ -176,6 +183,12 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 		break
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			s, err := c.ingestSource(ctx, input, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return s, err
+		}
 		collectedSrcName = srcNameNode{
 			id:     c.getNextID(),
 			parent: namesStruct.id,
@@ -200,6 +213,8 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 // Query Source
 
 func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if filter != nil && filter.Commit != nil && filter.Tag != nil {
 		if *filter.Commit != "" && *filter.Tag != "" {
 			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")

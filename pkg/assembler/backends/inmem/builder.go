@@ -57,8 +57,21 @@ func (c *demoClient) builderByKey(uri string) (*builderStruct, error) {
 
 // Ingest Builder
 func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+	return c.ingestBuilder(ctx, builder, true)
+}
+
+func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderInputSpec, readOnly bool) (*model.Builder, error) {
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
+
 	b, err := c.builderByKey(builder.URI)
 	if err != nil {
+		if readOnly {
+			c.m.RUnlock()
+			b, err := c.ingestBuilder(ctx, builder, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return b, err
+		}
 		b = &builderStruct{
 			id:  c.getNextID(),
 			uri: builder.URI,
@@ -71,6 +84,8 @@ func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 
 // Query Builder
 func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if builderSpec.ID != nil {
 		id64, err := strconv.ParseUint(*builderSpec.ID, 10, 32)
 		if err != nil {

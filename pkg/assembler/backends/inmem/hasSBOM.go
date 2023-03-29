@@ -88,10 +88,16 @@ func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // Ingest HasSBOM
 
 func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, input model.HasSBOMInputSpec) (*model.HasSbom, error) {
+	return c.ingestHasSbom(ctx, subject, input, true)
+}
+
+func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, input model.HasSBOMInputSpec, readOnly bool) (*model.HasSbom, error) {
 	err := helper.ValidatePackageOrSourceInput(&subject, "IngestHasSbom")
 	if err != nil {
 		return nil, err
 	}
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	var search []uint32
 	var packageID uint32
@@ -129,6 +135,13 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrS
 			h.collector == input.Collector {
 			return c.convHasSBOM(h), nil
 		}
+	}
+
+	if readOnly {
+		c.m.RUnlock()
+		b, err := c.ingestHasSbom(ctx, subject, input, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return b, err
 	}
 
 	h := &hasSBOMStruct{
@@ -173,6 +186,8 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
 		return nil, err
 	}
+	c.m.RLock()
+	defer c.m.RUnlock()
 
 	if filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)

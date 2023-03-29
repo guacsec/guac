@@ -107,6 +107,12 @@ func (n *ghsaIDNode) setVexLinks(id uint32) {
 
 // Ingest GHSA
 func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec) (*model.Ghsa, error) {
+	return c.ingestGhsa(ctx, input, true)
+}
+
+func (c *demoClient) ingestGhsa(ctx context.Context, input *model.GHSAInputSpec, readOnly bool) (*model.Ghsa, error) {
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 	ghsaStruct, hasGhsa := c.ghsas[ghsa]
 	if !hasGhsa {
 		ghsaStruct = &ghsaNode{
@@ -122,6 +128,12 @@ func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec)
 
 	ghsaIDStruct, hasGhsaID := ghsaIDs[ghsaID]
 	if !hasGhsaID {
+		if readOnly {
+			c.m.RUnlock()
+			g, err := c.ingestGhsa(ctx, input, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return g, err
+		}
 		ghsaIDStruct = &ghsaIDNode{
 			id:     c.getNextID(),
 			parent: ghsaStruct.id,
@@ -137,6 +149,8 @@ func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec)
 
 // Query GHSA
 func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model.Ghsa, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
 		id, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {

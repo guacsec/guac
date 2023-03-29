@@ -48,6 +48,12 @@ func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest IsDependency
 func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+	return c.ingestDependency(ctx, packageArg, dependentPackageArg, dependency, true)
+}
+
+func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec, readOnly bool) (*model.IsDependency, error) {
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 	if err != nil {
 		return nil, err
@@ -92,6 +98,12 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 		}
 	}
 	if !duplicate {
+		if readOnly {
+			c.m.RUnlock()
+			d, err := c.ingestDependency(ctx, packageArg, dependentPackageArg, dependency, false)
+			c.m.RLock() // relock so that defer unlock does not panic
+			return d, err
+		}
 		// store the link
 		collectedIsDependencyLink = isDependencyLink{
 			id:            c.getNextID(),
@@ -120,6 +132,8 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 
 // Query IsDependency
 func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependencySpec) ([]*model.IsDependency, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
 	funcName := "IsDependency"
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)

@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"sync/atomic"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
@@ -61,6 +62,7 @@ func (c *demoClient) getNextID() uint32 {
 
 type demoClient struct {
 	id uint32
+	m  sync.RWMutex
 
 	artifacts            artMap
 	builders             builderMap
@@ -155,4 +157,20 @@ func byID[E node](id uint32, c *demoClient) (E, error) {
 		return nl, fmt.Errorf("not a %T", nl)
 	}
 	return s, nil
+}
+
+func lock(m *sync.RWMutex, readOnly bool) {
+	if readOnly {
+		m.RLock()
+	} else {
+		m.Lock()
+	}
+}
+
+func unlock(m *sync.RWMutex, readOnly bool) {
+	if readOnly {
+		m.RUnlock()
+	} else {
+		m.Unlock()
+	}
 }

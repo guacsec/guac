@@ -67,6 +67,12 @@ func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest HashEqual
 func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+	return c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, true)
+}
+
+func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec, readOnly bool) (*model.HashEqual, error) {
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	aInt1, err := c.artifactByKey(artifact.Algorithm, artifact.Digest)
 	if err != nil {
@@ -95,6 +101,13 @@ func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.Artifac
 			slices.Equal(h.artifacts, artIDs) {
 			return c.convHashEqual(h), nil
 		}
+	}
+
+	if readOnly {
+		c.m.RUnlock()
+		he, err := c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return he, err
 	}
 
 	he := &hashEqualStruct{
@@ -162,7 +175,8 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 		return nil, gqlerror.Errorf(
 			"%v :: Provided spec has too many Artifacts", funcName)
 	}
-
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {

@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"golang.org/x/exp/slices"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -61,6 +62,8 @@ func (n *hasSLSAStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	funcName := "HasSlsa"
+	c.m.RLock()
+	defer c.m.RUnlock()
 	if filter != nil && filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
@@ -165,10 +168,19 @@ func (c *demoClient) IngestMaterials(ctx context.Context,
 func (c *demoClient) IngestSLSA(ctx context.Context,
 	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
 	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+	return c.ingestSLSA(ctx, subject, builtFrom, builtBy, slsa, true)
+}
+
+func (c *demoClient) ingestSLSA(ctx context.Context,
+	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
+	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec, readOnly bool) (
+	*model.HasSlsa, error) {
 
 	if len(builtFrom) < 1 {
 		return nil, gqlerror.Errorf("IngestSLSA :: Must have at least 1 builtFrom")
 	}
+	lock(&c.m, readOnly)
+	defer unlock(&c.m, readOnly)
 
 	s, err := c.artifactByKey(subject.Algorithm, subject.Digest)
 	if err != nil {
@@ -203,7 +215,7 @@ func (c *demoClient) IngestSLSA(ctx context.Context,
 			slices.Equal(sl.builtFrom, bfIDs) &&
 			sl.builtBy == b.id &&
 			sl.buildType == slsa.BuildType &&
-			slices.Equal(sl.predicates, preds) &&
+			cmp.Equal(sl.predicates, preds) &&
 			sl.version == slsa.SlsaVersion &&
 			sl.start == slsa.StartedOn &&
 			sl.finish == slsa.FinishedOn &&
@@ -211,6 +223,13 @@ func (c *demoClient) IngestSLSA(ctx context.Context,
 			sl.collector == slsa.Collector {
 			return c.convSLSA(sl), nil
 		}
+	}
+
+	if readOnly {
+		c.m.RUnlock()
+		s, err := c.ingestSLSA(ctx, subject, builtFrom, builtBy, slsa, false)
+		c.m.RLock() // relock so that defer unlock does not panic
+		return s, err
 	}
 
 	sl := &hasSLSAStruct{

@@ -63,3 +63,49 @@ query SLSAQ6 {
     ...allHasSLSATree
   }
 }
+
+fragment allArtifactTree on Artifact {
+  id
+  algorithm
+  digest
+}
+
+mutation ArtifactM1 {
+  ingestArtifact(artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}) {
+    ...allArtifactTree
+  }
+}
+
+mutation ArtifactM2 {
+  ingestArtifact(artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}) {
+    ...allArtifactTree
+  }
+}
+
+
+mutation BuilderM1 {
+  ingestBuilder(builder: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"}) {
+    id
+    uri
+  }
+}
+
+
+mutation SLSAM1 {
+  ingestSLSA(
+    subject: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"},
+    builtFrom: [{algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}],
+    builtBy: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"},
+    slsa: {
+      buildType: "type",
+      slsaVersion: "v1",
+      origin: "here",
+      collector: "there",
+      startedOn:"2023-03-28T11:01:23-07:00",
+      finishedOn: "2023-03-28T11:01:35-07:00",
+      slsaPredicate: [{key:"key1", value: "value1"}]
+    }
+  ){
+    ...allSLSATree
+  }
+}
