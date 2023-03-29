@@ -83,7 +83,6 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 	}
 
 	return m, nil
-
 }
 
 func isCommit(s string) bool {

@@ -189,6 +189,16 @@ func Test_GuessDocument(t *testing.T) {
 		},
 		expectedType:   processor.DocumentITE6Vul,
 		expectedFormat: processor.FormatJSON,
+	}, {
+		name: "valid deps.dev Document",
+		document: &processor.Document{
+			Blob:              []byte(testdata.CollectedYargsParser),
+			Type:              processor.DocumentUnknown,
+			Format:            processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{},
+		},
+		expectedType:   processor.DocumentDepsDev,
+		expectedFormat: processor.FormatJSON,
 	}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {

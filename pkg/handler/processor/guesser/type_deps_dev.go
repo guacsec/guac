@@ -26,8 +26,8 @@ type depsDevTypeGuesser struct{}
 
 func (_ *depsDevTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
 	packageComponent := deps_dev.PackageComponent{}
-	if json.Unmarshal(blob, &packageComponent) == nil && format == processor.FormatJSON {
-		return processor.DocumentScorecard
+	if json.Unmarshal(blob, &packageComponent) == nil && format == processor.FormatJSON && packageComponent.CurrentPackage != nil {
+		return processor.DocumentDepsDev
 	}
 	return processor.DocumentUnknown
 }

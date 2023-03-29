@@ -22,6 +22,9 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
+	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -42,7 +45,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, tt.token, tt.packages)
+			_, err := NewDepsCollector(ctx, tt.token, toPurlSource(tt.packages))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -53,56 +56,6 @@ func TestNewDepsCollector(t *testing.T) {
 
 func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	ctx := context.Background()
-	collectedComponent := `
-	{
-		"CurrentPackage":{
-		   "type":"npm",
-		   "namespace":"",
-		   "name":"yargs-parser",
-		   "version":"4.2.1",
-		   "qualifiers":null,
-		   "subpath":""
-		},
-		"Source":{
-		   "type":"git",
-		   "namespace":"github.com/yargs",
-		   "name":"yargs-parser.git",
-		   "tag":null,
-		   "commit":null
-		},
-		"Vulnerabilities":[
-		   {
-			  "osvId":"GHSA-p9pc-299p-vxgp"
-		   }
-		],
-		"Scorecard":null,
-		"DepPackages":[
-		   {
-			  "CurrentPackage":{
-				 "type":"NPM",
-				 "namespace":"",
-				 "name":"camelcase",
-				 "version":"3.0.0",
-				 "qualifiers":[
-					
-				 ],
-				 "subpath":""
-			  },
-			  "Source":{
-				 "type":"git",
-				 "namespace":"github.com/sindresorhus",
-				 "name":"camelcase.git",
-				 "tag":null,
-				 "commit":null
-			  },
-			  "Vulnerabilities":null,
-			  "Scorecard":null,
-			  "DepPackages":null,
-			  "UpdateTime":"2022-11-21T17:45:50.52Z"
-		   }
-		],
-		"UpdateTime":"2022-11-21T17:45:50.52Z"
-	 }`
 	tests := []struct {
 		name     string
 		token    string
@@ -121,7 +74,23 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		packages: []string{"pkg:npm/yargs-parser@4.2.1"},
 		want: []*processor.Document{
 			{
-				Blob:   []byte(collectedComponent),
+				Blob:   []byte(testdata.CollectedYargsParser),
+				Type:   processor.DocumentDepsDev,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: DepsCollector,
+					Source:    DepsCollector,
+				},
+			},
+		},
+		wantErr: false,
+	}, {
+		name:     "foreign-types package",
+		token:    "9d9bbf75-7557-4f69-bb5f-8541fd005216",
+		packages: []string{"pkg:cargo/foreign-types@0.3.2"},
+		want: []*processor.Document{
+			{
+				Blob:   []byte(testdata.CollectedForeignTypes),
 				Type:   processor.DocumentDepsDev,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -134,7 +103,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := NewDepsCollector(ctx, tt.token, tt.packages)
+			c, err := NewDepsCollector(ctx, tt.token, toPurlSource(tt.packages))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -189,8 +158,29 @@ func normalizeTimeStamp(blob []byte) ([]byte, error) {
 		return nil, err
 	}
 	packageComponent.UpdateTime = tm.UTC()
+	if packageComponent.Scorecard != nil {
+		packageComponent.Scorecard.TimeScanned = tm.UTC()
+	}
 	for _, depPack := range packageComponent.DepPackages {
 		depPack.UpdateTime = tm.UTC()
+		if depPack.Scorecard != nil {
+			depPack.Scorecard.TimeScanned = tm.UTC()
+		}
 	}
 	return json.Marshal(packageComponent)
+}
+
+func toPurlSource(purlValues []string) datasource.CollectSource {
+	values := []datasource.Source{}
+	for _, v := range purlValues {
+		values = append(values, datasource.Source{Value: v})
+	}
+
+	ds, err := inmemsource.NewInmemDataSources(&datasource.DataSources{
+		PurlDataSources: values,
+	})
+	if err != nil {
+		panic(err)
+	}
+	return ds
 }

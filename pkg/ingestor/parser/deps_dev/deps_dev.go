@@ -61,38 +61,55 @@ func parseDepsDevBlob(p []byte) (*deps_dev.PackageComponent, error) {
 func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	preds := &assembler.IngestPredicates{}
 
+	// create and append predicates for the top level package
+	appendPredicates(d.packComponent, preds)
+
 	depPackages := []*model.PkgInputSpec{}
 	for _, depComp := range d.packComponent.DepPackages {
 		depPackages = append(depPackages, depComp.CurrentPackage)
-		hasSourceAt := createHasSourceAtIngest(depComp.CurrentPackage, depComp.Source, depComp.UpdateTime.UTC())
-		scorecard := createScorecardIngest(depComp.Source, depComp.Scorecard)
-		isVulnList := createIsVulnerabilityIngest(depComp.Vulnerabilities)
-		certifyVulnList := createCertifyVulnerabilityIngest(depComp.CurrentPackage, depComp.Vulnerabilities, depComp.UpdateTime.UTC())
 
-		preds.HasSourceAt = append(preds.HasSourceAt, hasSourceAt)
-		preds.CertifyScorecard = append(preds.CertifyScorecard, scorecard)
-		preds.IsVuln = append(preds.IsVuln, isVulnList...)
-		preds.CertifyVuln = append(preds.CertifyVuln, certifyVulnList...)
+		// create and append predicates for dependent packages
+		appendPredicates(depComp, preds)
+
 	}
 	preds.IsDependency = append(preds.IsDependency, createTopLevelIsDeps(d.packComponent.CurrentPackage, depPackages)...)
 
 	return preds
 }
 
-func createHasSourceAtIngest(pkg *model.PkgInputSpec, src *model.SourceInputSpec, knownSince time.Time) assembler.HasSourceAtIngest {
-	return assembler.HasSourceAtIngest{
-		Pkg: pkg,
-		PkgMatchFlag: model.MatchFlags{
-			Pkg: model.PkgMatchTypeAllVersions,
-		},
-		Src: src,
-		HasSourceAt: &model.HasSourceAtInputSpec{
-			KnownSince:    knownSince,
-			Justification: "collected via deps.dev",
-			Origin:        deps_dev.DepsCollector,
-			Collector:     deps_dev.DepsCollector,
-		},
+func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler.IngestPredicates) {
+	hasSourceAt := createHasSourceAtIngest(packComponent.CurrentPackage, packComponent.Source, packComponent.UpdateTime.UTC())
+	scorecard := createScorecardIngest(packComponent.Source, packComponent.Scorecard)
+	isVulnList := createIsVulnerabilityIngest(packComponent.Vulnerabilities)
+	certifyVulnList := createCertifyVulnerabilityIngest(packComponent.CurrentPackage, packComponent.Vulnerabilities, packComponent.UpdateTime.UTC())
+
+	if hasSourceAt != nil {
+		preds.HasSourceAt = append(preds.HasSourceAt, *hasSourceAt)
 	}
+	if scorecard != nil {
+		preds.CertifyScorecard = append(preds.CertifyScorecard, *scorecard)
+	}
+	preds.IsVuln = append(preds.IsVuln, isVulnList...)
+	preds.CertifyVuln = append(preds.CertifyVuln, certifyVulnList...)
+}
+
+func createHasSourceAtIngest(pkg *model.PkgInputSpec, src *model.SourceInputSpec, knownSince time.Time) *assembler.HasSourceAtIngest {
+	if pkg != nil && src != nil {
+		return &assembler.HasSourceAtIngest{
+			Pkg: pkg,
+			PkgMatchFlag: model.MatchFlags{
+				Pkg: model.PkgMatchTypeAllVersions,
+			},
+			Src: src,
+			HasSourceAt: &model.HasSourceAtInputSpec{
+				KnownSince:    knownSince,
+				Justification: "collected via deps.dev",
+				Origin:        deps_dev.DepsCollector,
+				Collector:     deps_dev.DepsCollector,
+			},
+		}
+	}
+	return nil
 }
 
 func createCertifyVulnerabilityIngest(pkg *model.PkgInputSpec, osvList []*model.OSVInputSpec, knownSince time.Time) []assembler.CertifyVulnIngest {
@@ -129,6 +146,8 @@ func createIsVulnerabilityIngest(osvList []*model.OSVInputSpec) []assembler.IsVu
 			GHSA: ghsa,
 			IsVuln: &model.IsVulnerabilityInputSpec{
 				Justification: "decoded OSV data collected via deps.dev",
+				Origin:        deps_dev.DepsCollector,
+				Collector:     deps_dev.DepsCollector,
 			},
 		}
 		ivs = append(ivs, iv)
@@ -136,11 +155,14 @@ func createIsVulnerabilityIngest(osvList []*model.OSVInputSpec) []assembler.IsVu
 	return ivs
 }
 
-func createScorecardIngest(src *model.SourceInputSpec, scorecard *model.ScorecardInputSpec) assembler.CertifyScorecardIngest {
-	return assembler.CertifyScorecardIngest{
-		Source:    src,
-		Scorecard: scorecard,
+func createScorecardIngest(src *model.SourceInputSpec, scorecard *model.ScorecardInputSpec) *assembler.CertifyScorecardIngest {
+	if src != nil && scorecard != nil {
+		return &assembler.CertifyScorecardIngest{
+			Source:    src,
+			Scorecard: scorecard,
+		}
 	}
+	return nil
 }
 
 func createTopLevelIsDeps(toplevel *model.PkgInputSpec, packages []*model.PkgInputSpec) []assembler.IsDependencyIngest {
