@@ -28,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _CertifyPkg_id(ctx context.Context, field graphql.CollectedField, obj *model.CertifyPkg) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyPkg_id(ctx, field)
+func (ec *executionContext) _PkgEqual_id(ctx context.Context, field graphql.CollectedField, obj *model.PkgEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PkgEqual_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -59,9 +59,9 @@ func (ec *executionContext) _CertifyPkg_id(ctx context.Context, field graphql.Co
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyPkg_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PkgEqual_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyPkg",
+		Object:     "PkgEqual",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -72,8 +72,8 @@ func (ec *executionContext) fieldContext_CertifyPkg_id(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyPkg_packages(ctx context.Context, field graphql.CollectedField, obj *model.CertifyPkg) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyPkg_packages(ctx, field)
+func (ec *executionContext) _PkgEqual_packages(ctx context.Context, field graphql.CollectedField, obj *model.PkgEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PkgEqual_packages(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -103,9 +103,9 @@ func (ec *executionContext) _CertifyPkg_packages(ctx context.Context, field grap
 	return ec.marshalNPackage2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyPkg_packages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PkgEqual_packages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyPkg",
+		Object:     "PkgEqual",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -124,8 +124,8 @@ func (ec *executionContext) fieldContext_CertifyPkg_packages(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyPkg_justification(ctx context.Context, field graphql.CollectedField, obj *model.CertifyPkg) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyPkg_justification(ctx, field)
+func (ec *executionContext) _PkgEqual_justification(ctx context.Context, field graphql.CollectedField, obj *model.PkgEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PkgEqual_justification(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -155,9 +155,9 @@ func (ec *executionContext) _CertifyPkg_justification(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyPkg_justification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PkgEqual_justification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyPkg",
+		Object:     "PkgEqual",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -168,8 +168,8 @@ func (ec *executionContext) fieldContext_CertifyPkg_justification(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyPkg_origin(ctx context.Context, field graphql.CollectedField, obj *model.CertifyPkg) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyPkg_origin(ctx, field)
+func (ec *executionContext) _PkgEqual_origin(ctx context.Context, field graphql.CollectedField, obj *model.PkgEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PkgEqual_origin(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -199,9 +199,9 @@ func (ec *executionContext) _CertifyPkg_origin(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyPkg_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PkgEqual_origin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyPkg",
+		Object:     "PkgEqual",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -212,8 +212,8 @@ func (ec *executionContext) fieldContext_CertifyPkg_origin(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyPkg_collector(ctx context.Context, field graphql.CollectedField, obj *model.CertifyPkg) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyPkg_collector(ctx, field)
+func (ec *executionContext) _PkgEqual_collector(ctx context.Context, field graphql.CollectedField, obj *model.PkgEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PkgEqual_collector(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -243,9 +243,9 @@ func (ec *executionContext) _CertifyPkg_collector(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyPkg_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PkgEqual_collector(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "CertifyPkg",
+		Object:     "PkgEqual",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -260,8 +260,8 @@ func (ec *executionContext) fieldContext_CertifyPkg_collector(ctx context.Contex
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCertifyPkgInputSpec(ctx context.Context, obj interface{}) (model.CertifyPkgInputSpec, error) {
-	var it model.CertifyPkgInputSpec
+func (ec *executionContext) unmarshalInputPkgEqualInputSpec(ctx context.Context, obj interface{}) (model.PkgEqualInputSpec, error) {
+	var it model.PkgEqualInputSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -304,8 +304,8 @@ func (ec *executionContext) unmarshalInputCertifyPkgInputSpec(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCertifyPkgSpec(ctx context.Context, obj interface{}) (model.CertifyPkgSpec, error) {
-	var it model.CertifyPkgSpec
+func (ec *executionContext) unmarshalInputPkgEqualSpec(ctx context.Context, obj interface{}) (model.PkgEqualSpec, error) {
+	var it model.PkgEqualSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -372,47 +372,47 @@ func (ec *executionContext) unmarshalInputCertifyPkgSpec(ctx context.Context, ob
 
 // region    **************************** object.gotpl ****************************
 
-var certifyPkgImplementors = []string{"CertifyPkg", "Node"}
+var pkgEqualImplementors = []string{"PkgEqual", "Node"}
 
-func (ec *executionContext) _CertifyPkg(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyPkg) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, certifyPkgImplementors)
+func (ec *executionContext) _PkgEqual(ctx context.Context, sel ast.SelectionSet, obj *model.PkgEqual) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pkgEqualImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("CertifyPkg")
+			out.Values[i] = graphql.MarshalString("PkgEqual")
 		case "id":
 
-			out.Values[i] = ec._CertifyPkg_id(ctx, field, obj)
+			out.Values[i] = ec._PkgEqual_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "packages":
 
-			out.Values[i] = ec._CertifyPkg_packages(ctx, field, obj)
+			out.Values[i] = ec._PkgEqual_packages(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "justification":
 
-			out.Values[i] = ec._CertifyPkg_justification(ctx, field, obj)
+			out.Values[i] = ec._PkgEqual_justification(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "origin":
 
-			out.Values[i] = ec._CertifyPkg_origin(ctx, field, obj)
+			out.Values[i] = ec._PkgEqual_origin(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "collector":
 
-			out.Values[i] = ec._CertifyPkg_collector(ctx, field, obj)
+			out.Values[i] = ec._PkgEqual_collector(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -432,11 +432,11 @@ func (ec *executionContext) _CertifyPkg(ctx context.Context, sel ast.SelectionSe
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNCertifyPkg2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkg(ctx context.Context, sel ast.SelectionSet, v model.CertifyPkg) graphql.Marshaler {
-	return ec._CertifyPkg(ctx, sel, &v)
+func (ec *executionContext) marshalNPkgEqual2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqual(ctx context.Context, sel ast.SelectionSet, v model.PkgEqual) graphql.Marshaler {
+	return ec._PkgEqual(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCertifyPkg2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyPkg) graphql.Marshaler {
+func (ec *executionContext) marshalNPkgEqual2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PkgEqual) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -460,7 +460,7 @@ func (ec *executionContext) marshalNCertifyPkg2ᚕᚖgithubᚗcomᚋguacsecᚋgu
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNCertifyPkg2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkg(ctx, sel, v[i])
+			ret[i] = ec.marshalNPkgEqual2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqual(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -480,26 +480,26 @@ func (ec *executionContext) marshalNCertifyPkg2ᚕᚖgithubᚗcomᚋguacsecᚋgu
 	return ret
 }
 
-func (ec *executionContext) marshalNCertifyPkg2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkg(ctx context.Context, sel ast.SelectionSet, v *model.CertifyPkg) graphql.Marshaler {
+func (ec *executionContext) marshalNPkgEqual2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqual(ctx context.Context, sel ast.SelectionSet, v *model.PkgEqual) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._CertifyPkg(ctx, sel, v)
+	return ec._PkgEqual(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCertifyPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgInputSpec(ctx context.Context, v interface{}) (model.CertifyPkgInputSpec, error) {
-	res, err := ec.unmarshalInputCertifyPkgInputSpec(ctx, v)
+func (ec *executionContext) unmarshalNPkgEqualInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualInputSpec(ctx context.Context, v interface{}) (model.PkgEqualInputSpec, error) {
+	res, err := ec.unmarshalInputPkgEqualInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOCertifyPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyPkgSpec(ctx context.Context, v interface{}) (*model.CertifyPkgSpec, error) {
+func (ec *executionContext) unmarshalOPkgEqualSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx context.Context, v interface{}) (*model.PkgEqualSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputCertifyPkgSpec(ctx, v)
+	res, err := ec.unmarshalInputPkgEqualSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

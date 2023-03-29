@@ -44,8 +44,8 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
-    ... on CertifyPkg {
-      ...allCertifyPkg
+    ... on PkgEqual {
+      ...allPkgEqual
     }
     ... on IsOccurrence {
       ...AllIsOccurrencesTree
@@ -110,8 +110,8 @@ query Neighbors($node: ID!) {
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
-    ... on CertifyPkg {
-      ...allCertifyPkg
+    ... on PkgEqual {
+      ...allPkgEqual
     }
     ... on IsOccurrence {
       ...AllIsOccurrencesTree

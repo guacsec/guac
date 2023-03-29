@@ -1,0 +1,63 @@
+fragment allPkgEqualTree on PkgEqual {
+  id
+  justification
+  packages {
+    id
+    type
+    namespaces {
+      id
+      namespace
+      names {
+        id
+        name
+        versions {
+          id
+          version
+          qualifiers {
+            key
+            value
+          }
+          subpath
+        }
+      }
+    }
+  }
+  origin
+  collector
+}
+
+query PkgEqualQ1 {
+  PkgEqual(pkgEqualSpec: {}) {
+    ...allPkgEqualTree
+  }
+}
+
+query PkgEqualQ2 {
+  PkgEqual(pkgEqualSpec: {origin: "Demo ingestion"}) {
+    ...allPkgEqualTree
+  }
+}
+
+query PkgEqualQ3 {
+  PkgEqual(
+    pkgEqualSpec: {packages: {type: "conan", namespace: "openssl.org", name: "openssl", version: "3.0.3", subpath: ""}}
+  ) {
+    ...allPkgEqualTree
+  }
+}
+
+query PkgEqualQ4 {
+  PkgEqual(
+    pkgEqualSpec: {packages: {type: "pypi", namespace: "", name: "django", version: "1.11.1", subpath: "subpath"}}
+  ) {
+    ...allPkgEqualTree
+  }
+}
+
+query PkgEqualQ5 {
+  PkgEqual(
+    pkgEqualSpec: {packages: {type: "deb", namespace: "debian"}}
+  ) {
+    ...allPkgEqualTree
+  }
+}

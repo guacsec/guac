@@ -38,7 +38,7 @@ union Node
   | CertifyVEXStatement
   | HashEqual
   | CertifyBad
-  | CertifyPkg
+  | PkgEqual
   | CertifyScorecard
   | CertifyVuln
   | HasSourceAt

@@ -254,7 +254,7 @@ fragment AllCertifyVuln on CertifyVuln {
   }
 }
 
-fragment allCertifyPkg on CertifyPkg {
+fragment allPkgEqual on PkgEqual {
   id
   justification
   packages {

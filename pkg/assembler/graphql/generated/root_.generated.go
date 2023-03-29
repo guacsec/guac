@@ -68,14 +68,6 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
-	CertifyPkg struct {
-		Collector     func(childComplexity int) int
-		ID            func(childComplexity int) int
-		Justification func(childComplexity int) int
-		Origin        func(childComplexity int) int
-		Packages      func(childComplexity int) int
-	}
-
 	CertifyScorecard struct {
 		ID        func(childComplexity int) int
 		Scorecard func(childComplexity int) int
@@ -174,7 +166,6 @@ type ComplexityRoot struct {
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
-		IngestCertifyPkg      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
@@ -186,6 +177,7 @@ type ComplexityRoot struct {
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
+		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
@@ -232,11 +224,18 @@ type ComplexityRoot struct {
 		Version    func(childComplexity int) int
 	}
 
+	PkgEqual struct {
+		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Packages      func(childComplexity int) int
+	}
+
 	Query struct {
 		Artifacts           func(childComplexity int, artifactSpec *model.ArtifactSpec) int
 		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
 		CertifyBad          func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
-		CertifyPkg          func(childComplexity int, certifyPkgSpec *model.CertifyPkgSpec) int
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
@@ -252,6 +251,7 @@ type ComplexityRoot struct {
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int) int
+		PkgEqual            func(childComplexity int, pkgEqualSpec *model.PkgEqualSpec) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
 	}
@@ -437,41 +437,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyBad.Subject(childComplexity), true
-
-	case "CertifyPkg.collector":
-		if e.complexity.CertifyPkg.Collector == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Collector(childComplexity), true
-
-	case "CertifyPkg.id":
-		if e.complexity.CertifyPkg.ID == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.ID(childComplexity), true
-
-	case "CertifyPkg.justification":
-		if e.complexity.CertifyPkg.Justification == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Justification(childComplexity), true
-
-	case "CertifyPkg.origin":
-		if e.complexity.CertifyPkg.Origin == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Origin(childComplexity), true
-
-	case "CertifyPkg.packages":
-		if e.complexity.CertifyPkg.Packages == nil {
-			break
-		}
-
-		return e.complexity.CertifyPkg.Packages(childComplexity), true
 
 	case "CertifyScorecard.id":
 		if e.complexity.CertifyScorecard.ID == nil {
@@ -920,18 +885,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
 
-	case "Mutation.ingestCertifyPkg":
-		if e.complexity.Mutation.IngestCertifyPkg == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_ingestCertifyPkg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.IngestCertifyPkg(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["certifyPkg"].(model.CertifyPkgInputSpec)), true
-
 	case "Mutation.ingestCVE":
 		if e.complexity.Mutation.IngestCve == nil {
 			break
@@ -1063,6 +1016,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(model.PkgInputSpec)), true
+
+	case "Mutation.ingestPkgEqual":
+		if e.complexity.Mutation.IngestPkgEqual == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestPkgEqual_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["pkgEqual"].(model.PkgEqualInputSpec)), true
 
 	case "Mutation.ingestSLSA":
 		if e.complexity.Mutation.IngestSlsa == nil {
@@ -1245,6 +1210,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PackageVersion.Version(childComplexity), true
 
+	case "PkgEqual.collector":
+		if e.complexity.PkgEqual.Collector == nil {
+			break
+		}
+
+		return e.complexity.PkgEqual.Collector(childComplexity), true
+
+	case "PkgEqual.id":
+		if e.complexity.PkgEqual.ID == nil {
+			break
+		}
+
+		return e.complexity.PkgEqual.ID(childComplexity), true
+
+	case "PkgEqual.justification":
+		if e.complexity.PkgEqual.Justification == nil {
+			break
+		}
+
+		return e.complexity.PkgEqual.Justification(childComplexity), true
+
+	case "PkgEqual.origin":
+		if e.complexity.PkgEqual.Origin == nil {
+			break
+		}
+
+		return e.complexity.PkgEqual.Origin(childComplexity), true
+
+	case "PkgEqual.packages":
+		if e.complexity.PkgEqual.Packages == nil {
+			break
+		}
+
+		return e.complexity.PkgEqual.Packages(childComplexity), true
+
 	case "Query.artifacts":
 		if e.complexity.Query.Artifacts == nil {
 			break
@@ -1280,18 +1280,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(*model.CertifyBadSpec)), true
-
-	case "Query.CertifyPkg":
-		if e.complexity.Query.CertifyPkg == nil {
-			break
-		}
-
-		args, err := ec.field_Query_CertifyPkg_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.CertifyPkg(childComplexity, args["certifyPkgSpec"].(*model.CertifyPkgSpec)), true
 
 	case "Query.CertifyVEXStatement":
 		if e.complexity.Query.CertifyVEXStatement == nil {
@@ -1472,6 +1460,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int)), true
+
+	case "Query.PkgEqual":
+		if e.complexity.Query.PkgEqual == nil {
+			break
+		}
+
+		args, err := ec.field_Query_PkgEqual_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(*model.PkgEqualSpec)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -1772,8 +1772,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadInputSpec,
 		ec.unmarshalInputCertifyBadSpec,
-		ec.unmarshalInputCertifyPkgInputSpec,
-		ec.unmarshalInputCertifyPkgSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
@@ -1807,6 +1805,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
+		ec.unmarshalInputPkgEqualInputSpec,
+		ec.unmarshalInputPkgEqualSpec,
 		ec.unmarshalInputPkgInputSpec,
 		ec.unmarshalInputPkgNameSpec,
 		ec.unmarshalInputPkgSpec,
@@ -2111,75 +2111,6 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that two packages are similar"
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
-}
-`, BuiltIn: false},
-	{Name: "../schema/certifyPkg.graphql", Input: `#
-# Copyright 2023 The GUAC Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# NOTE: This is experimental and might change in the future!
-
-# Defines a GraphQL schema for the CertifyPkg. It contains a list of packages that are similar
-# along with the justification, origin and collector.
-"""
-CertifyPkg is an attestation that represents when a package objects are similar
-
-packages (subject) - list of package objects
-justification (property) - string value representing why the packages are similar
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
-type CertifyPkg {
-  id: ID!
-  packages: [Package!]!
-  justification: String!
-  origin: String!
-  collector: String!
-}
-
-"""
-CertifyPkgSpec allows filtering the list of CertifyPkg to return.
-
-Specifying just the package allows to query for all similar packages (if they exist)
-"""
-input CertifyPkgSpec {
-  id: ID
-  packages: [PkgSpec]
-  justification: String
-  origin: String
-  collector: String
-}
-
-"""
-CertifyPkgInputSpec is the same as CertifyPkg but for mutation input.
-
-All fields are required.
-"""
-input CertifyPkgInputSpec {
-  justification: String!
-  origin: String!
-  collector: String!
-}
-
-extend type Query {
-  "Returns all CertifyPkg"
-  CertifyPkg(certifyPkgSpec: CertifyPkgSpec): [CertifyPkg!]!
-}
-
-extend type Mutation {
-  "Adds a certification that two packages are similar"
-  ingestCertifyPkg(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, certifyPkg: CertifyPkgInputSpec!): CertifyPkg!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -3662,7 +3593,7 @@ union Node
   | CertifyVEXStatement
   | HashEqual
   | CertifyBad
-  | CertifyPkg
+  | PkgEqual
   | CertifyScorecard
   | CertifyVuln
   | HasSourceAt
@@ -3684,6 +3615,75 @@ extend type Query {
   Similarly, the input is only specified by its ID.
   """
   neighbors(node: ID!): [Node!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/pkgEqual.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the PkgEqual. It contains a list of packages that are similar
+# along with the justification, origin and collector.
+"""
+PkgEqual is an attestation that represents when a package objects are similar
+
+packages (subject) - list of package objects
+justification (property) - string value representing why the packages are similar
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
+"""
+type PkgEqual {
+  id: ID!
+  packages: [Package!]!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+PkgEqualSpec allows filtering the list of PkgEqual to return.
+
+Specifying just the package allows to query for all similar packages (if they exist)
+"""
+input PkgEqualSpec {
+  id: ID
+  packages: [PkgSpec]
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+PkgEqualInputSpec is the same as PkgEqual but for mutation input.
+
+All fields are required.
+"""
+input PkgEqualInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all PkgEqual"
+  PkgEqual(pkgEqualSpec: PkgEqualSpec): [PkgEqual!]!
+}
+
+extend type Mutation {
+  "Adds a certification that two packages are similar"
+  ingestPkgEqual(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#

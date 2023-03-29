@@ -25,8 +25,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-type certifyPkgList []*certifyPkgStruct
-type certifyPkgStruct struct {
+type pkgEqualList []*pkgEqualStruct
+type pkgEqualStruct struct {
 	id            uint32
 	pkgs          []uint32
 	justification string
@@ -34,14 +34,14 @@ type certifyPkgStruct struct {
 	collector     string
 }
 
-func (n *certifyPkgStruct) ID() uint32          { return n.id }
-func (n *certifyPkgStruct) Neighbors() []uint32 { return n.pkgs }
+func (n *pkgEqualStruct) ID() uint32          { return n.id }
+func (n *pkgEqualStruct) Neighbors() []uint32 { return n.pkgs }
 
-func (n *certifyPkgStruct) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.convCertifyPkg(n), nil
+func (n *pkgEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
+	return c.convPkgEqual(n), nil
 }
 
-// func registerAllCertifyPkg(client *demoClient) error {
+// func registerAllPkgEqual(client *demoClient) error {
 
 // 	// pkg:conan/openssl.org/openssl@3.0.3?user=bincrafters&channel=stable
 // 	//	("conan", "openssl.org", "openssl", "3.0.3", "", "user=bincrafters", "channel=stable")
@@ -72,7 +72,7 @@ func (n *certifyPkgStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	client.registerCertifyPkg([]*model.Package{selectedPackage1[0], selectedPackage2[0]}, "these two opnessl packages are the same", "inmem backend", "inmem backend")
+// 	client.registerPkgEqual([]*model.Package{selectedPackage1[0], selectedPackage2[0]}, "these two opnessl packages are the same", "inmem backend", "inmem backend")
 
 // 	// pkg:pypi/django@1.11.1
 // 	// client.registerPackage("pypi", "", "django", "1.11.1", "")
@@ -101,15 +101,15 @@ func (n *certifyPkgStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	client.registerCertifyPkg([]*model.Package{selectedPackage3[0], selectedPackage4[0]}, "these two pypi packages are the same", "inmem backend", "inmem backend")
+// 	client.registerPkgEqual([]*model.Package{selectedPackage3[0], selectedPackage4[0]}, "these two pypi packages are the same", "inmem backend", "inmem backend")
 
 // 	return nil
 // }
 
-// Ingest CertifyPkg
+// Ingest PkgEqual
 
-func (c *demoClient) convCertifyPkg(in *certifyPkgStruct) *model.CertifyPkg {
-	out := &model.CertifyPkg{
+func (c *demoClient) convPkgEqual(in *pkgEqualStruct) *model.PkgEqual {
+	out := &model.PkgEqual{
 		ID:            nodeID(in.id),
 		Justification: in.justification,
 		Origin:        in.origin,
@@ -122,11 +122,11 @@ func (c *demoClient) convCertifyPkg(in *certifyPkgStruct) *model.CertifyPkg {
 	return out
 }
 
-func (c *demoClient) IngestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec) (*model.CertifyPkg, error) {
-	return c.ingestCertifyPkg(ctx, pkg, depPkg, certifyPkg, true)
+func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
+	return c.ingestPkgEqual(ctx, pkg, depPkg, pkgEqual, true)
 }
 
-func (c *demoClient) ingestCertifyPkg(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, certifyPkg model.CertifyPkgInputSpec, readOnly bool) (*model.CertifyPkg, error) {
+func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec, readOnly bool) (*model.PkgEqual, error) {
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
@@ -134,7 +134,7 @@ func (c *demoClient) ingestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 	for _, pi := range []model.PkgInputSpec{pkg, depPkg} {
 		pid, err := getPackageIDFromInput(c, pi, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestCertifyPkg :: %v", err)
+			return nil, gqlerror.Errorf("IngestPkgEqual :: %v", err)
 		}
 		pIDs = append(pIDs, pid)
 	}
@@ -146,58 +146,58 @@ func (c *demoClient) ingestCertifyPkg(ctx context.Context, pkg model.PkgInputSpe
 		ps = append(ps, p)
 	}
 
-	for _, id := range ps[0].certifyPkgs {
-		cp, _ := byID[*certifyPkgStruct](id, c)
+	for _, id := range ps[0].pkgEquals {
+		cp, _ := byID[*pkgEqualStruct](id, c)
 		if slices.Equal(cp.pkgs, pIDs) &&
-			cp.justification == certifyPkg.Justification &&
-			cp.origin == certifyPkg.Origin &&
-			cp.collector == certifyPkg.Collector {
-			return c.convCertifyPkg(cp), nil
+			cp.justification == pkgEqual.Justification &&
+			cp.origin == pkgEqual.Origin &&
+			cp.collector == pkgEqual.Collector {
+			return c.convPkgEqual(cp), nil
 		}
 	}
 
 	if readOnly {
 		c.m.RUnlock()
-		cp, err := c.ingestCertifyPkg(ctx, pkg, depPkg, certifyPkg, false)
+		cp, err := c.ingestPkgEqual(ctx, pkg, depPkg, pkgEqual, false)
 		c.m.RLock() // relock so that defer unlock does not panic
 		return cp, err
 	}
 
-	cp := &certifyPkgStruct{
+	cp := &pkgEqualStruct{
 		id:            c.getNextID(),
 		pkgs:          pIDs,
-		justification: certifyPkg.Justification,
-		origin:        certifyPkg.Origin,
-		collector:     certifyPkg.Collector,
+		justification: pkgEqual.Justification,
+		origin:        pkgEqual.Origin,
+		collector:     pkgEqual.Collector,
 	}
 	c.index[cp.id] = cp
 	for _, p := range ps {
-		p.setCertifyPkgs(cp.id)
+		p.setPkgEquals(cp.id)
 	}
-	c.certifyPkgs = append(c.certifyPkgs, cp)
+	c.pkgEquals = append(c.pkgEquals, cp)
 
-	return c.convCertifyPkg(cp), nil
+	return c.convPkgEqual(cp), nil
 }
 
-// Query CertifyPkg
+// Query PkgEqual
 
-func (c *demoClient) CertifyPkg(ctx context.Context, filter *model.CertifyPkgSpec) ([]*model.CertifyPkg, error) {
+func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
-	funcName := "CertifyPkg"
+	funcName := "PkgEqual"
 	if filter.ID != nil {
 		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
 		}
 		id := uint32(id64)
-		link, err := byID[*certifyPkgStruct](id, c)
+		link, err := byID[*pkgEqualStruct](id, c)
 		if err != nil {
 			// Not found
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.CertifyPkg{c.convCertifyPkg(link)}, nil
+		return []*model.PkgEqual{c.convPkgEqual(link)}, nil
 	}
 
 	var search []uint32
@@ -209,17 +209,17 @@ func (c *demoClient) CertifyPkg(ctx context.Context, filter *model.CertifyPkgSpe
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if exactPackage != nil {
-				search = append(search, exactPackage.certifyPkgs...)
+				search = append(search, exactPackage.pkgEquals...)
 				foundOne = true
 				break
 			}
 		}
 	}
 
-	var out []*model.CertifyPkg
+	var out []*model.PkgEqual
 	if foundOne {
 		for _, id := range search {
-			link, err := byID[*certifyPkgStruct](id, c)
+			link, err := byID[*pkgEqualStruct](id, c)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
@@ -229,7 +229,7 @@ func (c *demoClient) CertifyPkg(ctx context.Context, filter *model.CertifyPkgSpe
 			}
 		}
 	} else {
-		for _, link := range c.certifyPkgs {
+		for _, link := range c.pkgEquals {
 			var err error
 			out, err = c.addCPIfMatch(out, filter, link)
 			if err != nil {
@@ -240,9 +240,9 @@ func (c *demoClient) CertifyPkg(ctx context.Context, filter *model.CertifyPkgSpe
 	return out, nil
 }
 
-func (c *demoClient) addCPIfMatch(out []*model.CertifyPkg,
-	filter *model.CertifyPkgSpec, link *certifyPkgStruct) (
-	[]*model.CertifyPkg, error) {
+func (c *demoClient) addCPIfMatch(out []*model.PkgEqual,
+	filter *model.PkgEqualSpec, link *pkgEqualStruct) (
+	[]*model.PkgEqual, error) {
 
 	if noMatch(filter.Justification, link.justification) ||
 		noMatch(filter.Origin, link.origin) ||
@@ -267,5 +267,5 @@ func (c *demoClient) addCPIfMatch(out []*model.CertifyPkg,
 			return out, nil
 		}
 	}
-	return append(out, c.convCertifyPkg(link)), nil
+	return append(out, c.convPkgEqual(link)), nil
 }
