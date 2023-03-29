@@ -18,15 +18,14 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/json"
-	"io"
+	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/certifier"
 	pb "github.com/guacsec/guac/pkg/handler/collector/deps_dev/internal"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -40,33 +39,32 @@ const (
 )
 
 type PackageComponent struct {
-	currentPackage  *model.PkgInputSpec
-	source          *model.SourceInputSpec
-	vulnerabilities []*model.OSVInputSpec
-	scorecard       *model.ScorecardInputSpec
+	CurrentPackage  *model.PkgInputSpec
+	Source          *model.SourceInputSpec
+	Vulnerabilities []*model.OSVInputSpec
+	Scorecard       *model.ScorecardInputSpec
 	DepPackages     []*PackageComponent
+	UpdateTime      time.Time
 }
 
 type depsCollector struct {
-	packages    []string
-	apiKey      string
-	client      pb.InsightsClient
-	lastChecked time.Time
-	interval    time.Duration
+	packages []string
+	apiKey   string
+	client   pb.InsightsClient
 }
 
-func NewDepsCollector(ctx context.Context, token string, packages []string, interval time.Duration) *depsCollector {
+func NewDepsCollector(ctx context.Context, token string, packages []string) (*depsCollector, error) {
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to get system cert: %w", err)
 	}
 
 	// Connect to the service using TLS.
 	creds := credentials.NewClientTLSFromCert(sysPool, "")
 	conn, err := grpc.Dial("api.deps.dev:443", grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 	}
 
 	// Create a new Insights Client.
@@ -76,8 +74,7 @@ func NewDepsCollector(ctx context.Context, token string, packages []string, inte
 		packages: packages,
 		apiKey:   token,
 		client:   client,
-		interval: interval,
-	}
+	}, nil
 }
 
 // scheme:type/namespace/name@version?qualifiers#subpath
@@ -130,7 +127,7 @@ func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 	for _, purl := range d.packages {
 		err := d.fetchDependencies(ctx, purl, docChannel)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to fetch dependencies: %w", err)
 		}
 	}
 
@@ -139,7 +136,6 @@ func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 
 func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
-
 	component := &PackageComponent{}
 	packageInput, err := helpers.PurlToPkg(purl)
 	if err != nil {
@@ -152,67 +148,11 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		return nil
 	}
 
-	component.currentPackage = packageInput
+	component.CurrentPackage = packageInput
 
-	versionReq := &pb.GetVersionRequest{
-		VersionKey: &pb.VersionKey{
-			System:  parseSystem(packageInput.Type),
-			Name:    packageInput.Name,
-			Version: *packageInput.Version,
-		},
-	}
-
-	version, err := d.client.GetVersion(ctx, versionReq)
+	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Name, *packageInput.Version, component)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, link := range version.Links {
-		if link.Label == "REPO" {
-			src, err := helpers.VcsToSrc(link.Url)
-			if err != nil {
-				continue
-			}
-			component.source = src
-
-			projectReq := &pb.GetProjectRequest{
-				ProjectKey: &pb.ProjectKey{
-					Id: link.Label,
-				},
-			}
-
-			project, err := d.client.GetProject(ctx, projectReq)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if project.Scorecard != nil {
-				component.scorecard.AggregateScore = float64(project.Scorecard.OverallScore)
-				component.scorecard.ScorecardCommit = project.Scorecard.Scorecard.Commit
-				component.scorecard.ScorecardVersion = project.Scorecard.Scorecard.Version
-				component.scorecard.TimeScanned = project.Scorecard.Date.AsTime().UTC()
-				component.scorecard.Origin = DepsCollector
-				component.scorecard.Collector = DepsCollector
-				inputChecks := []model.ScorecardCheckInputSpec{}
-				for _, check := range project.Scorecard.Checks {
-					inputCheck := model.ScorecardCheckInputSpec{
-						Check: check.Name,
-						Score: int(check.Score),
-					}
-					inputChecks = append(inputChecks, inputCheck)
-				}
-				component.scorecard.Checks = inputChecks
-			}
-		}
-	}
-
-	vulnerabilities := []*model.OSVInputSpec{}
-	for _, vuln := range version.AdvisoryKeys {
-		advisory, err := d.client.GetAdvisory()
-		if e
-		vuln := model.OSVInputSpec{
-			OsvId: vuln.Id,
-		}
-		vulnerabilities = append(vulnerabilities, &vuln)
+		logger.Errorf("failed to get additional metadata for package: %s, err: %w", purl, err)
 	}
 
 	// Make an RPC Request. The returned result is a stream of
@@ -225,56 +165,34 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		},
 	}
 
-	packageReq := &pb.GetPackageRequest{
-		VersionKey: &pb.PackageKey{
-			System:  parseSystem(packageInput.Type),
-			Name:    packageInput.Name,
-			Version: *packageInput.Version,
-		},
-	}
-
-	advisoryReq := &pb.GetAdvisoryRequest{
-		VersionKey: &pb.AdvisoryKey{
-			System:  parseSystem(packageInput.Type),
-			Name:    packageInput.Name,
-			Version: *packageInput.Version,
-		},
-	}
-
-	versionReq := &pb.GetVersionRequest{
-		VersionKey: &pb.VersionKey{
-			System:  parseSystem(packageInput.Type),
-			Name:    packageInput.Name,
-			Version: *packageInput.Version,
-		},
-	}
-
-	req := &pb.VersionsRequest{
-		PackageKey: &pb.PackageKey{
-			System: sys,
-			Name:   pkg,
-		},
-	}
-
-	deps, err := d.client.GetDependencies(ctx, req)
+	deps, err := d.client.GetDependencies(ctx, dependenciesReq)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	projects, err := d.client.GetProject()
+	for i, node := range deps.Nodes {
+		// the nodes of the dependency graph. The first node is the root of the graph, which is captured above so skip.
+		if i == 0 {
+			continue
+		}
+		depComponent := &PackageComponent{}
 
-	packs, err := d.client.GetPackage()
+		depPackageInput := &model.PkgInputSpec{
+			Type:       node.VersionKey.System.String(),
+			Namespace:  ptrfrom.String(""),
+			Name:       node.VersionKey.Name,
+			Version:    &node.VersionKey.Version,
+			Qualifiers: []model.PackageQualifierInputSpec{},
+			Subpath:    ptrfrom.String(""),
+		}
 
-	
-	version, err := d.client.GetVersion()
+		depComponent.CurrentPackage = depPackageInput
 
-	vulnKeys := version.AdvisoryKeys[0].Id
-	source := version.Links[0].Url
-
-	for _, node := range deps.Nodes {
-		// pkg:pypi/django@1.11.1
-		purl := "pkg:" + pack.system + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
-		component.DepPackages = append(component.DepPackages, &certifier.Component{Package: assembler.PackageNode{Purl: purl}})
+		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Name, *depPackageInput.Version, depComponent)
+		if err != nil {
+			logger.Errorf("failed to get additional metadata for package: %s, err: %w", purl, err)
+		}
+		component.DepPackages = append(component.DepPackages, depComponent)
 	}
 
 	blob, err := json.Marshal(component)
@@ -284,63 +202,93 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	doc := &processor.Document{
 		Blob:   blob,
-		Type:   processor.DocumentUnknown,
-		Format: processor.FormatUnknown,
+		Type:   processor.DocumentDepsDev,
+		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
-			Collector: string(DepsCollector),
-			Source:    "deps.dev",
+			Collector: DepsCollector,
+			Source:    DepsCollector,
+		},
+	}
+	fmt.Println(string(blob))
+	docChannel <- doc
+
+	return nil
+}
+
+func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, name, version string, pkgComponent *PackageComponent) error {
+	versionReq := &pb.GetVersionRequest{
+		VersionKey: &pb.VersionKey{
+			System:  parseSystem(system),
+			Name:    name,
+			Version: version,
 		},
 	}
 
-	docChannel <- doc
+	versionResponse, err := d.client.GetVersion(ctx, versionReq)
+	if err != nil {
+		return err
+	}
+
+	for _, link := range versionResponse.Links {
+		if link.Label == "SOURCE_REPO" {
+			src, err := helpers.VcsToSrc(link.Url)
+			if err != nil {
+				continue
+			}
+			pkgComponent.Source = src
+
+			projectReq := &pb.GetProjectRequest{
+				ProjectKey: &pb.ProjectKey{
+					Id: src.Namespace + "/" + src.Name,
+				},
+			}
+
+			project, err := d.client.GetProject(ctx, projectReq)
+			if err != nil {
+				continue
+			}
+			if project.Scorecard != nil {
+				pkgComponent.Scorecard = &model.ScorecardInputSpec{}
+				pkgComponent.Scorecard.AggregateScore = float64(project.Scorecard.OverallScore)
+				pkgComponent.Scorecard.ScorecardCommit = project.Scorecard.Scorecard.Commit
+				pkgComponent.Scorecard.ScorecardVersion = project.Scorecard.Scorecard.Version
+				pkgComponent.Scorecard.TimeScanned = project.Scorecard.Date.AsTime().UTC()
+				pkgComponent.Scorecard.Origin = DepsCollector
+				pkgComponent.Scorecard.Collector = DepsCollector
+				inputChecks := []model.ScorecardCheckInputSpec{}
+				for _, check := range project.Scorecard.Checks {
+					inputCheck := model.ScorecardCheckInputSpec{
+						Check: check.Name,
+						Score: int(check.Score),
+					}
+					inputChecks = append(inputChecks, inputCheck)
+				}
+				pkgComponent.Scorecard.Checks = inputChecks
+			}
+		}
+	}
+
+	vulnerabilities := []*model.OSVInputSpec{}
+	for _, vuln := range versionResponse.AdvisoryKeys {
+		osv := model.OSVInputSpec{
+			OsvId: vuln.Id,
+		}
+		vulnerabilities = append(vulnerabilities, &osv)
+	}
+	pkgComponent.Vulnerabilities = append(pkgComponent.Vulnerabilities, vulnerabilities...)
+	// add time when data was obtained
+	pkgComponent.UpdateTime = time.Now().UTC()
 
 	return nil
 }
 
 // parseSystem returns the pb.System value represented by the argument string.
 func parseSystem(name string) pb.System {
-	sys, ok := pb.System_value["SYSTEM_"+strings.ToUpper(name)]
+	sys, ok := pb.System_value[strings.ToUpper(name)]
 	if !ok {
 		log.Fatalf("unknown Insights system %q", name)
 	}
 	return pb.System(sys)
-}
-
-// defaultVersion returns the default version identifier for the package.
-func defaultVersion(ctx context.Context, client pb.InsightsClient, sys pb.System, pkg string) string {
-	// Make an RPC Request. The returned result is a stream of
-	// VersionsResponse structs.
-	req := &pb.VersionsRequest{
-		PackageKey: &pb.PackageKey{
-			System: sys,
-			Name:   pkg,
-		},
-	}
-	stream, err := client.Versions(ctx, req)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Drain the stream until we hit EOF.
-	def := ""
-	for {
-		resp, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, version := range resp.Versions {
-			if version.IsDefault {
-				def = version.VersionKey.Version // Don't return here; continue to drain the stream.
-			}
-		}
-	}
-	if def == "" {
-		log.Fatalf("no default version found for package %s", pkg)
-	}
-	return def
 }
 
 // Type returns the collector type

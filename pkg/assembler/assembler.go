@@ -153,6 +153,7 @@ type IngestPredicates struct {
 	HasSlsa          []HasSlsaIngest
 	CertifyVuln      []CertifyVulnIngest
 	IsVuln           []IsVulnIngest
+	HasSourceAt      []HasSourceAtIngest
 }
 
 type CertifyScorecardIngest struct {
@@ -202,6 +203,13 @@ type IsVulnIngest struct {
 	CVE    *generated.CVEInputSpec
 	GHSA   *generated.GHSAInputSpec
 	IsVuln *generated.IsVulnerabilityInputSpec
+}
+
+type HasSourceAtIngest struct {
+	Pkg          *generated.PkgInputSpec
+	PkgMatchFlag generated.MatchFlags
+	Src          *generated.SourceInputSpec
+	HasSourceAt  *generated.HasSourceAtInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph

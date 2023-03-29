@@ -60,6 +60,7 @@ const (
 	DocumentJsonLines   DocumentType = "JSON_LINES"
 	DocumentScorecard   DocumentType = "SCORECARD"
 	DocumentCycloneDX   DocumentType = "CycloneDX"
+	DocumentDepsDev     DocumentType = "DEPS_DEV"
 	DocumentUnknown     DocumentType = "UNKNOWN"
 )
 

@@ -42,13 +42,21 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 
 	m := &model.SourceInputSpec{}
 
-	// Should be <vcs_tool>+<transport>
-	schemeSp := strings.Split(u.Scheme, "+")
-	if len(schemeSp) != 2 {
-		return nil, fmt.Errorf("scheme should be in format <vcs_tool>+<transport>, got %s", u.Scheme)
-	}
-	m.Type = schemeSp[0]
+	if u.Scheme == "https" {
+		if u.Host == "github.com" || u.Host == "gitlab.com" || strings.Contains(u.Host, "bitbucket") {
+			m.Type = "git"
+		} else {
+			return nil, fmt.Errorf("scheme has unknown source type: %s", u.Host)
+		}
 
+	} else {
+		// Should be <vcs_tool>+<transport>
+		schemeSp := strings.Split(u.Scheme, "+")
+		if len(schemeSp) != 2 {
+			return nil, fmt.Errorf("scheme should be in format <vcs_tool>+<transport>, got %s", u.Scheme)
+		}
+		m.Type = schemeSp[0]
+	}
 	m.Namespace = u.Host
 
 	idx := strings.LastIndex(u.Path, "/")
@@ -75,6 +83,7 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 	}
 
 	return m, nil
+
 }
 
 func isCommit(s string) bool {
