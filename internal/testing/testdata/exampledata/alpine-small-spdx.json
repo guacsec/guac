@@ -475,9 +475,9 @@
    "relatedSpdxElement": "SPDXRef-879bdb5c61068a44"
   },
   {
-   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
-   "relationshipType": "CONTAINS",
-   "relatedSpdxElement": "SPDXRef-9b559b61986fccb0"
+    "spdxElementId": "SPDXRef-9b559b61986fccb0",
+    "relationshipType": "CONTAINED_BY",
+    "relatedSpdxElement": "SPDXRef-3f53edc3b14056c3"
   },
   {
    "spdxElementId": "SPDXRef-3f53edc3b14056c3",

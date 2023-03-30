@@ -316,6 +316,9 @@ var (
 	isDepJustifyContains = &model.IsDependencyInputSpec{
 		Justification: "Derived from SPDX CONTAINS relationship",
 	}
+	isDepJustifyContainedBy = &model.IsDependencyInputSpec{
+		Justification: "Derived from SPDX CONTAINED_BY relationship",
+	}
 	isDepJustifyDepends = &model.IsDependencyInputSpec{
 		Justification: "Derived from SPDX DEPENDS_ON relationship",
 	}
@@ -385,7 +388,7 @@ var (
 		{
 			Pkg:          keysPack,
 			DepPkg:       rsaPubFilePack,
-			IsDependency: isDepJustifyContains,
+			IsDependency: isDepJustifyContainedBy,
 		},
 	}
 
