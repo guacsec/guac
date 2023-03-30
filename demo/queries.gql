@@ -1,0 +1,229 @@
+fragment allPkgTree on Package {
+  id
+  type
+  namespaces {
+    id
+    namespace
+    names {
+      id
+      name
+      versions {
+        id
+        version
+        qualifiers {
+          key
+          value
+        }
+        subpath
+      }
+    }
+  }
+}
+
+query PkgQ1 {
+  packages(pkgSpec: {}) {
+    type
+  }
+}
+
+query PkgQ2 {
+  packages(pkgSpec: { type: "oci" }) {
+    type
+    namespaces {
+      namespace
+    }
+  }
+}
+
+query PkgQ3 {
+  packages(pkgSpec: { name: "libp11-kit0" }) {
+    ...allPkgTree
+  }
+}
+
+
+query PkgQ4 {
+  packages(pkgSpec: { type: "oci", namespace: "docker.io/library", name: "consul" }) {
+    ...allPkgTree
+  }
+}
+
+fragment allIsDependencyTree on IsDependency {
+  id
+  justification
+  versionRange
+  package {
+    ...allPkgTree
+  }
+  dependentPackage {
+    ...allPkgTree
+  }
+  origin
+  collector
+}
+
+query IsDependencyQ1 {
+  IsDependency(isDependencySpec: { package: { type: "oci", namespace: "docker.io/library", name: "consul" }}) {
+    dependentPackage {
+      type
+      namespaces {
+        namespace
+        names {
+          name
+        }
+      }
+    }
+  }
+}
+
+query IsDependencyQ2 {
+  IsDependency(isDependencySpec: {
+    package: { type: "oci", namespace: "docker.io/library", name: "consul" }
+    dependentPackage: { type: "golang", namespace: "github.com/sirupsen", name: "logrus" }
+  }) {
+    ...allIsDependencyTree
+  }
+}
+
+query PkgQ5 {
+  packages(pkgSpec: { type: "golang", namespace: "go.etcd.io/etcd/client", name: "v2" }) {
+    type
+    namespaces {
+      namespace
+      names {
+        id
+        name
+      }
+    }
+  }
+}
+
+query PkgQ6 {
+  packages(pkgSpec: { type: "golang", namespace: "go.etcd.io/etcd/api", name: "v3" }) {
+    type
+    namespaces {
+      namespace
+      names {
+        id
+        name
+      }
+    }
+  }
+}
+
+query PathQ1 ($subject: ID!, $target: ID!) {
+  path(subject: $subject, target: $target, maxPathLength: 10) {
+    __typename
+    ... on Package{
+        ...allPkgTree
+    }
+    ... on IsDependency {
+        ...allIsDependencyTree
+    }
+  }
+}
+
+query GetNeighbors ($nodeId: ID!) {
+  neighbors(node: $nodeId) {
+    __typename
+    ... on Package{
+      ...allPkgTree
+    }
+    ... on IsDependency {
+      ...allIsDependencyTree
+    }
+  }
+}
+
+fragment allCveTree on CVE {
+  id
+  year
+  cveIds {
+    id
+    cveId
+  }
+}
+
+fragment allGHSATree on GHSA {
+  id
+  ghsaIds {
+    id
+    ghsaId
+  }
+}
+
+fragment allOSVTree on OSV {
+  id
+  osvIds {
+    id
+    osvId
+  }
+}
+
+
+fragment allCertifyVulnTree on CertifyVuln {
+  id
+  package {
+    ...allPkgTree
+  }
+  vulnerability {
+    __typename
+    ... on CVE {
+      ...allCveTree
+    }
+    ... on OSV {
+      ...allOSVTree
+    }
+    ... on GHSA {
+      ...allGHSATree
+    }
+  }
+  metadata {
+    dbUri
+    dbVersion
+    scannerUri
+    scannerVersion
+    timeScanned
+    origin
+    collector
+  }
+}
+
+query OSVQ1 {
+  osv(osvSpec: {osvId: "ghsa-jfh8-c2jp-5v3q"}) {
+    ...allOSVTree
+  }
+}
+
+query CertifyVulnQ1 {
+  CertifyVuln(certifyVulnSpec: {vulnerability: {osv: {osvId: "ghsa-jfh8-c2jp-5v3q"}}}) {
+    ...allCertifyVulnTree
+  }
+}
+
+
+query PkgQ7 {
+  packages(pkgSpec: { type: "oci", name: "python" }) {
+    type
+    namespaces {
+      namespace
+      names {
+        id
+        name
+      }
+    }
+  }
+}
+
+query PkgQ8 {
+  packages(pkgSpec: { type: "deb", name: "libsqlite3-dev" }) {
+    type
+    namespaces {
+      namespace
+      names {
+        id
+        name
+      }
+    }
+  }
+}

@@ -12,8 +12,8 @@
 
 This demo utilizes the [v0.0.1 release] version of GUAC, due to some major
 refactors in GUAC to support a more extensive data model with [GUAC beta], the
-HEAD of the main branch may not expose the same APIs and data structures used
-in this doc.
+HEAD of the main branch may not expose the same APIs and data structures used in
+this doc.
 
 ## Prepare the working directories
 
@@ -60,8 +60,8 @@ docker run --rm \
 ```
 
 Once it is done, the Neo4j console can be accessed either in the web browser at
-<http://localhost:7474/>, either using a client like [Neo4j Desktop],
-or by using any [Neo4j drivers] of your choice.
+<http://localhost:7474/>, either using a client like [Neo4j Desktop], or by
+using any [Neo4j drivers] of your choice.
 
 To login, use the credentials set above: `neo4j/s3cr3t`.
 
@@ -71,10 +71,12 @@ Neo4j stored procedures add-on which can be used for more advanced queries.
 ## Ingesting the data
 
 To ingest the data, we will use the help of the `guacone` binary, which is an
-all-in-one utility that can take a collection of files and ingest them into
-the neo4j database.
+all-in-one utility that can take a collection of files and ingest them into the
+neo4j database.
 
-We build it by first going into the guac project folder and running `make build`:
+We build it by first going into the guac project folder and running
+`make build`:
+
 ```bash
 cd guac
 make build
@@ -86,14 +88,14 @@ Once compiled, use the `guacone` client on the set of downloaded documents:
 bin/guacone files --gdbuser neo4j --gdbpass s3cr3t ${GUACSEC_HOME}/guac-data/docs
 ```
 
-This will take a couple minutes (should not be more than 5 minutes - if so, please
-make sure that you created the database indices as mentioned above). This dataset
-consists of a set of document types:
+This will take a couple minutes (should not be more than 5 minutes - if so,
+please make sure that you created the database indices as mentioned above). This
+dataset consists of a set of document types:
+
 - SLSA attestations for kubernetes
 - Scorecard data for kubernetes repos
 - SPDX SBOMs for kubernetes containers
 - CycloneDX SBOMs for some latest DockerHub images
-
 
 ## Observing the data
 
@@ -105,13 +107,14 @@ MATCH (n) RETURN n LIMIT 25;
 
 ![image](https://user-images.githubusercontent.com/3060102/196476203-3e288fa7-241e-4520-aacb-8ebb9a8e442e.png)
 
-**Note:** The neo4j client has multiple views of the data, for the demo, we
-will be going between different views of the data to aid visual understanding.
+**Note:** The neo4j client has multiple views of the data, for the demo, we will
+be going between different views of the data to aid visual understanding.
 
-**Note:** Each node has a different color depending on the label it has, these colors
-may be different on your neo4j instance.
+**Note:** Each node has a different color depending on the label it has, these
+colors may be different on your neo4j instance.
 
-**Note:** If you make a mistake and want to reset the data, you can perform a [cleanup]
+**Note:** If you make a mistake and want to reset the data, you can perform a
+[cleanup]
 
 ## Example 1: Exploring Kubernetes Containers
 
@@ -119,6 +122,7 @@ In this first example, we want to take a look at the kubernetes containers, and
 see what metadata/attestations can be connected to it.
 
 We first start by looking up the `kube-controller-manager` containers.
+
 ```
 MATCH (n:Package)
 WHERE n.purl CONTAINS "kube-controller-manager"
@@ -130,8 +134,8 @@ RETURN n;
 
 We'll pick a specific version, for now we'll choose `v1.24.6`.
 
-In this next query we want to ask what are all the binaries in this container, and
-for each of them, is there any metadata tied to them?
+In this next query we want to ask what are all the binaries in this container,
+and for each of them, is there any metadata tied to them?
 
 ```
 MATCH p=((n:Package{purl: "pkg:oci/kube-controller-manager-v1.24.6?repository_url=k8s.gcr.io"})-[:DependsOn|Contains*1..5]->(a))
@@ -151,15 +155,15 @@ In the returned sub-graph result, we can observe the following:
 
 - We can see the kubernetes container package (red) has two binaries
   `/go-runner` and `/usr/local/bin/kube-controller-manager`.
-- We can see we have a SLSA attestation (orange) for kube binary,
-  but no attestations for the `/go-runner`.
-- We also notice that there is scorecards metadata for the kube binary, which was
-  derived through understanding that the kube binary was built from (through SLSA)
-  the kubernetes source repo/commit, which has a scorecard information.
+- We can see we have a SLSA attestation (orange) for kube binary, but no
+  attestations for the `/go-runner`.
+- We also notice that there is scorecards metadata for the kube binary, which
+  was derived through understanding that the kube binary was built from (through
+  SLSA) the kubernetes source repo/commit, which has a scorecard information.
 - We can view the scorecards information in the panel on the right.
 
-This gives us an understanding of the security metadata of a container, and also provides
-addition insight that we are lacking attestations for `/go-runner`.
+This gives us an understanding of the security metadata of a container, and also
+provides addition insight that we are lacking attestations for `/go-runner`.
 
 # Example 2: Debian container overlaps
 
@@ -168,6 +172,7 @@ containers potentially use it as a base image - for use statistics or security
 incident response.
 
 We first view the debian image we are looking to compare against.
+
 ```
 MATCH (n:Package)
 WHERE "container" in n.tags
@@ -178,9 +183,9 @@ RETURN n;
 Text output:
 ![image](https://user-images.githubusercontent.com/3060102/197051068-ac22ecd1-16ae-44f1-8c1f-44c049a4627e.png)
 
-
-We then run the following commands that finds other containers that share dependencies
-with the debian image, and counts the number of shared dependencies in descending order.
+We then run the following commands that finds other containers that share
+dependencies with the debian image, and counts the number of shared dependencies
+in descending order.
 
 ```
 MATCH (n:Package{purl:"pkg:oci/debian@sha256:9b0e3056b8cd8630271825665a0613cc27829d6a24906dc0122b3b4834312f7d?repository_url=docker.io/library/debian&tag=latest"}) -[:Contains|DependsOn*1..5]->(d)<-[*1..3]-(o:Package)
@@ -203,6 +208,7 @@ packages/files, and thus probably don't use the debian image.
 ## Clean-up
 
 To delete the nodes in your database, you execute the query:
+
 ```
 MATCH (n) DETACH DELETE n;
 ```
@@ -211,19 +217,25 @@ MATCH (n) DETACH DELETE n;
 
 Perform a [cleanup] to remove all nodes and start from scratch.
 
-In this example, we will ingest an SPDX SBOM for a custom vulnerable image that contains `log4j` and `text4shell`.
+In this example, we will ingest an SPDX SBOM for a custom vulnerable image that
+contains `log4j` and `text4shell`.
 
-Running the OSV Certifier will allow all the packages to be evaluated against the OSV database. If a vulnerability
-is found, a vulnerability node will be generated containing the OSV ID that can be queried further for more information.
-Along with the vulnerability node, a vulnerability attestation node is also generated based on a custom predicate defined
-in [pkg/certifier/attestation/attestation_vuln.go](https://github.com/guacsec/guac/blob/main/pkg/certifier/attestation/attestation_vuln.go) and an example defined in
-[internal/testing/testdata/exampledata/certify-vuln.json](https://github.com/guacsec/guac/blob/main/internal/testing/testdata/exampledata/certify-vuln.json). This attestation is generated
-for all packages that are evaluated, containing a list of vulnerabilities (if they exist). Future plans are that the `certifiers`
+Running the OSV Certifier will allow all the packages to be evaluated against
+the OSV database. If a vulnerability is found, a vulnerability node will be
+generated containing the OSV ID that can be queried further for more
+information. Along with the vulnerability node, a vulnerability attestation node
+is also generated based on a custom predicate defined in
+[pkg/certifier/attestation/attestation_vuln.go](https://github.com/guacsec/guac/blob/main/pkg/certifier/attestation/attestation_vuln.go)
+and an example defined in
+[internal/testing/testdata/exampledata/certify-vuln.json](https://github.com/guacsec/guac/blob/main/internal/testing/testdata/exampledata/certify-vuln.json).
+This attestation is generated for all packages that are evaluated, containing a
+list of vulnerabilities (if they exist). Future plans are that the `certifiers`
 would run periodically (or ad-hoc) to keep the information up to date.
 
 **NOTE:**
 
-The vulnerability predicate is a work in progress and might eventually be replaced and moved to
+The vulnerability predicate is a work in progress and might eventually be
+replaced and moved to
 [in-toto/attestation](https://github.com/in-toto/attestation) repo.
 
 We first ingest the vulnerable SPDX SBOM into GUAC:
@@ -232,7 +244,8 @@ We first ingest the vulnerable SPDX SBOM into GUAC:
 bin/guacone files --gdbuser neo4j --gdbpass s3cr3t ${GUACSEC_HOME}/guac-data/docs/spdx/spdx_vuln.json
 ```
 
-Once the SBOM is ingested, we can run the `certifier` so that all the packages to be evaluated against the OSV database.
+Once the SBOM is ingested, we can run the `certifier` so that all the packages
+to be evaluated against the OSV database.
 
 ```bash
 bin/guacone certifier --gdbuser neo4j --gdbpass s3cr3t
@@ -246,11 +259,13 @@ MATCH (n:Vulnerability) RETURN n LIMIT 25
 
 ![image](https://user-images.githubusercontent.com/88045217/213845716-d32cef13-98c6-4e6c-ba65-a8fc6ea8db6f.png)
 
-We can expand the vulnerability nodes into their associated attestations that map to the actual packages.
+We can expand the vulnerability nodes into their associated attestations that
+map to the actual packages.
 
 ![image](https://user-images.githubusercontent.com/88045217/213845759-59a5bfd5-8825-469c-8019-74ba287ff71f.png)
 
-We can query for a specific package `log4j` and expand out where the package is utilized:
+We can query for a specific package `log4j` and expand out where the package is
+utilized:
 
 ```
 MATCH (n:Package)
@@ -260,9 +275,11 @@ RETURN n;
 
 ![image](https://user-images.githubusercontent.com/88045217/213845773-4f551873-0e66-4a5c-a27e-b4cd0e4c015f.png)
 
-We can also query for a specific OSV ID and work backward to the package and where it's utilized:
+We can also query for a specific OSV ID and work backward to the package and
+where it's utilized:
 
-**Note:** Future features will allow for the OSV ID to expand into more information about the package, CVEs...etc
+**Note:** Future features will allow for the OSV ID to expand into more
+information about the package, CVEs...etc
 
 ```
 MATCH (n:Vulnerability)
@@ -272,7 +289,8 @@ RETURN n;
 
 ![image](https://user-images.githubusercontent.com/88045217/213845911-88c8b393-7353-4937-b340-384631010277.png)
 
-Similarly, you can also query for `text4shell` and expand to find where it's utilized:
+Similarly, you can also query for `text4shell` and expand to find where it's
+utilized:
 
 ```
 MATCH (n:Package)
@@ -292,6 +310,7 @@ You can perform a [cleanup] to remove all nodes when done.
 [npx]: https://docs.npmjs.com/cli/v7/commands/npx
 [cleanup]: #Clean-up
 [apoc]: https://neo4j.com/labs/apoc/
-[protoc/protoc-gen-go/protoc-gen-go-grpc]: https://grpc.io/docs/languages/go/quickstart/
+[protoc/protoc-gen-go/protoc-gen-go-grpc]:
+  https://grpc.io/docs/languages/go/quickstart/
 [GUAC beta]: https://github.com/guacsec/guac/issues/251
 [v0.0.1 release]: https://github.com/guacsec/guac/releases/tag/v0.0.1

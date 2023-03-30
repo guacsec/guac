@@ -1,9 +1,8 @@
-assembler/backends
-==================
+# assembler/backends
 
 This directory contains implementation for 2 backends for the GraphQL server
-side of ["Refactoring the GUAC
-Assembler"](https://docs.google.com/document/d/1yZ3-ZcfnRDWgw9uZlPuLmIHS9pNMr3DO_AEbHsDXmN8/edit?usp=sharing)
+side of
+["Refactoring the GUAC Assembler"](https://docs.google.com/document/d/1yZ3-ZcfnRDWgw9uZlPuLmIHS9pNMr3DO_AEbHsDXmN8/edit?usp=sharing)
 project.
 
 **Note**: This is still in experimental state and might change in the future!
