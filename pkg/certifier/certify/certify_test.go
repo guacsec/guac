@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -33,7 +34,6 @@ import (
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	uuid "github.com/satori/go.uuid"
 )
 
 type mockQuery struct {
@@ -214,9 +214,12 @@ func Test_Publish(t *testing.T) {
 
 func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
 	logger := logging.FromContext(ctx)
-	id := uuid.NewV4().String()
-
-	psub, err := emitter.NewPubSub(ctx, id, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to get uuid with the following error: %w", err)
+	}
+	uuidString := uuid.String()
+	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}
@@ -225,7 +228,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %w", id, err)
+			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
@@ -238,11 +241,11 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		docTree := processor.DocumentTree(docNode)
 		err = transportFunc(docTree)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %w", id, err)
+			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %w", uuidString, err)
 			logger.Error(fmtErr)
 			return fmtErr
 		}
-		logger.Infof("[processor: %s] docTree Processed: %+v", id, docTree.Document.SourceInformation)
+		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
 		return nil
 	}
 
