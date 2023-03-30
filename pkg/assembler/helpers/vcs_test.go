@@ -49,6 +49,14 @@ func TestVcsUriToSrc(t *testing.T) {
 			uri:      "git+https://github.com/kubernetes@main",
 			wantErr:  false,
 			expected: src("git", "github.com", "kubernetes", nil, strP("main")),
+		}, {
+			uri:      "https://github.com/sfackler/rust-openssl",
+			wantErr:  false,
+			expected: src("git", "github.com/sfackler", "rust-openssl", nil, nil),
+		},
+		{
+			uri:     "github.com/sfackler/rust-openssl",
+			wantErr: true,
 		},
 		{
 			uri:     "git://github.com/kubernetes@main",

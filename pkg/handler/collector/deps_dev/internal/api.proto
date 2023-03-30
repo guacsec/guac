@@ -1,0 +1,423 @@
+syntax = "proto3";
+
+package deps_dev.v3alpha;
+
+import "pkg/handler/collector/deps_dev/internal/google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "sos.googlesource.com/sos/proto/api/v3alpha";
+
+// The Deps.dev Insights API provides information about open source software
+// packages, projects, and security advisories. The information is gathered
+// from upstream services like npm, GitHub, and OSV, and augmented by computing
+// dependencies and relationships between entities.
+service Insights {
+  // GetPackage returns information about a package, including a list of its
+  // available versions, with the default version marked if known.
+  rpc GetPackage(GetPackageRequest) returns (Package) {
+    option (google.api.http) = {
+      get: "/v3alpha/systems/{package_key.system}/packages/{package_key.name}"
+    };
+  }
+
+  // GetVersion returns information about a specific package version, including
+  // its licenses and any security advisories known to affect it.
+  rpc GetVersion(GetVersionRequest) returns (Version) {
+    option (google.api.http) = {
+      get: "/v3alpha/systems/{version_key.system}/packages/{version_key.name}/versions/{version_key.version}"
+    };
+  }
+
+  // GetDependencies returns a resolved dependency graph for the given package
+  // version.
+  //
+  // The dependency graph should be similar to one produced by installing the
+  // package version on a generic 64-bit Linux system, with no other
+  // dependencies present. The precise meaning of this varies from system to
+  // system.
+  rpc GetDependencies(GetDependenciesRequest) returns (Dependencies) {
+    option (google.api.http) = {
+      get: "/v3alpha/systems/{version_key.system}/packages/{version_key.name}/versions/{version_key.version}:dependencies"
+    };
+  }
+
+  // GetProject returns information about projects hosted by GitHub, GitLab, or
+  // BitBucket, when known to us.
+  rpc GetProject(GetProjectRequest) returns (Project) {
+    option (google.api.http) = {
+      get: "/v3alpha/projects/{project_key.id}"
+    };
+  }
+
+  // GetAdvisory returns information about security advisories hosted by OSV.
+  rpc GetAdvisory(GetAdvisoryRequest) returns (Advisory) {
+    option (google.api.http) = {
+      get: "/v3alpha/advisories/{advisory_key.id}"
+    };
+  }
+
+  // Query returns information about multiple package versions, which can be
+  // specified by name, content hash, or both.
+  rpc Query(QueryRequest) returns (QueryResult) {
+    option (google.api.http) = {
+      // Request fields are passed as query parameters.
+      get: "/v3alpha/query"
+    };
+  }
+}
+
+// System identifies a package management system.
+enum System {
+  SYSTEM_UNSPECIFIED = 0;
+  GO = 1;
+  NPM = 3;
+  CARGO = 4;
+  MAVEN = 6;
+  PYPI = 7;
+  NUGET = 8;
+}
+
+// PackageKey identifies a package by name.
+message PackageKey {
+  // The package management system containing the package.
+  System system = 1;
+
+  // The name of the package.
+  string name = 2;
+}
+
+// VersionKey identifies a package version by name.
+message VersionKey {
+  // The package management system containing the package.
+  System system = 1;
+
+  // The name of the package.
+  string name = 2;
+
+  // The version of the package.
+  string version = 3;
+}
+
+// ProjectKey identifies a project.
+message ProjectKey {
+  // A project identifier of the form `github.com/user/repo`,
+  // `gitlab.com/user/repo`, or `bitbucket.org/user/repo`.
+  string id = 1;
+}
+
+// AdvisoryKey identifies a security advisory.
+message AdvisoryKey {
+  // The OSV identifier for the security advisory.
+  string id = 1;
+}
+
+// HashType identifies a function used to produce a hash.
+enum HashType {
+  HASH_TYPE_UNSPECIFIED = 0;
+  MD5 = 1;
+  SHA1 = 2;
+  SHA256 = 3;
+  SHA512 = 4;
+}
+
+// Hash represents the output of a hash function. These messages are used to
+// identify package version artifacts by content hash.
+message Hash {
+  // The function used to produce this hash.
+  HashType type = 1;
+
+  // A hash value.
+  bytes value = 2;
+}
+
+// Link represents a link declared by or derived from package version metadata,
+// to an external web resource such as a homepage or source code repository.
+message Link {
+  // A label describing the resource that the link points to.
+  string label = 1;
+
+  // The URL of the link.
+  string url = 2;
+}
+
+// GetPackageRequest identifies a package for which to return information.
+message GetPackageRequest {
+  PackageKey package_key = 1;
+}
+
+// Package holds information about a package, including a list of its available
+// versions, with the default version marked if known.
+message Package {
+  // The name of the package. Note that it may differ from the name in the
+  // request, due to canonicalization.
+  PackageKey package_key = 1;
+
+  message Version {
+    // The name of the version. Note that the package name may differ from the
+    // name in the request, due to canonicalization.
+    VersionKey version_key = 1;
+
+    // If true, this is the default version of the package: the version that is
+    // installed when no version is specified. The precise meaning of this is
+    // system-specific, but it is commonly the version with the greatest
+    // version number, ignoring pre-release versions.
+    bool is_default = 2;
+  }
+
+  // The available versions of the package.
+  repeated Version versions = 2;
+}
+
+// GetVersionRequest identifies a package version for which to return information.
+message GetVersionRequest {
+  VersionKey version_key = 1;
+}
+
+// Version holds information about a package version.
+message Version {
+  // The name of the package version. Note that the package and version name
+  // may differ from names specified in requests, if applicable, due to
+  // canonicalization.
+  VersionKey version_key = 1;
+
+  // If true, this is the default version of the package: the version that is
+  // installed when no version is specified. The precise meaning of this is
+  // system-specific, but it is commonly the version with the greatest version
+  // number, ignoring pre-release versions.
+  bool is_default = 2;
+
+  // The licenses governing the use of this package version.
+  //
+  // We identify licenses as
+  // [SPDX 2.1](https://spdx.dev/spdx-specification-21-web-version/)
+  // expressions. When there is no associated SPDX identifier, we identify a
+  // license as "non-standard". When we are unable to obtain license
+  // information, this field is empty. When more than one license is listed,
+  // their relationship is unspecified.
+  //
+  // For Cargo, Maven, npm, and PyPI, license information is read from the
+  // package metadata. For Go, license information is determined using the
+  // [licensecheck](https://github.com/google/licensecheck) package.
+  //
+  // License information is not intended to be legal advice, and you should
+  // independently verify the license or terms of any software for your own
+  // needs.
+  repeated string licenses = 3;
+
+  // Security advisories known to affect this package version.
+  // Further information can be requested using the Advisory method.
+  repeated AdvisoryKey advisory_keys = 4;
+
+  // Links declared by or derived from package version metadata, to external
+  // web resources such as a homepage or source code repository. Note that
+  // these links are not verified for correctness.
+  repeated Link links = 5;
+}
+
+// GetDependenciesRequest identifies a package version for which to return
+// dependencies.
+message GetDependenciesRequest {
+  VersionKey version_key = 1;
+}
+
+// Dependencies holds a resolved dependency graph for a package version.
+//
+// The dependency graph should be similar to one produced by installing the
+// package version on a generic 64-bit Linux system, with no other dependencies
+// present. The precise meaning of this varies from system to system.
+message Dependencies {
+  // Node represents a node in a resolved dependency graph.
+  message Node {
+    // The package version represented by this node. Note that the package and
+    // version name may differ from the names in the request, if provided, due
+    // to canonicalization.
+    //
+    // For some systems, a graph may contain multiple nodes for the same
+    // package version.
+    VersionKey version_key = 1;
+
+    // Errors associated with this node of the graph, such as an unresolved
+    // dependency requirement. An error on a node may imply the graph as a
+    // whole is incorrect. These error messages have no defined format and are
+    // intended for human consumption.
+    repeated string errors = 6;
+  }
+  // The nodes of the dependency graph. The first node is the root of the graph.
+  repeated Node nodes = 1;
+
+  // Edge represents a directed edge in a resolved dependency graph: a
+  // dependency relation between two nodes.
+  message Edge {
+    // The node declaring the dependency, specified as an index into the list of
+    // nodes.
+    uint32 from_node = 1;
+
+    // The node resolving the dependency, specified as an index into the list of
+    // nodes.
+    uint32 to_node = 2;
+
+    // The requirement resolved by this edge, as declared by the "from" node.
+    // The meaning of this field is system-specific. As an example, in npm, the
+    // requirement "^1.0.0" may be resolved by the version "1.2.3".
+    string requirement = 3;
+  }
+  // The edges of the dependency graph.
+  repeated Edge edges = 2;
+
+  // Any error associated with the dependency graph that is not specific to a
+  // node. An error here may imply the graph as a whole is incorrect.
+  // This error message has no defined format and is intended for human
+  // consumption.
+  string error = 3;
+}
+
+// GetProjectRequest identifies a project for which to return information.
+message GetProjectRequest {
+  ProjectKey project_key = 1;
+}
+
+// Project holds information about a project hosted by GitHub, GitLab, or
+// Bitbucket.
+message Project {
+  // The identifier for the project. Note that this may differ from the
+  // identifier in the request, due to canonicalization.
+  ProjectKey project_key = 1;
+
+  // The number of stars reported by the project host.
+  // Only available for GitHub and GitLab.
+  int64 open_issues_count = 2;
+
+  // The number of stars reported by the project host.
+  // Only available for GitHub and GitLab.
+  int64 stars_count = 3;
+
+  // The number of forks reported by the project host.
+  // Only available for GitHub and GitLab.
+  int64 forks_count = 4;
+
+  // The license reported by the project host.
+  string license = 5;
+
+  // The description reported by the project host.
+  string description = 6;
+
+  // The homepage reported by the project host.
+  string homepage = 7;
+
+  message Scorecard {
+    // The date at which the scorecard was produced.
+    google.protobuf.Timestamp date = 1;
+
+    message Repository {
+      // The source code repository the scorecard was produced from.
+      string name = 1;
+
+      // The source code commit the scorecard was produced from.
+      string commit = 2;
+    }
+
+    // The source code repository and commit the scorecard was produced from.
+    Repository repository = 2;
+
+    message ScorecardDetails {
+      // The version of the Scorecard program used to produce the scorecard.
+      string version = 1;
+
+      // The commit of the Scorecard program used to produce the scorecard.
+      string commit = 2;
+    }
+
+    // The version and commit of the Scorecard program used to produce the
+    // scorecard.
+    ScorecardDetails scorecard = 3;
+
+    message Check {
+      // The name of the check.
+      string name = 1;
+
+      message Documentation {
+        // A short description of the check.
+        string short_description = 1;
+
+        // A link to more details about the check.
+        string url = 2;
+      }
+
+      // Human-readable documentation for the check.
+      Documentation documentation = 2;
+
+      // A score in the range [0,10]. A higher score is better.
+      // A negative score indicates that the check did not run successfully.
+      int64 score = 3;
+
+      // The reason for the score.
+      string reason = 4;
+
+      // Further details regarding the check.
+      repeated string details = 5;
+    }
+
+    // The results of the
+    // [Scorecard Checks](https://github.com/ossf/scorecard#scorecard-checks)
+    // performed on the project.
+    repeated Check checks = 4;
+
+    // A weighted average score in the range [0,10]. A higher score is better.
+    float overall_score = 5;
+
+    // Additional metadata associated with the scorecard.
+    repeated string metadata = 6;
+  }
+
+  // An [OpenSSF Scorecard](https://github.com/ossf/scorecard) for the project,
+  // if one is available.
+  Scorecard scorecard = 8;
+}
+
+// GetAdvisoryRequest identifies a security advisory for which to return
+// information.
+message GetAdvisoryRequest {
+  AdvisoryKey advisory_key = 1;
+}
+
+// Advisory holds information about a security advisory hosted by OSV.
+message Advisory {
+  // The identifier for the security advisory. Note that this may differ from
+  // the identifier in the request, due to canonicalization.
+  AdvisoryKey advisory_key = 1;
+
+  // The URL of the security advisory.
+  string url = 2;
+
+  // A brief human-readable description.
+  string title = 3;
+
+  // Other identifiers used for the advisory, including CVEs.
+  repeated string aliases = 4;
+
+  // The severity of the advisory as a CVSS v3 score in the range [0,10].
+  // A higher score represents greater severity.
+  float cvss3_score = 5;
+
+  // The severity of the advisory as a CVSS v3 vector string.
+  string cvss3_vector = 6;
+}
+
+// QueryRequest identifies package versions for which to return information.
+// At least one of its fields must be set, and both fields may be set to narrow
+// the results.
+message QueryRequest {
+  // A content hash for an artifact associated with a package version, such as a
+  // JAR file. Currently supported for npm, Cargo, Maven, and NuGet. Note that
+  // hashes and package versions have a many-to-many relationship.
+  Hash hash = 1;
+
+  // The name of the package version.
+  VersionKey version_key = 2;
+}
+
+// QueryResult holds information about package versions matching the query.
+message QueryResult {
+  // Package versions matching the query.
+  repeated Version versions = 1;
+}

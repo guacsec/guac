@@ -45,12 +45,11 @@ import (
 )
 
 type parser struct {
-	packages  []*generated.PkgInputSpec
-	vulnData  *generated.VulnerabilityMetaDataInput
-	vulns     []*generated.OSVInputSpec
-	isVulns   []assembler.IsVulnIngest
-	isOccs    []assembler.IsOccurenceIngest
-	artifacts []*generated.ArtifactInputSpec
+	packages []*generated.PkgInputSpec
+	vulnData *generated.VulnerabilityMetaDataInput
+	vulns    []*generated.OSVInputSpec
+	isVulns  []assembler.IsVulnIngest
+	isOccs   []assembler.IsOccurenceIngest
 }
 
 // NewVulnCertificationParser initializes the parser

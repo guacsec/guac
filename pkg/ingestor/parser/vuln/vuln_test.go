@@ -54,7 +54,7 @@ func TestParser(t *testing.T) {
 			},
 		},
 		wantCVs: []assembler.CertifyVulnIngest{
-			assembler.CertifyVulnIngest{
+			{
 				Pkg: &generated.PkgInputSpec{
 					Type:      "maven",
 					Namespace: ptrfrom.String("org.apache.logging.log4j"),
@@ -71,7 +71,7 @@ func TestParser(t *testing.T) {
 					ScannerVersion: "0.0.14",
 				},
 			},
-			assembler.CertifyVulnIngest{
+			{
 				Pkg: &generated.PkgInputSpec{
 					Type:      "maven",
 					Namespace: ptrfrom.String("org.apache.logging.log4j"),
@@ -88,7 +88,7 @@ func TestParser(t *testing.T) {
 					ScannerVersion: "0.0.14",
 				},
 			},
-			assembler.CertifyVulnIngest{
+			{
 				Pkg: &generated.PkgInputSpec{
 					Type:      "maven",
 					Namespace: ptrfrom.String("org.apache.logging.log4j"),
@@ -105,7 +105,7 @@ func TestParser(t *testing.T) {
 					ScannerVersion: "0.0.14",
 				},
 			},
-			assembler.CertifyVulnIngest{
+			{
 				Pkg: &generated.PkgInputSpec{
 					Type:      "maven",
 					Namespace: ptrfrom.String("org.apache.logging.log4j"),
@@ -122,7 +122,7 @@ func TestParser(t *testing.T) {
 					ScannerVersion: "0.0.14",
 				},
 			},
-			assembler.CertifyVulnIngest{
+			{
 				Pkg: &generated.PkgInputSpec{
 					Type:      "maven",
 					Namespace: ptrfrom.String("org.apache.logging.log4j"),
@@ -139,7 +139,7 @@ func TestParser(t *testing.T) {
 					ScannerVersion: "0.0.14",
 				},
 			},
-			assembler.CertifyVulnIngest{
+			{
 				Pkg: &generated.PkgInputSpec{
 					Type:      "maven",
 					Namespace: ptrfrom.String("org.apache.logging.log4j"),
@@ -158,7 +158,7 @@ func TestParser(t *testing.T) {
 			},
 		},
 		wantIVs: []assembler.IsVulnIngest{
-			assembler.IsVulnIngest{
+			{
 				OSV: &generated.OSVInputSpec{
 					OsvId: "GHSA-vwqq-5vrc-xw9h",
 				},
@@ -170,7 +170,7 @@ func TestParser(t *testing.T) {
 					Justification: "Decoded OSV data",
 				},
 			},
-			assembler.IsVulnIngest{
+			{
 				OSV: &generated.OSVInputSpec{
 					OsvId: "GHSA-7rjr-3q55-vv33",
 				},
@@ -182,7 +182,7 @@ func TestParser(t *testing.T) {
 					Justification: "Decoded OSV data",
 				},
 			},
-			assembler.IsVulnIngest{
+			{
 				OSV: &generated.OSVInputSpec{
 					OsvId: "GHSA-8489-44mv-ggj8",
 				},
@@ -194,7 +194,7 @@ func TestParser(t *testing.T) {
 					Justification: "Decoded OSV data",
 				},
 			},
-			assembler.IsVulnIngest{
+			{
 				OSV: &generated.OSVInputSpec{
 					OsvId: "GHSA-fxph-q3j8-mv87",
 				},
@@ -206,7 +206,7 @@ func TestParser(t *testing.T) {
 					Justification: "Decoded OSV data",
 				},
 			},
-			assembler.IsVulnIngest{
+			{
 				OSV: &generated.OSVInputSpec{
 					OsvId: "GHSA-jfh8-c2jp-5v3q",
 				},
@@ -218,7 +218,7 @@ func TestParser(t *testing.T) {
 					Justification: "Decoded OSV data",
 				},
 			},
-			assembler.IsVulnIngest{
+			{
 				OSV: &generated.OSVInputSpec{
 					OsvId: "GHSA-p6xc-xr62-6r2g",
 				},

@@ -60,6 +60,10 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				return err
 			}
 
+			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
+			if err := hasSourceAt(ctx, gqlclient, p.HasSourceAt); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -88,11 +92,11 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, vs []assembl
 func ingestIsOccurrence(ctx context.Context, client graphql.Client, vs []assembler.IsOccurenceIngest) error {
 	for _, v := range vs {
 		if v.Pkg != nil && v.Src != nil {
-			return fmt.Errorf("unable to create IsOccurence with both Src and Pkg subject specified")
+			return fmt.Errorf("unable to create IsOccurrence with both Src and Pkg subject specified")
 		}
 
 		if v.Pkg == nil && v.Src == nil {
-			return fmt.Errorf("unable to create IsOccurence without either Src and Pkg subject specified")
+			return fmt.Errorf("unable to create IsOccurrence without either Src and Pkg subject specified")
 		}
 
 		if v.Src != nil {
@@ -155,6 +159,16 @@ func ingestIsVuln(ctx context.Context, client graphql.Client, ivs []assembler.Is
 
 		}
 
+	}
+	return nil
+}
+
+func hasSourceAt(ctx context.Context, client graphql.Client, hsaList []assembler.HasSourceAtIngest) error {
+	for _, hsa := range hsaList {
+		_, err := model.HasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
