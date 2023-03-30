@@ -35,13 +35,15 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 		name: "simple test",
 		input: []*parser_common.IdentifierStrings{
 			{
-				OciStrings: []string{"index.docker.io/guacsec/local-organic-guac"},
-				VcsStrings: []string{"git+https://github.com/guacsec/guac"},
+				OciStrings:  []string{"index.docker.io/guacsec/local-organic-guac"},
+				VcsStrings:  []string{"git+https://github.com/guacsec/guac"},
+				PurlStrings: []string{"pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?repository_url=repo.spring.io%2Frelease"},
 			},
 		},
 		expected: []*pb.CollectEntry{
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "index.docker.io/guacsec/local-organic-guac"},
 			{Type: pb.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
+			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?repository_url=repo.spring.io%2Frelease"},
 		},
 	}, {
 		name: "simple unclassified string test",
@@ -49,14 +51,18 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 			{
 				UnclassifiedStrings: []string{"index.docker.io/guacsec/local-organic-guac",
 					"ghcr.io/guacsec/local-organic-guac",
+					"pkg:npm/%40angular/animation@12.3.1",
 					"https://not-oci-registry.com/guacsec/local-organic-guac",
-					"gcr.io/guacsec/local-organic-guac"},
+					"gcr.io/guacsec/local-organic-guac",
+					"pkg:golang/google.golang.org/genproto#googleapis/api/annotations"},
 			},
 		},
 		expected: []*pb.CollectEntry{
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "index.docker.io/guacsec/local-organic-guac"},
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "ghcr.io/guacsec/local-organic-guac"},
+			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:npm/%40angular/animation@12.3.1"},
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "gcr.io/guacsec/local-organic-guac"},
+			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:golang/google.golang.org/genproto#googleapis/api/annotations"},
 		},
 	}, {
 		name: "simple slice test",
@@ -69,6 +75,19 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 		},
 		expected: []*pb.CollectEntry{
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "index.docker.io/guacsec/local-organic-guac"},
+			{Type: pb.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
+		},
+	}, {
+		name: "simple purl test",
+		input: []*parser_common.IdentifierStrings{
+			{
+				PurlStrings: []string{"pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie"},
+			}, {
+				VcsStrings: []string{"git+https://github.com/guacsec/guac"},
+			},
+		},
+		expected: []*pb.CollectEntry{
+			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie"},
 			{Type: pb.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
 		},
 	}}
