@@ -70,19 +70,6 @@ fragment allArtifactTree on Artifact {
   digest
 }
 
-mutation ArtifactM1 {
-  ingestArtifact(artifact: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"}) {
-    ...allArtifactTree
-  }
-}
-
-mutation ArtifactM2 {
-  ingestArtifact(artifact: {algorithm: "md5", digest: "0ABCDEF0FEDCBA01234567890ABCDEF0"}) {
-    ...allArtifactTree
-  }
-}
-
-
 mutation BuilderM1 {
   ingestBuilder(builder: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"}) {
     id
@@ -106,6 +93,6 @@ mutation SLSAM1 {
       slsaPredicate: [{key:"key1", value: "value1"}]
     }
   ){
-    ...allSLSATree
+    ...allHasSLSATree
   }
 }
