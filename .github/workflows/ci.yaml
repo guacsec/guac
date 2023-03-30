@@ -55,7 +55,6 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            DEPS_DEV_APIKEY: ${{ secrets.DEPS_DEV_APIKEY }}
         run: make integration-test
 
   test-unit:

@@ -15,17 +15,19 @@ all: test cover fmt lint build generate
 test: generate
 	echo 'mode: atomic' > coverage.txt && go test -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
 
-# Run the integration tests. Requires Deps.dev API key (DEPS_DEV_APIKEY=<deps.dev token>) and github token for scorecard (GITHUB_AUTH_TOKEN=<your token>)
+# Run the integration tests. Requires github token for scorecard (GITHUB_AUTH_TOKEN=<your token>)
 .PHONY: integration-test
 integration-test: generate check-env
 	go test -tags=integration ./...
 
+# Run the deps.dev tests. Requires Deps.dev API key (DEPS_DEV_APIKEY=<deps.dev token>)
+.PHONY: deps-dev-test
+deps-dev-test: generate
+	go test -tags=deps ./...
+
 .PHONY: check-env
 ifndef GITHUB_AUTH_TOKEN
 	$(error GITHUB_AUTH_TOKEN is not set)
-endif
-ifndef DEPS_DEV_APIKEY
-	$(error DEPS_DEV_APIKEY is not set)
 endif
 
 # Run all the tests and opens the coverage report
