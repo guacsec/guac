@@ -1,0 +1,29 @@
+{
+  "packages": [
+    {
+      "type": "oci",
+      "namespaces": [
+        {
+          "namespace": "docker.io/library",
+          "names": [
+            {
+              "name": "consul",
+              "versions": [
+                {
+                  "version": "sha256:22ab19cf1326abbfaafec6a14eb68f96e899e88ffe9ce26fa36affcf8ffb582c",
+                  "qualifiers": [
+                    {
+                      "key": "tag",
+                      "value": "latest"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

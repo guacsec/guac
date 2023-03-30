@@ -1,0 +1,38 @@
+{
+  "CertifyVuln": [
+    {
+      "package": {
+        "type": "maven",
+        "namespaces": [
+          {
+            "namespace": "org.apache.logging.log4j",
+            "names": [
+              {
+                "name": "log4j-core",
+                "versions": [
+                  {
+                    "version": "2.8.1",
+                    "qualifiers": [],
+                    "subpath": ""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "vulnerability": {
+        "__typename": "OSV",
+        "osvId": "ghsa-jfh8-c2jp-5v3q"
+      },
+      "metadata": {
+        "dbUri": "",
+        "dbVersion": "",
+        "scannerUri": "osv.dev",
+        "scannerVersion": "0.0.14",
+        "origin": "guac",
+        "collector": "guac"
+      }
+    }
+  ]
+}

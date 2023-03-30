@@ -1,0 +1,18 @@
+{
+  "packages": [
+    {
+      "type": "oci",
+      "namespaces": [
+        {
+          "namespace": "docker.io/lib"
+        },
+        {
+          "namespace": "docker.io/librar"
+        },
+        {
+          "namespace": "docker.io/library"
+        }
+      ]
+    }
+  ]
+}

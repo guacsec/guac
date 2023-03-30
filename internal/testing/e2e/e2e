@@ -1,0 +1,85 @@
+#!/bin/bash
+
+#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -euf -o pipefail
+
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+GUAC_DIR=$(cd ${SCRIPT_DIR}/../../..; pwd)
+
+guac_data_hash="254d737ebc42ca32f95033e93370f5427e3fce64"
+
+echo @@@@ Installing gql Python package
+pip install gql[all]
+
+echo @@@@ Cloning guac-data
+pushd "$GUAC_DIR"
+git clone https://github.com/guacsec/guac-data.git
+pushd guac-data
+git checkout $guac_data_hash
+popd
+popd
+
+echo @@@@ Starting up graphql_playground server in background
+go run "${GUAC_DIR}/cmd/graphql_playground" &
+
+echo @@@@ Ingesting guac-data into server
+go run "${GUAC_DIR}/cmd/guacone" files "${GUAC_DIR}/guac-data/docs/"
+
+echo @@@@ Running certifiers
+go run "${GUAC_DIR}/cmd/guacone" certifier
+
+queries="${GUAC_DIR}/demo/queries.gql"
+
+echo @@@@ Running queries and validating output
+
+cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ1 | jq ' .packages |= sort ' > "${GUAC_DIR}/gotPkgQ1.json"
+diff -u "${SCRIPT_DIR}/expectPkgQ1.json" "${GUAC_DIR}/gotPkgQ1.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ2 | jq ' .packages[].namespaces |= sort ' > "${GUAC_DIR}/gotPkgQ2.json"
+diff -u "${SCRIPT_DIR}/expectPkgQ2.json" "${GUAC_DIR}/gotPkgQ2.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ3 | jq ' del(.. | .id?) | .packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.version) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) ' > "${GUAC_DIR}/gotPkgQ3.json"
+diff -u "${SCRIPT_DIR}/expectPkgQ3.json" "${GUAC_DIR}/gotPkgQ3.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ4 | jq ' del(.. | .id?) '> "${GUAC_DIR}/gotPkgQ4.json"
+diff -u "${SCRIPT_DIR}/expectPkgQ4.json" "${GUAC_DIR}/gotPkgQ4.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o IsDependencyQ1 | jq ' .IsDependency |= sort ' > "${GUAC_DIR}/gotIsDependencyQ1.json"
+diff -u "${SCRIPT_DIR}/expectIsDependencyQ1.json" "${GUAC_DIR}/gotIsDependencyQ1.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o IsDependencyQ2 | jq 'del(.. | .id?) | del(.. | .origin?)' > "${GUAC_DIR}/gotIsDependencyQ2.json"
+diff -u "${SCRIPT_DIR}/expectIsDependencyQ2.json" "${GUAC_DIR}/gotIsDependencyQ2.json"
+
+id1=$(cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ5 | jq -r ' .packages[0].namespaces[0].names[0].id ')
+id2=$(cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ6 | jq -r ' .packages[0].namespaces[0].names[0].id ')
+
+cat "$queries" | gql-cli http://localhost:8080/query -o PathQ1 -V subject:${id1} target:${id2} | jq 'del(.. | .id?) | del(.. | .origin?)' > "${GUAC_DIR}/gotPathQ1.json"
+diff -u "${SCRIPT_DIR}/expectPathQ1.json" "${GUAC_DIR}/gotPathQ1.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o OSVQ1 | jq 'del(.. | .id?)' > "${GUAC_DIR}/gotOSVQ1.json"
+diff -u "${SCRIPT_DIR}/expectOSVQ1.json" "${GUAC_DIR}/gotOSVQ1.json"
+
+cat "$queries" | gql-cli http://localhost:8080/query -o CertifyVulnQ1 | jq 'del(.. | .id?) | del(.. | .timeScanned?)' > "${GUAC_DIR}/gotCertifyVulnQ1.json"
+diff -u "${SCRIPT_DIR}/expectCertifyVulnQ1.json" "${GUAC_DIR}/gotCertifyVulnQ1.json"
+
+id3=$(cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ7 | jq -r ' .packages[0].namespaces[0].names[0].id ')
+id4=$(cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ8 | jq -r ' .packages[0].namespaces[0].names[0].id ')
+
+"${GUAC_DIR}/demo/path.py" $id3 $id4 | tail -n +2 | jq 'del(.. | .id?) | del(.. | .origin?)' > "${GUAC_DIR}/gotPathPy.json"
+diff -u "${SCRIPT_DIR}/expectPathPy.json" "${GUAC_DIR}/gotPathPy.json"
+
+# Note: graphql_playground is left running, CI will clean it up

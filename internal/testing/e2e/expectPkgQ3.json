@@ -1,0 +1,101 @@
+{
+  "packages": [
+    {
+      "type": "deb",
+      "namespaces": [
+        {
+          "namespace": "debian",
+          "names": [
+            {
+              "name": "libp11-kit0",
+              "versions": [
+                {
+                  "version": "0.23.22-1",
+                  "qualifiers": [
+                    {
+                      "key": "arch",
+                      "value": "amd64"
+                    },
+                    {
+                      "key": "distro",
+                      "value": "debian-11"
+                    },
+                    {
+                      "key": "upstream",
+                      "value": "p11-kit"
+                    }
+                  ],
+                  "subpath": ""
+                },
+                {
+                  "version": "0.23.22-1",
+                  "qualifiers": [
+                    {
+                      "key": "arch",
+                      "value": "arm64"
+                    },
+                    {
+                      "key": "distro",
+                      "value": "debian-11"
+                    },
+                    {
+                      "key": "upstream",
+                      "value": "p11-kit"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "namespace": "ubuntu",
+          "names": [
+            {
+              "name": "libp11-kit0",
+              "versions": [
+                {
+                  "version": "0.23.20-1ubuntu0.1",
+                  "qualifiers": [
+                    {
+                      "key": "arch",
+                      "value": "amd64"
+                    },
+                    {
+                      "key": "distro",
+                      "value": "ubuntu-20.04"
+                    },
+                    {
+                      "key": "upstream",
+                      "value": "p11-kit"
+                    }
+                  ],
+                  "subpath": ""
+                },
+                {
+                  "version": "0.24.0-6build1",
+                  "qualifiers": [
+                    {
+                      "key": "arch",
+                      "value": "amd64"
+                    },
+                    {
+                      "key": "distro",
+                      "value": "ubuntu-22.04"
+                    },
+                    {
+                      "key": "upstream",
+                      "value": "p11-kit"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

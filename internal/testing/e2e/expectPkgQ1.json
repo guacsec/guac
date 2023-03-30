@@ -1,0 +1,25 @@
+{
+  "packages": [
+    {
+      "type": "alpine"
+    },
+    {
+      "type": "deb"
+    },
+    {
+      "type": "golang"
+    },
+    {
+      "type": "guac"
+    },
+    {
+      "type": "maven"
+    },
+    {
+      "type": "oci"
+    },
+    {
+      "type": "pypi"
+    }
+  ]
+}
