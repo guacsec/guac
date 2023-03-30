@@ -17,7 +17,7 @@ test: generate
 
 # Run the integration tests
 .PHONY: integration-test
-integration-test: generate
+integration-test: generate deps-test
 	go test -tags=integration ./...
 
 .PHONY: check-env
@@ -33,7 +33,7 @@ endif
 e2e-test: generate check-env
 	go test -tags=e2e ./...
 
-# To run the tests locally, run `DEPS_DEV_TOKEN=<deps.dev token> make deps-test`
+# To run the tests locally, run `DEPS_DEV_APIKEY=<deps.dev token> make deps-test`
 .PHONY: deps-test
 deps-test: generate check-env
 	go test -tags=deps ./...
