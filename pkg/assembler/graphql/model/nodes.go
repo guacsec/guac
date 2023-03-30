@@ -181,6 +181,45 @@ type CertifyBadSpec struct {
 	Collector     *string                      `json:"collector,omitempty"`
 }
 
+// CertifyGood is an attestation represents when a package, source or artifact is considered good
+//
+// subject - union type that can be either a package, source or artifact object type
+// justification (property) - string value representing why the subject is considered good
+// origin (property) - where this attestation was generated from (based on which document)
+// collector (property) - the GUAC collector that collected the document that generated this attestation
+//
+// Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+type CertifyGood struct {
+	ID            string                  `json:"id"`
+	Subject       PackageSourceOrArtifact `json:"subject"`
+	Justification string                  `json:"justification"`
+	Origin        string                  `json:"origin"`
+	Collector     string                  `json:"collector"`
+}
+
+func (CertifyGood) IsNode() {}
+
+// CertifyGoodInputSpec is the same as CertifyGood but for mutation input.
+//
+// All fields are required.
+type CertifyGoodInputSpec struct {
+	Justification string `json:"justification"`
+	Origin        string `json:"origin"`
+	Collector     string `json:"collector"`
+}
+
+// CertifyGoodSpec allows filtering the list of CertifyGood to return.
+// Note: Package, Source or artifact must be specified but not at the same time
+// For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+// For source - a SourceName must be specified (name, tag or commit)
+type CertifyGoodSpec struct {
+	ID            *string                      `json:"id,omitempty"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
+	Justification *string                      `json:"justification,omitempty"`
+	Origin        *string                      `json:"origin,omitempty"`
+	Collector     *string                      `json:"collector,omitempty"`
+}
+
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
 type CertifyScorecard struct {

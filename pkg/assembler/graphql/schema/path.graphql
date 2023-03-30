@@ -38,6 +38,7 @@ union Node
   | CertifyVEXStatement
   | HashEqual
   | CertifyBad
+  | CertifyGood
   | PkgEqual
   | CertifyScorecard
   | CertifyVuln

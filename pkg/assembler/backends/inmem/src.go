@@ -84,6 +84,7 @@ type srcNameNode struct {
 	occurrences    []uint32
 	hasSBOMs       []uint32
 	badLinks       []uint32
+	goodLinks      []uint32
 }
 
 func (n *srcNamespaceStruct) ID() uint32 { return n.id }
@@ -106,12 +107,13 @@ func (n *srcNameStruct) Neighbors() []uint32 {
 	return out
 }
 func (n *srcNameNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.scorecardLinks)+len(n.occurrences)+len(n.hasSBOMs)+len(n.badLinks))
+	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.scorecardLinks)+len(n.occurrences)+len(n.hasSBOMs)+len(n.badLinks)+len(n.goodLinks))
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.scorecardLinks...)
 	out = append(out, n.occurrences...)
 	out = append(out, n.hasSBOMs...)
 	out = append(out, n.badLinks...)
+	out = append(out, n.goodLinks...)
 	out = append(out, n.parent)
 	return out
 }
@@ -126,11 +128,12 @@ func (n *srcNameNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildSourceResponse(n.id, nil)
 }
 
-func (p *srcNameNode) setSrcMapLinks(id uint32)     { p.srcMapLinks = append(p.srcMapLinks, id) }
-func (p *srcNameNode) setScorecardLinks(id uint32)  { p.scorecardLinks = append(p.scorecardLinks, id) }
-func (p *srcNameNode) setOccurrenceLinks(id uint32) { p.occurrences = append(p.occurrences, id) }
-func (p *srcNameNode) setHasSBOM(id uint32)         { p.hasSBOMs = append(p.hasSBOMs, id) }
-func (p *srcNameNode) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
+func (p *srcNameNode) setSrcMapLinks(id uint32)      { p.srcMapLinks = append(p.srcMapLinks, id) }
+func (p *srcNameNode) setScorecardLinks(id uint32)   { p.scorecardLinks = append(p.scorecardLinks, id) }
+func (p *srcNameNode) setOccurrenceLinks(id uint32)  { p.occurrences = append(p.occurrences, id) }
+func (p *srcNameNode) setHasSBOM(id uint32)          { p.hasSBOMs = append(p.hasSBOMs, id) }
+func (p *srcNameNode) setCertifyBadLinks(id uint32)  { p.badLinks = append(p.badLinks, id) }
+func (p *srcNameNode) setCertifyGoodLinks(id uint32) { p.goodLinks = append(p.goodLinks, id) }
 
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {

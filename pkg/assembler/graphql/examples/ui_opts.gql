@@ -88,6 +88,9 @@ query GetNeighbors ($nodeId: ID!) {
     ... on CertifyBad {
         ...allCertifyBadTree
     }
+    ... on CertifyGood {
+        ...allCertifyGoodTree
+    }
     ... on CertifyPkg {
         ...allCertifyPkgTree
     }

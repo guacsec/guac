@@ -107,6 +107,6 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that two packages are similar"
+  "Adds a certification that a package, source or artifact is considered bad"
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
 }

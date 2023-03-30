@@ -68,6 +68,14 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
+	CertifyGood struct {
+		Collector     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Justification func(childComplexity int) int
+		Origin        func(childComplexity int) int
+		Subject       func(childComplexity int) int
+	}
+
 	CertifyScorecard struct {
 		ID        func(childComplexity int) int
 		Scorecard func(childComplexity int) int
@@ -166,6 +174,7 @@ type ComplexityRoot struct {
 		IngestArtifact        func(childComplexity int, artifact *model.ArtifactInputSpec) int
 		IngestBuilder         func(childComplexity int, builder *model.BuilderInputSpec) int
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
+		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
@@ -236,6 +245,7 @@ type ComplexityRoot struct {
 		Artifacts           func(childComplexity int, artifactSpec *model.ArtifactSpec) int
 		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
 		CertifyBad          func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
+		CertifyGood         func(childComplexity int, certifyGoodSpec *model.CertifyGoodSpec) int
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
@@ -437,6 +447,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyBad.Subject(childComplexity), true
+
+	case "CertifyGood.collector":
+		if e.complexity.CertifyGood.Collector == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.Collector(childComplexity), true
+
+	case "CertifyGood.id":
+		if e.complexity.CertifyGood.ID == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.ID(childComplexity), true
+
+	case "CertifyGood.justification":
+		if e.complexity.CertifyGood.Justification == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.Justification(childComplexity), true
+
+	case "CertifyGood.origin":
+		if e.complexity.CertifyGood.Origin == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.Origin(childComplexity), true
+
+	case "CertifyGood.subject":
+		if e.complexity.CertifyGood.Subject == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.Subject(childComplexity), true
 
 	case "CertifyScorecard.id":
 		if e.complexity.CertifyScorecard.ID == nil {
@@ -885,6 +930,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestCertifyBad(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyBad"].(model.CertifyBadInputSpec)), true
 
+	case "Mutation.ingestCertifyGood":
+		if e.complexity.Mutation.IngestCertifyGood == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestCertifyGood_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestCertifyGood(childComplexity, args["subject"].(model.PackageSourceOrArtifactInput), args["pkgMatchType"].(*model.MatchFlags), args["certifyGood"].(model.CertifyGoodInputSpec)), true
+
 	case "Mutation.ingestCVE":
 		if e.complexity.Mutation.IngestCve == nil {
 			break
@@ -1280,6 +1337,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(*model.CertifyBadSpec)), true
+
+	case "Query.CertifyGood":
+		if e.complexity.Query.CertifyGood == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyGood_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(*model.CertifyGoodSpec)), true
 
 	case "Query.CertifyVEXStatement":
 		if e.complexity.Query.CertifyVEXStatement == nil {
@@ -1772,6 +1841,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCVESpec,
 		ec.unmarshalInputCertifyBadInputSpec,
 		ec.unmarshalInputCertifyBadSpec,
+		ec.unmarshalInputCertifyGoodInputSpec,
+		ec.unmarshalInputCertifyGoodSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
@@ -2109,8 +2180,82 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a certification that two packages are similar"
+  "Adds a certification that a package, source or artifact is considered bad"
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
+}
+`, BuiltIn: false},
+	{Name: "../schema/certifyGood.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# NOTE: This is experimental and might change in the future!
+
+# Defines a GraphQL schema for the CertifyGood. It contains the subject (which
+#  can be either a package, source or artifact), justification, origin of the
+#  attestation, and collector
+
+"""
+CertifyGood is an attestation represents when a package, source or artifact is considered good
+
+subject - union type that can be either a package, source or artifact object type
+justification (property) - string value representing why the subject is considered good
+origin (property) - where this attestation was generated from (based on which document)
+collector (property) - the GUAC collector that collected the document that generated this attestation
+
+Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+"""
+type CertifyGood {
+  id: ID!
+  subject: PackageSourceOrArtifact!
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+"""
+CertifyGoodSpec allows filtering the list of CertifyGood to return.
+Note: Package, Source or artifact must be specified but not at the same time
+For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
+For source - a SourceName must be specified (name, tag or commit)
+"""
+input CertifyGoodSpec {
+  id: ID
+  subject: PackageSourceOrArtifactSpec
+  justification: String
+  origin: String
+  collector: String
+}
+
+"""
+CertifyGoodInputSpec is the same as CertifyGood but for mutation input.
+
+All fields are required.
+"""
+input CertifyGoodInputSpec {
+  justification: String!
+  origin: String!
+  collector: String!
+}
+
+extend type Query {
+  "Returns all CertifyGood"
+  CertifyGood(certifyGoodSpec: CertifyGoodSpec): [CertifyGood!]!
+}
+
+extend type Mutation {
+  "Adds a certification that a package, source or artifact is considered good"
+  ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyScorecard.graphql", Input: `#
@@ -3593,6 +3738,7 @@ union Node
   | CertifyVEXStatement
   | HashEqual
   | CertifyBad
+  | CertifyGood
   | PkgEqual
   | CertifyScorecard
   | CertifyVuln

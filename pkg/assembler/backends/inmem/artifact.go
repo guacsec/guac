@@ -38,17 +38,19 @@ type artStruct struct {
 	hasSLSAs    []uint32
 	vexLinks    []uint32
 	badLinks    []uint32
+	goodLinks   []uint32
 }
 
 func (n *artStruct) ID() uint32 { return n.id }
 
 func (n *artStruct) Neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences)+len(n.hasSLSAs)+len(n.vexLinks)+len(n.badLinks))
+	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences)+len(n.hasSLSAs)+len(n.vexLinks)+len(n.badLinks)+len(n.goodLinks))
 	out = append(out, n.hashEquals...)
 	out = append(out, n.occurrences...)
 	out = append(out, n.hasSLSAs...)
 	out = append(out, n.vexLinks...)
 	out = append(out, n.badLinks...)
+	out = append(out, n.goodLinks...)
 	return out
 }
 
@@ -56,11 +58,12 @@ func (n *artStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convArtifact(n), nil
 }
 
-func (n *artStruct) setHashEquals(id uint32)      { n.hashEquals = append(n.hashEquals, id) }
-func (n *artStruct) setOccurrences(id uint32)     { n.occurrences = append(n.occurrences, id) }
-func (n *artStruct) setHasSLSAs(id uint32)        { n.hasSLSAs = append(n.hasSLSAs, id) }
-func (n *artStruct) setVexLinks(id uint32)        { n.vexLinks = append(n.vexLinks, id) }
-func (n *artStruct) setCertifyBadLinks(id uint32) { n.badLinks = append(n.badLinks, id) }
+func (n *artStruct) setHashEquals(id uint32)       { n.hashEquals = append(n.hashEquals, id) }
+func (n *artStruct) setOccurrences(id uint32)      { n.occurrences = append(n.occurrences, id) }
+func (n *artStruct) setHasSLSAs(id uint32)         { n.hasSLSAs = append(n.hasSLSAs, id) }
+func (n *artStruct) setVexLinks(id uint32)         { n.vexLinks = append(n.vexLinks, id) }
+func (n *artStruct) setCertifyBadLinks(id uint32)  { n.badLinks = append(n.badLinks, id) }
+func (n *artStruct) setCertifyGoodLinks(id uint32) { n.goodLinks = append(n.goodLinks, id) }
 
 // TODO convert to unit tests
 // func registerAllArtifacts(c *demoClient) {

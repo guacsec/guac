@@ -184,6 +184,27 @@ fragment allCertifyBad on CertifyBad {
       ...allArtifactTree
     }
   }
+  origin
+  collector
+}
+
+fragment allCertifyGood on CertifyGood {
+  id
+  justification
+  subject {
+    __typename
+    ... on Package {
+      ...AllPkgTree
+    }
+    ... on Source {
+      ...AllSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+  }
+  origin
+  collector
 }
 
 fragment allHashEqualTree on HashEqual {

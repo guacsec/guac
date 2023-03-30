@@ -129,6 +129,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._CertifyBad(ctx, sel, obj)
+	case model.CertifyGood:
+		return ec._CertifyGood(ctx, sel, &obj)
+	case *model.CertifyGood:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CertifyGood(ctx, sel, obj)
 	case model.PkgEqual:
 		return ec._PkgEqual(ctx, sel, &obj)
 	case *model.PkgEqual:
