@@ -509,6 +509,28 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 		node = c.index[versionNode.parent]
 	}
 
+	if node, ok := node.(*pkgVersionStruct); ok {
+		if node.id == id {
+			for _, versionNode := range node.versions {
+				if filter != nil && noMatch(filter.Version, versionNode.version) {
+					continue
+				}
+				if filter != nil && noMatch(filter.Subpath, versionNode.subpath) {
+					continue
+				}
+				if filter != nil && noMatchQualifiers(filter, versionNode.qualifiers) {
+					continue
+				}
+				pvl = append(pvl, &model.PackageVersion{
+					ID:         nodeID(versionNode.id),
+					Version:    versionNode.version,
+					Subpath:    versionNode.subpath,
+					Qualifiers: getCollectedPackageQualifiers(versionNode.qualifiers),
+				})
+			}
+		}
+	}
+
 	pnl := []*model.PackageName{}
 	if versionStruct, ok := node.(*pkgVersionStruct); ok {
 		if filter != nil && noMatch(filter.Name, versionStruct.name) {
