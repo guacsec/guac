@@ -103,12 +103,12 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if os.Getenv("DEPS_DEV_TOKEN") == "" {
-				t.Errorf("DEPS_DEV_TOKEN is not set")
+			if os.Getenv("DEPS_DEV_APIKEY") == "" {
+				t.Fatalf("DEPS_DEV_APIKEY is not set")
 			}
-			depsToken := os.Getenv("DEPS_DEV_TOKEN")
+			depsToken := os.Getenv("DEPS_DEV_APIKEY")
 			if depsToken == "" {
-				t.Errorf("DEPS_DEV_TOKEN is not set")
+				t.Fatalf("DEPS_DEV_APIKEY is not set")
 			}
 			c, err := NewDepsCollector(ctx, depsToken, toPurlSource(tt.packages))
 			if (err != nil) != tt.wantErr {

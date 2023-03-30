@@ -54,6 +54,7 @@ jobs:
       - name: Run integration tests
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make integration-test
 
   test-unit:

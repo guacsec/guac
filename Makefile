@@ -15,28 +15,20 @@ all: test cover fmt lint build generate
 test: generate
 	echo 'mode: atomic' > coverage.txt && go test -covermode=atomic -coverprofile=coverage.txt -v -race -timeout=30s ./...
 
-# Run the integration tests
+# Run the integration tests. Requires github token for scorecard (GITHUB_AUTH_TOKEN=<your token>)
 .PHONY: integration-test
-integration-test: generate
+integration-test: generate check-env
 	go test -tags=integration ./...
+
+# Run the deps.dev tests. Requires Deps.dev API key (DEPS_DEV_APIKEY=<deps.dev token>)
+.PHONY: deps-dev-test
+deps-dev-test: generate
+	go test -tags=deps ./...
 
 .PHONY: check-env
 ifndef GITHUB_AUTH_TOKEN
 	$(error GITHUB_AUTH_TOKEN is not set)
 endif
-
-# Run the end to end tests and requires GITHUB_AUTH_TOKEN to be set. If not the tests will fail.
-# Not included in integration tests because it requires a github token.
-# To run the tests locally, run `GITHUB_AUTH_TOKEN=<your token> make e2e-test`
-# https://github.com/ossf/scorecard#authentication
-.PHONY: e2e-test
-e2e-test: generate check-env
-	go test -tags=e2e ./...
-
-# To run the tests locally, run `DEPS_DEV_TOKEN=<deps.dev token> make deps-test`
-.PHONY: deps-test
-deps-test: generate check-env
-	go test -tags=deps ./...
 
 # Run all the tests and opens the coverage report
 .PHONY: cover

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build e2e
+//go:build integration
 
 package scorecard
 
@@ -48,11 +48,11 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if os.Getenv("GITHUB_AUTH_TOKEN") == "" {
-				t.Errorf("GITHUB_AUTH_TOKEN is not set")
+				t.Fatalf("GITHUB_AUTH_TOKEN is not set")
 			}
 			ghToken := os.Getenv("GITHUB_AUTH_TOKEN")
 			if ghToken == "" {
-				t.Errorf("GITHUB_AUTH_TOKEN is not set")
+				t.Fatalf("GITHUB_AUTH_TOKEN is not set")
 			}
 			t.Setenv("GITHUB_AUTH_TOKEN", ghToken)
 			got, err := test.sc.GetScore(test.repoName, test.commit, test.tag)
