@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
@@ -50,6 +51,13 @@ func identifierStringsToCollectEntry(i *parser_common.IdentifierStrings) []*pb.C
 		})
 	}
 
+	for _, v := range i.PurlStrings {
+		entries = append(entries, &pb.CollectEntry{
+			Type:  pb.CollectDataType_DATATYPE_PURL,
+			Value: v,
+		})
+	}
+
 	for _, v := range i.UnclassifiedStrings {
 		e, err := guessUnknownIdentifierString(v)
 		if err == nil {
@@ -72,5 +80,11 @@ func guessUnknownIdentifierString(s string) (*pb.CollectEntry, error) {
 		}, nil
 	}
 
+	if _, err := helpers.PurlToPkg(s); err == nil {
+		return &pb.CollectEntry{
+			Type:  pb.CollectDataType_DATATYPE_PURL,
+			Value: s,
+		}, nil
+	}
 	return nil, fmt.Errorf("unable to guess collect entry")
 }
