@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 )
@@ -79,7 +80,7 @@ func guessUnknownIdentifierString(s string) (*pb.CollectEntry, error) {
 		}, nil
 	}
 
-	if strings.HasPrefix(s, "pkg:") {
+	if _, err := helpers.PurlToPkg(s); err == nil {
 		return &pb.CollectEntry{
 			Type:  pb.CollectDataType_DATATYPE_PURL,
 			Value: s,
