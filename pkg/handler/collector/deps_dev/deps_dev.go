@@ -20,7 +20,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -53,9 +52,11 @@ type depsCollector struct {
 	collectDataSource datasource.CollectSource
 	apiKey            string
 	client            pb.InsightsClient
+	poll              bool
+	interval          time.Duration
 }
 
-func NewDepsCollector(ctx context.Context, token string, collectDataSource datasource.CollectSource) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, token string, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) (*depsCollector, error) {
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
@@ -76,6 +77,8 @@ func NewDepsCollector(ctx context.Context, token string, collectDataSource datas
 		collectDataSource: collectDataSource,
 		apiKey:            token,
 		client:            client,
+		poll:              poll,
+		interval:          interval,
 	}, nil
 }
 
@@ -83,15 +86,38 @@ func NewDepsCollector(ctx context.Context, token string, collectDataSource datas
 func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	ctx = metadata.AppendToOutgoingContext(ctx, "X-DepsDev-APIKey", d.apiKey)
 
-	ds, err := d.collectDataSource.GetDataSources(ctx)
-	if err != nil {
-		return fmt.Errorf("unable to retrieve datasource: %w", err)
+	populatePurls := func() error {
+		ds, err := d.collectDataSource.GetDataSources(ctx)
+		if err != nil {
+			return fmt.Errorf("unable to retrieve datasource: %w", err)
+		}
+		for _, purl := range ds.PurlDataSources {
+			err := d.fetchDependencies(ctx, purl.Value, docChannel)
+			if err != nil {
+				return fmt.Errorf("failed to fetch dependencies: %w", err)
+			}
+		}
+		return nil
 	}
 
-	for _, purl := range ds.PurlDataSources {
-		err := d.fetchDependencies(ctx, purl.Value, docChannel)
+	if d.poll {
+		for {
+			select {
+			// If the context has been canceled it contains an err which we can throw.
+			case <-ctx.Done():
+				return ctx.Err() // nolint:wrapcheck
+			default:
+				err := populatePurls()
+				if err != nil {
+					return fmt.Errorf("unable to retrieve purls from collector subscriber: %w", err)
+				}
+				time.Sleep(d.interval)
+			}
+		}
+	} else {
+		err := populatePurls()
 		if err != nil {
-			return fmt.Errorf("failed to fetch dependencies: %w", err)
+			return fmt.Errorf("unable to retrieve purls from collector subscriber: %w", err)
 		}
 	}
 
@@ -103,7 +129,8 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	component := &PackageComponent{}
 	packageInput, err := helpers.PurlToPkg(purl)
 	if err != nil {
-		return err
+		logger.Infof("failed to parse purl to pkg: %s", purl)
+		return nil
 	}
 
 	// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
@@ -116,14 +143,20 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Name, *packageInput.Version, component)
 	if err != nil {
-		logger.Errorf("failed to get additional metadata for package: %s, err: %w", purl, err)
+		logger.Infof("failed to get additional metadata for package: %s, err: %w", purl, err)
+	}
+
+	sys, err := parseSystem(packageInput.Type)
+	if err != nil {
+		logger.Infof("failed to parse system: err: %w", err)
+		return nil
 	}
 
 	// Make an RPC Request. The returned result is a stream of
 	// DependenciesResponse structs.
 	dependenciesReq := &pb.GetDependenciesRequest{
 		VersionKey: &pb.VersionKey{
-			System:  parseSystem(packageInput.Type),
+			System:  sys,
 			Name:    packageInput.Name,
 			Version: *packageInput.Version,
 		},
@@ -131,7 +164,8 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	deps, err := d.client.GetDependencies(ctx, dependenciesReq)
 	if err != nil {
-		log.Fatal(err)
+		logger.Infof("failed to get dependencies", err)
+		return nil
 	}
 
 	for i, node := range deps.Nodes {
@@ -154,7 +188,8 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Name, *depPackageInput.Version, depComponent)
 		if err != nil {
-			logger.Errorf("failed to get additional metadata for package: %s, err: %w", purl, err)
+			logger.Infof("failed to get additional metadata for package: %s, err: %w", purl, err)
+			continue
 		}
 		component.DepPackages = append(component.DepPackages, depComponent)
 	}
@@ -179,9 +214,13 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 }
 
 func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, name, version string, pkgComponent *PackageComponent) error {
+	sys, err := parseSystem(system)
+	if err != nil {
+		return err
+	}
 	versionReq := &pb.GetVersionRequest{
 		VersionKey: &pb.VersionKey{
-			System:  parseSystem(system),
+			System:  sys,
 			Name:    name,
 			Version: version,
 		},
@@ -189,7 +228,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 
 	versionResponse, err := d.client.GetVersion(ctx, versionReq)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get version information: err: %w", err)
 	}
 
 	for _, link := range versionResponse.Links {
@@ -246,12 +285,12 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 }
 
 // parseSystem returns the pb.System value represented by the argument string.
-func parseSystem(name string) pb.System {
+func parseSystem(name string) (pb.System, error) {
 	sys, ok := pb.System_value[strings.ToUpper(name)]
 	if !ok {
-		log.Fatalf("unknown Insights system %q", name)
+		return pb.System_SYSTEM_UNSPECIFIED, fmt.Errorf("unknown Insights system %q", name)
 	}
-	return pb.System(sys)
+	return pb.System(sys), nil
 }
 
 // Type returns the collector type
