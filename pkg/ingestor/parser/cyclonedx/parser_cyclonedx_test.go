@@ -27,6 +27,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
@@ -230,7 +231,8 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 						Source:    "test",
 					},
 				},
-				packagePackages: map[string][]model.PkgInputSpec{},
+				packagePackages:   map[string][]model.PkgInputSpec{},
+				identifierStrings: &common.IdentifierStrings{},
 			}
 			c.cdxBom = tt.cdxBom
 			c.getTopLevelPackage(tt.cdxBom)

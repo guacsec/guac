@@ -33,15 +33,16 @@ import (
 )
 
 type cyclonedxParser struct {
-	doc             *processor.Document
-	packagePackages map[string][]model.PkgInputSpec
-
-	cdxBom *cdx.BOM
+	doc               *processor.Document
+	packagePackages   map[string][]model.PkgInputSpec
+	identifierStrings *common.IdentifierStrings
+	cdxBom            *cdx.BOM
 }
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
-		packagePackages: map[string][]model.PkgInputSpec{},
+		packagePackages:   map[string][]model.PkgInputSpec{},
+		identifierStrings: &common.IdentifierStrings{},
 	}
 }
 
@@ -103,6 +104,7 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 			}
 		}
 		topPackage, err := asmhelpers.PurlToPkg(purl)
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, purl)
 		if err != nil {
 			return err
 		}
@@ -123,6 +125,7 @@ func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 					return err
 				}
 				c.packagePackages[string(comp.BOMRef)] = append(c.packagePackages[string(comp.BOMRef)], *pkg)
+				c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, comp.PackageURL)
 				//TODO(dejanb): Parse hashes and create artifact nodes and isOccurence relations https://github.com/guacsec/guac/issues/632
 			}
 		}
@@ -148,7 +151,7 @@ func parseCycloneDXBOM(doc *processor.Document) (*cdx.BOM, error) {
 }
 
 func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return c.identifierStrings, nil
 }
 
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
