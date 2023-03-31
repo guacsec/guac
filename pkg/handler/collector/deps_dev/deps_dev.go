@@ -297,6 +297,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 		vulnerabilities = append(vulnerabilities, &osv)
 	}
 	pkgComponent.Vulnerabilities = append(pkgComponent.Vulnerabilities, vulnerabilities...)
+
 	// add time when data was obtained
 	pkgComponent.UpdateTime = time.Now().UTC()
 

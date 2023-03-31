@@ -75,6 +75,11 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			if err := ingestCertifyGood(ctx, gqlclient, p.CertifyGood); err != nil {
 				return err
 			}
+
+			logger.Infof("assembling VEX : %v", len(p.Vex))
+			if err := ingestVex(ctx, gqlclient, p.Vex); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -202,6 +207,59 @@ func hasSourceAt(ctx context.Context, client graphql.Client, hsaList []assembler
 		_, err := model.HasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
 		if err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+func ingestVex(ctx context.Context, client graphql.Client, vis []assembler.VexIngest) error {
+	for _, vi := range vis {
+		if vi.CVE != nil && vi.GHSA != nil {
+			return fmt.Errorf("unable to create VexIngest with both CVE and GHSA specified")
+		}
+
+		if vi.CVE == nil && vi.GHSA == nil {
+			return fmt.Errorf("unable to create VexIngest without either CVE or GHSA specified")
+		}
+
+		if vi.Artifact != nil && vi.Pkg != nil {
+			return fmt.Errorf("unable to create VexIngest with both Pkg and Artifact specified")
+		}
+
+		if vi.Artifact == nil && vi.Pkg == nil {
+			return fmt.Errorf("unable to create VexIngest without either Pkg or Artifact specified")
+		}
+
+		if vi.CVE != nil {
+			if vi.Pkg != nil {
+				_, err := model.VexPackageAndCve(ctx, client, *vi.Pkg, *vi.CVE, *vi.VexData)
+				if err != nil {
+					return err
+				}
+			}
+
+			if vi.Artifact != nil {
+				_, err := model.VexArtifactAndCve(ctx, client, *vi.Artifact, *vi.CVE, *vi.VexData)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if vi.GHSA != nil {
+			if vi.Pkg != nil {
+				_, err := model.VEXPackageAndGhsa(ctx, client, *vi.Pkg, *vi.GHSA, *vi.VexData)
+				if err != nil {
+					return err
+				}
+			}
+
+			if vi.Artifact != nil {
+				_, err := model.VexArtifactAndGhsa(ctx, client, *vi.Artifact, *vi.GHSA, *vi.VexData)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil

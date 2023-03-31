@@ -88,6 +88,7 @@ All fields are required.
 """
 input VexStatementInputSpec {
   justification: String!
+  status: String!
   knownSince: Time!
   origin: String!
   collector: String!

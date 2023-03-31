@@ -53,6 +53,18 @@ mutation CertifyGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: V
   }
 }
 
+mutation CertifyRHSA($pkg: PkgInputSpec!, $rhsa: RHSAInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
+  ingestPackage(pkg: $pkg) {
+    ...AllPkgTree
+  }
+  ingestRHSA(rhsa: $rhsa) {
+    ...allRHSATree
+  }
+  ingestVulnerability(pkg: $pkg, vulnerability: {rhsa: $rhsa}, certifyVuln: $certifyVuln) {
+    ...AllCertifyVuln
+  }
+}
+
 mutation CertifyNoKnownVuln($pkg: PkgInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {
     ...AllPkgTree

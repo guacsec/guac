@@ -23,6 +23,7 @@ import (
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/handler/processor/csaf"
 	"github.com/guacsec/guac/pkg/handler/processor/cyclonedx"
 	"github.com/guacsec/guac/pkg/handler/processor/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor/dsse"
@@ -43,6 +44,7 @@ func init() {
 	_ = RegisterDocumentProcessor(&ite6.ITE6Processor{}, processor.DocumentITE6Vul)
 	_ = RegisterDocumentProcessor(&dsse.DSSEProcessor{}, processor.DocumentDSSE)
 	_ = RegisterDocumentProcessor(&spdx.SPDXProcessor{}, processor.DocumentSPDX)
+	_ = RegisterDocumentProcessor(&csaf.CSAFProcessor{}, processor.DocumentCsaf)
 	_ = RegisterDocumentProcessor(&scorecard.ScorecardProcessor{}, processor.DocumentScorecard)
 	_ = RegisterDocumentProcessor(&cyclonedx.CycloneDXProcessor{}, processor.DocumentCycloneDX)
 	_ = RegisterDocumentProcessor(&deps_dev.DepsDev{}, processor.DocumentDepsDev)
