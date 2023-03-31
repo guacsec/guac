@@ -34,21 +34,22 @@ import (
 
 type spdxParser struct {
 	// TODO: Add hasSBOMInputSpec when its created
-	doc              *processor.Document
-	packagePackages  map[string][]model.PkgInputSpec
-	packageArtifacts map[string][]model.ArtifactInputSpec
-	filePackages     map[string][]model.PkgInputSpec
-	fileArtifacts    map[string][]model.ArtifactInputSpec
-
-	spdxDoc *v2_2.Document
+	doc               *processor.Document
+	packagePackages   map[string][]model.PkgInputSpec
+	packageArtifacts  map[string][]model.ArtifactInputSpec
+	filePackages      map[string][]model.PkgInputSpec
+	fileArtifacts     map[string][]model.ArtifactInputSpec
+	identifierStrings *common.IdentifierStrings
+	spdxDoc           *v2_2.Document
 }
 
 func NewSpdxParser() common.DocumentParser {
 	return &spdxParser{
-		packagePackages:  map[string][]model.PkgInputSpec{},
-		packageArtifacts: map[string][]model.ArtifactInputSpec{},
-		filePackages:     map[string][]model.PkgInputSpec{},
-		fileArtifacts:    map[string][]model.ArtifactInputSpec{},
+		packagePackages:   map[string][]model.PkgInputSpec{},
+		packageArtifacts:  map[string][]model.ArtifactInputSpec{},
+		filePackages:      map[string][]model.PkgInputSpec{},
+		fileArtifacts:     map[string][]model.ArtifactInputSpec{},
+		identifierStrings: &common.IdentifierStrings{},
 	}
 }
 
@@ -86,6 +87,7 @@ func (s *spdxParser) getTopLevelPackage() error {
 			return err
 		}
 		s.packagePackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packagePackages[string(s.spdxDoc.SPDXIdentifier)], *topPackage)
+		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purl)
 	}
 	return nil
 }
@@ -107,6 +109,8 @@ func (s *spdxParser) getPackages() error {
 		if purl == "" {
 			purl = asmhelpers.GuacPkgPurl(pac.PackageName, &pac.PackageVersion)
 		}
+
+		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purl)
 
 		pkg, err := asmhelpers.PurlToPkg(purl)
 		if err != nil {
@@ -262,7 +266,7 @@ func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformatio
 }
 
 func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return s.identifierStrings, nil
 }
 
 func getJustification(r *v2_2.Relationship) string {
