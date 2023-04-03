@@ -129,13 +129,13 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	component := &PackageComponent{}
 	packageInput, err := helpers.PurlToPkg(purl)
 	if err != nil {
-		logger.Infof("failed to parse purl to pkg: %s", purl)
+		logger.Debugf("failed to parse purl to pkg: %s", purl)
 		return nil
 	}
 
 	// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
 	if *packageInput.Version == "" {
-		logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
+		logger.Debugf("purl does not contain version, skipping deps.dev query: %s", purl)
 		return nil
 	}
 
@@ -143,12 +143,12 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Name, *packageInput.Version, component)
 	if err != nil {
-		logger.Infof("failed to get additional metadata for package: %s, err: %w", purl, err)
+		logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
 	}
 
 	sys, err := parseSystem(packageInput.Type)
 	if err != nil {
-		logger.Infof("failed to parse system: err: %w", err)
+		logger.Debugf("failed to parse system: err: %w", err)
 		return nil
 	}
 
@@ -164,7 +164,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	deps, err := d.client.GetDependencies(ctx, dependenciesReq)
 	if err != nil {
-		logger.Infof("failed to get dependencies", err)
+		logger.Debugf("failed to get dependencies", err)
 		return nil
 	}
 
@@ -188,12 +188,12 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Name, *depPackageInput.Version, depComponent)
 		if err != nil {
-			logger.Infof("failed to get additional metadata for package: %s, err: %w", purl, err)
-			continue
+			logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
 		}
 		component.DepPackages = append(component.DepPackages, depComponent)
 	}
 
+	logger.Infof("obtained additional metadata for package: %s", purl)
 	blob, err := json.Marshal(component)
 	if err != nil {
 		return err
