@@ -89,6 +89,22 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		poll:    false,
 		wantErr: false,
 	}, {
+		name:     "duplicate package",
+		packages: []string{"pkg:npm/yargs-parser@4.2.1", "pkg:npm/yargs-parser@4.2.1"},
+		want: []*processor.Document{
+			{
+				Blob:   []byte(testdata.CollectedYargsParser),
+				Type:   processor.DocumentDepsDev,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: DepsCollector,
+					Source:    DepsCollector,
+				},
+			},
+		},
+		poll:    false,
+		wantErr: false,
+	}, {
 		name:     "foreign-types package",
 		packages: []string{"pkg:cargo/foreign-types@0.3.2"},
 		want: []*processor.Document{

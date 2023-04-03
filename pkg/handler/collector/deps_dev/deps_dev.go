@@ -54,6 +54,7 @@ type depsCollector struct {
 	client            pb.InsightsClient
 	poll              bool
 	interval          time.Duration
+	checkedPurls      map[string]*PackageComponent
 }
 
 func NewDepsCollector(ctx context.Context, token string, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) (*depsCollector, error) {
@@ -79,6 +80,7 @@ func NewDepsCollector(ctx context.Context, token string, collectDataSource datas
 		client:            client,
 		poll:              poll,
 		interval:          interval,
+		checkedPurls:      map[string]*PackageComponent{},
 	}, nil
 }
 
@@ -127,6 +129,13 @@ func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	component := &PackageComponent{}
+
+	// check if top level purl has already been queried
+	if _, ok := d.checkedPurls[purl]; ok {
+		logger.Debugf("purl %s already queried: %s", purl)
+		return nil
+	}
+
 	packageInput, err := helpers.PurlToPkg(purl)
 	if err != nil {
 		logger.Debugf("failed to parse purl to pkg: %s", purl)
@@ -184,6 +193,15 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 			Subpath:    ptrfrom.String(""),
 		}
 
+		// check if dependent package purl has already been queried. If found, append to the list of dependent packages for top level package
+		if foundDepVal, ok := d.checkedPurls[helpers.PkgToPurl(depPackageInput.Type, *depPackageInput.Namespace, depPackageInput.Name,
+			*depPackageInput.Version, *depPackageInput.Subpath, []string{})]; ok {
+
+			logger.Debugf("dependant package purl %s already queried: %s", purl)
+			component.DepPackages = append(component.DepPackages, foundDepVal)
+			continue
+		}
+
 		depComponent.CurrentPackage = depPackageInput
 
 		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Name, *depPackageInput.Version, depComponent)
@@ -194,6 +212,9 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	}
 
 	logger.Infof("obtained additional metadata for package: %s", purl)
+
+	d.checkedPurls[purl] = component
+
 	blob, err := json.Marshal(component)
 	if err != nil {
 		return err
