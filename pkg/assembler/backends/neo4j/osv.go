@@ -111,24 +111,25 @@ func (c *neo4jClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
-			}
+			// FIXME update to OSV without root node.
+			// result, err := tx.Run(sb.String(), queryValues)
+			// if err != nil {
+			// 	return nil, err
+			// }
 
-			osvIds := []*model.OSVId{}
-			for result.Next() {
-				osvId := &model.OSVId{
-					OsvID: result.Record().Values[0].(string),
-				}
-				osvIds = append(osvIds, osvId)
-			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
+			// osvIds := []*model.OSVId{}
+			// for result.Next() {
+			// 	osvId := &model.OSVId{
+			// 		OsvID: result.Record().Values[0].(string),
+			// 	}
+			// 	osvIds = append(osvIds, osvId)
+			// }
+			// if err = result.Err(); err != nil {
+			// 	return nil, err
+			// }
 
 			osv := &model.Osv{
-				OsvIds: osvIds,
+				// OsvIds: osvIds,
 			}
 
 			return []*model.Osv{osv}, nil
@@ -187,9 +188,10 @@ RETURN osvID.id`
 
 // TODO: update to pass in the ID from neo4j
 func generateModelOsv(id string) *model.Osv {
-	osvID := &model.OSVId{OsvID: id}
+	// FIXME update to GHSA without root node.
+	// osvID := &model.OSVId{OsvID: id}
 	osv := model.Osv{
-		OsvIds: []*model.OSVId{osvID},
+		// OsvIds: []*model.OSVId{osvID},
 	}
 	return &osv
 }

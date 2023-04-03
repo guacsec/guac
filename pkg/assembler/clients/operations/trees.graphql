@@ -70,26 +70,17 @@ fragment allBuilderTree on Builder {
 fragment allCveTree on CVE {
   id
   year
-  cveIds {
-    id
-    cveId
-  }
+  cveId
 }
 
 fragment allGHSATree on GHSA {
   id
-  ghsaIds {
-    id
-    ghsaId
-  }
+  ghsaId
 }
 
 fragment allOSVTree on OSV {
   id
-  osvIds {
-    id
-    osvId
-  }
+  osvId
 }
 
 fragment AllCertifyScorecard on CertifyScorecard {

@@ -44,64 +44,42 @@ import (
 // 	}
 // }
 
-const ghsa string = "ghsa"
-
 // Internal data: osv
 type ghsaMap map[string]*ghsaNode
 type ghsaNode struct {
-	id      uint32
-	typeKey string
-	ghsaIDs ghsaIDMap
-}
-type ghsaIDMap map[string]*ghsaIDNode
-type ghsaIDNode struct {
 	id               uint32
-	parent           uint32
 	ghsaID           string
 	certifyVulnLinks []uint32
 	equalVulnLinks   []uint32
 	vexLinks         []uint32
 }
 
-func (n *ghsaIDNode) ID() uint32 { return n.id }
-func (n *ghsaNode) ID() uint32   { return n.id }
+func (n *ghsaNode) ID() uint32 { return n.id }
 
 func (n *ghsaNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.ghsaIDs))
-	for _, v := range n.ghsaIDs {
-		out = append(out, v.id)
-	}
-	return out
-}
-
-func (n *ghsaIDNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
+	out := make([]uint32, 0, len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
 	out = append(out, n.certifyVulnLinks...)
 	out = append(out, n.equalVulnLinks...)
 	out = append(out, n.vexLinks...)
-	out = append(out, n.parent)
 	return out
 }
 
-func (n *ghsaIDNode) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.buildGhsaResponse(n.id, nil)
-}
 func (n *ghsaNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildGhsaResponse(n.id, nil)
 }
 
 // certifyVulnerability back edges
-func (n *ghsaIDNode) setVulnerabilityLinks(id uint32) {
+func (n *ghsaNode) setVulnerabilityLinks(id uint32) {
 	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
 
 // isVulnerability back edges
-func (n *ghsaIDNode) setEqualVulnLinks(id uint32) {
+func (n *ghsaNode) setEqualVulnLinks(id uint32) {
 	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
 
 // certifyVexStatement back edges
-func (n *ghsaIDNode) setVexLinks(id uint32) {
+func (n *ghsaNode) setVexLinks(id uint32) {
 	n.vexLinks = append(n.vexLinks, id)
 }
 
@@ -113,20 +91,9 @@ func (c *demoClient) IngestGhsa(ctx context.Context, input *model.GHSAInputSpec)
 func (c *demoClient) ingestGhsa(ctx context.Context, input *model.GHSAInputSpec, readOnly bool) (*model.Ghsa, error) {
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
-	ghsaStruct, hasGhsa := c.ghsas[ghsa]
-	if !hasGhsa {
-		ghsaStruct = &ghsaNode{
-			id:      c.getNextID(),
-			typeKey: ghsa,
-			ghsaIDs: ghsaIDMap{},
-		}
-		c.index[ghsaStruct.id] = ghsaStruct
-		c.ghsas[ghsa] = ghsaStruct
-	}
-	ghsaIDs := ghsaStruct.ghsaIDs
-	ghsaID := strings.ToLower(input.GhsaID)
 
-	ghsaIDStruct, hasGhsaID := ghsaIDs[ghsaID]
+	ghsaID := strings.ToLower(input.GhsaID)
+	ghsaIDStruct, hasGhsaID := c.ghsas[ghsaID]
 	if !hasGhsaID {
 		if readOnly {
 			c.m.RUnlock()
@@ -134,13 +101,12 @@ func (c *demoClient) ingestGhsa(ctx context.Context, input *model.GHSAInputSpec,
 			c.m.RLock() // relock so that defer unlock does not panic
 			return g, err
 		}
-		ghsaIDStruct = &ghsaIDNode{
+		ghsaIDStruct = &ghsaNode{
 			id:     c.getNextID(),
-			parent: ghsaStruct.id,
 			ghsaID: ghsaID,
 		}
 		c.index[ghsaIDStruct.id] = ghsaIDStruct
-		ghsaIDs[ghsaID] = ghsaIDStruct
+		c.ghsas[ghsaID] = ghsaIDStruct
 	}
 
 	// build return GraphQL type
@@ -156,35 +122,26 @@ func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model
 		if err != nil {
 			return nil, err
 		}
-		osv, err := c.buildGhsaResponse(uint32(id), filter)
+		ghsa, err := c.buildGhsaResponse(uint32(id), filter)
 		if err != nil {
 			return nil, err
 		}
-		return []*model.Ghsa{osv}, nil
+		return []*model.Ghsa{ghsa}, nil
 	}
 	out := []*model.Ghsa{}
-	for _, ghsaNode := range c.ghsas {
-		ghsaIDList := []*model.GHSAId{}
-		if filter != nil && filter.GhsaID != nil {
-			ghsaIDNode, hasGhsaIDNode := ghsaNode.ghsaIDs[strings.ToLower(*filter.GhsaID)]
-			if hasGhsaIDNode {
-				ghsaIDList = append(ghsaIDList, &model.GHSAId{
-					ID:     nodeID(ghsaIDNode.id),
-					GhsaID: ghsaIDNode.ghsaID,
-				})
-			}
-		} else {
-			for _, ghsaIDNode := range ghsaNode.ghsaIDs {
-				ghsaIDList = append(ghsaIDList, &model.GHSAId{
-					ID:     nodeID(ghsaIDNode.id),
-					GhsaID: ghsaIDNode.ghsaID,
-				})
-			}
-		}
-		if len(ghsaIDList) > 0 {
+	if filter != nil && filter.GhsaID != nil {
+		ghsaNode, hasGhsaIDNode := c.ghsas[strings.ToLower(*filter.GhsaID)]
+		if hasGhsaIDNode {
 			out = append(out, &model.Ghsa{
-				ID:      nodeID(ghsaNode.id),
-				GhsaIds: ghsaIDList,
+				ID:     nodeID(ghsaNode.id),
+				GhsaID: ghsaNode.ghsaID,
+			})
+		}
+	} else {
+		for _, ghsaNode := range c.ghsas {
+			out = append(out, &model.Ghsa{
+				ID:     nodeID(ghsaNode.id),
+				GhsaID: ghsaNode.ghsaID,
 			})
 		}
 	}
@@ -209,30 +166,21 @@ func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*mode
 		return nil, gqlerror.Errorf("ID does not match existing node")
 	}
 
-	ghsaIDList := []*model.GHSAId{}
-	if ghsaIDNode, ok := node.(*ghsaIDNode); ok {
-		if filter != nil && noMatch(toLower(filter.GhsaID), ghsaIDNode.ghsaID) {
+	var ghsa *model.Ghsa
+	if ghsaNode, ok := node.(*ghsaNode); ok {
+		if filter != nil && noMatch(toLower(filter.GhsaID), ghsaNode.ghsaID) {
 			return nil, nil
 		}
-		ghsaIDList = append(ghsaIDList, &model.GHSAId{
-			ID:     nodeID(ghsaIDNode.id),
-			GhsaID: ghsaIDNode.ghsaID,
-		})
-		node = c.index[ghsaIDNode.parent]
+		ghsa = &model.Ghsa{
+			ID:     nodeID(ghsaNode.id),
+			GhsaID: ghsaNode.ghsaID,
+		}
 	}
 
-	ghsaNode, ok := node.(*ghsaNode)
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type for ghsa root")
-	}
-	s := model.Ghsa{
-		ID:      nodeID(ghsaNode.id),
-		GhsaIds: ghsaIDList,
-	}
-	return &s, nil
+	return ghsa, nil
 }
 
-func (c *demoClient) exactGHSA(filter *model.GHSASpec) (*ghsaIDNode, error) {
+func (c *demoClient) exactGHSA(filter *model.GHSASpec) (*ghsaNode, error) {
 	if filter == nil {
 		return nil, nil
 	}
@@ -243,30 +191,23 @@ func (c *demoClient) exactGHSA(filter *model.GHSASpec) (*ghsaIDNode, error) {
 		}
 		id := uint32(id64)
 		if node, ok := c.index[id]; ok {
-			if g, ok := node.(*ghsaIDNode); ok {
+			if g, ok := node.(*ghsaNode); ok {
 				return g, nil
 			}
 		}
 	}
 	if filter.GhsaID != nil {
-		if root, ok := c.ghsas[ghsa]; ok {
-			if node, ok := root.ghsaIDs[*filter.GhsaID]; ok {
-				return node, nil
-			}
+		if node, ok := c.ghsas[strings.ToLower(*filter.GhsaID)]; ok {
+			return node, nil
 		}
 	}
 	return nil, nil
 }
 
 func getGhsaIDFromInput(c *demoClient, input model.GHSAInputSpec) (uint32, error) {
-	ghsaStruct, hasGhsa := c.ghsas[ghsa]
-	if !hasGhsa {
-		return 0, gqlerror.Errorf("ghsa type \"%s\" not found", ghsa)
-	}
-	ghsaIDs := ghsaStruct.ghsaIDs
 	ghsaID := strings.ToLower(input.GhsaID)
 
-	ghsaIDStruct, hasGhsaID := ghsaIDs[ghsaID]
+	ghsaIDStruct, hasGhsaID := c.ghsas[ghsaID]
 	if !hasGhsaID {
 		return 0, gqlerror.Errorf("ghsa id \"%s\" not found", input.GhsaID)
 	}

@@ -173,32 +173,33 @@ func (c *neo4jClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
-			}
+			// FIXME update to GHSA without root node.
+			// result, err := tx.Run(sb.String(), queryValues)
+			// if err != nil {
+			// 	return nil, err
+			// }
 
-			cvesPerYear := map[int][]*model.CVEId{}
-			for result.Next() {
-				cveID := &model.CVEId{
-					CveID: result.Record().Values[1].(string),
-				}
-				cvesPerYear[result.Record().Values[0].(int)] = append(cvesPerYear[result.Record().Values[0].(int)], cveID)
-			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
+			// cvesPerYear := map[int][]*model.CVEId{}
+			// for result.Next() {
+			// 	cveID := &model.CVEId{
+			// 		CveID: result.Record().Values[1].(string),
+			// 	}
+			// 	cvesPerYear[result.Record().Values[0].(int)] = append(cvesPerYear[result.Record().Values[0].(int)], cveID)
+			// }
+			// if err = result.Err(); err != nil {
+			// 	return nil, err
+			// }
 
-			cves := []*model.Cve{}
-			for year := range cvesPerYear {
-				cve := &model.Cve{
-					Year:   year,
-					CveIds: cvesPerYear[year],
-				}
-				cves = append(cves, cve)
+			// cves := []*model.Cve{}
+			// for year := range cvesPerYear {
+			cve := &model.Cve{
+				// Year:   year,
+				// CveIds: cvesPerYear[year],
 			}
+			// cves = append(cves, cve)
+			// }
 
-			return cves, nil
+			return cve, nil
 		})
 	if err != nil {
 		return nil, err
@@ -225,24 +226,25 @@ func (c *neo4jClient) cveYear(ctx context.Context, cveSpec *model.CVESpec) ([]*m
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
-			}
+			// FIXME update to GHSA without root node.
+			// result, err := tx.Run(sb.String(), queryValues)
+			// if err != nil {
+			// 	return nil, err
+			// }
 
-			cves := []*model.Cve{}
-			for result.Next() {
-				cve := &model.Cve{
-					Year:   result.Record().Values[0].(int),
-					CveIds: []*model.CVEId{},
-				}
-				cves = append(cves, cve)
+			// cves := []*model.Cve{}
+			// for result.Next() {
+			cve := &model.Cve{
+				// Year: result.Record().Values[0].(int),
+				// CveIds: []*model.CVEId{},
 			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
+			// 	cves = append(cves, cve)
+			// }
+			// if err = result.Err(); err != nil {
+			// 	return nil, err
+			// }
 
-			return cves, nil
+			return cve, nil
 		})
 	if err != nil {
 		return nil, err
@@ -307,10 +309,11 @@ RETURN cveYear.year, cveID.id`
 
 // TODO: update to pass in the ID from neo4j
 func generateModelCve(yearStr int, idStr string) *model.Cve {
-	id := &model.CVEId{CveID: idStr}
+	// FIXME update to GHSA without root node.
+	// id := &model.CVEId{CveID: idStr}
 	cve := model.Cve{
-		Year:   yearStr,
-		CveIds: []*model.CVEId{id},
+		Year: yearStr,
+		// CveIds: []*model.CVEId{id},
 	}
 	return &cve
 }

@@ -111,24 +111,25 @@ func (c *neo4jClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*mo
 
 	result, err := session.ReadTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
-			result, err := tx.Run(sb.String(), queryValues)
-			if err != nil {
-				return nil, err
-			}
+			// FIXME update to GHSA without root node.
+			// result, err := tx.Run(sb.String(), queryValues)
+			// if err != nil {
+			// 	return nil, err
+			// }
 
-			ghsaIds := []*model.GHSAId{}
-			for result.Next() {
-				ghsaId := &model.GHSAId{
-					GhsaID: result.Record().Values[0].(string),
-				}
-				ghsaIds = append(ghsaIds, ghsaId)
-			}
-			if err = result.Err(); err != nil {
-				return nil, err
-			}
+			// ghsaIds := []*model.GHSAId{}
+			// for result.Next() {
+			// 	ghsaId := &model.GHSAId{
+			// 		GhsaID: result.Record().Values[0].(string),
+			// 	}
+			// 	ghsaIds = append(ghsaIds, ghsaId)
+			// }
+			// if err = result.Err(); err != nil {
+			// 	return nil, err
+			// }
 
 			ghsa := &model.Ghsa{
-				GhsaIds: ghsaIds,
+				// GhsaIds: ghsaIds,
 			}
 
 			return []*model.Ghsa{ghsa}, nil
@@ -187,9 +188,10 @@ RETURN ghsaID.id`
 
 // TODO: update to pass in the ID from neo4j
 func generateModelGhsa(id string) *model.Ghsa {
-	ghsaID := &model.GHSAId{GhsaID: id}
+	// FIXME update to GHSA without root node.
+	// ghsaID := &model.GHSAId{GhsaID: id}
 	ghsa := model.Ghsa{
-		GhsaIds: []*model.GHSAId{ghsaID},
+		// GhsaIds: []*model.GHSAId{ghsaID},
 	}
 	return &ghsa
 }

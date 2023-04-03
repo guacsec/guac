@@ -90,7 +90,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		if err != nil {
 			return nil, err
 		}
-		osvNode, ok := c.index[osvID].(*osvIDNode)
+		osvNode, ok := c.index[osvID].(*osvNode)
 		if ok {
 			vulnerabilityLinks = append(vulnerabilityLinks, osvNode.certifyVulnLinks...)
 		}
@@ -101,7 +101,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		if err != nil {
 			return nil, err
 		}
-		cveNode, ok := c.index[cveID].(*cveIDNode)
+		cveNode, ok := c.index[cveID].(*cveNode)
 		if ok {
 			vulnerabilityLinks = append(vulnerabilityLinks, cveNode.certifyVulnLinks...)
 		}
@@ -112,7 +112,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		if err != nil {
 			return nil, err
 		}
-		ghsaNode, ok := c.index[ghsaID].(*ghsaIDNode)
+		ghsaNode, ok := c.index[ghsaID].(*ghsaNode)
 		if ok {
 			vulnerabilityLinks = append(vulnerabilityLinks, ghsaNode.certifyVulnLinks...)
 		}
@@ -182,13 +182,13 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		// set the backlinks
 		c.index[packageID].(*pkgVersionNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		if osvID != 0 {
-			c.index[osvID].(*osvIDNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
+			c.index[osvID].(*osvNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 		if cveID != 0 {
-			c.index[cveID].(*cveIDNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
+			c.index[cveID].(*cveNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 		if ghsaID != 0 {
-			c.index[ghsaID].(*ghsaIDNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
+			c.index[ghsaID].(*ghsaNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 	}
 
