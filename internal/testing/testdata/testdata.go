@@ -319,8 +319,11 @@ var (
 	isDepJustifyContainedBy = &model.IsDependencyInputSpec{
 		Justification: "Derived from SPDX CONTAINED_BY relationship",
 	}
-	isDepJustifyDepends = &model.IsDependencyInputSpec{
+	isDepJustifyDependsOn = &model.IsDependencyInputSpec{
 		Justification: "Derived from SPDX DEPENDS_ON relationship",
+	}
+	isDepJustifyDependencyOf = &model.IsDependencyInputSpec{
+		Justification: "Derived from SPDX DEPENDENCY_OF relationship",
 	}
 	isCDXDepJustifyDepends = &model.IsDependencyInputSpec{
 		Justification: "CDX BOM Dependency",
@@ -373,12 +376,12 @@ var (
 		{
 			Pkg:          baselayoutPack,
 			DepPkg:       keysPack,
-			IsDependency: isDepJustifyDepends,
+			IsDependency: isDepJustifyDependencyOf,
 		},
 		{
 			Pkg:          rootFilePack,
 			DepPkg:       rsaPubFilePack,
-			IsDependency: isDepJustifyDepends,
+			IsDependency: isDepJustifyDependsOn,
 		},
 		{
 			Pkg:          baselayoutPack,

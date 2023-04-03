@@ -270,8 +270,8 @@ func isDependency(rel string) bool {
 
 func isDependent(rel string) bool {
 	return map[string]bool{
-		spdx_common.TypeRelationshipContainedBy:     true,
-		spdx_common.TypeRelationshipDevDependencyOf: true,
+		spdx_common.TypeRelationshipContainedBy:  true,
+		spdx_common.TypeRelationshipDependencyOf: true,
 	}[rel]
 }
 
