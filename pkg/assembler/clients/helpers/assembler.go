@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assembler.AssemblerInput) error {
@@ -62,6 +63,16 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
 			if err := hasSourceAt(ctx, gqlclient, p.HasSourceAt); err != nil {
+				return err
+			}
+
+			logger.Infof("assembling CertifyBad: %v", len(p.CertifyBad))
+			if err := ingestCertifyBad(ctx, gqlclient, p.CertifyBad); err != nil {
+				return err
+			}
+
+			logger.Infof("assembling CertifyGood: %v", len(p.CertifyGood))
+			if err := ingestCertifyGood(ctx, gqlclient, p.CertifyGood); err != nil {
 				return err
 			}
 		}
@@ -170,6 +181,80 @@ func hasSourceAt(ctx context.Context, client graphql.Client, hsaList []assembler
 			return err
 		}
 	}
+	return nil
+}
+
+func ingestCertifyBad(ctx context.Context, client graphql.Client, badList []assembler.CertifyBadIngest) error {
+	for _, bad := range badList {
+
+		err := validatePackageSourceOrArtifactInput(bad.Pkg, bad.Src, bad.Artifact, "certifyBad")
+		if err != nil {
+			return fmt.Errorf("input validation failed for certifyBad: %w", err)
+		}
+
+		if bad.Pkg != nil {
+			_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, &bad.PkgMatchFlag, *bad.CertifyBad)
+			if err != nil {
+				return err
+			}
+		} else if bad.Src != nil {
+			_, err := model.CertifyBadSrc(ctx, client, *bad.Src, *bad.CertifyBad)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := model.CertifyBadArtifact(ctx, client, *bad.Artifact, *bad.CertifyBad)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func ingestCertifyGood(ctx context.Context, client graphql.Client, goodList []assembler.CertifyGoodIngest) error {
+	for _, good := range goodList {
+
+		err := validatePackageSourceOrArtifactInput(good.Pkg, good.Src, good.Artifact, "certifyGood")
+		if err != nil {
+			return fmt.Errorf("input validation failed for certifyBad: %w", err)
+		}
+
+		if good.Pkg != nil {
+			_, err := model.CertifyGoodPkg(ctx, client, *good.Pkg, &good.PkgMatchFlag, *good.CertifyGood)
+			if err != nil {
+				return err
+			}
+		} else if good.Src != nil {
+			_, err := model.CertifyGoodSrc(ctx, client, *good.Src, *good.CertifyGood)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := model.CertifyGoodArtifact(ctx, client, *good.Artifact, *good.CertifyGood)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.SourceInputSpec, artifact *model.ArtifactInputSpec, path string) error {
+	valuesDefined := 0
+	if pkg != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if src != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if artifact != nil {
+		valuesDefined = valuesDefined + 1
+	}
+	if valuesDefined != 1 {
+		return gqlerror.Errorf("Must specify at most one package, source, or artifact for %v", path)
+	}
+
 	return nil
 }
 

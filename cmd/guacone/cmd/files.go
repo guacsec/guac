@@ -59,6 +59,14 @@ type options struct {
 
 	// gql endpoint
 	graphqlEndpoint string
+
+	// certifyBad/certifyGood
+	good          bool
+	certifyType   string
+	justification string
+	subject       string
+	// if type is package, true if attestation is at pkgName (for all versions) or false for a specific version
+	pkgName bool
 }
 
 var exampleCmd = &cobra.Command{
