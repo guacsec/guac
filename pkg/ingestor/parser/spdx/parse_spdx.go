@@ -105,7 +105,6 @@ func (s *spdxParser) getPackages() error {
 			}
 
 		}
-
 		if purl == "" {
 			purl = asmhelpers.GuacPkgPurl(pac.PackageName, &pac.PackageVersion)
 		}
@@ -192,18 +191,23 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages, "top-level package GUAC heuristic connecting to each file/package")...)
 	}
 	for _, rel := range s.spdxDoc.Relationships {
+		var foundId string
+		var relatedId string
 
-		if !map[string]bool{
-			spdx_common.TypeRelationshipContains:  true,
-			spdx_common.TypeRelationshipDependsOn: true,
-		}[rel.Relationship] {
+		if isDependency(rel.Relationship) {
+			foundId = string(rel.RefA.ElementRefID)
+			relatedId = string(rel.RefB.ElementRefID)
+		} else if isDependent(rel.Relationship) {
+			foundId = string(rel.RefB.ElementRefID)
+			relatedId = string(rel.RefA.ElementRefID)
+		} else {
 			continue
 		}
 
-		foundPackNodes := s.getPackageElement(string(rel.RefA.ElementRefID))
-		foundFileNodes := s.getFileElement(string(rel.RefA.ElementRefID))
-		relatedPackNodes := s.getPackageElement(string(rel.RefB.ElementRefID))
-		relatedFileNodes := s.getFileElement(string(rel.RefB.ElementRefID))
+		foundPackNodes := s.getPackageElement(foundId)
+		foundFileNodes := s.getFileElement(foundId)
+		relatedPackNodes := s.getPackageElement(relatedId)
+		relatedFileNodes := s.getFileElement(relatedId)
 
 		justification := getJustification(rel)
 
@@ -259,6 +263,20 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 
 	return preds
+}
+
+func isDependency(rel string) bool {
+	return map[string]bool{
+		spdx_common.TypeRelationshipContains:  true,
+		spdx_common.TypeRelationshipDependsOn: true,
+	}[rel]
+}
+
+func isDependent(rel string) bool {
+	return map[string]bool{
+		spdx_common.TypeRelationshipContainedBy:  true,
+		spdx_common.TypeRelationshipDependencyOf: true,
+	}[rel]
 }
 
 func (s *spdxParser) GetIdentities(ctx context.Context) []common.TrustInformation {

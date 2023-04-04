@@ -255,9 +255,9 @@
     "relatedSpdxElement": "SPDXRef-2ac427870f248704"
    },
   {
-   "spdxElementId": "SPDXRef-35085779bdf473bb",
-   "relationshipType": "DEPENDS_ON",
-   "relatedSpdxElement": "SPDXRef-3f53edc3b14056c3"
+   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
+   "relationshipType": "DEPENDENCY_OF",
+   "relatedSpdxElement": "SPDXRef-35085779bdf473bb"
   },
   {
    "spdxElementId": "SPDXRef-2bc2db5bac1d0fe4",
@@ -475,9 +475,9 @@
    "relatedSpdxElement": "SPDXRef-879bdb5c61068a44"
   },
   {
-   "spdxElementId": "SPDXRef-3f53edc3b14056c3",
-   "relationshipType": "CONTAINS",
-   "relatedSpdxElement": "SPDXRef-9b559b61986fccb0"
+   "spdxElementId": "SPDXRef-9b559b61986fccb0",
+   "relationshipType": "CONTAINED_BY",
+   "relatedSpdxElement": "SPDXRef-3f53edc3b14056c3"
   },
   {
    "spdxElementId": "SPDXRef-3f53edc3b14056c3",
