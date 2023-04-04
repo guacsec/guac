@@ -52,62 +52,43 @@ import (
 // 	}
 // }
 
-// Internal data: osv
-type cveMap map[int]*cveNode
+// Internal data: csv
+type cveMap map[string]*cveNode
 type cveNode struct {
-	id     uint32
-	year   int
-	cveIDs cveIDMap
-}
-type cveIDMap map[string]*cveIDNode
-type cveIDNode struct {
 	id               uint32
-	parent           uint32
+	year             int
 	cveID            string
 	certifyVulnLinks []uint32
 	equalVulnLinks   []uint32
 	vexLinks         []uint32
 }
 
-func (n *cveIDNode) ID() uint32 { return n.id }
-func (n *cveNode) ID() uint32   { return n.id }
+func (n *cveNode) ID() uint32 { return n.id }
 
 func (n *cveNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.cveIDs))
-	for _, v := range n.cveIDs {
-		out = append(out, v.id)
-	}
-	return out
-}
-
-func (n *cveIDNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
+	out := make([]uint32, 0, len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
 	out = append(out, n.certifyVulnLinks...)
 	out = append(out, n.equalVulnLinks...)
 	out = append(out, n.vexLinks...)
-	out = append(out, n.parent)
 	return out
 }
 
-func (n *cveIDNode) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.buildCveResponse(n.id, nil)
-}
 func (n *cveNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildCveResponse(n.id, nil)
 }
 
 // certifyVulnerability back edges
-func (n *cveIDNode) setVulnerabilityLinks(id uint32) {
+func (n *cveNode) setVulnerabilityLinks(id uint32) {
 	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
 
 // isVulnerability back edges
-func (n *cveIDNode) setEqualVulnLinks(id uint32) {
+func (n *cveNode) setEqualVulnLinks(id uint32) {
 	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
 
 // certifyVexStatement back edges
-func (n *cveIDNode) setVexLinks(id uint32) {
+func (n *cveNode) setVexLinks(id uint32) {
 	n.vexLinks = append(n.vexLinks, id)
 }
 
@@ -119,20 +100,9 @@ func (c *demoClient) IngestCve(ctx context.Context, input *model.CVEInputSpec) (
 func (c *demoClient) ingestCve(ctx context.Context, input *model.CVEInputSpec, readOnly bool) (*model.Cve, error) {
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
-	cveStruct, hasCve := c.cves[input.Year]
-	if !hasCve {
-		cveStruct = &cveNode{
-			id:     c.getNextID(),
-			year:   input.Year,
-			cveIDs: cveIDMap{},
-		}
-		c.index[cveStruct.id] = cveStruct
-		c.cves[input.Year] = cveStruct
-	}
-	cveIDs := cveStruct.cveIDs
 	cveID := strings.ToLower(input.CveID)
 
-	cveIDStruct, hasCveID := cveIDs[cveID]
+	cveIDStruct, hasCveID := c.cves[cveID]
 	if !hasCveID {
 		if readOnly {
 			c.m.RUnlock()
@@ -140,13 +110,13 @@ func (c *demoClient) ingestCve(ctx context.Context, input *model.CVEInputSpec, r
 			c.m.RLock() // relock so that defer unlock does not panic
 			return cve, err
 		}
-		cveIDStruct = &cveIDNode{
-			id:     c.getNextID(),
-			parent: cveStruct.id,
-			cveID:  cveID,
+		cveIDStruct = &cveNode{
+			id:    c.getNextID(),
+			cveID: cveID,
+			year:  input.Year,
 		}
 		c.index[cveIDStruct.id] = cveIDStruct
-		cveIDs[cveID] = cveIDStruct
+		c.cves[cveID] = cveIDStruct
 	}
 
 	// build return GraphQL type
@@ -168,28 +138,24 @@ func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.C
 		}
 		return []*model.Cve{osv}, nil
 	}
-	out := []*model.Cve{}
 
-	if filter != nil && filter.Year != nil {
-		foundCveNode, ok := c.cves[*filter.Year]
+	var out []*model.Cve
+	if filter != nil && filter.CveID != nil {
+		foundCveNode, ok := c.cves[strings.ToLower(*filter.CveID)]
 		if ok {
-			cveIDList := buildCveID(foundCveNode, filter)
-			if len(cveIDList) > 0 {
-				out = append(out, &model.Cve{
-					ID:     nodeID(foundCveNode.id),
-					Year:   foundCveNode.year,
-					CveIds: cveIDList,
-				})
-			}
+			out = append(out, &model.Cve{
+				ID:    nodeID(foundCveNode.id),
+				Year:  foundCveNode.year,
+				CveID: foundCveNode.cveID,
+			})
 		}
 	} else {
 		for _, cveNode := range c.cves {
-			cveIDList := buildCveID(cveNode, filter)
-			if len(cveIDList) > 0 {
+			if filter == nil || filter.Year == nil || *filter.Year == cveNode.year {
 				out = append(out, &model.Cve{
-					ID:     nodeID(cveNode.id),
-					Year:   cveNode.year,
-					CveIds: cveIDList,
+					ID:    nodeID(cveNode.id),
+					Year:  cveNode.year,
+					CveID: cveNode.cveID,
 				})
 			}
 		}
@@ -197,7 +163,7 @@ func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.C
 	return out, nil
 }
 
-func (c *demoClient) exactCVE(filter *model.CVESpec) (*cveIDNode, error) {
+func (c *demoClient) exactCVE(filter *model.CVESpec) (*cveNode, error) {
 	if filter == nil {
 		return nil, nil
 	}
@@ -208,40 +174,17 @@ func (c *demoClient) exactCVE(filter *model.CVESpec) (*cveIDNode, error) {
 		}
 		id := uint32(id64)
 		if node, ok := c.index[id]; ok {
-			if c, ok := node.(*cveIDNode); ok {
+			if c, ok := node.(*cveNode); ok {
 				return c, nil
 			}
 		}
 	}
-	if filter.Year != nil && filter.CveID != nil {
-		if year, ok := c.cves[*filter.Year]; ok {
-			if node, ok := year.cveIDs[*filter.CveID]; ok {
-				return node, nil
-			}
+	if filter.CveID != nil {
+		if node, ok := c.cves[strings.ToLower(*filter.CveID)]; ok {
+			return node, nil
 		}
 	}
 	return nil, nil
-}
-
-func buildCveID(foundCveNode *cveNode, filter *model.CVESpec) []*model.CVEId {
-	cveIDList := []*model.CVEId{}
-	if filter != nil && filter.CveID != nil {
-		cveIDNode, hasCveIDNode := foundCveNode.cveIDs[strings.ToLower(*filter.CveID)]
-		if hasCveIDNode {
-			cveIDList = append(cveIDList, &model.CVEId{
-				ID:    nodeID(cveIDNode.id),
-				CveID: cveIDNode.cveID,
-			})
-		}
-	} else {
-		for _, cveIDNode := range foundCveNode.cveIDs {
-			cveIDList = append(cveIDList, &model.CVEId{
-				ID:    nodeID(cveIDNode.id),
-				CveID: cveIDNode.cveID,
-			})
-		}
-	}
-	return cveIDList
 }
 
 // Builds a model.Cve to send as GraphQL response, starting from id.
@@ -262,39 +205,26 @@ func (c *demoClient) buildCveResponse(id uint32, filter *model.CVESpec) (*model.
 		return nil, gqlerror.Errorf("ID does not match existing node")
 	}
 
-	cveIDList := []*model.CVEId{}
-	if cveIDNode, ok := node.(*cveIDNode); ok {
-		if filter != nil && noMatch(toLower(filter.CveID), cveIDNode.cveID) {
+	var csv *model.Cve
+	if cveIDNode, ok := node.(*cveNode); ok {
+		if filter != nil && (noMatch(toLower(filter.CveID), cveIDNode.cveID) ||
+			(filter.Year != nil && *filter.Year != cveIDNode.year)) {
 			return nil, nil
 		}
-		cveIDList = append(cveIDList, &model.CVEId{
+		csv = &model.Cve{
 			ID:    nodeID(cveIDNode.id),
+			Year:  cveIDNode.year,
 			CveID: cveIDNode.cveID,
-		})
-		node = c.index[cveIDNode.parent]
+		}
 	}
 
-	cveNode, ok := node.(*cveNode)
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type for cve root")
-	}
-	s := model.Cve{
-		ID:     nodeID(cveNode.id),
-		Year:   cveNode.year,
-		CveIds: cveIDList,
-	}
-	return &s, nil
+	return csv, nil
 }
 
 func getCveIDFromInput(c *demoClient, input model.CVEInputSpec) (uint32, error) {
-	cveStruct, hasCve := c.cves[input.Year]
-	if !hasCve {
-		return 0, gqlerror.Errorf("cve year \"%d\" not found", input.Year)
-	}
-	cveIDs := cveStruct.cveIDs
 	cveID := strings.ToLower(input.CveID)
 
-	cveIDStruct, hasCveID := cveIDs[cveID]
+	cveIDStruct, hasCveID := c.cves[cveID]
 	if !hasCveID {
 		return 0, gqlerror.Errorf("cve id \"%s\" not found", input.CveID)
 	}

@@ -120,7 +120,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		if err != nil {
 			return nil, err
 		}
-		osvNode, ok := c.index[osvID].(*osvIDNode)
+		osvNode, ok := c.index[osvID].(*osvNode)
 		if ok {
 			vulnerabilityVexLinks = append(vulnerabilityVexLinks, osvNode.vexLinks...)
 		}
@@ -132,7 +132,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		if err != nil {
 			return nil, err
 		}
-		cveNode, ok := c.index[cveID].(*cveIDNode)
+		cveNode, ok := c.index[cveID].(*cveNode)
 		if ok {
 			vulnerabilityVexLinks = append(vulnerabilityVexLinks, cveNode.vexLinks...)
 		}
@@ -144,7 +144,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		if err != nil {
 			return nil, err
 		}
-		ghsaNode, ok := c.index[ghsaID].(*ghsaIDNode)
+		ghsaNode, ok := c.index[ghsaID].(*ghsaNode)
 		if ok {
 			vulnerabilityVexLinks = append(vulnerabilityVexLinks, ghsaNode.vexLinks...)
 		}
@@ -217,13 +217,13 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 			c.index[artifactID].(*artStruct).setVexLinks(collectedCertifyVexLink.id)
 		}
 		if osvID != 0 {
-			c.index[osvID].(*osvIDNode).setVexLinks(collectedCertifyVexLink.id)
+			c.index[osvID].(*osvNode).setVexLinks(collectedCertifyVexLink.id)
 		}
 		if cveID != 0 {
-			c.index[cveID].(*cveIDNode).setVexLinks(collectedCertifyVexLink.id)
+			c.index[cveID].(*cveNode).setVexLinks(collectedCertifyVexLink.id)
 		}
 		if ghsaID != 0 {
-			c.index[ghsaID].(*ghsaIDNode).setVexLinks(collectedCertifyVexLink.id)
+			c.index[ghsaID].(*ghsaNode).setVexLinks(collectedCertifyVexLink.id)
 		}
 	}
 

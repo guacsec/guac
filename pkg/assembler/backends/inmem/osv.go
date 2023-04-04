@@ -53,59 +53,39 @@ const osv string = "osv"
 // Internal data: osv
 type osvMap map[string]*osvNode
 type osvNode struct {
-	id      uint32
-	typeKey string
-	osvIDs  osvIDMap
-}
-type osvIDMap map[string]*osvIDNode
-type osvIDNode struct {
 	id               uint32
-	parent           uint32
 	osvID            string
 	certifyVulnLinks []uint32
 	equalVulnLinks   []uint32
 	vexLinks         []uint32
 }
 
-func (n *osvIDNode) ID() uint32 { return n.id }
-func (n *osvNode) ID() uint32   { return n.id }
+func (n *osvNode) ID() uint32 { return n.id }
 
 func (n *osvNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.osvIDs))
-	for _, v := range n.osvIDs {
-		out = append(out, v.id)
-	}
-	return out
-}
-
-func (n *osvIDNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
+	out := make([]uint32, 0, len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
 	out = append(out, n.certifyVulnLinks...)
 	out = append(out, n.equalVulnLinks...)
 	out = append(out, n.vexLinks...)
-	out = append(out, n.parent)
 	return out
 }
 
-func (n *osvIDNode) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.buildOsvResponse(n.id, nil)
-}
 func (n *osvNode) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildOsvResponse(n.id, nil)
 }
 
 // certifyVulnerability back edges
-func (n *osvIDNode) setVulnerabilityLinks(id uint32) {
+func (n *osvNode) setVulnerabilityLinks(id uint32) {
 	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
 
 // isVulnerability back edges
-func (n *osvIDNode) setEqualVulnLinks(id uint32) {
+func (n *osvNode) setEqualVulnLinks(id uint32) {
 	n.equalVulnLinks = append(n.equalVulnLinks, id)
 }
 
 // certifyVexStatement back edges
-func (n *osvIDNode) setVexLinks(id uint32) {
+func (n *osvNode) setVexLinks(id uint32) {
 	n.vexLinks = append(n.vexLinks, id)
 }
 
@@ -117,20 +97,9 @@ func (c *demoClient) IngestOsv(ctx context.Context, input *model.OSVInputSpec) (
 func (c *demoClient) ingestOsv(ctx context.Context, input *model.OSVInputSpec, readOnly bool) (*model.Osv, error) {
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
-	osvStruct, hasOsv := c.osvs[osv]
-	if !hasOsv {
-		osvStruct = &osvNode{
-			id:      c.getNextID(),
-			typeKey: osv,
-			osvIDs:  osvIDMap{},
-		}
-		c.index[osvStruct.id] = osvStruct
-		c.osvs[osv] = osvStruct
-	}
-	osvIDs := osvStruct.osvIDs
 	osvID := strings.ToLower(input.OsvID)
 
-	osvIDStruct, hasOsvID := osvIDs[osvID]
+	osvIDStruct, hasOsvID := c.osvs[osvID]
 	if !hasOsvID {
 		if readOnly {
 			c.m.RUnlock()
@@ -138,13 +107,12 @@ func (c *demoClient) ingestOsv(ctx context.Context, input *model.OSVInputSpec, r
 			c.m.RLock() // relock so that defer unlock does not panic
 			return o, err
 		}
-		osvIDStruct = &osvIDNode{
-			id:     c.getNextID(),
-			parent: osvStruct.id,
-			osvID:  osvID,
+		osvIDStruct = &osvNode{
+			id:    c.getNextID(),
+			osvID: osvID,
 		}
 		c.index[osvIDStruct.id] = osvIDStruct
-		osvIDs[osvID] = osvIDStruct
+		c.osvs[osvID] = osvIDStruct
 	}
 
 	// build return GraphQL type
@@ -166,36 +134,27 @@ func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.O
 		}
 		return []*model.Osv{osv}, nil
 	}
-	out := []*model.Osv{}
-	for _, osvNode := range c.osvs {
-		osvIDList := []*model.OSVId{}
-		if filter != nil && filter.OsvID != nil {
-			osvIDNode, hasOsvIDNode := osvNode.osvIDs[strings.ToLower(*filter.OsvID)]
-			if hasOsvIDNode {
-				osvIDList = append(osvIDList, &model.OSVId{
-					ID:    nodeID(osvIDNode.id),
-					OsvID: osvIDNode.osvID,
-				})
-			}
-		} else {
-			for _, osvIDNode := range osvNode.osvIDs {
-				osvIDList = append(osvIDList, &model.OSVId{
-					ID:    nodeID(osvIDNode.id),
-					OsvID: osvIDNode.osvID,
-				})
-			}
-		}
-		if len(osvIDList) > 0 {
+	var out []*model.Osv
+	if filter != nil && filter.OsvID != nil {
+		osvNode, hasOsvIDNode := c.osvs[strings.ToLower(*filter.OsvID)]
+		if hasOsvIDNode {
 			out = append(out, &model.Osv{
-				ID:     nodeID(osvNode.id),
-				OsvIds: osvIDList,
+				ID:    nodeID(osvNode.id),
+				OsvID: osvNode.osvID,
+			})
+		}
+	} else {
+		for _, osvNode := range c.osvs {
+			out = append(out, &model.Osv{
+				ID:    nodeID(osvNode.id),
+				OsvID: osvNode.osvID,
 			})
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) exactOSV(filter *model.OSVSpec) (*osvIDNode, error) {
+func (c *demoClient) exactOSV(filter *model.OSVSpec) (*osvNode, error) {
 	if filter == nil {
 		return nil, nil
 	}
@@ -206,16 +165,14 @@ func (c *demoClient) exactOSV(filter *model.OSVSpec) (*osvIDNode, error) {
 		}
 		id := uint32(id64)
 		if node, ok := c.index[id]; ok {
-			if o, ok := node.(*osvIDNode); ok {
+			if o, ok := node.(*osvNode); ok {
 				return o, nil
 			}
 		}
 	}
 	if filter.OsvID != nil {
-		if root, ok := c.osvs[osv]; ok {
-			if node, ok := root.osvIDs[*filter.OsvID]; ok {
-				return node, nil
-			}
+		if node, ok := c.osvs[strings.ToLower(*filter.OsvID)]; ok {
+			return node, nil
 		}
 	}
 	return nil, nil
@@ -239,38 +196,24 @@ func (c *demoClient) buildOsvResponse(id uint32, filter *model.OSVSpec) (*model.
 		return nil, gqlerror.Errorf("ID does not match existing node")
 	}
 
-	osvIDList := []*model.OSVId{}
-	if osvIDNode, ok := node.(*osvIDNode); ok {
-		if filter != nil && noMatch(toLower(filter.OsvID), osvIDNode.osvID) {
+	var osv *model.Osv
+	if osvNode, ok := node.(*osvNode); ok {
+		if filter != nil && noMatch(toLower(filter.OsvID), osvNode.osvID) {
 			return nil, nil
 		}
-		osvIDList = append(osvIDList, &model.OSVId{
-			ID:    nodeID(osvIDNode.id),
-			OsvID: osvIDNode.osvID,
-		})
-		node = c.index[osvIDNode.parent]
+		osv = &model.Osv{
+			ID:    nodeID(osvNode.id),
+			OsvID: osvNode.osvID,
+		}
 	}
 
-	osvNode, ok := node.(*osvNode)
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type for osv root")
-	}
-	s := model.Osv{
-		ID:     nodeID(osvNode.id),
-		OsvIds: osvIDList,
-	}
-	return &s, nil
+	return osv, nil
 }
 
 func getOsvIDFromInput(c *demoClient, input model.OSVInputSpec) (uint32, error) {
-	osvStruct, hasOsv := c.osvs[osv]
-	if !hasOsv {
-		return 0, gqlerror.Errorf("osv type \"%s\" not found", osv)
-	}
-	osvIDs := osvStruct.osvIDs
 	osvID := strings.ToLower(input.OsvID)
 
-	osvIDStruct, hasOsvID := osvIDs[osvID]
+	osvIDStruct, hasOsvID := c.osvs[osvID]
 	if !hasOsvID {
 		return 0, gqlerror.Errorf("osv id \"%s\" not found", input.OsvID)
 	}
