@@ -154,7 +154,7 @@ require (
 )
 
 require (
-	github.com/99designs/gqlgen v0.17.27
+	github.com/99designs/gqlgen v0.17.28
 	github.com/CycloneDX/cyclonedx-go v0.7.1
 	github.com/Khan/genqlient v0.5.0
 	github.com/fsnotify/fsnotify v1.6.0
