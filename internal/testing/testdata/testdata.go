@@ -281,7 +281,7 @@ var (
 
 	// SPDX Testdata
 
-	topLevelPack, _       = asmhelpers.PurlToPkg("pkg:guac/oci/gcr.io/google-containers/alpine-latest")
+	topLevelPack, _       = asmhelpers.PurlToPkg("pkg:guac/spdx/gcr.io/google-containers/alpine-latest")
 	baselayoutPack, _     = asmhelpers.PurlToPkg("pkg:alpine/alpine-baselayout@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2")
 	keysPack, _           = asmhelpers.PurlToPkg("pkg:alpine/alpine-keys@2.4-r1?arch=x86_64&upstream=alpine-keys&distro=alpine-3.16.2")
 	baselayoutdataPack, _ = asmhelpers.PurlToPkg("pkg:alpine/alpine-baselayout-data@3.2.0-r22?arch=x86_64&upstream=alpine-baselayout&distro=alpine-3.16.2")
