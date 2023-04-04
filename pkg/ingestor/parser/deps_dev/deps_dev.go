@@ -104,8 +104,6 @@ func createHasSourceAtIngest(pkg *model.PkgInputSpec, src *model.SourceInputSpec
 			HasSourceAt: &model.HasSourceAtInputSpec{
 				KnownSince:    knownSince,
 				Justification: "collected via deps.dev",
-				Origin:        deps_dev.DepsCollector,
-				Collector:     deps_dev.DepsCollector,
 			},
 		}
 	}
@@ -124,8 +122,6 @@ func createCertifyVulnerabilityIngest(pkg *model.PkgInputSpec, osvList []*model.
 				DbVersion:      "",
 				ScannerUri:     osv.URI,
 				ScannerVersion: "",
-				Origin:         deps_dev.DepsCollector,
-				Collector:      deps_dev.DepsCollector,
 			},
 		}
 		cvi = append(cvi, cv)
@@ -146,8 +142,6 @@ func createIsVulnerabilityIngest(osvList []*model.OSVInputSpec) []assembler.IsVu
 			GHSA: ghsa,
 			IsVuln: &model.IsVulnerabilityInputSpec{
 				Justification: "decoded OSV data collected via deps.dev",
-				Origin:        deps_dev.DepsCollector,
-				Collector:     deps_dev.DepsCollector,
 			},
 		}
 		ivs = append(ivs, iv)
@@ -175,8 +169,6 @@ func createTopLevelIsDeps(toplevel *model.PkgInputSpec, packages []*model.PkgInp
 				IsDependency: &model.IsDependencyInputSpec{
 					Justification: "dependency data collected via deps.dev",
 					VersionRange:  *packNode.Version,
-					Origin:        deps_dev.DepsCollector,
-					Collector:     deps_dev.DepsCollector,
 				},
 			}
 			isDeps = append(isDeps, p)

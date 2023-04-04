@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/cyclonedx"
+	"github.com/guacsec/guac/pkg/ingestor/parser/deps_dev"
 	"github.com/guacsec/guac/pkg/ingestor/parser/dsse"
 	"github.com/guacsec/guac/pkg/ingestor/parser/scorecard"
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
@@ -41,6 +42,7 @@ func init() {
 	_ = RegisterDocumentParser(spdx.NewSpdxParser, processor.DocumentSPDX)
 	_ = RegisterDocumentParser(cyclonedx.NewCycloneDXParser, processor.DocumentCycloneDX)
 	_ = RegisterDocumentParser(scorecard.NewScorecardParser, processor.DocumentScorecard)
+	_ = RegisterDocumentParser(deps_dev.NewDepsDevParser, processor.DocumentDepsDev)
 }
 
 var (

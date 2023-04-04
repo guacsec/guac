@@ -884,8 +884,8 @@ var (
 	   "timeScanned":"2022-11-21T17:45:50.52Z",
 	   "scorecardVersion":"v4.8.0-78-gfb07860",
 	   "scorecardCommit":"fb07860d86065cdcbd2d0d5c6b998ff4542d53fe",
-	   "origin":"deps.dev",
-	   "collector":"deps.dev"
+	   "origin":"",
+	   "collector":""
 	},
 	"DepPackages":[
 	   {
@@ -978,8 +978,8 @@ var (
 			 "timeScanned":"2022-11-21T17:45:50.52Z",
 			 "scorecardVersion":"v4.8.0-78-gfb07860",
 			 "scorecardCommit":"fb07860d86065cdcbd2d0d5c6b998ff4542d53fe",
-			 "origin":"deps.dev",
-			 "collector":"deps.dev"
+			 "origin":"",
+			 "collector":""
 		  },
 		  "DepPackages":null,
 		  "UpdateTime":"2022-11-21T17:45:50.52Z"

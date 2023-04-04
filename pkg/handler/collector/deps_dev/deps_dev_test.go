@@ -49,7 +49,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, tt.token, toPurlSource(tt.packages))
+			_, err := NewDepsCollector(ctx, tt.token, toPurlSource(tt.packages), false, 5*time.Second)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -59,16 +59,18 @@ func TestNewDepsCollector(t *testing.T) {
 }
 
 func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
-	ctx := context.Background()
 	tests := []struct {
 		name     string
 		packages []string
 		want     []*processor.Document
+		poll     bool
+		interval time.Duration
 		wantErr  bool
 	}{{
 		name:     "no packages",
 		packages: []string{},
 		want:     []*processor.Document{},
+		poll:     false,
 		wantErr:  false,
 	}, {
 		name:     "yargs-parser package",
@@ -84,6 +86,23 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				},
 			},
 		},
+		poll:    false,
+		wantErr: false,
+	}, {
+		name:     "duplicate package",
+		packages: []string{"pkg:npm/yargs-parser@4.2.1", "pkg:npm/yargs-parser@4.2.1"},
+		want: []*processor.Document{
+			{
+				Blob:   []byte(testdata.CollectedYargsParser),
+				Type:   processor.DocumentDepsDev,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: DepsCollector,
+					Source:    DepsCollector,
+				},
+			},
+		},
+		poll:    false,
 		wantErr: false,
 	}, {
 		name:     "foreign-types package",
@@ -99,7 +118,9 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				},
 			},
 		},
-		wantErr: false,
+		poll:     true,
+		interval: time.Second,
+		wantErr:  true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -110,9 +131,19 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			if depsToken == "" {
 				t.Fatalf("DEPS_DEV_APIKEY is not set")
 			}
-			c, err := NewDepsCollector(ctx, depsToken, toPurlSource(tt.packages))
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
+
+			var ctx context.Context
+			var cancel context.CancelFunc
+			if tt.poll {
+				ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+			} else {
+				ctx = context.Background()
+			}
+
+			c, err := NewDepsCollector(ctx, depsToken, toPurlSource(tt.packages), tt.poll, tt.interval)
+			if err != nil {
+				t.Errorf("NewDepsCollector() error = %v", err)
 				return
 			}
 
