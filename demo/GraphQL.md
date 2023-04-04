@@ -1,12 +1,8 @@
-# Demo
+# GraphQL Demo
 
-Note: this is temporarily living as SETUP-new.md, because we want to keep the
-existing SETUP.md that points to v0.0.1 in HEAD for anyone happening upon the
-repo.
-
-Note: the previous file was setup + demo. This included developer environment
-setup. These should be split, this new file is just the demo. Maybe it should be
-Demo.md
+This demo introduces the GUAC GraphQL API. It covers the basic node "noun" and
+"verb" types and what they contain. Also, it explores the server-side `path`
+query and demonstrates a client-side search program.
 
 ## Requirements
 
@@ -104,7 +100,7 @@ The GUAC graph is queryable using GraphQL. (Expand on GraphQL here)
 
 ## A Simple Query
 
-A primary type of node in GUAC is a Package. Packages are stored in heirarichal
+A primary type of node in GUAC is a Package. Packages are stored in hierarchical
 nodes by Type -> Namespace -> Name -> Version. First we will run the below
 query:
 
@@ -336,7 +332,7 @@ of attributes.
 
 We have explored Package nodes, which are called "nouns" in GUAC. Now let's
 explore nodes that are called "verbs". `IsDependency` is a node that links two
-packages, signifying that one package dependens on the other. First take look at
+packages, signifying that one package depends on the other. First take look at
 the Package node for the `consul` container image:
 
 ```bash
@@ -453,7 +449,7 @@ cat demo/queries.gql | gql-cli http://localhost:8080/query -o IsDependencyQ1 | j
 ... many more
 ```
 
-We see that the `consul` image depens on the `logrus` Go package. We can query
+We see that the `consul` image depends on the `logrus` Go package. We can query
 the full details of that link as so:
 
 ```
@@ -585,7 +581,7 @@ What we have learned is that the `vault` container image depends on both the
 `client` and `api` package. This is maybe not the dependency relationship we
 were hoping to find, for client-side searching, see the section below...
 
-## Vulnerabilites
+## Vulnerabilities
 
 The data we have ingested in GUAC is based on the SBOM files in the `guac-data`
 repo, but does not contain any vulnerability information. GUAC has built-in
@@ -630,8 +626,8 @@ cat demo/queries.gql | gql-cli http://localhost:8080/query -o OSVQ1 | jq
 GUAC doesn't store a lot of information here, just the OSV ID which can be
 easily cross-referenced.
 
-The "verb" node type that links packages to vulnerabilites is `CertifyVuln`. We
-can query to see all of these nodes that link pacakges to the above
+The "verb" node type that links packages to vulnerabilities is `CertifyVuln`. We
+can query to see all of these nodes that link packages to the above
 vulnerability like so:
 
 ```
@@ -699,7 +695,7 @@ cat demo/queries.gql | gql-cli http://localhost:8080/query -o CertifyVulnQ1 | jq
 }
 ```
 
-This node has the package and vulnerabilty nodes along with the metadata that
+This node has the package and vulnerability nodes along with the metadata that
 records how this link was found.
 
 ## Client-side search
@@ -728,7 +724,7 @@ The neighbors query looks like this:
 
 The `demo/path.py` file contains a simple Python program to do a breadth-first
 search of GUAC nodes, similar to the `path` server-side query. However, in
-`path.py` we have defined a `filter()` funcion that filters the types and
+`path.py` we have defined a `filter()` function that filters the types and
 direction of links that are searched. This filter has been written in an attempt
 to find "downward" dependency relationships.
 
