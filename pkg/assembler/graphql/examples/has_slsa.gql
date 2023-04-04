@@ -70,14 +70,6 @@ fragment allArtifactTree on Artifact {
   digest
 }
 
-mutation BuilderM1 {
-  ingestBuilder(builder: {uri: "https://github.com/Attestations/GitHubHostedActions@v2"}) {
-    id
-    uri
-  }
-}
-
-
 mutation SLSAM1 {
   ingestSLSA(
     subject: {algorithm: "md5", digest: "2b00042f7481c7b056c4b410d28f33cf"},
