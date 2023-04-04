@@ -46,6 +46,12 @@ query GetCertifyVuln($spec: CertifyVulnSpec) {
   }
 }
 
+query GetCertifyNoKnowVuln($spec: CertifyNoKnownVulnSpec) {
+  CertifyNoKnownVuln(certifyNoKnownVulnSpec: $spec){
+      ...allNoKnownVulnTree
+  }
+}
+
 query GetNeighbors ($nodeId: ID!) {
   neighbors(node: $nodeId) {
     __typename

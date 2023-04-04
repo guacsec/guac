@@ -173,6 +173,7 @@ type ComplexityRoot struct {
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
 		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
+		IngestNoKnownVuln     func(childComplexity int, pkg model.PkgInputSpec, noKnownVuln model.VulnerabilityMetaDataInput) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
@@ -181,6 +182,12 @@ type ComplexityRoot struct {
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
 		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
+	}
+
+	NoKnownVuln struct {
+		ID       func(childComplexity int) int
+		Metadata func(childComplexity int) int
+		Package  func(childComplexity int) int
 	}
 
 	OSV struct {
@@ -231,6 +238,7 @@ type ComplexityRoot struct {
 		Builders            func(childComplexity int, builderSpec *model.BuilderSpec) int
 		CertifyBad          func(childComplexity int, certifyBadSpec *model.CertifyBadSpec) int
 		CertifyGood         func(childComplexity int, certifyGoodSpec *model.CertifyGoodSpec) int
+		CertifyNoKnownVuln  func(childComplexity int, certifyNoKnownVulnSpec *model.CertifyNoKnownVulnSpec) int
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
@@ -996,6 +1004,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestMaterials(childComplexity, args["materials"].([]*model.ArtifactInputSpec)), true
 
+	case "Mutation.ingestNoKnownVuln":
+		if e.complexity.Mutation.IngestNoKnownVuln == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestNoKnownVuln_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestNoKnownVuln(childComplexity, args["pkg"].(model.PkgInputSpec), args["noKnownVuln"].(model.VulnerabilityMetaDataInput)), true
+
 	case "Mutation.ingestOccurrence":
 		if e.complexity.Mutation.IngestOccurrence == nil {
 			break
@@ -1091,6 +1111,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
+
+	case "NoKnownVuln.id":
+		if e.complexity.NoKnownVuln.ID == nil {
+			break
+		}
+
+		return e.complexity.NoKnownVuln.ID(childComplexity), true
+
+	case "NoKnownVuln.metadata":
+		if e.complexity.NoKnownVuln.Metadata == nil {
+			break
+		}
+
+		return e.complexity.NoKnownVuln.Metadata(childComplexity), true
+
+	case "NoKnownVuln.package":
+		if e.complexity.NoKnownVuln.Package == nil {
+			break
+		}
+
+		return e.complexity.NoKnownVuln.Package(childComplexity), true
 
 	case "OSV.id":
 		if e.complexity.OSV.ID == nil {
@@ -1293,6 +1334,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(*model.CertifyGoodSpec)), true
+
+	case "Query.CertifyNoKnownVuln":
+		if e.complexity.Query.CertifyNoKnownVuln == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyNoKnownVuln_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyNoKnownVuln(childComplexity, args["certifyNoKnownVulnSpec"].(*model.CertifyNoKnownVulnSpec)), true
 
 	case "Query.CertifyVEXStatement":
 		if e.complexity.Query.CertifyVEXStatement == nil {
@@ -1799,6 +1852,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyBadSpec,
 		ec.unmarshalInputCertifyGoodInputSpec,
 		ec.unmarshalInputCertifyGoodSpec,
+		ec.unmarshalInputCertifyNoKnownVulnSpec,
 		ec.unmarshalInputCertifyScorecardSpec,
 		ec.unmarshalInputCertifyVEXStatementSpec,
 		ec.unmarshalInputCertifyVulnSpec,
@@ -2469,11 +2523,11 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyVuln. It contains a package, vulnerability that can be of type
-# cve, ghsa or osv, time scanned, db uri, db version, scanner uri, scanner version, origin and collector
-"""
-CertifyVuln is an attestation that represents when a package has a vulnerability
+# Defines a GraphQL schema for the CertifyVuln and NoKnownVuln.
 
+"""
+CertifyVuln is an attestation that represents when a package has a
+vulnerability (OSV, CVE or GHSA).
 """
 type CertifyVuln {
   id: ID!
@@ -2485,6 +2539,25 @@ type CertifyVuln {
   metadata: VulnerabilityMetaData!
 }
 
+"""
+NoKnownVuln attests that at the time of scanning there was no vulnerability
+present in the package.
+
+Structure is similar to CertifyVuln, except the vulnerability field is missing.
+"""
+type NoKnownVuln {
+  id: ID!
+  "package (subject) - the package object type that represents the package"
+  package: Package!
+  "metadata (property) - contains all the vulnerability metadata "
+  metadata: VulnerabilityMetaData!
+}
+
+"""
+VulnerabilityMetaData is the metadata attached to CertifyVuln and NoKnownVuln.
+
+It contains metadata about the scanner process that created the certification.
+"""
 type VulnerabilityMetaData {
   "timeScanned (property) - timestamp of when the package was last scanned"
   timeScanned: Time!
@@ -2503,13 +2576,15 @@ type VulnerabilityMetaData {
 }
 
 """
-OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be
+specified for vulnerability
 """
 union OsvCveOrGhsa = OSV | CVE | GHSA
 
 """
-OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
-input type to be used in read queries.
+OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as input type to be used in
+read queries.
+
 Exactly one of the value must be set to non-nil.
 """
 input OsvCveOrGhsaSpec {
@@ -2521,8 +2596,10 @@ input OsvCveOrGhsaSpec {
 """
 CertifyVulnSpec allows filtering the list of CertifyVuln to return.
 
-Specifying just the package allows to query for all vulnerabilities associated with the package.
-Only OSV, CVE or GHSA can be specified at once
+Specifying just the package allows to query for all vulnerabilities associated
+with the package.
+
+Only OSV, CVE or GHSA can be specified at once.
 """
 input CertifyVulnSpec {
   id: ID
@@ -2537,8 +2614,32 @@ input CertifyVulnSpec {
   collector: String
 }
 
+# TODO(mihaimaruseac): Remove some of the duplication (after beta)
+
 """
-VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
+CertifyNoKnownVulnSpec allows filtering the list of certifications of packages
+that are not vulnerable.
+
+Specifying just the package allows to query for all packages that had no known
+vulnerabilities at some point after ingestion.
+
+Only OSV, CVE or GHSA can be specified at once.
+"""
+input CertifyNoKnownVulnSpec {
+  id: ID
+  package: PkgSpec
+  timeScanned: Time
+  dbUri: String
+  dbVersion: String
+  scannerUri: String
+  scannerVersion: String
+  origin: String
+  collector: String
+}
+
+"""
+VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation
+input.
 
 All fields are required.
 """
@@ -2555,6 +2656,7 @@ input VulnerabilityMetaDataInput {
 """
 OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
 input type to be used in mutations.
+
 Exactly one of the value must be set to non-nil.
 """
 input OsvCveOrGhsaInput {
@@ -2564,13 +2666,19 @@ input OsvCveOrGhsaInput {
 }
 
 extend type Query {
-  "Returns all CertifyVuln"
+  "Returns all vulnerability certifications matching the input filter"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
+  """
+  Returns all certifications of no known vulnerability.
+  """
+  CertifyNoKnownVuln(certifyNoKnownVulnSpec: CertifyNoKnownVulnSpec): [NoKnownVuln!]!
 }
 
 extend type Mutation {
-  "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
+  "Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
   ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  "Certify that a package has no known vulnerability at this scan"
+  ingestNoKnownVuln(pkg: PkgInputSpec!, noKnownVuln: VulnerabilityMetaDataInput!): NoKnownVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
@@ -3666,6 +3774,7 @@ union Node
   | PkgEqual
   | CertifyScorecard
   | CertifyVuln
+  | NoKnownVuln
   | HasSourceAt
   | HasSBOM
   | HasSLSA

@@ -15,11 +15,11 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyVuln. It contains a package, vulnerability that can be of type
-# cve, ghsa or osv, time scanned, db uri, db version, scanner uri, scanner version, origin and collector
-"""
-CertifyVuln is an attestation that represents when a package has a vulnerability
+# Defines a GraphQL schema for the CertifyVuln and NoKnownVuln.
 
+"""
+CertifyVuln is an attestation that represents when a package has a
+vulnerability (OSV, CVE or GHSA).
 """
 type CertifyVuln {
   id: ID!
@@ -31,6 +31,25 @@ type CertifyVuln {
   metadata: VulnerabilityMetaData!
 }
 
+"""
+NoKnownVuln attests that at the time of scanning there was no vulnerability
+present in the package.
+
+Structure is similar to CertifyVuln, except the vulnerability field is missing.
+"""
+type NoKnownVuln {
+  id: ID!
+  "package (subject) - the package object type that represents the package"
+  package: Package!
+  "metadata (property) - contains all the vulnerability metadata "
+  metadata: VulnerabilityMetaData!
+}
+
+"""
+VulnerabilityMetaData is the metadata attached to CertifyVuln and NoKnownVuln.
+
+It contains metadata about the scanner process that created the certification.
+"""
 type VulnerabilityMetaData {
   "timeScanned (property) - timestamp of when the package was last scanned"
   timeScanned: Time!
@@ -49,13 +68,15 @@ type VulnerabilityMetaData {
 }
 
 """
-OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be
+specified for vulnerability
 """
 union OsvCveOrGhsa = OSV | CVE | GHSA
 
 """
-OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
-input type to be used in read queries.
+OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as input type to be used in
+read queries.
+
 Exactly one of the value must be set to non-nil.
 """
 input OsvCveOrGhsaSpec {
@@ -67,8 +88,10 @@ input OsvCveOrGhsaSpec {
 """
 CertifyVulnSpec allows filtering the list of CertifyVuln to return.
 
-Specifying just the package allows to query for all vulnerabilities associated with the package.
-Only OSV, CVE or GHSA can be specified at once
+Specifying just the package allows to query for all vulnerabilities associated
+with the package.
+
+Only OSV, CVE or GHSA can be specified at once.
 """
 input CertifyVulnSpec {
   id: ID
@@ -83,8 +106,32 @@ input CertifyVulnSpec {
   collector: String
 }
 
+# TODO(mihaimaruseac): Remove some of the duplication (after beta)
+
 """
-VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
+CertifyNoKnownVulnSpec allows filtering the list of certifications of packages
+that are not vulnerable.
+
+Specifying just the package allows to query for all packages that had no known
+vulnerabilities at some point after ingestion.
+
+Only OSV, CVE or GHSA can be specified at once.
+"""
+input CertifyNoKnownVulnSpec {
+  id: ID
+  package: PkgSpec
+  timeScanned: Time
+  dbUri: String
+  dbVersion: String
+  scannerUri: String
+  scannerVersion: String
+  origin: String
+  collector: String
+}
+
+"""
+VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation
+input.
 
 All fields are required.
 """
@@ -101,6 +148,7 @@ input VulnerabilityMetaDataInput {
 """
 OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
 input type to be used in mutations.
+
 Exactly one of the value must be set to non-nil.
 """
 input OsvCveOrGhsaInput {
@@ -110,11 +158,17 @@ input OsvCveOrGhsaInput {
 }
 
 extend type Query {
-  "Returns all CertifyVuln"
+  "Returns all vulnerability certifications matching the input filter"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
+  """
+  Returns all certifications of no known vulnerability.
+  """
+  CertifyNoKnownVuln(certifyNoKnownVulnSpec: CertifyNoKnownVulnSpec): [NoKnownVuln!]!
 }
 
 extend type Mutation {
-  "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
+  "Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
   ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  "Certify that a package has no known vulnerability at this scan"
+  ingestNoKnownVuln(pkg: PkgInputSpec!, noKnownVuln: VulnerabilityMetaDataInput!): NoKnownVuln!
 }

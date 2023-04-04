@@ -157,6 +157,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._CertifyVuln(ctx, sel, obj)
+	case model.NoKnownVuln:
+		return ec._NoKnownVuln(ctx, sel, &obj)
+	case *model.NoKnownVuln:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._NoKnownVuln(ctx, sel, obj)
 	case model.HasSourceAt:
 		return ec._HasSourceAt(ctx, sel, &obj)
 	case *model.HasSourceAt:

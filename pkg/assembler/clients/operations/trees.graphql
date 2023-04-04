@@ -266,6 +266,22 @@ fragment AllCertifyVuln on CertifyVuln {
   }
 }
 
+fragment AllNoKnownVuln on NoKnownVuln {
+  id
+  package {
+    ...AllPkgTree
+  }
+  metadata {
+    dbUri
+    dbVersion
+    scannerUri
+    scannerVersion
+    timeScanned
+    origin
+    collector
+  }
+}
+
 fragment allPkgEqual on PkgEqual {
   id
   justification

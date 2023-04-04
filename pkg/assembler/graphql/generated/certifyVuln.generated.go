@@ -229,6 +229,162 @@ func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _NoKnownVuln_id(ctx context.Context, field graphql.CollectedField, obj *model.NoKnownVuln) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_NoKnownVuln_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_NoKnownVuln_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "NoKnownVuln",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _NoKnownVuln_package(ctx context.Context, field graphql.CollectedField, obj *model.NoKnownVuln) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_NoKnownVuln_package(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Package, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Package)
+	fc.Result = res
+	return ec.marshalNPackage2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_NoKnownVuln_package(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "NoKnownVuln",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Package_id(ctx, field)
+			case "type":
+				return ec.fieldContext_Package_type(ctx, field)
+			case "namespaces":
+				return ec.fieldContext_Package_namespaces(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Package", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _NoKnownVuln_metadata(ctx context.Context, field graphql.CollectedField, obj *model.NoKnownVuln) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_NoKnownVuln_metadata(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Metadata, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.VulnerabilityMetaData)
+	fc.Result = res
+	return ec.marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_NoKnownVuln_metadata(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "NoKnownVuln",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "timeScanned":
+				return ec.fieldContext_VulnerabilityMetaData_timeScanned(ctx, field)
+			case "dbUri":
+				return ec.fieldContext_VulnerabilityMetaData_dbUri(ctx, field)
+			case "dbVersion":
+				return ec.fieldContext_VulnerabilityMetaData_dbVersion(ctx, field)
+			case "scannerUri":
+				return ec.fieldContext_VulnerabilityMetaData_scannerUri(ctx, field)
+			case "scannerVersion":
+				return ec.fieldContext_VulnerabilityMetaData_scannerVersion(ctx, field)
+			case "origin":
+				return ec.fieldContext_VulnerabilityMetaData_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_VulnerabilityMetaData_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetaData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _VulnerabilityMetaData_timeScanned(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetaData) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_VulnerabilityMetaData_timeScanned(ctx, field)
 	if err != nil {
@@ -540,6 +696,98 @@ func (ec *executionContext) fieldContext_VulnerabilityMetaData_collector(ctx con
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
+
+func (ec *executionContext) unmarshalInputCertifyNoKnownVulnSpec(ctx context.Context, obj interface{}) (model.CertifyNoKnownVulnSpec, error) {
+	var it model.CertifyNoKnownVulnSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "package", "timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "package":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
+			it.Package, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "timeScanned":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
+			it.TimeScanned, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dbUri":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbUri"))
+			it.DbURI, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dbVersion":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbVersion"))
+			it.DbVersion, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scannerUri":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerUri"))
+			it.ScannerURI, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scannerVersion":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerVersion"))
+			it.ScannerVersion, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "origin":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
+			it.Origin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "collector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
+			it.Collector, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
 
 func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, obj interface{}) (model.CertifyVulnSpec, error) {
 	var it model.CertifyVulnSpec
@@ -892,6 +1140,48 @@ func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var noKnownVulnImplementors = []string{"NoKnownVuln", "Node"}
+
+func (ec *executionContext) _NoKnownVuln(ctx context.Context, sel ast.SelectionSet, obj *model.NoKnownVuln) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, noKnownVulnImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NoKnownVuln")
+		case "id":
+
+			out.Values[i] = ec._NoKnownVuln_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "package":
+
+			out.Values[i] = ec._NoKnownVuln_package(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "metadata":
+
+			out.Values[i] = ec._NoKnownVuln_metadata(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var vulnerabilityMetaDataImplementors = []string{"VulnerabilityMetaData"}
 
 func (ec *executionContext) _VulnerabilityMetaData(ctx context.Context, sel ast.SelectionSet, obj *model.VulnerabilityMetaData) graphql.Marshaler {
@@ -1024,6 +1314,64 @@ func (ec *executionContext) marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._CertifyVuln(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNNoKnownVuln2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNoKnownVuln(ctx context.Context, sel ast.SelectionSet, v model.NoKnownVuln) graphql.Marshaler {
+	return ec._NoKnownVuln(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNNoKnownVuln2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNoKnownVulnᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.NoKnownVuln) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNNoKnownVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNoKnownVuln(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNNoKnownVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNoKnownVuln(ctx context.Context, sel ast.SelectionSet, v *model.NoKnownVuln) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._NoKnownVuln(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNOsvCveOrGhsa2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsa(ctx context.Context, sel ast.SelectionSet, v model.OsvCveOrGhsa) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -1052,6 +1400,14 @@ func (ec *executionContext) marshalNVulnerabilityMetaData2ᚖgithubᚗcomᚋguac
 func (ec *executionContext) unmarshalNVulnerabilityMetaDataInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetaDataInput(ctx context.Context, v interface{}) (model.VulnerabilityMetaDataInput, error) {
 	res, err := ec.unmarshalInputVulnerabilityMetaDataInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOCertifyNoKnownVulnSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyNoKnownVulnSpec(ctx context.Context, v interface{}) (*model.CertifyNoKnownVulnSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCertifyNoKnownVulnSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOCertifyVulnSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx context.Context, v interface{}) (*model.CertifyVulnSpec, error) {

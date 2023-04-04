@@ -23,7 +23,8 @@ type Node interface {
 	IsNode()
 }
 
-// OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
+// OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be
+// specified for vulnerability
 type OsvCveOrGhsa interface {
 	IsOsvCveOrGhsa()
 }
@@ -210,6 +211,25 @@ type CertifyGoodSpec struct {
 	Collector     *string                      `json:"collector,omitempty"`
 }
 
+// CertifyNoKnownVulnSpec allows filtering the list of certifications of packages
+// that are not vulnerable.
+//
+// Specifying just the package allows to query for all packages that had no known
+// vulnerabilities at some point after ingestion.
+//
+// Only OSV, CVE or GHSA can be specified at once.
+type CertifyNoKnownVulnSpec struct {
+	ID             *string    `json:"id,omitempty"`
+	Package        *PkgSpec   `json:"package,omitempty"`
+	TimeScanned    *time.Time `json:"timeScanned,omitempty"`
+	DbURI          *string    `json:"dbUri,omitempty"`
+	DbVersion      *string    `json:"dbVersion,omitempty"`
+	ScannerURI     *string    `json:"scannerUri,omitempty"`
+	ScannerVersion *string    `json:"scannerVersion,omitempty"`
+	Origin         *string    `json:"origin,omitempty"`
+	Collector      *string    `json:"collector,omitempty"`
+}
+
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
 type CertifyScorecard struct {
@@ -267,7 +287,8 @@ type CertifyVEXStatementSpec struct {
 	Collector     *string                `json:"collector,omitempty"`
 }
 
-// CertifyVuln is an attestation that represents when a package has a vulnerability
+// CertifyVuln is an attestation that represents when a package has a
+// vulnerability (OSV, CVE or GHSA).
 type CertifyVuln struct {
 	ID string `json:"id"`
 	// package (subject) - the package object type that represents the package
@@ -282,8 +303,10 @@ func (CertifyVuln) IsNode() {}
 
 // CertifyVulnSpec allows filtering the list of CertifyVuln to return.
 //
-// Specifying just the package allows to query for all vulnerabilities associated with the package.
-// Only OSV, CVE or GHSA can be specified at once
+// Specifying just the package allows to query for all vulnerabilities associated
+// with the package.
+//
+// Only OSV, CVE or GHSA can be specified at once.
 type CertifyVulnSpec struct {
 	ID             *string           `json:"id,omitempty"`
 	Package        *PkgSpec          `json:"package,omitempty"`
@@ -614,6 +637,20 @@ type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
 
+// NoKnownVuln attests that at the time of scanning there was no vulnerability
+// present in the package.
+//
+// Structure is similar to CertifyVuln, except the vulnerability field is missing.
+type NoKnownVuln struct {
+	ID string `json:"id"`
+	// package (subject) - the package object type that represents the package
+	Package *Package `json:"package"`
+	// metadata (property) - contains all the vulnerability metadata
+	Metadata *VulnerabilityMetaData `json:"metadata"`
+}
+
+func (NoKnownVuln) IsNode() {}
+
 // OSV represents an Open Source Vulnerability.
 //
 // The `osvId` field is mandatory and canonicalized to be lowercase.
@@ -644,6 +681,7 @@ type OSVSpec struct {
 
 // OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
 // input type to be used in mutations.
+//
 // Exactly one of the value must be set to non-nil.
 type OsvCveOrGhsaInput struct {
 	Osv  *OSVInputSpec  `json:"osv,omitempty"`
@@ -651,8 +689,9 @@ type OsvCveOrGhsaInput struct {
 	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
 }
 
-// OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
-// input type to be used in read queries.
+// OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as input type to be used in
+// read queries.
+//
 // Exactly one of the value must be set to non-nil.
 type OsvCveOrGhsaSpec struct {
 	Osv  *OSVSpec  `json:"osv,omitempty"`
@@ -1161,6 +1200,9 @@ type VexStatementInputSpec struct {
 	Collector     string    `json:"collector"`
 }
 
+// VulnerabilityMetaData is the metadata attached to CertifyVuln and NoKnownVuln.
+//
+// It contains metadata about the scanner process that created the certification.
 type VulnerabilityMetaData struct {
 	// timeScanned (property) - timestamp of when the package was last scanned
 	TimeScanned time.Time `json:"timeScanned"`
@@ -1178,7 +1220,8 @@ type VulnerabilityMetaData struct {
 	Collector string `json:"collector"`
 }
 
-// VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
+// VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation
+// input.
 //
 // All fields are required.
 type VulnerabilityMetaDataInput struct {
