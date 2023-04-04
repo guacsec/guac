@@ -276,8 +276,6 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 				pkgComponent.Scorecard.ScorecardCommit = project.Scorecard.Scorecard.Commit
 				pkgComponent.Scorecard.ScorecardVersion = project.Scorecard.Scorecard.Version
 				pkgComponent.Scorecard.TimeScanned = project.Scorecard.Date.AsTime().UTC()
-				pkgComponent.Scorecard.Origin = DepsCollector
-				pkgComponent.Scorecard.Collector = DepsCollector
 				inputChecks := []model.ScorecardCheckInputSpec{}
 				for _, check := range project.Scorecard.Checks {
 					inputCheck := model.ScorecardCheckInputSpec{

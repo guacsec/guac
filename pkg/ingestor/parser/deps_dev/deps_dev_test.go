@@ -26,7 +26,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
@@ -97,8 +96,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						TimeScanned:      tm.UTC(),
 						ScorecardVersion: "v4.8.0-78-gfb07860",
 						ScorecardCommit:  "fb07860d86065cdcbd2d0d5c6b998ff4542d53fe",
-						Origin:           deps_dev.DepsCollector,
-						Collector:        deps_dev.DepsCollector,
+						Origin:           "",
+						Collector:        "",
 					},
 				}, {
 					Source: &model.SourceInputSpec{
@@ -129,8 +128,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						TimeScanned:      tm.UTC(),
 						ScorecardVersion: "v4.8.0-78-gfb07860",
 						ScorecardCommit:  "fb07860d86065cdcbd2d0d5c6b998ff4542d53fe",
-						Origin:           deps_dev.DepsCollector,
-						Collector:        deps_dev.DepsCollector,
+						Origin:           "",
+						Collector:        "",
 					},
 				},
 			},
@@ -153,8 +152,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					IsDependency: &model.IsDependencyInputSpec{
 						VersionRange:  "0.1.1",
 						Justification: "dependency data collected via deps.dev",
-						Origin:        deps_dev.DepsCollector,
-						Collector:     deps_dev.DepsCollector,
+						Origin:        "",
+						Collector:     "",
 					},
 				},
 			},
@@ -178,8 +177,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					HasSourceAt: &model.HasSourceAtInputSpec{
 						KnownSince:    tm.UTC(),
 						Justification: "collected via deps.dev",
-						Origin:        deps_dev.DepsCollector,
-						Collector:     deps_dev.DepsCollector,
+						Origin:        "",
+						Collector:     "",
 					},
 				}, {
 					Pkg: &model.PkgInputSpec{
@@ -200,8 +199,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					HasSourceAt: &model.HasSourceAtInputSpec{
 						KnownSince:    tm.UTC(),
 						Justification: "collected via deps.dev",
-						Origin:        deps_dev.DepsCollector,
-						Collector:     deps_dev.DepsCollector,
+						Origin:        "",
+						Collector:     "",
 					},
 				},
 			},
@@ -235,8 +234,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					IsDependency: &model.IsDependencyInputSpec{
 						VersionRange:  "3.0.0",
 						Justification: "dependency data collected via deps.dev",
-						Origin:        deps_dev.DepsCollector,
-						Collector:     deps_dev.DepsCollector,
+						Origin:        "",
+						Collector:     "",
 					},
 				},
 			},
@@ -258,8 +257,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						DbVersion:      "",
 						ScannerUri:     "osv.dev",
 						ScannerVersion: "",
-						Origin:         deps_dev.DepsCollector,
-						Collector:      deps_dev.DepsCollector,
+						Origin:         "",
+						Collector:      "",
 					},
 				},
 			},
@@ -273,8 +272,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsVuln: &model.IsVulnerabilityInputSpec{
 						Justification: "decoded OSV data collected via deps.dev",
-						Origin:        deps_dev.DepsCollector,
-						Collector:     deps_dev.DepsCollector,
+						Origin:        "",
+						Collector:     "",
 					},
 				},
 			},
@@ -298,8 +297,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					HasSourceAt: &model.HasSourceAtInputSpec{
 						KnownSince:    tm.UTC(),
 						Justification: "collected via deps.dev",
-						Origin:        deps_dev.DepsCollector,
-						Collector:     deps_dev.DepsCollector,
+						Origin:        "",
+						Collector:     "",
 					},
 				},
 				{
@@ -321,8 +320,8 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					HasSourceAt: &model.HasSourceAtInputSpec{
 						KnownSince:    tm.UTC(),
 						Justification: "collected via deps.dev",
-						Origin:        deps_dev.DepsCollector,
-						Collector:     deps_dev.DepsCollector,
+						Origin:        "",
+						Collector:     "",
 					},
 				},
 			},
