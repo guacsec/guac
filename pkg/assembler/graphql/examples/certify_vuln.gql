@@ -48,40 +48,6 @@ fragment allCertifyVulnTree on CertifyVuln {
   }
 }
 
-fragment allNoKnownVulnTree on NoKnownVuln {
-  id
-  package {
-      id
-      type
-      namespaces {
-        id
-        namespace
-        names {
-          id
-          name
-          versions {
-            id
-            version
-            qualifiers {
-              key
-              value
-            }
-            subpath
-          }
-        }
-      }
-    }
-  metadata {
-    dbUri
-    dbVersion
-    scannerUri
-    scannerVersion
-    timeScanned
-    origin
-    collector
-  }
-}
-
 query CertifyVulnQ1 {
   CertifyVuln(certifyVulnSpec: {}) {
     ...allCertifyVulnTree

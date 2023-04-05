@@ -43,21 +43,7 @@ type vulnerabilityLink struct {
 	collector      string
 }
 
-type noKnownVulnList []*noKnownVulnLink
-type noKnownVulnLink struct {
-	id             uint32
-	packageID      uint32
-	timeScanned    time.Time
-	dbURI          string
-	dbVersion      string
-	scannerURI     string
-	scannerVersion string
-	origin         string
-	collector      string
-}
-
 func (n *vulnerabilityLink) ID() uint32 { return n.id }
-func (n *noKnownVulnLink) ID() uint32   { return n.id }
 
 func (n *vulnerabilityLink) Neighbors() []uint32 {
 	out := make([]uint32, 0, 2)
@@ -74,14 +60,8 @@ func (n *vulnerabilityLink) Neighbors() []uint32 {
 	return out
 }
 
-func (n *noKnownVulnLink) Neighbors() []uint32 { return []uint32{n.packageID} }
-
 func (n *vulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.buildCertifyVulnerability(n, nil, true)
-}
-
-func (n *noKnownVulnLink) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.buildCertifyNoKnownVulnerability(n, nil, true)
 }
 
 // Ingest CertifyVuln
@@ -220,75 +200,6 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 	return builtCertifyVuln, nil
 }
 
-// Ingest NoKnownVuln
-func (c *demoClient) IngestNoKnownVuln(ctx context.Context, pkg model.PkgInputSpec, noKnownVuln model.VulnerabilityMetaDataInput) (*model.NoKnownVuln, error) {
-	return c.ingestNoKnownVuln(ctx, pkg, noKnownVuln, true)
-}
-
-func (c *demoClient) ingestNoKnownVuln(ctx context.Context, packageArg model.PkgInputSpec, certifyNoVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.NoKnownVuln, error) {
-	lock(&c.m, readOnly)
-	defer unlock(&c.m, readOnly)
-
-	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
-	if err != nil {
-		return nil, err
-	}
-
-	packageNoVulns := []uint32{}
-	foundPkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
-	if ok {
-		packageNoVulns = append(packageNoVulns, foundPkgVersionNode.certifyNoKnownVulnLinks...)
-	}
-
-	searchIDs := packageNoVulns
-
-	// Don't insert duplicates
-	duplicate := false
-	collectedCertifyNoVulnLink := noKnownVulnLink{}
-	for _, id := range searchIDs {
-		v, _ := byID[*noKnownVulnLink](id, c)
-		if packageID == v.packageID && certifyNoVuln.TimeScanned.UTC() == v.timeScanned && certifyNoVuln.DbURI == v.dbURI &&
-			certifyNoVuln.DbVersion == v.dbVersion && certifyNoVuln.ScannerURI == v.scannerURI && certifyNoVuln.ScannerVersion == v.scannerVersion &&
-			certifyNoVuln.Origin == v.origin && certifyNoVuln.Collector == v.collector {
-
-			collectedCertifyNoVulnLink = *v
-			duplicate = true
-			break
-		}
-	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			cv, err := c.ingestNoKnownVuln(ctx, packageArg, certifyNoVuln, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return cv, err
-		}
-		// store the link
-		collectedCertifyNoVulnLink = noKnownVulnLink{
-			id:             c.getNextID(),
-			packageID:      packageID,
-			timeScanned:    certifyNoVuln.TimeScanned.UTC(),
-			dbURI:          certifyNoVuln.DbURI,
-			dbVersion:      certifyNoVuln.DbVersion,
-			scannerURI:     certifyNoVuln.ScannerURI,
-			scannerVersion: certifyNoVuln.ScannerVersion,
-			origin:         certifyNoVuln.Origin,
-			collector:      certifyNoVuln.Collector,
-		}
-		c.index[collectedCertifyNoVulnLink.id] = &collectedCertifyNoVulnLink
-		c.knownNoVulnerabilities = append(c.knownNoVulnerabilities, &collectedCertifyNoVulnLink)
-		// set the backlinks
-		c.index[packageID].(*pkgVersionNode).setNoKnownVulnerabilityLinks(collectedCertifyNoVulnLink.id)
-	}
-
-	// build return GraphQL type
-	builtCertifyNoVuln, err := c.buildCertifyNoKnownVulnerability(&collectedCertifyNoVulnLink, nil, true)
-	if err != nil {
-		return nil, err
-	}
-	return builtCertifyNoVuln, nil
-}
-
 // Query CertifyVuln
 func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	c.m.RLock()
@@ -386,57 +297,6 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	return out, nil
 }
 
-// Query NoKnownVuln
-func (c *demoClient) CertifyNoKnownVuln(ctx context.Context, filter *model.CertifyNoKnownVulnSpec) ([]*model.NoKnownVuln, error) {
-	c.m.RLock()
-	defer c.m.RUnlock()
-	funcName := "CertifyVuln"
-
-	if filter != nil && filter.ID != nil {
-		id64, err := strconv.ParseUint(*filter.ID, 10, 32)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: invalid ID %s", funcName, err)
-		}
-		id := uint32(id64)
-		link, err := byID[*noKnownVulnLink](id, c)
-		if err != nil {
-			// Not found
-			return nil, nil
-		}
-		// If found by id, ignore rest of fields in spec and return as a match
-		foundCertifyNoVuln, err := c.buildCertifyNoKnownVulnerability(link, filter, true)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		return []*model.NoKnownVuln{foundCertifyNoVuln}, nil
-	}
-
-	var search []uint32
-	if filter != nil && filter.Package != nil {
-		exactPackage, err := c.exactPackageVersion(filter.Package)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		if exactPackage != nil {
-			search = append(search, exactPackage.certifyNoKnownVulnLinks...)
-		}
-	}
-
-	var out []*model.NoKnownVuln
-	for _, id := range search {
-		link, err := byID[*noKnownVulnLink](id, c)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-		out, err = c.addNKVIfMatch(out, filter, link)
-		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-		}
-	}
-
-	return out, nil
-}
-
 func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
 	filter *model.CertifyVulnSpec,
 	link *vulnerabilityLink) ([]*model.CertifyVuln, error) {
@@ -470,41 +330,6 @@ func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
 		return out, nil
 	}
 	return append(out, foundCertifyVuln), nil
-}
-
-func (c *demoClient) addNKVIfMatch(out []*model.NoKnownVuln,
-	filter *model.CertifyNoKnownVulnSpec,
-	link *noKnownVulnLink) ([]*model.NoKnownVuln, error) {
-	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.DbURI, link.dbURI) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.DbVersion, link.dbVersion) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.ScannerURI, link.scannerURI) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.ScannerVersion, link.scannerVersion) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.Collector, link.collector) {
-		return out, nil
-	}
-	if filter != nil && noMatch(filter.Origin, link.origin) {
-		return out, nil
-	}
-
-	foundCertifyNoVuln, err := c.buildCertifyNoKnownVulnerability(link, filter, false)
-	if err != nil {
-		return nil, err
-	}
-	if foundCertifyNoVuln == nil {
-		return out, nil
-	}
-	return append(out, foundCertifyNoVuln), nil
 }
 
 func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *model.CertifyVulnSpec, ingestOrIDProvided bool) (*model.CertifyVuln, error) {
@@ -614,44 +439,4 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 		Metadata:      metadata,
 	}
 	return &certifyVuln, nil
-}
-
-func (c *demoClient) buildCertifyNoKnownVulnerability(link *noKnownVulnLink, filter *model.CertifyNoKnownVulnSpec, ingestOrIDProvided bool) (*model.NoKnownVuln, error) {
-	var p *model.Package
-	var err error
-	if filter != nil {
-		p, err = c.buildPackageResponse(link.packageID, filter.Package)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		p, err = c.buildPackageResponse(link.packageID, nil)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
-	if p == nil && ingestOrIDProvided {
-		return nil, gqlerror.Errorf("failed to retrieve package via packageID")
-	} else if p == nil && !ingestOrIDProvided {
-		return nil, nil
-	}
-
-	metadata := &model.VulnerabilityMetaData{
-		TimeScanned:    link.timeScanned,
-		DbURI:          link.dbURI,
-		DbVersion:      link.dbVersion,
-		ScannerURI:     link.scannerURI,
-		ScannerVersion: link.scannerVersion,
-		Origin:         link.origin,
-		Collector:      link.collector,
-	}
-
-	certifyNoVuln := model.NoKnownVuln{
-		ID:       nodeID(link.id),
-		Package:  p,
-		Metadata: metadata,
-	}
-	return &certifyNoVuln, nil
 }

@@ -104,21 +104,20 @@ type pkgVersionStruct struct {
 }
 type pkgVersionList []*pkgVersionNode
 type pkgVersionNode struct {
-	id                      uint32
-	parent                  uint32
-	version                 string
-	subpath                 string
-	qualifiers              map[string]string
-	srcMapLinks             []uint32
-	isDependencyLinks       []uint32
-	occurrences             []uint32
-	certifyVulnLinks        []uint32
-	certifyNoKnownVulnLinks []uint32
-	hasSBOMs                []uint32
-	vexLinks                []uint32
-	badLinks                []uint32
-	goodLinks               []uint32
-	pkgEquals               []uint32
+	id                uint32
+	parent            uint32
+	version           string
+	subpath           string
+	qualifiers        map[string]string
+	srcMapLinks       []uint32
+	isDependencyLinks []uint32
+	occurrences       []uint32
+	certifyVulnLinks  []uint32
+	hasSBOMs          []uint32
+	vexLinks          []uint32
+	badLinks          []uint32
+	goodLinks         []uint32
+	pkgEquals         []uint32
 }
 
 // Be type safe, don't use any / interface{}
@@ -167,12 +166,11 @@ func (n *pkgVersionStruct) Neighbors() []uint32 {
 	return out
 }
 func (n *pkgVersionNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.certifyNoKnownVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.goodLinks)+len(n.pkgEquals))
+	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.goodLinks)+len(n.pkgEquals))
 	out = append(out, n.srcMapLinks...)
 	out = append(out, n.isDependencyLinks...)
 	out = append(out, n.occurrences...)
 	out = append(out, n.certifyVulnLinks...)
-	out = append(out, n.certifyNoKnownVulnLinks...)
 	out = append(out, n.hasSBOMs...)
 	out = append(out, n.vexLinks...)
 	out = append(out, n.badLinks...)
@@ -220,9 +218,6 @@ func (p *pkgVersionNode) setOccurrenceLinks(id uint32) { p.occurrences = append(
 // certifyVulnerability back edges
 func (p *pkgVersionNode) setVulnerabilityLinks(id uint32) {
 	p.certifyVulnLinks = append(p.certifyVulnLinks, id)
-}
-func (p *pkgVersionNode) setNoKnownVulnerabilityLinks(id uint32) {
-	p.certifyNoKnownVulnLinks = append(p.certifyNoKnownVulnLinks, id)
 }
 
 // certifyVexStatement back edges

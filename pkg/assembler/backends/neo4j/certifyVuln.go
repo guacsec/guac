@@ -17,7 +17,6 @@ package neo4j
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -559,12 +558,4 @@ func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInpu
 	} else {
 		return nil, gqlerror.Errorf("package or source not specified for IngestOccurrence")
 	}
-}
-
-func (c *neo4jClient) CertifyNoKnownVuln(ctx context.Context, certifyNoKnownVulnSpec *model.CertifyNoKnownVulnSpec) ([]*model.NoKnownVuln, error) {
-	panic(fmt.Errorf("not implemented: CertifyNoKnownVuln - CertifyNoKnownVuln in Neo4J backend"))
-}
-
-func (c *neo4jClient) IngestNoKnownVuln(ctx context.Context, pkg model.PkgInputSpec, noKnownVuln model.VulnerabilityMetaDataInput) (*model.NoKnownVuln, error) {
-	panic(fmt.Errorf("not implemented: IngestNoKnownVuln - ingestNoKnownVuln in Neo4J backend"))
 }

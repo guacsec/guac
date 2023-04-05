@@ -15,11 +15,12 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyVuln and NoKnownVuln.
+# Defines a GraphQL schema for the CertifyVuln.
 
 """
 CertifyVuln is an attestation that represents when a package has a
-vulnerability (OSV, CVE or GHSA).
+vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+the time of scanning no vulnerability was found.
 """
 type CertifyVuln {
   id: ID!
@@ -32,21 +33,7 @@ type CertifyVuln {
 }
 
 """
-NoKnownVuln attests that at the time of scanning there was no vulnerability
-present in the package.
-
-Structure is similar to CertifyVuln, except the vulnerability field is missing.
-"""
-type NoKnownVuln {
-  id: ID!
-  "package (subject) - the package object type that represents the package"
-  package: Package!
-  "metadata (property) - contains all the vulnerability metadata "
-  metadata: VulnerabilityMetaData!
-}
-
-"""
-VulnerabilityMetaData is the metadata attached to CertifyVuln and NoKnownVuln.
+VulnerabilityMetaData is the metadata attached to CertifyVuln.
 
 It contains metadata about the scanner process that created the certification.
 """
@@ -106,29 +93,6 @@ input CertifyVulnSpec {
   collector: String
 }
 
-# TODO(mihaimaruseac): Remove some of the duplication (after beta)
-
-"""
-CertifyNoKnownVulnSpec allows filtering the list of certifications of packages
-that are not vulnerable.
-
-Specifying just the package allows to query for all packages that had no known
-vulnerabilities at some point after ingestion.
-
-Only OSV, CVE or GHSA can be specified at once.
-"""
-input CertifyNoKnownVulnSpec {
-  id: ID
-  package: PkgSpec
-  timeScanned: Time
-  dbUri: String
-  dbVersion: String
-  scannerUri: String
-  scannerVersion: String
-  origin: String
-  collector: String
-}
-
 """
 VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation
 input.
@@ -160,15 +124,9 @@ input OsvCveOrGhsaInput {
 extend type Query {
   "Returns all vulnerability certifications matching the input filter"
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
-  """
-  Returns all certifications of no known vulnerability.
-  """
-  CertifyNoKnownVuln(certifyNoKnownVulnSpec: CertifyNoKnownVulnSpec): [NoKnownVuln!]!
 }
 
 extend type Mutation {
   "Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
   ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
-  "Certify that a package has no known vulnerability at this scan"
-  ingestNoKnownVuln(pkg: PkgInputSpec!, noKnownVuln: VulnerabilityMetaDataInput!): NoKnownVuln!
 }

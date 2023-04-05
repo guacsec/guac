@@ -15,17 +15,7 @@ func (r *mutationResolver) IngestVulnerability(ctx context.Context, pkg model.Pk
 	return r.Backend.IngestVulnerability(ctx, pkg, vulnerability, certifyVuln)
 }
 
-// IngestNoKnownVuln is the resolver for the ingestNoKnownVuln field.
-func (r *mutationResolver) IngestNoKnownVuln(ctx context.Context, pkg model.PkgInputSpec, noKnownVuln model.VulnerabilityMetaDataInput) (*model.NoKnownVuln, error) {
-	return r.Backend.IngestNoKnownVuln(ctx, pkg, noKnownVuln)
-}
-
 // CertifyVuln is the resolver for the CertifyVuln field.
 func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	return r.Backend.CertifyVuln(ctx, certifyVulnSpec)
-}
-
-// CertifyNoKnownVuln is the resolver for the CertifyNoKnownVuln field.
-func (r *queryResolver) CertifyNoKnownVuln(ctx context.Context, certifyNoKnownVulnSpec *model.CertifyNoKnownVulnSpec) ([]*model.NoKnownVuln, error) {
-	return r.Backend.CertifyNoKnownVuln(ctx, certifyNoKnownVulnSpec)
 }

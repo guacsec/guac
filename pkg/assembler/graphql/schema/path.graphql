@@ -42,7 +42,6 @@ union Node
   | PkgEqual
   | CertifyScorecard
   | CertifyVuln
-  | NoKnownVuln
   | HasSourceAt
   | HasSBOM
   | HasSLSA

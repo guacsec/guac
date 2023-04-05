@@ -64,54 +64,52 @@ type demoClient struct {
 	id uint32
 	m  sync.RWMutex
 
-	artifacts              artMap
-	builders               builderMap
-	certifyBads            badList
-	certifyGoods           goodList
-	pkgEquals              pkgEqualList
-	cves                   cveMap
-	equalVulnerabilities   equalVulnerabilityList
-	ghsas                  ghsaMap
-	hasSBOMs               hasSBOMList
-	hasSLSAs               hasSLSAList
-	hasSources             hasSrcList
-	hashEquals             hashEqualList
-	index                  indexType
-	isDependencies         isDependencyList
-	occurrences            isOccurrenceList
-	osvs                   osvMap
-	packages               pkgTypeMap
-	scorecards             scorecardList
-	sources                srcTypeMap
-	vexs                   vexList
-	vulnerabilities        vulnerabilityList
-	knownNoVulnerabilities noKnownVulnList
+	artifacts            artMap
+	builders             builderMap
+	certifyBads          badList
+	certifyGoods         goodList
+	pkgEquals            pkgEqualList
+	cves                 cveMap
+	equalVulnerabilities equalVulnerabilityList
+	ghsas                ghsaMap
+	hasSBOMs             hasSBOMList
+	hasSLSAs             hasSLSAList
+	hasSources           hasSrcList
+	hashEquals           hashEqualList
+	index                indexType
+	isDependencies       isDependencyList
+	occurrences          isOccurrenceList
+	osvs                 osvMap
+	packages             pkgTypeMap
+	scorecards           scorecardList
+	sources              srcTypeMap
+	vexs                 vexList
+	vulnerabilities      vulnerabilityList
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	client := &demoClient{
-		artifacts:              artMap{},
-		builders:               builderMap{},
-		certifyBads:            badList{},
-		certifyGoods:           goodList{},
-		pkgEquals:              pkgEqualList{},
-		cves:                   cveMap{},
-		equalVulnerabilities:   equalVulnerabilityList{},
-		ghsas:                  ghsaMap{},
-		hasSBOMs:               hasSBOMList{},
-		hasSLSAs:               hasSLSAList{},
-		hasSources:             hasSrcList{},
-		hashEquals:             hashEqualList{},
-		index:                  indexType{},
-		isDependencies:         isDependencyList{},
-		occurrences:            isOccurrenceList{},
-		osvs:                   osvMap{},
-		packages:               pkgTypeMap{},
-		scorecards:             scorecardList{},
-		sources:                srcTypeMap{},
-		vexs:                   vexList{},
-		vulnerabilities:        vulnerabilityList{},
-		knownNoVulnerabilities: noKnownVulnList{},
+		artifacts:            artMap{},
+		builders:             builderMap{},
+		certifyBads:          badList{},
+		certifyGoods:         goodList{},
+		pkgEquals:            pkgEqualList{},
+		cves:                 cveMap{},
+		equalVulnerabilities: equalVulnerabilityList{},
+		ghsas:                ghsaMap{},
+		hasSBOMs:             hasSBOMList{},
+		hasSLSAs:             hasSLSAList{},
+		hasSources:           hasSrcList{},
+		hashEquals:           hashEqualList{},
+		index:                indexType{},
+		isDependencies:       isDependencyList{},
+		occurrences:          isOccurrenceList{},
+		osvs:                 osvMap{},
+		packages:             pkgTypeMap{},
+		scorecards:           scorecardList{},
+		sources:              srcTypeMap{},
+		vexs:                 vexList{},
+		vulnerabilities:      vulnerabilityList{},
 	}
 
 	return client, nil

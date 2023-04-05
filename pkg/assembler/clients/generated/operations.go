@@ -190,7 +190,8 @@ func (v *AllCertifyScorecardSource) __premarshalJSON() (*__premarshalAllCertifyS
 // The GraphQL type's documentation follows.
 //
 // CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE or GHSA).
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type AllCertifyVuln struct {
 	Id string `json:"id"`
 	// package (subject) - the package object type that represents the package
@@ -290,7 +291,7 @@ func (v *AllCertifyVuln) __premarshalJSON() (*__premarshalAllCertifyVuln, error)
 // AllCertifyVulnMetadataVulnerabilityMetaData includes the requested fields of the GraphQL type VulnerabilityMetaData.
 // The GraphQL type's documentation follows.
 //
-// VulnerabilityMetaData is the metadata attached to CertifyVuln and NoKnownVuln.
+// VulnerabilityMetaData is the metadata attached to CertifyVuln.
 //
 // It contains metadata about the scanner process that created the certification.
 type AllCertifyVulnMetadataVulnerabilityMetaData struct {
@@ -1189,158 +1190,6 @@ func (v *AllIsOccurrencesTreeSubjectSource) __premarshalJSON() (*__premarshalAll
 	retval.Id = v.AllSourceTree.Id
 	retval.Type = v.AllSourceTree.Type
 	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
-}
-
-// AllNoKnownVuln includes the GraphQL fields of NoKnownVuln requested by the fragment AllNoKnownVuln.
-// The GraphQL type's documentation follows.
-//
-// NoKnownVuln attests that at the time of scanning there was no vulnerability
-// present in the package.
-//
-// Structure is similar to CertifyVuln, except the vulnerability field is missing.
-type AllNoKnownVuln struct {
-	Id string `json:"id"`
-	// package (subject) - the package object type that represents the package
-	Package AllNoKnownVulnPackage `json:"package"`
-	// metadata (property) - contains all the vulnerability metadata
-	Metadata AllNoKnownVulnMetadataVulnerabilityMetaData `json:"metadata"`
-}
-
-// GetId returns AllNoKnownVuln.Id, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVuln) GetId() string { return v.Id }
-
-// GetPackage returns AllNoKnownVuln.Package, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVuln) GetPackage() AllNoKnownVulnPackage { return v.Package }
-
-// GetMetadata returns AllNoKnownVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVuln) GetMetadata() AllNoKnownVulnMetadataVulnerabilityMetaData { return v.Metadata }
-
-// AllNoKnownVulnMetadataVulnerabilityMetaData includes the requested fields of the GraphQL type VulnerabilityMetaData.
-// The GraphQL type's documentation follows.
-//
-// VulnerabilityMetaData is the metadata attached to CertifyVuln and NoKnownVuln.
-//
-// It contains metadata about the scanner process that created the certification.
-type AllNoKnownVulnMetadataVulnerabilityMetaData struct {
-	// dbUri (property) - scanner vulnerability database uri
-	DbUri string `json:"dbUri"`
-	// dbVersion (property) - scanner vulnerability database version
-	DbVersion string `json:"dbVersion"`
-	// scannerUri (property) - vulnerability scanner's uri
-	ScannerUri string `json:"scannerUri"`
-	// scannerVersion (property) - vulnerability scanner version
-	ScannerVersion string `json:"scannerVersion"`
-	// timeScanned (property) - timestamp of when the package was last scanned
-	TimeScanned time.Time `json:"timeScanned"`
-	// origin (property) - where this attestation was generated from (based on which document)
-	Origin string `json:"origin"`
-	// collector (property) - the GUAC collector that collected the document that generated this attestation
-	Collector string `json:"collector"`
-}
-
-// GetDbUri returns AllNoKnownVulnMetadataVulnerabilityMetaData.DbUri, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnMetadataVulnerabilityMetaData) GetDbUri() string { return v.DbUri }
-
-// GetDbVersion returns AllNoKnownVulnMetadataVulnerabilityMetaData.DbVersion, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnMetadataVulnerabilityMetaData) GetDbVersion() string { return v.DbVersion }
-
-// GetScannerUri returns AllNoKnownVulnMetadataVulnerabilityMetaData.ScannerUri, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnMetadataVulnerabilityMetaData) GetScannerUri() string { return v.ScannerUri }
-
-// GetScannerVersion returns AllNoKnownVulnMetadataVulnerabilityMetaData.ScannerVersion, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnMetadataVulnerabilityMetaData) GetScannerVersion() string {
-	return v.ScannerVersion
-}
-
-// GetTimeScanned returns AllNoKnownVulnMetadataVulnerabilityMetaData.TimeScanned, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnMetadataVulnerabilityMetaData) GetTimeScanned() time.Time {
-	return v.TimeScanned
-}
-
-// GetOrigin returns AllNoKnownVulnMetadataVulnerabilityMetaData.Origin, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnMetadataVulnerabilityMetaData) GetOrigin() string { return v.Origin }
-
-// GetCollector returns AllNoKnownVulnMetadataVulnerabilityMetaData.Collector, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnMetadataVulnerabilityMetaData) GetCollector() string { return v.Collector }
-
-// AllNoKnownVulnPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents a package.
-//
-// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
-// The `type` field matches the pURL types but we might also use `"guac"` for the
-// cases where the pURL representation is not complete or when we have custom
-// rules.
-//
-// This node is a singleton: backends guarantee that there is exactly one node
-// with the same `type` value.
-//
-// Also note that this is named `Package`, not `PackageType`. This is only to make
-// queries more readable.
-type AllNoKnownVulnPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns AllNoKnownVulnPackage.Id, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns AllNoKnownVulnPackage.Type, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns AllNoKnownVulnPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *AllNoKnownVulnPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *AllNoKnownVulnPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*AllNoKnownVulnPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.AllNoKnownVulnPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalAllNoKnownVulnPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *AllNoKnownVulnPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *AllNoKnownVulnPackage) __premarshalJSON() (*__premarshalAllNoKnownVulnPackage, error) {
-	var retval __premarshalAllNoKnownVulnPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
 	return &retval, nil
 }
 
@@ -2377,7 +2226,8 @@ func (v *CertifyCVEIngestPackage) __premarshalJSON() (*__premarshalCertifyCVEIng
 // The GraphQL type's documentation follows.
 //
 // CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE or GHSA).
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type CertifyCVEIngestVulnerabilityCertifyVuln struct {
 	AllCertifyVuln `json:"-"`
 }
@@ -2634,7 +2484,8 @@ func (v *CertifyGHSAIngestPackage) __premarshalJSON() (*__premarshalCertifyGHSAI
 // The GraphQL type's documentation follows.
 //
 // CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE or GHSA).
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type CertifyGHSAIngestVulnerabilityCertifyVuln struct {
 	AllCertifyVuln `json:"-"`
 }
@@ -3347,178 +3198,6 @@ func (v *CertifyGoodSrcResponse) GetIngestCertifyGood() CertifyGoodSrcIngestCert
 	return v.IngestCertifyGood
 }
 
-// CertifyNoKnownVulnIngestNoKnownVuln includes the requested fields of the GraphQL type NoKnownVuln.
-// The GraphQL type's documentation follows.
-//
-// NoKnownVuln attests that at the time of scanning there was no vulnerability
-// present in the package.
-//
-// Structure is similar to CertifyVuln, except the vulnerability field is missing.
-type CertifyNoKnownVulnIngestNoKnownVuln struct {
-	AllNoKnownVuln `json:"-"`
-}
-
-// GetId returns CertifyNoKnownVulnIngestNoKnownVuln.Id, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestNoKnownVuln) GetId() string { return v.AllNoKnownVuln.Id }
-
-// GetPackage returns CertifyNoKnownVulnIngestNoKnownVuln.Package, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestNoKnownVuln) GetPackage() AllNoKnownVulnPackage {
-	return v.AllNoKnownVuln.Package
-}
-
-// GetMetadata returns CertifyNoKnownVulnIngestNoKnownVuln.Metadata, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestNoKnownVuln) GetMetadata() AllNoKnownVulnMetadataVulnerabilityMetaData {
-	return v.AllNoKnownVuln.Metadata
-}
-
-func (v *CertifyNoKnownVulnIngestNoKnownVuln) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyNoKnownVulnIngestNoKnownVuln
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyNoKnownVulnIngestNoKnownVuln = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllNoKnownVuln)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyNoKnownVulnIngestNoKnownVuln struct {
-	Id string `json:"id"`
-
-	Package AllNoKnownVulnPackage `json:"package"`
-
-	Metadata AllNoKnownVulnMetadataVulnerabilityMetaData `json:"metadata"`
-}
-
-func (v *CertifyNoKnownVulnIngestNoKnownVuln) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyNoKnownVulnIngestNoKnownVuln) __premarshalJSON() (*__premarshalCertifyNoKnownVulnIngestNoKnownVuln, error) {
-	var retval __premarshalCertifyNoKnownVulnIngestNoKnownVuln
-
-	retval.Id = v.AllNoKnownVuln.Id
-	retval.Package = v.AllNoKnownVuln.Package
-	retval.Metadata = v.AllNoKnownVuln.Metadata
-	return &retval, nil
-}
-
-// CertifyNoKnownVulnIngestPackage includes the requested fields of the GraphQL type Package.
-// The GraphQL type's documentation follows.
-//
-// Package represents a package.
-//
-// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
-// The `type` field matches the pURL types but we might also use `"guac"` for the
-// cases where the pURL representation is not complete or when we have custom
-// rules.
-//
-// This node is a singleton: backends guarantee that there is exactly one node
-// with the same `type` value.
-//
-// Also note that this is named `Package`, not `PackageType`. This is only to make
-// queries more readable.
-type CertifyNoKnownVulnIngestPackage struct {
-	AllPkgTree `json:"-"`
-}
-
-// GetId returns CertifyNoKnownVulnIngestPackage.Id, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestPackage) GetId() string { return v.AllPkgTree.Id }
-
-// GetType returns CertifyNoKnownVulnIngestPackage.Type, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestPackage) GetType() string { return v.AllPkgTree.Type }
-
-// GetNamespaces returns CertifyNoKnownVulnIngestPackage.Namespaces, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
-	return v.AllPkgTree.Namespaces
-}
-
-func (v *CertifyNoKnownVulnIngestPackage) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyNoKnownVulnIngestPackage
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyNoKnownVulnIngestPackage = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllPkgTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyNoKnownVulnIngestPackage struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
-}
-
-func (v *CertifyNoKnownVulnIngestPackage) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyNoKnownVulnIngestPackage) __premarshalJSON() (*__premarshalCertifyNoKnownVulnIngestPackage, error) {
-	var retval __premarshalCertifyNoKnownVulnIngestPackage
-
-	retval.Id = v.AllPkgTree.Id
-	retval.Type = v.AllPkgTree.Type
-	retval.Namespaces = v.AllPkgTree.Namespaces
-	return &retval, nil
-}
-
-// CertifyNoKnownVulnResponse is returned by CertifyNoKnownVuln on success.
-type CertifyNoKnownVulnResponse struct {
-	// Ingest a new package. Returns the ingested package trie
-	IngestPackage CertifyNoKnownVulnIngestPackage `json:"ingestPackage"`
-	// Certify that a package has no known vulnerability at this scan
-	IngestNoKnownVuln CertifyNoKnownVulnIngestNoKnownVuln `json:"ingestNoKnownVuln"`
-}
-
-// GetIngestPackage returns CertifyNoKnownVulnResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnResponse) GetIngestPackage() CertifyNoKnownVulnIngestPackage {
-	return v.IngestPackage
-}
-
-// GetIngestNoKnownVuln returns CertifyNoKnownVulnResponse.IngestNoKnownVuln, and is useful for accessing the field via an interface.
-func (v *CertifyNoKnownVulnResponse) GetIngestNoKnownVuln() CertifyNoKnownVulnIngestNoKnownVuln {
-	return v.IngestNoKnownVuln
-}
-
 // CertifyOSVIngestOSV includes the requested fields of the GraphQL type OSV.
 // The GraphQL type's documentation follows.
 //
@@ -3671,7 +3350,8 @@ func (v *CertifyOSVIngestPackage) __premarshalJSON() (*__premarshalCertifyOSVIng
 // The GraphQL type's documentation follows.
 //
 // CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE or GHSA).
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type CertifyOSVIngestVulnerabilityCertifyVuln struct {
 	AllCertifyVuln `json:"-"`
 }
@@ -6815,7 +6495,8 @@ func (v *NeighborsNeighborsCertifyVEXStatement) __premarshalJSON() (*__premarsha
 // The GraphQL type's documentation follows.
 //
 // CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE or GHSA).
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type NeighborsNeighborsCertifyVuln struct {
 	Typename       *string `json:"__typename"`
 	AllCertifyVuln `json:"-"`
@@ -7709,20 +7390,6 @@ func (v *NeighborsNeighborsIsVulnerability) __premarshalJSON() (*__premarshalNei
 	return &retval, nil
 }
 
-// NeighborsNeighborsNoKnownVuln includes the requested fields of the GraphQL type NoKnownVuln.
-// The GraphQL type's documentation follows.
-//
-// NoKnownVuln attests that at the time of scanning there was no vulnerability
-// present in the package.
-//
-// Structure is similar to CertifyVuln, except the vulnerability field is missing.
-type NeighborsNeighborsNoKnownVuln struct {
-	Typename *string `json:"__typename"`
-}
-
-// GetTypename returns NeighborsNeighborsNoKnownVuln.Typename, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsNoKnownVuln) GetTypename() *string { return v.Typename }
-
 // NeighborsNeighborsNode includes the requested fields of the GraphQL interface Node.
 //
 // NeighborsNeighborsNode is implemented by the following types:
@@ -7743,7 +7410,6 @@ func (v *NeighborsNeighborsNoKnownVuln) GetTypename() *string { return v.Typenam
 // NeighborsNeighborsPkgEqual
 // NeighborsNeighborsCertifyScorecard
 // NeighborsNeighborsCertifyVuln
-// NeighborsNeighborsNoKnownVuln
 // NeighborsNeighborsHasSourceAt
 // NeighborsNeighborsHasSBOM
 // NeighborsNeighborsHasSLSA
@@ -7777,7 +7443,6 @@ func (v *NeighborsNeighborsCertifyGood) implementsGraphQLInterfaceNeighborsNeigh
 func (v *NeighborsNeighborsPkgEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
 func (v *NeighborsNeighborsCertifyScorecard) implementsGraphQLInterfaceNeighborsNeighborsNode()    {}
 func (v *NeighborsNeighborsCertifyVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
-func (v *NeighborsNeighborsNoKnownVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
 func (v *NeighborsNeighborsHasSourceAt) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
 func (v *NeighborsNeighborsHasSBOM) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsHasSLSA) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
@@ -7846,9 +7511,6 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 		return json.Unmarshal(b, *v)
 	case "CertifyVuln":
 		*v = new(NeighborsNeighborsCertifyVuln)
-		return json.Unmarshal(b, *v)
-	case "NoKnownVuln":
-		*v = new(NeighborsNeighborsNoKnownVuln)
 		return json.Unmarshal(b, *v)
 	case "HasSourceAt":
 		*v = new(NeighborsNeighborsHasSourceAt)
@@ -8071,14 +7733,6 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsCertifyVuln
 		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsNoKnownVuln:
-		typename = "NoKnownVuln"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*NeighborsNeighborsNoKnownVuln
-		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsHasSourceAt:
 		typename = "HasSourceAt"
@@ -11501,7 +11155,8 @@ func (v *PathPathCertifyVEXStatement) __premarshalJSON() (*__premarshalPathPathC
 // The GraphQL type's documentation follows.
 //
 // CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE or GHSA).
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type PathPathCertifyVuln struct {
 	Typename       *string `json:"__typename"`
 	AllCertifyVuln `json:"-"`
@@ -12369,20 +12024,6 @@ func (v *PathPathIsVulnerability) __premarshalJSON() (*__premarshalPathPathIsVul
 	return &retval, nil
 }
 
-// PathPathNoKnownVuln includes the requested fields of the GraphQL type NoKnownVuln.
-// The GraphQL type's documentation follows.
-//
-// NoKnownVuln attests that at the time of scanning there was no vulnerability
-// present in the package.
-//
-// Structure is similar to CertifyVuln, except the vulnerability field is missing.
-type PathPathNoKnownVuln struct {
-	Typename *string `json:"__typename"`
-}
-
-// GetTypename returns PathPathNoKnownVuln.Typename, and is useful for accessing the field via an interface.
-func (v *PathPathNoKnownVuln) GetTypename() *string { return v.Typename }
-
 // PathPathNode includes the requested fields of the GraphQL interface Node.
 //
 // PathPathNode is implemented by the following types:
@@ -12403,7 +12044,6 @@ func (v *PathPathNoKnownVuln) GetTypename() *string { return v.Typename }
 // PathPathPkgEqual
 // PathPathCertifyScorecard
 // PathPathCertifyVuln
-// PathPathNoKnownVuln
 // PathPathHasSourceAt
 // PathPathHasSBOM
 // PathPathHasSLSA
@@ -12437,7 +12077,6 @@ func (v *PathPathCertifyGood) implementsGraphQLInterfacePathPathNode()         {
 func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()            {}
 func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()    {}
 func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()         {}
-func (v *PathPathNoKnownVuln) implementsGraphQLInterfacePathPathNode()         {}
 func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()         {}
 func (v *PathPathHasSBOM) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathHasSLSA) implementsGraphQLInterfacePathPathNode()             {}
@@ -12506,9 +12145,6 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 		return json.Unmarshal(b, *v)
 	case "CertifyVuln":
 		*v = new(PathPathCertifyVuln)
-		return json.Unmarshal(b, *v)
-	case "NoKnownVuln":
-		*v = new(PathPathNoKnownVuln)
 		return json.Unmarshal(b, *v)
 	case "HasSourceAt":
 		*v = new(PathPathHasSourceAt)
@@ -12731,14 +12367,6 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathCertifyVuln
 		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathNoKnownVuln:
-		typename = "NoKnownVuln"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*PathPathNoKnownVuln
-		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathHasSourceAt:
 		typename = "HasSourceAt"
@@ -16235,18 +15863,6 @@ func (v *__CertifyGoodSrcInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetCertifyGood returns __CertifyGoodSrcInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodSrcInput) GetCertifyGood() CertifyGoodInputSpec { return v.CertifyGood }
-
-// __CertifyNoKnownVulnInput is used internally by genqlient
-type __CertifyNoKnownVulnInput struct {
-	Pkg         PkgInputSpec               `json:"pkg"`
-	NoKnownVuln VulnerabilityMetaDataInput `json:"noKnownVuln"`
-}
-
-// GetPkg returns __CertifyNoKnownVulnInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__CertifyNoKnownVulnInput) GetPkg() PkgInputSpec { return v.Pkg }
-
-// GetNoKnownVuln returns __CertifyNoKnownVulnInput.NoKnownVuln, and is useful for accessing the field via an interface.
-func (v *__CertifyNoKnownVulnInput) GetNoKnownVuln() VulnerabilityMetaDataInput { return v.NoKnownVuln }
 
 // __CertifyOSVInput is used internally by genqlient
 type __CertifyOSVInput struct {
@@ -20827,79 +20443,6 @@ fragment allArtifactTree on Artifact {
 	var err error
 
 	var data CertifyGoodSrcResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-func CertifyNoKnownVuln(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	noKnownVuln VulnerabilityMetaDataInput,
-) (*CertifyNoKnownVulnResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyNoKnownVuln",
-		Query: `
-mutation CertifyNoKnownVuln ($pkg: PkgInputSpec!, $noKnownVuln: VulnerabilityMetaDataInput!) {
-	ingestPackage(pkg: $pkg) {
-		... AllPkgTree
-	}
-	ingestNoKnownVuln(pkg: $pkg, noKnownVuln: $noKnownVuln) {
-		... AllNoKnownVuln
-	}
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-fragment AllNoKnownVuln on NoKnownVuln {
-	id
-	package {
-		... AllPkgTree
-	}
-	metadata {
-		dbUri
-		dbVersion
-		scannerUri
-		scannerVersion
-		timeScanned
-		origin
-		collector
-	}
-}
-`,
-		Variables: &__CertifyNoKnownVulnInput{
-			Pkg:         pkg,
-			NoKnownVuln: noKnownVuln,
-		},
-	}
-	var err error
-
-	var data CertifyNoKnownVulnResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

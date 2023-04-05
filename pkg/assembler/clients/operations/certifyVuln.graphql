@@ -53,11 +53,11 @@ mutation CertifyGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: V
   }
 }
 
-mutation CertifyNoKnownVuln($pkg: PkgInputSpec!, $noKnownVuln: VulnerabilityMetaDataInput!) {
-  ingestPackage(pkg: $pkg) {
-    ...AllPkgTree
-  }
-  ingestNoKnownVuln(pkg: $pkg, noKnownVuln: $noKnownVuln) {
-    ...AllNoKnownVuln
-  }
-}
+#mutation CertifyNoKnownVuln($pkg: PkgInputSpec!, $noKnownVuln: VulnerabilityMetaDataInput!) {
+#  ingestPackage(pkg: $pkg) {
+#    ...AllPkgTree
+#  }
+#  ingestNoKnownVuln(pkg: $pkg, noKnownVuln: $noKnownVuln) {
+#    ...AllNoKnownVuln
+#  }
+#}

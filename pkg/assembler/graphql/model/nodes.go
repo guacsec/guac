@@ -211,25 +211,6 @@ type CertifyGoodSpec struct {
 	Collector     *string                      `json:"collector,omitempty"`
 }
 
-// CertifyNoKnownVulnSpec allows filtering the list of certifications of packages
-// that are not vulnerable.
-//
-// Specifying just the package allows to query for all packages that had no known
-// vulnerabilities at some point after ingestion.
-//
-// Only OSV, CVE or GHSA can be specified at once.
-type CertifyNoKnownVulnSpec struct {
-	ID             *string    `json:"id,omitempty"`
-	Package        *PkgSpec   `json:"package,omitempty"`
-	TimeScanned    *time.Time `json:"timeScanned,omitempty"`
-	DbURI          *string    `json:"dbUri,omitempty"`
-	DbVersion      *string    `json:"dbVersion,omitempty"`
-	ScannerURI     *string    `json:"scannerUri,omitempty"`
-	ScannerVersion *string    `json:"scannerVersion,omitempty"`
-	Origin         *string    `json:"origin,omitempty"`
-	Collector      *string    `json:"collector,omitempty"`
-}
-
 // CertifyScorecard is an attestation which represents the scorecard of a
 // particular source repository.
 type CertifyScorecard struct {
@@ -288,7 +269,8 @@ type CertifyVEXStatementSpec struct {
 }
 
 // CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE or GHSA).
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type CertifyVuln struct {
 	ID string `json:"id"`
 	// package (subject) - the package object type that represents the package
@@ -636,20 +618,6 @@ type IsVulnerabilitySpec struct {
 type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
-
-// NoKnownVuln attests that at the time of scanning there was no vulnerability
-// present in the package.
-//
-// Structure is similar to CertifyVuln, except the vulnerability field is missing.
-type NoKnownVuln struct {
-	ID string `json:"id"`
-	// package (subject) - the package object type that represents the package
-	Package *Package `json:"package"`
-	// metadata (property) - contains all the vulnerability metadata
-	Metadata *VulnerabilityMetaData `json:"metadata"`
-}
-
-func (NoKnownVuln) IsNode() {}
 
 // OSV represents an Open Source Vulnerability.
 //
@@ -1200,7 +1168,7 @@ type VexStatementInputSpec struct {
 	Collector     string    `json:"collector"`
 }
 
-// VulnerabilityMetaData is the metadata attached to CertifyVuln and NoKnownVuln.
+// VulnerabilityMetaData is the metadata attached to CertifyVuln.
 //
 // It contains metadata about the scanner process that created the certification.
 type VulnerabilityMetaData struct {
