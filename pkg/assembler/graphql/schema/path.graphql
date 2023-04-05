@@ -61,4 +61,11 @@ extend type Query {
   Similarly, the input is only specified by its ID.
   """
   neighbors(node: ID!): [Node!]!
+
+  """
+  node returns a single node, regardless of type
+
+  The input is only specified by its ID.
+  """
+  node(node: ID!): Node!
 }

@@ -19,3 +19,8 @@ func (r *queryResolver) Path(ctx context.Context, subject string, target string,
 func (r *queryResolver) Neighbors(ctx context.Context, node string) ([]model.Node, error) {
 	return r.Backend.Neighbors(ctx, node)
 }
+
+// Node is the resolver for the node field.
+func (r *queryResolver) Node(ctx context.Context, node string) (model.Node, error) {
+	return r.Backend.Node(ctx, node)
+}

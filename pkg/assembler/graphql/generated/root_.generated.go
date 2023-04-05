@@ -243,6 +243,7 @@ type ComplexityRoot struct {
 		IsOccurrence        func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
 		Neighbors           func(childComplexity int, node string) int
+		Node                func(childComplexity int, node string) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int) int
@@ -1436,6 +1437,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string)), true
+
+	case "Query.node":
+		if e.complexity.Query.Node == nil {
+			break
+		}
+
+		args, err := ec.field_Query_node_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Node(childComplexity, args["node"].(string)), true
 
 	case "Query.osv":
 		if e.complexity.Query.Osv == nil {
@@ -3672,6 +3685,13 @@ extend type Query {
   Similarly, the input is only specified by its ID.
   """
   neighbors(node: ID!): [Node!]!
+
+  """
+  node returns a single node, regardless of type
+
+  The input is only specified by its ID.
+  """
+  node(node: ID!): Node!
 }
 `, BuiltIn: false},
 	{Name: "../schema/pkgEqual.graphql", Input: `#
