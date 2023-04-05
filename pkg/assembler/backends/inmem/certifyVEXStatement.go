@@ -77,7 +77,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 	if err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement"); err != nil {
 		return nil, err
 	}
-	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement"); err != nil {
+	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement", false); err != nil {
 		return nil, err
 	}
 
@@ -243,7 +243,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 	if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
 		return nil, err
 	}
-	if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability); err != nil {
+	if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, false); err != nil {
 		return nil, err
 	}
 

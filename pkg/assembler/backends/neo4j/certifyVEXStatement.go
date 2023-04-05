@@ -536,7 +536,7 @@ func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.Pack
 	if err != nil {
 		return nil, err
 	}
-	err = helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement")
+	err = helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement", false)
 	if err != nil {
 		return nil, err
 	}

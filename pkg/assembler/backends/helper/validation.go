@@ -20,7 +20,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func ValidateVulnerabilityIngestionInput(vulnerability model.VulnerabilityInput, path string) error {
+func ValidateVulnerabilityIngestionInput(vulnerability model.VulnerabilityInput, path string, noVulnAllowed bool) error {
 	vulnDefined := 0
 	if vulnerability.Osv != nil {
 		vulnDefined = vulnDefined + 1
@@ -31,13 +31,19 @@ func ValidateVulnerabilityIngestionInput(vulnerability model.VulnerabilityInput,
 	if vulnerability.Cve != nil {
 		vulnDefined = vulnDefined + 1
 	}
+	if noVulnAllowed && vulnerability.NoVuln != nil && *vulnerability.NoVuln {
+		if vulnDefined != 0 {
+			return gqlerror.Errorf("Since NoVuln is set, no other vulnerability type is allowed for %v", path)
+		}
+		return nil
+	}
 	if vulnDefined != 1 {
 		return gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
 	}
 	return nil
 }
 
-func ValidateVulnerabilityQueryFilter(vulnerability *model.VulnerabilitySpec) error {
+func ValidateVulnerabilityQueryFilter(vulnerability *model.VulnerabilitySpec, noVulnAllowed bool) error {
 	if vulnerability == nil {
 		return nil
 	} else {
@@ -50,6 +56,12 @@ func ValidateVulnerabilityQueryFilter(vulnerability *model.VulnerabilitySpec) er
 		}
 		if vulnerability.Cve != nil {
 			vulnDefined = vulnDefined + 1
+		}
+		if noVulnAllowed && vulnerability.NoVuln != nil && *vulnerability.NoVuln {
+			if vulnDefined != 0 {
+				return gqlerror.Errorf("Since NoVuln is set, no other vulnerability type is allowed")
+			}
+			return nil
 		}
 		if vulnDefined != 1 {
 			return gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa)")

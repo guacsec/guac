@@ -333,7 +333,7 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.Vulnerability, time
 
 func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability")
+	err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability", true)
 	if err != nil {
 		return nil, err
 	}
