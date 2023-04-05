@@ -38,6 +38,8 @@ func (c *demoClient) Path(ctx context.Context, source string, target string, max
 		return nil, err
 	}
 
+	c.m.RLock()
+	defer c.m.RUnlock()
 	return c.bfs(uint32(sourceID), uint32(targetID), maxPathLength)
 }
 
@@ -47,11 +49,16 @@ func (c *demoClient) Neighbors(ctx context.Context, source string) ([]model.Node
 		return nil, err
 	}
 
+	c.m.RLock()
 	neighbors, err := c.neighborsFromId(uint32(id))
 	if err != nil {
+		c.m.RUnlock()
 		return nil, err
 	}
+	c.m.RUnlock()
 
+	c.m.RLock()
+	defer c.m.RUnlock()
 	return c.buildModelNodes(neighbors)
 }
 
