@@ -154,6 +154,8 @@ type IngestPredicates struct {
 	CertifyVuln      []CertifyVulnIngest
 	IsVuln           []IsVulnIngest
 	HasSourceAt      []HasSourceAtIngest
+	CertifyBad       []CertifyBadIngest
+	CertifyGood      []CertifyGoodIngest
 }
 
 type CertifyScorecardIngest struct {
@@ -210,6 +212,24 @@ type HasSourceAtIngest struct {
 	PkgMatchFlag generated.MatchFlags
 	Src          *generated.SourceInputSpec
 	HasSourceAt  *generated.HasSourceAtInputSpec
+}
+
+type CertifyBadIngest struct {
+	// certifyBad describes either pkg, src or artifact
+	Pkg          *generated.PkgInputSpec
+	PkgMatchFlag generated.MatchFlags
+	Src          *generated.SourceInputSpec
+	Artifact     *generated.ArtifactInputSpec
+	CertifyBad   *generated.CertifyBadInputSpec
+}
+
+type CertifyGoodIngest struct {
+	// certifyGood describes either pkg, src or artifact
+	Pkg          *generated.PkgInputSpec
+	PkgMatchFlag generated.MatchFlags
+	Src          *generated.SourceInputSpec
+	Artifact     *generated.ArtifactInputSpec
+	CertifyGood  *generated.CertifyGoodInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph
