@@ -179,8 +179,12 @@ type ComplexityRoot struct {
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
-		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) int
-		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) int
+		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) int
+		IngestVulnerability   func(childComplexity int, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) int
+	}
+
+	NoVuln struct {
+		ID func(childComplexity int) int
 	}
 
 	OSV struct {
@@ -1078,7 +1082,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.OsvCveOrGhsaInput), args["vexStatement"].(model.VexStatementInputSpec)), true
+		return e.complexity.Mutation.IngestVEXStatement(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["vulnerability"].(model.VulnerabilityInput), args["vexStatement"].(model.VexStatementInputSpec)), true
 
 	case "Mutation.ingestVulnerability":
 		if e.complexity.Mutation.IngestVulnerability == nil {
@@ -1090,7 +1094,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.OsvCveOrGhsaInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
+		return e.complexity.Mutation.IngestVulnerability(childComplexity, args["pkg"].(model.PkgInputSpec), args["vulnerability"].(model.VulnerabilityInput), args["certifyVuln"].(model.VulnerabilityMetaDataInput)), true
+
+	case "NoVuln.id":
+		if e.complexity.NoVuln.ID == nil {
+			break
+		}
+
+		return e.complexity.NoVuln.ID(childComplexity), true
 
 	case "OSV.id":
 		if e.complexity.OSV.ID == nil {
@@ -1822,8 +1833,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputMatchFlags,
 		ec.unmarshalInputOSVInputSpec,
 		ec.unmarshalInputOSVSpec,
-		ec.unmarshalInputOsvCveOrGhsaInput,
-		ec.unmarshalInputOsvCveOrGhsaSpec,
 		ec.unmarshalInputPackageOrArtifactInput,
 		ec.unmarshalInputPackageOrArtifactSpec,
 		ec.unmarshalInputPackageOrSourceInput,
@@ -1846,7 +1855,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSourceInputSpec,
 		ec.unmarshalInputSourceSpec,
 		ec.unmarshalInputVexStatementInputSpec,
+		ec.unmarshalInputVulnerabilityInput,
 		ec.unmarshalInputVulnerabilityMetaDataInput,
+		ec.unmarshalInputVulnerabilitySpec,
 	)
 	first := true
 
@@ -2368,17 +2379,15 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyVEXStatement. It contains a subject which can be a package or artifact object, vulnerability that can be of type
-# cve or ghsa, justification, origin and collector
+# Defines a GraphQL schema for certifying VEX statements.
 
-"""
-PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
-"""
+"PackageOrArtifact is a union of Package and Artifact."
 union PackageOrArtifact = Package | Artifact
 
 """
 PackageOrArtifactSpec allows using PackageOrArtifact union as
 input type to be used in read queries.
+
 Exactly one of the value must be set to non-nil.
 """
 input PackageOrArtifactSpec {
@@ -2387,33 +2396,49 @@ input PackageOrArtifactSpec {
 }
 
 """
-CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
+PackageOrArtifactInput allows using PackageOrArtifact union as
+input type to be used in mutations.
 
-subject - union type that represents a package or artifact
-vulnerability (object) - union type that consists of cve, ghsa or osv
-justification (property) - justification for VEX
-knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
+Exactly one of the value must be set to non-nil.
+"""
+input PackageOrArtifactInput {
+  package: PkgInputSpec
+  artifact: ArtifactInputSpec
+}
+
+"""
+CertifyVEXStatement is an attestation that represents when a package or
+artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 """
 type CertifyVEXStatement {
   id: ID!
+  "Subject of attestation"
   subject: PackageOrArtifact!
-  vulnerability: OsvCveOrGhsa!
+  "Attested vulnerability"
+  vulnerability: Vulnerability!
+  "Justification for VEX"
   justification: String!
+  "Timestamp (exact time in RFC 3339 format) for the VEX statement"
   knownSince: Time!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
-Only package or artifact and CVE, GHSA or OSV can be specified at once.
+CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to
+return.
+
+Only one subject type (package or artifact) and one vulnerability type (CVE,
+GHSA or OSV) may be specified.
+
+Note that setting ` + "`" + `noVuln` + "`" + ` in VulnerabilitySpec is invalid for VEX statements!
 """
 input CertifyVEXStatementSpec {
   id: ID
   subject: PackageOrArtifactSpec
-  vulnerability: OsvCveOrGhsaSpec
+  vulnerability: VulnerabilitySpec
   justification: String
   knownSince: Time
   origin: String
@@ -2432,24 +2457,18 @@ input VexStatementInputSpec {
   collector: String!
 }
 
-"""
-PackageOrArtifactInput allows using PackageOrArtifact union as
-input type to be used in mutations.
-Exactly one of the value must be set to non-nil.
-"""
-input PackageOrArtifactInput {
-  package: PkgInputSpec
-  artifact: ArtifactInputSpec
-}
-
 extend type Query {
-  "Returns all CertifyVEXStatement"
+  "Returns all CertifyVEXStatement."
   CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
 }
 
 extend type Mutation {
-  "certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV"
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: OsvCveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  """
+  Certify that a package or an artifact has an associated VEX for a vulnerability.
+
+  Note that setting ` + "`" + `noVuln` + "`" + ` in VulnerabilityInput is invalid for VEX statements!
+  """
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }
 `, BuiltIn: false},
 	{Name: "../schema/certifyVuln.graphql", Input: `#
@@ -2469,65 +2488,105 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyVuln. It contains a package, vulnerability that can be of type
-# cve, ghsa or osv, time scanned, db uri, db version, scanner uri, scanner version, origin and collector
-"""
-CertifyVuln is an attestation that represents when a package has a vulnerability
+# Defines a GraphQL schema for the vulnerability certifications.
 
 """
-type CertifyVuln {
+NoVuln is a special vulnerability node to attest that no vulnerability has been
+found during a vulnerability scan.
+
+Backends guarantee that this is a singleton node.
+
+We define an ID field due to GraphQL restrictions.
+"""
+type NoVuln {
   id: ID!
-  "package (subject) - the package object type that represents the package"
-  package: Package!
-  "vulnerability (object) - union type that consists of osv, cve or ghsa"
-  vulnerability: OsvCveOrGhsa!
-  "metadata (property) - contains all the vulnerability metadata "
-  metadata: VulnerabilityMetaData!
 }
 
-type VulnerabilityMetaData {
-  "timeScanned (property) - timestamp of when the package was last scanned"
-  timeScanned: Time!
-  "dbUri (property) - scanner vulnerability database uri"
-  dbUri: String!
-  "dbVersion (property) - scanner vulnerability database version"
-  dbVersion: String!
-  "scannerUri (property) - vulnerability scanner's uri"
-  scannerUri: String!
-  "scannerVersion (property) - vulnerability scanner version"
-  scannerVersion: String!
-  "origin (property) - where this attestation was generated from (based on which document)"
-  origin: String!
-  "collector (property) - the GUAC collector that collected the document that generated this attestation"
-  collector: String!
-}
+"Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node."
+union Vulnerability = OSV | CVE | GHSA | NoVuln
 
 """
-OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
-"""
-union OsvCveOrGhsa = OSV | CVE | GHSA
+VulnerabilitySpec allows using Vulnerability union as input type to be used in
+read queries.
 
+Either ` + "`" + `noVuln` + "`" + ` must be set to true or exactly one of ` + "`" + `osv` + "`" + `, ` + "`" + `cve` + "`" + ` or ` + "`" + `ghsa` + "`" + `
+must be set to non-nil. Setting ` + "`" + `noVuln` + "`" + ` to true means retrieving nodes where
+there is no vulnerability attached (thus, the special NoVuln node). Setting one
+of the other fields means retrieving certifications for the corresponding
+vulnerability types.
 """
-OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
-input type to be used in read queries.
-Exactly one of the value must be set to non-nil.
-"""
-input OsvCveOrGhsaSpec {
+input VulnerabilitySpec {
   osv: OSVSpec
   cve: CVESpec
   ghsa: GHSASpec
+  noVuln: Boolean
+}
+
+"""
+VulnerabilityInput allows using Vulnerability union as
+input type to be used in mutations.
+
+Either ` + "`" + `noVuln` + "`" + ` must be set to true or one of ` + "`" + `osv` + "`" + `, ` + "`" + `cve` + "`" + `, or ` + "`" + `ghsa` + "`" + ` must be
+set to non-nil. If ` + "`" + `noVuln` + "`" + ` is set then this is an ingestion of a known lack of
+vulnerabilities, so the special NoVuln node will be used by the backend.
+Otherwise, the specific vulnerability type will be linked to this attestation.
+"""
+input VulnerabilityInput {
+  osv: OSVInputSpec
+  cve: CVEInputSpec
+  ghsa: GHSAInputSpec
+  noVuln: Boolean
+}
+
+"""
+CertifyVuln is an attestation that represents when a package has a
+vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+the time of scanning no vulnerability was found.
+"""
+type CertifyVuln {
+  id: ID!
+  "The package that is attested"
+  package: Package!
+  "The vulnerability object. Can be an OSV, CVE, or GHSA or the special NoVuln node."
+  vulnerability: Vulnerability!
+  "Metadata attached to the certification"
+  metadata: VulnerabilityMetaData!
+}
+
+"""
+VulnerabilityMetaData is the metadata attached to vulnerability certification.
+
+It contains metadata about the scanner process that created the certification.
+"""
+type VulnerabilityMetaData {
+  "Time of scan (in RFC 3339 format)"
+  timeScanned: Time!
+  "URI of the vulnerability database used by the scanner"
+  dbUri: String!
+  "Version of the vulnerability database used by the scanner"
+  dbVersion: String!
+  "URI of the scanner"
+  scannerUri: String!
+  "Version of the scanner"
+  scannerVersion: String!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
 }
 
 """
 CertifyVulnSpec allows filtering the list of CertifyVuln to return.
 
-Specifying just the package allows to query for all vulnerabilities associated with the package.
-Only OSV, CVE or GHSA can be specified at once
+Specifying just the package allows to query for all vulnerabilities associated
+with the package.
+
+Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be specified.
 """
 input CertifyVulnSpec {
   id: ID
   package: PkgSpec
-  vulnerability: OsvCveOrGhsaSpec
+  vulnerability: VulnerabilitySpec
   timeScanned: Time
   dbUri: String
   dbVersion: String
@@ -2552,25 +2611,14 @@ input VulnerabilityMetaDataInput {
   collector: String!
 }
 
-"""
-OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
-input type to be used in mutations.
-Exactly one of the value must be set to non-nil.
-"""
-input OsvCveOrGhsaInput {
-  osv: OSVInputSpec
-  cve: CVEInputSpec
-  ghsa: GHSAInputSpec
-}
-
 extend type Query {
-  "Returns all CertifyVuln"
+  "Returns all vulnerability certifications matching the input filter."
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec): [CertifyVuln!]!
 }
 
 extend type Mutation {
-  "certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
-  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  "Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA) or no vulnerability has been detected."
+  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
 	{Name: "../schema/cve.graphql", Input: `#
@@ -3656,6 +3704,7 @@ union Node
   | OSV
   | CVE
   | GHSA
+  | NoVuln
   | IsOccurrence
   | IsDependency
   | IsVulnerability

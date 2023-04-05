@@ -34,6 +34,7 @@ type vulnerabilityLink struct {
 	osvID          uint32
 	cveID          uint32
 	ghsaID         uint32
+	noKnownVulnID  uint32
 	timeScanned    time.Time
 	dbURI          string
 	dbVersion      string
@@ -57,6 +58,9 @@ func (n *vulnerabilityLink) Neighbors() []uint32 {
 	if n.ghsaID != 0 {
 		out = append(out, n.ghsaID)
 	}
+	if n.noKnownVulnID != 0 {
+		out = append(out, n.noKnownVulnID)
+	}
 	return out
 }
 
@@ -65,12 +69,12 @@ func (n *vulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest CertifyVuln
-func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 	return c.ingestVulnerability(ctx, packageArg, vulnerability, certifyVuln, true)
 }
 
-func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.CertifyVuln, error) {
-	if err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVulnerability"); err != nil {
+func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.CertifyVuln, error) {
+	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability", true); err != nil {
 		return nil, err
 	}
 
@@ -84,6 +88,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 	var osvID uint32
 	var cveID uint32
 	var ghsaID uint32
+	var noKnownVulnID uint32
 	vulnerabilityLinks := []uint32{}
 	if vulnerability.Osv != nil {
 		osvID, err = getOsvIDFromInput(c, *vulnerability.Osv)
@@ -117,6 +122,10 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 			vulnerabilityLinks = append(vulnerabilityLinks, ghsaNode.certifyVulnLinks...)
 		}
 	}
+	if vulnerability.NoVuln != nil && *vulnerability.NoVuln {
+		noKnownVulnID = c.noKnownVulnID
+		vulnerabilityLinks = append(vulnerabilityLinks, c.noKnownVulnNode.certifyVulnLinks...)
+	}
 
 	packageVulns := []uint32{}
 	foundPkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
@@ -146,6 +155,9 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		if ghsaID != 0 && ghsaID == v.ghsaID {
 			vulnMatch = true
 		}
+		if noKnownVulnID != 0 && noKnownVulnID == v.noKnownVulnID {
+			vulnMatch = true
+		}
 		if vulnMatch && packageID == v.packageID && certifyVuln.TimeScanned.UTC() == v.timeScanned && certifyVuln.DbURI == v.dbURI &&
 			certifyVuln.DbVersion == v.dbVersion && certifyVuln.ScannerURI == v.scannerURI && certifyVuln.ScannerVersion == v.scannerVersion &&
 			certifyVuln.Origin == v.origin && certifyVuln.Collector == v.collector {
@@ -169,6 +181,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 			osvID:          osvID,
 			cveID:          cveID,
 			ghsaID:         ghsaID,
+			noKnownVulnID:  noKnownVulnID,
 			timeScanned:    certifyVuln.TimeScanned.UTC(),
 			dbURI:          certifyVuln.DbURI,
 			dbVersion:      certifyVuln.DbVersion,
@@ -190,6 +203,9 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		if ghsaID != 0 {
 			c.index[ghsaID].(*ghsaNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
+		if noKnownVulnID != 0 {
+			c.noKnownVulnNode.setVulnerabilityLinks(collectedCertifyVulnLink.id)
+		}
 	}
 
 	// build return GraphQL type
@@ -205,7 +221,8 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	c.m.RLock()
 	defer c.m.RUnlock()
 	funcName := "CertifyVuln"
-	if err := helper.ValidateOsvCveOrGhsaQueryFilter(filter.Vulnerability); err != nil {
+	// TODO: this panics if filter is missing (cannot retrieve all certifications)
+	if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, true); err != nil {
 		return nil, err
 	}
 
@@ -270,6 +287,10 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			foundOne = true
 		}
 	}
+	if !foundOne && filter != nil && filter.Vulnerability != nil && *filter.Vulnerability.NoVuln {
+		search = append(search, c.noKnownVulnNode.certifyVulnLinks...)
+		foundOne = true
+	}
 
 	var out []*model.CertifyVuln
 	if foundOne {
@@ -297,9 +318,8 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 }
 
 func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
-	filter *model.CertifyVulnSpec, link *vulnerabilityLink) (
-	[]*model.CertifyVuln, error) {
-
+	filter *model.CertifyVulnSpec,
+	link *vulnerabilityLink) ([]*model.CertifyVuln, error) {
 	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
 		return out, nil
 	}
@@ -337,6 +357,7 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 	var osv *model.Osv
 	var cve *model.Cve
 	var ghsa *model.Ghsa
+	var noVuln *model.NoVuln
 	var err error
 	if filter != nil {
 		p, err = c.buildPackageResponse(link.packageID, filter.Package)
@@ -369,6 +390,13 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 				return nil, err
 			}
 		}
+		if filter.Vulnerability.NoVuln != nil && link.noKnownVulnID != 0 {
+			noVulnNode, err := c.noKnownVulnNode.BuildModelNode(c)
+			if err != nil {
+				return nil, err
+			}
+			noVuln = noVulnNode.(*model.NoVuln)
+		}
 	} else {
 		if link.osvID != 0 {
 			osv, err = c.buildOsvResponse(link.osvID, nil)
@@ -388,6 +416,13 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 				return nil, err
 			}
 		}
+		if link.noKnownVulnID != 0 {
+			noVulnNode, err := c.noKnownVulnNode.BuildModelNode(c)
+			if err != nil {
+				return nil, err
+			}
+			noVuln = noVulnNode.(*model.NoVuln)
+		}
 	}
 	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
 	if p == nil && ingestOrIDProvided {
@@ -396,7 +431,7 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 		return nil, nil
 	}
 
-	var vuln model.OsvCveOrGhsa
+	var vuln model.Vulnerability
 	if link.osvID != 0 {
 		if osv == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve osv via osvID")
@@ -420,6 +455,9 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 			return nil, nil
 		}
 		vuln = ghsa
+	}
+	if link.noKnownVulnID != 0 {
+		vuln = noVuln
 	}
 
 	metadata := &model.VulnerabilityMetaData{

@@ -11,7 +11,7 @@ import (
 )
 
 // IngestVulnerability is the resolver for the ingestVulnerability field.
-func (r *mutationResolver) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+func (r *mutationResolver) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 	return r.Backend.IngestVulnerability(ctx, pkg, vulnerability, certifyVuln)
 }
 

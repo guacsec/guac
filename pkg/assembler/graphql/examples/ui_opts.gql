@@ -70,6 +70,9 @@ query GetNeighbors ($nodeId: ID!) {
     ... on GHSA {
         ...allGHSATree
     }
+    ... on NoVuln {
+      id
+    }
     ... on IsOccurrence {
         ...allIsOccurrencesTree
     }

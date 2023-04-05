@@ -32,6 +32,7 @@ union Node
   | OSV
   | CVE
   | GHSA
+  | NoVuln
   | IsOccurrence
   | IsDependency
   | IsVulnerability

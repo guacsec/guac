@@ -24,8 +24,8 @@ type MutationResolver interface {
 	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error)
 	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error)
 	CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error)
-	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
-	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
+	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error)
+	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
 	IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error)
@@ -566,10 +566,10 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.C
 		}
 	}
 	args["subject"] = arg0
-	var arg1 model.OsvCveOrGhsaInput
+	var arg1 model.VulnerabilityInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNOsvCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx, tmp)
+		arg1, err = ec.unmarshalNVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -599,10 +599,10 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 		}
 	}
 	args["pkg"] = arg0
-	var arg1 model.OsvCveOrGhsaInput
+	var arg1 model.VulnerabilityInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNOsvCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx, tmp)
+		arg1, err = ec.unmarshalNVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1473,7 +1473,7 @@ func (ec *executionContext) _Mutation_ingestVEXStatement(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.OsvCveOrGhsaInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
+		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.VulnerabilityInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1544,7 +1544,7 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.OsvCveOrGhsaInput), fc.Args["certifyVuln"].(model.VulnerabilityMetaDataInput))
+		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.VulnerabilityInput), fc.Args["certifyVuln"].(model.VulnerabilityMetaDataInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

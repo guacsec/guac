@@ -151,9 +151,9 @@ func (ec *executionContext) _CertifyVuln_vulnerability(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.OsvCveOrGhsa)
+	res := resTmp.(model.Vulnerability)
 	fc.Result = res
-	return ec.marshalNOsvCveOrGhsa2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsa(ctx, field.Selections, res)
+	return ec.marshalNVulnerability2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerability(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyVuln_vulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -163,7 +163,7 @@ func (ec *executionContext) fieldContext_CertifyVuln_vulnerability(ctx context.C
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type OsvCveOrGhsa does not have child fields")
+			return nil, errors.New("field of type Vulnerability does not have child fields")
 		},
 	}
 	return fc, nil
@@ -224,6 +224,50 @@ func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Contex
 				return ec.fieldContext_VulnerabilityMetaData_collector(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetaData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _NoVuln_id(ctx context.Context, field graphql.CollectedField, obj *model.NoVuln) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_NoVuln_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_NoVuln_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "NoVuln",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -575,7 +619,7 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-			it.Vulnerability, err = ec.unmarshalOOsvCveOrGhsaSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaSpec(ctx, v)
+			it.Vulnerability, err = ec.unmarshalOVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -641,14 +685,14 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputOsvCveOrGhsaInput(ctx context.Context, obj interface{}) (model.OsvCveOrGhsaInput, error) {
-	var it model.OsvCveOrGhsaInput
+func (ec *executionContext) unmarshalInputVulnerabilityInput(ctx context.Context, obj interface{}) (model.VulnerabilityInput, error) {
+	var it model.VulnerabilityInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"osv", "cve", "ghsa"}
+	fieldsInOrder := [...]string{"osv", "cve", "ghsa", "noVuln"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -679,47 +723,11 @@ func (ec *executionContext) unmarshalInputOsvCveOrGhsaInput(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputOsvCveOrGhsaSpec(ctx context.Context, obj interface{}) (model.OsvCveOrGhsaSpec, error) {
-	var it model.OsvCveOrGhsaSpec
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"osv", "cve", "ghsa"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "osv":
+		case "noVuln":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-			it.Osv, err = ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "cve":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-			it.Cve, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "ghsa":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-			it.Ghsa, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noVuln"))
+			it.NoVuln, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -805,11 +813,63 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetaDataInput(ctx context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputVulnerabilitySpec(ctx context.Context, obj interface{}) (model.VulnerabilitySpec, error) {
+	var it model.VulnerabilitySpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"osv", "cve", "ghsa", "noVuln"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "osv":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
+			it.Osv, err = ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "cve":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
+			it.Cve, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ghsa":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
+			it.Ghsa, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "noVuln":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noVuln"))
+			it.NoVuln, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _OsvCveOrGhsa(ctx context.Context, sel ast.SelectionSet, obj model.OsvCveOrGhsa) graphql.Marshaler {
+func (ec *executionContext) _Vulnerability(ctx context.Context, sel ast.SelectionSet, obj model.Vulnerability) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -834,6 +894,13 @@ func (ec *executionContext) _OsvCveOrGhsa(ctx context.Context, sel ast.Selection
 			return graphql.Null
 		}
 		return ec._GHSA(ctx, sel, obj)
+	case model.NoVuln:
+		return ec._NoVuln(ctx, sel, &obj)
+	case *model.NoVuln:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._NoVuln(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -877,6 +944,34 @@ func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionS
 		case "metadata":
 
 			out.Values[i] = ec._CertifyVuln_metadata(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var noVulnImplementors = []string{"NoVuln", "Vulnerability", "Node"}
+
+func (ec *executionContext) _NoVuln(ctx context.Context, sel ast.SelectionSet, obj *model.NoVuln) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, noVulnImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NoVuln")
+		case "id":
+
+			out.Values[i] = ec._NoVuln_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -1024,18 +1119,18 @@ func (ec *executionContext) marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._CertifyVuln(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNOsvCveOrGhsa2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsa(ctx context.Context, sel ast.SelectionSet, v model.OsvCveOrGhsa) graphql.Marshaler {
+func (ec *executionContext) marshalNVulnerability2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerability(ctx context.Context, sel ast.SelectionSet, v model.Vulnerability) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._OsvCveOrGhsa(ctx, sel, v)
+	return ec._Vulnerability(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNOsvCveOrGhsaInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaInput(ctx context.Context, v interface{}) (model.OsvCveOrGhsaInput, error) {
-	res, err := ec.unmarshalInputOsvCveOrGhsaInput(ctx, v)
+func (ec *executionContext) unmarshalNVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInput(ctx context.Context, v interface{}) (model.VulnerabilityInput, error) {
+	res, err := ec.unmarshalInputVulnerabilityInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -1062,11 +1157,11 @@ func (ec *executionContext) unmarshalOCertifyVulnSpec2ᚖgithubᚗcomᚋguacsec�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOOsvCveOrGhsaSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOsvCveOrGhsaSpec(ctx context.Context, v interface{}) (*model.OsvCveOrGhsaSpec, error) {
+func (ec *executionContext) unmarshalOVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx context.Context, v interface{}) (*model.VulnerabilitySpec, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputOsvCveOrGhsaSpec(ctx, v)
+	res, err := ec.unmarshalInputVulnerabilitySpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

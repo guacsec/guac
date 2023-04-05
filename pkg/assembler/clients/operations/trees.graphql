@@ -254,6 +254,9 @@ fragment AllCertifyVuln on CertifyVuln {
     ... on GHSA {
       ...allGHSATree
     }
+    ... on NoVuln {
+      id
+    }
   }
   metadata {
     dbUri

@@ -85,6 +85,30 @@ type demoClient struct {
 	sources              srcTypeMap
 	vexs                 vexList
 	vulnerabilities      vulnerabilityList
+
+	// Ensures that only one noKnownVuln node is created
+	noKnownVulnNode noKnownVuln
+	noKnownVulnID   uint32
+}
+
+// This node is a singleton!
+type noKnownVuln struct {
+	id               uint32
+	certifyVulnLinks []uint32
+}
+
+func (n *noKnownVuln) ID() uint32 { return n.id }
+
+func (n *noKnownVuln) Neighbors() []uint32 {
+	return n.certifyVulnLinks
+}
+
+func (n *noKnownVuln) BuildModelNode(c *demoClient) (model.Node, error) {
+	return model.NoVuln{nodeID(n.id)}, nil
+}
+
+func (n *noKnownVuln) setVulnerabilityLinks(id uint32) {
+	n.certifyVulnLinks = append(n.certifyVulnLinks, id)
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
@@ -110,7 +134,13 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 		sources:              srcTypeMap{},
 		vexs:                 vexList{},
 		vulnerabilities:      vulnerabilityList{},
+		noKnownVulnNode:      noKnownVuln{},
 	}
+
+	// Build the special noKnownVuln node and link it everywhere
+	client.noKnownVulnID = client.getNextID()
+	client.noKnownVulnNode.id = client.noKnownVulnID
+	client.index[client.noKnownVulnID] = &client.noKnownVulnNode
 
 	return client, nil
 }

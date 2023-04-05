@@ -23,12 +23,7 @@ type Node interface {
 	IsNode()
 }
 
-// OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be specified for vulnerability
-type OsvCveOrGhsa interface {
-	IsOsvCveOrGhsa()
-}
-
-// PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
+// PackageOrArtifact is a union of Package and Artifact.
 type PackageOrArtifact interface {
 	IsPackageOrArtifact()
 }
@@ -41,6 +36,11 @@ type PackageOrSource interface {
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
 type PackageSourceOrArtifact interface {
 	IsPackageSourceOrArtifact()
+}
+
+// Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node.
+type Vulnerability interface {
+	IsVulnerability()
 }
 
 // Artifact represents the artifact and contains a digest field
@@ -113,7 +113,7 @@ type Cve struct {
 	CveID string `json:"cveId"`
 }
 
-func (Cve) IsOsvCveOrGhsa() {}
+func (Cve) IsVulnerability() {}
 
 func (Cve) IsCveOrGhsa() {}
 
@@ -235,46 +235,53 @@ type CertifyScorecardSpec struct {
 	Collector        *string               `json:"collector,omitempty"`
 }
 
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type CertifyVEXStatement struct {
-	ID            string            `json:"id"`
-	Subject       PackageOrArtifact `json:"subject"`
-	Vulnerability OsvCveOrGhsa      `json:"vulnerability"`
-	Justification string            `json:"justification"`
-	KnownSince    time.Time         `json:"knownSince"`
-	Origin        string            `json:"origin"`
-	Collector     string            `json:"collector"`
+	ID string `json:"id"`
+	// Subject of attestation
+	Subject PackageOrArtifact `json:"subject"`
+	// Attested vulnerability
+	Vulnerability Vulnerability `json:"vulnerability"`
+	// Justification for VEX
+	Justification string `json:"justification"`
+	// Timestamp (exact time in RFC 3339 format) for the VEX statement
+	KnownSince time.Time `json:"knownSince"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 func (CertifyVEXStatement) IsNode() {}
 
-// CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to return.
-// Only package or artifact and CVE, GHSA or OSV can be specified at once.
+// CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to
+// return.
+//
+// Only one subject type (package or artifact) and one vulnerability type (CVE,
+// GHSA or OSV) may be specified.
+//
+// Note that setting `noVuln` in VulnerabilitySpec is invalid for VEX statements!
 type CertifyVEXStatementSpec struct {
 	ID            *string                `json:"id,omitempty"`
 	Subject       *PackageOrArtifactSpec `json:"subject,omitempty"`
-	Vulnerability *OsvCveOrGhsaSpec      `json:"vulnerability,omitempty"`
+	Vulnerability *VulnerabilitySpec     `json:"vulnerability,omitempty"`
 	Justification *string                `json:"justification,omitempty"`
 	KnownSince    *time.Time             `json:"knownSince,omitempty"`
 	Origin        *string                `json:"origin,omitempty"`
 	Collector     *string                `json:"collector,omitempty"`
 }
 
-// CertifyVuln is an attestation that represents when a package has a vulnerability
+// CertifyVuln is an attestation that represents when a package has a
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
 type CertifyVuln struct {
 	ID string `json:"id"`
-	// package (subject) - the package object type that represents the package
+	// The package that is attested
 	Package *Package `json:"package"`
-	// vulnerability (object) - union type that consists of osv, cve or ghsa
-	Vulnerability OsvCveOrGhsa `json:"vulnerability"`
-	// metadata (property) - contains all the vulnerability metadata
+	// The vulnerability object. Can be an OSV, CVE, or GHSA or the special NoVuln node.
+	Vulnerability Vulnerability `json:"vulnerability"`
+	// Metadata attached to the certification
 	Metadata *VulnerabilityMetaData `json:"metadata"`
 }
 
@@ -282,19 +289,21 @@ func (CertifyVuln) IsNode() {}
 
 // CertifyVulnSpec allows filtering the list of CertifyVuln to return.
 //
-// Specifying just the package allows to query for all vulnerabilities associated with the package.
-// Only OSV, CVE or GHSA can be specified at once
+// Specifying just the package allows to query for all vulnerabilities associated
+// with the package.
+//
+// Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be specified.
 type CertifyVulnSpec struct {
-	ID             *string           `json:"id,omitempty"`
-	Package        *PkgSpec          `json:"package,omitempty"`
-	Vulnerability  *OsvCveOrGhsaSpec `json:"vulnerability,omitempty"`
-	TimeScanned    *time.Time        `json:"timeScanned,omitempty"`
-	DbURI          *string           `json:"dbUri,omitempty"`
-	DbVersion      *string           `json:"dbVersion,omitempty"`
-	ScannerURI     *string           `json:"scannerUri,omitempty"`
-	ScannerVersion *string           `json:"scannerVersion,omitempty"`
-	Origin         *string           `json:"origin,omitempty"`
-	Collector      *string           `json:"collector,omitempty"`
+	ID             *string            `json:"id,omitempty"`
+	Package        *PkgSpec           `json:"package,omitempty"`
+	Vulnerability  *VulnerabilitySpec `json:"vulnerability,omitempty"`
+	TimeScanned    *time.Time         `json:"timeScanned,omitempty"`
+	DbURI          *string            `json:"dbUri,omitempty"`
+	DbVersion      *string            `json:"dbVersion,omitempty"`
+	ScannerURI     *string            `json:"scannerUri,omitempty"`
+	ScannerVersion *string            `json:"scannerVersion,omitempty"`
+	Origin         *string            `json:"origin,omitempty"`
+	Collector      *string            `json:"collector,omitempty"`
 }
 
 // CveOrGhsaInput allows using CveOrGhsa union as
@@ -323,7 +332,7 @@ type Ghsa struct {
 	GhsaID string `json:"ghsaId"`
 }
 
-func (Ghsa) IsOsvCveOrGhsa() {}
+func (Ghsa) IsVulnerability() {}
 
 func (Ghsa) IsCveOrGhsa() {}
 
@@ -614,6 +623,20 @@ type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
 
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan.
+//
+// Backends guarantee that this is a singleton node.
+//
+// We define an ID field due to GraphQL restrictions.
+type NoVuln struct {
+	ID string `json:"id"`
+}
+
+func (NoVuln) IsVulnerability() {}
+
+func (NoVuln) IsNode() {}
+
 // OSV represents an Open Source Vulnerability.
 //
 // The `osvId` field is mandatory and canonicalized to be lowercase.
@@ -627,7 +650,7 @@ type Osv struct {
 	OsvID string `json:"osvId"`
 }
 
-func (Osv) IsOsvCveOrGhsa() {}
+func (Osv) IsVulnerability() {}
 
 func (Osv) IsNode() {}
 
@@ -640,24 +663,6 @@ type OSVInputSpec struct {
 type OSVSpec struct {
 	ID    *string `json:"id,omitempty"`
 	OsvID *string `json:"osvId,omitempty"`
-}
-
-// OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
-// input type to be used in mutations.
-// Exactly one of the value must be set to non-nil.
-type OsvCveOrGhsaInput struct {
-	Osv  *OSVInputSpec  `json:"osv,omitempty"`
-	Cve  *CVEInputSpec  `json:"cve,omitempty"`
-	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
-}
-
-// OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as
-// input type to be used in read queries.
-// Exactly one of the value must be set to non-nil.
-type OsvCveOrGhsaSpec struct {
-	Osv  *OSVSpec  `json:"osv,omitempty"`
-	Cve  *CVESpec  `json:"cve,omitempty"`
-	Ghsa *GHSASpec `json:"ghsa,omitempty"`
 }
 
 // Package represents a package.
@@ -716,6 +721,7 @@ type PackageNamespace struct {
 
 // PackageOrArtifactInput allows using PackageOrArtifact union as
 // input type to be used in mutations.
+//
 // Exactly one of the value must be set to non-nil.
 type PackageOrArtifactInput struct {
 	Package  *PkgInputSpec      `json:"package,omitempty"`
@@ -724,6 +730,7 @@ type PackageOrArtifactInput struct {
 
 // PackageOrArtifactSpec allows using PackageOrArtifact union as
 // input type to be used in read queries.
+//
 // Exactly one of the value must be set to non-nil.
 type PackageOrArtifactSpec struct {
 	Package  *PkgSpec      `json:"package,omitempty"`
@@ -1161,20 +1168,37 @@ type VexStatementInputSpec struct {
 	Collector     string    `json:"collector"`
 }
 
+// VulnerabilityInput allows using Vulnerability union as
+// input type to be used in mutations.
+//
+// Either `noVuln` must be set to true or one of `osv`, `cve`, or `ghsa` must be
+// set to non-nil. If `noVuln` is set then this is an ingestion of a known lack of
+// vulnerabilities, so the special NoVuln node will be used by the backend.
+// Otherwise, the specific vulnerability type will be linked to this attestation.
+type VulnerabilityInput struct {
+	Osv    *OSVInputSpec  `json:"osv,omitempty"`
+	Cve    *CVEInputSpec  `json:"cve,omitempty"`
+	Ghsa   *GHSAInputSpec `json:"ghsa,omitempty"`
+	NoVuln *bool          `json:"noVuln,omitempty"`
+}
+
+// VulnerabilityMetaData is the metadata attached to vulnerability certification.
+//
+// It contains metadata about the scanner process that created the certification.
 type VulnerabilityMetaData struct {
-	// timeScanned (property) - timestamp of when the package was last scanned
+	// Time of scan (in RFC 3339 format)
 	TimeScanned time.Time `json:"timeScanned"`
-	// dbUri (property) - scanner vulnerability database uri
+	// URI of the vulnerability database used by the scanner
 	DbURI string `json:"dbUri"`
-	// dbVersion (property) - scanner vulnerability database version
+	// Version of the vulnerability database used by the scanner
 	DbVersion string `json:"dbVersion"`
-	// scannerUri (property) - vulnerability scanner's uri
+	// URI of the scanner
 	ScannerURI string `json:"scannerUri"`
-	// scannerVersion (property) - vulnerability scanner version
+	// Version of the scanner
 	ScannerVersion string `json:"scannerVersion"`
-	// origin (property) - where this attestation was generated from (based on which document)
+	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
-	// collector (property) - the GUAC collector that collected the document that generated this attestation
+	// GUAC collector for the document
 	Collector string `json:"collector"`
 }
 
@@ -1189,6 +1213,21 @@ type VulnerabilityMetaDataInput struct {
 	ScannerVersion string    `json:"scannerVersion"`
 	Origin         string    `json:"origin"`
 	Collector      string    `json:"collector"`
+}
+
+// VulnerabilitySpec allows using Vulnerability union as input type to be used in
+// read queries.
+//
+// Either `noVuln` must be set to true or exactly one of `osv`, `cve` or `ghsa`
+// must be set to non-nil. Setting `noVuln` to true means retrieving nodes where
+// there is no vulnerability attached (thus, the special NoVuln node). Setting one
+// of the other fields means retrieving certifications for the corresponding
+// vulnerability types.
+type VulnerabilitySpec struct {
+	Osv    *OSVSpec  `json:"osv,omitempty"`
+	Cve    *CVESpec  `json:"cve,omitempty"`
+	Ghsa   *GHSASpec `json:"ghsa,omitempty"`
+	NoVuln *bool     `json:"noVuln,omitempty"`
 }
 
 // PkgMatchType is an enum to determine if the attestation should be done at the
