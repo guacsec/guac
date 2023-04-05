@@ -3676,6 +3676,34 @@ func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabil
 	return v.IngestVulnerability
 }
 
+// Edge allows filtering path/neighbors output to only contain a subset of all
+// possible GUAC verbs.
+//
+// Each member of the enum matches with one of the verbs. The naming scheme is
+// converting the CamelCase name to CAPITALS_WITH_UNDERSCORES.
+//
+// Note that each GUAC verb is at the same time both an Edge and a Node. We need
+// to return it as a Node to have it show up in the return type of the queries and
+// we need it to be an edge to allow filtering paths to only consider certain
+// predicates.
+type Edge string
+
+const (
+	EdgeIsOccurrence        Edge = "IS_OCCURRENCE"
+	EdgeIsDependency        Edge = "IS_DEPENDENCY"
+	EdgeIsVulnerability     Edge = "IS_VULNERABILITY"
+	EdgeCertifyVexStatement Edge = "CERTIFY_VEX_STATEMENT"
+	EdgeHashEqual           Edge = "HASH_EQUAL"
+	EdgeCertifyBad          Edge = "CERTIFY_BAD"
+	EdgeCertifyGood         Edge = "CERTIFY_GOOD"
+	EdgePkgEqual            Edge = "PKG_EQUAL"
+	EdgeCertifyScorecard    Edge = "CERTIFY_SCORECARD"
+	EdgeCertifyVuln         Edge = "CERTIFY_VULN"
+	EdgeHasSourceAt         Edge = "HAS_SOURCE_AT"
+	EdgeHasSbom             Edge = "HAS_SBOM"
+	EdgeHasSlsa             Edge = "HAS_SLSA"
+)
+
 // GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
 type GHSAInputSpec struct {
 	GhsaId string `json:"ghsaId"`
@@ -16315,11 +16343,15 @@ func (v *__IsVulnerabilityGHSAInput) GetIsVulnerability() IsVulnerabilityInputSp
 
 // __NeighborsInput is used internally by genqlient
 type __NeighborsInput struct {
-	Node string `json:"node"`
+	Node      string `json:"node"`
+	UsingOnly []Edge `json:"usingOnly"`
 }
 
 // GetNode returns __NeighborsInput.Node, and is useful for accessing the field via an interface.
 func (v *__NeighborsInput) GetNode() string { return v.Node }
+
+// GetUsingOnly returns __NeighborsInput.UsingOnly, and is useful for accessing the field via an interface.
+func (v *__NeighborsInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
 // __NodeInput is used internally by genqlient
 type __NodeInput struct {
@@ -16342,6 +16374,7 @@ type __PathInput struct {
 	Subject       string `json:"subject"`
 	Target        string `json:"target"`
 	MaxPathLength int    `json:"maxPathLength"`
+	UsingOnly     []Edge `json:"usingOnly"`
 }
 
 // GetSubject returns __PathInput.Subject, and is useful for accessing the field via an interface.
@@ -16352,6 +16385,9 @@ func (v *__PathInput) GetTarget() string { return v.Target }
 
 // GetMaxPathLength returns __PathInput.MaxPathLength, and is useful for accessing the field via an interface.
 func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
+
+// GetUsingOnly returns __PathInput.UsingOnly, and is useful for accessing the field via an interface.
+func (v *__PathInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
 // __PkgEqualInput is used internally by genqlient
 type __PkgEqualInput struct {
@@ -21733,12 +21769,13 @@ func Neighbors(
 	ctx context.Context,
 	client graphql.Client,
 	node string,
+	usingOnly []Edge,
 ) (*NeighborsResponse, error) {
 	req := &graphql.Request{
 		OpName: "Neighbors",
 		Query: `
-query Neighbors ($node: ID!) {
-	neighbors(node: $node, usingOnly: []) {
+query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
+	neighbors(node: $node, usingOnly: $usingOnly) {
 		__typename
 		... on Package {
 			... AllPkgTree
@@ -22077,7 +22114,8 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 }
 `,
 		Variables: &__NeighborsInput{
-			Node: node,
+			Node:      node,
+			UsingOnly: usingOnly,
 		},
 	}
 	var err error
@@ -22515,12 +22553,13 @@ func Path(
 	subject string,
 	target string,
 	maxPathLength int,
+	usingOnly []Edge,
 ) (*PathResponse, error) {
 	req := &graphql.Request{
 		OpName: "Path",
 		Query: `
-query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
-	path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: []) {
+query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
+	path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
 		__typename
 		... on Package {
 			... AllPkgTree
@@ -22862,6 +22901,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			Subject:       subject,
 			Target:        target,
 			MaxPathLength: maxPathLength,
+			UsingOnly:     usingOnly,
 		},
 	}
 	var err error

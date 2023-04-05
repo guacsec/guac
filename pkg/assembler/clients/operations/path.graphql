@@ -17,8 +17,8 @@
 
 # Exposes GraphQL queries to retrieve GUAC graph connectivity data
 
-query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
-  path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: []) {
+query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
+  path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
     __typename
     ... on Package {
       ... AllPkgTree
@@ -86,8 +86,8 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
   }
 }
 
-query Neighbors($node: ID!) {
-  neighbors(node: $node, usingOnly: []) {
+query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
+  neighbors(node: $node, usingOnly: $usingOnly) {
     __typename
     ... on Package {
       ... AllPkgTree
