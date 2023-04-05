@@ -194,11 +194,11 @@ func (v *AllCertifyScorecardSource) __premarshalJSON() (*__premarshalAllCertifyS
 // the time of scanning no vulnerability was found.
 type AllCertifyVuln struct {
 	Id string `json:"id"`
-	// package (subject) - the package object type that represents the package
+	// The package that is attested
 	Package AllCertifyVulnPackage `json:"package"`
-	// vulnerability (object) - union type that consists of osv, cve or ghsa
+	// The vulnerability object. Can be an OSV, CVE, or GHSA or the special NoVuln node.
 	Vulnerability AllCertifyVulnVulnerability `json:"-"`
-	// metadata (property) - contains all the vulnerability metadata
+	// Metadata attached to the certification
 	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
 
@@ -289,23 +289,23 @@ func (v *AllCertifyVuln) __premarshalJSON() (*__premarshalAllCertifyVuln, error)
 // AllCertifyVulnMetadataVulnerabilityMetaData includes the requested fields of the GraphQL type VulnerabilityMetaData.
 // The GraphQL type's documentation follows.
 //
-// VulnerabilityMetaData is the metadata attached to CertifyVuln.
+// VulnerabilityMetaData is the metadata attached to vulnerability certification.
 //
 // It contains metadata about the scanner process that created the certification.
 type AllCertifyVulnMetadataVulnerabilityMetaData struct {
-	// dbUri (property) - scanner vulnerability database uri
+	// URI of the vulnerability database used by the scanner
 	DbUri string `json:"dbUri"`
-	// dbVersion (property) - scanner vulnerability database version
+	// Version of the vulnerability database used by the scanner
 	DbVersion string `json:"dbVersion"`
-	// scannerUri (property) - vulnerability scanner's uri
+	// URI of the scanner
 	ScannerUri string `json:"scannerUri"`
-	// scannerVersion (property) - vulnerability scanner version
+	// Version of the scanner
 	ScannerVersion string `json:"scannerVersion"`
-	// timeScanned (property) - timestamp of when the package was last scanned
+	// Time of scan (in RFC 3339 format)
 	TimeScanned time.Time `json:"timeScanned"`
-	// origin (property) - where this attestation was generated from (based on which document)
+	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
-	// collector (property) - the GUAC collector that collected the document that generated this attestation
+	// GUAC collector for the document
 	Collector string `json:"collector"`
 }
 
@@ -420,20 +420,20 @@ func (v *AllCertifyVulnPackage) __premarshalJSON() (*__premarshalAllCertifyVulnP
 // AllCertifyVulnVulnerabilityOSV
 // AllCertifyVulnVulnerabilityCVE
 // AllCertifyVulnVulnerabilityGHSA
+// AllCertifyVulnVulnerabilityNoVuln
 // The GraphQL type's documentation follows.
 //
-// Vulnerability is a union of OSV, CVE and GHSA.
-//
-// Any of these objects can be specified for a vulnerability.  #TODO
+// Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node.
 type AllCertifyVulnVulnerability interface {
 	implementsGraphQLInterfaceAllCertifyVulnVulnerability()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
 	GetTypename() *string
 }
 
-func (v *AllCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceAllCertifyVulnVulnerability()  {}
-func (v *AllCertifyVulnVulnerabilityCVE) implementsGraphQLInterfaceAllCertifyVulnVulnerability()  {}
-func (v *AllCertifyVulnVulnerabilityGHSA) implementsGraphQLInterfaceAllCertifyVulnVulnerability() {}
+func (v *AllCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceAllCertifyVulnVulnerability()    {}
+func (v *AllCertifyVulnVulnerabilityCVE) implementsGraphQLInterfaceAllCertifyVulnVulnerability()    {}
+func (v *AllCertifyVulnVulnerabilityGHSA) implementsGraphQLInterfaceAllCertifyVulnVulnerability()   {}
+func (v *AllCertifyVulnVulnerabilityNoVuln) implementsGraphQLInterfaceAllCertifyVulnVulnerability() {}
 
 func __unmarshalAllCertifyVulnVulnerability(b []byte, v *AllCertifyVulnVulnerability) error {
 	if string(b) == "null" {
@@ -457,6 +457,9 @@ func __unmarshalAllCertifyVulnVulnerability(b []byte, v *AllCertifyVulnVulnerabi
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(AllCertifyVulnVulnerabilityGHSA)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(AllCertifyVulnVulnerabilityNoVuln)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -506,6 +509,14 @@ func __marshalAllCertifyVulnVulnerability(v *AllCertifyVulnVulnerability) ([]byt
 			TypeName string `json:"__typename"`
 			*__premarshalAllCertifyVulnVulnerabilityGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *AllCertifyVulnVulnerabilityNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*AllCertifyVulnVulnerabilityNoVuln
+		}{typename, v}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -666,6 +677,26 @@ func (v *AllCertifyVulnVulnerabilityGHSA) __premarshalJSON() (*__premarshalAllCe
 	retval.GhsaId = v.allGHSATree.GhsaId
 	return &retval, nil
 }
+
+// AllCertifyVulnVulnerabilityNoVuln includes the requested fields of the GraphQL type NoVuln.
+// The GraphQL type's documentation follows.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan.
+//
+// Backends guarantee that this is a singleton node.
+//
+// We define an ID field due to GraphQL restrictions.
+type AllCertifyVulnVulnerabilityNoVuln struct {
+	Typename *string `json:"__typename"`
+	Id       string  `json:"id"`
+}
+
+// GetTypename returns AllCertifyVulnVulnerabilityNoVuln.Typename, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnVulnerabilityNoVuln) GetTypename() *string { return v.Typename }
+
+// GetId returns AllCertifyVulnVulnerabilityNoVuln.Id, and is useful for accessing the field via an interface.
+func (v *AllCertifyVulnVulnerabilityNoVuln) GetId() string { return v.Id }
 
 // AllCertifyVulnVulnerabilityOSV includes the requested fields of the GraphQL type OSV.
 // The GraphQL type's documentation follows.
@@ -2316,7 +2347,7 @@ type CertifyCVEResponse struct {
 	IngestPackage CertifyCVEIngestPackage `json:"ingestPackage"`
 	// Ingest a new CVE. Returns the ingested object
 	IngestCVE CertifyCVEIngestCVE `json:"ingestCVE"`
-	// Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)
+	// Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA) or no vulnerability has been detected.
 	IngestVulnerability CertifyCVEIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
 }
 
@@ -2574,7 +2605,7 @@ type CertifyGHSAResponse struct {
 	IngestPackage CertifyGHSAIngestPackage `json:"ingestPackage"`
 	// Ingest a new GHSA. Returns the ingested object
 	IngestGHSA CertifyGHSAIngestGHSA `json:"ingestGHSA"`
-	// Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)
+	// Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA) or no vulnerability has been detected.
 	IngestVulnerability CertifyGHSAIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
 }
 
@@ -3194,6 +3225,196 @@ func (v *CertifyGoodSrcResponse) GetIngestCertifyGood() CertifyGoodSrcIngestCert
 	return v.IngestCertifyGood
 }
 
+// CertifyNoKnownVulnIngestPackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents a package.
+//
+// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
+// The `type` field matches the pURL types but we might also use `"guac"` for the
+// cases where the pURL representation is not complete or when we have custom
+// rules.
+//
+// This node is a singleton: backends guarantee that there is exactly one node
+// with the same `type` value.
+//
+// Also note that this is named `Package`, not `PackageType`. This is only to make
+// queries more readable.
+type CertifyNoKnownVulnIngestPackage struct {
+	AllPkgTree `json:"-"`
+}
+
+// GetId returns CertifyNoKnownVulnIngestPackage.Id, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnIngestPackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns CertifyNoKnownVulnIngestPackage.Type, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnIngestPackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns CertifyNoKnownVulnIngestPackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnIngestPackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *CertifyNoKnownVulnIngestPackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyNoKnownVulnIngestPackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyNoKnownVulnIngestPackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyNoKnownVulnIngestPackage struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *CertifyNoKnownVulnIngestPackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyNoKnownVulnIngestPackage) __premarshalJSON() (*__premarshalCertifyNoKnownVulnIngestPackage, error) {
+	var retval __premarshalCertifyNoKnownVulnIngestPackage
+
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// CertifyNoKnownVulnIngestVulnerabilityCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation that represents when a package has a
+// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
+// the time of scanning no vulnerability was found.
+type CertifyNoKnownVulnIngestVulnerabilityCertifyVuln struct {
+	AllCertifyVuln `json:"-"`
+}
+
+// GetId returns CertifyNoKnownVulnIngestVulnerabilityCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) GetId() string { return v.AllCertifyVuln.Id }
+
+// GetPackage returns CertifyNoKnownVulnIngestVulnerabilityCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) GetPackage() AllCertifyVulnPackage {
+	return v.AllCertifyVuln.Package
+}
+
+// GetVulnerability returns CertifyNoKnownVulnIngestVulnerabilityCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
+	return v.AllCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns CertifyNoKnownVulnIngestVulnerabilityCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData {
+	return v.AllCertifyVuln.Metadata
+}
+
+func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyNoKnownVulnIngestVulnerabilityCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyNoKnownVulnIngestVulnerabilityCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyNoKnownVulnIngestVulnerabilityCertifyVuln struct {
+	Id string `json:"id"`
+
+	Package AllCertifyVulnPackage `json:"package"`
+
+	Vulnerability json.RawMessage `json:"vulnerability"`
+
+	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
+}
+
+func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premarshalCertifyNoKnownVulnIngestVulnerabilityCertifyVuln, error) {
+	var retval __premarshalCertifyNoKnownVulnIngestVulnerabilityCertifyVuln
+
+	retval.Id = v.AllCertifyVuln.Id
+	retval.Package = v.AllCertifyVuln.Package
+	{
+
+		dst := &retval.Vulnerability
+		src := v.AllCertifyVuln.Vulnerability
+		var err error
+		*dst, err = __marshalAllCertifyVulnVulnerability(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal CertifyNoKnownVulnIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+		}
+	}
+	retval.Metadata = v.AllCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// CertifyNoKnownVulnResponse is returned by CertifyNoKnownVuln on success.
+type CertifyNoKnownVulnResponse struct {
+	// Ingest a new package. Returns the ingested package trie
+	IngestPackage CertifyNoKnownVulnIngestPackage `json:"ingestPackage"`
+	// Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA) or no vulnerability has been detected.
+	IngestVulnerability CertifyNoKnownVulnIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
+}
+
+// GetIngestPackage returns CertifyNoKnownVulnResponse.IngestPackage, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnResponse) GetIngestPackage() CertifyNoKnownVulnIngestPackage {
+	return v.IngestPackage
+}
+
+// GetIngestVulnerability returns CertifyNoKnownVulnResponse.IngestVulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyNoKnownVulnResponse) GetIngestVulnerability() CertifyNoKnownVulnIngestVulnerabilityCertifyVuln {
+	return v.IngestVulnerability
+}
+
 // CertifyOSVIngestOSV includes the requested fields of the GraphQL type OSV.
 // The GraphQL type's documentation follows.
 //
@@ -3440,7 +3661,7 @@ type CertifyOSVResponse struct {
 	IngestPackage CertifyOSVIngestPackage `json:"ingestPackage"`
 	// Ingest a new OSV. Returns the ingested object
 	IngestOSV CertifyOSVIngestOSV `json:"ingestOSV"`
-	// Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)
+	// Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA) or no vulnerability has been detected.
 	IngestVulnerability CertifyOSVIngestVulnerabilityCertifyVuln `json:"ingestVulnerability"`
 }
 
@@ -6351,14 +6572,8 @@ func (v *NeighborsNeighborsCertifyScorecard) __premarshalJSON() (*__premarshalNe
 // NeighborsNeighborsCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type NeighborsNeighborsCertifyVEXStatement struct {
 	Typename               *string `json:"__typename"`
 	allCertifyVEXStatement `json:"-"`
@@ -7386,6 +7601,22 @@ func (v *NeighborsNeighborsIsVulnerability) __premarshalJSON() (*__premarshalNei
 	return &retval, nil
 }
 
+// NeighborsNeighborsNoVuln includes the requested fields of the GraphQL type NoVuln.
+// The GraphQL type's documentation follows.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan.
+//
+// Backends guarantee that this is a singleton node.
+//
+// We define an ID field due to GraphQL restrictions.
+type NeighborsNeighborsNoVuln struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns NeighborsNeighborsNoVuln.Typename, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsNoVuln) GetTypename() *string { return v.Typename }
+
 // NeighborsNeighborsNode includes the requested fields of the GraphQL interface Node.
 //
 // NeighborsNeighborsNode is implemented by the following types:
@@ -7396,6 +7627,7 @@ func (v *NeighborsNeighborsIsVulnerability) __premarshalJSON() (*__premarshalNei
 // NeighborsNeighborsOSV
 // NeighborsNeighborsCVE
 // NeighborsNeighborsGHSA
+// NeighborsNeighborsNoVuln
 // NeighborsNeighborsIsOccurrence
 // NeighborsNeighborsIsDependency
 // NeighborsNeighborsIsVulnerability
@@ -7429,6 +7661,7 @@ func (v *NeighborsNeighborsBuilder) implementsGraphQLInterfaceNeighborsNeighbors
 func (v *NeighborsNeighborsOSV) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
 func (v *NeighborsNeighborsCVE) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
 func (v *NeighborsNeighborsGHSA) implementsGraphQLInterfaceNeighborsNeighborsNode()                {}
+func (v *NeighborsNeighborsNoVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
 func (v *NeighborsNeighborsIsOccurrence) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
 func (v *NeighborsNeighborsIsDependency) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
 func (v *NeighborsNeighborsIsVulnerability) implementsGraphQLInterfaceNeighborsNeighborsNode()     {}
@@ -7477,6 +7710,9 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(NeighborsNeighborsGHSA)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(NeighborsNeighborsNoVuln)
 		return json.Unmarshal(b, *v)
 	case "IsOccurrence":
 		*v = new(NeighborsNeighborsIsOccurrence)
@@ -7613,6 +7849,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsNoVuln
+		}{typename, v}
 		return json.Marshal(result)
 	case *NeighborsNeighborsIsOccurrence:
 		typename = "IsOccurrence"
@@ -11013,14 +11257,8 @@ func (v *PathPathCertifyScorecard) __premarshalJSON() (*__premarshalPathPathCert
 // PathPathCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type PathPathCertifyVEXStatement struct {
 	Typename               *string `json:"__typename"`
 	allCertifyVEXStatement `json:"-"`
@@ -12020,6 +12258,22 @@ func (v *PathPathIsVulnerability) __premarshalJSON() (*__premarshalPathPathIsVul
 	return &retval, nil
 }
 
+// PathPathNoVuln includes the requested fields of the GraphQL type NoVuln.
+// The GraphQL type's documentation follows.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan.
+//
+// Backends guarantee that this is a singleton node.
+//
+// We define an ID field due to GraphQL restrictions.
+type PathPathNoVuln struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns PathPathNoVuln.Typename, and is useful for accessing the field via an interface.
+func (v *PathPathNoVuln) GetTypename() *string { return v.Typename }
+
 // PathPathNode includes the requested fields of the GraphQL interface Node.
 //
 // PathPathNode is implemented by the following types:
@@ -12030,6 +12284,7 @@ func (v *PathPathIsVulnerability) __premarshalJSON() (*__premarshalPathPathIsVul
 // PathPathOSV
 // PathPathCVE
 // PathPathGHSA
+// PathPathNoVuln
 // PathPathIsOccurrence
 // PathPathIsDependency
 // PathPathIsVulnerability
@@ -12063,6 +12318,7 @@ func (v *PathPathBuilder) implementsGraphQLInterfacePathPathNode()             {
 func (v *PathPathOSV) implementsGraphQLInterfacePathPathNode()                 {}
 func (v *PathPathCVE) implementsGraphQLInterfacePathPathNode()                 {}
 func (v *PathPathGHSA) implementsGraphQLInterfacePathPathNode()                {}
+func (v *PathPathNoVuln) implementsGraphQLInterfacePathPathNode()              {}
 func (v *PathPathIsOccurrence) implementsGraphQLInterfacePathPathNode()        {}
 func (v *PathPathIsDependency) implementsGraphQLInterfacePathPathNode()        {}
 func (v *PathPathIsVulnerability) implementsGraphQLInterfacePathPathNode()     {}
@@ -12111,6 +12367,9 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(PathPathGHSA)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(PathPathNoVuln)
 		return json.Unmarshal(b, *v)
 	case "IsOccurrence":
 		*v = new(PathPathIsOccurrence)
@@ -12247,6 +12506,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathNoVuln
+		}{typename, v}
 		return json.Marshal(result)
 	case *PathPathIsOccurrence:
 		typename = "IsOccurrence"
@@ -14024,14 +14291,8 @@ func (v *VEXPackageAndGhsaIngestPackage) __premarshalJSON() (*__premarshalVEXPac
 // VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
@@ -14161,7 +14422,9 @@ type VEXPackageAndGhsaResponse struct {
 	IngestPackage VEXPackageAndGhsaIngestPackage `json:"ingestPackage"`
 	// Ingest a new GHSA. Returns the ingested object
 	IngestGHSA VEXPackageAndGhsaIngestGHSA `json:"ingestGHSA"`
-	// certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV
+	// Certify that a package or an artifact has an associated VEX for a vulnerability.
+	//
+	// Note that setting `noVuln` in VulnerabilityInput is invalid for VEX statements!
 	IngestVEXStatement VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
@@ -14327,14 +14590,8 @@ func (v *VexArtifactAndCveIngestCVE) __premarshalJSON() (*__premarshalVexArtifac
 // VexArtifactAndCveIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type VexArtifactAndCveIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
@@ -14464,7 +14721,9 @@ type VexArtifactAndCveResponse struct {
 	IngestArtifact VexArtifactAndCveIngestArtifact `json:"ingestArtifact"`
 	// Ingest a new CVE. Returns the ingested object
 	IngestCVE VexArtifactAndCveIngestCVE `json:"ingestCVE"`
-	// certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV
+	// Certify that a package or an artifact has an associated VEX for a vulnerability.
+	//
+	// Note that setting `noVuln` in VulnerabilityInput is invalid for VEX statements!
 	IngestVEXStatement VexArtifactAndCveIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
@@ -14622,14 +14881,8 @@ func (v *VexArtifactAndGhsaIngestGHSA) __premarshalJSON() (*__premarshalVexArtif
 // VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
@@ -14759,7 +15012,9 @@ type VexArtifactAndGhsaResponse struct {
 	IngestArtifact VexArtifactAndGhsaIngestArtifact `json:"ingestArtifact"`
 	// Ingest a new GHSA. Returns the ingested object
 	IngestGHSA VexArtifactAndGhsaIngestGHSA `json:"ingestGHSA"`
-	// certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV
+	// Certify that a package or an artifact has an associated VEX for a vulnerability.
+	//
+	// Note that setting `noVuln` in VulnerabilityInput is invalid for VEX statements!
 	IngestVEXStatement VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
@@ -14922,14 +15177,8 @@ func (v *VexArtifactAndOsvIngestOSV) __premarshalJSON() (*__premarshalVexArtifac
 // VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
@@ -15059,7 +15308,9 @@ type VexArtifactAndOsvResponse struct {
 	IngestArtifact VexArtifactAndOsvIngestArtifact `json:"ingestArtifact"`
 	// Ingest a new OSV. Returns the ingested object
 	IngestOSV VexArtifactAndOsvIngestOSV `json:"ingestOSV"`
-	// certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV
+	// Certify that a package or an artifact has an associated VEX for a vulnerability.
+	//
+	// Note that setting `noVuln` in VulnerabilityInput is invalid for VEX statements!
 	IngestVEXStatement VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
@@ -15232,14 +15483,8 @@ func (v *VexPackageAndCveIngestPackage) __premarshalJSON() (*__premarshalVexPack
 // VexPackageAndCveIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type VexPackageAndCveIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
@@ -15369,7 +15614,9 @@ type VexPackageAndCveResponse struct {
 	IngestPackage VexPackageAndCveIngestPackage `json:"ingestPackage"`
 	// Ingest a new CVE. Returns the ingested object
 	IngestCVE VexPackageAndCveIngestCVE `json:"ingestCVE"`
-	// certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV
+	// Certify that a package or an artifact has an associated VEX for a vulnerability.
+	//
+	// Note that setting `noVuln` in VulnerabilityInput is invalid for VEX statements!
 	IngestVEXStatement VexPackageAndCveIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
@@ -15537,14 +15784,8 @@ func (v *VexPackageAndOsvIngestPackage) __premarshalJSON() (*__premarshalVexPack
 // VexPackageAndOsvIngestVEXStatementCertifyVEXStatement includes the requested fields of the GraphQL type CertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type VexPackageAndOsvIngestVEXStatementCertifyVEXStatement struct {
 	allCertifyVEXStatement `json:"-"`
 }
@@ -15674,7 +15915,9 @@ type VexPackageAndOsvResponse struct {
 	IngestPackage VexPackageAndOsvIngestPackage `json:"ingestPackage"`
 	// Ingest a new OSV. Returns the ingested object
 	IngestOSV VexPackageAndOsvIngestOSV `json:"ingestOSV"`
-	// certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV
+	// Certify that a package or an artifact has an associated VEX for a vulnerability.
+	//
+	// Note that setting `noVuln` in VulnerabilityInput is invalid for VEX statements!
 	IngestVEXStatement VexPackageAndOsvIngestVEXStatementCertifyVEXStatement `json:"ingestVEXStatement"`
 }
 
@@ -15713,8 +15956,7 @@ func (v *VexStatementInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns VexStatementInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *VexStatementInputSpec) GetCollector() string { return v.Collector }
 
-// VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation
-// input.
+// VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
 //
 // All fields are required.
 type VulnerabilityMetaDataInput struct {
@@ -15859,6 +16101,18 @@ func (v *__CertifyGoodSrcInput) GetSource() SourceInputSpec { return v.Source }
 
 // GetCertifyGood returns __CertifyGoodSrcInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__CertifyGoodSrcInput) GetCertifyGood() CertifyGoodInputSpec { return v.CertifyGood }
+
+// __CertifyNoKnownVulnInput is used internally by genqlient
+type __CertifyNoKnownVulnInput struct {
+	Pkg         PkgInputSpec               `json:"pkg"`
+	CertifyVuln VulnerabilityMetaDataInput `json:"certifyVuln"`
+}
+
+// GetPkg returns __CertifyNoKnownVulnInput.Pkg, and is useful for accessing the field via an interface.
+func (v *__CertifyNoKnownVulnInput) GetPkg() PkgInputSpec { return v.Pkg }
+
+// GetCertifyVuln returns __CertifyNoKnownVulnInput.CertifyVuln, and is useful for accessing the field via an interface.
+func (v *__CertifyNoKnownVulnInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
 // __CertifyOSVInput is used internally by genqlient
 type __CertifyOSVInput struct {
@@ -17181,22 +17435,22 @@ func (v *allCertifyGoodSubjectSource) __premarshalJSON() (*__premarshalallCertif
 // allCertifyVEXStatement includes the GraphQL fields of CertifyVEXStatement requested by the fragment allCertifyVEXStatement.
 // The GraphQL type's documentation follows.
 //
-// CertifyVEXStatement is an attestation that represents when a package or artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV)
-//
-// subject - union type that represents a package or artifact
-// vulnerability (object) - union type that consists of cve, ghsa or osv
-// justification (property) - justification for VEX
-// knownSince (property) - timestamp of the VEX (exact time in RFC 3339 format)
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// CertifyVEXStatement is an attestation that represents when a package or
+// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
 type allCertifyVEXStatement struct {
-	Id            string                                         `json:"id"`
-	Subject       allCertifyVEXStatementSubjectPackageOrArtifact `json:"-"`
-	Vulnerability allCertifyVEXStatementVulnerability            `json:"-"`
-	Justification string                                         `json:"justification"`
-	KnownSince    time.Time                                      `json:"knownSince"`
-	Origin        string                                         `json:"origin"`
-	Collector     string                                         `json:"collector"`
+	Id string `json:"id"`
+	// Subject of attestation
+	Subject allCertifyVEXStatementSubjectPackageOrArtifact `json:"-"`
+	// Attested vulnerability
+	Vulnerability allCertifyVEXStatementVulnerability `json:"-"`
+	// Justification for VEX
+	Justification string `json:"justification"`
+	// Timestamp (exact time in RFC 3339 format) for the VEX statement
+	KnownSince time.Time `json:"knownSince"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // GetId returns allCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
@@ -17506,7 +17760,7 @@ func (v *allCertifyVEXStatementSubjectPackage) __premarshalJSON() (*__premarshal
 // allCertifyVEXStatementSubjectArtifact
 // The GraphQL type's documentation follows.
 //
-// PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
+// PackageOrArtifact is a union of Package and Artifact.
 type allCertifyVEXStatementSubjectPackageOrArtifact interface {
 	implementsGraphQLInterfaceallCertifyVEXStatementSubjectPackageOrArtifact()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
@@ -17589,11 +17843,10 @@ func __marshalallCertifyVEXStatementSubjectPackageOrArtifact(v *allCertifyVEXSta
 // allCertifyVEXStatementVulnerabilityOSV
 // allCertifyVEXStatementVulnerabilityCVE
 // allCertifyVEXStatementVulnerabilityGHSA
+// allCertifyVEXStatementVulnerabilityNoVuln
 // The GraphQL type's documentation follows.
 //
-// Vulnerability is a union of OSV, CVE and GHSA.
-//
-// Any of these objects can be specified for a vulnerability.  #TODO
+// Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node.
 type allCertifyVEXStatementVulnerability interface {
 	implementsGraphQLInterfaceallCertifyVEXStatementVulnerability()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
@@ -17605,6 +17858,8 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) implementsGraphQLInterfaceallCe
 func (v *allCertifyVEXStatementVulnerabilityCVE) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
 }
 func (v *allCertifyVEXStatementVulnerabilityGHSA) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
+}
+func (v *allCertifyVEXStatementVulnerabilityNoVuln) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
 }
 
 func __unmarshalallCertifyVEXStatementVulnerability(b []byte, v *allCertifyVEXStatementVulnerability) error {
@@ -17629,6 +17884,9 @@ func __unmarshalallCertifyVEXStatementVulnerability(b []byte, v *allCertifyVEXSt
 		return json.Unmarshal(b, *v)
 	case "GHSA":
 		*v = new(allCertifyVEXStatementVulnerabilityGHSA)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(allCertifyVEXStatementVulnerabilityNoVuln)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -17678,6 +17936,14 @@ func __marshalallCertifyVEXStatementVulnerability(v *allCertifyVEXStatementVulne
 			TypeName string `json:"__typename"`
 			*__premarshalallCertifyVEXStatementVulnerabilityGHSA
 		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allCertifyVEXStatementVulnerabilityNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*allCertifyVEXStatementVulnerabilityNoVuln
+		}{typename, v}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -17838,6 +18104,22 @@ func (v *allCertifyVEXStatementVulnerabilityGHSA) __premarshalJSON() (*__premars
 	retval.GhsaId = v.allGHSATree.GhsaId
 	return &retval, nil
 }
+
+// allCertifyVEXStatementVulnerabilityNoVuln includes the requested fields of the GraphQL type NoVuln.
+// The GraphQL type's documentation follows.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan.
+//
+// Backends guarantee that this is a singleton node.
+//
+// We define an ID field due to GraphQL restrictions.
+type allCertifyVEXStatementVulnerabilityNoVuln struct {
+	Typename *string `json:"__typename"`
+}
+
+// GetTypename returns allCertifyVEXStatementVulnerabilityNoVuln.Typename, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatementVulnerabilityNoVuln) GetTypename() *string { return v.Typename }
 
 // allCertifyVEXStatementVulnerabilityOSV includes the requested fields of the GraphQL type OSV.
 // The GraphQL type's documentation follows.
@@ -20021,6 +20303,9 @@ fragment AllCertifyVuln on CertifyVuln {
 		... on GHSA {
 			... allGHSATree
 		}
+		... on NoVuln {
+			id
+		}
 	}
 	metadata {
 		dbUri
@@ -20122,6 +20407,9 @@ fragment AllCertifyVuln on CertifyVuln {
 		}
 		... on GHSA {
 			... allGHSATree
+		}
+		... on NoVuln {
+			id
 		}
 	}
 	metadata {
@@ -20451,6 +20739,107 @@ fragment allArtifactTree on Artifact {
 	return &data, err
 }
 
+func CertifyNoKnownVuln(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
+) (*CertifyNoKnownVulnResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyNoKnownVuln",
+		Query: `
+mutation CertifyNoKnownVuln ($pkg: PkgInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
+	ingestPackage(pkg: $pkg) {
+		... AllPkgTree
+	}
+	ingestVulnerability(pkg: $pkg, vulnerability: {noVuln:true}, certifyVuln: $certifyVuln) {
+		... AllCertifyVuln
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllCertifyVuln on CertifyVuln {
+	id
+	package {
+		... AllPkgTree
+	}
+	vulnerability {
+		__typename
+		... on CVE {
+			... allCveTree
+		}
+		... on OSV {
+			... allOSVTree
+		}
+		... on GHSA {
+			... allGHSATree
+		}
+		... on NoVuln {
+			id
+		}
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment allCveTree on CVE {
+	id
+	year
+	cveId
+}
+fragment allOSVTree on OSV {
+	id
+	osvId
+}
+fragment allGHSATree on GHSA {
+	id
+	ghsaId
+}
+`,
+		Variables: &__CertifyNoKnownVulnInput{
+			Pkg:         pkg,
+			CertifyVuln: certifyVuln,
+		},
+	}
+	var err error
+
+	var data CertifyNoKnownVulnResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 func CertifyOSV(
 	ctx context.Context,
 	client graphql.Client,
@@ -20512,6 +20901,9 @@ fragment AllCertifyVuln on CertifyVuln {
 		}
 		... on GHSA {
 			... allGHSATree
+		}
+		... on NoVuln {
+			id
 		}
 	}
 	metadata {
@@ -21581,6 +21973,9 @@ fragment AllCertifyVuln on CertifyVuln {
 		... on GHSA {
 			... allGHSATree
 		}
+		... on NoVuln {
+			id
+		}
 	}
 	metadata {
 		dbUri
@@ -22353,6 +22748,9 @@ fragment AllCertifyVuln on CertifyVuln {
 		}
 		... on GHSA {
 			... allGHSATree
+		}
+		... on NoVuln {
+			id
 		}
 	}
 	metadata {

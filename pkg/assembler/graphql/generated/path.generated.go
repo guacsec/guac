@@ -87,6 +87,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._GHSA(ctx, sel, obj)
+	case model.NoVuln:
+		return ec._NoVuln(ctx, sel, &obj)
+	case *model.NoVuln:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._NoVuln(ctx, sel, obj)
 	case model.IsOccurrence:
 		return ec._IsOccurrence(ctx, sel, &obj)
 	case *model.IsOccurrence:

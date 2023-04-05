@@ -36,6 +36,9 @@ fragment allCertifyVulnTree on CertifyVuln {
       id
       ghsaId
     }
+    ... on NoVuln {
+      id
+    }
   }
   metadata {
     dbUri
