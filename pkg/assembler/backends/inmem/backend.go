@@ -88,12 +88,12 @@ type demoClient struct {
 
 	// Ensures that only one noKnownVuln node is created
 	noKnownVulnNode noKnownVuln
-	noKnownVulnID uint32
+	noKnownVulnID   uint32
 }
 
 // This node is a singleton!
 type noKnownVuln struct {
-	id uint32
+	id               uint32
 	certifyVulnLinks []uint32
 }
 
