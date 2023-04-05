@@ -46,7 +46,7 @@ type packageQuery struct {
 }
 
 var getPackages func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error)
-var getNeighbors func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error)
+var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
 func NewPackageQuery(client graphql.Client, daysSinceLastScan int) certifier.QueryComponents {
