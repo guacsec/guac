@@ -46,7 +46,7 @@ type hasSLSAStruct struct {
 
 func (n *hasSLSAStruct) ID() uint32 { return n.id }
 
-func (n *hasSLSAStruct) Neighbors() []uint32 {
+func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 2+len(n.builtFrom))
 	out = append(out, n.subject)
 	out = append(out, n.builtBy)

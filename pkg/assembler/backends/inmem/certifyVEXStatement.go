@@ -43,7 +43,7 @@ type vexLink struct {
 
 func (n *vexLink) ID() uint32 { return n.id }
 
-func (n *vexLink) Neighbors() []uint32 {
+func (n *vexLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 2)
 	if n.packageID != 0 {
 		out = append(out, n.packageID)

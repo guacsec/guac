@@ -42,7 +42,7 @@ type scorecardLink struct {
 
 func (n *scorecardLink) ID() uint32 { return n.id }
 
-func (n *scorecardLink) Neighbors() []uint32 {
+func (n *scorecardLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	return []uint32{n.sourceID}
 }
 

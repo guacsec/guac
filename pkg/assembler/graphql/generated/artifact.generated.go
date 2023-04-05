@@ -60,8 +60,8 @@ type QueryResolver interface {
 	IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error)
 	Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error)
 	Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error)
-	Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error)
-	Neighbors(ctx context.Context, node string) ([]model.Node, error)
+	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
+	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
 	Node(ctx context.Context, node string) (model.Node, error)
 	PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error)
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
@@ -887,6 +887,15 @@ func (ec *executionContext) field_Query_neighbors_args(ctx context.Context, rawA
 		}
 	}
 	args["node"] = arg0
+	var arg1 []model.Edge
+	if tmp, ok := rawArgs["usingOnly"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
+		arg1, err = ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["usingOnly"] = arg1
 	return args, nil
 }
 
@@ -965,6 +974,15 @@ func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["maxPathLength"] = arg2
+	var arg3 []model.Edge
+	if tmp, ok := rawArgs["usingOnly"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
+		arg3, err = ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["usingOnly"] = arg3
 	return args, nil
 }
 
@@ -3709,7 +3727,7 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Path(rctx, fc.Args["subject"].(string), fc.Args["target"].(string), fc.Args["maxPathLength"].(int))
+		return ec.resolvers.Query().Path(rctx, fc.Args["subject"].(string), fc.Args["target"].(string), fc.Args["maxPathLength"].(int), fc.Args["usingOnly"].([]model.Edge))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3764,7 +3782,7 @@ func (ec *executionContext) _Query_neighbors(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Neighbors(rctx, fc.Args["node"].(string))
+		return ec.resolvers.Query().Neighbors(rctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

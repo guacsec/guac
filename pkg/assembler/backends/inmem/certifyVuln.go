@@ -46,7 +46,7 @@ type vulnerabilityLink struct {
 
 func (n *vulnerabilityLink) ID() uint32 { return n.id }
 
-func (n *vulnerabilityLink) Neighbors() []uint32 {
+func (n *vulnerabilityLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 2)
 	out = append(out, n.packageID)
 	if n.osvID != 0 {

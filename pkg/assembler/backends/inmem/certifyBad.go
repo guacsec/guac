@@ -39,7 +39,7 @@ type badLink struct {
 
 func (n *badLink) ID() uint32 { return n.id }
 
-func (n *badLink) Neighbors() []uint32 {
+func (n *badLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1)
 	if n.packageID != 0 {
 		out = append(out, n.packageID)

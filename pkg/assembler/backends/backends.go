@@ -75,9 +75,9 @@ type Backend interface {
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 
 	// Topological queries: queries where node connectivity matters more than node type
-	Neighbors(ctx context.Context, node string) ([]model.Node, error)
+	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
 	Node(ctx context.Context, node string) (model.Node, error)
-	Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error)
+	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

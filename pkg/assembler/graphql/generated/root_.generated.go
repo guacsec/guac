@@ -246,11 +246,11 @@ type ComplexityRoot struct {
 		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
 		IsOccurrence        func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
-		Neighbors           func(childComplexity int, node string) int
+		Neighbors           func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                func(childComplexity int, node string) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Path                func(childComplexity int, subject string, target string, maxPathLength int) int
+		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
 		PkgEqual            func(childComplexity int, pkgEqualSpec *model.PkgEqualSpec) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
@@ -1447,7 +1447,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string)), true
+		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge)), true
 
 	case "Query.node":
 		if e.complexity.Query.Node == nil {
@@ -1495,7 +1495,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int)), true
+		return e.complexity.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int), args["usingOnly"].([]model.Edge)), true
 
 	case "Query.PkgEqual":
 		if e.complexity.Query.PkgEqual == nil {
@@ -3719,21 +3719,55 @@ union Node
   | HasSBOM
   | HasSLSA
 
+"""
+Edge allows filtering path/neighbors output to only contain a subset of all
+possible GUAC verbs.
+
+Each member of the enum matches with one of the verbs. The naming scheme is
+converting the CamelCase name to CAPITALS_WITH_UNDERSCORES.
+
+Note that each GUAC verb is at the same time both an Edge and a Node. We need
+to return it as a Node to have it show up in the return type of the queries and
+we need it to be an edge to allow filtering paths to only consider certain
+predicates.
+"""
+enum Edge {
+  IS_OCCURRENCE
+  IS_DEPENDENCY
+  IS_VULNERABILITY
+  CERTIFY_VEX_STATEMENT
+  HASH_EQUAL
+  CERTIFY_BAD
+  CERTIFY_GOOD
+  PKG_EQUAL
+  CERTIFY_SCORECARD
+  CERTIFY_VULN
+  HAS_SOURCE_AT
+  HAS_SBOM
+  HAS_SLSA
+}
+
 extend type Query {
   """
   path query returns a path between subject and target, of a maximum length
 
   Since we want to uniquely identify endpoints, nodes must be specified by
   valid IDs only (instead of using filters/input spec structs).
+
+  Specifying any Edge value in ` + "`" + `usingOnly` + "`" + ` will make the path only contain the
+  corresponding GUAC evidence trees (GUAC verbs).
   """
-  path(subject: ID!, target: ID!, maxPathLength: Int!): [Node!]!
+  path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
 
   """
   neighbors returns all the direct neighbors of a node
 
   Similarly, the input is only specified by its ID.
+
+  Specifying any Edge value in ` + "`" + `usingOnly` + "`" + ` will make the neighbors list only
+  contain the corresponding GUAC evidence trees (GUAC verbs).
   """
-  neighbors(node: ID!): [Node!]!
+  neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
 
   """
   node returns a single node, regardless of type

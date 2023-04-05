@@ -138,14 +138,14 @@ func (n *pkgNameStruct) ID() uint32      { return n.id }
 func (n *pkgVersionStruct) ID() uint32   { return n.id }
 func (n *pkgVersionNode) ID() uint32     { return n.id }
 
-func (n *pkgNamespaceStruct) Neighbors() []uint32 {
+func (n *pkgNamespaceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1+len(n.namespaces))
 	for _, v := range n.namespaces {
 		out = append(out, v.id)
 	}
 	return out
 }
-func (n *pkgNameStruct) Neighbors() []uint32 {
+func (n *pkgNameStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1+len(n.names))
 	for _, v := range n.names {
 		out = append(out, v.id)
@@ -153,30 +153,102 @@ func (n *pkgNameStruct) Neighbors() []uint32 {
 	out = append(out, n.parent)
 	return out
 }
-func (n *pkgVersionStruct) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.badLinks)+len(n.goodLinks))
+func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
+	maxLen := 1 + len(n.versions)
+	if allowedEdges[model.EdgeHasSourceAt] {
+		maxLen = maxLen + len(n.srcMapLinks)
+	}
+	if allowedEdges[model.EdgeIsDependency] {
+		maxLen = maxLen + len(n.isDependencyLinks)
+	}
+	if allowedEdges[model.EdgeCertifyBad] {
+		maxLen = maxLen + len(n.badLinks)
+	}
+	if allowedEdges[model.EdgeCertifyGood] {
+		maxLen = maxLen + len(n.goodLinks)
+	}
+
+	out := make([]uint32, 0, maxLen)
+	out = append(out, n.parent)
 	for _, v := range n.versions {
 		out = append(out, v.id)
 	}
-	out = append(out, n.srcMapLinks...)
-	out = append(out, n.isDependencyLinks...)
-	out = append(out, n.badLinks...)
-	out = append(out, n.goodLinks...)
-	out = append(out, n.parent)
+
+	if allowedEdges[model.EdgeHasSourceAt] {
+		out = append(out, n.srcMapLinks...)
+	}
+	if allowedEdges[model.EdgeIsDependency] {
+		out = append(out, n.isDependencyLinks...)
+	}
+	if allowedEdges[model.EdgeCertifyBad] {
+		out = append(out, n.badLinks...)
+	}
+	if allowedEdges[model.EdgeCertifyGood] {
+		out = append(out, n.goodLinks...)
+	}
 	return out
 }
-func (n *pkgVersionNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.goodLinks)+len(n.pkgEquals))
-	out = append(out, n.srcMapLinks...)
-	out = append(out, n.isDependencyLinks...)
-	out = append(out, n.occurrences...)
-	out = append(out, n.certifyVulnLinks...)
-	out = append(out, n.hasSBOMs...)
-	out = append(out, n.vexLinks...)
-	out = append(out, n.badLinks...)
-	out = append(out, n.goodLinks...)
-	out = append(out, n.pkgEquals...)
+func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
+	maxLen := 1
+	if allowedEdges[model.EdgeHasSourceAt] {
+		maxLen = maxLen + len(n.srcMapLinks)
+	}
+	if allowedEdges[model.EdgeIsDependency] {
+		maxLen = maxLen + len(n.isDependencyLinks)
+	}
+	if allowedEdges[model.EdgeIsOccurrence] {
+		maxLen = maxLen + len(n.occurrences)
+	}
+	if allowedEdges[model.EdgeCertifyVuln] {
+		maxLen = maxLen + len(n.certifyVulnLinks)
+	}
+	if allowedEdges[model.EdgeHasSbom] {
+		maxLen = maxLen + len(n.hasSBOMs)
+	}
+	if allowedEdges[model.EdgeCertifyVexStatement] {
+		maxLen = maxLen + len(n.vexLinks)
+	}
+	if allowedEdges[model.EdgeCertifyBad] {
+		maxLen = maxLen + len(n.badLinks)
+	}
+	if allowedEdges[model.EdgeCertifyGood] {
+		maxLen = maxLen + len(n.goodLinks)
+	}
+	if allowedEdges[model.EdgePkgEqual] {
+		maxLen = maxLen + len(n.pkgEquals)
+	}
+
+	out := make([]uint32, 0, maxLen)
 	out = append(out, n.parent)
+
+	if allowedEdges[model.EdgeHasSourceAt] {
+		out = append(out, n.srcMapLinks...)
+	}
+	if allowedEdges[model.EdgeIsDependency] {
+		out = append(out, n.isDependencyLinks...)
+	}
+	if allowedEdges[model.EdgeIsOccurrence] {
+		out = append(out, n.occurrences...)
+	}
+	if allowedEdges[model.EdgeCertifyVuln] {
+		out = append(out, n.certifyVulnLinks...)
+	}
+	if allowedEdges[model.EdgeHasSbom] {
+		out = append(out, n.hasSBOMs...)
+	}
+	if allowedEdges[model.EdgeCertifyVexStatement] {
+		out = append(out, n.vexLinks...)
+	}
+	if allowedEdges[model.EdgeCertifyBad] {
+		out = append(out, n.badLinks...)
+	}
+	if allowedEdges[model.EdgeCertifyGood] {
+		out = append(out, n.goodLinks...)
+	}
+	if allowedEdges[model.EdgePkgEqual] {
+		out = append(out, n.pkgEquals...)
+	}
+
 	return out
 }
 

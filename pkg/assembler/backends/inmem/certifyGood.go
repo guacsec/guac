@@ -39,7 +39,7 @@ type goodLink struct {
 
 func (n *goodLink) ID() uint32 { return n.id }
 
-func (n *goodLink) Neighbors() []uint32 {
+func (n *goodLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1)
 	if n.packageID != 0 {
 		out = append(out, n.packageID)

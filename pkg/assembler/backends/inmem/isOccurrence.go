@@ -41,7 +41,7 @@ type isOccurrenceStruct struct {
 
 func (n *isOccurrenceStruct) ID() uint32 { return n.id }
 
-func (n *isOccurrenceStruct) Neighbors() []uint32 {
+func (n *isOccurrenceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 3)
 	if n.pkg != 0 {
 		out = append(out, n.pkg)

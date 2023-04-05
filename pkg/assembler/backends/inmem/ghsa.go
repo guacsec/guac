@@ -56,11 +56,31 @@ type ghsaNode struct {
 
 func (n *ghsaNode) ID() uint32 { return n.id }
 
-func (n *ghsaNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
-	out = append(out, n.certifyVulnLinks...)
-	out = append(out, n.equalVulnLinks...)
-	out = append(out, n.vexLinks...)
+func (n *ghsaNode) Neighbors(allowedEdges edgeMap) []uint32 {
+	maxLen := 0
+	if allowedEdges[model.EdgeCertifyVuln] {
+		maxLen = maxLen + len(n.certifyVulnLinks)
+	}
+	if allowedEdges[model.EdgeIsVulnerability] {
+		maxLen = maxLen + len(n.equalVulnLinks)
+	}
+	if allowedEdges[model.EdgeCertifyVexStatement] {
+		maxLen = maxLen + len(n.vexLinks)
+	}
+	if maxLen == 0 {
+		return []uint32{}
+	}
+
+	out := make([]uint32, 0, maxLen)
+	if allowedEdges[model.EdgeCertifyVuln] {
+		out = append(out, n.certifyVulnLinks...)
+	}
+	if allowedEdges[model.EdgeIsVulnerability] {
+		out = append(out, n.equalVulnLinks...)
+	}
+	if allowedEdges[model.EdgeCertifyVexStatement] {
+		out = append(out, n.vexLinks...)
+	}
 	return out
 }
 

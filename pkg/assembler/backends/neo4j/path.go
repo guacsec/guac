@@ -22,11 +22,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func (c *neo4jClient) Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error) {
+func (c *neo4jClient) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Path - path"))
 }
 
-func (c *neo4jClient) Neighbors(ctx context.Context, node string) ([]model.Node, error) {
+func (c *neo4jClient) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Neighbors - neighbors"))
 }
 

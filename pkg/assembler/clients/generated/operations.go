@@ -8366,6 +8366,9 @@ type NeighborsResponse struct {
 	// neighbors returns all the direct neighbors of a node
 	//
 	// Similarly, the input is only specified by its ID.
+	//
+	// Specifying any Edge value in `usingOnly` will make the neighbors list only
+	// contain the corresponding GUAC evidence trees (GUAC verbs).
 	Neighbors []NeighborsNeighborsNode `json:"-"`
 }
 
@@ -13051,6 +13054,9 @@ type PathResponse struct {
 	//
 	// Since we want to uniquely identify endpoints, nodes must be specified by
 	// valid IDs only (instead of using filters/input spec structs).
+	//
+	// Specifying any Edge value in `usingOnly` will make the path only contain the
+	// corresponding GUAC evidence trees (GUAC verbs).
 	Path []PathPathNode `json:"-"`
 }
 
@@ -21732,7 +21738,7 @@ func Neighbors(
 		OpName: "Neighbors",
 		Query: `
 query Neighbors ($node: ID!) {
-	neighbors(node: $node) {
+	neighbors(node: $node, usingOnly: []) {
 		__typename
 		... on Package {
 			... AllPkgTree
@@ -22514,7 +22520,7 @@ func Path(
 		OpName: "Path",
 		Query: `
 query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
-	path(subject: $subject, target: $target, maxPathLength: $maxPathLength) {
+	path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: []) {
 		__typename
 		... on Package {
 			... AllPkgTree

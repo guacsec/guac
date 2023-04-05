@@ -39,7 +39,7 @@ type srcMapLink struct {
 
 func (n *srcMapLink) ID() uint32 { return n.id }
 
-func (n *srcMapLink) Neighbors() []uint32 {
+func (n *srcMapLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	return []uint32{n.sourceID, n.packageID}
 }
 

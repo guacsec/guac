@@ -1230,6 +1230,79 @@ type VulnerabilitySpec struct {
 	NoVuln *bool     `json:"noVuln,omitempty"`
 }
 
+// Edge allows filtering path/neighbors output to only contain a subset of all
+// possible GUAC verbs.
+//
+// Each member of the enum matches with one of the verbs. The naming scheme is
+// converting the CamelCase name to CAPITALS_WITH_UNDERSCORES.
+//
+// Note that each GUAC verb is at the same time both an Edge and a Node. We need
+// to return it as a Node to have it show up in the return type of the queries and
+// we need it to be an edge to allow filtering paths to only consider certain
+// predicates.
+type Edge string
+
+const (
+	EdgeIsOccurrence        Edge = "IS_OCCURRENCE"
+	EdgeIsDependency        Edge = "IS_DEPENDENCY"
+	EdgeIsVulnerability     Edge = "IS_VULNERABILITY"
+	EdgeCertifyVexStatement Edge = "CERTIFY_VEX_STATEMENT"
+	EdgeHashEqual           Edge = "HASH_EQUAL"
+	EdgeCertifyBad          Edge = "CERTIFY_BAD"
+	EdgeCertifyGood         Edge = "CERTIFY_GOOD"
+	EdgePkgEqual            Edge = "PKG_EQUAL"
+	EdgeCertifyScorecard    Edge = "CERTIFY_SCORECARD"
+	EdgeCertifyVuln         Edge = "CERTIFY_VULN"
+	EdgeHasSourceAt         Edge = "HAS_SOURCE_AT"
+	EdgeHasSbom             Edge = "HAS_SBOM"
+	EdgeHasSlsa             Edge = "HAS_SLSA"
+)
+
+var AllEdge = []Edge{
+	EdgeIsOccurrence,
+	EdgeIsDependency,
+	EdgeIsVulnerability,
+	EdgeCertifyVexStatement,
+	EdgeHashEqual,
+	EdgeCertifyBad,
+	EdgeCertifyGood,
+	EdgePkgEqual,
+	EdgeCertifyScorecard,
+	EdgeCertifyVuln,
+	EdgeHasSourceAt,
+	EdgeHasSbom,
+	EdgeHasSlsa,
+}
+
+func (e Edge) IsValid() bool {
+	switch e {
+	case EdgeIsOccurrence, EdgeIsDependency, EdgeIsVulnerability, EdgeCertifyVexStatement, EdgeHashEqual, EdgeCertifyBad, EdgeCertifyGood, EdgePkgEqual, EdgeCertifyScorecard, EdgeCertifyVuln, EdgeHasSourceAt, EdgeHasSbom, EdgeHasSlsa:
+		return true
+	}
+	return false
+}
+
+func (e Edge) String() string {
+	return string(e)
+}
+
+func (e *Edge) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Edge(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Edge", str)
+	}
+	return nil
+}
+
+func (e Edge) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // PkgMatchType is an enum to determine if the attestation should be done at the
 // specific version or package name
 type PkgMatchType string

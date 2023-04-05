@@ -47,7 +47,10 @@ type node interface {
 	//
 	// This is useful for path related queries where the type of the node
 	// is not as relevant as its connections.
-	Neighbors() []uint32
+	//
+	// The allowedEdges argument allows filtering the set of neighbors to
+	// only include certain GUAC verbs.
+	Neighbors(allowedEdges edgeMap) []uint32
 
 	// BuildModelNode builds a GraphQL return type for a backend node,
 	BuildModelNode(c *demoClient) (model.Node, error)
@@ -99,8 +102,11 @@ type noKnownVuln struct {
 
 func (n *noKnownVuln) ID() uint32 { return n.id }
 
-func (n *noKnownVuln) Neighbors() []uint32 {
-	return n.certifyVulnLinks
+func (n *noKnownVuln) Neighbors(allowedEdges edgeMap) []uint32 {
+	if allowedEdges[model.EdgeCertifyVuln] {
+		return n.certifyVulnLinks
+	}
+	return []uint32{}
 }
 
 func (n *noKnownVuln) BuildModelNode(c *demoClient) (model.Node, error) {

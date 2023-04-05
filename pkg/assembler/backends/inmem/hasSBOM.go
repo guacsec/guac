@@ -37,7 +37,7 @@ type hasSBOMStruct struct {
 
 func (n *hasSBOMStruct) ID() uint32 { return n.id }
 
-func (n *hasSBOMStruct) Neighbors() []uint32 {
+func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	if n.pkg != 0 {
 		return []uint32{n.pkg}
 	}

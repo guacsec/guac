@@ -91,14 +91,14 @@ func (n *srcNamespaceStruct) ID() uint32 { return n.id }
 func (n *srcNameStruct) ID() uint32      { return n.id }
 func (n *srcNameNode) ID() uint32        { return n.id }
 
-func (n *srcNamespaceStruct) Neighbors() []uint32 {
+func (n *srcNamespaceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, len(n.namespaces))
 	for _, v := range n.namespaces {
 		out = append(out, v.id)
 	}
 	return out
 }
-func (n *srcNameStruct) Neighbors() []uint32 {
+func (n *srcNameStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1+len(n.names))
 	for _, v := range n.names {
 		out = append(out, v.id)
@@ -106,15 +106,48 @@ func (n *srcNameStruct) Neighbors() []uint32 {
 	out = append(out, n.parent)
 	return out
 }
-func (n *srcNameNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.scorecardLinks)+len(n.occurrences)+len(n.hasSBOMs)+len(n.badLinks)+len(n.goodLinks))
-	out = append(out, n.srcMapLinks...)
-	out = append(out, n.scorecardLinks...)
-	out = append(out, n.occurrences...)
-	out = append(out, n.hasSBOMs...)
-	out = append(out, n.badLinks...)
-	out = append(out, n.goodLinks...)
+func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []uint32 {
+	maxLen := 1
+	if allowedEdges[model.EdgeHasSourceAt] {
+		maxLen = maxLen + len(n.srcMapLinks)
+	}
+	if allowedEdges[model.EdgeCertifyScorecard] {
+		maxLen = maxLen + len(n.scorecardLinks)
+	}
+	if allowedEdges[model.EdgeIsOccurrence] {
+		maxLen = maxLen + len(n.occurrences)
+	}
+	if allowedEdges[model.EdgeHasSbom] {
+		maxLen = maxLen + len(n.hasSBOMs)
+	}
+	if allowedEdges[model.EdgeCertifyBad] {
+		maxLen = maxLen + len(n.badLinks)
+	}
+	if allowedEdges[model.EdgeCertifyGood] {
+		maxLen = maxLen + len(n.goodLinks)
+	}
+
+	out := make([]uint32, 0, maxLen)
 	out = append(out, n.parent)
+
+	if allowedEdges[model.EdgeHasSourceAt] {
+		out = append(out, n.srcMapLinks...)
+	}
+	if allowedEdges[model.EdgeCertifyScorecard] {
+		out = append(out, n.scorecardLinks...)
+	}
+	if allowedEdges[model.EdgeIsOccurrence] {
+		out = append(out, n.occurrences...)
+	}
+	if allowedEdges[model.EdgeHasSbom] {
+		out = append(out, n.hasSBOMs...)
+	}
+	if allowedEdges[model.EdgeCertifyBad] {
+		out = append(out, n.badLinks...)
+	}
+	if allowedEdges[model.EdgeCertifyGood] {
+		out = append(out, n.goodLinks...)
+	}
 	return out
 }
 
