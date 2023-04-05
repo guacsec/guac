@@ -23,12 +23,6 @@ type Node interface {
 	IsNode()
 }
 
-// OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be
-// specified for vulnerability
-type OsvCveOrGhsa interface {
-	IsOsvCveOrGhsa()
-}
-
 // PackageOrArtifact is a union of Package and Artifact. Any of these objects can be specified
 type PackageOrArtifact interface {
 	IsPackageOrArtifact()
@@ -42,6 +36,13 @@ type PackageOrSource interface {
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
 type PackageSourceOrArtifact interface {
 	IsPackageSourceOrArtifact()
+}
+
+// Vulnerability is a union of OSV, CVE and GHSA.
+//
+// Any of these objects can be specified for a vulnerability.  #TODO
+type Vulnerability interface {
+	IsVulnerability()
 }
 
 // Artifact represents the artifact and contains a digest field
@@ -114,7 +115,7 @@ type Cve struct {
 	CveID string `json:"cveId"`
 }
 
-func (Cve) IsOsvCveOrGhsa() {}
+func (Cve) IsVulnerability() {}
 
 func (Cve) IsCveOrGhsa() {}
 
@@ -247,7 +248,7 @@ type CertifyScorecardSpec struct {
 type CertifyVEXStatement struct {
 	ID            string            `json:"id"`
 	Subject       PackageOrArtifact `json:"subject"`
-	Vulnerability OsvCveOrGhsa      `json:"vulnerability"`
+	Vulnerability Vulnerability     `json:"vulnerability"`
 	Justification string            `json:"justification"`
 	KnownSince    time.Time         `json:"knownSince"`
 	Origin        string            `json:"origin"`
@@ -261,7 +262,7 @@ func (CertifyVEXStatement) IsNode() {}
 type CertifyVEXStatementSpec struct {
 	ID            *string                `json:"id,omitempty"`
 	Subject       *PackageOrArtifactSpec `json:"subject,omitempty"`
-	Vulnerability *OsvCveOrGhsaSpec      `json:"vulnerability,omitempty"`
+	Vulnerability *VulnerabilitySpec     `json:"vulnerability,omitempty"`
 	Justification *string                `json:"justification,omitempty"`
 	KnownSince    *time.Time             `json:"knownSince,omitempty"`
 	Origin        *string                `json:"origin,omitempty"`
@@ -276,7 +277,7 @@ type CertifyVuln struct {
 	// package (subject) - the package object type that represents the package
 	Package *Package `json:"package"`
 	// vulnerability (object) - union type that consists of osv, cve or ghsa
-	Vulnerability OsvCveOrGhsa `json:"vulnerability"`
+	Vulnerability Vulnerability `json:"vulnerability"`
 	// metadata (property) - contains all the vulnerability metadata
 	Metadata *VulnerabilityMetaData `json:"metadata"`
 }
@@ -290,16 +291,16 @@ func (CertifyVuln) IsNode() {}
 //
 // Only OSV, CVE or GHSA can be specified at once.
 type CertifyVulnSpec struct {
-	ID             *string           `json:"id,omitempty"`
-	Package        *PkgSpec          `json:"package,omitempty"`
-	Vulnerability  *OsvCveOrGhsaSpec `json:"vulnerability,omitempty"`
-	TimeScanned    *time.Time        `json:"timeScanned,omitempty"`
-	DbURI          *string           `json:"dbUri,omitempty"`
-	DbVersion      *string           `json:"dbVersion,omitempty"`
-	ScannerURI     *string           `json:"scannerUri,omitempty"`
-	ScannerVersion *string           `json:"scannerVersion,omitempty"`
-	Origin         *string           `json:"origin,omitempty"`
-	Collector      *string           `json:"collector,omitempty"`
+	ID             *string            `json:"id,omitempty"`
+	Package        *PkgSpec           `json:"package,omitempty"`
+	Vulnerability  *VulnerabilitySpec `json:"vulnerability,omitempty"`
+	TimeScanned    *time.Time         `json:"timeScanned,omitempty"`
+	DbURI          *string            `json:"dbUri,omitempty"`
+	DbVersion      *string            `json:"dbVersion,omitempty"`
+	ScannerURI     *string            `json:"scannerUri,omitempty"`
+	ScannerVersion *string            `json:"scannerVersion,omitempty"`
+	Origin         *string            `json:"origin,omitempty"`
+	Collector      *string            `json:"collector,omitempty"`
 }
 
 // CveOrGhsaInput allows using CveOrGhsa union as
@@ -328,7 +329,7 @@ type Ghsa struct {
 	GhsaID string `json:"ghsaId"`
 }
 
-func (Ghsa) IsOsvCveOrGhsa() {}
+func (Ghsa) IsVulnerability() {}
 
 func (Ghsa) IsCveOrGhsa() {}
 
@@ -632,7 +633,7 @@ type Osv struct {
 	OsvID string `json:"osvId"`
 }
 
-func (Osv) IsOsvCveOrGhsa() {}
+func (Osv) IsVulnerability() {}
 
 func (Osv) IsNode() {}
 
@@ -645,26 +646,6 @@ type OSVInputSpec struct {
 type OSVSpec struct {
 	ID    *string `json:"id,omitempty"`
 	OsvID *string `json:"osvId,omitempty"`
-}
-
-// OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
-// input type to be used in mutations.
-//
-// Exactly one of the value must be set to non-nil.
-type OsvCveOrGhsaInput struct {
-	Osv  *OSVInputSpec  `json:"osv,omitempty"`
-	Cve  *CVEInputSpec  `json:"cve,omitempty"`
-	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
-}
-
-// OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as input type to be used in
-// read queries.
-//
-// Exactly one of the value must be set to non-nil.
-type OsvCveOrGhsaSpec struct {
-	Osv  *OSVSpec  `json:"osv,omitempty"`
-	Cve  *CVESpec  `json:"cve,omitempty"`
-	Ghsa *GHSASpec `json:"ghsa,omitempty"`
 }
 
 // Package represents a package.
@@ -1168,6 +1149,16 @@ type VexStatementInputSpec struct {
 	Collector     string    `json:"collector"`
 }
 
+// VulnerabilityInput allows using Vulnerability union as
+// input type to be used in mutations.
+//
+// Exactly one of the value must be set to non-nil.
+type VulnerabilityInput struct {
+	Osv  *OSVInputSpec  `json:"osv,omitempty"`
+	Cve  *CVEInputSpec  `json:"cve,omitempty"`
+	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
+}
+
 // VulnerabilityMetaData is the metadata attached to CertifyVuln.
 //
 // It contains metadata about the scanner process that created the certification.
@@ -1200,6 +1191,16 @@ type VulnerabilityMetaDataInput struct {
 	ScannerVersion string    `json:"scannerVersion"`
 	Origin         string    `json:"origin"`
 	Collector      string    `json:"collector"`
+}
+
+// VulnerabilitySpec allows using Vulnerability union as input type to be used in
+// read queries.
+//
+// Exactly one of the value must be set to non-nil.
+type VulnerabilitySpec struct {
+	Osv  *OSVSpec  `json:"osv,omitempty"`
+	Cve  *CVESpec  `json:"cve,omitempty"`
+	Ghsa *GHSASpec `json:"ghsa,omitempty"`
 }
 
 // PkgMatchType is an enum to determine if the attestation should be done at the

@@ -43,7 +43,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 
 	// TODO: Fix validation
 	queryAll := true
-	// queryAll, err := helper.ValidateOsvCveOrGhsaQueryInput(certifyVulnSpec.Vulnerability)
+	// queryAll, err := helper.ValidateVulnerabilityQueryInput(certifyVulnSpec.Vulnerability)
 	// if err != nil {
 	// 	return nil, err
 	// }
@@ -308,7 +308,7 @@ func setCertifyVulnValues(sb *strings.Builder, certifyVulnSpec *model.CertifyVul
 	}
 }
 
-func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveOrGhsa, timeScanned time.Time, dbUri, dbVersion, scannerUri,
+func generateModelCertifyVuln(pkg *model.Package, vuln model.Vulnerability, timeScanned time.Time, dbUri, dbVersion, scannerUri,
 	scannerVersion, origin, collector string) *model.CertifyVuln {
 
 	metadata := &model.VulnerabilityMetaData{
@@ -331,9 +331,9 @@ func generateModelCertifyVuln(pkg *model.Package, vuln model.OsvCveOrGhsa, timeS
 
 //  Ingest Vulnerability
 
-func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+func (c *neo4jClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 
-	err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVulnerability")
+	err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability")
 	if err != nil {
 		return nil, err
 	}

@@ -27,7 +27,7 @@ type CertifyVuln {
   "package (subject) - the package object type that represents the package"
   package: Package!
   "vulnerability (object) - union type that consists of osv, cve or ghsa"
-  vulnerability: OsvCveOrGhsa!
+  vulnerability: Vulnerability!
   "metadata (property) - contains all the vulnerability metadata "
   metadata: VulnerabilityMetaData!
 }
@@ -55,18 +55,19 @@ type VulnerabilityMetaData {
 }
 
 """
-OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be
-specified for vulnerability
+Vulnerability is a union of OSV, CVE and GHSA.
+
+Any of these objects can be specified for a vulnerability.  #TODO
 """
-union OsvCveOrGhsa = OSV | CVE | GHSA
+union Vulnerability = OSV | CVE | GHSA
 
 """
-OsvCveOrGhsaSpec allows using OsvCveOrGhsa union as input type to be used in
+VulnerabilitySpec allows using Vulnerability union as input type to be used in
 read queries.
 
 Exactly one of the value must be set to non-nil.
 """
-input OsvCveOrGhsaSpec {
+input VulnerabilitySpec {
   osv: OSVSpec
   cve: CVESpec
   ghsa: GHSASpec
@@ -83,7 +84,7 @@ Only OSV, CVE or GHSA can be specified at once.
 input CertifyVulnSpec {
   id: ID
   package: PkgSpec
-  vulnerability: OsvCveOrGhsaSpec
+  vulnerability: VulnerabilitySpec
   timeScanned: Time
   dbUri: String
   dbVersion: String
@@ -110,12 +111,12 @@ input VulnerabilityMetaDataInput {
 }
 
 """
-OsvCveOrGhsaInput allows using OsvCveOrGhsa union as
+VulnerabilityInput allows using Vulnerability union as
 input type to be used in mutations.
 
 Exactly one of the value must be set to non-nil.
 """
-input OsvCveOrGhsaInput {
+input VulnerabilityInput {
   osv: OSVInputSpec
   cve: CVEInputSpec
   ghsa: GHSAInputSpec
@@ -128,5 +129,5 @@ extend type Query {
 
 extend type Mutation {
   "Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA)"
-  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: OsvCveOrGhsaInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
+  ingestVulnerability(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }

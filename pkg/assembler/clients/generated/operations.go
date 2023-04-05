@@ -197,7 +197,7 @@ type AllCertifyVuln struct {
 	// package (subject) - the package object type that represents the package
 	Package AllCertifyVulnPackage `json:"package"`
 	// vulnerability (object) - union type that consists of osv, cve or ghsa
-	Vulnerability AllCertifyVulnVulnerabilityOsvCveOrGhsa `json:"-"`
+	Vulnerability AllCertifyVulnVulnerability `json:"-"`
 	// metadata (property) - contains all the vulnerability metadata
 	Metadata AllCertifyVulnMetadataVulnerabilityMetaData `json:"metadata"`
 }
@@ -209,9 +209,7 @@ func (v *AllCertifyVuln) GetId() string { return v.Id }
 func (v *AllCertifyVuln) GetPackage() AllCertifyVulnPackage { return v.Package }
 
 // GetVulnerability returns AllCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *AllCertifyVuln) GetVulnerability() AllCertifyVulnVulnerabilityOsvCveOrGhsa {
-	return v.Vulnerability
-}
+func (v *AllCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability { return v.Vulnerability }
 
 // GetMetadata returns AllCertifyVuln.Metadata, and is useful for accessing the field via an interface.
 func (v *AllCertifyVuln) GetMetadata() AllCertifyVulnMetadataVulnerabilityMetaData { return v.Metadata }
@@ -238,7 +236,7 @@ func (v *AllCertifyVuln) UnmarshalJSON(b []byte) error {
 		dst := &v.Vulnerability
 		src := firstPass.Vulnerability
 		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(
+			err = __unmarshalAllCertifyVulnVulnerability(
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
@@ -277,7 +275,7 @@ func (v *AllCertifyVuln) __premarshalJSON() (*__premarshalAllCertifyVuln, error)
 		dst := &retval.Vulnerability
 		src := v.Vulnerability
 		var err error
-		*dst, err = __marshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalAllCertifyVulnVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -414,6 +412,107 @@ func (v *AllCertifyVulnPackage) __premarshalJSON() (*__premarshalAllCertifyVulnP
 	retval.Type = v.AllPkgTree.Type
 	retval.Namespaces = v.AllPkgTree.Namespaces
 	return &retval, nil
+}
+
+// AllCertifyVulnVulnerability includes the requested fields of the GraphQL interface Vulnerability.
+//
+// AllCertifyVulnVulnerability is implemented by the following types:
+// AllCertifyVulnVulnerabilityOSV
+// AllCertifyVulnVulnerabilityCVE
+// AllCertifyVulnVulnerabilityGHSA
+// The GraphQL type's documentation follows.
+//
+// Vulnerability is a union of OSV, CVE and GHSA.
+//
+// Any of these objects can be specified for a vulnerability.  #TODO
+type AllCertifyVulnVulnerability interface {
+	implementsGraphQLInterfaceAllCertifyVulnVulnerability()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *AllCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceAllCertifyVulnVulnerability()  {}
+func (v *AllCertifyVulnVulnerabilityCVE) implementsGraphQLInterfaceAllCertifyVulnVulnerability()  {}
+func (v *AllCertifyVulnVulnerabilityGHSA) implementsGraphQLInterfaceAllCertifyVulnVulnerability() {}
+
+func __unmarshalAllCertifyVulnVulnerability(b []byte, v *AllCertifyVulnVulnerability) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "OSV":
+		*v = new(AllCertifyVulnVulnerabilityOSV)
+		return json.Unmarshal(b, *v)
+	case "CVE":
+		*v = new(AllCertifyVulnVulnerabilityCVE)
+		return json.Unmarshal(b, *v)
+	case "GHSA":
+		*v = new(AllCertifyVulnVulnerabilityGHSA)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing Vulnerability.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for AllCertifyVulnVulnerability: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalAllCertifyVulnVulnerability(v *AllCertifyVulnVulnerability) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *AllCertifyVulnVulnerabilityOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllCertifyVulnVulnerabilityOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *AllCertifyVulnVulnerabilityCVE:
+		typename = "CVE"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllCertifyVulnVulnerabilityCVE
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *AllCertifyVulnVulnerabilityGHSA:
+		typename = "GHSA"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllCertifyVulnVulnerabilityGHSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for AllCertifyVulnVulnerability: "%T"`, v)
+	}
 }
 
 // AllCertifyVulnVulnerabilityCVE includes the requested fields of the GraphQL type CVE.
@@ -641,109 +740,6 @@ func (v *AllCertifyVulnVulnerabilityOSV) __premarshalJSON() (*__premarshalAllCer
 	retval.Id = v.allOSVTree.Id
 	retval.OsvId = v.allOSVTree.OsvId
 	return &retval, nil
-}
-
-// AllCertifyVulnVulnerabilityOsvCveOrGhsa includes the requested fields of the GraphQL interface OsvCveOrGhsa.
-//
-// AllCertifyVulnVulnerabilityOsvCveOrGhsa is implemented by the following types:
-// AllCertifyVulnVulnerabilityOSV
-// AllCertifyVulnVulnerabilityCVE
-// AllCertifyVulnVulnerabilityGHSA
-// The GraphQL type's documentation follows.
-//
-// OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be
-// specified for vulnerability
-type AllCertifyVulnVulnerabilityOsvCveOrGhsa interface {
-	implementsGraphQLInterfaceAllCertifyVulnVulnerabilityOsvCveOrGhsa()
-	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
-	GetTypename() *string
-}
-
-func (v *AllCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceAllCertifyVulnVulnerabilityOsvCveOrGhsa() {
-}
-func (v *AllCertifyVulnVulnerabilityCVE) implementsGraphQLInterfaceAllCertifyVulnVulnerabilityOsvCveOrGhsa() {
-}
-func (v *AllCertifyVulnVulnerabilityGHSA) implementsGraphQLInterfaceAllCertifyVulnVulnerabilityOsvCveOrGhsa() {
-}
-
-func __unmarshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(b []byte, v *AllCertifyVulnVulnerabilityOsvCveOrGhsa) error {
-	if string(b) == "null" {
-		return nil
-	}
-
-	var tn struct {
-		TypeName string `json:"__typename"`
-	}
-	err := json.Unmarshal(b, &tn)
-	if err != nil {
-		return err
-	}
-
-	switch tn.TypeName {
-	case "OSV":
-		*v = new(AllCertifyVulnVulnerabilityOSV)
-		return json.Unmarshal(b, *v)
-	case "CVE":
-		*v = new(AllCertifyVulnVulnerabilityCVE)
-		return json.Unmarshal(b, *v)
-	case "GHSA":
-		*v = new(AllCertifyVulnVulnerabilityGHSA)
-		return json.Unmarshal(b, *v)
-	case "":
-		return fmt.Errorf(
-			"response was missing OsvCveOrGhsa.__typename")
-	default:
-		return fmt.Errorf(
-			`unexpected concrete type for AllCertifyVulnVulnerabilityOsvCveOrGhsa: "%v"`, tn.TypeName)
-	}
-}
-
-func __marshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(v *AllCertifyVulnVulnerabilityOsvCveOrGhsa) ([]byte, error) {
-
-	var typename string
-	switch v := (*v).(type) {
-	case *AllCertifyVulnVulnerabilityOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalAllCertifyVulnVulnerabilityOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *AllCertifyVulnVulnerabilityCVE:
-		typename = "CVE"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalAllCertifyVulnVulnerabilityCVE
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *AllCertifyVulnVulnerabilityGHSA:
-		typename = "GHSA"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalAllCertifyVulnVulnerabilityGHSA
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case nil:
-		return []byte("null"), nil
-	default:
-		return nil, fmt.Errorf(
-			`unexpected concrete type for AllCertifyVulnVulnerabilityOsvCveOrGhsa: "%T"`, v)
-	}
 }
 
 // AllIsOccurrencesTree includes the GraphQL fields of IsOccurrence requested by the fragment AllIsOccurrencesTree.
@@ -2241,7 +2237,7 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetPackage() AllCertifyVulnPa
 }
 
 // GetVulnerability returns CertifyCVEIngestVulnerabilityCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetVulnerability() AllCertifyVulnVulnerabilityOsvCveOrGhsa {
+func (v *CertifyCVEIngestVulnerabilityCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 	return v.AllCertifyVuln.Vulnerability
 }
 
@@ -2303,7 +2299,7 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 		dst := &retval.Vulnerability
 		src := v.AllCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalAllCertifyVulnVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -2499,7 +2495,7 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetPackage() AllCertifyVulnP
 }
 
 // GetVulnerability returns CertifyGHSAIngestVulnerabilityCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetVulnerability() AllCertifyVulnVulnerabilityOsvCveOrGhsa {
+func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 	return v.AllCertifyVuln.Vulnerability
 }
 
@@ -2561,7 +2557,7 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__prema
 		dst := &retval.Vulnerability
 		src := v.AllCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalAllCertifyVulnVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -3365,7 +3361,7 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetPackage() AllCertifyVulnPa
 }
 
 // GetVulnerability returns CertifyOSVIngestVulnerabilityCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetVulnerability() AllCertifyVulnVulnerabilityOsvCveOrGhsa {
+func (v *CertifyOSVIngestVulnerabilityCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 	return v.AllCertifyVuln.Vulnerability
 }
 
@@ -3427,7 +3423,7 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 		dst := &retval.Vulnerability
 		src := v.AllCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalAllCertifyVulnVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -6380,7 +6376,7 @@ func (v *NeighborsNeighborsCertifyVEXStatement) GetSubject() allCertifyVEXStatem
 }
 
 // GetVulnerability returns NeighborsNeighborsCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *NeighborsNeighborsCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -6477,7 +6473,7 @@ func (v *NeighborsNeighborsCertifyVEXStatement) __premarshalJSON() (*__premarsha
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -6514,7 +6510,7 @@ func (v *NeighborsNeighborsCertifyVuln) GetPackage() AllCertifyVulnPackage {
 }
 
 // GetVulnerability returns NeighborsNeighborsCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyVuln) GetVulnerability() AllCertifyVulnVulnerabilityOsvCveOrGhsa {
+func (v *NeighborsNeighborsCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 	return v.AllCertifyVuln.Vulnerability
 }
 
@@ -6579,7 +6575,7 @@ func (v *NeighborsNeighborsCertifyVuln) __premarshalJSON() (*__premarshalNeighbo
 		dst := &retval.Vulnerability
 		src := v.AllCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalAllCertifyVulnVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -11042,7 +11038,7 @@ func (v *PathPathCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubject
 }
 
 // GetVulnerability returns PathPathCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *PathPathCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -11137,7 +11133,7 @@ func (v *PathPathCertifyVEXStatement) __premarshalJSON() (*__premarshalPathPathC
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -11172,7 +11168,7 @@ func (v *PathPathCertifyVuln) GetId() string { return v.AllCertifyVuln.Id }
 func (v *PathPathCertifyVuln) GetPackage() AllCertifyVulnPackage { return v.AllCertifyVuln.Package }
 
 // GetVulnerability returns PathPathCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyVuln) GetVulnerability() AllCertifyVulnVulnerabilityOsvCveOrGhsa {
+func (v *PathPathCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
 	return v.AllCertifyVuln.Vulnerability
 }
 
@@ -11237,7 +11233,7 @@ func (v *PathPathCertifyVuln) __premarshalJSON() (*__premarshalPathPathCertifyVu
 		dst := &retval.Vulnerability
 		src := v.AllCertifyVuln.Vulnerability
 		var err error
-		*dst, err = __marshalAllCertifyVulnVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalAllCertifyVulnVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -14051,7 +14047,7 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetSubject() al
 }
 
 // GetVulnerability returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -14145,7 +14141,7 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -14354,7 +14350,7 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetSubject() al
 }
 
 // GetVulnerability returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -14448,7 +14444,7 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -14649,7 +14645,7 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetSubject() a
 }
 
 // GetVulnerability returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -14743,7 +14739,7 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJS
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -14949,7 +14945,7 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetSubject() al
 }
 
 // GetVulnerability returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -15043,7 +15039,7 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -15259,7 +15255,7 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetSubject() all
 }
 
 // GetVulnerability returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -15353,7 +15349,7 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -15564,7 +15560,7 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetSubject() all
 }
 
 // GetVulnerability returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
@@ -15658,7 +15654,7 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 		dst := &retval.Vulnerability
 		src := v.allCertifyVEXStatement.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -17194,13 +17190,13 @@ func (v *allCertifyGoodSubjectSource) __premarshalJSON() (*__premarshalallCertif
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type allCertifyVEXStatement struct {
-	Id            string                                          `json:"id"`
-	Subject       allCertifyVEXStatementSubjectPackageOrArtifact  `json:"-"`
-	Vulnerability allCertifyVEXStatementVulnerabilityOsvCveOrGhsa `json:"-"`
-	Justification string                                          `json:"justification"`
-	KnownSince    time.Time                                       `json:"knownSince"`
-	Origin        string                                          `json:"origin"`
-	Collector     string                                          `json:"collector"`
+	Id            string                                         `json:"id"`
+	Subject       allCertifyVEXStatementSubjectPackageOrArtifact `json:"-"`
+	Vulnerability allCertifyVEXStatementVulnerability            `json:"-"`
+	Justification string                                         `json:"justification"`
+	KnownSince    time.Time                                      `json:"knownSince"`
+	Origin        string                                         `json:"origin"`
+	Collector     string                                         `json:"collector"`
 }
 
 // GetId returns allCertifyVEXStatement.Id, and is useful for accessing the field via an interface.
@@ -17212,7 +17208,7 @@ func (v *allCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPacka
 }
 
 // GetVulnerability returns allCertifyVEXStatement.Vulnerability, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerabilityOsvCveOrGhsa {
+func (v *allCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.Vulnerability
 }
 
@@ -17264,7 +17260,7 @@ func (v *allCertifyVEXStatement) UnmarshalJSON(b []byte) error {
 		dst := &v.Vulnerability
 		src := firstPass.Vulnerability
 		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+			err = __unmarshalallCertifyVEXStatementVulnerability(
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
@@ -17320,7 +17316,7 @@ func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXS
 		dst := &retval.Vulnerability
 		src := v.Vulnerability
 		var err error
-		*dst, err = __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(
+		*dst, err = __marshalallCertifyVEXStatementVulnerability(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -17587,6 +17583,110 @@ func __marshalallCertifyVEXStatementSubjectPackageOrArtifact(v *allCertifyVEXSta
 	}
 }
 
+// allCertifyVEXStatementVulnerability includes the requested fields of the GraphQL interface Vulnerability.
+//
+// allCertifyVEXStatementVulnerability is implemented by the following types:
+// allCertifyVEXStatementVulnerabilityOSV
+// allCertifyVEXStatementVulnerabilityCVE
+// allCertifyVEXStatementVulnerabilityGHSA
+// The GraphQL type's documentation follows.
+//
+// Vulnerability is a union of OSV, CVE and GHSA.
+//
+// Any of these objects can be specified for a vulnerability.  #TODO
+type allCertifyVEXStatementVulnerability interface {
+	implementsGraphQLInterfaceallCertifyVEXStatementVulnerability()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *allCertifyVEXStatementVulnerabilityOSV) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
+}
+func (v *allCertifyVEXStatementVulnerabilityCVE) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
+}
+func (v *allCertifyVEXStatementVulnerabilityGHSA) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
+}
+
+func __unmarshalallCertifyVEXStatementVulnerability(b []byte, v *allCertifyVEXStatementVulnerability) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "OSV":
+		*v = new(allCertifyVEXStatementVulnerabilityOSV)
+		return json.Unmarshal(b, *v)
+	case "CVE":
+		*v = new(allCertifyVEXStatementVulnerabilityCVE)
+		return json.Unmarshal(b, *v)
+	case "GHSA":
+		*v = new(allCertifyVEXStatementVulnerabilityGHSA)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing Vulnerability.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for allCertifyVEXStatementVulnerability: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalallCertifyVEXStatementVulnerability(v *allCertifyVEXStatementVulnerability) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *allCertifyVEXStatementVulnerabilityOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementVulnerabilityOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allCertifyVEXStatementVulnerabilityCVE:
+		typename = "CVE"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementVulnerabilityCVE
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allCertifyVEXStatementVulnerabilityGHSA:
+		typename = "GHSA"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementVulnerabilityGHSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for allCertifyVEXStatementVulnerability: "%T"`, v)
+	}
+}
+
 // allCertifyVEXStatementVulnerabilityCVE includes the requested fields of the GraphQL type CVE.
 // The GraphQL type's documentation follows.
 //
@@ -17812,109 +17912,6 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) __premarshalJSON() (*__premarsh
 	retval.Id = v.allOSVTree.Id
 	retval.OsvId = v.allOSVTree.OsvId
 	return &retval, nil
-}
-
-// allCertifyVEXStatementVulnerabilityOsvCveOrGhsa includes the requested fields of the GraphQL interface OsvCveOrGhsa.
-//
-// allCertifyVEXStatementVulnerabilityOsvCveOrGhsa is implemented by the following types:
-// allCertifyVEXStatementVulnerabilityOSV
-// allCertifyVEXStatementVulnerabilityCVE
-// allCertifyVEXStatementVulnerabilityGHSA
-// The GraphQL type's documentation follows.
-//
-// OsvCveGhsaObject is a union of OSV, CVE and GHSA. Any of these objects can be
-// specified for vulnerability
-type allCertifyVEXStatementVulnerabilityOsvCveOrGhsa interface {
-	implementsGraphQLInterfaceallCertifyVEXStatementVulnerabilityOsvCveOrGhsa()
-	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
-	GetTypename() *string
-}
-
-func (v *allCertifyVEXStatementVulnerabilityOSV) implementsGraphQLInterfaceallCertifyVEXStatementVulnerabilityOsvCveOrGhsa() {
-}
-func (v *allCertifyVEXStatementVulnerabilityCVE) implementsGraphQLInterfaceallCertifyVEXStatementVulnerabilityOsvCveOrGhsa() {
-}
-func (v *allCertifyVEXStatementVulnerabilityGHSA) implementsGraphQLInterfaceallCertifyVEXStatementVulnerabilityOsvCveOrGhsa() {
-}
-
-func __unmarshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(b []byte, v *allCertifyVEXStatementVulnerabilityOsvCveOrGhsa) error {
-	if string(b) == "null" {
-		return nil
-	}
-
-	var tn struct {
-		TypeName string `json:"__typename"`
-	}
-	err := json.Unmarshal(b, &tn)
-	if err != nil {
-		return err
-	}
-
-	switch tn.TypeName {
-	case "OSV":
-		*v = new(allCertifyVEXStatementVulnerabilityOSV)
-		return json.Unmarshal(b, *v)
-	case "CVE":
-		*v = new(allCertifyVEXStatementVulnerabilityCVE)
-		return json.Unmarshal(b, *v)
-	case "GHSA":
-		*v = new(allCertifyVEXStatementVulnerabilityGHSA)
-		return json.Unmarshal(b, *v)
-	case "":
-		return fmt.Errorf(
-			"response was missing OsvCveOrGhsa.__typename")
-	default:
-		return fmt.Errorf(
-			`unexpected concrete type for allCertifyVEXStatementVulnerabilityOsvCveOrGhsa: "%v"`, tn.TypeName)
-	}
-}
-
-func __marshalallCertifyVEXStatementVulnerabilityOsvCveOrGhsa(v *allCertifyVEXStatementVulnerabilityOsvCveOrGhsa) ([]byte, error) {
-
-	var typename string
-	switch v := (*v).(type) {
-	case *allCertifyVEXStatementVulnerabilityOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalallCertifyVEXStatementVulnerabilityOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *allCertifyVEXStatementVulnerabilityCVE:
-		typename = "CVE"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalallCertifyVEXStatementVulnerabilityCVE
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *allCertifyVEXStatementVulnerabilityGHSA:
-		typename = "GHSA"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalallCertifyVEXStatementVulnerabilityGHSA
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case nil:
-		return []byte("null"), nil
-	default:
-		return nil, fmt.Errorf(
-			`unexpected concrete type for allCertifyVEXStatementVulnerabilityOsvCveOrGhsa: "%T"`, v)
-	}
 }
 
 // allCveTree includes the GraphQL fields of CVE requested by the fragment allCveTree.

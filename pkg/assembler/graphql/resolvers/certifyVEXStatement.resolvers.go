@@ -11,7 +11,7 @@ import (
 )
 
 // IngestVEXStatement is the resolver for the ingestVEXStatement field.
-func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	return r.Backend.IngestVEXStatement(ctx, subject, vulnerability, vexStatement)
 }
 

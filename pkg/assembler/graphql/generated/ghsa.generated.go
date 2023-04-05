@@ -191,7 +191,7 @@ func (ec *executionContext) unmarshalInputGHSASpec(ctx context.Context, obj inte
 
 // region    **************************** object.gotpl ****************************
 
-var gHSAImplementors = []string{"GHSA", "OsvCveOrGhsa", "CveOrGhsa", "Node"}
+var gHSAImplementors = []string{"GHSA", "Vulnerability", "CveOrGhsa", "Node"}
 
 func (ec *executionContext) _GHSA(ctx context.Context, sel ast.SelectionSet, obj *model.Ghsa) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, gHSAImplementors)

@@ -65,12 +65,12 @@ func (n *vulnerabilityLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest CertifyVuln
-func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
+func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
 	return c.ingestVulnerability(ctx, packageArg, vulnerability, certifyVuln, true)
 }
 
-func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.OsvCveOrGhsaInput, certifyVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.CertifyVuln, error) {
-	if err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVulnerability"); err != nil {
+func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.CertifyVuln, error) {
+	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability"); err != nil {
 		return nil, err
 	}
 
@@ -206,7 +206,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	defer c.m.RUnlock()
 	funcName := "CertifyVuln"
 	// TODO: this panics if filter is missing (cannot retrieve all certifications)
-	if err := helper.ValidateOsvCveOrGhsaQueryFilter(filter.Vulnerability); err != nil {
+	if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability); err != nil {
 		return nil, err
 	}
 
@@ -396,7 +396,7 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 		return nil, nil
 	}
 
-	var vuln model.OsvCveOrGhsa
+	var vuln model.Vulnerability
 	if link.osvID != 0 {
 		if osv == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve osv via osvID")

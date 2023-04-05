@@ -69,15 +69,15 @@ func (n *vexLink) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest CertifyVex
 
-func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 	return c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
 }
 
-func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
 	if err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement"); err != nil {
 		return nil, err
 	}
-	if err := helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVEXStatement"); err != nil {
+	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement"); err != nil {
 		return nil, err
 	}
 
@@ -243,7 +243,7 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 	if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
 		return nil, err
 	}
-	if err := helper.ValidateOsvCveOrGhsaQueryFilter(filter.Vulnerability); err != nil {
+	if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability); err != nil {
 		return nil, err
 	}
 
@@ -465,7 +465,7 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 		subj = a
 	}
 
-	var vuln model.OsvCveOrGhsa
+	var vuln model.Vulnerability
 	if link.osvID != 0 {
 		if osv == nil && ingestOrIDProvided {
 			return nil, gqlerror.Errorf("failed to retrieve osv via osvID")

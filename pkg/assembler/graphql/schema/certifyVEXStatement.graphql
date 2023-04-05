@@ -46,7 +46,7 @@ collector (property) - the GUAC collector that collected the document that gener
 type CertifyVEXStatement {
   id: ID!
   subject: PackageOrArtifact!
-  vulnerability: OsvCveOrGhsa!
+  vulnerability: Vulnerability!
   justification: String!
   knownSince: Time!
   origin: String!
@@ -60,7 +60,7 @@ Only package or artifact and CVE, GHSA or OSV can be specified at once.
 input CertifyVEXStatementSpec {
   id: ID
   subject: PackageOrArtifactSpec
-  vulnerability: OsvCveOrGhsaSpec
+  vulnerability: VulnerabilitySpec
   justification: String
   knownSince: Time
   origin: String
@@ -96,5 +96,5 @@ extend type Query {
 
 extend type Mutation {
   "certify that an either a package or artifact has an associated VEX for a CVE, GHSA or OSV"
-  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: OsvCveOrGhsaInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
+  ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }

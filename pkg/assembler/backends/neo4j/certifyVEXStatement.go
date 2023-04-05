@@ -518,7 +518,7 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	}
 }
 
-func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln model.OsvCveOrGhsa, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
+func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln model.Vulnerability, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
 	certifyVEXStatement := model.CertifyVEXStatement{
 		Subject:       subject,
 		Vulnerability: vuln,
@@ -530,13 +530,13 @@ func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln mode
 	return &certifyVEXStatement
 }
 
-func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.OsvCveOrGhsaInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
 
 	err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
 	if err != nil {
 		return nil, err
 	}
-	err = helper.ValidateOsvCveOrGhsaIngestionInput(vulnerability, "IngestVEXStatement")
+	err = helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement")
 	if err != nil {
 		return nil, err
 	}

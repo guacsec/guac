@@ -20,7 +20,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func ValidateOsvCveOrGhsaIngestionInput(vulnerability model.OsvCveOrGhsaInput, path string) error {
+func ValidateVulnerabilityIngestionInput(vulnerability model.VulnerabilityInput, path string) error {
 	vulnDefined := 0
 	if vulnerability.Osv != nil {
 		vulnDefined = vulnDefined + 1
@@ -37,7 +37,7 @@ func ValidateOsvCveOrGhsaIngestionInput(vulnerability model.OsvCveOrGhsaInput, p
 	return nil
 }
 
-func ValidateOsvCveOrGhsaQueryFilter(vulnerability *model.OsvCveOrGhsaSpec) error {
+func ValidateVulnerabilityQueryFilter(vulnerability *model.VulnerabilitySpec) error {
 	if vulnerability == nil {
 		return nil
 	} else {
