@@ -29,3 +29,7 @@ func (c *neo4jClient) Path(ctx context.Context, subject string, target string, m
 func (c *neo4jClient) Neighbors(ctx context.Context, node string) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Neighbors - neighbors"))
 }
+
+func (c *neo4jClient) Node(ctx context.Context, node string) (model.Node, error) {
+	panic(fmt.Errorf("not implemented: Node - node"))
+}

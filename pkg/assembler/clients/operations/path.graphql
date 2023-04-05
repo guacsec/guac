@@ -148,3 +148,69 @@ query Neighbors($node: ID!) {
     }
   }
 }
+
+query Node($node: ID!) {
+  node(node: $node) {
+    __typename
+    ... on Package {
+      ... AllPkgTree
+    }
+    ... on Source {
+      ... AllSourceTree
+    }
+    ... on Artifact {
+      ...allArtifactTree
+    }
+    ... on Builder {
+      ...allBuilderTree
+    }
+    ... on OSV {
+      ...allOSVTree
+    }
+    ... on CVE {
+      ...allCveTree
+    }
+    ... on GHSA {
+      ...allGHSATree
+    }
+    ... on CertifyScorecard {
+      ...AllCertifyScorecard
+    }
+    ... on PkgEqual {
+      ...allPkgEqual
+    }
+    ... on IsOccurrence {
+      ...AllIsOccurrencesTree
+    }
+    ... on IsDependency {
+      ...allIsDependencyTree
+    }
+    ... on HasSLSA {
+      ...allSLSATree
+    }
+    ... on CertifyBad {
+      ...allCertifyBad
+    }
+    ... on HashEqual {
+      ...allHashEqualTree
+    }
+    ... on HasSBOM {
+      ...allHasSBOMTree
+    }
+    ... on HasSourceAt {
+      ...allHasSourceAt
+    }
+    ... on CertifyVuln {
+      ...AllCertifyVuln
+    }
+    ... on IsVulnerability {
+      ...allIsVulnerability
+    }
+    ... on CertifyVEXStatement {
+      ...allCertifyVEXStatement
+    }
+    ... on Builder {
+      ...allBuilderTree
+    }
+  }
+}

@@ -152,3 +152,24 @@ func (c *demoClient) bfs(from, to uint32, maxLength int) ([]model.Node, error) {
 
 	return c.buildModelNodes(path)
 }
+
+func (c *demoClient) Node(ctx context.Context, source string) (model.Node, error) {
+	id, err := strconv.ParseUint(source, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	c.m.RLock()
+	defer c.m.RUnlock()
+	node, ok := c.index[uint32(id)]
+	if !ok {
+		return nil, gqlerror.Errorf("Node: got invalid node id %d", id)
+	}
+
+	out, err := node.BuildModelNode(c)
+	if err != nil {
+		return nil, gqlerror.Errorf("Node: could not build node: %v", err)
+	}
+
+	return out, nil
+}

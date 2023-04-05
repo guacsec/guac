@@ -77,6 +77,7 @@ type Backend interface {
 	// More advanced queries
 	Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error)
 	Neighbors(ctx context.Context, node string) ([]model.Node, error)
+	Node(ctx context.Context, node string) (model.Node, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to
