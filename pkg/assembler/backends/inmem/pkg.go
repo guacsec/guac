@@ -246,53 +246,92 @@ func (p *pkgVersionNode) setPkgEquals(id uint32) { p.pkgEquals = append(p.pkgEqu
 
 // Ingest Package
 func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
-	return c.ingestPackage(ctx, input, true)
-}
-
-func (c *demoClient) ingestPackage(ctx context.Context, input model.PkgInputSpec, readOnly bool) (*model.Package, error) {
-	lock(&c.m, readOnly)
-	defer unlock(&c.m, readOnly)
-
+	c.m.RLock()
 	namespacesStruct, hasNamespace := c.packages[input.Type]
+	c.m.RUnlock()
 	if !hasNamespace {
-		namespacesStruct = &pkgNamespaceStruct{
-			id:         c.getNextID(),
-			typeKey:    input.Type,
-			namespaces: pkgNamespaceMap{},
+		c.m.Lock()
+		namespacesStruct, hasNamespace = c.packages[input.Type]
+		if !hasNamespace {
+			namespacesStruct = &pkgNamespaceStruct{
+				id:         c.getNextID(),
+				typeKey:    input.Type,
+				namespaces: pkgNamespaceMap{},
+			}
+			c.index[namespacesStruct.id] = namespacesStruct
+			c.packages[input.Type] = namespacesStruct
 		}
-		c.index[namespacesStruct.id] = namespacesStruct
+		c.m.Unlock()
 	}
 	namespaces := namespacesStruct.namespaces
 
+	c.m.RLock()
 	namesStruct, hasName := namespaces[nilToEmpty(input.Namespace)]
+	c.m.RUnlock()
 	if !hasName {
-		namesStruct = &pkgNameStruct{
-			id:        c.getNextID(),
-			parent:    namespacesStruct.id,
-			namespace: nilToEmpty(input.Namespace),
-			names:     pkgNameMap{},
+		c.m.Lock()
+		namesStruct, hasName = namespaces[nilToEmpty(input.Namespace)]
+		if !hasName {
+			namesStruct = &pkgNameStruct{
+				id:        c.getNextID(),
+				parent:    namespacesStruct.id,
+				namespace: nilToEmpty(input.Namespace),
+				names:     pkgNameMap{},
+			}
+			c.index[namesStruct.id] = namesStruct
+			namespaces[nilToEmpty(input.Namespace)] = namesStruct
 		}
-		c.index[namesStruct.id] = namesStruct
+		c.m.Unlock()
 	}
 	names := namesStruct.names
 
+	c.m.RLock()
 	versionStruct, hasVersions := names[input.Name]
+	c.m.RUnlock()
 	if !hasVersions {
-		versionStruct = &pkgVersionStruct{
-			id:       c.getNextID(),
-			parent:   namesStruct.id,
-			name:     input.Name,
-			versions: pkgVersionList{},
+		c.m.Lock()
+		versionStruct, hasVersions = names[input.Name]
+		if !hasVersions {
+			versionStruct = &pkgVersionStruct{
+				id:       c.getNextID(),
+				parent:   namesStruct.id,
+				name:     input.Name,
+				versions: pkgVersionList{},
+			}
+			c.index[versionStruct.id] = versionStruct
+			names[input.Name] = versionStruct
 		}
-		c.index[versionStruct.id] = versionStruct
+		c.m.Unlock()
 	}
-	versions := versionStruct.versions
 
-	qualifiersVal := getQualifiersFromInput(input.Qualifiers)
+	c.m.RLock()
+	duplicate, collectedVersion := duplicatePkgVer(versionStruct.versions, input)
+	c.m.RUnlock()
+	if !duplicate {
+		c.m.Lock()
+		duplicate, collectedVersion = duplicatePkgVer(versionStruct.versions, input)
+		if !duplicate {
+			collectedVersion = &pkgVersionNode{
+				id:         c.getNextID(),
+				parent:     versionStruct.id,
+				version:    nilToEmpty(input.Version),
+				subpath:    nilToEmpty(input.Subpath),
+				qualifiers: getQualifiersFromInput(input.Qualifiers),
+			}
+			c.index[collectedVersion.id] = collectedVersion
+			// Need to append to version and replace field in versionStruct
+			versionStruct.versions = append(versionStruct.versions, collectedVersion)
+		}
+		c.m.Unlock()
+	}
 
-	// Don't insert duplicates
-	duplicate := false
-	collectedVersion := pkgVersionNode{}
+	// build return GraphQL type
+	c.m.RLock()
+	defer c.m.RUnlock()
+	return c.buildPackageResponse(collectedVersion.id, nil)
+}
+
+func duplicatePkgVer(versions pkgVersionList, input model.PkgInputSpec) (bool, *pkgVersionNode) {
 	for _, v := range versions {
 		if noMatchInput(input.Version, v.version) {
 			continue
@@ -300,38 +339,12 @@ func (c *demoClient) ingestPackage(ctx context.Context, input model.PkgInputSpec
 		if noMatchInput(input.Subpath, v.subpath) {
 			continue
 		}
-		if !reflect.DeepEqual(v.qualifiers, qualifiersVal) {
+		if !reflect.DeepEqual(v.qualifiers, getQualifiersFromInput(input.Qualifiers)) {
 			continue
 		}
-		collectedVersion = *v
-		duplicate = true
-		break
+		return true, v
 	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			p, err := c.ingestPackage(ctx, input, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return p, err
-		}
-		collectedVersion = pkgVersionNode{
-			id:         c.getNextID(),
-			parent:     versionStruct.id,
-			version:    nilToEmpty(input.Version),
-			subpath:    nilToEmpty(input.Subpath),
-			qualifiers: qualifiersVal,
-		}
-		c.index[collectedVersion.id] = &collectedVersion
-		// Need to append to version and replace field in versionStruct
-		versionStruct.versions = append(versions, &collectedVersion)
-		// All others are refs to maps, so no need to update struct
-		names[input.Name] = versionStruct
-		namespaces[nilToEmpty(input.Namespace)] = namesStruct
-		c.packages[input.Type] = namespacesStruct
-	}
-
-	// build return GraphQL type
-	return c.buildPackageResponse(collectedVersion.id, nil)
+	return false, nil
 }
 
 // Query Package
