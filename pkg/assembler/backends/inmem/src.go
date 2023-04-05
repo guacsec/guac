@@ -137,40 +137,75 @@ func (p *srcNameNode) setCertifyGoodLinks(id uint32) { p.goodLinks = append(p.go
 
 // Ingest Source
 func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
-	return c.ingestSource(ctx, input, true)
-}
-
-func (c *demoClient) ingestSource(ctx context.Context, input model.SourceInputSpec, readOnly bool) (*model.Source, error) {
-	lock(&c.m, readOnly)
-	defer unlock(&c.m, readOnly)
-
+	c.m.RLock()
 	namespacesStruct, hasNamespace := c.sources[input.Type]
+	c.m.RUnlock()
 	if !hasNamespace {
-		namespacesStruct = &srcNamespaceStruct{
-			id:         c.getNextID(),
-			typeKey:    input.Type,
-			namespaces: srcNamespaceMap{},
+		c.m.Lock()
+		namespacesStruct, hasNamespace = c.sources[input.Type]
+		if !hasNamespace {
+			namespacesStruct = &srcNamespaceStruct{
+				id:         c.getNextID(),
+				typeKey:    input.Type,
+				namespaces: srcNamespaceMap{},
+			}
+			c.index[namespacesStruct.id] = namespacesStruct
+			c.sources[input.Type] = namespacesStruct
 		}
-		c.index[namespacesStruct.id] = namespacesStruct
+		c.m.Unlock()
 	}
 	namespaces := namespacesStruct.namespaces
 
+	c.m.RLock()
 	namesStruct, hasName := namespaces[input.Namespace]
+	c.m.RUnlock()
 	if !hasName {
-		namesStruct = &srcNameStruct{
-			id:        c.getNextID(),
-			parent:    namespacesStruct.id,
-			namespace: input.Namespace,
-			names:     srcNameList{},
+		c.m.Lock()
+		namesStruct, hasName = namespaces[input.Namespace]
+		if !hasName {
+			namesStruct = &srcNameStruct{
+				id:        c.getNextID(),
+				parent:    namespacesStruct.id,
+				namespace: input.Namespace,
+				names:     srcNameList{},
+			}
+			c.index[namesStruct.id] = namesStruct
+			namespaces[input.Namespace] = namesStruct
 		}
-		c.index[namesStruct.id] = namesStruct
+		c.m.Unlock()
 	}
-	names := namesStruct.names
 
-	// Don't insert duplicates
-	duplicate := false
-	collectedSrcName := srcNameNode{}
+	c.m.RLock()
+	duplicate, collectedSrcName := duplicateSrcName(namesStruct.names, input)
+	c.m.RUnlock()
+	if !duplicate {
+		c.m.Lock()
+		duplicate, collectedSrcName = duplicateSrcName(namesStruct.names, input)
+		if !duplicate {
+			collectedSrcName = &srcNameNode{
+				id:     c.getNextID(),
+				parent: namesStruct.id,
+				name:   input.Name,
+			}
+			c.index[collectedSrcName.id] = collectedSrcName
+			if input.Tag != nil {
+				collectedSrcName.tag = nilToEmpty(input.Tag)
+			}
+			if input.Commit != nil {
+				collectedSrcName.commit = nilToEmpty(input.Commit)
+			}
+			namesStruct.names = append(namesStruct.names, collectedSrcName)
+		}
+		c.m.Unlock()
+	}
 
+	// build return GraphQL type
+	c.m.RLock()
+	defer c.m.RUnlock()
+	return c.buildSourceResponse(collectedSrcName.id, nil)
+}
+
+func duplicateSrcName(names srcNameList, input model.SourceInputSpec) (bool, *srcNameNode) {
 	for _, src := range names {
 		if src.name != input.Name {
 			continue
@@ -181,36 +216,9 @@ func (c *demoClient) ingestSource(ctx context.Context, input model.SourceInputSp
 		if noMatchInput(input.Commit, src.commit) {
 			continue
 		}
-		collectedSrcName = *src
-		duplicate = true
-		break
+		return true, src
 	}
-	if !duplicate {
-		if readOnly {
-			c.m.RUnlock()
-			s, err := c.ingestSource(ctx, input, false)
-			c.m.RLock() // relock so that defer unlock does not panic
-			return s, err
-		}
-		collectedSrcName = srcNameNode{
-			id:     c.getNextID(),
-			parent: namesStruct.id,
-			name:   input.Name,
-		}
-		c.index[collectedSrcName.id] = &collectedSrcName
-		if input.Tag != nil {
-			collectedSrcName.tag = nilToEmpty(input.Tag)
-		}
-		if input.Commit != nil {
-			collectedSrcName.commit = nilToEmpty(input.Commit)
-		}
-		namesStruct.names = append(names, &collectedSrcName)
-		namespaces[input.Namespace] = namesStruct
-		c.sources[input.Type] = namespacesStruct
-	}
-
-	// build return GraphQL type
-	return c.buildSourceResponse(collectedSrcName.id, nil)
+	return false, nil
 }
 
 // Query Source
