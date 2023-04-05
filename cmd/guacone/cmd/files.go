@@ -135,6 +135,9 @@ var exampleCmd = &cobra.Command{
 		}
 
 		totalNum := 0
+		totalSuccess := 0
+		var filesWithErrors []string
+
 		gotErr := false
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
@@ -144,22 +147,26 @@ var exampleCmd = &cobra.Command{
 			docTree, err := processorFunc(d)
 			if err != nil {
 				gotErr = true
+				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
 			}
 
 			graphs, err := ingestorFunc(docTree)
 			if err != nil {
 				gotErr = true
+				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest doc tree: %v", err)
 			}
 
 			err = assemblerFunc(graphs)
 			if err != nil {
 				gotErr = true
+				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to assemble graphs: %v", err)
 			}
 			t := time.Now()
 			elapsed := t.Sub(start)
+			totalSuccess += 1
 			logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
 			return nil
 		}
@@ -178,9 +185,9 @@ var exampleCmd = &cobra.Command{
 		}
 
 		if gotErr {
-			logger.Fatalf("completed ingestion with errors")
+			logger.Fatalf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v", totalSuccess, totalNum, printErrors(filesWithErrors))
 		} else {
-			logger.Infof("completed ingesting %v documents", totalNum)
+			logger.Infof("completed ingesting %v documents of %v", totalSuccess, totalNum)
 		}
 	},
 }
@@ -256,6 +263,14 @@ func createIndices(client graphdb.Client) error {
 	}
 
 	return nil
+}
+
+func printErrors(filesWithErrors []string) string {
+	var output string
+	for f := range filesWithErrors {
+		output += fmt.Sprintf("%v ", filesWithErrors[f])
+	}
+	return output
 }
 
 func init() {
