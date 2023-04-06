@@ -31,36 +31,38 @@ var a1 = &model.ArtifactInputSpec{
 	Algorithm: "sha256",
 	Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 }
-var a2 = &model.ArtifactInputSpec{
-	Algorithm: "sha1",
-	Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
-}
-var a3 = &model.ArtifactInputSpec{
-	Algorithm: "sha512",
-	Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
-}
+
+// var a2 = &model.ArtifactInputSpec{
+// 	Algorithm: "sha1",
+// 	Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+// }
+// var a3 = &model.ArtifactInputSpec{
+// 	Algorithm: "sha512",
+// 	Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
+// }
 
 var p1 = &model.PkgInputSpec{
 	Type: "pypi",
 	Name: "tensorflow",
 }
-var p2 = &model.PkgInputSpec{
-	Type:    "pypi",
-	Name:    "tensorflow",
-	Version: ptrfrom.String("2.11.1"),
-}
-var p3 = &model.PkgInputSpec{
-	Type:    "pypi",
-	Name:    "tensorflow",
-	Version: ptrfrom.String("2.11.1"),
-	Subpath: ptrfrom.String("saved_model_cli.py"),
-}
-var p4 = &model.PkgInputSpec{
-	Type:      "conan",
-	Namespace: ptrfrom.String("openssl.org"),
-	Name:      "openssl",
-	Version:   ptrfrom.String("3.0.3"),
-}
+
+// var p2 = &model.PkgInputSpec{
+// 	Type:    "pypi",
+// 	Name:    "tensorflow",
+// 	Version: ptrfrom.String("2.11.1"),
+// }
+// var p3 = &model.PkgInputSpec{
+// 	Type:    "pypi",
+// 	Name:    "tensorflow",
+// 	Version: ptrfrom.String("2.11.1"),
+// 	Subpath: ptrfrom.String("saved_model_cli.py"),
+// }
+// var p4 = &model.PkgInputSpec{
+// 	Type:      "conan",
+// 	Namespace: ptrfrom.String("openssl.org"),
+// 	Name:      "openssl",
+// 	Version:   ptrfrom.String("3.0.3"),
+// }
 
 func TestOccurrence(t *testing.T) {
 	type call struct {
@@ -120,10 +122,7 @@ func TestOccurrence(t *testing.T) {
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		if strings.Compare(".ID", p[len(p)-1].String()) == 0 {
-			return true
-		}
-		return false
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 	ctx := context.Background()
 	for _, test := range tests {
