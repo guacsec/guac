@@ -125,8 +125,6 @@ var osvCmd = &cobra.Command{
 			logger.Errorf("certifier ended with error: %v", err)
 			return false
 		}
-		fmt.Print(opts.interval)
-		fmt.Print(opts.poll)
 
 		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
 			logger.Fatal(err)
