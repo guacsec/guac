@@ -1,5 +1,5 @@
 run:
-  timeout: 2m
+  timeout: 3m
   skip-files:
     - ".*\\.pb\\.go$"
     - "pkg/assembler/generated/.*"
@@ -7,7 +7,4 @@ run:
 linters:
   enable:
     - wrapcheck
-issues:
-  # Exclude previously existing issues from the report
-  new: true
-  new-from-rev: HEAD
+    - forcetypeassert
