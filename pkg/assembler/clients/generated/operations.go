@@ -7612,10 +7612,14 @@ func (v *NeighborsNeighborsIsVulnerability) __premarshalJSON() (*__premarshalNei
 // We define an ID field due to GraphQL restrictions.
 type NeighborsNeighborsNoVuln struct {
 	Typename *string `json:"__typename"`
+	Id       string  `json:"id"`
 }
 
 // GetTypename returns NeighborsNeighborsNoVuln.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsNoVuln) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsNoVuln.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsNoVuln) GetId() string { return v.Id }
 
 // NeighborsNeighborsNode includes the requested fields of the GraphQL interface Node.
 //
@@ -12294,10 +12298,14 @@ func (v *PathPathIsVulnerability) __premarshalJSON() (*__premarshalPathPathIsVul
 // We define an ID field due to GraphQL restrictions.
 type PathPathNoVuln struct {
 	Typename *string `json:"__typename"`
+	Id       string  `json:"id"`
 }
 
 // GetTypename returns PathPathNoVuln.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathNoVuln) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathNoVuln.Id, and is useful for accessing the field via an interface.
+func (v *PathPathNoVuln) GetId() string { return v.Id }
 
 // PathPathNode includes the requested fields of the GraphQL interface Node.
 //
@@ -21747,6 +21755,9 @@ query Neighbors ($node: ID!) {
 		... on GHSA {
 			... allGHSATree
 		}
+		... on NoVuln {
+			id
+		}
 		... on CertifyScorecard {
 			... AllCertifyScorecard
 		}
@@ -22525,6 +22536,9 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
 		}
 		... on GHSA {
 			... allGHSATree
+		}
+		... on NoVuln {
+			id
 		}
 		... on CertifyScorecard {
 			... AllCertifyScorecard

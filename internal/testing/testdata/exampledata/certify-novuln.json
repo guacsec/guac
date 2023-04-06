@@ -1,0 +1,29 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "subject": [
+      {
+        "name": "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1",
+        "digest": {"sha256": "3a2bd2c5cc4c978e8aefd8bd0ef335fb42ee31d1"}
+      }
+  ],
+  "predicateType": "https://in-toto.io/attestation/vuln/v0.1",
+  "predicate": {
+    "invocation": {
+      "parameters": [""],
+      "uri": "guac",
+      "event_id": "",
+      "producer_id": "guac"
+    },
+    "scanner": {
+      "uri": "osv.dev",
+      "version": "0.0.14",
+      "db": {
+        "uri": "",
+        "version": ""
+      }
+    },
+    "metadata": {
+      "scannedOn": "2022-11-21T17:45:50.52Z"
+    }
+  }
+}

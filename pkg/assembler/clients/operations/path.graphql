@@ -41,6 +41,9 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
     ... on GHSA {
       ...allGHSATree
     }
+    ... on NoVuln {
+      id
+    }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
@@ -106,6 +109,9 @@ query Neighbors($node: ID!) {
     }
     ... on GHSA {
       ...allGHSATree
+    }
+    ... on NoVuln {
+      id
     }
     ... on CertifyScorecard {
       ...AllCertifyScorecard

@@ -194,8 +194,14 @@ type HasSlsaIngest struct {
 }
 
 type CertifyVulnIngest struct {
-	Pkg      *generated.PkgInputSpec
-	OSV      *generated.OSVInputSpec
+	// pkg is required
+	Pkg *generated.PkgInputSpec
+
+	// vulnerability should be either OSV, CVE, GHSA, or none if no vulnerability is found
+	OSV  *generated.OSVInputSpec
+	CVE  *generated.CVEInputSpec
+	GHSA *generated.GHSAInputSpec
+
 	VulnData *generated.VulnerabilityMetaDataInput
 }
 

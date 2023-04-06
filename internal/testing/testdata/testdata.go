@@ -99,6 +99,9 @@ var (
 	//go:embed exampledata/certify-vuln.json
 	ITE6VulnExample []byte
 
+	//go:embed exampledata/certify-novuln.json
+	ITE6NoVulnExample []byte
+
 	//go:embed exampledata/oci-dsse-att.json
 	OCIDsseAttExample []byte
 
