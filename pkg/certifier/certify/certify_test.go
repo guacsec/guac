@@ -65,8 +65,6 @@ func (q *mockUnknownQuery) GetComponents(ctx context.Context, compChan chan<- in
 }
 
 func TestCertify(t *testing.T) {
-	ctx := logging.WithLogger(context.Background())
-
 	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
 	if err != nil && !errors.Is(err, errCertifierOverwrite) {
 		t.Errorf("unexpected error: %v", err)
@@ -123,7 +121,8 @@ func TestCertify(t *testing.T) {
 				},
 			},
 		},
-		wantErr: false,
+		wantErr:    true,
+		errMessage: context.DeadlineExceeded,
 	}, {
 		name:       "unknown type for collected component",
 		query:      newMockUnknownQuery(),
@@ -132,6 +131,12 @@ func TestCertify(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			ctx := logging.WithLogger(context.Background())
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
+			defer cancel()
+
 			var collectedDocs []*processor.Document
 
 			emit := func(d *processor.Document) error {
@@ -139,11 +144,11 @@ func TestCertify(t *testing.T) {
 				return nil
 			}
 
-			err := Certify(ctx, tt.query, emit, errHandler)
+			err := Certify(ctx, tt.query, emit, errHandler, time.Second*1)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err == nil {
+			if err == context.DeadlineExceeded {
 				for i := range collectedDocs {
 					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
 					if err != nil {

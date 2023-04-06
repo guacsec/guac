@@ -149,7 +149,7 @@ var scorecardCmd = &cobra.Command{
 			return false
 		}
 
-		if err := certify.Certify(ctx, query, emit, errHandler); err != nil {
+		if err := certify.Certify(ctx, query, emit, errHandler, time.Minute*5); err != nil {
 			logger.Fatal(err)
 		}
 		if gotErr {

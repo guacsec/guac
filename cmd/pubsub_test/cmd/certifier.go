@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -172,7 +173,7 @@ var certifierCmd = &cobra.Command{
 			}
 		}()
 
-		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler); err != nil {
+		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, time.Minute*5); err != nil {
 			logger.Fatal(err)
 		}
 
