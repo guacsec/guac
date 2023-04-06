@@ -67,6 +67,10 @@ type options struct {
 	subject       string
 	// if type is package, true if attestation is at pkgName (for all versions) or false for a specific version
 	pkgName bool
+
+	// osv/scorecard certifier
+	poll     bool
+	interval int
 }
 
 var exampleCmd = &cobra.Command{

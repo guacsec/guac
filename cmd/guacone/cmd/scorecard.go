@@ -36,8 +36,8 @@ import (
 )
 
 var scorecardCmd = &cobra.Command{
-	Use:   "scorecard",
-	Short: "Gets scorecard data from GUAC graph",
+	Use:   "scorecard [flags]",
+	Short: "runs the scorecard certifier",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
@@ -48,6 +48,8 @@ var scorecardCmd = &cobra.Command{
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
 			viper.GetString("gql-endpoint"),
+			viper.GetBool("poll"),
+			viper.GetInt("interval"),
 		)
 
 		if err != nil {
@@ -149,7 +151,7 @@ var scorecardCmd = &cobra.Command{
 			return false
 		}
 
-		if err := certify.Certify(ctx, query, emit, errHandler, time.Minute*5); err != nil {
+		if err := certify.Certify(ctx, query, emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
 			logger.Fatal(err)
 		}
 		if gotErr {
@@ -160,13 +162,15 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(user string, pass string, dbAddr string, realm string, graphqlEndpoint string) (options, error) {
+func validateScorecardFlags(user string, pass string, dbAddr string, realm string, graphqlEndpoint string, poll bool, interval int) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.poll = poll
+	opts.interval = interval
 
 	return opts, nil
 }

@@ -47,6 +47,10 @@ type options struct {
 	path string
 	// nats
 	natsAddr string
+
+	// osv/scorecard certifier
+	poll     bool
+	interval int
 }
 
 var filesCmd = &cobra.Command{
