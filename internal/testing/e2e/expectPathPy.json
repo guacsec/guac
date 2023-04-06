@@ -1,0 +1,88 @@
+[
+  {
+    "__typename": "Package",
+    "type": "oci",
+    "namespaces": [
+      {
+        "namespace": "docker.io/librar",
+        "names": [
+          {
+            "name": "python",
+            "versions": [
+              {
+                "version": "sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d",
+                "qualifiers": [
+                  {
+                    "key": "tag",
+                    "value": "latest"
+                  }
+                ],
+                "subpath": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "__typename": "IsDependency",
+    "justification": "top-level package GUAC heuristic connecting to each file/package",
+    "versionRange": "",
+    "package": {
+      "type": "oci",
+      "namespaces": [
+        {
+          "namespace": "docker.io/librar",
+          "names": [
+            {
+              "name": "python",
+              "versions": [
+                {
+                  "version": "sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d",
+                  "qualifiers": [
+                    {
+                      "key": "tag",
+                      "value": "latest"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "dependentPackage": {
+      "type": "deb",
+      "namespaces": [
+        {
+          "namespace": "debian",
+          "names": [
+            {
+              "name": "libsqlite3-dev",
+              "versions": []
+            }
+          ]
+        }
+      ]
+    },
+    "collector": "FileCollector"
+  },
+  {
+    "__typename": "Package",
+    "type": "deb",
+    "namespaces": [
+      {
+        "namespace": "debian",
+        "names": [
+          {
+            "name": "libsqlite3-dev",
+            "versions": []
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -611,13 +611,8 @@ cat demo/queries.gql | gql-cli http://localhost:8080/query -o OSVQ1 | jq
 {
   "osv": [
     {
-      "id": "131389",
-      "osvIds": [
-        {
-          "id": "131683",
-          "osvId": "ghsa-jfh8-c2jp-5v3q"
-        }
-      ]
+      "id": "131666",
+      "osvId": "ghsa-jfh8-c2jp-5v3q"
     }
   ]
 }
@@ -673,13 +668,8 @@ cat demo/queries.gql | gql-cli http://localhost:8080/query -o CertifyVulnQ1 | jq
       },
       "vulnerability": {
         "__typename": "OSV",
-        "id": "131389",
-        "osvIds": [
-          {
-            "id": "131683",
-            "osvId": "ghsa-jfh8-c2jp-5v3q"
-          }
-        ]
+        "id": "131666",
+        "osvId": "ghsa-jfh8-c2jp-5v3q"
       },
       "metadata": {
         "dbUri": "",

@@ -1,0 +1,2869 @@
+{
+  "IsDependency": [
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest/autorest",
+            "names": [
+              {
+                "name": "adal"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/denverdino",
+            "names": [
+              {
+                "name": "aliyungo"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "alpine-baselayout"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "alpine-keys"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp/consul",
+            "names": [
+              {
+                "name": "api"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp/vault",
+            "names": [
+              {
+                "name": "api"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "google.golang.org",
+            "names": [
+              {
+                "name": "api"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "k8s.io",
+            "names": [
+              {
+                "name": "api"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "k8s.io",
+            "names": [
+              {
+                "name": "apimachinery"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "apk-tools"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest/autorest/azure",
+            "names": [
+              {
+                "name": "auth"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest",
+            "names": [
+              {
+                "name": "autorest"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/aws",
+            "names": [
+              {
+                "name": "aws-sdk-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure",
+            "names": [
+              {
+                "name": "azure-sdk-for-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "go.etcd.io",
+            "names": [
+              {
+                "name": "bbolt"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/boltdb",
+            "names": [
+              {
+                "name": "bolt"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "brotli-libs"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/google",
+            "names": [
+              {
+                "name": "btree"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "busybox"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "ca-certificates"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "ca-certificates-bundle"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/pquerna",
+            "names": [
+              {
+                "name": "cachecontrol"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/armon",
+            "names": [
+              {
+                "name": "circbuf"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/circonus-labs",
+            "names": [
+              {
+                "name": "circonus-gometrics"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/circonus-labs",
+            "names": [
+              {
+                "name": "circonusllhist"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest/autorest/azure",
+            "names": [
+              {
+                "name": "cli"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "cli"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "k8s.io",
+            "names": [
+              {
+                "name": "client-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/prometheus",
+            "names": [
+              {
+                "name": "client_golang"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/prometheus",
+            "names": [
+              {
+                "name": "client_model"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/fatih",
+            "names": [
+              {
+                "name": "color"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/ryanuber",
+            "names": [
+              {
+                "name": "columnize"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/prometheus",
+            "names": [
+              {
+                "name": "common"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/posener",
+            "names": [
+              {
+                "name": "complete"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/modern-go",
+            "names": [
+              {
+                "name": "concurrent"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "consul"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "consul-awsauth"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "consul-net-rpc"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "copystructure"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/coredns",
+            "names": [
+              {
+                "name": "coredns"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "crypto"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "curl"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/datadog",
+            "names": [
+              {
+                "name": "datadog-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest/autorest",
+            "names": [
+              {
+                "name": "date"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/miekg",
+            "names": [
+              {
+                "name": "dns"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "dumb-init"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/pkg",
+            "names": [
+              {
+                "name": "errors"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "errwrap"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/fsnotify",
+            "names": [
+              {
+                "name": "fsnotify"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "google.golang.org",
+            "names": [
+              {
+                "name": "genproto"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/googleapis",
+            "names": [
+              {
+                "name": "gnostic"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "cloud.google.com",
+            "names": [
+              {
+                "name": "go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/cncf/xds",
+            "names": [
+              {
+                "name": "go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/json-iterator",
+            "names": [
+              {
+                "name": "go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-bexpr"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/patrickmn",
+            "names": [
+              {
+                "name": "go-cache"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-checkpoint"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-cleanhttp"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mattn",
+            "names": [
+              {
+                "name": "go-colorable"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/docker",
+            "names": [
+              {
+                "name": "go-connections"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-connlimit"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/envoyproxy",
+            "names": [
+              {
+                "name": "go-control-plane"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/pmezard",
+            "names": [
+              {
+                "name": "go-difflib"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-discover"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/ryanuber",
+            "names": [
+              {
+                "name": "go-glob"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/grpc-ecosystem",
+            "names": [
+              {
+                "name": "go-grpc-middleware"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-hclog"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "go-homedir"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-immutable-radix"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mattn",
+            "names": [
+              {
+                "name": "go-isatty"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/jmespath",
+            "names": [
+              {
+                "name": "go-jmespath"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "gopkg.in/square",
+            "names": [
+              {
+                "name": "go-jose.v2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-memdb"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/armon",
+            "names": [
+              {
+                "name": "go-metrics"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-msgpack"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-multierror"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/coreos",
+            "names": [
+              {
+                "name": "go-oidc"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/google",
+            "names": [
+              {
+                "name": "go-querystring"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/armon",
+            "names": [
+              {
+                "name": "go-radix"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-raftchunking"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-retryablehttp"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-rootcerts"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-sockaddr"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/davecgh",
+            "names": [
+              {
+                "name": "go-spew"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/tklauser",
+            "names": [
+              {
+                "name": "go-sysconf"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-syslog"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "go-testing-interface"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-uuid"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "go-version"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "go.opencensus.io"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/digitalocean",
+            "names": [
+              {
+                "name": "godo"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/google",
+            "names": [
+              {
+                "name": "gofuzz"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "golang-lru"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/matttproud",
+            "names": [
+              {
+                "name": "golang_protobuf_extensions"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/gophercloud",
+            "names": [
+              {
+                "name": "gophercloud"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/vmware",
+            "names": [
+              {
+                "name": "govmomi"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/golang",
+            "names": [
+              {
+                "name": "groupcache"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "google.golang.org",
+            "names": [
+              {
+                "name": "grpc"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/nytimes",
+            "names": [
+              {
+                "name": "gziphandler"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "hashstructure"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "hcl"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "hil"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/tv42",
+            "names": [
+              {
+                "name": "httpunix"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "gopkg.in",
+            "names": [
+              {
+                "name": "inf.v0"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "iptables"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "iputils"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "jq"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/form3tech-oss",
+            "names": [
+              {
+                "name": "jwt-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "k8s.io",
+            "names": [
+              {
+                "name": "klog"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libc-utils"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libc6-compat"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libcap"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libcrypto1.1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libcurl"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libmnl"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libnftnl"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libretls"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "libssl1.1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/linode",
+            "names": [
+              {
+                "name": "linodego"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest",
+            "names": [
+              {
+                "name": "logger"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/sirupsen",
+            "names": [
+              {
+                "name": "logrus"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/pierrec",
+            "names": [
+              {
+                "name": "lz4"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "mapstructure"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "mdns"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "memberlist"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/imdario",
+            "names": [
+              {
+                "name": "mergo"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "musl"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "musl-utils"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "net"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "nghttp2-libs"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/tklauser",
+            "names": [
+              {
+                "name": "numcpus"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "oauth2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/stretchr",
+            "names": [
+              {
+                "name": "objx"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "oniguruma"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/census-instrumentation",
+            "names": [
+              {
+                "name": "opencensus-proto"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "go.opentelemetry.io/proto",
+            "names": [
+              {
+                "name": "otlp"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/packethost",
+            "names": [
+              {
+                "name": "packngo"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/beorn7",
+            "names": [
+              {
+                "name": "perks"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/spf13",
+            "names": [
+              {
+                "name": "pflag"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "pointerstructure"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/prometheus",
+            "names": [
+              {
+                "name": "procfs"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp/consul",
+            "names": [
+              {
+                "name": "proto-public"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/gogo",
+            "names": [
+              {
+                "name": "protobuf"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/golang",
+            "names": [
+              {
+                "name": "protobuf"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "google.golang.org",
+            "names": [
+              {
+                "name": "protobuf"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/envoyproxy",
+            "names": [
+              {
+                "name": "protoc-gen-validate"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "raft"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "raft-autopilot"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/modern-go",
+            "names": [
+              {
+                "name": "reflect2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh",
+            "names": [
+              {
+                "name": "reflectwalk"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "gopkg.in",
+            "names": [
+              {
+                "name": "resty.v1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/rboyer",
+            "names": [
+              {
+                "name": "safeio"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/nicolai86",
+            "names": [
+              {
+                "name": "scaleway-sdk"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "scanelf"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp/consul",
+            "names": [
+              {
+                "name": "sdk"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp/vault",
+            "names": [
+              {
+                "name": "sdk"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/sean-",
+            "names": [
+              {
+                "name": "seed"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "serf"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/golang",
+            "names": [
+              {
+                "name": "snappy"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/softlayer",
+            "names": [
+              {
+                "name": "softlayer-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/bgentry",
+            "names": [
+              {
+                "name": "speakeasy"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "ssl_client"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "su-exec"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "sync"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "sys"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/tencentcloud",
+            "names": [
+              {
+                "name": "tencentcloud-sdk-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "term"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/stretchr",
+            "names": [
+              {
+                "name": "testify"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/kr",
+            "names": [
+              {
+                "name": "text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "golang.org/x",
+            "names": [
+              {
+                "name": "time"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest/autorest",
+            "names": [
+              {
+                "name": "to"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest",
+            "names": [
+              {
+                "name": "tracing"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/joyent",
+            "names": [
+              {
+                "name": "triton-go"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "tzdata"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/dimchansky",
+            "names": [
+              {
+                "name": "utfbom"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "k8s.io",
+            "names": [
+              {
+                "name": "utils"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/cespare/xxhash",
+            "names": [
+              {
+                "name": "v2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/googleapis/gax-go",
+            "names": [
+              {
+                "name": "v2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp/raft-boltdb",
+            "names": [
+              {
+                "name": "v2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/mitchellh/hashstructure",
+            "names": [
+              {
+                "name": "v2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/shirou/gopsutil",
+            "names": [
+              {
+                "name": "v3"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "sigs.k8s.io/structured-merge-diff",
+            "names": [
+              {
+                "name": "v3"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/azure/go-autorest/autorest",
+            "names": [
+              {
+                "name": "validation"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "vic"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/renier",
+            "names": [
+              {
+                "name": "xmlrpc"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "sigs.k8s.io",
+            "names": [
+              {
+                "name": "yaml"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "gopkg.in",
+            "names": [
+              {
+                "name": "yaml.v2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "gopkg.in",
+            "names": [
+              {
+                "name": "yaml.v3"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "golang",
+        "namespaces": [
+          {
+            "namespace": "github.com/hashicorp",
+            "names": [
+              {
+                "name": "yamux"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "dependentPackage": {
+        "type": "alpine",
+        "namespaces": [
+          {
+            "namespace": "",
+            "names": [
+              {
+                "name": "zlib"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

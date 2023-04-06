@@ -41,7 +41,6 @@ query PkgQ3 {
   }
 }
 
-
 query PkgQ4 {
   packages(pkgSpec: { type: "oci", namespace: "docker.io/library", name: "consul" }) {
     ...allPkgTree
@@ -138,28 +137,18 @@ query GetNeighbors ($nodeId: ID!) {
 fragment allCveTree on CVE {
   id
   year
-  cveIds {
-    id
-    cveId
-  }
+  cveId
 }
 
 fragment allGHSATree on GHSA {
   id
-  ghsaIds {
-    id
-    ghsaId
-  }
+  ghsaId
 }
 
 fragment allOSVTree on OSV {
   id
-  osvIds {
-    id
-    osvId
-  }
+  osvId
 }
-
 
 fragment allCertifyVulnTree on CertifyVuln {
   id
@@ -200,7 +189,6 @@ query CertifyVulnQ1 {
     ...allCertifyVulnTree
   }
 }
-
 
 query PkgQ7 {
   packages(pkgSpec: { type: "oci", name: "python" }) {
