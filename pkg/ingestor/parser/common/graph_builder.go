@@ -73,9 +73,9 @@ func addMetadata(predicates *assembler.IngestPredicates, foundIdentities []Trust
 		v.IsDependency.Origin = srcInfo.Source
 	}
 
-	for _, v := range predicates.IsOccurence {
-		v.IsOccurence.Collector = srcInfo.Collector
-		v.IsOccurence.Origin = srcInfo.Source
+	for _, v := range predicates.IsOccurrence {
+		v.IsOccurrence.Collector = srcInfo.Collector
+		v.IsOccurrence.Origin = srcInfo.Source
 	}
 
 	for _, v := range predicates.HasSlsa {

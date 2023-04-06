@@ -40,8 +40,8 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				return err
 			}
 
-			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurence))
-			if err := ingestIsOccurrence(ctx, gqlclient, p.IsOccurence); err != nil {
+			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurrence))
+			if err := ingestIsOccurrence(ctx, gqlclient, p.IsOccurrence); err != nil {
 				return err
 			}
 
@@ -89,7 +89,7 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, vs []assembl
 	return nil
 }
 
-func ingestIsOccurrence(ctx context.Context, client graphql.Client, vs []assembler.IsOccurenceIngest) error {
+func ingestIsOccurrence(ctx context.Context, client graphql.Client, vs []assembler.IsOccurrenceIngest) error {
 	for _, v := range vs {
 		if v.Pkg != nil && v.Src != nil {
 			return fmt.Errorf("unable to create IsOccurrence with both Src and Pkg subject specified")
@@ -100,12 +100,12 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, vs []assembl
 		}
 
 		if v.Src != nil {
-			_, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurence)
+			_, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurrence)
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurence)
+			_, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurrence)
 			if err != nil {
 				return err
 			}

@@ -49,7 +49,7 @@ type parser struct {
 	vulnData *generated.VulnerabilityMetaDataInput
 	vulns    []*generated.OSVInputSpec
 	isVulns  []assembler.IsVulnIngest
-	isOccs   []assembler.IsOccurenceIngest
+	isOccs   []assembler.IsOccurrenceIngest
 }
 
 // NewVulnCertificationParser initializes the parser
@@ -89,9 +89,9 @@ func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStateme
 }
 
 func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgInputSpec,
-	[]assembler.IsOccurenceIngest, error) {
+	[]assembler.IsOccurrenceIngest, error) {
 	var ps []*generated.PkgInputSpec
-	var ios []assembler.IsOccurenceIngest
+	var ios []assembler.IsOccurrenceIngest
 	for _, sub := range s.StatementHeader.Subject {
 		p, err := helpers.PurlToPkg(sub.Name)
 		if err != nil {
@@ -99,13 +99,13 @@ func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgI
 		}
 		ps = append(ps, p)
 		for a, d := range sub.Digest {
-			io := assembler.IsOccurenceIngest{
+			io := assembler.IsOccurrenceIngest{
 				Pkg: p,
 				Artifact: &generated.ArtifactInputSpec{
 					Algorithm: a,
 					Digest:    d,
 				},
-				IsOccurence: &generated.IsOccurrenceInputSpec{
+				IsOccurrence: &generated.IsOccurrenceInputSpec{
 					Justification: "Package digest reported to vulnerability certifier",
 				},
 			}
@@ -156,8 +156,8 @@ func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement)
 
 func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	rv := &assembler.IngestPredicates{
-		IsVuln:      c.isVulns,
-		IsOccurence: c.isOccs,
+		IsVuln:       c.isVulns,
+		IsOccurrence: c.isOccs,
 	}
 	for _, p := range c.packages {
 		for _, v := range c.vulns {

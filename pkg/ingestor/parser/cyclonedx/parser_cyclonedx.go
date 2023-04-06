@@ -34,14 +34,16 @@ import (
 
 type cyclonedxParser struct {
 	doc               *processor.Document
-	packagePackages   map[string][]model.PkgInputSpec
+	packagePackages   map[string][]*model.PkgInputSpec
+	packageArtifacts  map[string][]*model.ArtifactInputSpec
 	identifierStrings *common.IdentifierStrings
 	cdxBom            *cdx.BOM
 }
 
 func NewCycloneDXParser() common.DocumentParser {
 	return &cyclonedxParser{
-		packagePackages:   map[string][]model.PkgInputSpec{},
+		packagePackages:   map[string][]*model.PkgInputSpec{},
+		packageArtifacts:  map[string][]*model.ArtifactInputSpec{},
 		identifierStrings: &common.IdentifierStrings{},
 	}
 }
@@ -108,7 +110,19 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 		if err != nil {
 			return err
 		}
-		c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)] = append(c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)], *topPackage)
+
+		c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)] = append(c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)], topPackage)
+
+		// if checksums exists create an artifact for each of them
+		if cdxBom.Metadata.Component.Hashes != nil {
+			for _, checksum := range *cdxBom.Metadata.Component.Hashes {
+				artifact := &model.ArtifactInputSpec{
+					Algorithm: strings.ToLower(string(checksum.Algorithm)),
+					Digest:    checksum.Value,
+				}
+				c.packageArtifacts[string(cdxBom.Metadata.Component.BOMRef)] = append(c.packageArtifacts[string(cdxBom.Metadata.Component.BOMRef)], artifact)
+			}
+		}
 	}
 	return nil
 }
@@ -124,9 +138,19 @@ func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 				if err != nil {
 					return err
 				}
-				c.packagePackages[string(comp.BOMRef)] = append(c.packagePackages[string(comp.BOMRef)], *pkg)
+				c.packagePackages[string(comp.BOMRef)] = append(c.packagePackages[string(comp.BOMRef)], pkg)
 				c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, comp.PackageURL)
-				//TODO(dejanb): Parse hashes and create artifact nodes and isOccurence relations https://github.com/guacsec/guac/issues/632
+
+				// if checksums exists create an artifact for each of them
+				if comp.Hashes != nil {
+					for _, checksum := range *comp.Hashes {
+						artifact := &model.ArtifactInputSpec{
+							Algorithm: strings.ToLower(string(checksum.Algorithm)),
+							Digest:    checksum.Value,
+						}
+						c.packageArtifacts[string(comp.BOMRef)] = append(c.packageArtifacts[string(comp.BOMRef)], artifact)
+					}
+				}
 			}
 		}
 	}
@@ -165,6 +189,20 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
 	}
 
+	for id := range c.packagePackages {
+		for _, pkg := range c.packagePackages[id] {
+			for _, art := range c.packageArtifacts[id] {
+				preds.IsOccurrence = append(preds.IsOccurrence, assembler.IsOccurrenceIngest{
+					Pkg:      pkg,
+					Artifact: art,
+					IsOccurrence: &model.IsOccurrenceInputSpec{
+						Justification: "cdx package with checksum",
+					},
+				})
+			}
+		}
+	}
+
 	if c.cdxBom.Dependencies == nil {
 		return preds
 	}
@@ -181,7 +219,7 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 			for _, depPkg := range *deps.Dependencies {
 				if depPkg, exist := c.packagePackages[depPkg]; exist {
 					for _, packNode := range currPkg {
-						p, err := common.GetIsDep(packNode, depPkg, []model.PkgInputSpec{}, "CDX BOM Dependency")
+						p, err := common.GetIsDep(packNode, depPkg, []*model.PkgInputSpec{}, "CDX BOM Dependency")
 						if err != nil {
 							logger.Errorf("error generating CycloneDX edge %v", err)
 							continue
@@ -198,7 +236,7 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	return preds
 }
 
-func (s *cyclonedxParser) getPackageElement(elementID string) []model.PkgInputSpec {
+func (s *cyclonedxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
 	if packNode, ok := s.packagePackages[string(elementID)]; ok {
 		return packNode
 	}

@@ -23,6 +23,12 @@
       "name" : "getting-started",
       "version" : "1.0.0-SNAPSHOT",
       "licenses" : [ ],
+      "hashes" : [
+        {
+          "alg" : "SHA3-512",
+          "content" : "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964"
+        }
+      ],
       "purl" : "pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar",
       "type" : "library",
       "bom-ref" : "pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar"
