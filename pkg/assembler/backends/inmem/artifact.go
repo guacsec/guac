@@ -44,30 +44,7 @@ type artStruct struct {
 func (n *artStruct) ID() uint32 { return n.id }
 
 func (n *artStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	maxLen := 0
-	if allowedEdges[model.EdgeHashEqual] {
-		maxLen = maxLen + len(n.hashEquals)
-	}
-	if allowedEdges[model.EdgeIsOccurrence] {
-		maxLen = maxLen + len(n.occurrences)
-	}
-	if allowedEdges[model.EdgeHasSlsa] {
-		maxLen = maxLen + len(n.hasSLSAs)
-	}
-	if allowedEdges[model.EdgeCertifyVexStatement] {
-		maxLen = maxLen + len(n.vexLinks)
-	}
-	if allowedEdges[model.EdgeCertifyBad] {
-		maxLen = maxLen + len(n.badLinks)
-	}
-	if allowedEdges[model.EdgeCertifyGood] {
-		maxLen = maxLen + len(n.goodLinks)
-	}
-	if maxLen == 0 {
-		return []uint32{}
-	}
-
-	out := make([]uint32, 0, maxLen)
+	out := []uint32{}
 	if allowedEdges[model.EdgeHashEqual] {
 		out = append(out, n.hashEquals...)
 	}

@@ -66,21 +66,7 @@ type cveNode struct {
 func (n *cveNode) ID() uint32 { return n.id }
 
 func (n *cveNode) Neighbors(allowedEdges edgeMap) []uint32 {
-	maxLen := 0
-	if allowedEdges[model.EdgeCertifyVuln] {
-		maxLen = maxLen + len(n.certifyVulnLinks)
-	}
-	if allowedEdges[model.EdgeIsVulnerability] {
-		maxLen = maxLen + len(n.equalVulnLinks)
-	}
-	if allowedEdges[model.EdgeCertifyVexStatement] {
-		maxLen = maxLen + len(n.vexLinks)
-	}
-	if maxLen == 0 {
-		return []uint32{}
-	}
-
-	out := make([]uint32, 0, maxLen)
+	out := []uint32{}
 	if allowedEdges[model.EdgeCertifyVuln] {
 		out = append(out, n.certifyVulnLinks...)
 	}
