@@ -62,6 +62,9 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
     ... on CertifyBad {
       ...allCertifyBad
     }
+    ... on CertifyGood {
+      ...allCertifyGood
+    }
     ... on HashEqual {
       ...allHashEqualTree
     }
@@ -131,6 +134,9 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
     ... on CertifyBad {
       ...allCertifyBad
     }
+    ... on CertifyGood {
+      ...allCertifyGood
+    }
     ... on HashEqual {
       ...allHashEqualTree
     }
@@ -179,6 +185,9 @@ query Node($node: ID!) {
     ... on GHSA {
       ...allGHSATree
     }
+    ... on NoVuln {
+      id
+    }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
@@ -196,6 +205,9 @@ query Node($node: ID!) {
     }
     ... on CertifyBad {
       ...allCertifyBad
+    }
+    ... on CertifyGood {
+      ...allCertifyGood
     }
     ... on HashEqual {
       ...allHashEqualTree
