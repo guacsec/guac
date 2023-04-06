@@ -452,7 +452,7 @@ func (c *demoClient) exactSource(filter *model.SourceSpec) (*srcNameNode, error)
 			if *filter.Name != n.name ||
 				noMatchInput(filter.Tag, n.tag) ||
 				noMatchInput(filter.Commit, n.commit) {
-				return nil, nil
+				continue
 			}
 			return n, nil
 		}

@@ -48,8 +48,6 @@ import (
 // 	}
 // }
 
-const osv string = "osv"
-
 // Internal data: osv
 type osvMap map[string]*osvNode
 type osvNode struct {
