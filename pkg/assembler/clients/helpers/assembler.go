@@ -139,9 +139,32 @@ func ingestHasSlsa(ctx context.Context, client graphql.Client, vs []assembler.Ha
 
 func ingestCertifyVuln(ctx context.Context, client graphql.Client, cvs []assembler.CertifyVulnIngest) error {
 	for _, cv := range cvs {
-		_, err := model.CertifyOSV(ctx, client, *cv.Pkg, *cv.OSV, *cv.VulnData)
+
+		err := ValidateVulnerabilityInput(cv.OSV, cv.CVE, cv.GHSA, "certifyVulnerability")
 		if err != nil {
-			return err
+			return fmt.Errorf("input validation failed for certifyVulnerability: %w", err)
+		}
+
+		if cv.OSV != nil {
+			_, err := model.CertifyOSV(ctx, client, *cv.Pkg, *cv.OSV, *cv.VulnData)
+			if err != nil {
+				return err
+			}
+		} else if cv.CVE != nil {
+			_, err := model.CertifyCVE(ctx, client, *cv.Pkg, *cv.CVE, *cv.VulnData)
+			if err != nil {
+				return err
+			}
+		} else if cv.GHSA != nil {
+			_, err := model.CertifyGHSA(ctx, client, *cv.Pkg, *cv.GHSA, *cv.VulnData)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := model.CertifyNoKnownVuln(ctx, client, *cv.Pkg, *cv.VulnData)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -255,6 +278,23 @@ func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.So
 		return gqlerror.Errorf("Must specify at most one package, source, or artifact for %v", path)
 	}
 
+	return nil
+}
+
+func ValidateVulnerabilityInput(osv *model.OSVInputSpec, cve *model.CVEInputSpec, ghsa *model.GHSAInputSpec, path string) error {
+	vulnDefined := 0
+	if osv != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if ghsa != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if cve != nil {
+		vulnDefined = vulnDefined + 1
+	}
+	if vulnDefined > 2 {
+		return gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
+	}
 	return nil
 }
 

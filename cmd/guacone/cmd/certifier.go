@@ -124,7 +124,7 @@ var certifierCmd = &cobra.Command{
 			return false
 		}
 
-		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler); err != nil {
+		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, time.Minute*5); err != nil {
 			logger.Fatal(err)
 		}
 		if gotErr {

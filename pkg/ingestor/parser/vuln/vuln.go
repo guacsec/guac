@@ -137,8 +137,7 @@ func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement)
 		vs = append(vs, v)
 		cve, ghsa, err := helpers.OSVToGHSACVE(id.VulnerabilityId)
 		if err != nil {
-			// TODO: should this return an error?
-			logger.Errorf("could not parse vuln id in attestation: %w", err)
+			logger.Debugf("osvID is not a CVE or GHSA: %w", err)
 			continue
 		}
 		iv := assembler.IsVulnIngest{
@@ -160,13 +159,20 @@ func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates 
 		IsOccurrence: c.isOccs,
 	}
 	for _, p := range c.packages {
-		for _, v := range c.vulns {
-			cv := assembler.CertifyVulnIngest{
-				Pkg:      p,
-				OSV:      v,
-				VulnData: c.vulnData,
+		if len(c.vulns) > 0 {
+			for _, v := range c.vulns {
+				cv := assembler.CertifyVulnIngest{
+					Pkg:      p,
+					OSV:      v,
+					VulnData: c.vulnData,
+				}
+				rv.CertifyVuln = append(rv.CertifyVuln, cv)
 			}
-			rv.CertifyVuln = append(rv.CertifyVuln, cv)
+		} else {
+			rv.CertifyVuln = append(rv.CertifyVuln, assembler.CertifyVulnIngest{
+				Pkg:      p,
+				VulnData: c.vulnData,
+			})
 		}
 	}
 	return rv

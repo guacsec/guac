@@ -28,6 +28,8 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 )
 
+const guacType string = "guac"
+
 // PackageNode represents package node along with the its corresponding artifact digest
 type PackageNode struct {
 	// Purl is the package url of the package
@@ -62,6 +64,8 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 		return fmt.Errorf("compChan cannot be nil")
 	}
 
+	tickInterval := 5 * time.Second
+
 	// nodeChan to receive components
 	nodeChan := make(chan *PackageNode, 10000)
 	// errChan to receive error from collectors
@@ -78,22 +82,22 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 
 	packNodes := []*PackageNode{}
 	componentsCaptured := false
-	timeout := time.After(5 * time.Second)
+	ticker := time.NewTicker(tickInterval)
 	for !componentsCaptured {
 		select {
-		case <-timeout:
+		case <-ticker.C:
 			if len(packNodes) > 0 {
 				compChan <- packNodes
 				packNodes = []*PackageNode{}
 			}
-			timeout = time.After(5 * time.Second)
+			ticker.Reset(tickInterval)
 		case d := <-nodeChan:
 			if len(packNodes) < 1000 {
 				packNodes = append(packNodes, d)
 			} else {
 				compChan <- packNodes
 				packNodes = []*PackageNode{}
-				timeout = time.After(5 * time.Second)
+				ticker.Reset(tickInterval)
 			}
 		case err := <-errChan:
 			if err != nil {
@@ -125,6 +129,9 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 func (p *packageQuery) getPackageNodes(ctx context.Context, response *generated.PackagesResponse, nodeChan chan<- *PackageNode) error {
 	packages := response.GetPackages()
 	for _, pkgType := range packages {
+		if pkgType.Type == guacType {
+			continue
+		}
 		for _, namespace := range pkgType.Namespaces {
 			for _, name := range namespace.Names {
 				for _, version := range name.Versions {

@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -52,8 +53,30 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 
 // Certify queries the graph DB to get the components to scan. Utilizing the registered certifiers,
 // it generates new nodes and attestations.
-func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
+func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler, interval time.Duration) error {
+	// initially run the certifier the first time and then tick per interval
+	err := runCertifier(ctx, query, emitter, handleErr)
+	if err != nil {
+		return fmt.Errorf("certifier failed with an error: %w", err)
+	}
 
+	ticker := time.NewTicker(interval)
+	for {
+		select {
+		case <-ticker.C:
+			err := runCertifier(ctx, query, emitter, handleErr)
+			if err != nil {
+				return fmt.Errorf("certifier failed with an error: %w", err)
+			}
+			ticker.Reset(interval)
+		// if the context has been canceled return the err.
+		case <-ctx.Done():
+			return ctx.Err() // nolint:wrapcheck
+		}
+	}
+}
+
+func runCertifier(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
 	// compChan to collect query components
 	compChan := make(chan interface{}, BufferChannelSize)
 	// errChan to receive error from collectors
@@ -85,7 +108,6 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 			logger.Errorf("generate certifier documents error: %w", err)
 		}
 	}
-
 	return nil
 }
 

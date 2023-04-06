@@ -104,7 +104,7 @@ func (n *noKnownVuln) Neighbors() []uint32 {
 }
 
 func (n *noKnownVuln) BuildModelNode(c *demoClient) (model.Node, error) {
-	return model.NoVuln{nodeID(n.id)}, nil
+	return &model.NoVuln{nodeID(n.id)}, nil
 }
 
 func (n *noKnownVuln) setVulnerabilityLinks(id uint32) {
