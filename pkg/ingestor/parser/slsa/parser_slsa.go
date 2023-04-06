@@ -30,16 +30,12 @@ import (
 	"github.com/jeremywohl/flatten"
 )
 
-const (
-	algorithmSHA256 string = "sha256"
-)
-
 // each subject or object is made of:
 // - A artifact for each digest information
 // - a pkg or source depending on what is represented by the name/URI
 // - An IsOccurence input spec which will generate a predicate for each occurence
 type slsaEntity struct {
-	artifacts []model.ArtifactInputSpec
+	artifacts []*model.ArtifactInputSpec
 	occurence model.IsOccurrenceInputSpec
 
 	// Either pkg or source
@@ -86,20 +82,12 @@ func (s *slsaParser) Parse(ctx context.Context, doc *processor.Document) error {
 	return nil
 }
 
-type parsedObject struct {
-	singletonArtifact *model.ArtifactInputSpec
-	singletonSource   *model.SourceInputSpec
-	// if it is a pkg, it returns the pkg encapsulated in
-	// the IsOccurence predicate
-	pkg *assembler.IsOccurenceIngest
-}
-
 func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 	// append artifact node for the subjects
 	for _, sub := range statement.Subject {
-		artifacts := []model.ArtifactInputSpec{}
+		artifacts := []*model.ArtifactInputSpec{}
 		for alg, ds := range sub.Digest {
-			artifacts = append(artifacts, model.ArtifactInputSpec{
+			artifacts = append(artifacts, &model.ArtifactInputSpec{
 				Algorithm: alg,
 				Digest:    strings.Trim(ds, "'"), // some slsa documents incorrectly add additional quotes
 			})
@@ -113,9 +101,9 @@ func (s *slsaParser) getSubject(statement *in_toto.ProvenanceStatement) {
 func (s *slsaParser) getMaterials(statement *in_toto.ProvenanceStatement) {
 	// append dependency nodes for the materials
 	for _, mat := range statement.Predicate.Materials {
-		artifacts := []model.ArtifactInputSpec{}
+		artifacts := []*model.ArtifactInputSpec{}
 		for alg, ds := range mat.Digest {
-			artifacts = append(artifacts, model.ArtifactInputSpec{
+			artifacts = append(artifacts, &model.ArtifactInputSpec{
 				Algorithm: alg,
 				Digest:    strings.Trim(ds, "'"), // some slsa documents incorrectly add additional quotes
 			})
@@ -126,7 +114,7 @@ func (s *slsaParser) getMaterials(statement *in_toto.ProvenanceStatement) {
 	}
 }
 
-func getSlsaEntity(name string, artifacts []model.ArtifactInputSpec) slsaEntity {
+func getSlsaEntity(name string, artifacts []*model.ArtifactInputSpec) slsaEntity {
 	s := slsaEntity{
 		artifacts: artifacts,
 	}
@@ -217,25 +205,25 @@ func parseSlsaPredicate(p []byte) (*in_toto.ProvenanceStatement, error) {
 func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	preds := &assembler.IngestPredicates{}
 
-	// Create occurences for subjects and materials
+	// Create occurrences for subjects and materials
 	for _, o := range s.subjects {
 		for _, a := range o.artifacts {
-			preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
-				Pkg:         o.pkg,
-				Src:         o.source,
-				Artifact:    &a,
-				IsOccurence: &o.occurence,
+			preds.IsOccurrence = append(preds.IsOccurrence, assembler.IsOccurrenceIngest{
+				Pkg:          o.pkg,
+				Src:          o.source,
+				Artifact:     a,
+				IsOccurrence: &o.occurence,
 			})
 		}
 	}
 
 	for _, o := range s.materials {
 		for _, a := range o.artifacts {
-			preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
-				Pkg:         o.pkg,
-				Src:         o.source,
-				Artifact:    &a,
-				IsOccurence: &o.occurence,
+			preds.IsOccurrence = append(preds.IsOccurrence, assembler.IsOccurrenceIngest{
+				Pkg:          o.pkg,
+				Src:          o.source,
+				Artifact:     a,
+				IsOccurrence: &o.occurence,
 			})
 		}
 	}
@@ -244,14 +232,14 @@ func (s *slsaParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	materials := []model.ArtifactInputSpec{}
 	for _, o := range s.materials {
 		for _, a := range o.artifacts {
-			materials = append(materials, a)
+			materials = append(materials, *a)
 		}
 	}
 
 	for _, o := range s.subjects {
 		for _, a := range o.artifacts {
 			preds.HasSlsa = append(preds.HasSlsa, assembler.HasSlsaIngest{
-				Artifact:  &a,
+				Artifact:  a,
 				HasSlsa:   &s.slsaAttestation,
 				Materials: materials,
 				Builder:   &s.builder,

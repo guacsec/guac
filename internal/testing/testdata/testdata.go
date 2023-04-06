@@ -226,10 +226,10 @@ var (
 
 	slsaStartTime, _ = time.Parse(time.RFC3339, "2020-08-19T08:38:00Z")
 	SlsaPreds        = assembler.IngestPredicates{
-		IsOccurence: []assembler.IsOccurenceIngest{
-			{Pkg: artPkg, Artifact: &art, IsOccurence: &slsaIsOccurrence},
-			{Src: mat1Src, Artifact: &mat1, IsOccurence: &slsaIsOccurrence},
-			{Pkg: mat2Pkg, Artifact: &mat2, IsOccurence: &slsaIsOccurrence},
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{Pkg: artPkg, Artifact: &art, IsOccurrence: &slsaIsOccurrence},
+			{Src: mat1Src, Artifact: &mat1, IsOccurrence: &slsaIsOccurrence},
+			{Pkg: mat2Pkg, Artifact: &mat2, IsOccurrence: &slsaIsOccurrence},
 		},
 		HasSlsa: []assembler.HasSlsaIngest{
 			{
@@ -310,6 +310,9 @@ var (
 		Digest:    "9a4cd858d9710963848e6d5f555325dc199d1c952b01cf6e64da2c15deedbd97",
 	}
 
+	isOccurrenceJustifyTopPkg = &model.IsOccurrenceInputSpec{
+		Justification: "cdx package with checksum",
+	}
 	isDepJustifyTopPkg = &model.IsDependencyInputSpec{
 		Justification: "top-level package GUAC heuristic connecting to each file/package",
 	}
@@ -395,32 +398,32 @@ var (
 		},
 	}
 
-	SpdxOccurences = []assembler.IsOccurenceIngest{
+	SpdxOccurences = []assembler.IsOccurrenceIngest{
 		{
-			Pkg:         worldFilePack,
-			Artifact:    worldFileArtifact,
-			IsOccurence: isOccJustifyFile,
+			Pkg:          worldFilePack,
+			Artifact:     worldFileArtifact,
+			IsOccurrence: isOccJustifyFile,
 		},
 		{
-			Pkg:         rootFilePack,
-			Artifact:    rootFileArtifact,
-			IsOccurence: isOccJustifyFile,
+			Pkg:          rootFilePack,
+			Artifact:     rootFileArtifact,
+			IsOccurrence: isOccJustifyFile,
 		},
 		{
-			Pkg:         rsaPubFilePack,
-			Artifact:    rsaPubFileArtifact,
-			IsOccurence: isOccJustifyFile,
+			Pkg:          rsaPubFilePack,
+			Artifact:     rsaPubFileArtifact,
+			IsOccurrence: isOccJustifyFile,
 		},
 		{
-			Pkg:         triggersFilePack,
-			Artifact:    triggersFileArtifact,
-			IsOccurence: isOccJustifyFile,
+			Pkg:          triggersFilePack,
+			Artifact:     triggersFileArtifact,
+			IsOccurrence: isOccJustifyFile,
 		},
 	}
 
 	SpdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: SpdxDeps,
-		IsOccurence:  SpdxOccurences,
+		IsOccurrence: SpdxOccurences,
 	}
 
 	// CycloneDX Testdata
@@ -478,8 +481,43 @@ var (
 		},
 	}
 
+	CdxQuarkusOccurrence = []assembler.IsOccurrenceIngest{
+		{
+			Pkg: cdxTopQuarkusPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		}, {
+			Pkg: cdxResteasyPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "md5",
+				Digest:    "bf39044af8c6ba66fc3beb034bc82ae8",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxResteasyPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "615e56bdfeb591af8b5fdeadf019f8fa729643232d7e0768674411a7d959bb00e12e114280a6949f871514e1a86e01e0033372a0a826d15720050d7cffb80e69",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+		{
+			Pkg: cdxReactiveCommonPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "54ffa51cb2fb25e70871e4b69489814ebb3d23d4f958e83ef1f811c00a8753c6c30c5bbc1b48b6427357eb70e5c35c7b357f5252e246fbfa00b90ee22ad095e1",
+			},
+			IsOccurrence: isOccurrenceJustifyTopPkg,
+		},
+	}
+
 	CdxQuarkusIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: CdxQuarkusDeps,
+		IsOccurrence: CdxQuarkusOccurrence,
 	}
 
 	cdxWebAppPackage, _ = asmhelpers.PurlToPkg("pkg:npm/web-app@1.0.0")
@@ -1168,7 +1206,7 @@ func isDependencyLess(e1, e2 assembler.IsDependencyIngest) bool {
 	return gLess(e1, e2)
 }
 
-func isOccurenceLess(e1, e2 assembler.IsOccurenceIngest) bool {
+func isOccurenceLess(e1, e2 assembler.IsOccurrenceIngest) bool {
 	return gLess(e1, e2)
 }
 

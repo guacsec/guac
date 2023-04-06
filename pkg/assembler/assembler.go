@@ -149,7 +149,7 @@ func (g *Graph) AppendGraph(gs ...Graph) {
 type IngestPredicates struct {
 	CertifyScorecard []CertifyScorecardIngest
 	IsDependency     []IsDependencyIngest
-	IsOccurence      []IsOccurenceIngest
+	IsOccurrence     []IsOccurrenceIngest
 	HasSlsa          []HasSlsaIngest
 	CertifyVuln      []CertifyVulnIngest
 	IsVuln           []IsVulnIngest
@@ -169,15 +169,15 @@ type IsDependencyIngest struct {
 	IsDependency *generated.IsDependencyInputSpec
 }
 
-type IsOccurenceIngest struct {
-	// Occurence describes either pkg or src
+type IsOccurrenceIngest struct {
+	// Occurrence describes either pkg or src
 	Pkg *generated.PkgInputSpec
 	Src *generated.SourceInputSpec
 
 	// Artifact is the required object of the occurence
 	Artifact *generated.ArtifactInputSpec
 
-	IsOccurence *generated.IsOccurrenceInputSpec
+	IsOccurrence *generated.IsOccurrenceInputSpec
 }
 
 type HasSlsaIngest struct {
@@ -186,7 +186,7 @@ type HasSlsaIngest struct {
 	Materials []generated.ArtifactInputSpec
 	Builder   *generated.BuilderInputSpec
 
-	// Unpon more investigation, seems like SLSA should
+	// Upon more investigation, seems like SLSA should
 	// only be applied to an artifact and linkages to pkg
 	// or src should be done via IsOccurrence
 	// Pkg      *generated.PkgInputSpec

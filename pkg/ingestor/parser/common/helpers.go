@@ -22,13 +22,13 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
-func GetIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpec, relatedFileNodes []model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
+func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputSpec, relatedFileNodes []*model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
 	if len(relatedFileNodes) > 0 {
 		for _, rfileNode := range relatedFileNodes {
 			// TODO: Check is this always just expected to be one?
 			return &assembler.IsDependencyIngest{
-				Pkg:    &foundNode,
-				DepPkg: &rfileNode,
+				Pkg:    foundNode,
+				DepPkg: rfileNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					Justification: justification,
 				},
@@ -37,8 +37,8 @@ func GetIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpe
 	} else if len(relatedPackNodes) > 0 {
 		for _, rpackNode := range relatedPackNodes {
 			return &assembler.IsDependencyIngest{
-				Pkg:    &foundNode,
-				DepPkg: &rpackNode,
+				Pkg:    foundNode,
+				DepPkg: rpackNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					Justification: justification,
 				},
@@ -49,14 +49,14 @@ func GetIsDep(foundNode model.PkgInputSpec, relatedPackNodes []model.PkgInputSpe
 	return nil, nil
 }
 
-func CreateTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]model.PkgInputSpec, files map[string][]model.PkgInputSpec, justification string) []assembler.IsDependencyIngest {
+func CreateTopLevelIsDeps(toplevel *model.PkgInputSpec, packages map[string][]*model.PkgInputSpec, files map[string][]*model.PkgInputSpec, justification string) []assembler.IsDependencyIngest {
 	isDeps := []assembler.IsDependencyIngest{}
 	for _, packNodes := range packages {
 		for _, packNode := range packNodes {
 			if !reflect.DeepEqual(packNode, toplevel) {
 				p := assembler.IsDependencyIngest{
-					Pkg:    &toplevel,
-					DepPkg: &packNode,
+					Pkg:    toplevel,
+					DepPkg: packNode,
 					IsDependency: &model.IsDependencyInputSpec{
 						Justification: justification,
 					},
@@ -69,8 +69,8 @@ func CreateTopLevelIsDeps(toplevel model.PkgInputSpec, packages map[string][]mod
 	for _, fileNodes := range files {
 		for _, fileNode := range fileNodes {
 			p := assembler.IsDependencyIngest{
-				Pkg:    &toplevel,
-				DepPkg: &fileNode,
+				Pkg:    toplevel,
+				DepPkg: fileNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					Justification: justification,
 				},

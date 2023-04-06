@@ -35,20 +35,20 @@ import (
 type spdxParser struct {
 	// TODO: Add hasSBOMInputSpec when its created
 	doc               *processor.Document
-	packagePackages   map[string][]model.PkgInputSpec
-	packageArtifacts  map[string][]model.ArtifactInputSpec
-	filePackages      map[string][]model.PkgInputSpec
-	fileArtifacts     map[string][]model.ArtifactInputSpec
+	packagePackages   map[string][]*model.PkgInputSpec
+	packageArtifacts  map[string][]*model.ArtifactInputSpec
+	filePackages      map[string][]*model.PkgInputSpec
+	fileArtifacts     map[string][]*model.ArtifactInputSpec
 	identifierStrings *common.IdentifierStrings
 	spdxDoc           *v2_2.Document
 }
 
 func NewSpdxParser() common.DocumentParser {
 	return &spdxParser{
-		packagePackages:   map[string][]model.PkgInputSpec{},
-		packageArtifacts:  map[string][]model.ArtifactInputSpec{},
-		filePackages:      map[string][]model.PkgInputSpec{},
-		fileArtifacts:     map[string][]model.ArtifactInputSpec{},
+		packagePackages:   map[string][]*model.PkgInputSpec{},
+		packageArtifacts:  map[string][]*model.ArtifactInputSpec{},
+		filePackages:      map[string][]*model.PkgInputSpec{},
+		fileArtifacts:     map[string][]*model.ArtifactInputSpec{},
 		identifierStrings: &common.IdentifierStrings{},
 	}
 }
@@ -89,7 +89,7 @@ func (s *spdxParser) getTopLevelPackage() error {
 		if err != nil {
 			return err
 		}
-		s.packagePackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packagePackages[string(s.spdxDoc.SPDXIdentifier)], *topPackage)
+		s.packagePackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.packagePackages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
 		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purl)
 	}
 	return nil
@@ -118,11 +118,11 @@ func (s *spdxParser) getPackages() error {
 		if err != nil {
 			return err
 		}
-		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], *pkg)
+		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range pac.PackageChecksums {
-			artifact := model.ArtifactInputSpec{
+			artifact := &model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
@@ -144,9 +144,9 @@ func (s *spdxParser) getFiles() error {
 			if err != nil {
 				return err
 			}
-			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], *pkg)
+			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], pkg)
 
-			artifact := model.ArtifactInputSpec{
+			artifact := &model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
@@ -169,14 +169,14 @@ func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	return spdx, nil
 }
 
-func (s *spdxParser) getPackageElement(elementID string) []model.PkgInputSpec {
+func (s *spdxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
 	if packNode, ok := s.packagePackages[string(elementID)]; ok {
 		return packNode
 	}
 	return nil
 }
 
-func (s *spdxParser) getFileElement(elementID string) []model.PkgInputSpec {
+func (s *spdxParser) getFileElement(elementID string) []*model.PkgInputSpec {
 	if fileNode, ok := s.filePackages[string(elementID)]; ok {
 		return fileNode
 	}
@@ -240,10 +240,10 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	for id := range s.fileArtifacts {
 		for _, pkg := range s.filePackages[id] {
 			for _, art := range s.fileArtifacts[id] {
-				preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
-					Pkg:      &pkg,
-					Artifact: &art,
-					IsOccurence: &model.IsOccurrenceInputSpec{
+				preds.IsOccurrence = append(preds.IsOccurrence, assembler.IsOccurrenceIngest{
+					Pkg:      pkg,
+					Artifact: art,
+					IsOccurrence: &model.IsOccurrenceInputSpec{
 						Justification: "spdx file with checksum",
 					},
 				})
@@ -254,10 +254,10 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	for id := range s.packagePackages {
 		for _, pkg := range s.packagePackages[id] {
 			for _, art := range s.packageArtifacts[id] {
-				preds.IsOccurence = append(preds.IsOccurence, assembler.IsOccurenceIngest{
-					Pkg:      &pkg,
-					Artifact: &art,
-					IsOccurence: &model.IsOccurrenceInputSpec{
+				preds.IsOccurrence = append(preds.IsOccurrence, assembler.IsOccurrenceIngest{
+					Pkg:      pkg,
+					Artifact: art,
+					IsOccurrence: &model.IsOccurrenceInputSpec{
 						Justification: "spdx package with checksum",
 					},
 				})

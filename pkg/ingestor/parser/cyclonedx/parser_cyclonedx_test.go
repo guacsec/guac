@@ -15,7 +15,6 @@
 
 package cyclonedx
 
-// TODO(bulldozer): freeze test
 import (
 	"context"
 	"testing"
@@ -231,7 +230,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 						Source:    "test",
 					},
 				},
-				packagePackages:   map[string][]model.PkgInputSpec{},
+				packagePackages:   map[string][]*model.PkgInputSpec{},
 				identifierStrings: &common.IdentifierStrings{},
 			}
 			c.cdxBom = tt.cdxBom
@@ -240,7 +239,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to parse purl %v", tt.wantPurl)
 			}
-			if d := cmp.Diff(*wantPackage, c.packagePackages[tt.cdxBom.Metadata.Component.BOMRef][0]); len(d) != 0 {
+			if d := cmp.Diff(*wantPackage, *c.packagePackages[tt.cdxBom.Metadata.Component.BOMRef][0]); len(d) != 0 {
 				t.Errorf("addRootPackage failed to produce expected package for %v", tt.name)
 			}
 		})
