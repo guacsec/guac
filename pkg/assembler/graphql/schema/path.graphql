@@ -52,7 +52,8 @@ Edge allows filtering path/neighbors output to only contain a subset of all
 possible GUAC verbs.
 
 Each member of the enum matches with one of the verbs. The naming scheme is
-converting the CamelCase name to CAPITALS_WITH_UNDERSCORES.
+converting the CamelCase name to CAPITALS_WITH_UNDERSCORES and appending noun
+node in CAPITALS.
 
 Note that each GUAC verb is at the same time both an Edge and a Node. We need
 to return it as a Node to have it show up in the return type of the queries and
@@ -60,19 +61,38 @@ we need it to be an edge to allow filtering paths to only consider certain
 predicates.
 """
 enum Edge {
-  IS_OCCURRENCE
-  IS_DEPENDENCY
-  IS_VULNERABILITY
-  CERTIFY_VEX_STATEMENT
-  HASH_EQUAL
-  CERTIFY_BAD
-  CERTIFY_GOOD
-  PKG_EQUAL
-  CERTIFY_SCORECARD
-  CERTIFY_VULN
-  HAS_SOURCE_AT
-  HAS_SBOM
-  HAS_SLSA
+  ARTIFACT_CERTIFY_BAD
+  ARTIFACT_CERTIFY_GOOD
+  ARTIFACT_CERTIFY_VEX_STATEMENT
+  ARTIFACT_HASH_EQUAL
+  ARTIFACT_HAS_SLSA
+  ARTIFACT_IS_OCCURRENCE
+  BUILDER_HAS_SLSA
+  CVE_CERTIFY_VEX_STATEMENT
+  CVE_CERTIFY_VULN
+  CVE_IS_VULNERABILITY
+  GHSA_CERTIFY_VEX_STATEMENT
+  GHSA_CERTIFY_VULN
+  GHSA_IS_VULNERABILITY
+  NO_VULN_CERTIFY_VULN
+  OSV_CERTIFY_VEX_STATEMENT
+  OSV_CERTIFY_VULN
+  OSV_IS_VULNERABILITY
+  PACKAGE_CERTIFY_BAD
+  PACKAGE_CERTIFY_GOOD
+  PACKAGE_CERTIFY_VEX_STATEMENT
+  PACKAGE_CERTIFY_VULN
+  PACKAGE_HAS_SBOM
+  PACKAGE_HAS_SOURCE_AT
+  PACKAGE_IS_DEPENDENCY
+  PACKAGE_IS_OCCURRENCE
+  PACKAGE_PKG_EQUAL
+  SOURCE_CERTIFY_BAD
+  SOURCE_CERTIFY_GOOD
+  SOURCE_CERTIFY_SCORECARD
+  SOURCE_HAS_SBOM
+  SOURCE_HAS_SOURCE_AT
+  SOURCE_IS_OCCURRENCE
 }
 
 extend type Query {

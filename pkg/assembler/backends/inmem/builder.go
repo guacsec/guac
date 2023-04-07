@@ -35,7 +35,7 @@ type builderStruct struct {
 func (b *builderStruct) ID() uint32 { return b.id }
 
 func (b *builderStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	if allowedEdges[model.EdgeHasSlsa] {
+	if allowedEdges[model.EdgeBuilderHasSlsa] {
 		return b.hasSLSAs
 	}
 	return []uint32{}

@@ -103,7 +103,7 @@ type noKnownVuln struct {
 func (n *noKnownVuln) ID() uint32 { return n.id }
 
 func (n *noKnownVuln) Neighbors(allowedEdges edgeMap) []uint32 {
-	if allowedEdges[model.EdgeCertifyVuln] {
+	if allowedEdges[model.EdgeNoVulnCertifyVuln] {
 		return n.certifyVulnLinks
 	}
 	return []uint32{}

@@ -3680,7 +3680,8 @@ func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabil
 // possible GUAC verbs.
 //
 // Each member of the enum matches with one of the verbs. The naming scheme is
-// converting the CamelCase name to CAPITALS_WITH_UNDERSCORES.
+// converting the CamelCase name to CAPITALS_WITH_UNDERSCORES and appending noun
+// node in CAPITALS.
 //
 // Note that each GUAC verb is at the same time both an Edge and a Node. We need
 // to return it as a Node to have it show up in the return type of the queries and
@@ -3689,19 +3690,38 @@ func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabil
 type Edge string
 
 const (
-	EdgeIsOccurrence        Edge = "IS_OCCURRENCE"
-	EdgeIsDependency        Edge = "IS_DEPENDENCY"
-	EdgeIsVulnerability     Edge = "IS_VULNERABILITY"
-	EdgeCertifyVexStatement Edge = "CERTIFY_VEX_STATEMENT"
-	EdgeHashEqual           Edge = "HASH_EQUAL"
-	EdgeCertifyBad          Edge = "CERTIFY_BAD"
-	EdgeCertifyGood         Edge = "CERTIFY_GOOD"
-	EdgePkgEqual            Edge = "PKG_EQUAL"
-	EdgeCertifyScorecard    Edge = "CERTIFY_SCORECARD"
-	EdgeCertifyVuln         Edge = "CERTIFY_VULN"
-	EdgeHasSourceAt         Edge = "HAS_SOURCE_AT"
-	EdgeHasSbom             Edge = "HAS_SBOM"
-	EdgeHasSlsa             Edge = "HAS_SLSA"
+	EdgeArtifactCertifyBad          Edge = "ARTIFACT_CERTIFY_BAD"
+	EdgeArtifactCertifyGood         Edge = "ARTIFACT_CERTIFY_GOOD"
+	EdgeArtifactCertifyVexStatement Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
+	EdgeArtifactHashEqual           Edge = "ARTIFACT_HASH_EQUAL"
+	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
+	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
+	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
+	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
+	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
+	EdgeCveIsVulnerability          Edge = "CVE_IS_VULNERABILITY"
+	EdgeGhsaCertifyVexStatement     Edge = "GHSA_CERTIFY_VEX_STATEMENT"
+	EdgeGhsaCertifyVuln             Edge = "GHSA_CERTIFY_VULN"
+	EdgeGhsaIsVulnerability         Edge = "GHSA_IS_VULNERABILITY"
+	EdgeNoVulnCertifyVuln           Edge = "NO_VULN_CERTIFY_VULN"
+	EdgeOsvCertifyVexStatement      Edge = "OSV_CERTIFY_VEX_STATEMENT"
+	EdgeOsvCertifyVuln              Edge = "OSV_CERTIFY_VULN"
+	EdgeOsvIsVulnerability          Edge = "OSV_IS_VULNERABILITY"
+	EdgePackageCertifyBad           Edge = "PACKAGE_CERTIFY_BAD"
+	EdgePackageCertifyGood          Edge = "PACKAGE_CERTIFY_GOOD"
+	EdgePackageCertifyVexStatement  Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
+	EdgePackageCertifyVuln          Edge = "PACKAGE_CERTIFY_VULN"
+	EdgePackageHasSbom              Edge = "PACKAGE_HAS_SBOM"
+	EdgePackageHasSourceAt          Edge = "PACKAGE_HAS_SOURCE_AT"
+	EdgePackageIsDependency         Edge = "PACKAGE_IS_DEPENDENCY"
+	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
+	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
+	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
+	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
+	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
+	EdgeSourceHasSbom               Edge = "SOURCE_HAS_SBOM"
+	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
+	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
 )
 
 // GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.

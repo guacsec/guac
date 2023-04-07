@@ -109,22 +109,22 @@ func (n *srcNameStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := []uint32{n.parent}
 
-	if allowedEdges[model.EdgeHasSourceAt] {
+	if allowedEdges[model.EdgeSourceHasSourceAt] {
 		out = append(out, n.srcMapLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyScorecard] {
+	if allowedEdges[model.EdgeSourceCertifyScorecard] {
 		out = append(out, n.scorecardLinks...)
 	}
-	if allowedEdges[model.EdgeIsOccurrence] {
+	if allowedEdges[model.EdgeSourceIsOccurrence] {
 		out = append(out, n.occurrences...)
 	}
-	if allowedEdges[model.EdgeHasSbom] {
+	if allowedEdges[model.EdgeSourceHasSbom] {
 		out = append(out, n.hasSBOMs...)
 	}
-	if allowedEdges[model.EdgeCertifyBad] {
+	if allowedEdges[model.EdgeSourceCertifyBad] {
 		out = append(out, n.badLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyGood] {
+	if allowedEdges[model.EdgeSourceCertifyGood] {
 		out = append(out, n.goodLinks...)
 	}
 	return out

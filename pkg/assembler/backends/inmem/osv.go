@@ -62,13 +62,13 @@ func (n *osvNode) ID() uint32 { return n.id }
 
 func (n *osvNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := []uint32{}
-	if allowedEdges[model.EdgeCertifyVuln] {
+	if allowedEdges[model.EdgeOsvCertifyVuln] {
 		out = append(out, n.certifyVulnLinks...)
 	}
-	if allowedEdges[model.EdgeIsVulnerability] {
+	if allowedEdges[model.EdgeOsvIsVulnerability] {
 		out = append(out, n.equalVulnLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyVexStatement] {
+	if allowedEdges[model.EdgeOsvCertifyVexStatement] {
 		out = append(out, n.vexLinks...)
 	}
 	return out

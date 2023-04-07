@@ -58,13 +58,13 @@ func (n *ghsaNode) ID() uint32 { return n.id }
 
 func (n *ghsaNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := []uint32{}
-	if allowedEdges[model.EdgeCertifyVuln] {
+	if allowedEdges[model.EdgeGhsaCertifyVuln] {
 		out = append(out, n.certifyVulnLinks...)
 	}
-	if allowedEdges[model.EdgeIsVulnerability] {
+	if allowedEdges[model.EdgeGhsaIsVulnerability] {
 		out = append(out, n.equalVulnLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyVexStatement] {
+	if allowedEdges[model.EdgeGhsaCertifyVexStatement] {
 		out = append(out, n.vexLinks...)
 	}
 	return out

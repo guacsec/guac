@@ -45,22 +45,22 @@ func (n *artStruct) ID() uint32 { return n.id }
 
 func (n *artStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := []uint32{}
-	if allowedEdges[model.EdgeHashEqual] {
+	if allowedEdges[model.EdgeArtifactHashEqual] {
 		out = append(out, n.hashEquals...)
 	}
-	if allowedEdges[model.EdgeIsOccurrence] {
+	if allowedEdges[model.EdgeArtifactIsOccurrence] {
 		out = append(out, n.occurrences...)
 	}
-	if allowedEdges[model.EdgeHasSlsa] {
+	if allowedEdges[model.EdgeArtifactHasSlsa] {
 		out = append(out, n.hasSLSAs...)
 	}
-	if allowedEdges[model.EdgeCertifyVexStatement] {
+	if allowedEdges[model.EdgeArtifactCertifyVexStatement] {
 		out = append(out, n.vexLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyBad] {
+	if allowedEdges[model.EdgeArtifactCertifyBad] {
 		out = append(out, n.badLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyGood] {
+	if allowedEdges[model.EdgeArtifactCertifyGood] {
 		out = append(out, n.goodLinks...)
 	}
 	return out

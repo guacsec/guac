@@ -159,16 +159,16 @@ func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 		out = append(out, v.id)
 	}
 
-	if allowedEdges[model.EdgeHasSourceAt] {
+	if allowedEdges[model.EdgePackageHasSourceAt] {
 		out = append(out, n.srcMapLinks...)
 	}
-	if allowedEdges[model.EdgeIsDependency] {
+	if allowedEdges[model.EdgePackageIsDependency] {
 		out = append(out, n.isDependencyLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyBad] {
+	if allowedEdges[model.EdgePackageCertifyBad] {
 		out = append(out, n.badLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyGood] {
+	if allowedEdges[model.EdgePackageCertifyGood] {
 		out = append(out, n.goodLinks...)
 	}
 	return out
@@ -176,31 +176,31 @@ func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := []uint32{n.parent}
 
-	if allowedEdges[model.EdgeHasSourceAt] {
+	if allowedEdges[model.EdgePackageHasSourceAt] {
 		out = append(out, n.srcMapLinks...)
 	}
-	if allowedEdges[model.EdgeIsDependency] {
+	if allowedEdges[model.EdgePackageIsDependency] {
 		out = append(out, n.isDependencyLinks...)
 	}
-	if allowedEdges[model.EdgeIsOccurrence] {
+	if allowedEdges[model.EdgePackageIsOccurrence] {
 		out = append(out, n.occurrences...)
 	}
-	if allowedEdges[model.EdgeCertifyVuln] {
+	if allowedEdges[model.EdgePackageCertifyVuln] {
 		out = append(out, n.certifyVulnLinks...)
 	}
-	if allowedEdges[model.EdgeHasSbom] {
+	if allowedEdges[model.EdgePackageHasSbom] {
 		out = append(out, n.hasSBOMs...)
 	}
-	if allowedEdges[model.EdgeCertifyVexStatement] {
+	if allowedEdges[model.EdgePackageCertifyVexStatement] {
 		out = append(out, n.vexLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyBad] {
+	if allowedEdges[model.EdgePackageCertifyBad] {
 		out = append(out, n.badLinks...)
 	}
-	if allowedEdges[model.EdgeCertifyGood] {
+	if allowedEdges[model.EdgePackageCertifyGood] {
 		out = append(out, n.goodLinks...)
 	}
-	if allowedEdges[model.EdgePkgEqual] {
+	if allowedEdges[model.EdgePackagePkgEqual] {
 		out = append(out, n.pkgEquals...)
 	}
 
