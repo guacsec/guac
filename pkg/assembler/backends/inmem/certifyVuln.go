@@ -48,7 +48,7 @@ func (n *vulnerabilityLink) ID() uint32 { return n.id }
 
 func (n *vulnerabilityLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 2)
-	if allowedEdges[model.EdgeCertifyVulnPackage]{
+	if allowedEdges[model.EdgeCertifyVulnPackage] {
 		out = append(out, n.packageID)
 	}
 	if n.osvID != 0 && allowedEdges[model.EdgeCertifyVulnOsv] {
