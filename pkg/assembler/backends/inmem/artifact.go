@@ -207,14 +207,9 @@ func (c *demoClient) buildArtifactResponse(id uint32, filter *model.ArtifactSpec
 		}
 	}
 
-	node, ok := c.index[id]
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match existing node")
-	}
-
-	artNode, ok := node.(*artStruct)
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type for artifact")
+	artNode, err := byID[*artStruct](id, c)
+	if err != nil {
+		return nil, fmt.Errorf("ID does not match expected node type for artifact, %w", err)
 	}
 
 	if filter != nil && noMatch(filter.Algorithm, artNode.algorithm) {

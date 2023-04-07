@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -134,18 +135,18 @@ func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.O
 	}
 	var out []*model.Osv
 	if filter != nil && filter.OsvID != nil {
-		osvNode, hasOsvIDNode := c.osvs[strings.ToLower(*filter.OsvID)]
+		o, hasOsvIDNode := c.osvs[strings.ToLower(*filter.OsvID)]
 		if hasOsvIDNode {
 			out = append(out, &model.Osv{
-				ID:    nodeID(osvNode.id),
-				OsvID: osvNode.osvID,
+				ID:    nodeID(o.id),
+				OsvID: o.osvID,
 			})
 		}
 	} else {
-		for _, osvNode := range c.osvs {
+		for _, o := range c.osvs {
 			out = append(out, &model.Osv{
-				ID:    nodeID(osvNode.id),
-				OsvID: osvNode.osvID,
+				ID:    nodeID(o.id),
+				OsvID: o.osvID,
 			})
 		}
 	}
@@ -189,23 +190,18 @@ func (c *demoClient) buildOsvResponse(id uint32, filter *model.OSVSpec) (*model.
 		}
 	}
 
-	node, ok := c.index[id]
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match existing node")
+	osv, err := byID[*osvNode](id, c)
+	if err != nil {
+		return nil, fmt.Errorf("Could not find node to build osv response, %w", err)
+	}
+	if filter != nil && noMatch(toLower(filter.OsvID), osv.osvID) {
+		return nil, nil
 	}
 
-	var osv *model.Osv
-	if osvNode, ok := node.(*osvNode); ok {
-		if filter != nil && noMatch(toLower(filter.OsvID), osvNode.osvID) {
-			return nil, nil
-		}
-		osv = &model.Osv{
-			ID:    nodeID(osvNode.id),
-			OsvID: osvNode.osvID,
-		}
-	}
-
-	return osv, nil
+	return &model.Osv{
+		ID:    nodeID(osv.id),
+		OsvID: osv.osvID,
+	}, nil
 }
 
 func getOsvIDFromInput(c *demoClient, input model.OSVInputSpec) (uint32, error) {

@@ -131,6 +131,7 @@ type pkgNameOrVersion interface {
 	getCertifyBadLinks() []uint32
 	setCertifyGoodLinks(id uint32)
 	getCertifyGoodLinks() []uint32
+	node
 }
 
 func (n *pkgNamespaceStruct) ID() uint32 { return n.id }
@@ -506,7 +507,10 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 			Subpath:    versionNode.subpath,
 			Qualifiers: getCollectedPackageQualifiers(versionNode.qualifiers),
 		})
-		node = c.index[versionNode.parent]
+		node, ok = c.index[versionNode.parent]
+		if !ok {
+			return nil, gqlerror.Errorf("ID does not match existing node")
+		}
 	}
 
 	pnl := []*model.PackageName{}
@@ -519,7 +523,10 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 			Name:     versionStruct.name,
 			Versions: pvl,
 		})
-		node = c.index[versionStruct.parent]
+		node, ok = c.index[versionStruct.parent]
+		if !ok {
+			return nil, gqlerror.Errorf("ID does not match existing node")
+		}
 	}
 
 	pnsl := []*model.PackageNamespace{}
@@ -532,7 +539,10 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 			Namespace: nameStruct.namespace,
 			Names:     pnl,
 		})
-		node = c.index[nameStruct.parent]
+		node, ok = c.index[nameStruct.parent]
+		if !ok {
+			return nil, gqlerror.Errorf("ID does not match existing node")
+		}
 	}
 
 	namespaceStruct, ok := node.(*pkgNamespaceStruct)

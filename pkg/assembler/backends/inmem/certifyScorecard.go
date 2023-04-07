@@ -56,18 +56,20 @@ func (c *demoClient) CertifyScorecard(ctx context.Context, source model.SourceIn
 }
 
 func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (*model.CertifyScorecard, error) {
+	funcName := "CertifyScorecard"
+
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
+
 	sourceID, err := getSourceIDFromInput(c, source)
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-
-	searchIDs := []uint32{}
-	srcName, ok := c.index[sourceID].(*srcNameNode)
-	if ok {
-		searchIDs = append(searchIDs, srcName.scorecardLinks...)
+	srcName, err := byID[*srcNameNode](sourceID, c)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	searchIDs := srcName.scorecardLinks
 
 	checksMap := getChecksFromInput(scorecard.Checks)
 
@@ -107,7 +109,7 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceIn
 		c.index[collectedScorecardLink.id] = &collectedScorecardLink
 		c.scorecards = append(c.scorecards, &collectedScorecardLink)
 		// set the backlinks
-		c.index[sourceID].(*srcNameNode).setScorecardLinks(collectedScorecardLink.id)
+		srcName.setScorecardLinks(collectedScorecardLink.id)
 	}
 
 	// build return GraphQL type

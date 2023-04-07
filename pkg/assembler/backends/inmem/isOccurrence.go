@@ -100,8 +100,9 @@ func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.Package
 }
 
 func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (*model.IsOccurrence, error) {
+	funcName := "IngestOccurrence"
 	if err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence"); err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
 	lock(&c.m, readOnly)
@@ -109,7 +110,7 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 
 	a, err := c.artifactByKey(artifact.Algorithm, artifact.Digest)
 	if err != nil {
-		return nil, gqlerror.Errorf("IngestOccurrence :: Artifact not found")
+		return nil, gqlerror.Errorf("%v :: Artifact not found %s", funcName, err)
 	}
 
 	var packageID uint32

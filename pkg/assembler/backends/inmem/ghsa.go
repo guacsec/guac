@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -161,23 +162,19 @@ func (c *demoClient) buildGhsaResponse(id uint32, filter *model.GHSASpec) (*mode
 		}
 	}
 
-	node, ok := c.index[id]
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match existing node")
+	ghsa, err := byID[*ghsaNode](id, c)
+	if err != nil {
+		return nil, fmt.Errorf("Could not find node to build ghsa response, %w", err)
 	}
 
-	var ghsa *model.Ghsa
-	if ghsaNode, ok := node.(*ghsaNode); ok {
-		if filter != nil && noMatch(toLower(filter.GhsaID), ghsaNode.ghsaID) {
-			return nil, nil
-		}
-		ghsa = &model.Ghsa{
-			ID:     nodeID(ghsaNode.id),
-			GhsaID: ghsaNode.ghsaID,
-		}
+	if filter != nil && noMatch(toLower(filter.GhsaID), ghsa.ghsaID) {
+		return nil, nil
 	}
 
-	return ghsa, nil
+	return &model.Ghsa{
+		ID:     nodeID(ghsa.id),
+		GhsaID: ghsa.ghsaID,
+	}, nil
 }
 
 func (c *demoClient) exactGHSA(filter *model.GHSASpec) (*ghsaNode, error) {
