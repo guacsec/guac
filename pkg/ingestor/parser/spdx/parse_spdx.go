@@ -156,10 +156,6 @@ func (s *spdxParser) getFiles() error {
 	return nil
 }
 
-func getTags(f *v2_2.File) []string {
-	return f.FileTypes
-}
-
 func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
 	reader := bytes.NewReader(p)
 	spdx, err := spdx_json.Load2_2(reader)

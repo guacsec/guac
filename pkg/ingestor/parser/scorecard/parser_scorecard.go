@@ -93,10 +93,10 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 	idx := strings.LastIndex(s.Repo.Name, "/")
 	if idx < 0 {
 		name = s.Repo.Name
+	} else {
+		ns = s.Repo.Name[:idx]
+		name = s.Repo.Name[idx+1:]
 	}
-
-	ns = s.Repo.Name[:idx]
-	name = s.Repo.Name[idx+1:]
 
 	srcInput := model.SourceInputSpec{
 		// assuming scorecards is only git

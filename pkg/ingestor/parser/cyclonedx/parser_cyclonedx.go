@@ -56,8 +56,12 @@ func (c *cyclonedxParser) Parse(ctx context.Context, doc *processor.Document) er
 		return fmt.Errorf("failed to parse cyclonedx BOM: %w", err)
 	}
 	c.cdxBom = cdxBom
-	c.getTopLevelPackage(cdxBom)
-	c.getPackages(cdxBom)
+	if err := c.getTopLevelPackage(cdxBom); err != nil {
+		return err
+	}
+	if err := c.getPackages(cdxBom); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -106,10 +110,10 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 			}
 		}
 		topPackage, err := asmhelpers.PurlToPkg(purl)
-		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, purl)
 		if err != nil {
 			return err
 		}
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, purl)
 
 		c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)] = append(c.packagePackages[string(cdxBom.Metadata.Component.BOMRef)], topPackage)
 

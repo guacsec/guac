@@ -163,10 +163,8 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 			return fmt.Errorf("failed to retrieve object attribute from bucket: %s, error: %w", g.bucket, err)
 		}
 
-		payload := []byte{}
-
 		if g.lastDownload.IsZero() || attrs.Updated.After(g.lastDownload) {
-			payload, err = g.getObject(ctx, attrs.Name)
+			payload, err := g.getObject(ctx, attrs.Name)
 			if err != nil {
 				logger.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
 				continue
