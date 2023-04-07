@@ -88,6 +88,12 @@ func TestPurlConvert(t *testing.T) {
 			purlUri:  "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io",
 			expected: pkg("docker", "gcr.io/customer", "dockerimage", "sha256:244fd47e07d10", "", map[string]string{}),
 		}, {
+			purlUri:  "pkg:oci/docker.io/library/alpine@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest&repository_url=docker.io%2Flibrary",
+			expected: pkg("oci", "docker.io/library", "alpine", "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870", "", map[string]string{"tag": "latest"}),
+		}, {
+			purlUri:  "pkg:oci/debian@sha256:244fd47e07d10?arch=amd64&tag=latest&repository_url=docker.io%2Flibrary",
+			expected: pkg("oci", "docker.io/library", "debian", "sha256:244fd47e07d10", "", map[string]string{"arch": "amd64", "tag": "latest"}),
+		}, {
 			purlUri:  "pkg:docker/smartentry/debian@dc437cc87d10",
 			expected: pkg("docker", "smartentry", "debian", "dc437cc87d10", "", map[string]string{}),
 		}, {
@@ -304,7 +310,7 @@ func TestPkgToPurl(t *testing.T) {
 			// use tags and potentially indicate truncated hashes.
 
 			//expectedPurlUri: "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io",
-			expectedPurlUri: "pkg:docker/gcr.io/customer/dockerimage@sha256:244fd47e07d10",
+			expectedPurlUri: "pkg:docker/dockerimage@sha256:244fd47e07d10?repository_url=gcr.io%2Fcustomer",
 			pkgType:         "docker",
 			namespace:       "gcr.io/customer",
 			name:            "dockerimage",
@@ -312,7 +318,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{},
 		}, {
-			expectedPurlUri: "pkg:docker/smartentry/debian@dc437cc87d10",
+			expectedPurlUri: "pkg:docker/debian@dc437cc87d10?repository_url=smartentry",
 			pkgType:         "docker",
 			namespace:       "smartentry",
 			name:            "debian",
@@ -453,7 +459,7 @@ func TestPkgToPurl(t *testing.T) {
 			//TODO (Issue #635): similar issue to above.
 
 			//expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=docker.io/library/debian&arch=amd64&tag=latest",
-			expectedPurlUri: "pkg:oci/docker.io/library/debian@sha256:244fd47e07d10?arch=amd64&tag=latest",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?arch=amd64&tag=latest&repository_url=docker.io%2Flibrary",
 			pkgType:         "oci",
 			namespace:       "docker.io/library",
 			name:            "debian",
@@ -461,7 +467,7 @@ func TestPkgToPurl(t *testing.T) {
 			subpath:         "",
 			qualifiers:      []string{"arch", "amd64", "tag", "latest"},
 		}, {
-			expectedPurlUri: "pkg:oci/ghcr.io/debian@sha256:244fd47e07d10?tag=bullseye",
+			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?tag=bullseye&repository_url=ghcr.io",
 			pkgType:         "oci",
 			namespace:       "ghcr.io",
 			name:            "debian",
