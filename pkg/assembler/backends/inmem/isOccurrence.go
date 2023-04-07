@@ -43,13 +43,15 @@ func (n *isOccurrenceStruct) ID() uint32 { return n.id }
 
 func (n *isOccurrenceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 3)
-	if n.pkg != 0 {
+	if n.pkg != 0 && allowedEdges[model.EdgeIsOccurrencePackage] {
 		out = append(out, n.pkg)
 	}
-	if n.source != 0 {
+	if n.source != 0 && allowedEdges[model.EdgeIsOccurrenceSource] {
 		out = append(out, n.source)
 	}
-	out = append(out, n.artifact)
+	if allowedEdges[model.EdgeIsOccurrenceArtifact] {
+		out = append(out, n.artifact)
+	}
 	return out
 }
 

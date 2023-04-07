@@ -40,7 +40,14 @@ type srcMapLink struct {
 func (n *srcMapLink) ID() uint32 { return n.id }
 
 func (n *srcMapLink) Neighbors(allowedEdges edgeMap) []uint32 {
-	return []uint32{n.sourceID, n.packageID}
+	out := make([]uint32, 0, 2)
+	if allowedEdges[model.EdgeHasSourceAtPackage] {
+		out = append(out, n.packageID)
+	}
+	if allowedEdges[model.EdgeHasSourceAtSource] {
+		out = append(out, n.sourceID)
+	}
+	return out
 }
 
 func (n *srcMapLink) BuildModelNode(c *demoClient) (model.Node, error) {

@@ -37,7 +37,10 @@ type pkgEqualStruct struct {
 func (n *pkgEqualStruct) ID() uint32 { return n.id }
 
 func (n *pkgEqualStruct) Neighbors(allowedEdges edgeMap) []uint32 {
-	return n.pkgs
+	if allowedEdges[model.EdgePkgEqualPackage] {
+		return n.pkgs
+	}
+	return []uint32{}
 }
 
 func (n *pkgEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {

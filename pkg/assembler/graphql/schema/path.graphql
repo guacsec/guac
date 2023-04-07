@@ -49,16 +49,15 @@ union Node
 
 """
 Edge allows filtering path/neighbors output to only contain a subset of all
-possible GUAC verbs.
+possible GUAC links.
 
-Each member of the enum matches with one of the verbs. The naming scheme is
-converting the CamelCase name to CAPITALS_WITH_UNDERSCORES and appending noun
-node in CAPITALS.
+Each member of the enum is formed by merging two Node names with _. Each name
+is converted from CamelCase to CAPITALS_WITH_UNDERSCORES. Only valid edges
+(pairs from Node to Node) are included.
 
-Note that each GUAC verb is at the same time both an Edge and a Node. We need
-to return it as a Node to have it show up in the return type of the queries and
-we need it to be an edge to allow filtering paths to only consider certain
-predicates.
+The only exception to the above rule is for links out of HasSLSA. The names are
+HAS_SLSA_SUBJECT, HAS_SLSA_BUILT_BY, and HAS_SLSA_MATERIALS. This is because
+ARTIFACT_HAS_SLSA is only from subject Artifact to HasSLSA.
 """
 enum Edge {
   ARTIFACT_CERTIFY_BAD
@@ -93,6 +92,40 @@ enum Edge {
   SOURCE_HAS_SBOM
   SOURCE_HAS_SOURCE_AT
   SOURCE_IS_OCCURRENCE
+
+  CERTIFY_BAD_ARTIFACT
+  CERTIFY_BAD_PACKAGE
+  CERTIFY_BAD_SOURCE
+  CERTIFY_GOOD_ARTIFACT
+  CERTIFY_GOOD_PACKAGE
+  CERTIFY_GOOD_SOURCE
+  CERTIFY_SCORECARD_SOURCE
+  CERTIFY_VEX_STATEMENT_ARTIFACT
+  CERTIFY_VEX_STATEMENT_CVE
+  CERTIFY_VEX_STATEMENT_GHSA
+  CERTIFY_VEX_STATEMENT_OSV
+  CERTIFY_VEX_STATEMENT_PACKAGE
+  CERTIFY_VULN_CVE
+  CERTIFY_VULN_GHSA
+  CERTIFY_VULN_NO_VULN
+  CERTIFY_VULN_OSV
+  CERTIFY_VULN_PACKAGE
+  HASH_EQUAL_ARTIFACT
+  HAS_SBOM_PACKAGE
+  HAS_SBOM_SOURCE
+  HAS_SLSA_BUILT_BY
+  HAS_SLSA_MATERIALS
+  HAS_SLSA_SUBJECT
+  HAS_SOURCE_AT_PACKAGE
+  HAS_SOURCE_AT_SOURCE
+  IS_DEPENDENCY_PACKAGE
+  IS_OCCURRENCE_ARTIFACT
+  IS_OCCURRENCE_PACKAGE
+  IS_OCCURRENCE_SOURCE
+  IS_VULNERABILITY_CVE
+  IS_VULNERABILITY_GHSA
+  IS_VULNERABILITY_OSV
+  PKG_EQUAL_PACKAGE
 }
 
 extend type Query {
