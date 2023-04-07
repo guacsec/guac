@@ -37,7 +37,7 @@ func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 }
 
 func PkgToPurl(purlType, namespace, name, version, subpath string, qualifiersList []string) string {
-	collectedQualifiers := []purl.Qualifier{}
+	collectedQualifiers := purl.Qualifiers{}
 	for i := range qualifiersList {
 		if i%2 == 0 {
 			qualifier := purl.Qualifier{
@@ -47,6 +47,14 @@ func PkgToPurl(purlType, namespace, name, version, subpath string, qualifiersLis
 			collectedQualifiers = append(collectedQualifiers, qualifier)
 		}
 	}
+
+	if purlType == purl.TypeOCI || purlType == purl.TypeDocker {
+		if namespace != "" {
+			collectedQualifiers = append(collectedQualifiers, purl.Qualifier{Key: "repository_url", Value: namespace})
+			namespace = ""
+		}
+	}
+
 	pkg := purl.NewPackageURL(purlType, namespace, name, version, collectedQualifiers, subpath)
 	return pkg.ToString()
 }

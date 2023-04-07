@@ -47,6 +47,10 @@ var flags = struct {
 
 	// graphQL client flags
 	graphqlEndpoint string
+
+	// run as poll certifier
+	poll     bool
+	interval int
 }{}
 
 var cfgFile string
@@ -73,10 +77,15 @@ func init() {
 	// graphql client flags
 	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
+	// certifier flags
+	persistentFlags.BoolVarP(&flags.poll, "poll", "p", true, "sets the certifier to polling mode")
+	persistentFlags.IntVarP(&flags.interval, "interval", "i", 5, "if polling set interval in minutes")
+
 	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm",
 		"verifier-keyPath", "verifier-keyID",
 		"csub-addr", "csub-listen-port",
 		"gql-backend", "gql-port", "gql-debug", "gql-endpoint",
+		"poll", "interval",
 	}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {

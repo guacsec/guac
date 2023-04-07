@@ -33,19 +33,21 @@ import (
 	"github.com/spf13/viper"
 )
 
-var certifierCmd = &cobra.Command{
-	Use:   "certifier",
-	Short: "certifies packages in GUAC graph, this command talks directly to the graphQL endpoint",
+var osvCmd = &cobra.Command{
+	Use:   "osv [flags]",
+	Short: "runs the osv certifier",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateCertifierFlags(
+		opts, err := validateOSVFlags(
 			viper.GetString("gdbuser"),
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
 			viper.GetString("gql-endpoint"),
+			viper.GetBool("poll"),
+			viper.GetInt("interval"),
 		)
 
 		if err != nil {
@@ -124,7 +126,7 @@ var certifierCmd = &cobra.Command{
 			return false
 		}
 
-		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, time.Minute*5); err != nil {
+		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
 			logger.Fatal(err)
 		}
 		if gotErr {
@@ -135,13 +137,15 @@ var certifierCmd = &cobra.Command{
 	},
 }
 
-func validateCertifierFlags(user string, pass string, dbAddr string, realm string, graphqlEndpoint string) (options, error) {
+func validateOSVFlags(user string, pass string, dbAddr string, realm string, graphqlEndpoint string, poll bool, interval int) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.poll = poll
+	opts.interval = interval
 
 	return opts, nil
 }
@@ -154,5 +158,5 @@ func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, e
 }
 
 func init() {
-	rootCmd.AddCommand(certifierCmd)
+	rootCmd.AddCommand(osvCmd)
 }

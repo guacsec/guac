@@ -39,8 +39,8 @@ go run "${GUAC_DIR}/cmd/graphql_playground" &
 echo @@@@ Ingesting guac-data into server
 go run "${GUAC_DIR}/cmd/guacone" files "${GUAC_DIR}/guac-data/docs/"
 
-echo @@@@ Running certifiers
-go run "${GUAC_DIR}/cmd/guacone" certifier
+echo @@@@ Running osv certifier
+go run "${GUAC_DIR}/cmd/guacone" osv -p=false
 
 queries="${GUAC_DIR}/demo/queries.gql"
 

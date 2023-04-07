@@ -76,12 +76,57 @@ func TestCertify(t *testing.T) {
 
 	tests := []struct {
 		name       string
+		poll       bool
 		query      certifier.QueryComponents
 		want       []*processor.Document
 		wantErr    bool
 		errMessage error
 	}{{
 		name:  "query and generate attestation",
+		poll:  false,
+		query: newMockQuery(),
+		want: []*processor.Document{
+			{
+				Blob:   []byte(testdata.Text4ShellVulAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "guac",
+					Source:    "guac",
+				},
+			},
+			{
+				Blob:   []byte(testdata.SecondLevelVulAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "guac",
+					Source:    "guac",
+				},
+			},
+			{
+				Blob:   []byte(testdata.Log4JVulAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "guac",
+					Source:    "guac",
+				},
+			},
+			{
+				Blob:   []byte(testdata.RootVulAttestation),
+				Type:   processor.DocumentITE6Vul,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "guac",
+					Source:    "guac",
+				},
+			},
+		},
+		wantErr: false,
+	}, {
+		name:  "polling - query and generate attestation",
+		poll:  true,
 		query: newMockQuery(),
 		want: []*processor.Document{
 			{
@@ -133,10 +178,11 @@ func TestCertify(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			ctx := logging.WithLogger(context.Background())
-			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
-			defer cancel()
-
+			if tt.poll {
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
+				defer cancel()
+			}
 			var collectedDocs []*processor.Document
 
 			emit := func(d *processor.Document) error {
@@ -144,11 +190,11 @@ func TestCertify(t *testing.T) {
 				return nil
 			}
 
-			err := Certify(ctx, tt.query, emit, errHandler, time.Second*1)
+			err := Certify(ctx, tt.query, emit, errHandler, tt.poll, time.Second*1)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Certify() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err == context.DeadlineExceeded {
+			if err == context.DeadlineExceeded || err == nil {
 				for i := range collectedDocs {
 					result, err := dochelper.DocEqualWithTimestamp(collectedDocs[i], tt.want[i])
 					if err != nil {
