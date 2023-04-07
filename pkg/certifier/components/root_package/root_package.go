@@ -92,9 +92,10 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 			}
 			ticker.Reset(tickInterval)
 		case d := <-nodeChan:
-			if len(packNodes) < 1000 {
+			if len(packNodes) < 999 {
 				packNodes = append(packNodes, d)
 			} else {
+				packNodes = append(packNodes, d)
 				compChan <- packNodes
 				packNodes = []*PackageNode{}
 				ticker.Reset(tickInterval)
@@ -111,9 +112,10 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 
 	for len(nodeChan) > 0 {
 		d := <-nodeChan
-		if len(packNodes) < 1000 {
+		if len(packNodes) < 999 {
 			packNodes = append(packNodes, d)
 		} else {
+			packNodes = append(packNodes, d)
 			compChan <- packNodes
 			packNodes = []*PackageNode{}
 		}
