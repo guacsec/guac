@@ -120,8 +120,7 @@ func Test_CsubSourceDataSourcesUpdate(t *testing.T) {
 		return
 	}
 
-	var expected datasource.DataSources
-	expected = expectedDataSource
+	expected := expectedDataSource
 	if !reflect.DeepEqual(ds, &expected) {
 		t.Errorf("unexpected datasource output: expect %v, got %v", &expected, ds)
 

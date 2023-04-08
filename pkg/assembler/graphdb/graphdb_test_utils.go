@@ -19,6 +19,8 @@
 package graphdb
 
 import (
+	"errors"
+
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
@@ -76,7 +78,11 @@ func ReadQueryForTesting(client Client, query string, args map[string]interface{
 	if err != nil {
 		return nil, err
 	}
-	return result.([][]interface{}), nil
+	rv, ok := result.([][]interface{})
+	if !ok {
+		return nil, errors.New("ReadQueryForTesting could not convert return value")
+	}
+	return rv, nil
 }
 
 func ReadQuery(client Client, query string, args map[string]interface{}) ([]interface{}, error) {
@@ -106,7 +112,11 @@ func ReadQuery(client Client, query string, args map[string]interface{}) ([]inte
 	if err != nil {
 		return nil, err
 	}
-	return result.([]interface{}), nil
+	rv, ok := result.([]interface{})
+	if !ok {
+		return nil, errors.New("ReadQuery could not convert return value")
+	}
+	return rv, nil
 }
 
 // ClearDBForTesting clears the entire database.

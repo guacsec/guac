@@ -234,7 +234,9 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				identifierStrings: &common.IdentifierStrings{},
 			}
 			c.cdxBom = tt.cdxBom
-			c.getTopLevelPackage(tt.cdxBom)
+			if err := c.getTopLevelPackage(tt.cdxBom); err != nil {
+				t.Errorf("Failed to getTopLevelPackage %s", err)
+			}
 			wantPackage, err := asmhelpers.PurlToPkg(tt.wantPurl)
 			if err != nil {
 				t.Errorf("Failed to parse purl %v", tt.wantPurl)

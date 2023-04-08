@@ -55,7 +55,7 @@ func ingestData(port int) {
 	ingestIsVulnerability(ctx, gqlclient)
 	ingestVEXStatement(ctx, gqlclient)
 	ingestReachabilityTestData(ctx, gqlclient)
-	time := time.Now().Sub(start)
+	time := time.Since(start)
 	logger.Infof("Ingesting test data into backend server took %v", time)
 }
 
