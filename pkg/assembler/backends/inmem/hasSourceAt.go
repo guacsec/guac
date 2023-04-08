@@ -53,35 +53,35 @@ func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.Pkg
 }
 
 func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (*model.HasSourceAt, error) {
+	funcName := "IngestHasSourceAt"
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
 	sourceID, err := getSourceIDFromInput(c, source)
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	srcName, err := byID[*srcNameNode](sourceID, c)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	sourceHasSourceLinks := srcName.srcMapLinks
 
 	packageID, err := getPackageIDFromInput(c, packageArg, pkgMatchType)
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	pkgNameOrVersionNode, err := byID[pkgNameOrVersion](packageID, c)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	packageHasSourceLinks := pkgNameOrVersionNode.getSrcMapLinks()
 
-	packageHasSourceLinks := []uint32{}
-	pkgNameOrVersionNode, ok := c.index[packageID].(pkgNameOrVersion)
-	if ok {
-		packageHasSourceLinks = append(packageHasSourceLinks, pkgNameOrVersionNode.getSrcMapLinks()...)
-	}
-	sourceHasSourceLinks := []uint32{}
-	srcName, ok := c.index[sourceID].(*srcNameNode)
-	if ok {
-		sourceHasSourceLinks = append(sourceHasSourceLinks, srcName.srcMapLinks...)
-	}
-
-	searchIDs := []uint32{}
-	if len(packageHasSourceLinks) > len(sourceHasSourceLinks) {
-		searchIDs = append(searchIDs, sourceHasSourceLinks...)
+	var searchIDs []uint32
+	if len(packageHasSourceLinks) < len(sourceHasSourceLinks) {
+		searchIDs = packageHasSourceLinks
 	} else {
-		searchIDs = append(searchIDs, packageHasSourceLinks...)
+		searchIDs = sourceHasSourceLinks
 	}
 
 	// Don't insert duplicates
@@ -116,8 +116,8 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.Pkg
 		c.index[collectedSrcMapLink.id] = &collectedSrcMapLink
 		c.hasSources = append(c.hasSources, &collectedSrcMapLink)
 		// set the backlinks
-		c.index[packageID].(pkgNameOrVersion).setSrcMapLinks(collectedSrcMapLink.id)
-		c.index[sourceID].(*srcNameNode).setSrcMapLinks(collectedSrcMapLink.id)
+		pkgNameOrVersionNode.setSrcMapLinks(collectedSrcMapLink.id)
+		srcName.setSrcMapLinks(collectedSrcMapLink.id)
 	}
 
 	// build return GraphQL type

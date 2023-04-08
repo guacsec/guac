@@ -359,7 +359,10 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 			Tag:    &nameNode.tag,
 			Commit: &nameNode.commit,
 		})
-		node = c.index[nameNode.parent]
+		node, ok = c.index[nameNode.parent]
+		if !ok {
+			return nil, gqlerror.Errorf("ID does not match existing node")
+		}
 	}
 
 	snsl := []*model.SourceNamespace{}
@@ -372,7 +375,10 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 			Namespace: nameStruct.namespace,
 			Names:     snl,
 		})
-		node = c.index[nameStruct.parent]
+		node, ok = c.index[nameStruct.parent]
+		if !ok {
+			return nil, gqlerror.Errorf("ID does not match existing node")
+		}
 	}
 
 	namespaceStruct, ok := node.(*srcNamespaceStruct)

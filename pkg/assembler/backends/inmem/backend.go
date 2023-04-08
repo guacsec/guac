@@ -88,7 +88,6 @@ type demoClient struct {
 
 	// Ensures that only one noKnownVuln node is created
 	noKnownVulnNode noKnownVuln
-	noKnownVulnID   uint32
 }
 
 // This node is a singleton!
@@ -138,9 +137,8 @@ func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	}
 
 	// Build the special noKnownVuln node and link it everywhere
-	client.noKnownVulnID = client.getNextID()
-	client.noKnownVulnNode.id = client.noKnownVulnID
-	client.index[client.noKnownVulnID] = &client.noKnownVulnNode
+	client.noKnownVulnNode.id = client.getNextID()
+	client.index[client.noKnownVulnNode.id] = &client.noKnownVulnNode
 
 	return client, nil
 }
@@ -205,4 +203,13 @@ func unlock(m *sync.RWMutex, readOnly bool) {
 	} else {
 		m.Unlock()
 	}
+}
+
+func (c *demoClient) buildNoVulnResponse() (*model.NoVuln, error) {
+	if c.noKnownVulnNode.id == 0 {
+		return nil, fmt.Errorf("noKnownVulnNode has not been initialized")
+	}
+	return &model.NoVuln{
+		ID: nodeID(c.noKnownVulnNode.id),
+	}, nil
 }

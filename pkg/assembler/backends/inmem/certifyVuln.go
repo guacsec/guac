@@ -74,8 +74,9 @@ func (c *demoClient) IngestVulnerability(ctx context.Context, packageArg model.P
 }
 
 func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput, readOnly bool) (*model.CertifyVuln, error) {
+	funcName := "IngestVulnerability"
 	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability", true); err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
 	lock(&c.m, readOnly)
@@ -83,61 +84,62 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 
 	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	foundPackage, err := byID[*pkgVersionNode](packageID, c)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	packageVulns := foundPackage.certifyVulnLinks
+
 	var osvID uint32
+	var foundOsvNode *osvNode
 	var cveID uint32
+	var foundCveNode *cveNode
 	var ghsaID uint32
+	var foundGhsaNode *ghsaNode
 	var noKnownVulnID uint32
-	vulnerabilityLinks := []uint32{}
+	var vulnerabilityLinks []uint32
 	if vulnerability.Osv != nil {
 		osvID, err = getOsvIDFromInput(c, *vulnerability.Osv)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		osvNode, ok := c.index[osvID].(*osvNode)
-		if ok {
-			vulnerabilityLinks = append(vulnerabilityLinks, osvNode.certifyVulnLinks...)
+		foundOsvNode, err = byID[*osvNode](osvID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-	}
-
-	if vulnerability.Cve != nil {
+		vulnerabilityLinks = foundOsvNode.certifyVulnLinks
+	} else if vulnerability.Cve != nil {
 		cveID, err = getCveIDFromInput(c, *vulnerability.Cve)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		cveNode, ok := c.index[cveID].(*cveNode)
-		if ok {
-			vulnerabilityLinks = append(vulnerabilityLinks, cveNode.certifyVulnLinks...)
+		foundCveNode, err = byID[*cveNode](cveID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-	}
-
-	if vulnerability.Ghsa != nil {
+		vulnerabilityLinks = foundCveNode.certifyVulnLinks
+	} else if vulnerability.Ghsa != nil {
 		ghsaID, err = getGhsaIDFromInput(c, *vulnerability.Ghsa)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		ghsaNode, ok := c.index[ghsaID].(*ghsaNode)
-		if ok {
-			vulnerabilityLinks = append(vulnerabilityLinks, ghsaNode.certifyVulnLinks...)
+		foundGhsaNode, err = byID[*ghsaNode](ghsaID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-	}
-	if vulnerability.NoVuln != nil && *vulnerability.NoVuln {
-		noKnownVulnID = c.noKnownVulnID
-		vulnerabilityLinks = append(vulnerabilityLinks, c.noKnownVulnNode.certifyVulnLinks...)
-	}
-
-	packageVulns := []uint32{}
-	foundPkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
-	if ok {
-		packageVulns = append(packageVulns, foundPkgVersionNode.certifyVulnLinks...)
-	}
-
-	searchIDs := []uint32{}
-	if len(packageVulns) > len(vulnerabilityLinks) {
-		searchIDs = append(searchIDs, vulnerabilityLinks...)
+		vulnerabilityLinks = foundGhsaNode.certifyVulnLinks
 	} else {
-		searchIDs = append(searchIDs, packageVulns...)
+		noKnownVulnID = c.noKnownVulnNode.id
+		vulnerabilityLinks = c.noKnownVulnNode.certifyVulnLinks
+	}
+
+	var searchIDs []uint32
+	if len(packageVulns) < len(vulnerabilityLinks) {
+		searchIDs = packageVulns
+	} else {
+		searchIDs = vulnerabilityLinks
 	}
 
 	// Don't insert duplicates
@@ -193,15 +195,15 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		c.index[collectedCertifyVulnLink.id] = &collectedCertifyVulnLink
 		c.vulnerabilities = append(c.vulnerabilities, &collectedCertifyVulnLink)
 		// set the backlinks
-		c.index[packageID].(*pkgVersionNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
+		foundPackage.setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		if osvID != 0 {
-			c.index[osvID].(*osvNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
+			foundOsvNode.setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 		if cveID != 0 {
-			c.index[cveID].(*cveNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
+			foundCveNode.setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 		if ghsaID != 0 {
-			c.index[ghsaID].(*ghsaNode).setVulnerabilityLinks(collectedCertifyVulnLink.id)
+			foundGhsaNode.setVulnerabilityLinks(collectedCertifyVulnLink.id)
 		}
 		if noKnownVulnID != 0 {
 			c.noKnownVulnNode.setVulnerabilityLinks(collectedCertifyVulnLink.id)
@@ -391,11 +393,10 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 			}
 		}
 		if filter.Vulnerability.NoVuln != nil && link.noKnownVulnID != 0 {
-			noVulnNode, err := c.noKnownVulnNode.BuildModelNode(c)
+			noVuln, err = c.buildNoVulnResponse()
 			if err != nil {
 				return nil, err
 			}
-			noVuln = noVulnNode.(*model.NoVuln)
 		}
 	} else {
 		if link.osvID != 0 {
@@ -417,11 +418,10 @@ func (c *demoClient) buildCertifyVulnerability(link *vulnerabilityLink, filter *
 			}
 		}
 		if link.noKnownVulnID != 0 {
-			noVulnNode, err := c.noKnownVulnNode.BuildModelNode(c)
+			noVuln, err = c.buildNoVulnResponse()
 			if err != nil {
 				return nil, err
 			}
-			noVuln = noVulnNode.(*model.NoVuln)
 		}
 	}
 	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search

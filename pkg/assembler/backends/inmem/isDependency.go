@@ -52,36 +52,39 @@ func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgI
 }
 
 func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec, readOnly bool) (*model.IsDependency, error) {
+	funcName := "IngestDependency"
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
+
+	// for IsDependency the dependent package will return the ID at the
+	// packageName node. VersionRange will be used to specify the versions are
+	// the attestation relates to
+
 	packageID, err := getPackageIDFromInput(c, packageArg, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	foundPkgVersion, err := byID[*pkgVersionNode](packageID, c)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	packageDependencies := foundPkgVersion.isDependencyLinks
 
-	// for IsDependency the dependent package will return the ID at the packageName node. VersionRange will be used to specify the
-	// versions are the attestation relates to
 	depPackageID, err := getPackageIDFromInput(c, dependentPackageArg, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions})
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
+	depPkgName, err := byID[*pkgVersionStruct](depPackageID, c)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+	depPackageDependencies := depPkgName.isDependencyLinks
 
-	packageDependencies := []uint32{}
-	pkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
-	if ok {
-		packageDependencies = append(packageDependencies, pkgVersionNode.isDependencyLinks...)
-	}
-	depPackageDependencies := []uint32{}
-	pkgName, ok := c.index[depPackageID].(*pkgVersionStruct)
-	if ok {
-		depPackageDependencies = append(depPackageDependencies, pkgName.isDependencyLinks...)
-	}
-
-	searchIDs := []uint32{}
-	if len(packageDependencies) > len(depPackageDependencies) {
-		searchIDs = append(searchIDs, depPackageDependencies...)
+	var searchIDs []uint32
+	if len(packageDependencies) < len(depPackageDependencies) {
+		searchIDs = packageDependencies
 	} else {
-		searchIDs = append(searchIDs, packageDependencies...)
+		searchIDs = depPackageDependencies
 	}
 
 	// Don't insert duplicates
@@ -117,8 +120,8 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 		c.index[collectedIsDependencyLink.id] = &collectedIsDependencyLink
 		c.isDependencies = append(c.isDependencies, &collectedIsDependencyLink)
 		// set the backlinks
-		c.index[packageID].(pkgNameOrVersion).setIsDependencyLinks(collectedIsDependencyLink.id)
-		c.index[depPackageID].(pkgNameOrVersion).setIsDependencyLinks(collectedIsDependencyLink.id)
+		foundPkgVersion.setIsDependencyLinks(collectedIsDependencyLink.id)
+		depPkgName.setIsDependencyLinks(collectedIsDependencyLink.id)
 	}
 
 	// build return GraphQL type

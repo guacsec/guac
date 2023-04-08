@@ -74,87 +74,93 @@ func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.Packa
 }
 
 func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
+	funcName := "IngestVEXStatement"
 	if err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement"); err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement", false); err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
 	var packageID uint32
+	var foundPkgVersionNode *pkgVersionNode
 	var artifactID uint32
-	subjectVexLinks := []uint32{}
+	var foundArtStrct *artStruct
+	var subjectVexLinks []uint32
 	if subject.Package != nil {
 		var err error
 		packageID, err = getPackageIDFromInput(c, *subject.Package, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundPkgVersionNode, ok := c.index[packageID].(*pkgVersionNode)
-		if ok {
-			subjectVexLinks = append(subjectVexLinks, foundPkgVersionNode.vexLinks...)
+		foundPkgVersionNode, err = byID[*pkgVersionNode](packageID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
+		subjectVexLinks = foundPkgVersionNode.vexLinks
 	} else {
 		var err error
 		artifactID, err = getArtifactIDFromInput(c, *subject.Artifact)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundArtStrct, ok := c.index[artifactID].(*artStruct)
-		if ok {
-			subjectVexLinks = append(subjectVexLinks, foundArtStrct.vexLinks...)
+		foundArtStrct, err = byID[*artStruct](artifactID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
+		subjectVexLinks = foundArtStrct.vexLinks
 	}
 
 	var osvID uint32
+	var foundOsvNode *osvNode
 	var cveID uint32
+	var foundCveNode *cveNode
 	var ghsaID uint32
-	vulnerabilityVexLinks := []uint32{}
-
+	var foundGhsaNode *ghsaNode
+	var vulnerabilityVexLinks []uint32
 	if vulnerability.Osv != nil {
 		var err error
 		osvID, err = getOsvIDFromInput(c, *vulnerability.Osv)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		osvNode, ok := c.index[osvID].(*osvNode)
-		if ok {
-			vulnerabilityVexLinks = append(vulnerabilityVexLinks, osvNode.vexLinks...)
+		foundOsvNode, err = byID[*osvNode](osvID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-	}
-
-	if vulnerability.Cve != nil {
+		vulnerabilityVexLinks = foundOsvNode.vexLinks
+	} else if vulnerability.Cve != nil {
 		var err error
 		cveID, err = getCveIDFromInput(c, *vulnerability.Cve)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		cveNode, ok := c.index[cveID].(*cveNode)
-		if ok {
-			vulnerabilityVexLinks = append(vulnerabilityVexLinks, cveNode.vexLinks...)
+		foundCveNode, err = byID[*cveNode](cveID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-	}
-
-	if vulnerability.Ghsa != nil {
+		vulnerabilityVexLinks = foundCveNode.vexLinks
+	} else {
 		var err error
 		ghsaID, err = getGhsaIDFromInput(c, *vulnerability.Ghsa)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		ghsaNode, ok := c.index[ghsaID].(*ghsaNode)
-		if ok {
-			vulnerabilityVexLinks = append(vulnerabilityVexLinks, ghsaNode.vexLinks...)
+		foundGhsaNode, err = byID[*ghsaNode](ghsaID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
+		vulnerabilityVexLinks = foundGhsaNode.vexLinks
 	}
 
-	searchIDs := []uint32{}
-	if len(subjectVexLinks) > len(vulnerabilityVexLinks) {
-		searchIDs = append(searchIDs, vulnerabilityVexLinks...)
+	var searchIDs []uint32
+	if len(subjectVexLinks) < len(vulnerabilityVexLinks) {
+		searchIDs = subjectVexLinks
 	} else {
-		searchIDs = append(searchIDs, subjectVexLinks...)
+		searchIDs = vulnerabilityVexLinks
 	}
 
 	// Don't insert duplicates
@@ -211,19 +217,19 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		c.vexs = append(c.vexs, &collectedCertifyVexLink)
 		// set the backlinks
 		if packageID != 0 {
-			c.index[packageID].(*pkgVersionNode).setVexLinks(collectedCertifyVexLink.id)
+			foundPkgVersionNode.setVexLinks(collectedCertifyVexLink.id)
 		}
 		if artifactID != 0 {
-			c.index[artifactID].(*artStruct).setVexLinks(collectedCertifyVexLink.id)
+			foundArtStrct.setVexLinks(collectedCertifyVexLink.id)
 		}
 		if osvID != 0 {
-			c.index[osvID].(*osvNode).setVexLinks(collectedCertifyVexLink.id)
+			foundOsvNode.setVexLinks(collectedCertifyVexLink.id)
 		}
 		if cveID != 0 {
-			c.index[cveID].(*cveNode).setVexLinks(collectedCertifyVexLink.id)
+			foundCveNode.setVexLinks(collectedCertifyVexLink.id)
 		}
 		if ghsaID != 0 {
-			c.index[ghsaID].(*ghsaNode).setVexLinks(collectedCertifyVexLink.id)
+			foundGhsaNode.setVexLinks(collectedCertifyVexLink.id)
 		}
 	}
 

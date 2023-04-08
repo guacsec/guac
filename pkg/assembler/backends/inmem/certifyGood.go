@@ -62,6 +62,7 @@ func (c *demoClient) IngestCertifyGood(ctx context.Context, subject model.Packag
 	return c.ingestCertifyGood(ctx, subject, pkgMatchType, certifyGood, true)
 }
 func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec, readOnly bool) (*model.CertifyGood, error) {
+	funcName := "IngestCertifyGood"
 	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, "good subject"); err != nil {
 		return nil, err
 	}
@@ -70,39 +71,45 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 	defer unlock(&c.m, readOnly)
 
 	var packageID uint32
+	var foundPkgNameorVersionNode pkgNameOrVersion
 	var artifactID uint32
+	var foundArtStrct *artStruct
 	var sourceID uint32
+	var srcName *srcNameNode
 	searchIDs := []uint32{}
 	if subject.Package != nil {
 		var err error
 		packageID, err = getPackageIDFromInput(c, *subject.Package, *pkgMatchType)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundPkgNameorVersionNode, ok := c.index[packageID].(pkgNameOrVersion)
-		if ok {
-			searchIDs = append(searchIDs, foundPkgNameorVersionNode.getCertifyGoodLinks()...)
+		foundPkgNameorVersionNode, err = byID[pkgNameOrVersion](packageID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
+		searchIDs = append(searchIDs, foundPkgNameorVersionNode.getCertifyBadLinks()...)
 	} else if subject.Artifact != nil {
 		var err error
 		artifactID, err = getArtifactIDFromInput(c, *subject.Artifact)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		foundArtStrct, ok := c.index[artifactID].(*artStruct)
-		if ok {
-			searchIDs = append(searchIDs, foundArtStrct.goodLinks...)
+		foundArtStrct, err = byID[*artStruct](artifactID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
+		searchIDs = append(searchIDs, foundArtStrct.badLinks...)
 	} else {
 		var err error
 		sourceID, err = getSourceIDFromInput(c, *subject.Source)
 		if err != nil {
-			return nil, err
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		srcName, ok := c.index[sourceID].(*srcNameNode)
-		if ok {
-			searchIDs = append(searchIDs, srcName.goodLinks...)
+		srcName, err = byID[*srcNameNode](sourceID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
+		searchIDs = append(searchIDs, srcName.badLinks...)
 	}
 
 	// Don't insert duplicates
@@ -149,13 +156,13 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 		c.certifyGoods = append(c.certifyGoods, &collectedCertifyGoodLink)
 		// set the backlinks
 		if packageID != 0 {
-			c.index[packageID].(pkgNameOrVersion).setCertifyGoodLinks(collectedCertifyGoodLink.id)
+			foundPkgNameorVersionNode.setCertifyGoodLinks(collectedCertifyGoodLink.id)
 		}
 		if artifactID != 0 {
-			c.index[artifactID].(*artStruct).setCertifyGoodLinks(collectedCertifyGoodLink.id)
+			foundArtStrct.setCertifyGoodLinks(collectedCertifyGoodLink.id)
 		}
 		if sourceID != 0 {
-			c.index[sourceID].(*srcNameNode).setCertifyGoodLinks(collectedCertifyGoodLink.id)
+			srcName.setCertifyGoodLinks(collectedCertifyGoodLink.id)
 		}
 
 	}
