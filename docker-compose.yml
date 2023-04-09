@@ -117,3 +117,25 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./container_files/guac:/guac
+  depsdev-collector:
+    image: "local-organic-guac"
+    command: "/opt/guac/collector deps_dev --use-csub"
+    working_dir: /guac
+    restart: on-failure
+    environment:
+      - DEPS_DEV_APIKEY
+    depends_on:
+      service-health-2:
+        condition: service_completed_successfully
+    volumes:
+      - ./container_files/guac:/guac
+  osv-certifier:
+    image: "local-organic-guac"
+    command: "/opt/guac/guacone osv --poll --interval 5"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      service-health-2:
+        condition: service_completed_successfully
+    volumes:
+      - ./container_files/guac:/guac
