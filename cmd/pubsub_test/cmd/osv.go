@@ -38,12 +38,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var osvFlags = struct {
-	// run as poll certifier
-	poll     bool
-	interval int
-}{}
-
 var osvCmd = &cobra.Command{
 	Use:   "osv [flags]",
 	Short: "runs the osv certifier",

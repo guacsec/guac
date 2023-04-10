@@ -27,7 +27,6 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/helpers"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -254,27 +253,6 @@ func getAssembler(ctx context.Context, opts options) (func([]assembler.IngestPre
 	gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 	f := helpers.GetAssembler(ctx, gqlclient)
 	return f, nil
-}
-
-func createIndices(client graphdb.Client) error {
-	indices := map[string][]string{
-		"Artifact":      {"digest", "name"},
-		"Package":       {"purl", "name"},
-		"Metadata":      {"id"},
-		"Attestation":   {"digest"},
-		"Vulnerability": {"id"},
-	}
-
-	for label, attributes := range indices {
-		for _, attribute := range attributes {
-			err := assembler.CreateIndexOn(client, label, attribute)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 func printErrors(filesWithErrors []string) string {
