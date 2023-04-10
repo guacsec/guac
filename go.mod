@@ -3,7 +3,7 @@ module github.com/guacsec/guac
 go 1.19
 
 require (
-	cloud.google.com/go/storage v1.30.0
+	cloud.google.com/go/storage v1.30.1
 	github.com/fsouza/fake-gcs-server v1.44.1
 	github.com/in-toto/in-toto-golang v0.7.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
@@ -42,7 +42,7 @@ require (
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
+	google.golang.org/genproto v0.0.0-20230320184635-7606e756e683
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0
 )
