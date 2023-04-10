@@ -316,24 +316,18 @@ var (
 	isOccurrenceJustifyTopPkg = &model.IsOccurrenceInputSpec{
 		Justification: "cdx package with checksum",
 	}
-	isDepJustifyTopPkg = &model.IsDependencyInputSpec{
-		Justification: "top-level package GUAC heuristic connecting to each file/package",
-	}
-	isDepJustifyContains = &model.IsDependencyInputSpec{
-		Justification: "Derived from SPDX CONTAINS relationship",
-	}
-	isDepJustifyContainedBy = &model.IsDependencyInputSpec{
-		Justification: "Derived from SPDX CONTAINED_BY relationship",
-	}
-	isDepJustifyDependsOn = &model.IsDependencyInputSpec{
-		Justification: "Derived from SPDX DEPENDS_ON relationship",
-	}
-	isDepJustifyDependencyOf = &model.IsDependencyInputSpec{
-		Justification: "Derived from SPDX DEPENDENCY_OF relationship",
-	}
-	isCDXDepJustifyDepends = &model.IsDependencyInputSpec{
-		Justification: "CDX BOM Dependency",
-	}
+
+	isDepJustifyTopPkgJustification = "top-level package GUAC heuristic connecting to each file/package"
+
+	isDepJustifyContainsJustification = "Derived from SPDX CONTAINS relationship"
+
+	isDepJustifyContainedByJustification = "Derived from SPDX CONTAINED_BY relationship"
+
+	isDepJustifyDependsOnJustification = "Derived from SPDX DEPENDS_ON relationship"
+
+	isDepJustifyDependencyOfJustification = "Derived from SPDX DEPENDENCY_OF relationship"
+
+	isCDXDepJustifyDependsJustification = "CDX BOM Dependency"
 
 	isOccJustifyFile = &model.IsOccurrenceInputSpec{
 		Justification: "spdx file with checksum",
@@ -345,59 +339,92 @@ var (
 
 	SpdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:          topLevelPack,
-			DepPkg:       baselayoutPack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    topLevelPack,
+			DepPkg: baselayoutPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "3.2.0-r22",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          topLevelPack,
-			DepPkg:       baselayoutdataPack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    topLevelPack,
+			DepPkg: baselayoutdataPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "3.2.0-r22",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          topLevelPack,
-			DepPkg:       keysPack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    topLevelPack,
+			DepPkg: keysPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "2.4-r1",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          topLevelPack,
-			DepPkg:       worldFilePack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    topLevelPack,
+			DepPkg: worldFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          topLevelPack,
-			DepPkg:       rootFilePack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    topLevelPack,
+			DepPkg: rootFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          topLevelPack,
-			DepPkg:       triggersFilePack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    topLevelPack,
+			DepPkg: triggersFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          topLevelPack,
-			DepPkg:       rsaPubFilePack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    topLevelPack,
+			DepPkg: rsaPubFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          baselayoutPack,
-			DepPkg:       keysPack,
-			IsDependency: isDepJustifyDependencyOf,
+			Pkg:    baselayoutPack,
+			DepPkg: keysPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "2.4-r1",
+				Justification: isDepJustifyDependencyOfJustification,
+			},
 		},
 		{
-			Pkg:          rootFilePack,
-			DepPkg:       rsaPubFilePack,
-			IsDependency: isDepJustifyDependsOn,
+			Pkg:    rootFilePack,
+			DepPkg: rsaPubFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "",
+				Justification: isDepJustifyDependsOnJustification,
+			},
 		},
 		{
-			Pkg:          baselayoutPack,
-			DepPkg:       rootFilePack,
-			IsDependency: isDepJustifyContains,
+			Pkg:    baselayoutPack,
+			DepPkg: rootFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "",
+				Justification: isDepJustifyContainsJustification,
+			},
 		},
 		{
-			Pkg:          keysPack,
-			DepPkg:       rsaPubFilePack,
-			IsDependency: isDepJustifyContainedBy,
+			Pkg:    keysPack,
+			DepPkg: rsaPubFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "",
+				Justification: isDepJustifyContainedByJustification,
+			},
 		},
 	}
 
@@ -440,19 +467,28 @@ var (
 
 	CdxDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:          cdxTopLevelPack,
-			DepPkg:       cdxBasefilesPack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxBasefilesPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "11.1+deb11u5",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          cdxTopLevelPack,
-			DepPkg:       cdxNetbasePack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxNetbasePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "6.3",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          cdxTopLevelPack,
-			DepPkg:       cdxTzdataPack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    cdxTopLevelPack,
+			DepPkg: cdxTzdataPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "2021a-1+deb11u6",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 	}
 
@@ -468,19 +504,28 @@ var (
 
 	CdxQuarkusDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:          cdxTopQuarkusPack,
-			DepPkg:       cdxResteasyPack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxResteasyPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "2.13.4.Final",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          cdxTopQuarkusPack,
-			DepPkg:       cdxReactiveCommonPack,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    cdxTopQuarkusPack,
+			DepPkg: cdxReactiveCommonPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "2.13.4.Final",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 		{
-			Pkg:          cdxResteasyPack,
-			DepPkg:       cdxReactiveCommonPack,
-			IsDependency: isCDXDepJustifyDepends,
+			Pkg:    cdxResteasyPack,
+			DepPkg: cdxReactiveCommonPack,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "2.13.4.Final",
+				Justification: isCDXDepJustifyDependsJustification,
+			},
 		},
 	}
 
@@ -529,9 +574,12 @@ var (
 
 	CdxNpmDeps = []assembler.IsDependencyIngest{
 		{
-			Pkg:          cdxWebAppPackage,
-			DepPkg:       cdxBootstrapPackage,
-			IsDependency: isDepJustifyTopPkg,
+			Pkg:    cdxWebAppPackage,
+			DepPkg: cdxBootstrapPackage,
+			IsDependency: &model.IsDependencyInputSpec{
+				VersionRange:  "4.0.0-beta.2",
+				Justification: isDepJustifyTopPkgJustification,
+			},
 		},
 	}
 

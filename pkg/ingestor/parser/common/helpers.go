@@ -31,6 +31,7 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 				DepPkg: rfileNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					Justification: justification,
+					VersionRange:  *rfileNode.Version,
 				},
 			}, nil
 		}
@@ -41,6 +42,7 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 				DepPkg: rpackNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					Justification: justification,
+					VersionRange:  *rpackNode.Version,
 				},
 			}, nil
 
@@ -59,6 +61,7 @@ func CreateTopLevelIsDeps(toplevel *model.PkgInputSpec, packages map[string][]*m
 					DepPkg: packNode,
 					IsDependency: &model.IsDependencyInputSpec{
 						Justification: justification,
+						VersionRange:  *packNode.Version,
 					},
 				}
 				isDeps = append(isDeps, p)
@@ -73,6 +76,7 @@ func CreateTopLevelIsDeps(toplevel *model.PkgInputSpec, packages map[string][]*m
 				DepPkg: fileNode,
 				IsDependency: &model.IsDependencyInputSpec{
 					Justification: justification,
+					VersionRange:  *fileNode.Version,
 				},
 			}
 			isDeps = append(isDeps, p)
