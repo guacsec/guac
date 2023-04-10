@@ -34,7 +34,12 @@ type builderStruct struct {
 
 func (b *builderStruct) ID() uint32 { return b.id }
 
-func (b *builderStruct) Neighbors() []uint32 { return b.hasSLSAs }
+func (b *builderStruct) Neighbors(allowedEdges edgeMap) []uint32 {
+	if allowedEdges[model.EdgeBuilderHasSlsa] {
+		return b.hasSLSAs
+	}
+	return []uint32{}
+}
 
 func (b *builderStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convBuilder(b), nil

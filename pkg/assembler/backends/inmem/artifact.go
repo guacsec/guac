@@ -43,14 +43,26 @@ type artStruct struct {
 
 func (n *artStruct) ID() uint32 { return n.id }
 
-func (n *artStruct) Neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.hashEquals)+len(n.occurrences)+len(n.hasSLSAs)+len(n.vexLinks)+len(n.badLinks)+len(n.goodLinks))
-	out = append(out, n.hashEquals...)
-	out = append(out, n.occurrences...)
-	out = append(out, n.hasSLSAs...)
-	out = append(out, n.vexLinks...)
-	out = append(out, n.badLinks...)
-	out = append(out, n.goodLinks...)
+func (n *artStruct) Neighbors(allowedEdges edgeMap) []uint32 {
+	out := []uint32{}
+	if allowedEdges[model.EdgeArtifactHashEqual] {
+		out = append(out, n.hashEquals...)
+	}
+	if allowedEdges[model.EdgeArtifactIsOccurrence] {
+		out = append(out, n.occurrences...)
+	}
+	if allowedEdges[model.EdgeArtifactHasSlsa] {
+		out = append(out, n.hasSLSAs...)
+	}
+	if allowedEdges[model.EdgeArtifactCertifyVexStatement] {
+		out = append(out, n.vexLinks...)
+	}
+	if allowedEdges[model.EdgeArtifactCertifyBad] {
+		out = append(out, n.badLinks...)
+	}
+	if allowedEdges[model.EdgeArtifactCertifyGood] {
+		out = append(out, n.goodLinks...)
+	}
 	return out
 }
 

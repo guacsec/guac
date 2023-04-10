@@ -3676,6 +3676,86 @@ func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabil
 	return v.IngestVulnerability
 }
 
+// Edge allows filtering path/neighbors output to only contain a subset of all
+// possible GUAC links.
+//
+// Each member of the enum is formed by merging two Node names with _. Each name
+// is converted from CamelCase to CAPITALS_WITH_UNDERSCORES. Only valid edges
+// (pairs from Node to Node) are included.
+//
+// The only exception to the above rule is for links out of HasSLSA. The names are
+// HAS_SLSA_SUBJECT, HAS_SLSA_BUILT_BY, and HAS_SLSA_MATERIALS. This is because
+// ARTIFACT_HAS_SLSA is only from subject Artifact to HasSLSA.
+type Edge string
+
+const (
+	EdgeArtifactCertifyBad          Edge = "ARTIFACT_CERTIFY_BAD"
+	EdgeArtifactCertifyGood         Edge = "ARTIFACT_CERTIFY_GOOD"
+	EdgeArtifactCertifyVexStatement Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
+	EdgeArtifactHashEqual           Edge = "ARTIFACT_HASH_EQUAL"
+	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
+	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
+	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
+	EdgeCveCertifyVexStatement      Edge = "CVE_CERTIFY_VEX_STATEMENT"
+	EdgeCveCertifyVuln              Edge = "CVE_CERTIFY_VULN"
+	EdgeCveIsVulnerability          Edge = "CVE_IS_VULNERABILITY"
+	EdgeGhsaCertifyVexStatement     Edge = "GHSA_CERTIFY_VEX_STATEMENT"
+	EdgeGhsaCertifyVuln             Edge = "GHSA_CERTIFY_VULN"
+	EdgeGhsaIsVulnerability         Edge = "GHSA_IS_VULNERABILITY"
+	EdgeNoVulnCertifyVuln           Edge = "NO_VULN_CERTIFY_VULN"
+	EdgeOsvCertifyVexStatement      Edge = "OSV_CERTIFY_VEX_STATEMENT"
+	EdgeOsvCertifyVuln              Edge = "OSV_CERTIFY_VULN"
+	EdgeOsvIsVulnerability          Edge = "OSV_IS_VULNERABILITY"
+	EdgePackageCertifyBad           Edge = "PACKAGE_CERTIFY_BAD"
+	EdgePackageCertifyGood          Edge = "PACKAGE_CERTIFY_GOOD"
+	EdgePackageCertifyVexStatement  Edge = "PACKAGE_CERTIFY_VEX_STATEMENT"
+	EdgePackageCertifyVuln          Edge = "PACKAGE_CERTIFY_VULN"
+	EdgePackageHasSbom              Edge = "PACKAGE_HAS_SBOM"
+	EdgePackageHasSourceAt          Edge = "PACKAGE_HAS_SOURCE_AT"
+	EdgePackageIsDependency         Edge = "PACKAGE_IS_DEPENDENCY"
+	EdgePackageIsOccurrence         Edge = "PACKAGE_IS_OCCURRENCE"
+	EdgePackagePkgEqual             Edge = "PACKAGE_PKG_EQUAL"
+	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
+	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
+	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
+	EdgeSourceHasSbom               Edge = "SOURCE_HAS_SBOM"
+	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
+	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
+	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
+	EdgeCertifyBadPackage           Edge = "CERTIFY_BAD_PACKAGE"
+	EdgeCertifyBadSource            Edge = "CERTIFY_BAD_SOURCE"
+	EdgeCertifyGoodArtifact         Edge = "CERTIFY_GOOD_ARTIFACT"
+	EdgeCertifyGoodPackage          Edge = "CERTIFY_GOOD_PACKAGE"
+	EdgeCertifyGoodSource           Edge = "CERTIFY_GOOD_SOURCE"
+	EdgeCertifyScorecardSource      Edge = "CERTIFY_SCORECARD_SOURCE"
+	EdgeCertifyVexStatementArtifact Edge = "CERTIFY_VEX_STATEMENT_ARTIFACT"
+	EdgeCertifyVexStatementCve      Edge = "CERTIFY_VEX_STATEMENT_CVE"
+	EdgeCertifyVexStatementGhsa     Edge = "CERTIFY_VEX_STATEMENT_GHSA"
+	EdgeCertifyVexStatementOsv      Edge = "CERTIFY_VEX_STATEMENT_OSV"
+	EdgeCertifyVexStatementPackage  Edge = "CERTIFY_VEX_STATEMENT_PACKAGE"
+	EdgeCertifyVulnCve              Edge = "CERTIFY_VULN_CVE"
+	EdgeCertifyVulnGhsa             Edge = "CERTIFY_VULN_GHSA"
+	EdgeCertifyVulnNoVuln           Edge = "CERTIFY_VULN_NO_VULN"
+	EdgeCertifyVulnOsv              Edge = "CERTIFY_VULN_OSV"
+	EdgeCertifyVulnPackage          Edge = "CERTIFY_VULN_PACKAGE"
+	EdgeHashEqualArtifact           Edge = "HASH_EQUAL_ARTIFACT"
+	EdgeHasSbomPackage              Edge = "HAS_SBOM_PACKAGE"
+	EdgeHasSbomSource               Edge = "HAS_SBOM_SOURCE"
+	EdgeHasSlsaBuiltBy              Edge = "HAS_SLSA_BUILT_BY"
+	EdgeHasSlsaMaterials            Edge = "HAS_SLSA_MATERIALS"
+	EdgeHasSlsaSubject              Edge = "HAS_SLSA_SUBJECT"
+	EdgeHasSourceAtPackage          Edge = "HAS_SOURCE_AT_PACKAGE"
+	EdgeHasSourceAtSource           Edge = "HAS_SOURCE_AT_SOURCE"
+	EdgeIsDependencyPackage         Edge = "IS_DEPENDENCY_PACKAGE"
+	EdgeIsOccurrenceArtifact        Edge = "IS_OCCURRENCE_ARTIFACT"
+	EdgeIsOccurrencePackage         Edge = "IS_OCCURRENCE_PACKAGE"
+	EdgeIsOccurrenceSource          Edge = "IS_OCCURRENCE_SOURCE"
+	EdgeIsVulnerabilityCve          Edge = "IS_VULNERABILITY_CVE"
+	EdgeIsVulnerabilityGhsa         Edge = "IS_VULNERABILITY_GHSA"
+	EdgeIsVulnerabilityOsv          Edge = "IS_VULNERABILITY_OSV"
+	EdgePkgEqualPackage             Edge = "PKG_EQUAL_PACKAGE"
+)
+
 // GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
 type GHSAInputSpec struct {
 	GhsaId string `json:"ghsaId"`
@@ -6484,11 +6564,101 @@ func (v *NeighborsNeighborsCertifyBad) __premarshalJSON() (*__premarshalNeighbor
 //
 // Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 type NeighborsNeighborsCertifyGood struct {
-	Typename *string `json:"__typename"`
+	Typename       *string `json:"__typename"`
+	allCertifyGood `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsCertifyGood.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyGood) GetTypename() *string { return v.Typename }
+
+// GetId returns NeighborsNeighborsCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyGood) GetId() string { return v.allCertifyGood.Id }
+
+// GetJustification returns NeighborsNeighborsCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyGood) GetJustification() string {
+	return v.allCertifyGood.Justification
+}
+
+// GetSubject returns NeighborsNeighborsCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyGood) GetSubject() allCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.allCertifyGood.Subject
+}
+
+// GetOrigin returns NeighborsNeighborsCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyGood) GetOrigin() string { return v.allCertifyGood.Origin }
+
+// GetCollector returns NeighborsNeighborsCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyGood) GetCollector() string { return v.allCertifyGood.Collector }
+
+func (v *NeighborsNeighborsCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NeighborsNeighborsCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NeighborsNeighborsCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNeighborsNeighborsCertifyGood struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NeighborsNeighborsCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NeighborsNeighborsCertifyGood) __premarshalJSON() (*__premarshalNeighborsNeighborsCertifyGood, error) {
+	var retval __premarshalNeighborsNeighborsCertifyGood
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyGood.Id
+	retval.Justification = v.allCertifyGood.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyGood.Subject
+		var err error
+		*dst, err = __marshalallCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NeighborsNeighborsCertifyGood.allCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.allCertifyGood.Origin
+	retval.Collector = v.allCertifyGood.Collector
+	return &retval, nil
+}
 
 // NeighborsNeighborsCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -7937,10 +8107,14 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 	case *NeighborsNeighborsCertifyGood:
 		typename = "CertifyGood"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NeighborsNeighborsCertifyGood
-		}{typename, v}
+			*__premarshalNeighborsNeighborsCertifyGood
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NeighborsNeighborsPkgEqual:
 		typename = "PkgEqual"
@@ -8366,6 +8540,9 @@ type NeighborsResponse struct {
 	// neighbors returns all the direct neighbors of a node
 	//
 	// Similarly, the input is only specified by its ID.
+	//
+	// Specifying any Edge value in `usingOnly` will make the neighbors list only
+	// contain the corresponding GUAC evidence trees (GUAC verbs).
 	Neighbors []NeighborsNeighborsNode `json:"-"`
 }
 
@@ -8763,10 +8940,14 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 	case *NodeNodeCertifyGood:
 		typename = "CertifyGood"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*NodeNodeCertifyGood
-		}{typename, v}
+			*__premarshalNodeNodeCertifyGood
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodeNodePkgEqual:
 		typename = "PkgEqual"
@@ -9196,11 +9377,99 @@ func (v *NodeNodeCertifyBad) __premarshalJSON() (*__premarshalNodeNodeCertifyBad
 //
 // Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 type NodeNodeCertifyGood struct {
-	Typename *string `json:"__typename"`
+	Typename       *string `json:"__typename"`
+	allCertifyGood `json:"-"`
 }
 
 // GetTypename returns NodeNodeCertifyGood.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyGood) GetTypename() *string { return v.Typename }
+
+// GetId returns NodeNodeCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyGood) GetId() string { return v.allCertifyGood.Id }
+
+// GetJustification returns NodeNodeCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyGood) GetJustification() string { return v.allCertifyGood.Justification }
+
+// GetSubject returns NodeNodeCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyGood) GetSubject() allCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.allCertifyGood.Subject
+}
+
+// GetOrigin returns NodeNodeCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyGood) GetOrigin() string { return v.allCertifyGood.Origin }
+
+// GetCollector returns NodeNodeCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyGood) GetCollector() string { return v.allCertifyGood.Collector }
+
+func (v *NodeNodeCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*NodeNodeCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.NodeNodeCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalNodeNodeCertifyGood struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *NodeNodeCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *NodeNodeCertifyGood) __premarshalJSON() (*__premarshalNodeNodeCertifyGood, error) {
+	var retval __premarshalNodeNodeCertifyGood
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyGood.Id
+	retval.Justification = v.allCertifyGood.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyGood.Subject
+		var err error
+		*dst, err = __marshalallCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal NodeNodeCertifyGood.allCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.allCertifyGood.Origin
+	retval.Collector = v.allCertifyGood.Collector
+	return &retval, nil
+}
 
 // NodeNodeCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -10296,10 +10565,14 @@ func (v *NodeNodeIsVulnerability) __premarshalJSON() (*__premarshalNodeNodeIsVul
 // We define an ID field due to GraphQL restrictions.
 type NodeNodeNoVuln struct {
 	Typename *string `json:"__typename"`
+	Id       string  `json:"id"`
 }
 
 // GetTypename returns NodeNodeNoVuln.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodeNoVuln) GetTypename() *string { return v.Typename }
+
+// GetId returns NodeNodeNoVuln.Id, and is useful for accessing the field via an interface.
+func (v *NodeNodeNoVuln) GetId() string { return v.Id }
 
 // NodeNodeOSV includes the requested fields of the GraphQL type OSV.
 // The GraphQL type's documentation follows.
@@ -11198,11 +11471,99 @@ func (v *PathPathCertifyBad) __premarshalJSON() (*__premarshalPathPathCertifyBad
 //
 // Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
 type PathPathCertifyGood struct {
-	Typename *string `json:"__typename"`
+	Typename       *string `json:"__typename"`
+	allCertifyGood `json:"-"`
 }
 
 // GetTypename returns PathPathCertifyGood.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyGood) GetTypename() *string { return v.Typename }
+
+// GetId returns PathPathCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyGood) GetId() string { return v.allCertifyGood.Id }
+
+// GetJustification returns PathPathCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyGood) GetJustification() string { return v.allCertifyGood.Justification }
+
+// GetSubject returns PathPathCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyGood) GetSubject() allCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.allCertifyGood.Subject
+}
+
+// GetOrigin returns PathPathCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyGood) GetOrigin() string { return v.allCertifyGood.Origin }
+
+// GetCollector returns PathPathCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyGood) GetCollector() string { return v.allCertifyGood.Collector }
+
+func (v *PathPathCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PathPathCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PathPathCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPathPathCertifyGood struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PathPathCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PathPathCertifyGood) __premarshalJSON() (*__premarshalPathPathCertifyGood, error) {
+	var retval __premarshalPathPathCertifyGood
+
+	retval.Typename = v.Typename
+	retval.Id = v.allCertifyGood.Id
+	retval.Justification = v.allCertifyGood.Justification
+	{
+
+		dst := &retval.Subject
+		src := v.allCertifyGood.Subject
+		var err error
+		*dst, err = __marshalallCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal PathPathCertifyGood.allCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.allCertifyGood.Origin
+	retval.Collector = v.allCertifyGood.Collector
+	return &retval, nil
+}
 
 // PathPathCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
 // The GraphQL type's documentation follows.
@@ -12623,10 +12984,14 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 	case *PathPathCertifyGood:
 		typename = "CertifyGood"
 
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*PathPathCertifyGood
-		}{typename, v}
+			*__premarshalPathPathCertifyGood
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *PathPathPkgEqual:
 		typename = "PkgEqual"
@@ -13051,6 +13416,9 @@ type PathResponse struct {
 	//
 	// Since we want to uniquely identify endpoints, nodes must be specified by
 	// valid IDs only (instead of using filters/input spec structs).
+	//
+	// Specifying any Edge value in `usingOnly` will make the path only contain the
+	// corresponding GUAC evidence trees (GUAC verbs).
 	Path []PathPathNode `json:"-"`
 }
 
@@ -16309,11 +16677,15 @@ func (v *__IsVulnerabilityGHSAInput) GetIsVulnerability() IsVulnerabilityInputSp
 
 // __NeighborsInput is used internally by genqlient
 type __NeighborsInput struct {
-	Node string `json:"node"`
+	Node      string `json:"node"`
+	UsingOnly []Edge `json:"usingOnly"`
 }
 
 // GetNode returns __NeighborsInput.Node, and is useful for accessing the field via an interface.
 func (v *__NeighborsInput) GetNode() string { return v.Node }
+
+// GetUsingOnly returns __NeighborsInput.UsingOnly, and is useful for accessing the field via an interface.
+func (v *__NeighborsInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
 // __NodeInput is used internally by genqlient
 type __NodeInput struct {
@@ -16336,6 +16708,7 @@ type __PathInput struct {
 	Subject       string `json:"subject"`
 	Target        string `json:"target"`
 	MaxPathLength int    `json:"maxPathLength"`
+	UsingOnly     []Edge `json:"usingOnly"`
 }
 
 // GetSubject returns __PathInput.Subject, and is useful for accessing the field via an interface.
@@ -16346,6 +16719,9 @@ func (v *__PathInput) GetTarget() string { return v.Target }
 
 // GetMaxPathLength returns __PathInput.MaxPathLength, and is useful for accessing the field via an interface.
 func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
+
+// GetUsingOnly returns __PathInput.UsingOnly, and is useful for accessing the field via an interface.
+func (v *__PathInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
 // __PkgEqualInput is used internally by genqlient
 type __PkgEqualInput struct {
@@ -21727,12 +22103,13 @@ func Neighbors(
 	ctx context.Context,
 	client graphql.Client,
 	node string,
+	usingOnly []Edge,
 ) (*NeighborsResponse, error) {
 	req := &graphql.Request{
 		OpName: "Neighbors",
 		Query: `
-query Neighbors ($node: ID!) {
-	neighbors(node: $node) {
+query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
+	neighbors(node: $node, usingOnly: $usingOnly) {
 		__typename
 		... on Package {
 			... AllPkgTree
@@ -21775,6 +22152,9 @@ query Neighbors ($node: ID!) {
 		}
 		... on CertifyBad {
 			... allCertifyBad
+		}
+		... on CertifyGood {
+			... allCertifyGood
 		}
 		... on HashEqual {
 			... allHashEqualTree
@@ -21939,6 +22319,24 @@ fragment allSLSATree on HasSLSA {
 	}
 }
 fragment allCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment allCertifyGood on CertifyGood {
 	id
 	justification
 	subject {
@@ -22071,7 +22469,8 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 }
 `,
 		Variables: &__NeighborsInput{
-			Node: node,
+			Node:      node,
+			UsingOnly: usingOnly,
 		},
 	}
 	var err error
@@ -22120,6 +22519,9 @@ query Node ($node: ID!) {
 		... on GHSA {
 			... allGHSATree
 		}
+		... on NoVuln {
+			id
+		}
 		... on CertifyScorecard {
 			... AllCertifyScorecard
 		}
@@ -22137,6 +22539,9 @@ query Node ($node: ID!) {
 		}
 		... on CertifyBad {
 			... allCertifyBad
+		}
+		... on CertifyGood {
+			... allCertifyGood
 		}
 		... on HashEqual {
 			... allHashEqualTree
@@ -22301,6 +22706,24 @@ fragment allSLSATree on HasSLSA {
 	}
 }
 fragment allCertifyBad on CertifyBad {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment allCertifyGood on CertifyGood {
 	id
 	justification
 	subject {
@@ -22509,12 +22932,13 @@ func Path(
 	subject string,
 	target string,
 	maxPathLength int,
+	usingOnly []Edge,
 ) (*PathResponse, error) {
 	req := &graphql.Request{
 		OpName: "Path",
 		Query: `
-query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
-	path(subject: $subject, target: $target, maxPathLength: $maxPathLength) {
+query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
+	path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
 		__typename
 		... on Package {
 			... AllPkgTree
@@ -22557,6 +22981,9 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!) {
 		}
 		... on CertifyBad {
 			... allCertifyBad
+		}
+		... on CertifyGood {
+			... allCertifyGood
 		}
 		... on HashEqual {
 			... allHashEqualTree
@@ -22738,6 +23165,24 @@ fragment allCertifyBad on CertifyBad {
 	origin
 	collector
 }
+fragment allCertifyGood on CertifyGood {
+	id
+	justification
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... allArtifactTree
+		}
+	}
+	origin
+	collector
+}
 fragment allHashEqualTree on HashEqual {
 	id
 	justification
@@ -22856,6 +23301,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			Subject:       subject,
 			Target:        target,
 			MaxPathLength: maxPathLength,
+			UsingOnly:     usingOnly,
 		},
 	}
 	var err error

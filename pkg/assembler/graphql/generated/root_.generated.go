@@ -246,11 +246,11 @@ type ComplexityRoot struct {
 		IsDependency        func(childComplexity int, isDependencySpec *model.IsDependencySpec) int
 		IsOccurrence        func(childComplexity int, isOccurrenceSpec *model.IsOccurrenceSpec) int
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
-		Neighbors           func(childComplexity int, node string) int
+		Neighbors           func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                func(childComplexity int, node string) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
-		Path                func(childComplexity int, subject string, target string, maxPathLength int) int
+		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
 		PkgEqual            func(childComplexity int, pkgEqualSpec *model.PkgEqualSpec) int
 		Scorecards          func(childComplexity int, scorecardSpec *model.CertifyScorecardSpec) int
 		Sources             func(childComplexity int, sourceSpec *model.SourceSpec) int
@@ -1447,7 +1447,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string)), true
+		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge)), true
 
 	case "Query.node":
 		if e.complexity.Query.Node == nil {
@@ -1495,7 +1495,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int)), true
+		return e.complexity.Query.Path(childComplexity, args["subject"].(string), args["target"].(string), args["maxPathLength"].(int), args["usingOnly"].([]model.Edge)), true
 
 	case "Query.PkgEqual":
 		if e.complexity.Query.PkgEqual == nil {
@@ -3719,21 +3719,108 @@ union Node
   | HasSBOM
   | HasSLSA
 
+"""
+Edge allows filtering path/neighbors output to only contain a subset of all
+possible GUAC links.
+
+Each member of the enum is formed by merging two Node names with _. Each name
+is converted from CamelCase to CAPITALS_WITH_UNDERSCORES. Only valid edges
+(pairs from Node to Node) are included.
+
+The only exception to the above rule is for links out of HasSLSA. The names are
+HAS_SLSA_SUBJECT, HAS_SLSA_BUILT_BY, and HAS_SLSA_MATERIALS. This is because
+ARTIFACT_HAS_SLSA is only from subject Artifact to HasSLSA.
+"""
+enum Edge {
+  ARTIFACT_CERTIFY_BAD
+  ARTIFACT_CERTIFY_GOOD
+  ARTIFACT_CERTIFY_VEX_STATEMENT
+  ARTIFACT_HASH_EQUAL
+  ARTIFACT_HAS_SLSA
+  ARTIFACT_IS_OCCURRENCE
+  BUILDER_HAS_SLSA
+  CVE_CERTIFY_VEX_STATEMENT
+  CVE_CERTIFY_VULN
+  CVE_IS_VULNERABILITY
+  GHSA_CERTIFY_VEX_STATEMENT
+  GHSA_CERTIFY_VULN
+  GHSA_IS_VULNERABILITY
+  NO_VULN_CERTIFY_VULN
+  OSV_CERTIFY_VEX_STATEMENT
+  OSV_CERTIFY_VULN
+  OSV_IS_VULNERABILITY
+  PACKAGE_CERTIFY_BAD
+  PACKAGE_CERTIFY_GOOD
+  PACKAGE_CERTIFY_VEX_STATEMENT
+  PACKAGE_CERTIFY_VULN
+  PACKAGE_HAS_SBOM
+  PACKAGE_HAS_SOURCE_AT
+  PACKAGE_IS_DEPENDENCY
+  PACKAGE_IS_OCCURRENCE
+  PACKAGE_PKG_EQUAL
+  SOURCE_CERTIFY_BAD
+  SOURCE_CERTIFY_GOOD
+  SOURCE_CERTIFY_SCORECARD
+  SOURCE_HAS_SBOM
+  SOURCE_HAS_SOURCE_AT
+  SOURCE_IS_OCCURRENCE
+
+  CERTIFY_BAD_ARTIFACT
+  CERTIFY_BAD_PACKAGE
+  CERTIFY_BAD_SOURCE
+  CERTIFY_GOOD_ARTIFACT
+  CERTIFY_GOOD_PACKAGE
+  CERTIFY_GOOD_SOURCE
+  CERTIFY_SCORECARD_SOURCE
+  CERTIFY_VEX_STATEMENT_ARTIFACT
+  CERTIFY_VEX_STATEMENT_CVE
+  CERTIFY_VEX_STATEMENT_GHSA
+  CERTIFY_VEX_STATEMENT_OSV
+  CERTIFY_VEX_STATEMENT_PACKAGE
+  CERTIFY_VULN_CVE
+  CERTIFY_VULN_GHSA
+  CERTIFY_VULN_NO_VULN
+  CERTIFY_VULN_OSV
+  CERTIFY_VULN_PACKAGE
+  HASH_EQUAL_ARTIFACT
+  HAS_SBOM_PACKAGE
+  HAS_SBOM_SOURCE
+  HAS_SLSA_BUILT_BY
+  HAS_SLSA_MATERIALS
+  HAS_SLSA_SUBJECT
+  HAS_SOURCE_AT_PACKAGE
+  HAS_SOURCE_AT_SOURCE
+  IS_DEPENDENCY_PACKAGE
+  IS_OCCURRENCE_ARTIFACT
+  IS_OCCURRENCE_PACKAGE
+  IS_OCCURRENCE_SOURCE
+  IS_VULNERABILITY_CVE
+  IS_VULNERABILITY_GHSA
+  IS_VULNERABILITY_OSV
+  PKG_EQUAL_PACKAGE
+}
+
 extend type Query {
   """
   path query returns a path between subject and target, of a maximum length
 
   Since we want to uniquely identify endpoints, nodes must be specified by
   valid IDs only (instead of using filters/input spec structs).
+
+  Specifying any Edge value in ` + "`" + `usingOnly` + "`" + ` will make the path only contain the
+  corresponding GUAC evidence trees (GUAC verbs).
   """
-  path(subject: ID!, target: ID!, maxPathLength: Int!): [Node!]!
+  path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
 
   """
   neighbors returns all the direct neighbors of a node
 
   Similarly, the input is only specified by its ID.
+
+  Specifying any Edge value in ` + "`" + `usingOnly` + "`" + ` will make the neighbors list only
+  contain the corresponding GUAC evidence trees (GUAC verbs).
   """
-  neighbors(node: ID!): [Node!]!
+  neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
 
   """
   node returns a single node, regardless of type

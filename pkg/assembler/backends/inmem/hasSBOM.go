@@ -37,11 +37,14 @@ type hasSBOMStruct struct {
 
 func (n *hasSBOMStruct) ID() uint32 { return n.id }
 
-func (n *hasSBOMStruct) Neighbors() []uint32 {
-	if n.pkg != 0 {
+func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []uint32 {
+	if n.pkg != 0 && allowedEdges[model.EdgeHasSbomPackage] {
 		return []uint32{n.pkg}
 	}
-	return []uint32{n.src}
+	if allowedEdges[model.EdgeHasSbomSource] {
+		return []uint32{n.src}
+	}
+	return []uint32{}
 }
 
 func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {

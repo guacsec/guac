@@ -37,8 +37,14 @@ type hashEqualStruct struct {
 	collector     string
 }
 
-func (n *hashEqualStruct) ID() uint32          { return n.id }
-func (n *hashEqualStruct) Neighbors() []uint32 { return n.artifacts }
+func (n *hashEqualStruct) ID() uint32 { return n.id }
+
+func (n *hashEqualStruct) Neighbors(allowedEdges edgeMap) []uint32 {
+	if allowedEdges[model.EdgeHashEqualArtifact] {
+		return n.artifacts
+	}
+	return []uint32{}
+}
 
 func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convHashEqual(n), nil

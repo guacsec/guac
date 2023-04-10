@@ -42,8 +42,11 @@ type scorecardLink struct {
 
 func (n *scorecardLink) ID() uint32 { return n.id }
 
-func (n *scorecardLink) Neighbors() []uint32 {
-	return []uint32{n.sourceID}
+func (n *scorecardLink) Neighbors(allowedEdges edgeMap) []uint32 {
+	if allowedEdges[model.EdgeCertifyScorecardSource] {
+		return []uint32{n.sourceID}
+	}
+	return []uint32{}
 }
 
 func (n *scorecardLink) BuildModelNode(c *demoClient) (model.Node, error) {

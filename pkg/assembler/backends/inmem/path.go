@@ -24,7 +24,21 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func (c *demoClient) Path(ctx context.Context, source string, target string, maxPathLength int) ([]model.Node, error) {
+type edgeMap map[model.Edge]bool
+
+func processUsingOnly(usingOnly []model.Edge) edgeMap {
+	m := edgeMap{}
+	allowedEdges := usingOnly
+	if len(usingOnly) == 0 {
+		allowedEdges = model.AllEdge
+	}
+	for _, edge := range allowedEdges {
+		m[edge] = true
+	}
+	return m
+}
+
+func (c *demoClient) Path(ctx context.Context, source string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	if maxPathLength <= 0 {
 		return nil, gqlerror.Errorf("maxPathLength argument must be positive, got %d", maxPathLength)
 	}
@@ -40,17 +54,17 @@ func (c *demoClient) Path(ctx context.Context, source string, target string, max
 
 	c.m.RLock()
 	defer c.m.RUnlock()
-	return c.bfs(uint32(sourceID), uint32(targetID), maxPathLength)
+	return c.bfs(uint32(sourceID), uint32(targetID), maxPathLength, processUsingOnly(usingOnly))
 }
 
-func (c *demoClient) Neighbors(ctx context.Context, source string) ([]model.Node, error) {
+func (c *demoClient) Neighbors(ctx context.Context, source string, usingOnly []model.Edge) ([]model.Node, error) {
 	id, err := strconv.ParseUint(source, 10, 32)
 	if err != nil {
 		return nil, err
 	}
 
 	c.m.RLock()
-	neighbors, err := c.neighborsFromId(uint32(id))
+	neighbors, err := c.neighborsFromId(uint32(id), processUsingOnly(usingOnly))
 	if err != nil {
 		c.m.RUnlock()
 		return nil, err
@@ -81,15 +95,15 @@ func (c *demoClient) buildModelNodes(nodeIDs []uint32) ([]model.Node, error) {
 	return out, nil
 }
 
-func (c *demoClient) neighborsFromId(id uint32) ([]uint32, error) {
+func (c *demoClient) neighborsFromId(id uint32, allowedEdges edgeMap) ([]uint32, error) {
 	node, ok := c.index[id]
 	if !ok {
 		return nil, gqlerror.Errorf("ID does not match existing node")
 	}
-	return node.Neighbors(), nil
+	return node.Neighbors(allowedEdges), nil
 }
 
-func (c *demoClient) bfs(from, to uint32, maxLength int) ([]model.Node, error) {
+func (c *demoClient) bfs(from, to uint32, maxLength int, allowedEdges edgeMap) ([]model.Node, error) {
 	queue := make([]uint32, 0) // the queue of nodes in bfs
 	type dfsNode struct {
 		expanded bool // true once all node neighbors are added to queue
@@ -116,7 +130,7 @@ func (c *demoClient) bfs(from, to uint32, maxLength int) ([]model.Node, error) {
 			break
 		}
 
-		neighbors, err := c.neighborsFromId(now)
+		neighbors, err := c.neighborsFromId(now, allowedEdges)
 		if err != nil {
 			return nil, err
 		}

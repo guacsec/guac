@@ -43,21 +43,21 @@ type vexLink struct {
 
 func (n *vexLink) ID() uint32 { return n.id }
 
-func (n *vexLink) Neighbors() []uint32 {
+func (n *vexLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 2)
-	if n.packageID != 0 {
+	if n.packageID != 0 && allowedEdges[model.EdgeCertifyVexStatementPackage] {
 		out = append(out, n.packageID)
 	}
-	if n.artifactID != 0 {
+	if n.artifactID != 0 && allowedEdges[model.EdgeCertifyVexStatementArtifact] {
 		out = append(out, n.artifactID)
 	}
-	if n.cveID != 0 {
+	if n.cveID != 0 && allowedEdges[model.EdgeCertifyVexStatementCve] {
 		out = append(out, n.cveID)
 	}
-	if n.ghsaID != 0 {
+	if n.ghsaID != 0 && allowedEdges[model.EdgeCertifyVexStatementGhsa] {
 		out = append(out, n.ghsaID)
 	}
-	if n.osvID != 0 {
+	if n.osvID != 0 && allowedEdges[model.EdgeCertifyVexStatementOsv] {
 		out = append(out, n.osvID)
 	}
 	return out

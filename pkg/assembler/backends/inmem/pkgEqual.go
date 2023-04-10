@@ -34,8 +34,14 @@ type pkgEqualStruct struct {
 	collector     string
 }
 
-func (n *pkgEqualStruct) ID() uint32          { return n.id }
-func (n *pkgEqualStruct) Neighbors() []uint32 { return n.pkgs }
+func (n *pkgEqualStruct) ID() uint32 { return n.id }
+
+func (n *pkgEqualStruct) Neighbors(allowedEdges edgeMap) []uint32 {
+	if allowedEdges[model.EdgePkgEqualPackage] {
+		return n.pkgs
+	}
+	return []uint32{}
+}
 
 func (n *pkgEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 	return c.convPkgEqual(n), nil

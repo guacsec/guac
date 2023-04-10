@@ -39,7 +39,7 @@ type SourceNode struct {
 }
 
 var getSources func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error)
-var getNeighbors func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error)
+var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // GetComponents get all the sources that do not have a certify scorecard attached or last scanned is more than daysSinceLastScan
 func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interface{}) error {
@@ -55,7 +55,7 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 	for _, src := range sources {
 		for _, namespace := range src.Namespaces {
 			for _, names := range namespace.Names {
-				response, err := getNeighbors(ctx, s.client, names.Id)
+				response, err := getNeighbors(ctx, s.client, names.Id, []generated.Edge{})
 				if err != nil {
 					return fmt.Errorf("failed neighbors query: %w", err)
 				}

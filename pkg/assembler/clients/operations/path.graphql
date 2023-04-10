@@ -17,8 +17,8 @@
 
 # Exposes GraphQL queries to retrieve GUAC graph connectivity data
 
-query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
-  path(subject: $subject, target: $target, maxPathLength: $maxPathLength) {
+query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
+  path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
     __typename
     ... on Package {
       ... AllPkgTree
@@ -61,6 +61,9 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
     }
     ... on CertifyBad {
       ...allCertifyBad
+    }
+    ... on CertifyGood {
+      ...allCertifyGood
     }
     ... on HashEqual {
       ...allHashEqualTree
@@ -86,8 +89,8 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!) {
   }
 }
 
-query Neighbors($node: ID!) {
-  neighbors(node: $node) {
+query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
+  neighbors(node: $node, usingOnly: $usingOnly) {
     __typename
     ... on Package {
       ... AllPkgTree
@@ -130,6 +133,9 @@ query Neighbors($node: ID!) {
     }
     ... on CertifyBad {
       ...allCertifyBad
+    }
+    ... on CertifyGood {
+      ...allCertifyGood
     }
     ... on HashEqual {
       ...allHashEqualTree
@@ -179,6 +185,9 @@ query Node($node: ID!) {
     ... on GHSA {
       ...allGHSATree
     }
+    ... on NoVuln {
+      id
+    }
     ... on CertifyScorecard {
       ...AllCertifyScorecard
     }
@@ -196,6 +205,9 @@ query Node($node: ID!) {
     }
     ... on CertifyBad {
       ...allCertifyBad
+    }
+    ... on CertifyGood {
+      ...allCertifyGood
     }
     ... on HashEqual {
       ...allHashEqualTree

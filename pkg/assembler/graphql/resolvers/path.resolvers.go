@@ -11,13 +11,13 @@ import (
 )
 
 // Path is the resolver for the path field.
-func (r *queryResolver) Path(ctx context.Context, subject string, target string, maxPathLength int) ([]model.Node, error) {
-	return r.Backend.Path(ctx, subject, target, maxPathLength)
+func (r *queryResolver) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
+	return r.Backend.Path(ctx, subject, target, maxPathLength, usingOnly)
 }
 
 // Neighbors is the resolver for the neighbors field.
-func (r *queryResolver) Neighbors(ctx context.Context, node string) ([]model.Node, error) {
-	return r.Backend.Neighbors(ctx, node)
+func (r *queryResolver) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
+	return r.Backend.Neighbors(ctx, node, usingOnly)
 }
 
 // Node is the resolver for the node field.

@@ -38,8 +38,11 @@ type isDependencyLink struct {
 
 func (n *isDependencyLink) ID() uint32 { return n.id }
 
-func (n *isDependencyLink) Neighbors() []uint32 {
-	return []uint32{n.packageID, n.depPackageID}
+func (n *isDependencyLink) Neighbors(allowedEdges edgeMap) []uint32 {
+	if allowedEdges[model.EdgeIsDependencyPackage] {
+		return []uint32{n.packageID, n.depPackageID}
+	}
+	return []uint32{}
 }
 
 func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {

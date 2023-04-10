@@ -139,14 +139,14 @@ func (n *pkgNameStruct) ID() uint32      { return n.id }
 func (n *pkgVersionStruct) ID() uint32   { return n.id }
 func (n *pkgVersionNode) ID() uint32     { return n.id }
 
-func (n *pkgNamespaceStruct) Neighbors() []uint32 {
+func (n *pkgNamespaceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1+len(n.namespaces))
 	for _, v := range n.namespaces {
 		out = append(out, v.id)
 	}
 	return out
 }
-func (n *pkgNameStruct) Neighbors() []uint32 {
+func (n *pkgNameStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1+len(n.names))
 	for _, v := range n.names {
 		out = append(out, v.id)
@@ -154,30 +154,57 @@ func (n *pkgNameStruct) Neighbors() []uint32 {
 	out = append(out, n.parent)
 	return out
 }
-func (n *pkgVersionStruct) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.versions)+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.badLinks)+len(n.goodLinks))
+func (n *pkgVersionStruct) Neighbors(allowedEdges edgeMap) []uint32 {
+	out := []uint32{n.parent}
 	for _, v := range n.versions {
 		out = append(out, v.id)
 	}
-	out = append(out, n.srcMapLinks...)
-	out = append(out, n.isDependencyLinks...)
-	out = append(out, n.badLinks...)
-	out = append(out, n.goodLinks...)
-	out = append(out, n.parent)
+
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		out = append(out, n.srcMapLinks...)
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		out = append(out, n.isDependencyLinks...)
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		out = append(out, n.badLinks...)
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		out = append(out, n.goodLinks...)
+	}
 	return out
 }
-func (n *pkgVersionNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, 1+len(n.srcMapLinks)+len(n.isDependencyLinks)+len(n.occurrences)+len(n.certifyVulnLinks)+len(n.hasSBOMs)+len(n.vexLinks)+len(n.badLinks)+len(n.goodLinks)+len(n.pkgEquals))
-	out = append(out, n.srcMapLinks...)
-	out = append(out, n.isDependencyLinks...)
-	out = append(out, n.occurrences...)
-	out = append(out, n.certifyVulnLinks...)
-	out = append(out, n.hasSBOMs...)
-	out = append(out, n.vexLinks...)
-	out = append(out, n.badLinks...)
-	out = append(out, n.goodLinks...)
-	out = append(out, n.pkgEquals...)
-	out = append(out, n.parent)
+func (n *pkgVersionNode) Neighbors(allowedEdges edgeMap) []uint32 {
+	out := []uint32{n.parent}
+
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		out = append(out, n.srcMapLinks...)
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		out = append(out, n.isDependencyLinks...)
+	}
+	if allowedEdges[model.EdgePackageIsOccurrence] {
+		out = append(out, n.occurrences...)
+	}
+	if allowedEdges[model.EdgePackageCertifyVuln] {
+		out = append(out, n.certifyVulnLinks...)
+	}
+	if allowedEdges[model.EdgePackageHasSbom] {
+		out = append(out, n.hasSBOMs...)
+	}
+	if allowedEdges[model.EdgePackageCertifyVexStatement] {
+		out = append(out, n.vexLinks...)
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		out = append(out, n.badLinks...)
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		out = append(out, n.goodLinks...)
+	}
+	if allowedEdges[model.EdgePackagePkgEqual] {
+		out = append(out, n.pkgEquals...)
+	}
+
 	return out
 }
 

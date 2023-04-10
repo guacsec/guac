@@ -114,7 +114,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		name              string
 		daysSinceLastScan int
 		getPackages       func(ctx context.Context, client graphql.Client, filter *generated.PkgSpec) (*generated.PackagesResponse, error)
-		getNeighbors      func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error)
+		getNeighbors      func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 		wantPackNode      []*PackageNode
 		wantErr           bool
 	}{
@@ -126,7 +126,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil
@@ -147,7 +147,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp},
 				}, nil
@@ -162,7 +162,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp},
 				}, nil
@@ -181,7 +181,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeNow},
 				}, nil
@@ -196,7 +196,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp, &neighborIsOccurrence},
 				}, nil
@@ -211,7 +211,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborIsOccurrence},
 				}, nil
@@ -230,7 +230,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 					Packages: []generated.PackagesPackagesPackage{testPypiPackage, testOpenSSLPackage},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil

@@ -46,19 +46,21 @@ type vulnerabilityLink struct {
 
 func (n *vulnerabilityLink) ID() uint32 { return n.id }
 
-func (n *vulnerabilityLink) Neighbors() []uint32 {
+func (n *vulnerabilityLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 2)
-	out = append(out, n.packageID)
-	if n.osvID != 0 {
+	if allowedEdges[model.EdgeCertifyVulnPackage] {
+		out = append(out, n.packageID)
+	}
+	if n.osvID != 0 && allowedEdges[model.EdgeCertifyVulnOsv] {
 		out = append(out, n.osvID)
 	}
-	if n.cveID != 0 {
+	if n.cveID != 0 && allowedEdges[model.EdgeCertifyVulnCve] {
 		out = append(out, n.cveID)
 	}
-	if n.ghsaID != 0 {
+	if n.ghsaID != 0 && allowedEdges[model.EdgeCertifyVulnGhsa] {
 		out = append(out, n.ghsaID)
 	}
-	if n.noKnownVulnID != 0 {
+	if n.noKnownVulnID != 0 && allowedEdges[model.EdgeCertifyVulnNoVuln] {
 		out = append(out, n.noKnownVulnID)
 	}
 	return out

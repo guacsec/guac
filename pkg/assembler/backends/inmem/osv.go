@@ -61,11 +61,17 @@ type osvNode struct {
 
 func (n *osvNode) ID() uint32 { return n.id }
 
-func (n *osvNode) Neighbors() []uint32 {
-	out := make([]uint32, 0, len(n.certifyVulnLinks)+len(n.equalVulnLinks)+len(n.vexLinks))
-	out = append(out, n.certifyVulnLinks...)
-	out = append(out, n.equalVulnLinks...)
-	out = append(out, n.vexLinks...)
+func (n *osvNode) Neighbors(allowedEdges edgeMap) []uint32 {
+	out := []uint32{}
+	if allowedEdges[model.EdgeOsvCertifyVuln] {
+		out = append(out, n.certifyVulnLinks...)
+	}
+	if allowedEdges[model.EdgeOsvIsVulnerability] {
+		out = append(out, n.equalVulnLinks...)
+	}
+	if allowedEdges[model.EdgeOsvCertifyVexStatement] {
+		out = append(out, n.vexLinks...)
+	}
 	return out
 }
 

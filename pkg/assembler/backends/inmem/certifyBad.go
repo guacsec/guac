@@ -39,15 +39,15 @@ type badLink struct {
 
 func (n *badLink) ID() uint32 { return n.id }
 
-func (n *badLink) Neighbors() []uint32 {
+func (n *badLink) Neighbors(allowedEdges edgeMap) []uint32 {
 	out := make([]uint32, 0, 1)
-	if n.packageID != 0 {
+	if n.packageID != 0 && allowedEdges[model.EdgeCertifyBadPackage] {
 		out = append(out, n.packageID)
 	}
-	if n.artifactID != 0 {
+	if n.artifactID != 0 && allowedEdges[model.EdgeCertifyBadArtifact] {
 		out = append(out, n.artifactID)
 	}
-	if n.sourceID != 0 {
+	if n.sourceID != 0 && allowedEdges[model.EdgeCertifyBadSource] {
 		out = append(out, n.sourceID)
 	}
 	return out

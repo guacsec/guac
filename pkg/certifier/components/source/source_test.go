@@ -139,7 +139,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 		name              string
 		daysSinceLastScan int
 		getSources        func(ctx context.Context, client graphql.Client, filter *generated.SourceSpec) (*generated.SourcesResponse, error)
-		getNeighbors      func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error)
+		getNeighbors      func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 		wantSourceNode    []*SourceNode
 		wantErr           bool
 	}{
@@ -151,7 +151,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil
@@ -172,7 +172,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoCommit},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil
@@ -193,7 +193,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoCommitWithAlgo},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil
@@ -214,7 +214,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyScorecardTimeStamp},
 				}, nil
@@ -229,7 +229,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyScorecardTimeStamp},
 				}, nil
@@ -250,7 +250,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyScorecardTimeNow},
 				}, nil
@@ -265,7 +265,7 @@ func Test_sourceArtifacts_GetComponents(t *testing.T) {
 					Sources: []generated.SourcesSourcesSource{testSourceDjangoTag, testSourceDjangoCommit, testSourceKubeTestTag},
 				}, nil
 			},
-			getNeighbors: func(ctx context.Context, client graphql.Client, node string) (*generated.NeighborsResponse, error) {
+			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
 					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil
