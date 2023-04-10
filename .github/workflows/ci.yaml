@@ -112,7 +112,7 @@ jobs:
     - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9
       with:
         go-version: '~1.19'
-    - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912
+    - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435
       with:
         python-version: '3.10'
     - run: ./internal/testing/e2e/e2e
