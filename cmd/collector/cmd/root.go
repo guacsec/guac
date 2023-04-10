@@ -21,7 +21,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/logging"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -32,8 +31,6 @@ import (
 type options struct {
 	// path to folder with documents to collect
 	path string
-	// datasource for the collector
-	dataSource datasource.CollectSource
 	// address for NATS connection
 	natsAddr string
 }

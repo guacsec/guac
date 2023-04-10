@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/graphdb"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -263,26 +262,26 @@ func getAssembler(opts options) (func([]assembler.IngestPredicates) error, error
 	return func(_ []assembler.IngestPredicates) error { return nil }, nil
 }
 
-func createIndices(client graphdb.Client) error {
-	indices := map[string][]string{
-		"Artifact":      {"digest", "name"},
-		"Package":       {"purl", "name"},
-		"Metadata":      {"id"},
-		"Attestation":   {"digest"},
-		"Vulnerability": {"id"},
-	}
+// func createIndices(client graphdb.Client) error {
+// 	indices := map[string][]string{
+// 		"Artifact":      {"digest", "name"},
+// 		"Package":       {"purl", "name"},
+// 		"Metadata":      {"id"},
+// 		"Attestation":   {"digest"},
+// 		"Vulnerability": {"id"},
+// 	}
 
-	for label, attributes := range indices {
-		for _, attribute := range attributes {
-			err := assembler.CreateIndexOn(client, label, attribute)
-			if err != nil {
-				return err
-			}
-		}
-	}
+// 	for label, attributes := range indices {
+// 		for _, attribute := range attributes {
+// 			err := assembler.CreateIndexOn(client, label, attribute)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func init() {
 	rootCmd.AddCommand(filesCmd)

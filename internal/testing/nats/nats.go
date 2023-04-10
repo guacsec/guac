@@ -72,12 +72,17 @@ func (n *natsTestServer) Shutdown() {
 // GetFreePort asks the kernel for a free open port that is ready to use.
 func getFreePort() (int, error) {
 	a, err := net.ResolveTCPAddr("tcp", "localhost:0")
-	if err == nil {
-		var l *net.TCPListener
-		if l, err = net.ListenTCP("tcp", a); err == nil {
-			defer l.Close()
-			return l.Addr().(*net.TCPAddr).Port, nil
-		}
+	if err != nil {
+		return 0, err
 	}
-	return 0, err
+	l, err := net.ListenTCP("tcp", a)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	ta, ok := l.Addr().(*net.TCPAddr)
+	if !ok {
+		return 0, fmt.Errorf("(*TCPListener) Addr() did not return *TCPAddr")
+	}
+	return ta.Port, nil
 }
