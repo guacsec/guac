@@ -15,7 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Exposes GraphQL queries to retrieve GUAC OSVs
+# Exposes GraphQL queries to retrieve GUAC GHSAs
 
 query GHSAs($filter: GHSASpec) {
   ghsa(ghsaSpec: $filter) {

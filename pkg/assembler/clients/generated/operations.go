@@ -22894,9 +22894,6 @@ query Node ($node: ID!) {
 		... on NoVuln {
 			id
 		}
-		... on NoVuln {
-			id
-		}
 		... on CertifyScorecard {
 			... AllCertifyScorecard
 		}
