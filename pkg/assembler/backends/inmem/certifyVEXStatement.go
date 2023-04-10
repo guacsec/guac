@@ -167,7 +167,10 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 	duplicate := false
 	collectedCertifyVexLink := vexLink{}
 	for _, id := range searchIDs {
-		v, _ := byID[*vexLink](id, c)
+		v, err := byID[*vexLink](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		vulnMatch := false
 		subjectMatch := false
 		if osvID != 0 && osvID == v.osvID {

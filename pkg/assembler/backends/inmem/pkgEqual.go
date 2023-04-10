@@ -44,7 +44,7 @@ func (n *pkgEqualStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 }
 
 func (n *pkgEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.convPkgEqual(n), nil
+	return c.convPkgEqual(n)
 }
 
 // func registerAllPkgEqual(client *demoClient) error {
@@ -114,7 +114,7 @@ func (n *pkgEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 // Ingest PkgEqual
 
-func (c *demoClient) convPkgEqual(in *pkgEqualStruct) *model.PkgEqual {
+func (c *demoClient) convPkgEqual(in *pkgEqualStruct) (*model.PkgEqual, error) {
 	out := &model.PkgEqual{
 		ID:            nodeID(in.id),
 		Justification: in.justification,
@@ -122,10 +122,13 @@ func (c *demoClient) convPkgEqual(in *pkgEqualStruct) *model.PkgEqual {
 		Collector:     in.collector,
 	}
 	for _, id := range in.pkgs {
-		p, _ := c.buildPackageResponse(id, nil)
+		p, err := c.buildPackageResponse(id, nil)
+		if err != nil {
+			return nil, err
+		}
 		out.Packages = append(out.Packages, p)
 	}
-	return out
+	return out, nil
 }
 
 func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
@@ -133,6 +136,7 @@ func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 }
 
 func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec, readOnly bool) (*model.PkgEqual, error) {
+	funcName := "IngestPkgEqual"
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
@@ -140,7 +144,7 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 	for _, pi := range []model.PkgInputSpec{pkg, depPkg} {
 		pid, err := getPackageIDFromInput(c, pi, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion})
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestPkgEqual :: %v", err)
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		pIDs = append(pIDs, pid)
 	}
@@ -153,12 +157,15 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 	}
 
 	for _, id := range ps[0].pkgEquals {
-		cp, _ := byID[*pkgEqualStruct](id, c)
+		cp, err := byID[*pkgEqualStruct](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
 		if slices.Equal(cp.pkgs, pIDs) &&
 			cp.justification == pkgEqual.Justification &&
 			cp.origin == pkgEqual.Origin &&
 			cp.collector == pkgEqual.Collector {
-			return c.convPkgEqual(cp), nil
+			return c.convPkgEqual(cp)
 		}
 	}
 
@@ -182,7 +189,7 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 	}
 	c.pkgEquals = append(c.pkgEquals, cp)
 
-	return c.convPkgEqual(cp), nil
+	return c.convPkgEqual(cp)
 }
 
 // Query PkgEqual
@@ -203,7 +210,11 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.PkgEqual{c.convPkgEqual(link)}, nil
+		pe, err := c.convPkgEqual(link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.PkgEqual{pe}, nil
 	}
 
 	var search []uint32
@@ -273,5 +284,9 @@ func (c *demoClient) addCPIfMatch(out []*model.PkgEqual,
 			return out, nil
 		}
 	}
-	return append(out, c.convPkgEqual(link)), nil
+	pe, err := c.convPkgEqual(link)
+	if err != nil {
+		return nil, err
+	}
+	return append(out, pe), nil
 }

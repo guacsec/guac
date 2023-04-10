@@ -61,7 +61,7 @@ func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 }
 
 func (n *hasSLSAStruct) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.convSLSA(n), nil
+	return c.convSLSA(n)
 }
 
 // Query HasSlsa
@@ -82,7 +82,11 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.HasSlsa{c.convSLSA(link)}, nil
+		hs, err := c.convSLSA(link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.HasSlsa{hs}, nil
 	}
 
 	var search []uint32
@@ -227,7 +231,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 			sl.finish == slsa.FinishedOn &&
 			sl.origin == slsa.Origin &&
 			sl.collector == slsa.Collector {
-			return c.convSLSA(sl), nil
+			return c.convSLSA(sl)
 		}
 	}
 
@@ -259,7 +263,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	}
 	b.setHasSLSAs(sl.id)
 
-	return c.convSLSA(sl), nil
+	return c.convSLSA(sl)
 }
 
 func convSLSAP(in []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
@@ -274,15 +278,23 @@ func convSLSAP(in []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
 	return rv
 }
 
-func (c *demoClient) convSLSA(in *hasSLSAStruct) *model.HasSlsa {
-	sub, _ := byID[*artStruct](in.subject, c)
-	// TODO propagate errors back
+func (c *demoClient) convSLSA(in *hasSLSAStruct) (*model.HasSlsa, error) {
+	sub, err := byID[*artStruct](in.subject, c)
+	if err != nil {
+		return nil, err
+	}
 	var bfs []*model.Artifact
 	for _, id := range in.builtFrom {
-		a, _ := byID[*artStruct](id, c)
+		a, err := byID[*artStruct](id, c)
+		if err != nil {
+			return nil, err
+		}
 		bfs = append(bfs, c.convArtifact(a))
 	}
-	bb, _ := byID[*builderStruct](in.builtBy, c)
+	bb, err := byID[*builderStruct](in.builtBy, c)
+	if err != nil {
+		return nil, err
+	}
 
 	return &model.HasSlsa{
 		ID:      nodeID(in.id),
@@ -298,7 +310,7 @@ func (c *demoClient) convSLSA(in *hasSLSAStruct) *model.HasSlsa {
 			Origin:        in.origin,
 			Collector:     in.collector,
 		},
-	}
+	}, nil
 }
 
 func (c *demoClient) addSLSAIfMatch(out []*model.HasSlsa,
@@ -321,5 +333,9 @@ func (c *demoClient) addSLSAIfMatch(out []*model.HasSlsa,
 		!c.matchArtifacts(filter.BuiltFrom, link.builtFrom) {
 		return out, nil
 	}
-	return append(out, c.convSLSA(link)), nil
+	hs, err := c.convSLSA(link)
+	if err != nil {
+		return nil, err
+	}
+	return append(out, hs), nil
 }

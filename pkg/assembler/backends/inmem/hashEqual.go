@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -47,7 +48,7 @@ func (n *hashEqualStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 }
 
 func (n *hashEqualStruct) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.convHashEqual(n), nil
+	return c.convHashEqual(n)
 }
 
 // TODO convert to unit tests
@@ -105,7 +106,7 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 			h.origin == hashEqual.Origin &&
 			h.collector == hashEqual.Collector &&
 			slices.Equal(h.artifacts, artIDs) {
-			return c.convHashEqual(h), nil
+			return c.convHashEqual(h)
 		}
 	}
 
@@ -128,7 +129,7 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 	aInt1.setHashEquals(he.id)
 	aInt2.setHashEquals(he.id)
 
-	return c.convHashEqual(he), nil
+	return c.convHashEqual(he)
 }
 
 func (c *demoClient) matchArtifacts(filter []*model.ArtifactSpec, value []uint32) bool {
@@ -157,7 +158,10 @@ func (c *demoClient) matchArtifacts(filter []*model.ArtifactSpec, value []uint32
 		match := false
 		remove := -1
 		for i, v := range val {
-			a, _ := byID[*artStruct](v, c)
+			a, err := byID[*artStruct](v, c)
+			if err != nil {
+				return false
+			}
 			if (m.Algorithm == nil || strings.ToLower(*m.Algorithm) == a.algorithm) &&
 				(m.Digest == nil || strings.ToLower(*m.Digest) == a.digest) {
 				match = true
@@ -195,7 +199,11 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.HashEqual{c.convHashEqual(link)}, nil
+		he, err := c.convHashEqual(link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.HashEqual{he}, nil
 	}
 
 	var search []uint32
@@ -238,11 +246,13 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 	return out, nil
 }
 
-func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
+func (c *demoClient) convHashEqual(h *hashEqualStruct) (*model.HashEqual, error) {
 	var artifacts []*model.Artifact
 	for _, id := range h.artifacts {
-		a, _ := byID[*artStruct](id, c)
-		// TODO propagate error back
+		a, err := byID[*artStruct](id, c)
+		if err != nil {
+			return nil, fmt.Errorf("convHashEqual: struct contains bad artifact id")
+		}
 		artifacts = append(artifacts, c.convArtifact(a))
 	}
 	return &model.HashEqual{
@@ -251,7 +261,7 @@ func (c *demoClient) convHashEqual(h *hashEqualStruct) *model.HashEqual {
 		Artifacts:     artifacts,
 		Origin:        h.origin,
 		Collector:     h.collector,
-	}
+	}, nil
 }
 
 func (c *demoClient) addHEIfMatch(out []*model.HashEqual,
@@ -263,5 +273,9 @@ func (c *demoClient) addHEIfMatch(out []*model.HashEqual,
 		!c.matchArtifacts(filter.Artifacts, link.artifacts) {
 		return out, nil
 	}
-	return append(out, c.convHashEqual(link)), nil
+	he, err := c.convHashEqual(link)
+	if err != nil {
+		return nil, err
+	}
+	return append(out, he), nil
 }

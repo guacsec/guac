@@ -48,7 +48,7 @@ func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 }
 
 func (n *hasSBOMStruct) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.convHasSBOM(n), nil
+	return c.convHasSBOM(n)
 }
 
 // TODO convert to unit tests
@@ -95,9 +95,9 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrS
 }
 
 func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, input model.HasSBOMInputSpec, readOnly bool) (*model.HasSbom, error) {
-	err := helper.ValidatePackageOrSourceInput(&subject, "IngestHasSbom")
-	if err != nil {
-		return nil, err
+	funcName := "IngestHasSbom"
+	if err := helper.ValidatePackageOrSourceInput(&subject, "IngestHasSbom"); err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
@@ -105,38 +105,44 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 	var search []uint32
 	var packageID uint32
 	var pkg *pkgVersionNode
-	if subject.Package != nil {
-		var pmt model.MatchFlags
-		pmt.Pkg = model.PkgMatchTypeSpecificVersion
-		pid, err := getPackageIDFromInput(c, *subject.Package, pmt)
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestHasSbom :: %v", err)
-		}
-		packageID = pid
-		pkg, _ = byID[*pkgVersionNode](pid, c)
-		search = pkg.getHasSBOM()
-	}
-
 	var sourceID uint32
 	var src *srcNameNode
-	if subject.Source != nil {
-		sid, err := getSourceIDFromInput(c, *subject.Source)
+	if subject.Package != nil {
+		pmt := model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}
+		var err error
+		packageID, err = getPackageIDFromInput(c, *subject.Package, pmt)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+		pkg, err = byID[*pkgVersionNode](packageID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+		search = pkg.hasSBOMs
+	} else {
+		var err error
+		sourceID, err = getSourceIDFromInput(c, *subject.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSbom :: %v", err)
 		}
-		sourceID = sid
-		src, _ = byID[*srcNameNode](sid, c)
+		src, err = byID[*srcNameNode](sourceID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		search = src.hasSBOMs
 	}
 
 	for _, id := range search {
-		h, _ := byID[*hasSBOMStruct](id, c)
+		h, err := byID[*hasSBOMStruct](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		if h.pkg == packageID &&
 			h.src == sourceID &&
 			h.uri == input.URI &&
 			h.origin == input.Origin &&
 			h.collector == input.Collector {
-			return c.convHasSBOM(h), nil
+			return c.convHasSBOM(h)
 		}
 	}
 
@@ -162,10 +168,10 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 	} else {
 		src.setHasSBOM(h.id)
 	}
-	return c.convHasSBOM(h), nil
+	return c.convHasSBOM(h)
 }
 
-func (c *demoClient) convHasSBOM(in *hasSBOMStruct) *model.HasSbom {
+func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 	out := &model.HasSbom{
 		ID:        nodeID(in.id),
 		URI:       in.uri,
@@ -173,13 +179,19 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) *model.HasSbom {
 		Collector: in.collector,
 	}
 	if in.pkg != 0 {
-		p, _ := c.buildPackageResponse(in.pkg, nil)
+		p, err := c.buildPackageResponse(in.pkg, nil)
+		if err != nil {
+			return nil, err
+		}
 		out.Subject = p
 	} else {
-		s, _ := c.buildSourceResponse(in.src, nil)
+		s, err := c.buildSourceResponse(in.src, nil)
+		if err != nil {
+			return nil, err
+		}
 		out.Subject = s
 	}
-	return out
+	return out, nil
 }
 
 // Query HasSBOM
@@ -187,7 +199,7 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) *model.HasSbom {
 func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	funcName := "HasSBOM"
 	if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 	}
 	c.m.RLock()
 	defer c.m.RUnlock()
@@ -204,7 +216,11 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.HasSbom{c.convHasSBOM(link)}, nil
+		sb, err := c.convHasSBOM(link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.HasSbom{sb}, nil
 	}
 
 	var search []uint32
@@ -287,5 +303,9 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 			}
 		}
 	}
-	return append(out, c.convHasSBOM(link)), nil
+	sb, err := c.convHasSBOM(link)
+	if err != nil {
+		return nil, err
+	}
+	return append(out, sb), nil
 }
