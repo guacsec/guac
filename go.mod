@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/storage v1.30.1
-	github.com/fsouza/fake-gcs-server v1.44.1
+	github.com/fsouza/fake-gcs-server v1.44.2
 	github.com/in-toto/in-toto-golang v0.7.0
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
 	github.com/secure-systems-lab/go-securesystemslib v0.5.0
