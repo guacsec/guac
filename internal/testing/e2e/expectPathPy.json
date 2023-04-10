@@ -28,7 +28,7 @@
   {
     "__typename": "IsDependency",
     "justification": "top-level package GUAC heuristic connecting to each file/package",
-    "versionRange": "",
+    "versionRange": "3.34.1-3",
     "package": {
       "type": "oci",
       "namespaces": [

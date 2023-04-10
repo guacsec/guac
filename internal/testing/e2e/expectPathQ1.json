@@ -16,120 +16,29 @@
       ]
     },
     {
-      "__typename": "IsDependency",
-      "justification": "top-level package GUAC heuristic connecting to each file/package",
-      "versionRange": "",
-      "package": {
-        "type": "oci",
-        "namespaces": [
-          {
-            "namespace": "docker.io/library",
-            "names": [
-              {
-                "name": "vault",
-                "versions": [
-                  {
-                    "version": "sha256:d9fdd0e93cdd325b144aed2c68d53999875c907c5a37b2d1a9456c8a45886158",
-                    "qualifiers": [
-                      {
-                        "key": "tag",
-                        "value": "latest"
-                      }
-                    ],
-                    "subpath": ""
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "dependentPackage": {
-        "type": "golang",
-        "namespaces": [
-          {
-            "namespace": "go.etcd.io/etcd/client",
-            "names": [
-              {
-                "name": "v2",
-                "versions": []
-              }
-            ]
-          }
-        ]
-      },
-      "collector": "FileCollector"
-    },
-    {
       "__typename": "Package",
-      "type": "oci",
+      "type": "golang",
       "namespaces": [
         {
-          "namespace": "docker.io/library",
-          "names": [
-            {
-              "name": "vault",
-              "versions": [
-                {
-                  "version": "sha256:d9fdd0e93cdd325b144aed2c68d53999875c907c5a37b2d1a9456c8a45886158",
-                  "qualifiers": [
-                    {
-                      "key": "tag",
-                      "value": "latest"
-                    }
-                  ],
-                  "subpath": ""
-                }
-              ]
-            }
-          ]
+          "namespace": "go.etcd.io/etcd/client",
+          "names": []
         }
       ]
     },
     {
-      "__typename": "IsDependency",
-      "justification": "top-level package GUAC heuristic connecting to each file/package",
-      "versionRange": "",
-      "package": {
-        "type": "oci",
-        "namespaces": [
-          {
-            "namespace": "docker.io/library",
-            "names": [
-              {
-                "name": "vault",
-                "versions": [
-                  {
-                    "version": "sha256:d9fdd0e93cdd325b144aed2c68d53999875c907c5a37b2d1a9456c8a45886158",
-                    "qualifiers": [
-                      {
-                        "key": "tag",
-                        "value": "latest"
-                      }
-                    ],
-                    "subpath": ""
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "dependentPackage": {
-        "type": "golang",
-        "namespaces": [
-          {
-            "namespace": "go.etcd.io/etcd/api",
-            "names": [
-              {
-                "name": "v3",
-                "versions": []
-              }
-            ]
-          }
-        ]
-      },
-      "collector": "FileCollector"
+      "__typename": "Package",
+      "type": "golang",
+      "namespaces": []
+    },
+    {
+      "__typename": "Package",
+      "type": "golang",
+      "namespaces": [
+        {
+          "namespace": "go.etcd.io/etcd/api",
+          "names": []
+        }
+      ]
     },
     {
       "__typename": "Package",

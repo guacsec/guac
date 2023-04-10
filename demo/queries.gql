@@ -111,7 +111,7 @@ query PkgQ6 {
 }
 
 query PathQ1 ($subject: ID!, $target: ID!) {
-  path(subject: $subject, target: $target, maxPathLength: 10) {
+  path(subject: $subject, target: $target, maxPathLength: 10, usingOnly: []) {
     __typename
     ... on Package{
         ...allPkgTree
@@ -123,7 +123,7 @@ query PathQ1 ($subject: ID!, $target: ID!) {
 }
 
 query GetNeighbors ($nodeId: ID!) {
-  neighbors(node: $nodeId) {
+  neighbors(node: $nodeId, usingOnly: []) {
     __typename
     ... on Package{
       ...allPkgTree
