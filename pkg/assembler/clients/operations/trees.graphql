@@ -67,18 +67,18 @@ fragment allBuilderTree on Builder {
   uri
 }
 
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
   id
   year
   cveId
 }
 
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
   id
   ghsaId
 }
 
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
   id
   osvId
 }
@@ -246,13 +246,13 @@ fragment AllCertifyVuln on CertifyVuln {
   vulnerability {
     __typename
     ... on CVE {
-      ...allCveTree
+      ...AllCveTree
     }
     ... on OSV {
-      ...allOSVTree
+      ...AllOSVTree
     }
     ... on GHSA {
-      ...allGHSATree
+      ...AllGHSATree
     }
     ... on NoVuln {
       id
@@ -282,15 +282,15 @@ fragment allPkgEqual on PkgEqual {
 fragment allIsVulnerability on IsVulnerability {
   id
   osv {
-    ...allOSVTree
+    ...AllOSVTree
   }
   vulnerability {
     __typename
     ... on CVE {
-      ...allCveTree
+      ...AllCveTree
     }
     ... on GHSA {
-      ...allGHSATree
+      ...AllGHSATree
     }
   }
   justification
@@ -312,13 +312,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
   vulnerability {
     __typename
     ... on CVE {
-      ...allCveTree
+      ...AllCveTree
     }
     ... on GHSA {
-      ...allGHSATree
+      ...AllGHSATree
     }
     ... on OSV {
-      ...allOSVTree
+      ...AllOSVTree
     }
   }
   justification
