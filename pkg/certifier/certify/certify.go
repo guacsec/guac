@@ -90,13 +90,13 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		return nil
 	}
 
-	if poll {
-		// initially run the certifier the first time and then tick per interval
-		err := runCertifier()
-		if err != nil {
-			return fmt.Errorf("certifier failed with an error: %w", err)
-		}
+	// initially run the certifier the first time and then tick per interval if polling
+	err := runCertifier()
+	if err != nil {
+		return fmt.Errorf("certifier failed with an error: %w", err)
+	}
 
+	if poll {
 		ticker := time.NewTicker(interval)
 		for {
 			select {
@@ -110,11 +110,6 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 			case <-ctx.Done():
 				return ctx.Err() // nolint:wrapcheck
 			}
-		}
-	} else {
-		err := runCertifier()
-		if err != nil {
-			return fmt.Errorf("certifier failed with an error: %w", err)
 		}
 	}
 	return nil
