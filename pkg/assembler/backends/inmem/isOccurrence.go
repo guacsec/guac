@@ -56,7 +56,7 @@ func (n *isOccurrenceStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 }
 
 func (n *isOccurrenceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
-	return c.convOccurrence(n), nil
+	return c.convOccurrence(n)
 }
 
 // TODO convert to unit tests
@@ -137,14 +137,17 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 
 	// could search backedges for pkg/src or artifiact, just do artifact
 	for _, id := range a.occurrences {
-		o, _ := byID[*isOccurrenceStruct](id, c)
+		o, err := byID[*isOccurrenceStruct](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		if o.pkg == packageID &&
 			o.source == sourceID &&
 			o.artifact == a.id &&
 			o.justification == occurrence.Justification &&
 			o.origin == occurrence.Origin &&
 			o.collector == occurrence.Collector {
-			return c.convOccurrence(o), nil
+			return c.convOccurrence(o)
 		}
 	}
 	if readOnly {
@@ -165,19 +168,28 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	c.index[o.id] = o
 	a.setOccurrences(o.id)
 	if packageID != 0 {
-		p, _ := byID[*pkgVersionNode](packageID, c)
+		p, err := byID[*pkgVersionNode](packageID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		p.setOccurrenceLinks(o.id)
 	} else {
-		s, _ := byID[*srcNameNode](sourceID, c)
+		s, err := byID[*srcNameNode](sourceID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		s.setOccurrenceLinks(o.id)
 	}
 	c.occurrences = append(c.occurrences, o)
 
-	return c.convOccurrence(o), nil
+	return c.convOccurrence(o)
 }
 
-func (c *demoClient) convOccurrence(in *isOccurrenceStruct) *model.IsOccurrence {
-	a, _ := byID[*artStruct](in.artifact, c)
+func (c *demoClient) convOccurrence(in *isOccurrenceStruct) (*model.IsOccurrence, error) {
+	a, err := byID[*artStruct](in.artifact, c)
+	if err != nil {
+		return nil, err
+	}
 	o := &model.IsOccurrence{
 		ID:            nodeID(in.id),
 		Artifact:      c.convArtifact(a),
@@ -186,13 +198,19 @@ func (c *demoClient) convOccurrence(in *isOccurrenceStruct) *model.IsOccurrence 
 		Collector:     in.collector,
 	}
 	if in.pkg != 0 {
-		p, _ := c.buildPackageResponse(in.pkg, nil)
+		p, err := c.buildPackageResponse(in.pkg, nil)
+		if err != nil {
+			return nil, err
+		}
 		o.Subject = p
 	} else {
-		s, _ := c.buildSourceResponse(in.source, nil)
+		s, err := c.buildSourceResponse(in.source, nil)
+		if err != nil {
+			return nil, err
+		}
 		o.Subject = s
 	}
-	return o
+	return o, nil
 }
 
 func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec) bool {
@@ -203,7 +221,10 @@ func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec)
 	if a != nil && a.id == aID {
 		return true
 	}
-	m, _ := byID[*artStruct](aID, c)
+	m, err := byID[*artStruct](aID, c)
+	if err != nil {
+		return false
+	}
 	if artifactSpec.Digest != nil && strings.ToLower(*artifactSpec.Digest) == m.digest {
 		return true
 	}
@@ -218,7 +239,7 @@ func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec)
 func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	funcName := "IsOccurrence"
 	if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 	}
 
 	c.m.RLock()
@@ -236,7 +257,11 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 			return nil, nil
 		}
 		// If found by id, ignore rest of fields in spec and return as a match
-		return []*model.IsOccurrence{c.convOccurrence(link)}, nil
+		o, err := c.convOccurrence(link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return []*model.IsOccurrence{o}, nil
 	}
 
 	var search []uint32
@@ -333,5 +358,9 @@ func (c *demoClient) addOccIfMatch(out []*model.IsOccurrence,
 			}
 		}
 	}
-	return append(out, c.convOccurrence(link)), nil
+	o, err := c.convOccurrence(link)
+	if err != nil {
+		return nil, err
+	}
+	return append(out, o), nil
 }

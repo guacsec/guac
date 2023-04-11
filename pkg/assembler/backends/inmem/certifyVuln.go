@@ -148,7 +148,10 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 	duplicate := false
 	collectedCertifyVulnLink := vulnerabilityLink{}
 	for _, id := range searchIDs {
-		v, _ := byID[*vulnerabilityLink](id, c)
+		v, err := byID[*vulnerabilityLink](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		vulnMatch := false
 		if osvID != 0 && osvID == v.osvID {
 			vulnMatch = true

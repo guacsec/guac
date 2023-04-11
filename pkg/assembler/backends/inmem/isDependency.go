@@ -94,7 +94,10 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 	duplicate := false
 	collectedIsDependencyLink := isDependencyLink{}
 	for _, id := range searchIDs {
-		v, _ := byID[*isDependencyLink](id, c)
+		v, err := byID[*isDependencyLink](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		if packageID == v.packageID && depPackageID == v.depPackageID && dependency.Justification == v.justification &&
 			dependency.Origin == v.origin && dependency.Collector == v.collector && dependency.VersionRange == v.versionRange {
 

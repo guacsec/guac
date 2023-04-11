@@ -116,7 +116,10 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 	duplicate := false
 	collectedCertifyGoodLink := goodLink{}
 	for _, id := range searchIDs {
-		v, _ := byID[*goodLink](id, c)
+		v, err := byID[*goodLink](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		subjectMatch := false
 		if packageID != 0 && packageID == v.packageID {
 			subjectMatch = true

@@ -80,7 +80,10 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceIn
 	duplicate := false
 	collectedScorecardLink := scorecardLink{}
 	for _, id := range searchIDs {
-		v, _ := byID[*scorecardLink](id, c)
+		v, err := byID[*scorecardLink](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		if sourceID == v.sourceID && scorecard.TimeScanned.UTC() == v.timeScanned && scorecard.AggregateScore == v.aggregateScore &&
 			scorecard.ScorecardVersion == v.scorecardVersion && scorecard.ScorecardCommit == v.scorecardCommit && scorecard.Origin == v.origin &&
 			scorecard.Collector == v.collector && reflect.DeepEqual(checksMap, v.checks) {
