@@ -27,7 +27,7 @@ query PkgQ1 {
 }
 
 query PkgQ2 {
-  packages(pkgSpec: { type: "oci" }) {
+  packages(pkgSpec: { type: "guac" }) {
     type
     namespaces {
       namespace

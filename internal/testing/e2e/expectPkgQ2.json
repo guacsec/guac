@@ -1,7 +1,7 @@
 {
   "packages": [
     {
-      "type": "oci",
+      "type": "guac",
       "namespaces": [
         {
           "namespace": "docker.io/lib"

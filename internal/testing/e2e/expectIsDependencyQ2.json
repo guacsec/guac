@@ -4,7 +4,7 @@
       "justification": "top-level package GUAC heuristic connecting to each file/package",
       "versionRange": "v1.4.2",
       "package": {
-        "type": "oci",
+        "type": "guac",
         "namespaces": [
           {
             "namespace": "docker.io/library",
