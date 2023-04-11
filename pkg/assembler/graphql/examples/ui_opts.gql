@@ -93,8 +93,8 @@ query GetCertifyVuln($spec: CertifyVulnSpec) {
   }
 }
 
-query GetNeighbors ($nodeId: ID!) {
-  neighbors(node: $nodeId) {
+query GetNeighbors ($nodeId: ID!, $edges: [Edge!]!) {
+  neighbors(node: $nodeId, usingOnly: $edges) {
     __typename
     ... on Package{
       ...allPkgTree
