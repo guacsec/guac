@@ -23,6 +23,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/spf13/cobra"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
@@ -31,57 +32,84 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-func startServer() {
+const (
+	neo4js = "neo4j"
+	inmems = "inmem"
+)
+
+func startServer(cmd *cobra.Command) {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
-	if flags.neo4jBackend == flags.inMemoryBackend {
-		fmt.Fprintf(os.Stderr, "Must use either Neo4j or in-memory backend\n")
+	if err := validateFlags(); err != nil {
+		fmt.Printf("unable to validate flags: %v\n", err)
+		_ = cmd.Help()
 		os.Exit(1)
 	}
 
+	srv, err := getGraphqlServer()
+	if err != nil {
+		logger.Errorf("unable to initialize graphql server: %v", err)
+		os.Exit(1)
+	}
+	http.Handle("/query", srv)
+
+	// Ingest additional test data in a go-routine.
+	if flags.testData {
+		go ingestData(flags.port)
+	}
+
+	if flags.debug {
+		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
+	}
+
+	// blocking until termination
+	logger.Info("starting server")
+	logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", flags.port), nil))
+}
+
+func validateFlags() error {
+	if flags.backend != neo4js &&
+		flags.backend != inmems {
+		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
+	}
+	return nil
+}
+
+func getGraphqlServer() (*handler.Server, error) {
 	var topResolver resolvers.Resolver
-	if flags.neo4jBackend {
+
+	switch flags.backend {
+
+	case neo4js:
 		args := neo4j.Neo4jConfig{
-			User:   flags.gdbuser,
-			Pass:   flags.gdbpass,
-			Realm:  flags.realm,
-			DBAddr: flags.dbAddr,
-			// TODO(mihaimaruseac): Once all ingestion is done, remove from here
-			TestData: flags.addTestData,
+			User:   flags.nUser,
+			Pass:   flags.nPass,
+			Realm:  flags.nRealm,
+			DBAddr: flags.nAddr,
 		}
 
 		backend, err := neo4j.GetBackend(&args)
 		if err != nil {
-			fmt.Printf("Error creating Neo4J Backend: %v", err)
-			os.Exit(1)
+			return nil, fmt.Errorf("Error creating neo4j backend: %w", err)
 		}
 
 		topResolver = resolvers.Resolver{Backend: backend}
-	} else {
+	case inmems:
 		args := inmem.DemoCredentials{}
 		backend, err := inmem.GetBackend(&args)
 		if err != nil {
-			fmt.Printf("Error creating inmem backend: %v", err)
-			os.Exit(1)
+			return nil, fmt.Errorf("Error creating inmem backend: %w", err)
 		}
 
 		topResolver = resolvers.Resolver{Backend: backend}
+	default:
+		return nil, fmt.Errorf("invalid backend specified: %v", flags.backend)
 	}
 
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
-	// Ingest additional test data in a go-routine.
-	port := flags.playgroundPort
-	if flags.addTestData {
-		go ingestData(port)
-	}
-
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
-
-	logger.Infof("connect to http://localhost:%d/ for GraphQL playground", port)
-	// blocking until termination
-	logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
+	return srv, nil
 }

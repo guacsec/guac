@@ -40,16 +40,13 @@ make
 
 ## Running the GUAC Server
 
-The GUAC server can be run in different ways. For this demo, we will use the
-`guacone gql-server` command with the `--debug` flag command, which sets up a
+For this demo, we will use the `guacgql --gql-debug` command, which sets up a
 GraphQL endpoint and playground, and runs an in-memory backend to store the GUAC
-graph.
-
-Run this command in a separate terminal (in the same path) and keep it running
-throughout the demo.
+graph. Run this command in a separate terminal (in the same path) and keep it
+running throughout the demo.
 
 ```bash
-bin/guacone gql-server --gql-debug
+bin/guacgql --gql-debug
 ```
 
 Note: As the data is stored in-memory, whenever you restart the server, the

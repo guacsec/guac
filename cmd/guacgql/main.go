@@ -15,11 +15,10 @@
 
 package main
 
-// This is experimental server only used to test the GraphQL interface during
-// development. Do not use in production!
+// This is the GUAC GraphQL server.
 
 import (
-	"github.com/guacsec/guac/cmd/graphql_playground/cmd"
+	"github.com/guacsec/guac/cmd/guacgql/cmd"
 )
 
 func main() {

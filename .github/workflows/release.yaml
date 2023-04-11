@@ -34,7 +34,7 @@ jobs:
           registry: ghcr.io
           username: ${GITHUB_WORKFLOW}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: setup pack 
+      - name: setup pack
         uses: buildpacks/github-actions/setup-pack@2c2fe0dad1a532cdcde622787d752df8fc3172f0 # v5.1.0
       - name: Build and publish image
         run: |
@@ -46,4 +46,4 @@ jobs:
           IMAGE: ghcr.io/guacsec/guac
           BUILDER: paketobuildpacks/builder:base
           BUILDPACK: paketo-buildpacks/go
-          BP_GO_TARGETS: "./cmd/collector:./cmd/guacone:./cmd/ingest:./cmd/graphql_playground"
+          BP_GO_TARGETS: "./cmd/collector:./cmd/guacone:./cmd/ingest:./cmd/guacgql"
