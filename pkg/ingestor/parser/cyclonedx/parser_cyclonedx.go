@@ -76,15 +76,7 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 		purl := cdxBom.Metadata.Component.PackageURL
 		if cdxBom.Metadata.Component.PackageURL == "" {
 			if cdxBom.Metadata.Component.Type == cdx.ComponentTypeContainer {
-				//TODO(dejanb): Change prefix to pkg:guac/cdx and align it with spdx implementation
 				splitImage := strings.Split(cdxBom.Metadata.Component.Name, "/")
-
-				const (
-					ociPrefix        = "pkg:oci/"
-					repositoryURLKey = "?repository_url="
-					tagKey           = "&tag="
-				)
-
 				splitTag := strings.Split(splitImage[len(splitImage)-1], ":")
 				var repositoryURL string
 				var tag string
@@ -102,13 +94,14 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 					tag = splitTag[1]
 				}
 
-				purl = fmt.Sprintf("%s%s@%s%s%s%s%s", ociPrefix, splitTag[0],
-					cdxBom.Metadata.Component.Version, repositoryURLKey, repositoryURL, tagKey, tag)
+				purl = "pkg:/guac/cdx/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
+					"?repository_url=" + repositoryURL + "&tag=" + tag
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")
 				purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
 			}
 		}
+
 		topPackage, err := asmhelpers.PurlToPkg(purl)
 		if err != nil {
 			return err
