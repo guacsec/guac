@@ -115,7 +115,7 @@ var ingestCmd = &cobra.Command{
 
 			entries := input.IdentifierStringsSliceToCollectEntries(i)
 			if len(entries) > 0 {
-				logger.Infof("got entries to add: %v", entries)
+				logger.Infof("got collect entries to add: %v", len(entries))
 				if err := csubClient.AddCollectEntries(ctx, entries); err != nil {
 					logger.Errorf("unable to add collect entries: %v", err)
 				}
