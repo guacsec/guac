@@ -22,7 +22,7 @@ mutation CertifyOSV($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: Vuln
     ...AllPkgTree
   }
   ingestOSV(osv: $osv) {
-    ...allOSVTree
+    ...AllOSVTree
   }
   ingestVulnerability(pkg: $pkg, vulnerability: {osv: $osv}, certifyVuln: $certifyVuln) {
     ...AllCertifyVuln
@@ -34,7 +34,7 @@ mutation CertifyCVE($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: Vuln
     ...AllPkgTree
   }
   ingestCVE(cve: $cve) {
-    ...allCveTree
+    ...AllCveTree
   }
   ingestVulnerability(pkg: $pkg, vulnerability: {cve: $cve}, certifyVuln: $certifyVuln) {
     ...AllCertifyVuln
@@ -46,7 +46,7 @@ mutation CertifyGHSA($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: V
     ...AllPkgTree
   }
   ingestGHSA(ghsa: $ghsa) {
-    ...allGHSATree
+    ...AllGHSATree
   }
   ingestVulnerability(pkg: $pkg, vulnerability: {ghsa: $ghsa}, certifyVuln: $certifyVuln) {
     ...AllCertifyVuln

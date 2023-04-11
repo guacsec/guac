@@ -33,13 +33,13 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
       ...allBuilderTree
     }
     ... on OSV {
-      ...allOSVTree
+      ...AllOSVTree
     }
     ... on CVE {
-      ...allCveTree
+      ...AllCveTree
     }
     ... on GHSA {
-      ...allGHSATree
+      ...AllGHSATree
     }
     ... on NoVuln {
       id
@@ -105,13 +105,13 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
       ...allBuilderTree
     }
     ... on OSV {
-      ...allOSVTree
+      ...AllOSVTree
     }
     ... on CVE {
-      ...allCveTree
+      ...AllCveTree
     }
     ... on GHSA {
-      ...allGHSATree
+      ...AllGHSATree
     }
     ... on NoVuln {
       id
@@ -177,13 +177,13 @@ query Node($node: ID!) {
       ...allBuilderTree
     }
     ... on OSV {
-      ...allOSVTree
+      ...AllOSVTree
     }
     ... on CVE {
-      ...allCveTree
+      ...AllCveTree
     }
     ... on GHSA {
-      ...allGHSATree
+      ...AllGHSATree
     }
     ... on NoVuln {
       id
