@@ -58,10 +58,13 @@ build: generate
 	go build -ldflags ${LDFLAGS} -o bin/graphql_playground cmd/graphql_playground/main.go
 
 .PHONY: proto
-proto: pkg/collectsub/collectsub/collectsub.proto
+proto: 
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		$^
+		pkg/collectsub/collectsub/collectsub.proto
+	protoc --go_out=. --go_opt=paths=source_relative \
+	    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		pkg/handler/collector/deps_dev/internal/api.proto
 
 # Remove temporary files
 .PHONY: clean
