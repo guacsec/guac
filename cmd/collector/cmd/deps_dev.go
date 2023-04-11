@@ -28,7 +28,6 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -97,17 +96,13 @@ func validateDepsDevFlags(natsAddr string, csubAddr string, useCsub bool, args [
 
 	sources := []datasource.Source{}
 	for _, arg := range args {
-		if _, err := ref.New(arg); err != nil {
-			return opts, fmt.Errorf("image_path parsing error. require format repo:tag")
-		}
-		sources = append(sources, datasource.Source{
-			Value: arg,
-		})
+		sources = append(sources, datasource.Source{Value: arg})
+
 	}
 
 	var err error
 	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
-		OciDataSources: sources,
+		PurlDataSources: sources,
 	})
 	if err != nil {
 		return opts, err

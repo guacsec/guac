@@ -55,12 +55,13 @@ func TestNewDepsCollector(t *testing.T) {
 
 func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	tests := []struct {
-		name     string
-		packages []string
-		want     []*processor.Document
-		poll     bool
-		interval time.Duration
-		wantErr  bool
+		name       string
+		packages   []string
+		want       []*processor.Document
+		poll       bool
+		interval   time.Duration
+		wantErr    bool
+		errMessage error
 	}{{
 		name:     "no packages",
 		packages: []string{},
@@ -113,9 +114,10 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				},
 			},
 		},
-		poll:     true,
-		interval: time.Second,
-		wantErr:  true,
+		poll:       true,
+		interval:   time.Second,
+		wantErr:    true,
+		errMessage: context.DeadlineExceeded,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -147,6 +149,11 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			eh := func(err error) bool {
 				if (err != nil) != tt.wantErr {
 					t.Errorf("gcsCollector.RetrieveArtifacts() = %v, want %v", err, tt.wantErr)
+				}
+				if err != nil {
+					if !errors.Is(err, tt.errMessage) {
+						t.Errorf("gcsCollector.RetrieveArtifacts() errored with message = %v, wanted error message %v", err, tt.errMessage)
+					}
 				}
 				return true
 			}
