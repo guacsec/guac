@@ -95,7 +95,10 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	duplicate := false
 	collectedSrcMapLink := srcMapLink{}
 	for _, id := range searchIDs {
-		v, _ := byID[*srcMapLink](id, c)
+		v, err := byID[*srcMapLink](id, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 		if packageID == v.packageID && sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
 			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.UTC() == v.knownSince {
 			collectedSrcMapLink = *v
