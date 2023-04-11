@@ -538,20 +538,20 @@ func __marshalAllCertifyVulnVulnerability(v *AllCertifyVulnVulnerability) ([]byt
 // This node can be referred to by other parts of GUAC.
 type AllCertifyVulnVulnerabilityCVE struct {
 	Typename   *string `json:"__typename"`
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetTypename returns AllCertifyVulnVulnerabilityCVE.Typename, and is useful for accessing the field via an interface.
 func (v *AllCertifyVulnVulnerabilityCVE) GetTypename() *string { return v.Typename }
 
 // GetId returns AllCertifyVulnVulnerabilityCVE.Id, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnVulnerabilityCVE) GetId() string { return v.allCveTree.Id }
+func (v *AllCertifyVulnVulnerabilityCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns AllCertifyVulnVulnerabilityCVE.Year, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnVulnerabilityCVE) GetYear() int { return v.allCveTree.Year }
+func (v *AllCertifyVulnVulnerabilityCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns AllCertifyVulnVulnerabilityCVE.CveId, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnVulnerabilityCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *AllCertifyVulnVulnerabilityCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *AllCertifyVulnVulnerabilityCVE) UnmarshalJSON(b []byte) error {
 
@@ -571,7 +571,7 @@ func (v *AllCertifyVulnVulnerabilityCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -600,9 +600,9 @@ func (v *AllCertifyVulnVulnerabilityCVE) __premarshalJSON() (*__premarshalAllCer
 	var retval __premarshalAllCertifyVulnVulnerabilityCVE
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -616,17 +616,17 @@ func (v *AllCertifyVulnVulnerabilityCVE) __premarshalJSON() (*__premarshalAllCer
 // This node can be referred to by other parts of GUAC.
 type AllCertifyVulnVulnerabilityGHSA struct {
 	Typename    *string `json:"__typename"`
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetTypename returns AllCertifyVulnVulnerabilityGHSA.Typename, and is useful for accessing the field via an interface.
 func (v *AllCertifyVulnVulnerabilityGHSA) GetTypename() *string { return v.Typename }
 
 // GetId returns AllCertifyVulnVulnerabilityGHSA.Id, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnVulnerabilityGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *AllCertifyVulnVulnerabilityGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns AllCertifyVulnVulnerabilityGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnVulnerabilityGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *AllCertifyVulnVulnerabilityGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *AllCertifyVulnVulnerabilityGHSA) UnmarshalJSON(b []byte) error {
 
@@ -646,7 +646,7 @@ func (v *AllCertifyVulnVulnerabilityGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -673,8 +673,8 @@ func (v *AllCertifyVulnVulnerabilityGHSA) __premarshalJSON() (*__premarshalAllCe
 	var retval __premarshalAllCertifyVulnVulnerabilityGHSA
 
 	retval.Typename = v.Typename
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -711,17 +711,17 @@ func (v *AllCertifyVulnVulnerabilityNoVuln) GetId() string { return v.Id }
 // This node can be referred to by other parts of GUAC.
 type AllCertifyVulnVulnerabilityOSV struct {
 	Typename   *string `json:"__typename"`
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetTypename returns AllCertifyVulnVulnerabilityOSV.Typename, and is useful for accessing the field via an interface.
 func (v *AllCertifyVulnVulnerabilityOSV) GetTypename() *string { return v.Typename }
 
 // GetId returns AllCertifyVulnVulnerabilityOSV.Id, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnVulnerabilityOSV) GetId() string { return v.allOSVTree.Id }
+func (v *AllCertifyVulnVulnerabilityOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns AllCertifyVulnVulnerabilityOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *AllCertifyVulnVulnerabilityOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *AllCertifyVulnVulnerabilityOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *AllCertifyVulnVulnerabilityOSV) UnmarshalJSON(b []byte) error {
 
@@ -741,7 +741,7 @@ func (v *AllCertifyVulnVulnerabilityOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -768,10 +768,54 @@ func (v *AllCertifyVulnVulnerabilityOSV) __premarshalJSON() (*__premarshalAllCer
 	var retval __premarshalAllCertifyVulnVulnerabilityOSV
 
 	retval.Typename = v.Typename
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
+
+// AllCveTree includes the GraphQL fields of CVE requested by the fragment AllCveTree.
+// The GraphQL type's documentation follows.
+//
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// The `year` is mandatory.
+// The `cveId` field is mandatory and canonicalized to be lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type AllCveTree struct {
+	Id    string `json:"id"`
+	Year  int    `json:"year"`
+	CveId string `json:"cveId"`
+}
+
+// GetId returns AllCveTree.Id, and is useful for accessing the field via an interface.
+func (v *AllCveTree) GetId() string { return v.Id }
+
+// GetYear returns AllCveTree.Year, and is useful for accessing the field via an interface.
+func (v *AllCveTree) GetYear() int { return v.Year }
+
+// GetCveId returns AllCveTree.CveId, and is useful for accessing the field via an interface.
+func (v *AllCveTree) GetCveId() string { return v.CveId }
+
+// AllGHSATree includes the GraphQL fields of GHSA requested by the fragment AllGHSATree.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// The `id` field is mandatory and canonicalized to be lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type AllGHSATree struct {
+	Id     string `json:"id"`
+	GhsaId string `json:"ghsaId"`
+}
+
+// GetId returns AllGHSATree.Id, and is useful for accessing the field via an interface.
+func (v *AllGHSATree) GetId() string { return v.Id }
+
+// GetGhsaId returns AllGHSATree.GhsaId, and is useful for accessing the field via an interface.
+func (v *AllGHSATree) GetGhsaId() string { return v.GhsaId }
 
 // AllIsOccurrencesTree includes the GraphQL fields of IsOccurrence requested by the fragment AllIsOccurrencesTree.
 // The GraphQL type's documentation follows.
@@ -1220,6 +1264,28 @@ func (v *AllIsOccurrencesTreeSubjectSource) __premarshalJSON() (*__premarshalAll
 	return &retval, nil
 }
 
+// AllOSVTree includes the GraphQL fields of OSV requested by the fragment AllOSVTree.
+// The GraphQL type's documentation follows.
+//
+// OSV represents an Open Source Vulnerability.
+//
+// The `osvId` field is mandatory and canonicalized to be lowercase.
+//
+// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
+// CVE ID).
+//
+// This node can be referred to by other parts of GUAC.
+type AllOSVTree struct {
+	Id    string `json:"id"`
+	OsvId string `json:"osvId"`
+}
+
+// GetId returns AllOSVTree.Id, and is useful for accessing the field via an interface.
+func (v *AllOSVTree) GetId() string { return v.Id }
+
+// GetOsvId returns AllOSVTree.OsvId, and is useful for accessing the field via an interface.
+func (v *AllOSVTree) GetOsvId() string { return v.OsvId }
+
 // AllPkgTree includes the GraphQL fields of Package requested by the fragment AllPkgTree.
 // The GraphQL type's documentation follows.
 //
@@ -1494,6 +1560,104 @@ func (v *CVEInputSpec) GetYear() int { return v.Year }
 
 // GetCveId returns CVEInputSpec.CveId, and is useful for accessing the field via an interface.
 func (v *CVEInputSpec) GetCveId() string { return v.CveId }
+
+// CVESpec allows filtering the list of cves to return.
+type CVESpec struct {
+	Id    *string `json:"id"`
+	Year  *int    `json:"year"`
+	CveId *string `json:"cveId"`
+}
+
+// GetId returns CVESpec.Id, and is useful for accessing the field via an interface.
+func (v *CVESpec) GetId() *string { return v.Id }
+
+// GetYear returns CVESpec.Year, and is useful for accessing the field via an interface.
+func (v *CVESpec) GetYear() *int { return v.Year }
+
+// GetCveId returns CVESpec.CveId, and is useful for accessing the field via an interface.
+func (v *CVESpec) GetCveId() *string { return v.CveId }
+
+// CVEsCveCVE includes the requested fields of the GraphQL type CVE.
+// The GraphQL type's documentation follows.
+//
+// CVE represents common vulnerabilities and exposures. It contains the year along
+// with the CVE ID.
+//
+// The `year` is mandatory.
+// The `cveId` field is mandatory and canonicalized to be lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type CVEsCveCVE struct {
+	AllCveTree `json:"-"`
+}
+
+// GetId returns CVEsCveCVE.Id, and is useful for accessing the field via an interface.
+func (v *CVEsCveCVE) GetId() string { return v.AllCveTree.Id }
+
+// GetYear returns CVEsCveCVE.Year, and is useful for accessing the field via an interface.
+func (v *CVEsCveCVE) GetYear() int { return v.AllCveTree.Year }
+
+// GetCveId returns CVEsCveCVE.CveId, and is useful for accessing the field via an interface.
+func (v *CVEsCveCVE) GetCveId() string { return v.AllCveTree.CveId }
+
+func (v *CVEsCveCVE) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CVEsCveCVE
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CVEsCveCVE = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCveTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCVEsCveCVE struct {
+	Id string `json:"id"`
+
+	Year int `json:"year"`
+
+	CveId string `json:"cveId"`
+}
+
+func (v *CVEsCveCVE) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CVEsCveCVE) __premarshalJSON() (*__premarshalCVEsCveCVE, error) {
+	var retval __premarshalCVEsCveCVE
+
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
+	return &retval, nil
+}
+
+// CVEsResponse is returned by CVEs on success.
+type CVEsResponse struct {
+	// Returns all CVEs
+	Cve []CVEsCveCVE `json:"cve"`
+}
+
+// GetCve returns CVEsResponse.Cve, and is useful for accessing the field via an interface.
+func (v *CVEsResponse) GetCve() []CVEsCveCVE { return v.Cve }
 
 // CertifyBadArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
 // The GraphQL type's documentation follows.
@@ -2107,17 +2271,17 @@ func (v *CertifyBadSrcResponse) GetIngestCertifyBad() CertifyBadSrcIngestCertify
 //
 // This node can be referred to by other parts of GUAC.
 type CertifyCVEIngestCVE struct {
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetId returns CertifyCVEIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestCVE) GetId() string { return v.allCveTree.Id }
+func (v *CertifyCVEIngestCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns CertifyCVEIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestCVE) GetYear() int { return v.allCveTree.Year }
+func (v *CertifyCVEIngestCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns CertifyCVEIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *CertifyCVEIngestCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *CertifyCVEIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *CertifyCVEIngestCVE) UnmarshalJSON(b []byte) error {
 
@@ -2137,7 +2301,7 @@ func (v *CertifyCVEIngestCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -2163,9 +2327,9 @@ func (v *CertifyCVEIngestCVE) MarshalJSON() ([]byte, error) {
 func (v *CertifyCVEIngestCVE) __premarshalJSON() (*__premarshalCertifyCVEIngestCVE, error) {
 	var retval __premarshalCertifyCVEIngestCVE
 
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -2371,14 +2535,14 @@ func (v *CertifyCVEResponse) GetIngestVulnerability() CertifyCVEIngestVulnerabil
 //
 // This node can be referred to by other parts of GUAC.
 type CertifyGHSAIngestGHSA struct {
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetId returns CertifyGHSAIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *CertifyGHSAIngestGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns CertifyGHSAIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *CertifyGHSAIngestGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *CertifyGHSAIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *CertifyGHSAIngestGHSA) UnmarshalJSON(b []byte) error {
 
@@ -2398,7 +2562,7 @@ func (v *CertifyGHSAIngestGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -2422,8 +2586,8 @@ func (v *CertifyGHSAIngestGHSA) MarshalJSON() ([]byte, error) {
 func (v *CertifyGHSAIngestGHSA) __premarshalJSON() (*__premarshalCertifyGHSAIngestGHSA, error) {
 	var retval __premarshalCertifyGHSAIngestGHSA
 
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -3427,14 +3591,14 @@ func (v *CertifyNoKnownVulnResponse) GetIngestVulnerability() CertifyNoKnownVuln
 //
 // This node can be referred to by other parts of GUAC.
 type CertifyOSVIngestOSV struct {
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetId returns CertifyOSVIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestOSV) GetId() string { return v.allOSVTree.Id }
+func (v *CertifyOSVIngestOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns CertifyOSVIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *CertifyOSVIngestOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *CertifyOSVIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *CertifyOSVIngestOSV) UnmarshalJSON(b []byte) error {
 
@@ -3454,7 +3618,7 @@ func (v *CertifyOSVIngestOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -3478,8 +3642,8 @@ func (v *CertifyOSVIngestOSV) MarshalJSON() ([]byte, error) {
 func (v *CertifyOSVIngestOSV) __premarshalJSON() (*__premarshalCertifyOSVIngestOSV, error) {
 	var retval __premarshalCertifyOSVIngestOSV
 
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -3763,6 +3927,94 @@ type GHSAInputSpec struct {
 
 // GetGhsaId returns GHSAInputSpec.GhsaId, and is useful for accessing the field via an interface.
 func (v *GHSAInputSpec) GetGhsaId() string { return v.GhsaId }
+
+// GHSASpec allows filtering the list of GHSA to return.
+//
+// The argument will be canonicalized to lowercase.
+type GHSASpec struct {
+	Id     *string `json:"id"`
+	GhsaId *string `json:"ghsaId"`
+}
+
+// GetId returns GHSASpec.Id, and is useful for accessing the field via an interface.
+func (v *GHSASpec) GetId() *string { return v.Id }
+
+// GetGhsaId returns GHSASpec.GhsaId, and is useful for accessing the field via an interface.
+func (v *GHSASpec) GetGhsaId() *string { return v.GhsaId }
+
+// GHSAsGhsaGHSA includes the requested fields of the GraphQL type GHSA.
+// The GraphQL type's documentation follows.
+//
+// GHSA represents GitHub security advisories.
+//
+// The `id` field is mandatory and canonicalized to be lowercase.
+//
+// This node can be referred to by other parts of GUAC.
+type GHSAsGhsaGHSA struct {
+	AllGHSATree `json:"-"`
+}
+
+// GetId returns GHSAsGhsaGHSA.Id, and is useful for accessing the field via an interface.
+func (v *GHSAsGhsaGHSA) GetId() string { return v.AllGHSATree.Id }
+
+// GetGhsaId returns GHSAsGhsaGHSA.GhsaId, and is useful for accessing the field via an interface.
+func (v *GHSAsGhsaGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
+
+func (v *GHSAsGhsaGHSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GHSAsGhsaGHSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GHSAsGhsaGHSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllGHSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGHSAsGhsaGHSA struct {
+	Id string `json:"id"`
+
+	GhsaId string `json:"ghsaId"`
+}
+
+func (v *GHSAsGhsaGHSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GHSAsGhsaGHSA) __premarshalJSON() (*__premarshalGHSAsGhsaGHSA, error) {
+	var retval __premarshalGHSAsGhsaGHSA
+
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
+	return &retval, nil
+}
+
+// GHSAsResponse is returned by GHSAs on success.
+type GHSAsResponse struct {
+	// Returns all GHSA nodes
+	Ghsa []GHSAsGhsaGHSA `json:"ghsa"`
+}
+
+// GetGhsa returns GHSAsResponse.Ghsa, and is useful for accessing the field via an interface.
+func (v *GHSAsResponse) GetGhsa() []GHSAsGhsaGHSA { return v.Ghsa }
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 //
@@ -5657,17 +5909,17 @@ func (v *IsOccurrenceSrcResponse) GetIngestOccurrence() IsOccurrenceSrcIngestOcc
 //
 // This node can be referred to by other parts of GUAC.
 type IsVulnerabilityCVEIngestCVE struct {
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetId returns IsVulnerabilityCVEIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestCVE) GetId() string { return v.allCveTree.Id }
+func (v *IsVulnerabilityCVEIngestCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns IsVulnerabilityCVEIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestCVE) GetYear() int { return v.allCveTree.Year }
+func (v *IsVulnerabilityCVEIngestCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns IsVulnerabilityCVEIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *IsVulnerabilityCVEIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *IsVulnerabilityCVEIngestCVE) UnmarshalJSON(b []byte) error {
 
@@ -5687,7 +5939,7 @@ func (v *IsVulnerabilityCVEIngestCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -5713,9 +5965,9 @@ func (v *IsVulnerabilityCVEIngestCVE) MarshalJSON() ([]byte, error) {
 func (v *IsVulnerabilityCVEIngestCVE) __premarshalJSON() (*__premarshalIsVulnerabilityCVEIngestCVE, error) {
 	var retval __premarshalIsVulnerabilityCVEIngestCVE
 
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -5843,14 +6095,14 @@ func (v *IsVulnerabilityCVEIngestIsVulnerability) __premarshalJSON() (*__premars
 //
 // This node can be referred to by other parts of GUAC.
 type IsVulnerabilityCVEIngestOSV struct {
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetId returns IsVulnerabilityCVEIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestOSV) GetId() string { return v.allOSVTree.Id }
+func (v *IsVulnerabilityCVEIngestOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns IsVulnerabilityCVEIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityCVEIngestOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *IsVulnerabilityCVEIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *IsVulnerabilityCVEIngestOSV) UnmarshalJSON(b []byte) error {
 
@@ -5870,7 +6122,7 @@ func (v *IsVulnerabilityCVEIngestOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -5894,8 +6146,8 @@ func (v *IsVulnerabilityCVEIngestOSV) MarshalJSON() ([]byte, error) {
 func (v *IsVulnerabilityCVEIngestOSV) __premarshalJSON() (*__premarshalIsVulnerabilityCVEIngestOSV, error) {
 	var retval __premarshalIsVulnerabilityCVEIngestOSV
 
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -5929,14 +6181,14 @@ func (v *IsVulnerabilityCVEResponse) GetIngestIsVulnerability() IsVulnerabilityC
 //
 // This node can be referred to by other parts of GUAC.
 type IsVulnerabilityGHSAIngestGHSA struct {
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetId returns IsVulnerabilityGHSAIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *IsVulnerabilityGHSAIngestGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns IsVulnerabilityGHSAIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *IsVulnerabilityGHSAIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *IsVulnerabilityGHSAIngestGHSA) UnmarshalJSON(b []byte) error {
 
@@ -5956,7 +6208,7 @@ func (v *IsVulnerabilityGHSAIngestGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -5980,8 +6232,8 @@ func (v *IsVulnerabilityGHSAIngestGHSA) MarshalJSON() ([]byte, error) {
 func (v *IsVulnerabilityGHSAIngestGHSA) __premarshalJSON() (*__premarshalIsVulnerabilityGHSAIngestGHSA, error) {
 	var retval __premarshalIsVulnerabilityGHSAIngestGHSA
 
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -6109,14 +6361,14 @@ func (v *IsVulnerabilityGHSAIngestIsVulnerability) __premarshalJSON() (*__premar
 //
 // This node can be referred to by other parts of GUAC.
 type IsVulnerabilityGHSAIngestOSV struct {
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetId returns IsVulnerabilityGHSAIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestOSV) GetId() string { return v.allOSVTree.Id }
+func (v *IsVulnerabilityGHSAIngestOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns IsVulnerabilityGHSAIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *IsVulnerabilityGHSAIngestOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *IsVulnerabilityGHSAIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *IsVulnerabilityGHSAIngestOSV) UnmarshalJSON(b []byte) error {
 
@@ -6136,7 +6388,7 @@ func (v *IsVulnerabilityGHSAIngestOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -6160,8 +6412,8 @@ func (v *IsVulnerabilityGHSAIngestOSV) MarshalJSON() ([]byte, error) {
 func (v *IsVulnerabilityGHSAIngestOSV) __premarshalJSON() (*__premarshalIsVulnerabilityGHSAIngestOSV, error) {
 	var retval __premarshalIsVulnerabilityGHSAIngestOSV
 
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -6376,20 +6628,20 @@ func (v *NeighborsNeighborsBuilder) __premarshalJSON() (*__premarshalNeighborsNe
 // This node can be referred to by other parts of GUAC.
 type NeighborsNeighborsCVE struct {
 	Typename   *string `json:"__typename"`
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsCVE.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCVE) GetTypename() *string { return v.Typename }
 
 // GetId returns NeighborsNeighborsCVE.Id, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCVE) GetId() string { return v.allCveTree.Id }
+func (v *NeighborsNeighborsCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns NeighborsNeighborsCVE.Year, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCVE) GetYear() int { return v.allCveTree.Year }
+func (v *NeighborsNeighborsCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns NeighborsNeighborsCVE.CveId, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *NeighborsNeighborsCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *NeighborsNeighborsCVE) UnmarshalJSON(b []byte) error {
 
@@ -6409,7 +6661,7 @@ func (v *NeighborsNeighborsCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -6438,9 +6690,9 @@ func (v *NeighborsNeighborsCVE) __premarshalJSON() (*__premarshalNeighborsNeighb
 	var retval __premarshalNeighborsNeighborsCVE
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -6981,17 +7233,17 @@ func (v *NeighborsNeighborsCertifyVuln) __premarshalJSON() (*__premarshalNeighbo
 // This node can be referred to by other parts of GUAC.
 type NeighborsNeighborsGHSA struct {
 	Typename    *string `json:"__typename"`
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsGHSA.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsGHSA) GetTypename() *string { return v.Typename }
 
 // GetId returns NeighborsNeighborsGHSA.Id, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *NeighborsNeighborsGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns NeighborsNeighborsGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *NeighborsNeighborsGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *NeighborsNeighborsGHSA) UnmarshalJSON(b []byte) error {
 
@@ -7011,7 +7263,7 @@ func (v *NeighborsNeighborsGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -7038,8 +7290,8 @@ func (v *NeighborsNeighborsGHSA) __premarshalJSON() (*__premarshalNeighborsNeigh
 	var retval __premarshalNeighborsNeighborsGHSA
 
 	retval.Typename = v.Typename
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -8209,17 +8461,17 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 // This node can be referred to by other parts of GUAC.
 type NeighborsNeighborsOSV struct {
 	Typename   *string `json:"__typename"`
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetTypename returns NeighborsNeighborsOSV.Typename, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsOSV) GetTypename() *string { return v.Typename }
 
 // GetId returns NeighborsNeighborsOSV.Id, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsOSV) GetId() string { return v.allOSVTree.Id }
+func (v *NeighborsNeighborsOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns NeighborsNeighborsOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *NeighborsNeighborsOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *NeighborsNeighborsOSV) UnmarshalJSON(b []byte) error {
 
@@ -8239,7 +8491,7 @@ func (v *NeighborsNeighborsOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -8266,8 +8518,8 @@ func (v *NeighborsNeighborsOSV) __premarshalJSON() (*__premarshalNeighborsNeighb
 	var retval __premarshalNeighborsNeighborsOSV
 
 	retval.Typename = v.Typename
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -9191,20 +9443,20 @@ func (v *NodeNodeBuilder) __premarshalJSON() (*__premarshalNodeNodeBuilder, erro
 // This node can be referred to by other parts of GUAC.
 type NodeNodeCVE struct {
 	Typename   *string `json:"__typename"`
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetTypename returns NodeNodeCVE.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodeCVE) GetTypename() *string { return v.Typename }
 
 // GetId returns NodeNodeCVE.Id, and is useful for accessing the field via an interface.
-func (v *NodeNodeCVE) GetId() string { return v.allCveTree.Id }
+func (v *NodeNodeCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns NodeNodeCVE.Year, and is useful for accessing the field via an interface.
-func (v *NodeNodeCVE) GetYear() int { return v.allCveTree.Year }
+func (v *NodeNodeCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns NodeNodeCVE.CveId, and is useful for accessing the field via an interface.
-func (v *NodeNodeCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *NodeNodeCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *NodeNodeCVE) UnmarshalJSON(b []byte) error {
 
@@ -9224,7 +9476,7 @@ func (v *NodeNodeCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -9253,9 +9505,9 @@ func (v *NodeNodeCVE) __premarshalJSON() (*__premarshalNodeNodeCVE, error) {
 	var retval __premarshalNodeNodeCVE
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -9788,17 +10040,17 @@ func (v *NodeNodeCertifyVuln) __premarshalJSON() (*__premarshalNodeNodeCertifyVu
 // This node can be referred to by other parts of GUAC.
 type NodeNodeGHSA struct {
 	Typename    *string `json:"__typename"`
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetTypename returns NodeNodeGHSA.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodeGHSA) GetTypename() *string { return v.Typename }
 
 // GetId returns NodeNodeGHSA.Id, and is useful for accessing the field via an interface.
-func (v *NodeNodeGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *NodeNodeGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns NodeNodeGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *NodeNodeGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *NodeNodeGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *NodeNodeGHSA) UnmarshalJSON(b []byte) error {
 
@@ -9818,7 +10070,7 @@ func (v *NodeNodeGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -9845,8 +10097,8 @@ func (v *NodeNodeGHSA) __premarshalJSON() (*__premarshalNodeNodeGHSA, error) {
 	var retval __premarshalNodeNodeGHSA
 
 	retval.Typename = v.Typename
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -10587,17 +10839,17 @@ func (v *NodeNodeNoVuln) GetId() string { return v.Id }
 // This node can be referred to by other parts of GUAC.
 type NodeNodeOSV struct {
 	Typename   *string `json:"__typename"`
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetTypename returns NodeNodeOSV.Typename, and is useful for accessing the field via an interface.
 func (v *NodeNodeOSV) GetTypename() *string { return v.Typename }
 
 // GetId returns NodeNodeOSV.Id, and is useful for accessing the field via an interface.
-func (v *NodeNodeOSV) GetId() string { return v.allOSVTree.Id }
+func (v *NodeNodeOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns NodeNodeOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *NodeNodeOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *NodeNodeOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *NodeNodeOSV) UnmarshalJSON(b []byte) error {
 
@@ -10617,7 +10869,7 @@ func (v *NodeNodeOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -10644,8 +10896,8 @@ func (v *NodeNodeOSV) __premarshalJSON() (*__premarshalNodeNodeOSV, error) {
 	var retval __premarshalNodeNodeOSV
 
 	retval.Typename = v.Typename
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -10993,6 +11245,95 @@ type OSVInputSpec struct {
 // GetOsvId returns OSVInputSpec.OsvId, and is useful for accessing the field via an interface.
 func (v *OSVInputSpec) GetOsvId() string { return v.OsvId }
 
+// OSVSpec allows filtering the list of OSV to return.
+type OSVSpec struct {
+	Id    *string `json:"id"`
+	OsvId *string `json:"osvId"`
+}
+
+// GetId returns OSVSpec.Id, and is useful for accessing the field via an interface.
+func (v *OSVSpec) GetId() *string { return v.Id }
+
+// GetOsvId returns OSVSpec.OsvId, and is useful for accessing the field via an interface.
+func (v *OSVSpec) GetOsvId() *string { return v.OsvId }
+
+// OSVsOsvOSV includes the requested fields of the GraphQL type OSV.
+// The GraphQL type's documentation follows.
+//
+// OSV represents an Open Source Vulnerability.
+//
+// The `osvId` field is mandatory and canonicalized to be lowercase.
+//
+// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
+// CVE ID).
+//
+// This node can be referred to by other parts of GUAC.
+type OSVsOsvOSV struct {
+	AllOSVTree `json:"-"`
+}
+
+// GetId returns OSVsOsvOSV.Id, and is useful for accessing the field via an interface.
+func (v *OSVsOsvOSV) GetId() string { return v.AllOSVTree.Id }
+
+// GetOsvId returns OSVsOsvOSV.OsvId, and is useful for accessing the field via an interface.
+func (v *OSVsOsvOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
+
+func (v *OSVsOsvOSV) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*OSVsOsvOSV
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.OSVsOsvOSV = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllOSVTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalOSVsOsvOSV struct {
+	Id string `json:"id"`
+
+	OsvId string `json:"osvId"`
+}
+
+func (v *OSVsOsvOSV) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *OSVsOsvOSV) __premarshalJSON() (*__premarshalOSVsOsvOSV, error) {
+	var retval __premarshalOSVsOsvOSV
+
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
+	return &retval, nil
+}
+
+// OSVsResponse is returned by OSVs on success.
+type OSVsResponse struct {
+	// Returns all OSV
+	Osv []OSVsOsvOSV `json:"osv"`
+}
+
+// GetOsv returns OSVsResponse.Osv, and is useful for accessing the field via an interface.
+func (v *OSVsResponse) GetOsv() []OSVsOsvOSV { return v.Osv }
+
 // PackageQualifierInputSpec is the same as PackageQualifier, but usable as
 // mutation input.
 //
@@ -11285,20 +11626,20 @@ func (v *PathPathBuilder) __premarshalJSON() (*__premarshalPathPathBuilder, erro
 // This node can be referred to by other parts of GUAC.
 type PathPathCVE struct {
 	Typename   *string `json:"__typename"`
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetTypename returns PathPathCVE.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathCVE) GetTypename() *string { return v.Typename }
 
 // GetId returns PathPathCVE.Id, and is useful for accessing the field via an interface.
-func (v *PathPathCVE) GetId() string { return v.allCveTree.Id }
+func (v *PathPathCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns PathPathCVE.Year, and is useful for accessing the field via an interface.
-func (v *PathPathCVE) GetYear() int { return v.allCveTree.Year }
+func (v *PathPathCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns PathPathCVE.CveId, and is useful for accessing the field via an interface.
-func (v *PathPathCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *PathPathCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *PathPathCVE) UnmarshalJSON(b []byte) error {
 
@@ -11318,7 +11659,7 @@ func (v *PathPathCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -11347,9 +11688,9 @@ func (v *PathPathCVE) __premarshalJSON() (*__premarshalPathPathCVE, error) {
 	var retval __premarshalPathPathCVE
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -11882,17 +12223,17 @@ func (v *PathPathCertifyVuln) __premarshalJSON() (*__premarshalPathPathCertifyVu
 // This node can be referred to by other parts of GUAC.
 type PathPathGHSA struct {
 	Typename    *string `json:"__typename"`
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetTypename returns PathPathGHSA.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathGHSA) GetTypename() *string { return v.Typename }
 
 // GetId returns PathPathGHSA.Id, and is useful for accessing the field via an interface.
-func (v *PathPathGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *PathPathGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns PathPathGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *PathPathGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *PathPathGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *PathPathGHSA) UnmarshalJSON(b []byte) error {
 
@@ -11912,7 +12253,7 @@ func (v *PathPathGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -11939,8 +12280,8 @@ func (v *PathPathGHSA) __premarshalJSON() (*__premarshalPathPathGHSA, error) {
 	var retval __premarshalPathPathGHSA
 
 	retval.Typename = v.Typename
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -13086,17 +13427,17 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 // This node can be referred to by other parts of GUAC.
 type PathPathOSV struct {
 	Typename   *string `json:"__typename"`
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetTypename returns PathPathOSV.Typename, and is useful for accessing the field via an interface.
 func (v *PathPathOSV) GetTypename() *string { return v.Typename }
 
 // GetId returns PathPathOSV.Id, and is useful for accessing the field via an interface.
-func (v *PathPathOSV) GetId() string { return v.allOSVTree.Id }
+func (v *PathPathOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns PathPathOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *PathPathOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *PathPathOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *PathPathOSV) UnmarshalJSON(b []byte) error {
 
@@ -13116,7 +13457,7 @@ func (v *PathPathOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -13143,8 +13484,8 @@ func (v *PathPathOSV) __premarshalJSON() (*__premarshalPathPathOSV, error) {
 	var retval __premarshalPathPathOSV
 
 	retval.Typename = v.Typename
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -14553,14 +14894,14 @@ func (v *SourcesSourcesSource) __premarshalJSON() (*__premarshalSourcesSourcesSo
 //
 // This node can be referred to by other parts of GUAC.
 type VEXPackageAndGhsaIngestGHSA struct {
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetId returns VEXPackageAndGhsaIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *VEXPackageAndGhsaIngestGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns VEXPackageAndGhsaIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *VEXPackageAndGhsaIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *VEXPackageAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
 
@@ -14580,7 +14921,7 @@ func (v *VEXPackageAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -14604,8 +14945,8 @@ func (v *VEXPackageAndGhsaIngestGHSA) MarshalJSON() ([]byte, error) {
 func (v *VEXPackageAndGhsaIngestGHSA) __premarshalJSON() (*__premarshalVEXPackageAndGhsaIngestGHSA, error) {
 	var retval __premarshalVEXPackageAndGhsaIngestGHSA
 
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -14926,17 +15267,17 @@ func (v *VexArtifactAndCveIngestArtifact) __premarshalJSON() (*__premarshalVexAr
 //
 // This node can be referred to by other parts of GUAC.
 type VexArtifactAndCveIngestCVE struct {
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetId returns VexArtifactAndCveIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestCVE) GetId() string { return v.allCveTree.Id }
+func (v *VexArtifactAndCveIngestCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns VexArtifactAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestCVE) GetYear() int { return v.allCveTree.Year }
+func (v *VexArtifactAndCveIngestCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns VexArtifactAndCveIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *VexArtifactAndCveIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *VexArtifactAndCveIngestCVE) UnmarshalJSON(b []byte) error {
 
@@ -14956,7 +15297,7 @@ func (v *VexArtifactAndCveIngestCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -14982,9 +15323,9 @@ func (v *VexArtifactAndCveIngestCVE) MarshalJSON() ([]byte, error) {
 func (v *VexArtifactAndCveIngestCVE) __premarshalJSON() (*__premarshalVexArtifactAndCveIngestCVE, error) {
 	var retval __premarshalVexArtifactAndCveIngestCVE
 
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -15223,14 +15564,14 @@ func (v *VexArtifactAndGhsaIngestArtifact) __premarshalJSON() (*__premarshalVexA
 //
 // This node can be referred to by other parts of GUAC.
 type VexArtifactAndGhsaIngestGHSA struct {
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetId returns VexArtifactAndGhsaIngestGHSA.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *VexArtifactAndGhsaIngestGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns VexArtifactAndGhsaIngestGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *VexArtifactAndGhsaIngestGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *VexArtifactAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
 
@@ -15250,7 +15591,7 @@ func (v *VexArtifactAndGhsaIngestGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -15274,8 +15615,8 @@ func (v *VexArtifactAndGhsaIngestGHSA) MarshalJSON() ([]byte, error) {
 func (v *VexArtifactAndGhsaIngestGHSA) __premarshalJSON() (*__premarshalVexArtifactAndGhsaIngestGHSA, error) {
 	var retval __premarshalVexArtifactAndGhsaIngestGHSA
 
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -15519,14 +15860,14 @@ func (v *VexArtifactAndOsvIngestArtifact) __premarshalJSON() (*__premarshalVexAr
 //
 // This node can be referred to by other parts of GUAC.
 type VexArtifactAndOsvIngestOSV struct {
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetId returns VexArtifactAndOsvIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestOSV) GetId() string { return v.allOSVTree.Id }
+func (v *VexArtifactAndOsvIngestOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns VexArtifactAndOsvIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *VexArtifactAndOsvIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *VexArtifactAndOsvIngestOSV) UnmarshalJSON(b []byte) error {
 
@@ -15546,7 +15887,7 @@ func (v *VexArtifactAndOsvIngestOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -15570,8 +15911,8 @@ func (v *VexArtifactAndOsvIngestOSV) MarshalJSON() ([]byte, error) {
 func (v *VexArtifactAndOsvIngestOSV) __premarshalJSON() (*__premarshalVexArtifactAndOsvIngestOSV, error) {
 	var retval __premarshalVexArtifactAndOsvIngestOSV
 
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -15739,17 +16080,17 @@ func (v *VexArtifactAndOsvResponse) GetIngestVEXStatement() VexArtifactAndOsvIng
 //
 // This node can be referred to by other parts of GUAC.
 type VexPackageAndCveIngestCVE struct {
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetId returns VexPackageAndCveIngestCVE.Id, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestCVE) GetId() string { return v.allCveTree.Id }
+func (v *VexPackageAndCveIngestCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns VexPackageAndCveIngestCVE.Year, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestCVE) GetYear() int { return v.allCveTree.Year }
+func (v *VexPackageAndCveIngestCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns VexPackageAndCveIngestCVE.CveId, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *VexPackageAndCveIngestCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *VexPackageAndCveIngestCVE) UnmarshalJSON(b []byte) error {
 
@@ -15769,7 +16110,7 @@ func (v *VexPackageAndCveIngestCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -15795,9 +16136,9 @@ func (v *VexPackageAndCveIngestCVE) MarshalJSON() ([]byte, error) {
 func (v *VexPackageAndCveIngestCVE) __premarshalJSON() (*__premarshalVexPackageAndCveIngestCVE, error) {
 	var retval __premarshalVexPackageAndCveIngestCVE
 
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -16046,14 +16387,14 @@ func (v *VexPackageAndCveResponse) GetIngestVEXStatement() VexPackageAndCveInges
 //
 // This node can be referred to by other parts of GUAC.
 type VexPackageAndOsvIngestOSV struct {
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetId returns VexPackageAndOsvIngestOSV.Id, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestOSV) GetId() string { return v.allOSVTree.Id }
+func (v *VexPackageAndOsvIngestOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns VexPackageAndOsvIngestOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *VexPackageAndOsvIngestOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *VexPackageAndOsvIngestOSV) UnmarshalJSON(b []byte) error {
 
@@ -16073,7 +16414,7 @@ func (v *VexPackageAndOsvIngestOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -16097,8 +16438,8 @@ func (v *VexPackageAndOsvIngestOSV) MarshalJSON() ([]byte, error) {
 func (v *VexPackageAndOsvIngestOSV) __premarshalJSON() (*__premarshalVexPackageAndOsvIngestOSV, error) {
 	var retval __premarshalVexPackageAndOsvIngestOSV
 
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -16391,6 +16732,14 @@ func (v *VulnerabilityMetaDataInput) GetOrigin() string { return v.Origin }
 // GetCollector returns VulnerabilityMetaDataInput.Collector, and is useful for accessing the field via an interface.
 func (v *VulnerabilityMetaDataInput) GetCollector() string { return v.Collector }
 
+// __CVEsInput is used internally by genqlient
+type __CVEsInput struct {
+	Filter *CVESpec `json:"filter"`
+}
+
+// GetFilter returns __CVEsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CVEsInput) GetFilter() *CVESpec { return v.Filter }
+
 // __CertifyBadArtifactInput is used internally by genqlient
 type __CertifyBadArtifactInput struct {
 	Artifact   ArtifactInputSpec   `json:"artifact"`
@@ -16530,6 +16879,14 @@ func (v *__CertifyOSVInput) GetOsv() OSVInputSpec { return v.Osv }
 
 // GetCertifyVuln returns __CertifyOSVInput.CertifyVuln, and is useful for accessing the field via an interface.
 func (v *__CertifyOSVInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
+
+// __GHSAsInput is used internally by genqlient
+type __GHSAsInput struct {
+	Filter *GHSASpec `json:"filter"`
+}
+
+// GetFilter returns __GHSAsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__GHSAsInput) GetFilter() *GHSASpec { return v.Filter }
 
 // __HasSBOMPkgInput is used internally by genqlient
 type __HasSBOMPkgInput struct {
@@ -16694,6 +17051,14 @@ type __NodeInput struct {
 
 // GetNode returns __NodeInput.Node, and is useful for accessing the field via an interface.
 func (v *__NodeInput) GetNode() string { return v.Node }
+
+// __OSVsInput is used internally by genqlient
+type __OSVsInput struct {
+	Filter *OSVSpec `json:"filter"`
+}
+
+// GetFilter returns __OSVsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__OSVsInput) GetFilter() *OSVSpec { return v.Filter }
 
 // __PackagesInput is used internally by genqlient
 type __PackagesInput struct {
@@ -18374,20 +18739,20 @@ func __marshalallCertifyVEXStatementVulnerability(v *allCertifyVEXStatementVulne
 // This node can be referred to by other parts of GUAC.
 type allCertifyVEXStatementVulnerabilityCVE struct {
 	Typename   *string `json:"__typename"`
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetTypename returns allCertifyVEXStatementVulnerabilityCVE.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementVulnerabilityCVE) GetTypename() *string { return v.Typename }
 
 // GetId returns allCertifyVEXStatementVulnerabilityCVE.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityCVE) GetId() string { return v.allCveTree.Id }
+func (v *allCertifyVEXStatementVulnerabilityCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns allCertifyVEXStatementVulnerabilityCVE.Year, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityCVE) GetYear() int { return v.allCveTree.Year }
+func (v *allCertifyVEXStatementVulnerabilityCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns allCertifyVEXStatementVulnerabilityCVE.CveId, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *allCertifyVEXStatementVulnerabilityCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *allCertifyVEXStatementVulnerabilityCVE) UnmarshalJSON(b []byte) error {
 
@@ -18407,7 +18772,7 @@ func (v *allCertifyVEXStatementVulnerabilityCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -18436,9 +18801,9 @@ func (v *allCertifyVEXStatementVulnerabilityCVE) __premarshalJSON() (*__premarsh
 	var retval __premarshalallCertifyVEXStatementVulnerabilityCVE
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -18452,17 +18817,17 @@ func (v *allCertifyVEXStatementVulnerabilityCVE) __premarshalJSON() (*__premarsh
 // This node can be referred to by other parts of GUAC.
 type allCertifyVEXStatementVulnerabilityGHSA struct {
 	Typename    *string `json:"__typename"`
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetTypename returns allCertifyVEXStatementVulnerabilityGHSA.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementVulnerabilityGHSA) GetTypename() *string { return v.Typename }
 
 // GetId returns allCertifyVEXStatementVulnerabilityGHSA.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *allCertifyVEXStatementVulnerabilityGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns allCertifyVEXStatementVulnerabilityGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *allCertifyVEXStatementVulnerabilityGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *allCertifyVEXStatementVulnerabilityGHSA) UnmarshalJSON(b []byte) error {
 
@@ -18482,7 +18847,7 @@ func (v *allCertifyVEXStatementVulnerabilityGHSA) UnmarshalJSON(b []byte) error 
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -18509,8 +18874,8 @@ func (v *allCertifyVEXStatementVulnerabilityGHSA) __premarshalJSON() (*__premars
 	var retval __premarshalallCertifyVEXStatementVulnerabilityGHSA
 
 	retval.Typename = v.Typename
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
 
@@ -18543,17 +18908,17 @@ func (v *allCertifyVEXStatementVulnerabilityNoVuln) GetTypename() *string { retu
 // This node can be referred to by other parts of GUAC.
 type allCertifyVEXStatementVulnerabilityOSV struct {
 	Typename   *string `json:"__typename"`
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetTypename returns allCertifyVEXStatementVulnerabilityOSV.Typename, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatementVulnerabilityOSV) GetTypename() *string { return v.Typename }
 
 // GetId returns allCertifyVEXStatementVulnerabilityOSV.Id, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityOSV) GetId() string { return v.allOSVTree.Id }
+func (v *allCertifyVEXStatementVulnerabilityOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns allCertifyVEXStatementVulnerabilityOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatementVulnerabilityOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *allCertifyVEXStatementVulnerabilityOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *allCertifyVEXStatementVulnerabilityOSV) UnmarshalJSON(b []byte) error {
 
@@ -18573,7 +18938,7 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -18600,54 +18965,10 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) __premarshalJSON() (*__premarsh
 	var retval __premarshalallCertifyVEXStatementVulnerabilityOSV
 
 	retval.Typename = v.Typename
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
-
-// allCveTree includes the GraphQL fields of CVE requested by the fragment allCveTree.
-// The GraphQL type's documentation follows.
-//
-// CVE represents common vulnerabilities and exposures. It contains the year along
-// with the CVE ID.
-//
-// The `year` is mandatory.
-// The `cveId` field is mandatory and canonicalized to be lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type allCveTree struct {
-	Id    string `json:"id"`
-	Year  int    `json:"year"`
-	CveId string `json:"cveId"`
-}
-
-// GetId returns allCveTree.Id, and is useful for accessing the field via an interface.
-func (v *allCveTree) GetId() string { return v.Id }
-
-// GetYear returns allCveTree.Year, and is useful for accessing the field via an interface.
-func (v *allCveTree) GetYear() int { return v.Year }
-
-// GetCveId returns allCveTree.CveId, and is useful for accessing the field via an interface.
-func (v *allCveTree) GetCveId() string { return v.CveId }
-
-// allGHSATree includes the GraphQL fields of GHSA requested by the fragment allGHSATree.
-// The GraphQL type's documentation follows.
-//
-// GHSA represents GitHub security advisories.
-//
-// The `id` field is mandatory and canonicalized to be lowercase.
-//
-// This node can be referred to by other parts of GUAC.
-type allGHSATree struct {
-	Id     string `json:"id"`
-	GhsaId string `json:"ghsaId"`
-}
-
-// GetId returns allGHSATree.Id, and is useful for accessing the field via an interface.
-func (v *allGHSATree) GetId() string { return v.Id }
-
-// GetGhsaId returns allGHSATree.GhsaId, and is useful for accessing the field via an interface.
-func (v *allGHSATree) GetGhsaId() string { return v.GhsaId }
 
 // allHasSBOMTree includes the GraphQL fields of HasSBOM requested by the fragment allHasSBOMTree.
 // The GraphQL type's documentation follows.
@@ -19650,14 +19971,14 @@ func (v *allIsVulnerability) __premarshalJSON() (*__premarshalallIsVulnerability
 //
 // This node can be referred to by other parts of GUAC.
 type allIsVulnerabilityOsvOSV struct {
-	allOSVTree `json:"-"`
+	AllOSVTree `json:"-"`
 }
 
 // GetId returns allIsVulnerabilityOsvOSV.Id, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityOsvOSV) GetId() string { return v.allOSVTree.Id }
+func (v *allIsVulnerabilityOsvOSV) GetId() string { return v.AllOSVTree.Id }
 
 // GetOsvId returns allIsVulnerabilityOsvOSV.OsvId, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityOsvOSV) GetOsvId() string { return v.allOSVTree.OsvId }
+func (v *allIsVulnerabilityOsvOSV) GetOsvId() string { return v.AllOSVTree.OsvId }
 
 func (v *allIsVulnerabilityOsvOSV) UnmarshalJSON(b []byte) error {
 
@@ -19677,7 +19998,7 @@ func (v *allIsVulnerabilityOsvOSV) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allOSVTree)
+		b, &v.AllOSVTree)
 	if err != nil {
 		return err
 	}
@@ -19701,8 +20022,8 @@ func (v *allIsVulnerabilityOsvOSV) MarshalJSON() ([]byte, error) {
 func (v *allIsVulnerabilityOsvOSV) __premarshalJSON() (*__premarshalallIsVulnerabilityOsvOSV, error) {
 	var retval __premarshalallIsVulnerabilityOsvOSV
 
-	retval.Id = v.allOSVTree.Id
-	retval.OsvId = v.allOSVTree.OsvId
+	retval.Id = v.AllOSVTree.Id
+	retval.OsvId = v.AllOSVTree.OsvId
 	return &retval, nil
 }
 
@@ -19718,20 +20039,20 @@ func (v *allIsVulnerabilityOsvOSV) __premarshalJSON() (*__premarshalallIsVulnera
 // This node can be referred to by other parts of GUAC.
 type allIsVulnerabilityVulnerabilityCVE struct {
 	Typename   *string `json:"__typename"`
-	allCveTree `json:"-"`
+	AllCveTree `json:"-"`
 }
 
 // GetTypename returns allIsVulnerabilityVulnerabilityCVE.Typename, and is useful for accessing the field via an interface.
 func (v *allIsVulnerabilityVulnerabilityCVE) GetTypename() *string { return v.Typename }
 
 // GetId returns allIsVulnerabilityVulnerabilityCVE.Id, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityVulnerabilityCVE) GetId() string { return v.allCveTree.Id }
+func (v *allIsVulnerabilityVulnerabilityCVE) GetId() string { return v.AllCveTree.Id }
 
 // GetYear returns allIsVulnerabilityVulnerabilityCVE.Year, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityVulnerabilityCVE) GetYear() int { return v.allCveTree.Year }
+func (v *allIsVulnerabilityVulnerabilityCVE) GetYear() int { return v.AllCveTree.Year }
 
 // GetCveId returns allIsVulnerabilityVulnerabilityCVE.CveId, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityVulnerabilityCVE) GetCveId() string { return v.allCveTree.CveId }
+func (v *allIsVulnerabilityVulnerabilityCVE) GetCveId() string { return v.AllCveTree.CveId }
 
 func (v *allIsVulnerabilityVulnerabilityCVE) UnmarshalJSON(b []byte) error {
 
@@ -19751,7 +20072,7 @@ func (v *allIsVulnerabilityVulnerabilityCVE) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allCveTree)
+		b, &v.AllCveTree)
 	if err != nil {
 		return err
 	}
@@ -19780,9 +20101,9 @@ func (v *allIsVulnerabilityVulnerabilityCVE) __premarshalJSON() (*__premarshalal
 	var retval __premarshalallIsVulnerabilityVulnerabilityCVE
 
 	retval.Typename = v.Typename
-	retval.Id = v.allCveTree.Id
-	retval.Year = v.allCveTree.Year
-	retval.CveId = v.allCveTree.CveId
+	retval.Id = v.AllCveTree.Id
+	retval.Year = v.AllCveTree.Year
+	retval.CveId = v.AllCveTree.CveId
 	return &retval, nil
 }
 
@@ -19880,17 +20201,17 @@ func __marshalallIsVulnerabilityVulnerabilityCveOrGhsa(v *allIsVulnerabilityVuln
 // This node can be referred to by other parts of GUAC.
 type allIsVulnerabilityVulnerabilityGHSA struct {
 	Typename    *string `json:"__typename"`
-	allGHSATree `json:"-"`
+	AllGHSATree `json:"-"`
 }
 
 // GetTypename returns allIsVulnerabilityVulnerabilityGHSA.Typename, and is useful for accessing the field via an interface.
 func (v *allIsVulnerabilityVulnerabilityGHSA) GetTypename() *string { return v.Typename }
 
 // GetId returns allIsVulnerabilityVulnerabilityGHSA.Id, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityVulnerabilityGHSA) GetId() string { return v.allGHSATree.Id }
+func (v *allIsVulnerabilityVulnerabilityGHSA) GetId() string { return v.AllGHSATree.Id }
 
 // GetGhsaId returns allIsVulnerabilityVulnerabilityGHSA.GhsaId, and is useful for accessing the field via an interface.
-func (v *allIsVulnerabilityVulnerabilityGHSA) GetGhsaId() string { return v.allGHSATree.GhsaId }
+func (v *allIsVulnerabilityVulnerabilityGHSA) GetGhsaId() string { return v.AllGHSATree.GhsaId }
 
 func (v *allIsVulnerabilityVulnerabilityGHSA) UnmarshalJSON(b []byte) error {
 
@@ -19910,7 +20231,7 @@ func (v *allIsVulnerabilityVulnerabilityGHSA) UnmarshalJSON(b []byte) error {
 	}
 
 	err = json.Unmarshal(
-		b, &v.allGHSATree)
+		b, &v.AllGHSATree)
 	if err != nil {
 		return err
 	}
@@ -19937,32 +20258,10 @@ func (v *allIsVulnerabilityVulnerabilityGHSA) __premarshalJSON() (*__premarshala
 	var retval __premarshalallIsVulnerabilityVulnerabilityGHSA
 
 	retval.Typename = v.Typename
-	retval.Id = v.allGHSATree.Id
-	retval.GhsaId = v.allGHSATree.GhsaId
+	retval.Id = v.AllGHSATree.Id
+	retval.GhsaId = v.AllGHSATree.GhsaId
 	return &retval, nil
 }
-
-// allOSVTree includes the GraphQL fields of OSV requested by the fragment allOSVTree.
-// The GraphQL type's documentation follows.
-//
-// OSV represents an Open Source Vulnerability.
-//
-// The `osvId` field is mandatory and canonicalized to be lowercase.
-//
-// This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
-// CVE ID).
-//
-// This node can be referred to by other parts of GUAC.
-type allOSVTree struct {
-	Id    string `json:"id"`
-	OsvId string `json:"osvId"`
-}
-
-// GetId returns allOSVTree.Id, and is useful for accessing the field via an interface.
-func (v *allOSVTree) GetId() string { return v.Id }
-
-// GetOsvId returns allOSVTree.OsvId, and is useful for accessing the field via an interface.
-func (v *allOSVTree) GetOsvId() string { return v.OsvId }
 
 // allPkgEqual includes the GraphQL fields of PkgEqual requested by the fragment allPkgEqual.
 // The GraphQL type's documentation follows.
@@ -20362,6 +20661,43 @@ func (v *allSLSATreeSubjectArtifact) __premarshalJSON() (*__premarshalallSLSATre
 	return &retval, nil
 }
 
+func CVEs(
+	ctx context.Context,
+	client graphql.Client,
+	filter *CVESpec,
+) (*CVEsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CVEs",
+		Query: `
+query CVEs ($filter: CVESpec) {
+	cve(cveSpec: $filter) {
+		... AllCveTree
+	}
+}
+fragment AllCveTree on CVE {
+	id
+	year
+	cveId
+}
+`,
+		Variables: &__CVEsInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data CVEsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 func CertifyBadArtifact(
 	ctx context.Context,
 	client graphql.Client,
@@ -20664,7 +21000,7 @@ mutation CertifyCVE ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: Vul
 		... AllPkgTree
 	}
 	ingestCVE(cve: $cve) {
-		... allCveTree
+		... AllCveTree
 	}
 	ingestVulnerability(pkg: $pkg, vulnerability: {cve:$cve}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
@@ -20691,7 +21027,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
@@ -20704,13 +21040,13 @@ fragment AllCertifyVuln on CertifyVuln {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -20726,11 +21062,11 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -20770,7 +21106,7 @@ mutation CertifyGHSA ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: 
 		... AllPkgTree
 	}
 	ingestGHSA(ghsa: $ghsa) {
-		... allGHSATree
+		... AllGHSATree
 	}
 	ingestVulnerability(pkg: $pkg, vulnerability: {ghsa:$ghsa}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
@@ -20797,7 +21133,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -20809,13 +21145,13 @@ fragment AllCertifyVuln on CertifyVuln {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -20831,12 +21167,12 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -21194,13 +21530,13 @@ fragment AllCertifyVuln on CertifyVuln {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -21216,16 +21552,16 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -21264,7 +21600,7 @@ mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: Vul
 		... AllPkgTree
 	}
 	ingestOSV(osv: $osv) {
-		... allOSVTree
+		... AllOSVTree
 	}
 	ingestVulnerability(pkg: $pkg, vulnerability: {osv:$osv}, certifyVuln: $certifyVuln) {
 		... AllCertifyVuln
@@ -21291,7 +21627,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -21303,13 +21639,13 @@ fragment AllCertifyVuln on CertifyVuln {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -21325,12 +21661,12 @@ fragment AllCertifyVuln on CertifyVuln {
 		collector
 	}
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -21344,6 +21680,42 @@ fragment allGHSATree on GHSA {
 	var err error
 
 	var data CertifyOSVResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func GHSAs(
+	ctx context.Context,
+	client graphql.Client,
+	filter *GHSASpec,
+) (*GHSAsResponse, error) {
+	req := &graphql.Request{
+		OpName: "GHSAs",
+		Query: `
+query GHSAs ($filter: GHSASpec) {
+	ghsa(ghsaSpec: $filter) {
+		... AllGHSATree
+	}
+}
+fragment AllGHSATree on GHSA {
+	id
+	ghsaId
+}
+`,
+		Variables: &__GHSAsInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data GHSAsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -21965,20 +22337,20 @@ func IsVulnerabilityCVE(
 		Query: `
 mutation IsVulnerabilityCVE ($osv: OSVInputSpec!, $cve: CVEInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
 	ingestOSV(osv: $osv) {
-		... allOSVTree
+		... AllOSVTree
 	}
 	ingestCVE(cve: $cve) {
-		... allCveTree
+		... AllCveTree
 	}
 	ingestIsVulnerability(osv: $osv, vulnerability: {cve:$cve}, isVulnerability: $isVulnerability) {
 		... allIsVulnerability
 	}
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
@@ -21986,22 +22358,22 @@ fragment allCveTree on CVE {
 fragment allIsVulnerability on IsVulnerability {
 	id
 	osv {
-		... allOSVTree
+		... AllOSVTree
 	}
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 	}
 	justification
 	origin
 	collector
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -22038,42 +22410,42 @@ func IsVulnerabilityGHSA(
 		Query: `
 mutation IsVulnerabilityGHSA ($osv: OSVInputSpec!, $ghsa: GHSAInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
 	ingestOSV(osv: $osv) {
-		... allOSVTree
+		... AllOSVTree
 	}
 	ingestGHSA(ghsa: $ghsa) {
-		... allGHSATree
+		... AllGHSATree
 	}
 	ingestIsVulnerability(osv: $osv, vulnerability: {ghsa:$ghsa}, isVulnerability: $isVulnerability) {
 		... allIsVulnerability
 	}
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
 fragment allIsVulnerability on IsVulnerability {
 	id
 	osv {
-		... allOSVTree
+		... AllOSVTree
 	}
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 	}
 	justification
 	origin
 	collector
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
@@ -22124,13 +22496,13 @@ query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 			... allBuilderTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -22223,16 +22595,16 @@ fragment allBuilderTree on Builder {
 	id
 	uri
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -22399,13 +22771,13 @@ fragment AllCertifyVuln on CertifyVuln {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -22424,15 +22796,15 @@ fragment AllCertifyVuln on CertifyVuln {
 fragment allIsVulnerability on IsVulnerability {
 	id
 	osv {
-		... allOSVTree
+		... AllOSVTree
 	}
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 	}
 	justification
@@ -22453,13 +22825,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -22511,13 +22883,13 @@ query Node ($node: ID!) {
 			... allBuilderTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -22610,16 +22982,16 @@ fragment allBuilderTree on Builder {
 	id
 	uri
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -22786,13 +23158,13 @@ fragment AllCertifyVuln on CertifyVuln {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -22811,15 +23183,15 @@ fragment AllCertifyVuln on CertifyVuln {
 fragment allIsVulnerability on IsVulnerability {
 	id
 	osv {
-		... allOSVTree
+		... AllOSVTree
 	}
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 	}
 	justification
@@ -22840,13 +23212,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -22862,6 +23234,42 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	var err error
 
 	var data NodeResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func OSVs(
+	ctx context.Context,
+	client graphql.Client,
+	filter *OSVSpec,
+) (*OSVsResponse, error) {
+	req := &graphql.Request{
+		OpName: "OSVs",
+		Query: `
+query OSVs ($filter: OSVSpec) {
+	osv(osvSpec: $filter) {
+		... AllOSVTree
+	}
+}
+fragment AllOSVTree on OSV {
+	id
+	osvId
+}
+`,
+		Variables: &__OSVsInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data OSVsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -22953,13 +23361,13 @@ query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge
 			... allBuilderTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -23052,16 +23460,16 @@ fragment allBuilderTree on Builder {
 	id
 	uri
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -23228,13 +23636,13 @@ fragment AllCertifyVuln on CertifyVuln {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on NoVuln {
 			id
@@ -23253,15 +23661,15 @@ fragment AllCertifyVuln on CertifyVuln {
 fragment allIsVulnerability on IsVulnerability {
 	id
 	osv {
-		... allOSVTree
+		... AllOSVTree
 	}
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 	}
 	justification
@@ -23282,13 +23690,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -23596,7 +24004,7 @@ mutation VEXPackageAndGhsa ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStat
 		... AllPkgTree
 	}
 	ingestGHSA(ghsa: $ghsa) {
-		... allGHSATree
+		... AllGHSATree
 	}
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {ghsa:$ghsa}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -23623,7 +24031,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -23641,13 +24049,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -23660,12 +24068,12 @@ fragment allArtifactTree on Artifact {
 	algorithm
 	digest
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -23705,7 +24113,7 @@ mutation VexArtifactAndCve ($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, 
 		... allArtifactTree
 	}
 	ingestCVE(cve: $cve) {
-		... allCveTree
+		... AllCveTree
 	}
 	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -23716,7 +24124,7 @@ fragment allArtifactTree on Artifact {
 	algorithm
 	digest
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
@@ -23735,13 +24143,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -23770,11 +24178,11 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -23814,7 +24222,7 @@ mutation VexArtifactAndGhsa ($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec
 		... allArtifactTree
 	}
 	ingestGHSA(ghsa: $ghsa) {
-		... allGHSATree
+		... AllGHSATree
 	}
 	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {ghsa:$ghsa}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -23825,7 +24233,7 @@ fragment allArtifactTree on Artifact {
 	algorithm
 	digest
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -23843,13 +24251,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -23878,12 +24286,12 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -23923,7 +24331,7 @@ mutation VexArtifactAndOsv ($artifact: ArtifactInputSpec!, $osv: OSVInputSpec!, 
 		... allArtifactTree
 	}
 	ingestOSV(osv: $osv) {
-		... allOSVTree
+		... AllOSVTree
 	}
 	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: {osv:$osv}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -23934,7 +24342,7 @@ fragment allArtifactTree on Artifact {
 	algorithm
 	digest
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -23952,13 +24360,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -23987,12 +24395,12 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
@@ -24032,7 +24440,7 @@ mutation VexPackageAndCve ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStateme
 		... AllPkgTree
 	}
 	ingestCVE(cve: $cve) {
-		... allCveTree
+		... AllCveTree
 	}
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {cve:$cve}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -24059,7 +24467,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
@@ -24078,13 +24486,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -24097,11 +24505,11 @@ fragment allArtifactTree on Artifact {
 	algorithm
 	digest
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -24141,7 +24549,7 @@ mutation VexPackageAndOsv ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $vexStateme
 		... AllPkgTree
 	}
 	ingestOSV(osv: $osv) {
-		... allOSVTree
+		... AllOSVTree
 	}
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: {osv:$osv}, vexStatement: $vexStatement) {
 		... allCertifyVEXStatement
@@ -24168,7 +24576,7 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-fragment allOSVTree on OSV {
+fragment AllOSVTree on OSV {
 	id
 	osvId
 }
@@ -24186,13 +24594,13 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	vulnerability {
 		__typename
 		... on CVE {
-			... allCveTree
+			... AllCveTree
 		}
 		... on GHSA {
-			... allGHSATree
+			... AllGHSATree
 		}
 		... on OSV {
-			... allOSVTree
+			... AllOSVTree
 		}
 	}
 	justification
@@ -24205,12 +24613,12 @@ fragment allArtifactTree on Artifact {
 	algorithm
 	digest
 }
-fragment allCveTree on CVE {
+fragment AllCveTree on CVE {
 	id
 	year
 	cveId
 }
-fragment allGHSATree on GHSA {
+fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
