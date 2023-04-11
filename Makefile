@@ -20,11 +20,6 @@ test: generate
 integration-test: generate check-env
 	go test -tags=integration ./...
 
-# Run the deps.dev tests. Requires Deps.dev API key (DEPS_DEV_APIKEY=<deps.dev token>)
-.PHONY: deps-dev-test
-deps-dev-test: generate
-	go test -tags=deps ./...
-
 .PHONY: check-env
 ifndef GITHUB_AUTH_TOKEN
 	$(error GITHUB_AUTH_TOKEN is not set)

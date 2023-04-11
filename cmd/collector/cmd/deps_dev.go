@@ -61,14 +61,8 @@ var depsDevCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if os.Getenv("DEPS_DEV_APIKEY") == "" {
-			logger.Errorf("DEPS_DEV_APIKEY is not set")
-			os.Exit(1)
-		}
-		depsToken := os.Getenv("DEPS_DEV_APIKEY")
-
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, depsToken, opts.dataSource, opts.poll, 30*time.Second)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
 		if err != nil {
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
