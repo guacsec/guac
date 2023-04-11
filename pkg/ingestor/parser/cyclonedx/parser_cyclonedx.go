@@ -94,8 +94,7 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 					tag = splitTag[1]
 				}
 
-				purl = "pkg:/guac/cdx/" + splitTag[0] + "@" + cdxBom.Metadata.Component.Version +
-					"?repository_url=" + repositoryURL + "&tag=" + tag
+				purl = "pkg:guac/cdx/" + repositoryURL + "@" + cdxBom.Metadata.Component.Version + "?tag=" + tag
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")
 				purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version

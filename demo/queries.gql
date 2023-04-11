@@ -27,7 +27,7 @@ query PkgQ1 {
 }
 
 query PkgQ2 {
-  packages(pkgSpec: { type: "guac" }) {
+  packages(pkgSpec: { type: "deb" }) {
     type
     namespaces {
       namespace
@@ -42,7 +42,7 @@ query PkgQ3 {
 }
 
 query PkgQ4 {
-  packages(pkgSpec: { type: "oci", namespace: "docker.io/library", name: "consul" }) {
+  packages(pkgSpec: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }) {
     ...allPkgTree
   }
 }
@@ -62,7 +62,7 @@ fragment allIsDependencyTree on IsDependency {
 }
 
 query IsDependencyQ1 {
-  IsDependency(isDependencySpec: { package: { type: "oci", namespace: "docker.io/library", name: "consul" }}) {
+  IsDependency(isDependencySpec: { package: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }}) {
     dependentPackage {
       type
       namespaces {
@@ -77,7 +77,7 @@ query IsDependencyQ1 {
 
 query IsDependencyQ2 {
   IsDependency(isDependencySpec: {
-    package: { type: "oci", namespace: "docker.io/library", name: "consul" }
+    package: { type: "guac", namespace: "cdx/docker.io/library", name: "consul" }
     dependentPackage: { type: "golang", namespace: "github.com/sirupsen", name: "logrus" }
   }) {
     ...allIsDependencyTree

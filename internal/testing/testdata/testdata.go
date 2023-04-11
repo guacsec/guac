@@ -457,7 +457,7 @@ var (
 	}
 
 	// CycloneDX Testdata
-	cdxTopLevelPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot")
+	cdxTopLevelPack, _ = asmhelpers.PurlToPkg("pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot")
 
 	cdxTzdataPack, _ = asmhelpers.PurlToPkg("pkg:deb/debian/tzdata@2021a-1+deb11u6?arch=all&distro=debian-11")
 

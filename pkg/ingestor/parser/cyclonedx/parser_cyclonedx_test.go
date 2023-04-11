@@ -143,7 +143,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			},
 		},
 		wantTag:  "container",
-		wantPurl: "pkg:guac/cdx/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
+		wantPurl: "pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot",
 	}, {
 		name: "gcr.io/distroless/static - purl not provided, tag not specified",
 		cdxBom: &cdx.BOM{
@@ -156,7 +156,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			},
 		},
 		wantTag:  "container",
-		wantPurl: "pkg:guac/cdx/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=",
+		wantPurl: "pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=",
 	}, {
 		name: "gcr.io/distroless/static - purl not provided, tag not specified, version not specified",
 		cdxBom: &cdx.BOM{
@@ -168,7 +168,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			},
 		},
 		wantTag:  "container",
-		wantPurl: "pkg:guac/cdx/static@?repository_url=gcr.io/distroless/static&tag=",
+		wantPurl: "pkg:guac/cdx/gcr.io/distroless/static@?tag=",
 	}, {
 		name: "library/debian:latest - purl not provided, assume docker.io",
 		cdxBom: &cdx.BOM{
@@ -181,7 +181,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			},
 		},
 		wantTag:  "container",
-		wantPurl: "pkg:guac/cdx/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=library/debian&tag=latest",
+		wantPurl: "pkg:guac/cdx/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest",
 	}, {
 		name: "library/debian - purl not provided, assume docker.io, tag not specified",
 		cdxBom: &cdx.BOM{
@@ -194,7 +194,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			},
 		},
 		wantTag:  "container",
-		wantPurl: "pkg:guac/cdx/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?repository_url=library/debian&tag=",
+		wantPurl: "pkg:guac/cdx/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
 	}, {
 		name: "file type - purl nor provided, version provided",
 		cdxBom: &cdx.BOM{
@@ -239,7 +239,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 			}
 			wantPackage, err := asmhelpers.PurlToPkg(tt.wantPurl)
 			if err != nil {
-				t.Errorf("Failed to parse purl %v", tt.wantPurl)
+				t.Errorf("Failed to parse purl %v %v", tt.wantPurl, err)
 			}
 			if d := cmp.Diff(*wantPackage, *c.packagePackages[tt.cdxBom.Metadata.Component.BOMRef][0]); len(d) != 0 {
 				t.Errorf("addRootPackage failed to produce expected package for %v", tt.name)

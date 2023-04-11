@@ -126,9 +126,6 @@ We receive:
 {
   "packages": [
     {
-      "type": "oci"
-    },
-    {
       "type": "alpine"
     },
     {
@@ -160,7 +157,7 @@ Type. The query looks like this:
 
 ```
 {
-  packages(pkgSpec: { type: "oci" }) {
+  packages(pkgSpec: { type: "deb" }) {
     type
     namespaces {
       namespace
@@ -179,22 +176,21 @@ Output:
 
 ```json
 {
-  "packages": [
-    {
-      "type": "oci",
-      "namespaces": [
-        {
-          "namespace": "docker.io/library"
-        },
-        {
-          "namespace": "docker.io/librar"
-        },
-        {
-          "namespace": "docker.io/lib"
-        }
-      ]
-    }
-  ]
+  "data": {
+    "packages": [
+      {
+        "type": "deb",
+        "namespaces": [
+          {
+            "namespace": "ubuntu"
+          },
+          {
+            "namespace": "debian"
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 
