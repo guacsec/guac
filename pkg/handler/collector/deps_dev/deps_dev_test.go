@@ -13,15 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build deps
-
 package deps_dev
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"os"
 	"testing"
 	"time"
 
@@ -38,18 +35,16 @@ func TestNewDepsCollector(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		token    string
 		packages []string
 		wantErr  bool
 	}{{
 		name:     "new collector",
-		token:    "",
 		packages: []string{},
 		wantErr:  false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, tt.token, toPurlSource(tt.packages), false, 5*time.Second)
+			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, 5*time.Second)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -124,14 +119,6 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if os.Getenv("DEPS_DEV_APIKEY") == "" {
-				t.Fatalf("DEPS_DEV_APIKEY is not set")
-			}
-			depsToken := os.Getenv("DEPS_DEV_APIKEY")
-			if depsToken == "" {
-				t.Fatalf("DEPS_DEV_APIKEY is not set")
-			}
-
 			var ctx context.Context
 			var cancel context.CancelFunc
 			if tt.poll {
@@ -141,7 +128,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, depsToken, toPurlSource(tt.packages), tt.poll, tt.interval)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, tt.interval)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return

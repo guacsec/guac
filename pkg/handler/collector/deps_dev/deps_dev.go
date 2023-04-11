@@ -32,7 +32,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/metadata"
 )
 
 const (
@@ -50,14 +49,13 @@ type PackageComponent struct {
 
 type depsCollector struct {
 	collectDataSource datasource.CollectSource
-	apiKey            string
 	client            pb.InsightsClient
 	poll              bool
 	interval          time.Duration
 	checkedPurls      map[string]*PackageComponent
 }
 
-func NewDepsCollector(ctx context.Context, token string, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) (*depsCollector, error) {
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
@@ -76,7 +74,6 @@ func NewDepsCollector(ctx context.Context, token string, collectDataSource datas
 
 	return &depsCollector{
 		collectDataSource: collectDataSource,
-		apiKey:            token,
 		client:            client,
 		poll:              poll,
 		interval:          interval,
@@ -86,8 +83,6 @@ func NewDepsCollector(ctx context.Context, token string, collectDataSource datas
 
 // RetrieveArtifacts get the metadata from deps.dev based on the purl provided
 func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	ctx = metadata.AppendToOutgoingContext(ctx, "X-DepsDev-APIKey", d.apiKey)
-
 	populatePurls := func() error {
 		ds, err := d.collectDataSource.GetDataSources(ctx)
 		if err != nil {

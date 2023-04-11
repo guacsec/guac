@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: pkg/handler/collector/deps_dev/internal/api.proto
 
-package v3alpha
+package internal
 
 import (
 	context "context"
@@ -43,6 +43,10 @@ type InsightsClient interface {
 	GetAdvisory(ctx context.Context, in *GetAdvisoryRequest, opts ...grpc.CallOption) (*Advisory, error)
 	// Query returns information about multiple package versions, which can be
 	// specified by name, content hash, or both.
+	//
+	// It is typical for hash queries to return many results; hashes are matched
+	// against multiple artifacts that comprise package versions, and any given
+	// artifact may appear in many package versions.
 	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResult, error)
 }
 
@@ -133,6 +137,10 @@ type InsightsServer interface {
 	GetAdvisory(context.Context, *GetAdvisoryRequest) (*Advisory, error)
 	// Query returns information about multiple package versions, which can be
 	// specified by name, content hash, or both.
+	//
+	// It is typical for hash queries to return many results; hashes are matched
+	// against multiple artifacts that comprise package versions, and any given
+	// artifact may appear in many package versions.
 	Query(context.Context, *QueryRequest) (*QueryResult, error)
 	mustEmbedUnimplementedInsightsServer()
 }

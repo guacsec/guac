@@ -1,11 +1,24 @@
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 syntax = "proto3";
 
 package deps_dev.v3alpha;
 
-import "pkg/handler/collector/deps_dev/internal/google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "sos.googlesource.com/sos/proto/api/v3alpha";
+option go_package = "github.com/guacsec/guac/pkg/handler/collector/deps_dev/internal";
 
 // The Deps.dev Insights API provides information about open source software
 // packages, projects, and security advisories. The information is gathered
@@ -14,19 +27,11 @@ option go_package = "sos.googlesource.com/sos/proto/api/v3alpha";
 service Insights {
   // GetPackage returns information about a package, including a list of its
   // available versions, with the default version marked if known.
-  rpc GetPackage(GetPackageRequest) returns (Package) {
-    option (google.api.http) = {
-      get: "/v3alpha/systems/{package_key.system}/packages/{package_key.name}"
-    };
-  }
+  rpc GetPackage(GetPackageRequest) returns (Package) {}
 
   // GetVersion returns information about a specific package version, including
   // its licenses and any security advisories known to affect it.
-  rpc GetVersion(GetVersionRequest) returns (Version) {
-    option (google.api.http) = {
-      get: "/v3alpha/systems/{version_key.system}/packages/{version_key.name}/versions/{version_key.version}"
-    };
-  }
+  rpc GetVersion(GetVersionRequest) returns (Version) {}
 
   // GetDependencies returns a resolved dependency graph for the given package
   // version.
@@ -35,35 +40,22 @@ service Insights {
   // package version on a generic 64-bit Linux system, with no other
   // dependencies present. The precise meaning of this varies from system to
   // system.
-  rpc GetDependencies(GetDependenciesRequest) returns (Dependencies) {
-    option (google.api.http) = {
-      get: "/v3alpha/systems/{version_key.system}/packages/{version_key.name}/versions/{version_key.version}:dependencies"
-    };
-  }
+  rpc GetDependencies(GetDependenciesRequest) returns (Dependencies) {}
 
   // GetProject returns information about projects hosted by GitHub, GitLab, or
   // BitBucket, when known to us.
-  rpc GetProject(GetProjectRequest) returns (Project) {
-    option (google.api.http) = {
-      get: "/v3alpha/projects/{project_key.id}"
-    };
-  }
+  rpc GetProject(GetProjectRequest) returns (Project) {}
 
   // GetAdvisory returns information about security advisories hosted by OSV.
-  rpc GetAdvisory(GetAdvisoryRequest) returns (Advisory) {
-    option (google.api.http) = {
-      get: "/v3alpha/advisories/{advisory_key.id}"
-    };
-  }
+  rpc GetAdvisory(GetAdvisoryRequest) returns (Advisory) {}
 
   // Query returns information about multiple package versions, which can be
   // specified by name, content hash, or both.
-  rpc Query(QueryRequest) returns (QueryResult) {
-    option (google.api.http) = {
-      // Request fields are passed as query parameters.
-      get: "/v3alpha/query"
-    };
-  }
+  //
+  // It is typical for hash queries to return many results; hashes are matched
+  // against multiple artifacts that comprise package versions, and any given
+  // artifact may appear in many package versions.
+  rpc Query(QueryRequest) returns (QueryResult) {}
 }
 
 // System identifies a package management system.
@@ -236,11 +228,20 @@ message Dependencies {
     // package version.
     VersionKey version_key = 1;
 
+    // If true, this is a bundled dependency. For bundled dependencies, the
+    // package name in the version key encodes how the dependency is bundled.
+    //
+    // As an example, a bundled dependency with a name like "a>1.2.3>b>c" is
+    // part of the dependency graph of package "a" at version "1.2.3", and has
+    // the local name "c". It may or may not be the same as a package with the
+    // global name "c".
+    bool bundled = 2;
+
     // Errors associated with this node of the graph, such as an unresolved
     // dependency requirement. An error on a node may imply the graph as a
     // whole is incorrect. These error messages have no defined format and are
     // intended for human consumption.
-    repeated string errors = 6;
+    repeated string errors = 3;
   }
   // The nodes of the dependency graph. The first node is the root of the graph.
   repeated Node nodes = 1;
@@ -418,6 +419,6 @@ message QueryRequest {
 
 // QueryResult holds information about package versions matching the query.
 message QueryResult {
-  // Package versions matching the query.
+  // Package versions matching the query. At most 1000 versions are returned.
   repeated Version versions = 1;
 }
