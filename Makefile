@@ -20,11 +20,6 @@ test: generate
 integration-test: generate check-env
 	go test -tags=integration ./...
 
-# Run the deps.dev tests. Requires Deps.dev API key (DEPS_DEV_APIKEY=<deps.dev token>)
-.PHONY: deps-dev-test
-deps-dev-test: generate
-	go test -tags=deps ./...
-
 .PHONY: check-env
 ifndef GITHUB_AUTH_TOKEN
 	$(error GITHUB_AUTH_TOKEN is not set)
@@ -63,10 +58,13 @@ build: generate
 	go build -ldflags ${LDFLAGS} -o bin/graphql_playground cmd/graphql_playground/main.go
 
 .PHONY: proto
-proto: pkg/collectsub/collectsub/collectsub.proto
+proto: 
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		$^
+		pkg/collectsub/collectsub/collectsub.proto
+	protoc --go_out=. --go_opt=paths=source_relative \
+	    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		pkg/handler/collector/deps_dev/internal/api.proto
 
 # Remove temporary files
 .PHONY: clean
