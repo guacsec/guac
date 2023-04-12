@@ -255,7 +255,6 @@ func (p *pkgVersionNode) setVexLinks(id uint32) {
 
 // hasSBOM back edges
 func (p *pkgVersionNode) setHasSBOM(id uint32) { p.hasSBOMs = append(p.hasSBOMs, id) }
-func (p *pkgVersionNode) getHasSBOM() []uint32 { return p.hasSBOMs }
 
 // certifyBad back edges
 func (p *pkgVersionStruct) setCertifyBadLinks(id uint32) { p.badLinks = append(p.badLinks, id) }
