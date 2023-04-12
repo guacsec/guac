@@ -544,9 +544,9 @@ For [status] “affected”, MUST include one [action_statement]
 */
 func validateVexInputBasedOnStatus(status model.VexStatus, justification model.VexJustification, statement string) error {
 	if status == model.VexStatusNotAffected && justification == model.VexJustificationNotProvided && statement == "" {
-		return fmt.Errorf("for [status] “not_affected”, if [justification] is not provided then [impact_statement] MUST be provided")
+		return fmt.Errorf("for [status] “not_affected”, if [justification] is not provided then [statement] MUST be provided")
 	} else if status == model.VexStatusAffected && justification == model.VexJustificationNotProvided && statement == "" {
-		return fmt.Errorf("for [status] “affected”, MUST include one [action_statement]")
+		return fmt.Errorf("for [status] “affected”, MUST include one [statement]")
 	}
 	return nil
 }
