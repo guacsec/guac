@@ -30,6 +30,7 @@ type HasSBOM {
   id: ID!
   subject: PackageOrSource!
   uri: String!
+  annotation: String!
   origin: String!
   collector: String!
 }
@@ -44,6 +45,7 @@ input HasSBOMSpec {
   id: ID
   subject: PackageOrSourceSpec
   uri: String
+  annotation: String
   origin: String
   collector: String
 }
@@ -55,6 +57,7 @@ All fields are required.
 """
 input HasSBOMInputSpec {
   uri: String!
+  annotation: String!
   origin: String!
   collector: String!
 }

@@ -103,11 +103,12 @@ type ComplexityRoot struct {
 	}
 
 	HasSBOM struct {
-		Collector func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Origin    func(childComplexity int) int
-		Subject   func(childComplexity int) int
-		URI       func(childComplexity int) int
+		Annotation func(childComplexity int) int
+		Collector  func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Origin     func(childComplexity int) int
+		Subject    func(childComplexity int) int
+		URI        func(childComplexity int) int
 	}
 
 	HasSLSA struct {
@@ -594,6 +595,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GHSA.ID(childComplexity), true
+
+	case "HasSBOM.annotation":
+		if e.complexity.HasSBOM.Annotation == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.Annotation(childComplexity), true
 
 	case "HasSBOM.collector":
 		if e.complexity.HasSBOM.Collector == nil {
@@ -2827,6 +2835,7 @@ type HasSBOM {
   id: ID!
   subject: PackageOrSource!
   uri: String!
+  annotation: String!
   origin: String!
   collector: String!
 }
@@ -2841,6 +2850,7 @@ input HasSBOMSpec {
   id: ID
   subject: PackageOrSourceSpec
   uri: String
+  annotation: String
   origin: String
   collector: String
 }
@@ -2852,6 +2862,7 @@ All fields are required.
 """
 input HasSBOMInputSpec {
   uri: String!
+  annotation: String!
   origin: String!
   collector: String!
 }
