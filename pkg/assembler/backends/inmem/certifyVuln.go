@@ -294,7 +294,9 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			foundOne = true
 		}
 	}
-	if !foundOne && filter != nil && filter.Vulnerability != nil && *filter.Vulnerability.NoVuln {
+	if !foundOne && filter != nil && filter.Vulnerability != nil &&
+		filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
+
 		search = append(search, c.noKnownVulnNode.certifyVulnLinks...)
 		foundOne = true
 	}

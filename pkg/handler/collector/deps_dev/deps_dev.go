@@ -36,6 +36,8 @@ import (
 
 const (
 	DepsCollector = "deps.dev"
+	goUpperCase   = "GO"
+	golang        = "golang"
 )
 
 type PackageComponent struct {
@@ -145,7 +147,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	component.CurrentPackage = packageInput
 
-	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Name, *packageInput.Version, component)
+	err = d.collectAdditionalMetadata(ctx, packageInput.Type, *packageInput.Namespace, packageInput.Name, *packageInput.Version, component)
 	if err != nil {
 		logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
 	}
@@ -161,7 +163,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	dependenciesReq := &pb.GetDependenciesRequest{
 		VersionKey: &pb.VersionKey{
 			System:  sys,
-			Name:    packageInput.Name,
+			Name:    *packageInput.Namespace + "/" + packageInput.Name,
 			Version: *packageInput.Version,
 		},
 	}
@@ -179,8 +181,14 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		}
 		depComponent := &PackageComponent{}
 
+		pkgtype := ""
+		if node.VersionKey.System.String() == goUpperCase {
+			pkgtype = golang
+		} else {
+			pkgtype = strings.ToLower(node.VersionKey.System.String())
+		}
 		depPackageInput := &model.PkgInputSpec{
-			Type:       strings.ToLower(node.VersionKey.System.String()),
+			Type:       pkgtype,
 			Namespace:  ptrfrom.String(""),
 			Name:       node.VersionKey.Name,
 			Version:    &node.VersionKey.Version,
@@ -199,7 +207,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 		depComponent.CurrentPackage = depPackageInput
 
-		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Name, *depPackageInput.Version, depComponent)
+		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, *depPackageInput.Namespace, depPackageInput.Name, *depPackageInput.Version, depComponent)
 		if err != nil {
 			logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
 		}
@@ -229,7 +237,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	return nil
 }
 
-func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, name, version string, pkgComponent *PackageComponent) error {
+func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, namespace, name, version string, pkgComponent *PackageComponent) error {
 	sys, err := parseSystem(system)
 	if err != nil {
 		return err
@@ -237,7 +245,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 	versionReq := &pb.GetVersionRequest{
 		VersionKey: &pb.VersionKey{
 			System:  sys,
-			Name:    name,
+			Name:    namespace + "/" + name,
 			Version: version,
 		},
 	}
@@ -300,7 +308,13 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 
 // parseSystem returns the pb.System value represented by the argument string.
 func parseSystem(name string) (pb.System, error) {
-	sys, ok := pb.System_value[strings.ToUpper(name)]
+	systemType := ""
+	if name == golang {
+		systemType = goUpperCase
+	} else {
+		systemType = strings.ToUpper(name)
+	}
+	sys, ok := pb.System_value[systemType]
 	if !ok {
 		return pb.System_SYSTEM_UNSPECIFIED, fmt.Errorf("unknown Insights system %q", name)
 	}
