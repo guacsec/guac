@@ -191,7 +191,7 @@ query CertifyVulnQ1 {
 }
 
 query PkgQ7 {
-  packages(pkgSpec: { type: "oci", name: "python" }) {
+  packages(pkgSpec: { type: "guac", name: "python" }) {
     type
     namespaces {
       namespace
