@@ -112,7 +112,7 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Algorithm: "sha1",
 	}
 	materials := []model.ArtifactInputSpec{
-		model.ArtifactInputSpec{
+		{
 			Digest:    "0123456789abcdef0000000fedcba9876543210",
 			Algorithm: "sha1",
 		},
@@ -139,11 +139,11 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		Algorithm: "sha512",
 	}
 	materials = []model.ArtifactInputSpec{
-		model.ArtifactInputSpec{
+		{
 			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 			Algorithm: "sha256",
 		},
-		model.ArtifactInputSpec{
+		{
 			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 			Algorithm: "sha1",
 		},
@@ -1284,10 +1284,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			OsvId: "CVE-2019-14750",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this package is not vulnerable to this OSV",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusFixed,
+			VexJustification: model.VexJustificationNotProvided,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this package is not vulnerable to this CVE",
@@ -1303,10 +1304,12 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			CveId: "CVE-2019-13110",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this package is not vulnerable to this CVE",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusAffected,
+			VexJustification: model.VexJustificationNotProvided,
+			Statement:        "this package is vulnerable to this CVE",
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this package is not vulnerable to this GHSA",
@@ -1321,10 +1324,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			GhsaId: "GHSA-h45f-rjvw-2rv2",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this package is not vulnerable to this GHSA",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusNotAffected,
+			VexJustification: model.VexJustificationComponentNotPresent,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this artifact is not vulnerable to this OSV",
@@ -1336,10 +1340,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			OsvId: "CVE-2018-15710",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this artifact is not vulnerable to this OSV",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusUnderInvestigation,
+			VexJustification: model.VexJustificationNotProvided,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this artifact is not vulnerable to this CVE",
@@ -1352,10 +1357,13 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			CveId: "CVE-2018-43610",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this artifact is not vulnerable to this CVE",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusNotAffected,
+			VexJustification: model.VexJustificationNotProvided,
+			Statement:        "this artifact is not vulnerable to this CVE",
+			StatusNotes:      "status not affected because code not in execution path",
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this artifact is not vulnerable to this GHSA",
@@ -1367,10 +1375,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			GhsaId: "GHSA-hj5f-4gvw-4rv2",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this artifact is not vulnerable to this GHSA",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusNotAffected,
+			VexJustification: model.VexJustificationVulnerableCodeNotInExecutePath,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this package is not vulnerable to this OSV (duplicate)",
@@ -1385,10 +1394,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			OsvId: "CVE-2019-14750",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this package is not vulnerable to this OSV",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusFixed,
+			VexJustification: model.VexJustificationNotProvided,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this package is not vulnerable to this CVE (duplicate)",
@@ -1404,10 +1414,12 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			CveId: "CVE-2019-13110",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this package is not vulnerable to this CVE",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusAffected,
+			VexJustification: model.VexJustificationNotProvided,
+			Statement:        "this package is vulnerable to this CVE",
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this package is not vulnerable to this GHSA (duplicate)",
@@ -1422,10 +1434,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			GhsaId: "GHSA-h45f-rjvw-2rv2",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this package is not vulnerable to this GHSA",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusNotAffected,
+			VexJustification: model.VexJustificationComponentNotPresent,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this artifact is not vulnerable to this OSV (duplicate)",
@@ -1437,10 +1450,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			OsvId: "CVE-2018-15710",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this artifact is not vulnerable to this OSV",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusUnderInvestigation,
+			VexJustification: model.VexJustificationNotProvided,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this artifact is not vulnerable to this CVE (duplicate)",
@@ -1453,10 +1467,13 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			CveId: "CVE-2018-43610",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this artifact is not vulnerable to this CVE",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusNotAffected,
+			VexJustification: model.VexJustificationNotProvided,
+			Statement:        "this artifact is not vulnerable to this CVE",
+			StatusNotes:      "status not affected because code not in execution path",
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}, {
 		name: "this artifact is not vulnerable to this GHSA (duplicate)",
@@ -1468,10 +1485,11 @@ func ingestVEXStatement(ctx context.Context, client graphql.Client) {
 			GhsaId: "GHSA-hj5f-4gvw-4rv2",
 		},
 		vexStatement: model.VexStatementInputSpec{
-			Justification: "this artifact is not vulnerable to this GHSA",
-			KnownSince:    tm,
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			Status:           model.VexStatusNotAffected,
+			VexJustification: model.VexJustificationVulnerableCodeNotInExecutePath,
+			KnownSince:       tm,
+			Origin:           "Demo ingestion",
+			Collector:        "Demo ingestion",
 		},
 	}}
 	for _, ingest := range ingestCertifyVex {

@@ -78,13 +78,16 @@ type ComplexityRoot struct {
 	}
 
 	CertifyVEXStatement struct {
-		Collector     func(childComplexity int) int
-		ID            func(childComplexity int) int
-		Justification func(childComplexity int) int
-		KnownSince    func(childComplexity int) int
-		Origin        func(childComplexity int) int
-		Subject       func(childComplexity int) int
-		Vulnerability func(childComplexity int) int
+		Collector        func(childComplexity int) int
+		ID               func(childComplexity int) int
+		KnownSince       func(childComplexity int) int
+		Origin           func(childComplexity int) int
+		Statement        func(childComplexity int) int
+		Status           func(childComplexity int) int
+		StatusNotes      func(childComplexity int) int
+		Subject          func(childComplexity int) int
+		VexJustification func(childComplexity int) int
+		Vulnerability    func(childComplexity int) int
 	}
 
 	CertifyVuln struct {
@@ -494,13 +497,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyVEXStatement.ID(childComplexity), true
 
-	case "CertifyVEXStatement.justification":
-		if e.complexity.CertifyVEXStatement.Justification == nil {
-			break
-		}
-
-		return e.complexity.CertifyVEXStatement.Justification(childComplexity), true
-
 	case "CertifyVEXStatement.knownSince":
 		if e.complexity.CertifyVEXStatement.KnownSince == nil {
 			break
@@ -515,12 +511,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyVEXStatement.Origin(childComplexity), true
 
+	case "CertifyVEXStatement.statement":
+		if e.complexity.CertifyVEXStatement.Statement == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Statement(childComplexity), true
+
+	case "CertifyVEXStatement.status":
+		if e.complexity.CertifyVEXStatement.Status == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Status(childComplexity), true
+
+	case "CertifyVEXStatement.statusNotes":
+		if e.complexity.CertifyVEXStatement.StatusNotes == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.StatusNotes(childComplexity), true
+
 	case "CertifyVEXStatement.subject":
 		if e.complexity.CertifyVEXStatement.Subject == nil {
 			break
 		}
 
 		return e.complexity.CertifyVEXStatement.Subject(childComplexity), true
+
+	case "CertifyVEXStatement.vexJustification":
+		if e.complexity.CertifyVEXStatement.VexJustification == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.VexJustification(childComplexity), true
 
 	case "CertifyVEXStatement.vulnerability":
 		if e.complexity.CertifyVEXStatement.Vulnerability == nil {
@@ -2406,6 +2430,22 @@ input PackageOrArtifactInput {
   artifact: ArtifactInputSpec
 }
 
+enum VexStatus {
+  NOT_AFFECTED
+  AFFECTED
+  FIXED
+  UNDER_INVESTIGATION
+}
+
+enum VexJustification {
+  COMPONENT_NOT_PRESENT
+  VULNERABLE_CODE_NOT_PRESENT
+  VULNERABLE_CODE_NOT_IN_EXECUTE_PATH
+  VULNERABLE_CODE_CANNOT_BE_CONTROLLED_BY_ADVERSARY
+  INLINE_MITIGATIONS_ALREADY_EXIST
+  NOT_PROVIDED
+}
+
 """
 CertifyVEXStatement is an attestation that represents when a package or
 artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
@@ -2416,8 +2456,14 @@ type CertifyVEXStatement {
   subject: PackageOrArtifact!
   "Attested vulnerability"
   vulnerability: Vulnerability!
+  "status of the vulnerabilities with respect to the products and components listed in the statement"
+  status: VexStatus!
   "Justification for VEX"
-  justification: String!
+  vexJustification: VexJustification!
+  "impact_statement or action_statement depending on the status filed"
+  statement: String!
+  "statusNotes may convey information about how status was determined"
+  statusNotes: String!
   "Timestamp (exact time in RFC 3339 format) for the VEX statement"
   knownSince: Time!
   "Document from which this attestation is generated from"
@@ -2439,7 +2485,10 @@ input CertifyVEXStatementSpec {
   id: ID
   subject: PackageOrArtifactSpec
   vulnerability: VulnerabilitySpec
-  justification: String
+  status: VexStatus
+  vexJustification: VexJustification
+  statement: String
+  statusNotes: String
   knownSince: Time
   origin: String
   collector: String
@@ -2451,7 +2500,10 @@ VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
 All fields are required.
 """
 input VexStatementInputSpec {
-  justification: String!
+  status: VexStatus!
+  vexJustification: VexJustification!
+  statement: String!
+  statusNotes: String!
   knownSince: Time!
   origin: String!
   collector: String!

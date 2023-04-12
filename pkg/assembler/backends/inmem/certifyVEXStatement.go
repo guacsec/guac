@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -36,7 +37,10 @@ type vexLink struct {
 	ghsaID        uint32
 	osvID         uint32
 	knownSince    time.Time
-	justification string
+	status        model.VexStatus
+	statement     string
+	statusNotes   string
+	justification model.VexJustification
 	origin        string
 	collector     string
 }
@@ -79,6 +83,11 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	if err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVEXStatement", false); err != nil {
+		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
+	err := validateVexInputBasedOnStatus(vexStatement.Status, vexStatement.VexJustification, vexStatement.Statement)
+	if err != nil {
 		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
@@ -188,7 +197,8 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		if artifactID != 0 && artifactID == v.artifactID {
 			subjectMatch = true
 		}
-		if vulnMatch && subjectMatch && vexStatement.KnownSince.UTC() == v.knownSince && vexStatement.Justification == v.justification &&
+		if vulnMatch && subjectMatch && vexStatement.KnownSince.UTC() == v.knownSince && vexStatement.VexJustification == v.justification &&
+			vexStatement.Status == v.status && vexStatement.Statement == v.statement && vexStatement.StatusNotes == v.statusNotes &&
 			vexStatement.Origin == v.origin && vexStatement.Collector == v.collector {
 
 			collectedCertifyVexLink = *v
@@ -212,7 +222,10 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 			ghsaID:        ghsaID,
 			osvID:         osvID,
 			knownSince:    vexStatement.KnownSince.UTC(),
-			justification: vexStatement.Justification,
+			status:        vexStatement.Status,
+			justification: vexStatement.VexJustification,
+			statement:     vexStatement.Statement,
+			statusNotes:   vexStatement.StatusNotes,
 			origin:        vexStatement.Origin,
 			collector:     vexStatement.Collector,
 		}
@@ -360,7 +373,16 @@ func (c *demoClient) addVexIfMatch(out []*model.CertifyVEXStatement,
 	if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
 		return out, nil
 	}
-	if filter != nil && noMatch(filter.Justification, link.justification) {
+	if filter != nil && filter.VexJustification != nil && *filter.VexJustification == link.justification {
+		return out, nil
+	}
+	if filter != nil && filter.Status != nil && *filter.Status == link.status {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.Statement, link.statement) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.StatusNotes, link.statusNotes) {
 		return out, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.collector) {
@@ -501,13 +523,30 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 	}
 
 	certifyVuln := model.CertifyVEXStatement{
-		ID:            nodeID(link.id),
-		Subject:       subj,
-		Vulnerability: vuln,
-		Justification: link.justification,
-		KnownSince:    link.knownSince,
-		Origin:        link.origin,
-		Collector:     link.collector,
+		ID:               nodeID(link.id),
+		Subject:          subj,
+		Vulnerability:    vuln,
+		Status:           link.status,
+		VexJustification: link.justification,
+		Statement:        link.statement,
+		StatusNotes:      link.statusNotes,
+		KnownSince:       link.knownSince,
+		Origin:           link.origin,
+		Collector:        link.collector,
 	}
 	return &certifyVuln, nil
+}
+
+/*
+For [status] “not_affected”, a VEX statement SHOULD provide a [justification].
+If [justification] is not provided then [impact_statement] MUST be provided.
+For [status] “affected”, MUST include one [action_statement]
+*/
+func validateVexInputBasedOnStatus(status model.VexStatus, justification model.VexJustification, statement string) error {
+	if status == model.VexStatusNotAffected && justification == model.VexJustificationNotProvided && statement == "" {
+		return fmt.Errorf("for [status] “not_affected”, if [justification] is not provided then [statement] MUST be provided")
+	} else if status == model.VexStatusAffected && justification == model.VexJustificationNotProvided && statement == "" {
+		return fmt.Errorf("for [status] “affected”, MUST include one [statement]")
+	}
+	return nil
 }

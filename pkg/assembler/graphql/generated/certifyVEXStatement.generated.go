@@ -161,8 +161,8 @@ func (ec *executionContext) fieldContext_CertifyVEXStatement_vulnerability(ctx c
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyVEXStatement_justification(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVEXStatement) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyVEXStatement_justification(ctx, field)
+func (ec *executionContext) _CertifyVEXStatement_status(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVEXStatement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVEXStatement_status(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -175,7 +175,95 @@ func (ec *executionContext) _CertifyVEXStatement_justification(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Justification, nil
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.VexStatus)
+	fc.Result = res
+	return ec.marshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVEXStatement_status(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVEXStatement",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type VexStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVEXStatement_vexJustification(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVEXStatement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVEXStatement_vexJustification(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VexJustification, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.VexJustification)
+	fc.Result = res
+	return ec.marshalNVexJustification2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVEXStatement_vexJustification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVEXStatement",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type VexJustification does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVEXStatement_statement(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVEXStatement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVEXStatement_statement(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Statement, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -192,7 +280,51 @@ func (ec *executionContext) _CertifyVEXStatement_justification(ctx context.Conte
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyVEXStatement_justification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CertifyVEXStatement_statement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVEXStatement",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVEXStatement_statusNotes(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVEXStatement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVEXStatement_statusNotes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StatusNotes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVEXStatement_statusNotes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CertifyVEXStatement",
 		Field:      field,
@@ -348,7 +480,7 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "vulnerability", "justification", "knownSince", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "subject", "vulnerability", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -379,11 +511,35 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 			if err != nil {
 				return it, err
 			}
-		case "justification":
+		case "status":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalOVexStatus2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vexJustification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vexJustification"))
+			it.VexJustification, err = ec.unmarshalOVexJustification2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "statement":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("statement"))
+			it.Statement, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "statusNotes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("statusNotes"))
+			it.StatusNotes, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -496,18 +652,42 @@ func (ec *executionContext) unmarshalInputVexStatementInputSpec(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "knownSince", "origin", "collector"}
+	fieldsInOrder := [...]string{"status", "vexJustification", "statement", "statusNotes", "knownSince", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "justification":
+		case "status":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vexJustification":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vexJustification"))
+			it.VexJustification, err = ec.unmarshalNVexJustification2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "statement":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("statement"))
+			it.Statement, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "statusNotes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("statusNotes"))
+			it.StatusNotes, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -603,9 +783,30 @@ func (ec *executionContext) _CertifyVEXStatement(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "justification":
+		case "status":
 
-			out.Values[i] = ec._CertifyVEXStatement_justification(ctx, field, obj)
+			out.Values[i] = ec._CertifyVEXStatement_status(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "vexJustification":
+
+			out.Values[i] = ec._CertifyVEXStatement_vexJustification(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "statement":
+
+			out.Values[i] = ec._CertifyVEXStatement_statement(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "statusNotes":
+
+			out.Values[i] = ec._CertifyVEXStatement_statusNotes(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -719,9 +920,29 @@ func (ec *executionContext) unmarshalNPackageOrArtifactInput2githubᚗcomᚋguac
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNVexJustification2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, v interface{}) (model.VexJustification, error) {
+	var res model.VexJustification
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNVexJustification2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, sel ast.SelectionSet, v model.VexJustification) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNVexStatementInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatementInputSpec(ctx context.Context, v interface{}) (model.VexStatementInputSpec, error) {
 	res, err := ec.unmarshalInputVexStatementInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, v interface{}) (model.VexStatus, error) {
+	var res model.VexStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, sel ast.SelectionSet, v model.VexStatus) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalOCertifyVEXStatementSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx context.Context, v interface{}) (*model.CertifyVEXStatementSpec, error) {
@@ -738,6 +959,38 @@ func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋgu
 	}
 	res, err := ec.unmarshalInputPackageOrArtifactSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOVexJustification2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, v interface{}) (*model.VexJustification, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.VexJustification)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVexJustification2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, sel ast.SelectionSet, v *model.VexJustification) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOVexStatus2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, v interface{}) (*model.VexStatus, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.VexStatus)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVexStatus2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, sel ast.SelectionSet, v *model.VexStatus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 // endregion ***************************** type.gotpl *****************************

@@ -87,7 +87,7 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		searchIDs = append(searchIDs, foundPkgNameorVersionNode.getCertifyBadLinks()...)
+		searchIDs = append(searchIDs, foundPkgNameorVersionNode.getCertifyGoodLinks()...)
 	} else if subject.Artifact != nil {
 		var err error
 		artifactID, err = getArtifactIDFromInput(c, *subject.Artifact)
@@ -98,7 +98,7 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		searchIDs = append(searchIDs, foundArtStrct.badLinks...)
+		searchIDs = append(searchIDs, foundArtStrct.goodLinks...)
 	} else {
 		var err error
 		sourceID, err = getSourceIDFromInput(c, *subject.Source)
@@ -109,7 +109,7 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		searchIDs = append(searchIDs, srcName.badLinks...)
+		searchIDs = append(searchIDs, srcName.goodLinks...)
 	}
 
 	// Don't insert duplicates
