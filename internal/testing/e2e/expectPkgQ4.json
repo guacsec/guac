@@ -1,10 +1,10 @@
 {
   "packages": [
     {
-      "type": "oci",
+      "type": "guac",
       "namespaces": [
         {
-          "namespace": "docker.io/library",
+          "namespace": "cdx/docker.io/library",
           "names": [
             {
               "name": "consul",
