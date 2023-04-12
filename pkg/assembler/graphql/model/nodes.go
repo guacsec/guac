@@ -369,11 +369,12 @@ type GHSASpec struct {
 //
 // Note: Only package object or source object can be defined. Not both.
 type HasSbom struct {
-	ID        string          `json:"id"`
-	Subject   PackageOrSource `json:"subject"`
-	URI       string          `json:"uri"`
-	Origin    string          `json:"origin"`
-	Collector string          `json:"collector"`
+	ID         string          `json:"id"`
+	Subject    PackageOrSource `json:"subject"`
+	URI        string          `json:"uri"`
+	Annotation string          `json:"annotation"`
+	Origin     string          `json:"origin"`
+	Collector  string          `json:"collector"`
 }
 
 func (HasSbom) IsNode() {}
@@ -382,9 +383,10 @@ func (HasSbom) IsNode() {}
 //
 // All fields are required.
 type HasSBOMInputSpec struct {
-	URI       string `json:"uri"`
-	Origin    string `json:"origin"`
-	Collector string `json:"collector"`
+	URI        string `json:"uri"`
+	Annotation string `json:"annotation"`
+	Origin     string `json:"origin"`
+	Collector  string `json:"collector"`
 }
 
 // HashEqualSpec allows filtering the list of HasSBOM to return.
@@ -392,11 +394,12 @@ type HasSBOMInputSpec struct {
 // Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
 // relationship.
 type HasSBOMSpec struct {
-	ID        *string              `json:"id,omitempty"`
-	Subject   *PackageOrSourceSpec `json:"subject,omitempty"`
-	URI       *string              `json:"uri,omitempty"`
-	Origin    *string              `json:"origin,omitempty"`
-	Collector *string              `json:"collector,omitempty"`
+	ID         *string              `json:"id,omitempty"`
+	Subject    *PackageOrSourceSpec `json:"subject,omitempty"`
+	URI        *string              `json:"uri,omitempty"`
+	Annotation *string              `json:"annotation,omitempty"`
+	Origin     *string              `json:"origin,omitempty"`
+	Collector  *string              `json:"collector,omitempty"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.

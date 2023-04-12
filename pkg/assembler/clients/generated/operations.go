@@ -4020,13 +4020,17 @@ func (v *GHSAsResponse) GetGhsa() []GHSAsGhsaGHSA { return v.Ghsa }
 //
 // All fields are required.
 type HasSBOMInputSpec struct {
-	Uri       string `json:"uri"`
-	Origin    string `json:"origin"`
-	Collector string `json:"collector"`
+	Uri        string `json:"uri"`
+	Annotation string `json:"annotation"`
+	Origin     string `json:"origin"`
+	Collector  string `json:"collector"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetUri() string { return v.Uri }
+
+// GetAnnotation returns HasSBOMInputSpec.Annotation, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetAnnotation() string { return v.Annotation }
 
 // GetOrigin returns HasSBOMInputSpec.Origin, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
@@ -4054,6 +4058,9 @@ func (v *HasSBOMPkgIngestHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 
 // GetUri returns HasSBOMPkgIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
+
+// GetAnnotation returns HasSBOMPkgIngestHasSBOM.Annotation, and is useful for accessing the field via an interface.
+func (v *HasSBOMPkgIngestHasSBOM) GetAnnotation() string { return v.allHasSBOMTree.Annotation }
 
 // GetSubject returns HasSBOMPkgIngestHasSBOM.Subject, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
@@ -4096,6 +4103,8 @@ type __premarshalHasSBOMPkgIngestHasSBOM struct {
 
 	Uri string `json:"uri"`
 
+	Annotation string `json:"annotation"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -4116,6 +4125,7 @@ func (v *HasSBOMPkgIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMPkgIng
 
 	retval.Id = v.allHasSBOMTree.Id
 	retval.Uri = v.allHasSBOMTree.Uri
+	retval.Annotation = v.allHasSBOMTree.Annotation
 	{
 
 		dst := &retval.Subject
@@ -4248,6 +4258,9 @@ func (v *HasSBOMSrcIngestHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 // GetUri returns HasSBOMSrcIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
 func (v *HasSBOMSrcIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
 
+// GetAnnotation returns HasSBOMSrcIngestHasSBOM.Annotation, and is useful for accessing the field via an interface.
+func (v *HasSBOMSrcIngestHasSBOM) GetAnnotation() string { return v.allHasSBOMTree.Annotation }
+
 // GetSubject returns HasSBOMSrcIngestHasSBOM.Subject, and is useful for accessing the field via an interface.
 func (v *HasSBOMSrcIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
 	return v.allHasSBOMTree.Subject
@@ -4289,6 +4302,8 @@ type __premarshalHasSBOMSrcIngestHasSBOM struct {
 
 	Uri string `json:"uri"`
 
+	Annotation string `json:"annotation"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -4309,6 +4324,7 @@ func (v *HasSBOMSrcIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMSrcIng
 
 	retval.Id = v.allHasSBOMTree.Id
 	retval.Uri = v.allHasSBOMTree.Uri
+	retval.Annotation = v.allHasSBOMTree.Annotation
 	{
 
 		dst := &retval.Subject
@@ -7344,6 +7360,9 @@ func (v *NeighborsNeighborsHasSBOM) GetId() string { return v.allHasSBOMTree.Id 
 // GetUri returns NeighborsNeighborsHasSBOM.Uri, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
 
+// GetAnnotation returns NeighborsNeighborsHasSBOM.Annotation, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetAnnotation() string { return v.allHasSBOMTree.Annotation }
+
 // GetSubject returns NeighborsNeighborsHasSBOM.Subject, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
 	return v.allHasSBOMTree.Subject
@@ -7387,6 +7406,8 @@ type __premarshalNeighborsNeighborsHasSBOM struct {
 
 	Uri string `json:"uri"`
 
+	Annotation string `json:"annotation"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -7408,6 +7429,7 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 	retval.Typename = v.Typename
 	retval.Id = v.allHasSBOMTree.Id
 	retval.Uri = v.allHasSBOMTree.Uri
+	retval.Annotation = v.allHasSBOMTree.Annotation
 	{
 
 		dst := &retval.Subject
@@ -10173,6 +10195,9 @@ func (v *NodeNodeHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 // GetUri returns NodeNodeHasSBOM.Uri, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
 
+// GetAnnotation returns NodeNodeHasSBOM.Annotation, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetAnnotation() string { return v.allHasSBOMTree.Annotation }
+
 // GetSubject returns NodeNodeHasSBOM.Subject, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
 	return v.allHasSBOMTree.Subject
@@ -10216,6 +10241,8 @@ type __premarshalNodeNodeHasSBOM struct {
 
 	Uri string `json:"uri"`
 
+	Annotation string `json:"annotation"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -10237,6 +10264,7 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 	retval.Typename = v.Typename
 	retval.Id = v.allHasSBOMTree.Id
 	retval.Uri = v.allHasSBOMTree.Uri
+	retval.Annotation = v.allHasSBOMTree.Annotation
 	{
 
 		dst := &retval.Subject
@@ -12378,6 +12406,9 @@ func (v *PathPathHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 // GetUri returns PathPathHasSBOM.Uri, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
 
+// GetAnnotation returns PathPathHasSBOM.Annotation, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetAnnotation() string { return v.allHasSBOMTree.Annotation }
+
 // GetSubject returns PathPathHasSBOM.Subject, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
 	return v.allHasSBOMTree.Subject
@@ -12421,6 +12452,8 @@ type __premarshalPathPathHasSBOM struct {
 
 	Uri string `json:"uri"`
 
+	Annotation string `json:"annotation"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -12442,6 +12475,7 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 	retval.Typename = v.Typename
 	retval.Id = v.allHasSBOMTree.Id
 	retval.Uri = v.allHasSBOMTree.Uri
+	retval.Annotation = v.allHasSBOMTree.Annotation
 	{
 
 		dst := &retval.Subject
@@ -19250,11 +19284,12 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) __premarshalJSON() (*__premarsh
 //
 // Note: Only package object or source object can be defined. Not both.
 type allHasSBOMTree struct {
-	Id        string                               `json:"id"`
-	Uri       string                               `json:"uri"`
-	Subject   allHasSBOMTreeSubjectPackageOrSource `json:"-"`
-	Origin    string                               `json:"origin"`
-	Collector string                               `json:"collector"`
+	Id         string                               `json:"id"`
+	Uri        string                               `json:"uri"`
+	Annotation string                               `json:"annotation"`
+	Subject    allHasSBOMTreeSubjectPackageOrSource `json:"-"`
+	Origin     string                               `json:"origin"`
+	Collector  string                               `json:"collector"`
 }
 
 // GetId returns allHasSBOMTree.Id, and is useful for accessing the field via an interface.
@@ -19262,6 +19297,9 @@ func (v *allHasSBOMTree) GetId() string { return v.Id }
 
 // GetUri returns allHasSBOMTree.Uri, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTree) GetUri() string { return v.Uri }
+
+// GetAnnotation returns allHasSBOMTree.Annotation, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTree) GetAnnotation() string { return v.Annotation }
 
 // GetSubject returns allHasSBOMTree.Subject, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTree) GetSubject() allHasSBOMTreeSubjectPackageOrSource { return v.Subject }
@@ -19310,6 +19348,8 @@ type __premarshalallHasSBOMTree struct {
 
 	Uri string `json:"uri"`
 
+	Annotation string `json:"annotation"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -19330,6 +19370,7 @@ func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error)
 
 	retval.Id = v.Id
 	retval.Uri = v.Uri
+	retval.Annotation = v.Annotation
 	{
 
 		dst := &retval.Subject
@@ -22036,6 +22077,7 @@ fragment AllPkgTree on Package {
 fragment allHasSBOMTree on HasSBOM {
 	id
 	uri
+	annotation
 	subject {
 		__typename
 		... on Package {
@@ -22116,6 +22158,7 @@ fragment AllSourceTree on Source {
 fragment allHasSBOMTree on HasSBOM {
 	id
 	uri
+	annotation
 	subject {
 		__typename
 		... on Package {
@@ -23006,6 +23049,7 @@ fragment allHashEqualTree on HashEqual {
 fragment allHasSBOMTree on HasSBOM {
 	id
 	uri
+	annotation
 	subject {
 		__typename
 		... on Package {
@@ -23396,6 +23440,7 @@ fragment allHashEqualTree on HashEqual {
 fragment allHasSBOMTree on HasSBOM {
 	id
 	uri
+	annotation
 	subject {
 		__typename
 		... on Package {
@@ -23877,6 +23922,7 @@ fragment allHashEqualTree on HashEqual {
 fragment allHasSBOMTree on HasSBOM {
 	id
 	uri
+	annotation
 	subject {
 		__typename
 		... on Package {
