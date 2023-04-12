@@ -7018,13 +7018,23 @@ func (v *NeighborsNeighborsCertifyVEXStatement) GetVulnerability() allCertifyVEX
 }
 
 // GetStatus returns NeighborsNeighborsCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyVEXStatement) GetStatus() string {
+func (v *NeighborsNeighborsCertifyVEXStatement) GetStatus() VexStatus {
 	return v.allCertifyVEXStatement.Status
 }
 
-// GetJustification returns NeighborsNeighborsCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns NeighborsNeighborsCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns NeighborsNeighborsCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns NeighborsNeighborsCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns NeighborsNeighborsCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -7076,9 +7086,13 @@ type __premarshalNeighborsNeighborsCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -7125,7 +7139,9 @@ func (v *NeighborsNeighborsCertifyVEXStatement) __premarshalJSON() (*__premarsha
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -9837,11 +9853,21 @@ func (v *NodeNodeCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementV
 }
 
 // GetStatus returns NodeNodeCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *NodeNodeCertifyVEXStatement) GetStatus() string { return v.allCertifyVEXStatement.Status }
+func (v *NodeNodeCertifyVEXStatement) GetStatus() VexStatus { return v.allCertifyVEXStatement.Status }
 
-// GetJustification returns NodeNodeCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *NodeNodeCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns NodeNodeCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns NodeNodeCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns NodeNodeCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns NodeNodeCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -9891,9 +9917,13 @@ type __premarshalNodeNodeCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -9940,7 +9970,9 @@ func (v *NodeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalNodeNodeC
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -12026,11 +12058,21 @@ func (v *PathPathCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementV
 }
 
 // GetStatus returns PathPathCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyVEXStatement) GetStatus() string { return v.allCertifyVEXStatement.Status }
+func (v *PathPathCertifyVEXStatement) GetStatus() VexStatus { return v.allCertifyVEXStatement.Status }
 
-// GetJustification returns PathPathCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *PathPathCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns PathPathCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns PathPathCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns PathPathCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns PathPathCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -12080,9 +12122,13 @@ type __premarshalPathPathCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -12129,7 +12175,9 @@ func (v *PathPathCertifyVEXStatement) __premarshalJSON() (*__premarshalPathPathC
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -15075,13 +15123,23 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerabilit
 }
 
 // GetStatus returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
 	return v.allCertifyVEXStatement.Status
 }
 
-// GetJustification returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -15131,9 +15189,13 @@ type __premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -15179,7 +15241,9 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -15382,13 +15446,23 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerabilit
 }
 
 // GetStatus returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
 	return v.allCertifyVEXStatement.Status
 }
 
-// GetJustification returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -15438,9 +15512,13 @@ type __premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -15486,7 +15564,9 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -15681,13 +15761,23 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerabili
 }
 
 // GetStatus returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
 	return v.allCertifyVEXStatement.Status
 }
 
-// GetJustification returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -15737,9 +15827,13 @@ type __premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement struct 
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -15785,7 +15879,9 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJS
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -15985,13 +16081,23 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerabilit
 }
 
 // GetStatus returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
 	return v.allCertifyVEXStatement.Status
 }
 
-// GetJustification returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -16041,9 +16147,13 @@ type __premarshalVexArtifactAndOsvIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -16089,7 +16199,9 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -16120,6 +16232,17 @@ func (v *VexArtifactAndOsvResponse) GetIngestOSV() VexArtifactAndOsvIngestOSV { 
 func (v *VexArtifactAndOsvResponse) GetIngestVEXStatement() VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement {
 	return v.IngestVEXStatement
 }
+
+type VexJustification string
+
+const (
+	VexJustificationComponentNotPresent                         VexJustification = "COMPONENT_NOT_PRESENT"
+	VexJustificationVulnerableCodeNotPresent                    VexJustification = "VULNERABLE_CODE_NOT_PRESENT"
+	VexJustificationVulnerableCodeNotInExecutePath              VexJustification = "VULNERABLE_CODE_NOT_IN_EXECUTE_PATH"
+	VexJustificationVulnerableCodeCannotBeControlledByAdversary VexJustification = "VULNERABLE_CODE_CANNOT_BE_CONTROLLED_BY_ADVERSARY"
+	VexJustificationInlineMitigationsAlreadyExist               VexJustification = "INLINE_MITIGATIONS_ALREADY_EXIST"
+	VexJustificationNotProvided                                 VexJustification = "NOT_PROVIDED"
+)
 
 // VexPackageAndCveIngestCVE includes the requested fields of the GraphQL type CVE.
 // The GraphQL type's documentation follows.
@@ -16299,13 +16422,23 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability
 }
 
 // GetStatus returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
 	return v.allCertifyVEXStatement.Status
 }
 
-// GetJustification returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -16355,9 +16488,13 @@ type __premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -16403,7 +16540,9 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -16608,13 +16747,23 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerability
 }
 
 // GetStatus returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetStatus() VexStatus {
 	return v.allCertifyVEXStatement.Status
 }
 
-// GetJustification returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetJustification() string {
-	return v.allCertifyVEXStatement.Justification
+// GetVexJustification returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetVexJustification() VexJustification {
+	return v.allCertifyVEXStatement.VexJustification
+}
+
+// GetStatement returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetStatement() string {
+	return v.allCertifyVEXStatement.Statement
+}
+
+// GetStatusNotes returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetStatusNotes() string {
+	return v.allCertifyVEXStatement.StatusNotes
 }
 
 // GetKnownSince returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
@@ -16664,9 +16813,13 @@ type __premarshalVexPackageAndOsvIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -16712,7 +16865,9 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
-	retval.Justification = v.allCertifyVEXStatement.Justification
+	retval.VexJustification = v.allCertifyVEXStatement.VexJustification
+	retval.Statement = v.allCertifyVEXStatement.Statement
+	retval.StatusNotes = v.allCertifyVEXStatement.StatusNotes
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
 	retval.Collector = v.allCertifyVEXStatement.Collector
@@ -16748,18 +16903,26 @@ func (v *VexPackageAndOsvResponse) GetIngestVEXStatement() VexPackageAndOsvInges
 //
 // All fields are required.
 type VexStatementInputSpec struct {
-	Status        string    `json:"status"`
-	Justification string    `json:"justification"`
-	KnownSince    time.Time `json:"knownSince"`
-	Origin        string    `json:"origin"`
-	Collector     string    `json:"collector"`
+	Status           VexStatus        `json:"status"`
+	VexJustification VexJustification `json:"vexJustification"`
+	Statement        string           `json:"statement"`
+	StatusNotes      string           `json:"statusNotes"`
+	KnownSince       time.Time        `json:"knownSince"`
+	Origin           string           `json:"origin"`
+	Collector        string           `json:"collector"`
 }
 
 // GetStatus returns VexStatementInputSpec.Status, and is useful for accessing the field via an interface.
-func (v *VexStatementInputSpec) GetStatus() string { return v.Status }
+func (v *VexStatementInputSpec) GetStatus() VexStatus { return v.Status }
 
-// GetJustification returns VexStatementInputSpec.Justification, and is useful for accessing the field via an interface.
-func (v *VexStatementInputSpec) GetJustification() string { return v.Justification }
+// GetVexJustification returns VexStatementInputSpec.VexJustification, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetVexJustification() VexJustification { return v.VexJustification }
+
+// GetStatement returns VexStatementInputSpec.Statement, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetStatement() string { return v.Statement }
+
+// GetStatusNotes returns VexStatementInputSpec.StatusNotes, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetStatusNotes() string { return v.StatusNotes }
 
 // GetKnownSince returns VexStatementInputSpec.KnownSince, and is useful for accessing the field via an interface.
 func (v *VexStatementInputSpec) GetKnownSince() time.Time { return v.KnownSince }
@@ -16769,6 +16932,15 @@ func (v *VexStatementInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns VexStatementInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *VexStatementInputSpec) GetCollector() string { return v.Collector }
+
+type VexStatus string
+
+const (
+	VexStatusNotAffected        VexStatus = "NOT_AFFECTED"
+	VexStatusAffected           VexStatus = "AFFECTED"
+	VexStatusFixed              VexStatus = "FIXED"
+	VexStatusUnderInvestigation VexStatus = "UNDER_INVESTIGATION"
+)
 
 // VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
 //
@@ -18290,9 +18462,13 @@ type allCertifyVEXStatement struct {
 	// Attested vulnerability
 	Vulnerability allCertifyVEXStatementVulnerability `json:"-"`
 	// status of the vulnerabilities with respect to the products and components listed in the statement
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 	// Justification for VEX
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+	// impact_statement or action_statement depending on the status filed
+	Statement string `json:"statement"`
+	// statusNotes may convey information about how status was determined
+	StatusNotes string `json:"statusNotes"`
 	// Timestamp (exact time in RFC 3339 format) for the VEX statement
 	KnownSince time.Time `json:"knownSince"`
 	// Document from which this attestation is generated from
@@ -18315,10 +18491,16 @@ func (v *allCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulner
 }
 
 // GetStatus returns allCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatement) GetStatus() string { return v.Status }
+func (v *allCertifyVEXStatement) GetStatus() VexStatus { return v.Status }
 
-// GetJustification returns allCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
-func (v *allCertifyVEXStatement) GetJustification() string { return v.Justification }
+// GetVexJustification returns allCertifyVEXStatement.VexJustification, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetVexJustification() VexJustification { return v.VexJustification }
+
+// GetStatement returns allCertifyVEXStatement.Statement, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetStatement() string { return v.Statement }
+
+// GetStatusNotes returns allCertifyVEXStatement.StatusNotes, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetStatusNotes() string { return v.StatusNotes }
 
 // GetKnownSince returns allCertifyVEXStatement.KnownSince, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatement) GetKnownSince() time.Time { return v.KnownSince }
@@ -18383,9 +18565,13 @@ type __premarshalallCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
-	Status string `json:"status"`
+	Status VexStatus `json:"status"`
 
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+
+	Statement string `json:"statement"`
+
+	StatusNotes string `json:"statusNotes"`
 
 	KnownSince time.Time `json:"knownSince"`
 
@@ -18431,7 +18617,9 @@ func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXS
 		}
 	}
 	retval.Status = v.Status
-	retval.Justification = v.Justification
+	retval.VexJustification = v.VexJustification
+	retval.Statement = v.Statement
+	retval.StatusNotes = v.StatusNotes
 	retval.KnownSince = v.KnownSince
 	retval.Origin = v.Origin
 	retval.Collector = v.Collector
@@ -22915,7 +23103,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -23303,7 +23493,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -23782,7 +23974,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -24142,7 +24336,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -24237,7 +24433,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -24346,7 +24544,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -24456,7 +24656,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -24583,7 +24785,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector
@@ -24692,7 +24896,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 		}
 	}
 	status
-	justification
+	vexJustification
+	statement
+	statusNotes
 	knownSince
 	origin
 	collector

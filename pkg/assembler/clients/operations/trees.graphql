@@ -322,7 +322,9 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
     }
   }
   status
-  justification
+  vexJustification
+  statement
+  statusNotes
   knownSince
   origin
   collector
