@@ -1,10 +1,10 @@
 [
   {
     "__typename": "Package",
-    "type": "oci",
+    "type": "guac",
     "namespaces": [
       {
-        "namespace": "docker.io/librar",
+        "namespace": "cdx/docker.io/library",
         "names": [
           {
             "name": "python",
@@ -33,7 +33,7 @@
       "type": "guac",
       "namespaces": [
         {
-          "namespace": "docker.io/librar",
+          "namespace": "cdx/docker.io/library",
           "names": [
             {
               "name": "python",
