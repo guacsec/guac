@@ -8,6 +8,21 @@
         "names": [
           {
             "name": "python",
+            "versions": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "__typename": "Package",
+    "type": "guac",
+    "namespaces": [
+      {
+        "namespace": "cdx/docker.io/library",
+        "names": [
+          {
+            "name": "python",
             "versions": [
               {
                 "version": "sha256:e9ebb760d74df0c28447c2f67050800c3392a3987ed77ce493545c7d3ad24c9d",

@@ -134,6 +134,18 @@ query GetNeighbors ($nodeId: ID!) {
   }
 }
 
+query Node ($nodeId: ID!) {
+  node(node: $nodeId) {
+    __typename
+    ... on Package{
+      ...allPkgTree
+    }
+    ... on IsDependency {
+      ...allIsDependencyTree
+    }
+  }
+}
+
 fragment allCveTree on CVE {
   id
   year
