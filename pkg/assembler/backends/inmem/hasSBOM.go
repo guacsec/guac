@@ -27,12 +27,13 @@ import (
 
 type hasSBOMList []*hasSBOMStruct
 type hasSBOMStruct struct {
-	id        uint32
-	pkg       uint32
-	src       uint32
-	uri       string
-	origin    string
-	collector string
+	id         uint32
+	pkg        uint32
+	src        uint32
+	uri        string
+	annotation string
+	origin     string
+	collector  string
 }
 
 func (n *hasSBOMStruct) ID() uint32 { return n.id }
@@ -140,6 +141,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 		if h.pkg == packageID &&
 			h.src == sourceID &&
 			h.uri == input.URI &&
+			h.annotation == input.Annotation &&
 			h.origin == input.Origin &&
 			h.collector == input.Collector {
 			return c.convHasSBOM(h)
@@ -154,12 +156,13 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 	}
 
 	h := &hasSBOMStruct{
-		id:        c.getNextID(),
-		pkg:       packageID,
-		src:       sourceID,
-		uri:       input.URI,
-		origin:    input.Origin,
-		collector: input.Collector,
+		id:         c.getNextID(),
+		pkg:        packageID,
+		src:        sourceID,
+		uri:        input.URI,
+		annotation: input.Annotation,
+		origin:     input.Origin,
+		collector:  input.Collector,
 	}
 	c.index[h.id] = h
 	c.hasSBOMs = append(c.hasSBOMs, h)
@@ -173,10 +176,11 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 
 func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 	out := &model.HasSbom{
-		ID:        nodeID(in.id),
-		URI:       in.uri,
-		Origin:    in.origin,
-		Collector: in.collector,
+		ID:         nodeID(in.id),
+		URI:        in.uri,
+		Annotation: in.annotation,
+		Origin:     in.origin,
+		Collector:  in.collector,
 	}
 	if in.pkg != 0 {
 		p, err := c.buildPackageResponse(in.pkg, nil)
@@ -274,6 +278,7 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 	filter *model.HasSBOMSpec, link *hasSBOMStruct) (
 	[]*model.HasSbom, error) {
 	if noMatch(filter.URI, link.uri) ||
+		noMatch(filter.Annotation, link.annotation) ||
 		noMatch(filter.Origin, link.origin) ||
 		noMatch(filter.Collector, link.collector) {
 		return out, nil
