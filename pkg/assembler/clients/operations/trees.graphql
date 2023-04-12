@@ -321,6 +321,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
       ...AllOSVTree
     }
   }
+  status
   justification
   knownSince
   origin

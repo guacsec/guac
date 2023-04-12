@@ -36,6 +36,7 @@ type vexLink struct {
 	ghsaID        uint32
 	osvID         uint32
 	knownSince    time.Time
+	status        string
 	justification string
 	origin        string
 	collector     string
@@ -189,7 +190,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 			subjectMatch = true
 		}
 		if vulnMatch && subjectMatch && vexStatement.KnownSince.UTC() == v.knownSince && vexStatement.Justification == v.justification &&
-			vexStatement.Origin == v.origin && vexStatement.Collector == v.collector {
+			vexStatement.Status == v.status && vexStatement.Origin == v.origin && vexStatement.Collector == v.collector {
 
 			collectedCertifyVexLink = *v
 			duplicate = true
@@ -212,6 +213,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 			ghsaID:        ghsaID,
 			osvID:         osvID,
 			knownSince:    vexStatement.KnownSince.UTC(),
+			status:        vexStatement.Status,
 			justification: vexStatement.Justification,
 			origin:        vexStatement.Origin,
 			collector:     vexStatement.Collector,
@@ -363,6 +365,9 @@ func (c *demoClient) addVexIfMatch(out []*model.CertifyVEXStatement,
 	if filter != nil && noMatch(filter.Justification, link.justification) {
 		return out, nil
 	}
+	if filter != nil && noMatch(filter.Status, link.status) {
+		return out, nil
+	}
 	if filter != nil && noMatch(filter.Collector, link.collector) {
 		return out, nil
 	}
@@ -504,6 +509,7 @@ func (c *demoClient) buildCertifyVEXStatement(link *vexLink, filter *model.Certi
 		ID:            nodeID(link.id),
 		Subject:       subj,
 		Vulnerability: vuln,
+		Status:        link.status,
 		Justification: link.justification,
 		KnownSince:    link.knownSince,
 		Origin:        link.origin,

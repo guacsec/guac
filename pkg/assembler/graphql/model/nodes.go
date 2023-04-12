@@ -243,6 +243,8 @@ type CertifyVEXStatement struct {
 	Subject PackageOrArtifact `json:"subject"`
 	// Attested vulnerability
 	Vulnerability Vulnerability `json:"vulnerability"`
+	// status of the vulnerabilities with respect to the products and components listed in the statement
+	Status string `json:"status"`
 	// Justification for VEX
 	Justification string `json:"justification"`
 	// Timestamp (exact time in RFC 3339 format) for the VEX statement
@@ -266,6 +268,7 @@ type CertifyVEXStatementSpec struct {
 	ID            *string                `json:"id,omitempty"`
 	Subject       *PackageOrArtifactSpec `json:"subject,omitempty"`
 	Vulnerability *VulnerabilitySpec     `json:"vulnerability,omitempty"`
+	Status        *string                `json:"status,omitempty"`
 	Justification *string                `json:"justification,omitempty"`
 	KnownSince    *time.Time             `json:"knownSince,omitempty"`
 	Origin        *string                `json:"origin,omitempty"`
@@ -1162,6 +1165,7 @@ type SourceSpec struct {
 //
 // All fields are required.
 type VexStatementInputSpec struct {
+	Status        string    `json:"status"`
 	Justification string    `json:"justification"`
 	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`

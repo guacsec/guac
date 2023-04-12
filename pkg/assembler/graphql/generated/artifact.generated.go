@@ -1522,6 +1522,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestVEXStatement(ctx context
 				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
 			case "vulnerability":
 				return ec.fieldContext_CertifyVEXStatement_vulnerability(ctx, field)
+			case "status":
+				return ec.fieldContext_CertifyVEXStatement_status(ctx, field)
 			case "justification":
 				return ec.fieldContext_CertifyVEXStatement_justification(ctx, field)
 			case "knownSince":
@@ -2897,6 +2899,8 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.C
 				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
 			case "vulnerability":
 				return ec.fieldContext_CertifyVEXStatement_vulnerability(ctx, field)
+			case "status":
+				return ec.fieldContext_CertifyVEXStatement_status(ctx, field)
 			case "justification":
 				return ec.fieldContext_CertifyVEXStatement_justification(ctx, field)
 			case "knownSince":

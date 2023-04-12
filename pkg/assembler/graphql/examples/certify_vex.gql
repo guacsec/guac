@@ -45,6 +45,7 @@ fragment allCertifyVEXStatementTree on CertifyVEXStatement {
       ghsaId
     }
   }
+  status
   justification
   knownSince
   origin

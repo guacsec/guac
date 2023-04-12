@@ -161,6 +161,50 @@ func (ec *executionContext) fieldContext_CertifyVEXStatement_vulnerability(ctx c
 	return fc, nil
 }
 
+func (ec *executionContext) _CertifyVEXStatement_status(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVEXStatement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVEXStatement_status(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVEXStatement_status(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVEXStatement",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _CertifyVEXStatement_justification(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVEXStatement) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CertifyVEXStatement_justification(ctx, field)
 	if err != nil {
@@ -348,7 +392,7 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "vulnerability", "justification", "knownSince", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "subject", "vulnerability", "status", "justification", "knownSince", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -376,6 +420,14 @@ func (ec *executionContext) unmarshalInputCertifyVEXStatementSpec(ctx context.Co
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
 			it.Vulnerability, err = ec.unmarshalOVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -496,13 +548,21 @@ func (ec *executionContext) unmarshalInputVexStatementInputSpec(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "knownSince", "origin", "collector"}
+	fieldsInOrder := [...]string{"status", "justification", "knownSince", "origin", "collector"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "status":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "justification":
 			var err error
 
@@ -599,6 +659,13 @@ func (ec *executionContext) _CertifyVEXStatement(ctx context.Context, sel ast.Se
 		case "vulnerability":
 
 			out.Values[i] = ec._CertifyVEXStatement_vulnerability(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+
+			out.Values[i] = ec._CertifyVEXStatement_status(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

@@ -32,6 +32,7 @@ const (
 	origin        string = "origin"
 	collector     string = "collector"
 	justification string = "justification"
+	status        string = "status"
 )
 
 type Neo4jConfig struct {

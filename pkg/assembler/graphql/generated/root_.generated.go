@@ -83,6 +83,7 @@ type ComplexityRoot struct {
 		Justification func(childComplexity int) int
 		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
+		Status        func(childComplexity int) int
 		Subject       func(childComplexity int) int
 		Vulnerability func(childComplexity int) int
 	}
@@ -514,6 +515,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVEXStatement.Origin(childComplexity), true
+
+	case "CertifyVEXStatement.status":
+		if e.complexity.CertifyVEXStatement.Status == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.Status(childComplexity), true
 
 	case "CertifyVEXStatement.subject":
 		if e.complexity.CertifyVEXStatement.Subject == nil {
@@ -2416,6 +2424,8 @@ type CertifyVEXStatement {
   subject: PackageOrArtifact!
   "Attested vulnerability"
   vulnerability: Vulnerability!
+  "status of the vulnerabilities with respect to the products and components listed in the statement"
+  status: String!
   "Justification for VEX"
   justification: String!
   "Timestamp (exact time in RFC 3339 format) for the VEX statement"
@@ -2439,6 +2449,7 @@ input CertifyVEXStatementSpec {
   id: ID
   subject: PackageOrArtifactSpec
   vulnerability: VulnerabilitySpec
+  status: String
   justification: String
   knownSince: Time
   origin: String
@@ -2451,6 +2462,7 @@ VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
 All fields are required.
 """
 input VexStatementInputSpec {
+  status: String!
   justification: String!
   knownSince: Time!
   origin: String!

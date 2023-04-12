@@ -115,7 +115,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, cve, certifyVEXStatementNode.Props[justification].(string),
+					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, cve, certifyVEXStatementNode.Props[status].(string), certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -191,7 +191,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, ghsa, certifyVEXStatementNode.Props[justification].(string),
+					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, ghsa, certifyVEXStatementNode.Props[status].(string), certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -267,7 +267,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, osv, certifyVEXStatementNode.Props[justification].(string),
+					certifyVEXStatement := generateModelCertifyVEXStatement(pkg, osv, certifyVEXStatementNode.Props[status].(string), certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -337,7 +337,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, cve, certifyVEXStatementNode.Props[justification].(string),
+					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, cve, certifyVEXStatementNode.Props[status].(string), certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -406,7 +406,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, ghsa, certifyVEXStatementNode.Props[justification].(string),
+					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, ghsa, certifyVEXStatementNode.Props[status].(string), certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -475,7 +475,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						return nil, gqlerror.Errorf("certifyVEXStatement Node not found in neo4j")
 					}
 
-					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, osv, certifyVEXStatementNode.Props[justification].(string),
+					certifyVEXStatement := generateModelCertifyVEXStatement(artifact, osv, certifyVEXStatementNode.Props[status].(string), certifyVEXStatementNode.Props[justification].(string),
 						certifyVEXStatementNode.Props[origin].(string), certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -501,6 +501,11 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 		*firstMatch = false
 		queryValues[knownSince] = certifyVEXStatementSpec.KnownSince.UTC()
 	}
+	if certifyVEXStatementSpec.Status != nil {
+		matchProperties(sb, *firstMatch, "certifyVEXStatement", status, "$"+status)
+		*firstMatch = false
+		queryValues["status"] = certifyVEXStatementSpec.Status
+	}
 	if certifyVEXStatementSpec.Justification != nil {
 		matchProperties(sb, *firstMatch, "certifyVEXStatement", justification, "$"+justification)
 		*firstMatch = false
@@ -518,10 +523,11 @@ func setCertifyVEXStatementValues(sb *strings.Builder, certifyVEXStatementSpec *
 	}
 }
 
-func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln model.Vulnerability, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
+func generateModelCertifyVEXStatement(subject model.PackageOrArtifact, vuln model.Vulnerability, status, justification, origin, collector string, knownSince time.Time) *model.CertifyVEXStatement {
 	certifyVEXStatement := model.CertifyVEXStatement{
 		Subject:       subject,
 		Vulnerability: vuln,
+		Status:        status,
 		Justification: justification,
 		KnownSince:    knownSince,
 		Origin:        origin,

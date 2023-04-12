@@ -7017,6 +7017,11 @@ func (v *NeighborsNeighborsCertifyVEXStatement) GetVulnerability() allCertifyVEX
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns NeighborsNeighborsCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyVEXStatement) GetStatus() string {
+	return v.allCertifyVEXStatement.Status
+}
+
 // GetJustification returns NeighborsNeighborsCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -7071,6 +7076,8 @@ type __premarshalNeighborsNeighborsCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -7117,6 +7124,7 @@ func (v *NeighborsNeighborsCertifyVEXStatement) __premarshalJSON() (*__premarsha
 				"Unable to marshal NeighborsNeighborsCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -9828,6 +9836,9 @@ func (v *NodeNodeCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementV
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns NodeNodeCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyVEXStatement) GetStatus() string { return v.allCertifyVEXStatement.Status }
+
 // GetJustification returns NodeNodeCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -9880,6 +9891,8 @@ type __premarshalNodeNodeCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -9926,6 +9939,7 @@ func (v *NodeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalNodeNodeC
 				"Unable to marshal NodeNodeCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -12011,6 +12025,9 @@ func (v *PathPathCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementV
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns PathPathCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyVEXStatement) GetStatus() string { return v.allCertifyVEXStatement.Status }
+
 // GetJustification returns PathPathCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -12063,6 +12080,8 @@ type __premarshalPathPathCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -12109,6 +12128,7 @@ func (v *PathPathCertifyVEXStatement) __premarshalJSON() (*__premarshalPathPathC
 				"Unable to marshal PathPathCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -15054,6 +15074,11 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerabilit
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+	return v.allCertifyVEXStatement.Status
+}
+
 // GetJustification returns VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -15106,6 +15131,8 @@ type __premarshalVEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -15151,6 +15178,7 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 				"Unable to marshal VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -15353,6 +15381,11 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerabilit
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+	return v.allCertifyVEXStatement.Status
+}
+
 // GetJustification returns VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -15405,6 +15438,8 @@ type __premarshalVexArtifactAndCveIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -15450,6 +15485,7 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 				"Unable to marshal VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -15644,6 +15680,11 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetVulnerabili
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+	return v.allCertifyVEXStatement.Status
+}
+
 // GetJustification returns VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -15696,6 +15737,8 @@ type __premarshalVexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement struct 
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -15741,6 +15784,7 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJS
 				"Unable to marshal VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -15940,6 +15984,11 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerabilit
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+	return v.allCertifyVEXStatement.Status
+}
+
 // GetJustification returns VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -15992,6 +16041,8 @@ type __premarshalVexArtifactAndOsvIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -16037,6 +16088,7 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 				"Unable to marshal VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -16246,6 +16298,11 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetVulnerability
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+	return v.allCertifyVEXStatement.Status
+}
+
 // GetJustification returns VexPackageAndCveIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -16298,6 +16355,8 @@ type __premarshalVexPackageAndCveIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -16343,6 +16402,7 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 				"Unable to marshal VexPackageAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -16547,6 +16607,11 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetVulnerability
 	return v.allCertifyVEXStatement.Vulnerability
 }
 
+// GetStatus returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetStatus() string {
+	return v.allCertifyVEXStatement.Status
+}
+
 // GetJustification returns VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) GetJustification() string {
 	return v.allCertifyVEXStatement.Justification
@@ -16599,6 +16664,8 @@ type __premarshalVexPackageAndOsvIngestVEXStatementCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -16644,6 +16711,7 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 				"Unable to marshal VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.allCertifyVEXStatement.Status
 	retval.Justification = v.allCertifyVEXStatement.Justification
 	retval.KnownSince = v.allCertifyVEXStatement.KnownSince
 	retval.Origin = v.allCertifyVEXStatement.Origin
@@ -16680,11 +16748,15 @@ func (v *VexPackageAndOsvResponse) GetIngestVEXStatement() VexPackageAndOsvInges
 //
 // All fields are required.
 type VexStatementInputSpec struct {
+	Status        string    `json:"status"`
 	Justification string    `json:"justification"`
 	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
 }
+
+// GetStatus returns VexStatementInputSpec.Status, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetStatus() string { return v.Status }
 
 // GetJustification returns VexStatementInputSpec.Justification, and is useful for accessing the field via an interface.
 func (v *VexStatementInputSpec) GetJustification() string { return v.Justification }
@@ -18217,6 +18289,8 @@ type allCertifyVEXStatement struct {
 	Subject allCertifyVEXStatementSubjectPackageOrArtifact `json:"-"`
 	// Attested vulnerability
 	Vulnerability allCertifyVEXStatementVulnerability `json:"-"`
+	// status of the vulnerabilities with respect to the products and components listed in the statement
+	Status string `json:"status"`
 	// Justification for VEX
 	Justification string `json:"justification"`
 	// Timestamp (exact time in RFC 3339 format) for the VEX statement
@@ -18239,6 +18313,9 @@ func (v *allCertifyVEXStatement) GetSubject() allCertifyVEXStatementSubjectPacka
 func (v *allCertifyVEXStatement) GetVulnerability() allCertifyVEXStatementVulnerability {
 	return v.Vulnerability
 }
+
+// GetStatus returns allCertifyVEXStatement.Status, and is useful for accessing the field via an interface.
+func (v *allCertifyVEXStatement) GetStatus() string { return v.Status }
 
 // GetJustification returns allCertifyVEXStatement.Justification, and is useful for accessing the field via an interface.
 func (v *allCertifyVEXStatement) GetJustification() string { return v.Justification }
@@ -18306,6 +18383,8 @@ type __premarshalallCertifyVEXStatement struct {
 
 	Vulnerability json.RawMessage `json:"vulnerability"`
 
+	Status string `json:"status"`
+
 	Justification string `json:"justification"`
 
 	KnownSince time.Time `json:"knownSince"`
@@ -18351,6 +18430,7 @@ func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXS
 				"Unable to marshal allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
+	retval.Status = v.Status
 	retval.Justification = v.Justification
 	retval.KnownSince = v.KnownSince
 	retval.Origin = v.Origin
@@ -22834,6 +22914,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -23221,6 +23302,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -23699,6 +23781,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -24058,6 +24141,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -24152,6 +24236,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -24260,6 +24345,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -24369,6 +24455,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -24495,6 +24582,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
@@ -24603,6 +24691,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 			... AllOSVTree
 		}
 	}
+	status
 	justification
 	knownSince
 	origin
