@@ -121,7 +121,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					if err != nil {
-						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %w", err)
+						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %v", err)
 					}
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -203,7 +203,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					if err != nil {
-						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %w", err)
+						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %v", err)
 					}
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -285,7 +285,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					if err != nil {
-						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %w", err)
+						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %v", err)
 					}
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -361,7 +361,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					if err != nil {
-						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %w", err)
+						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %v", err)
 					}
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
@@ -436,7 +436,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					if err != nil {
-						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %w", err)
+						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %v", err)
 					}
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
 				}
@@ -510,7 +510,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 						certifyVEXStatementNode.Props[collector].(string), certifyVEXStatementNode.Props[knownSince].(time.Time))
 
 					if err != nil {
-						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %w", err)
+						return nil, gqlerror.Errorf("generateModelCertifyVEXStatement failed due to error: %v", err)
 					}
 
 					collectedCertifyVEXStatement = append(collectedCertifyVEXStatement, certifyVEXStatement)
