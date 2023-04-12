@@ -182,7 +182,7 @@ func init() {
 	localFlags.BoolVarP(&certifyFlags.good, "good", "g", true, "set true if certifyGood or false for certifyBad")
 	localFlags.StringVarP(&certifyFlags.subjectType, "type", "t", "", "package, source or artifact that is being certified")
 	localFlags.StringVarP(&certifyFlags.justification, "justification", "j", "", "justification for the certification (either good or bad)")
-	localFlags.BoolVarP(&certifyFlags.pkgName, "pkgName", "p", false, "if type is package, true if attestation is at pkgName (for all versions) or false for a specific version")
+	localFlags.BoolVarP(&certifyFlags.pkgName, "pkgName", "n", false, "if type is package, true if attestation is at pkgName (for all versions) or false for a specific version")
 	flagNames := []string{"good", "type", "justification", "pkgName"}
 	for _, name := range flagNames {
 		if flag := localFlags.Lookup(name); flag != nil {
