@@ -1,10 +1,10 @@
 [
   {
     "__typename": "Package",
-    "type": "oci",
+    "type": "guac",
     "namespaces": [
       {
-        "namespace": "docker.io/librar",
+        "namespace": "cdx/docker.io/library",
         "names": [
           {
             "name": "python",
@@ -30,10 +30,10 @@
     "justification": "top-level package GUAC heuristic connecting to each file/package",
     "versionRange": "3.34.1-3",
     "package": {
-      "type": "oci",
+      "type": "guac",
       "namespaces": [
         {
-          "namespace": "docker.io/librar",
+          "namespace": "cdx/docker.io/library",
           "names": [
             {
               "name": "python",

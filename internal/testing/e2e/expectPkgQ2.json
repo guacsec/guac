@@ -1,16 +1,13 @@
 {
   "packages": [
     {
-      "type": "oci",
+      "type": "deb",
       "namespaces": [
         {
-          "namespace": "docker.io/lib"
+          "namespace": "debian"
         },
         {
-          "namespace": "docker.io/librar"
-        },
-        {
-          "namespace": "docker.io/library"
+          "namespace": "ubuntu"
         }
       ]
     }

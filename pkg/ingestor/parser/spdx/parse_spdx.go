@@ -73,16 +73,13 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 func (s *spdxParser) getTopLevelPackage() error {
 	// TODO: Add CertifyPkg to make a connection from GUAC purl to OCI purl guessed
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
-	splitImage := strings.Split(s.spdxDoc.DocumentName, "/")
+
+	// TODO (dejanb): do a quick check for SPDX to see if there are any "DESCRIBES" relationships
+	// from the document and omit this top level heuristic package otherwise.
 
 	// Currently create TopLevel package as well in some cases where we guess that the SPDX document
 	// may not encode it
-	var purl string
-	if len(splitImage) == 3 {
-		purl = "pkg:guac/spdx/" + s.spdxDoc.DocumentName
-	} else if len(splitImage) == 2 {
-		purl = "pkg:guac/spdx/" + s.spdxDoc.DocumentName
-	}
+	var purl string = "pkg:guac/spdx/" + s.spdxDoc.DocumentName
 
 	if purl != "" {
 		topPackage, err := asmhelpers.PurlToPkg(purl)
