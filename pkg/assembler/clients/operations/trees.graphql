@@ -321,7 +321,10 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
       ...AllOSVTree
     }
   }
-  justification
+  status
+  vexJustification
+  statement
+  statusNotes
   knownSince
   origin
   collector

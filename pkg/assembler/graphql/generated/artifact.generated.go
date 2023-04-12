@@ -1522,8 +1522,14 @@ func (ec *executionContext) fieldContext_Mutation_ingestVEXStatement(ctx context
 				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
 			case "vulnerability":
 				return ec.fieldContext_CertifyVEXStatement_vulnerability(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyVEXStatement_justification(ctx, field)
+			case "status":
+				return ec.fieldContext_CertifyVEXStatement_status(ctx, field)
+			case "vexJustification":
+				return ec.fieldContext_CertifyVEXStatement_vexJustification(ctx, field)
+			case "statement":
+				return ec.fieldContext_CertifyVEXStatement_statement(ctx, field)
+			case "statusNotes":
+				return ec.fieldContext_CertifyVEXStatement_statusNotes(ctx, field)
 			case "knownSince":
 				return ec.fieldContext_CertifyVEXStatement_knownSince(ctx, field)
 			case "origin":
@@ -2897,8 +2903,14 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.C
 				return ec.fieldContext_CertifyVEXStatement_subject(ctx, field)
 			case "vulnerability":
 				return ec.fieldContext_CertifyVEXStatement_vulnerability(ctx, field)
-			case "justification":
-				return ec.fieldContext_CertifyVEXStatement_justification(ctx, field)
+			case "status":
+				return ec.fieldContext_CertifyVEXStatement_status(ctx, field)
+			case "vexJustification":
+				return ec.fieldContext_CertifyVEXStatement_vexJustification(ctx, field)
+			case "statement":
+				return ec.fieldContext_CertifyVEXStatement_statement(ctx, field)
+			case "statusNotes":
+				return ec.fieldContext_CertifyVEXStatement_statusNotes(ctx, field)
 			case "knownSince":
 				return ec.fieldContext_CertifyVEXStatement_knownSince(ctx, field)
 			case "origin":

@@ -243,8 +243,14 @@ type CertifyVEXStatement struct {
 	Subject PackageOrArtifact `json:"subject"`
 	// Attested vulnerability
 	Vulnerability Vulnerability `json:"vulnerability"`
+	// status of the vulnerabilities with respect to the products and components listed in the statement
+	Status VexStatus `json:"status"`
 	// Justification for VEX
-	Justification string `json:"justification"`
+	VexJustification VexJustification `json:"vexJustification"`
+	// impact_statement or action_statement depending on the status filed
+	Statement string `json:"statement"`
+	// statusNotes may convey information about how status was determined
+	StatusNotes string `json:"statusNotes"`
 	// Timestamp (exact time in RFC 3339 format) for the VEX statement
 	KnownSince time.Time `json:"knownSince"`
 	// Document from which this attestation is generated from
@@ -263,13 +269,16 @@ func (CertifyVEXStatement) IsNode() {}
 //
 // Note that setting `noVuln` in VulnerabilitySpec is invalid for VEX statements!
 type CertifyVEXStatementSpec struct {
-	ID            *string                `json:"id,omitempty"`
-	Subject       *PackageOrArtifactSpec `json:"subject,omitempty"`
-	Vulnerability *VulnerabilitySpec     `json:"vulnerability,omitempty"`
-	Justification *string                `json:"justification,omitempty"`
-	KnownSince    *time.Time             `json:"knownSince,omitempty"`
-	Origin        *string                `json:"origin,omitempty"`
-	Collector     *string                `json:"collector,omitempty"`
+	ID               *string                `json:"id,omitempty"`
+	Subject          *PackageOrArtifactSpec `json:"subject,omitempty"`
+	Vulnerability    *VulnerabilitySpec     `json:"vulnerability,omitempty"`
+	Status           *VexStatus             `json:"status,omitempty"`
+	VexJustification *VexJustification      `json:"vexJustification,omitempty"`
+	Statement        *string                `json:"statement,omitempty"`
+	StatusNotes      *string                `json:"statusNotes,omitempty"`
+	KnownSince       *time.Time             `json:"knownSince,omitempty"`
+	Origin           *string                `json:"origin,omitempty"`
+	Collector        *string                `json:"collector,omitempty"`
 }
 
 // CertifyVuln is an attestation that represents when a package has a
@@ -1162,10 +1171,13 @@ type SourceSpec struct {
 //
 // All fields are required.
 type VexStatementInputSpec struct {
-	Justification string    `json:"justification"`
-	KnownSince    time.Time `json:"knownSince"`
-	Origin        string    `json:"origin"`
-	Collector     string    `json:"collector"`
+	Status           VexStatus        `json:"status"`
+	VexJustification VexJustification `json:"vexJustification"`
+	Statement        string           `json:"statement"`
+	StatusNotes      string           `json:"statusNotes"`
+	KnownSince       time.Time        `json:"knownSince"`
+	Origin           string           `json:"origin"`
+	Collector        string           `json:"collector"`
 }
 
 // VulnerabilityInput allows using Vulnerability union as
@@ -1447,5 +1459,99 @@ func (e *PkgMatchType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e PkgMatchType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VexJustification string
+
+const (
+	VexJustificationComponentNotPresent                         VexJustification = "COMPONENT_NOT_PRESENT"
+	VexJustificationVulnerableCodeNotPresent                    VexJustification = "VULNERABLE_CODE_NOT_PRESENT"
+	VexJustificationVulnerableCodeNotInExecutePath              VexJustification = "VULNERABLE_CODE_NOT_IN_EXECUTE_PATH"
+	VexJustificationVulnerableCodeCannotBeControlledByAdversary VexJustification = "VULNERABLE_CODE_CANNOT_BE_CONTROLLED_BY_ADVERSARY"
+	VexJustificationInlineMitigationsAlreadyExist               VexJustification = "INLINE_MITIGATIONS_ALREADY_EXIST"
+	VexJustificationNotProvided                                 VexJustification = "NOT_PROVIDED"
+)
+
+var AllVexJustification = []VexJustification{
+	VexJustificationComponentNotPresent,
+	VexJustificationVulnerableCodeNotPresent,
+	VexJustificationVulnerableCodeNotInExecutePath,
+	VexJustificationVulnerableCodeCannotBeControlledByAdversary,
+	VexJustificationInlineMitigationsAlreadyExist,
+	VexJustificationNotProvided,
+}
+
+func (e VexJustification) IsValid() bool {
+	switch e {
+	case VexJustificationComponentNotPresent, VexJustificationVulnerableCodeNotPresent, VexJustificationVulnerableCodeNotInExecutePath, VexJustificationVulnerableCodeCannotBeControlledByAdversary, VexJustificationInlineMitigationsAlreadyExist, VexJustificationNotProvided:
+		return true
+	}
+	return false
+}
+
+func (e VexJustification) String() string {
+	return string(e)
+}
+
+func (e *VexJustification) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VexJustification(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VexJustification", str)
+	}
+	return nil
+}
+
+func (e VexJustification) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VexStatus string
+
+const (
+	VexStatusNotAffected        VexStatus = "NOT_AFFECTED"
+	VexStatusAffected           VexStatus = "AFFECTED"
+	VexStatusFixed              VexStatus = "FIXED"
+	VexStatusUnderInvestigation VexStatus = "UNDER_INVESTIGATION"
+)
+
+var AllVexStatus = []VexStatus{
+	VexStatusNotAffected,
+	VexStatusAffected,
+	VexStatusFixed,
+	VexStatusUnderInvestigation,
+}
+
+func (e VexStatus) IsValid() bool {
+	switch e {
+	case VexStatusNotAffected, VexStatusAffected, VexStatusFixed, VexStatusUnderInvestigation:
+		return true
+	}
+	return false
+}
+
+func (e VexStatus) String() string {
+	return string(e)
+}
+
+func (e *VexStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VexStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VexStatus", str)
+	}
+	return nil
+}
+
+func (e VexStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
