@@ -38,6 +38,7 @@ const (
 	DepsCollector = "deps.dev"
 	goUpperCase   = "GO"
 	golang        = "golang"
+	sourceRepo    = "SOURCE_REPO"
 )
 
 type PackageComponent struct {
@@ -147,25 +148,21 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	component.CurrentPackage = packageInput
 
-	err = d.collectAdditionalMetadata(ctx, packageInput.Type, *packageInput.Namespace, packageInput.Name, *packageInput.Version, component)
+	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version, component)
 	if err != nil {
 		logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
 	}
 
-	sys, err := parseSystem(packageInput.Type)
+	// Make an RPC Request. The returned result is a stream of
+	// DependenciesResponse structs.
+	versionKey, err := getVersionKey(packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version)
 	if err != nil {
-		logger.Debugf("failed to parse system: err: %w", err)
+		logger.Debugf("failed to getVersionKey with the following error: %w", err)
 		return nil
 	}
 
-	// Make an RPC Request. The returned result is a stream of
-	// DependenciesResponse structs.
 	dependenciesReq := &pb.GetDependenciesRequest{
-		VersionKey: &pb.VersionKey{
-			System:  sys,
-			Name:    *packageInput.Namespace + "/" + packageInput.Name,
-			Version: *packageInput.Version,
-		},
+		VersionKey: versionKey,
 	}
 
 	deps, err := d.client.GetDependencies(ctx, dependenciesReq)
@@ -207,7 +204,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 		depComponent.CurrentPackage = depPackageInput
 
-		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, *depPackageInput.Namespace, depPackageInput.Name, *depPackageInput.Version, depComponent)
+		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Namespace, depPackageInput.Name, depPackageInput.Version, depComponent)
 		if err != nil {
 			logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
 		}
@@ -237,17 +234,14 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	return nil
 }
 
-func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, namespace, name, version string, pkgComponent *PackageComponent) error {
-	sys, err := parseSystem(system)
+func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType string, namespace *string, name string, version *string, pkgComponent *PackageComponent) error {
+
+	versionKey, err := getVersionKey(pkgType, namespace, name, version)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to getVersionKey with the following error: %w", err)
 	}
 	versionReq := &pb.GetVersionRequest{
-		VersionKey: &pb.VersionKey{
-			System:  sys,
-			Name:    namespace + "/" + name,
-			Version: version,
-		},
+		VersionKey: versionKey,
 	}
 
 	versionResponse, err := d.client.GetVersion(ctx, versionReq)
@@ -256,7 +250,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 	}
 
 	for _, link := range versionResponse.Links {
-		if link.Label == "SOURCE_REPO" {
+		if link.Label == sourceRepo {
 			src, err := helpers.VcsToSrc(link.Url)
 			if err != nil {
 				continue
@@ -265,7 +259,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 
 			projectReq := &pb.GetProjectRequest{
 				ProjectKey: &pb.ProjectKey{
-					Id: src.Namespace + "/" + src.Name,
+					Id: strings.TrimSuffix(src.Namespace, "/") + "/" + src.Name,
 				},
 			}
 
@@ -304,6 +298,25 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, system, n
 	pkgComponent.UpdateTime = time.Now().UTC()
 
 	return nil
+}
+
+func getVersionKey(pkgType string, namespace *string, name string, version *string) (*pb.VersionKey, error) {
+	queryName := ""
+	if namespace != nil && *namespace != "" {
+		queryName = strings.TrimSuffix(*namespace, "/") + "/" + name
+	} else {
+		queryName = name
+	}
+	sys, err := parseSystem(pkgType)
+	if err != nil {
+		return nil, err
+	}
+	versionKey := &pb.VersionKey{
+		System:  sys,
+		Name:    queryName,
+		Version: *version,
+	}
+	return versionKey, nil
 }
 
 // parseSystem returns the pb.System value represented by the argument string.
