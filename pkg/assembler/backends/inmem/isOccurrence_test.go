@@ -17,15 +17,39 @@ package inmem_test
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/exp/slices"
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+func convNode(n model.Node) hasID {
+	// All nodes have a json "id"
+	// Only getting top-level id however
+	var h hasID
+	b, _ := json.Marshal(n)
+	_ = json.Unmarshal(b, &h)
+	return h
+}
+
+func convNodes(ns []model.Node) []string {
+	var ids []string
+	for _, n := range ns {
+		h := convNode(n)
+		ids = append(ids, h.ID)
+	}
+	return ids
+}
+
+type hasID struct {
+	ID string `json:"id"`
+}
 
 var a1 = &model.ArtifactInputSpec{
 	Algorithm: "sha256",
@@ -491,6 +515,120 @@ func TestOccurrence(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestOccurrenceNeighbors(t *testing.T) {
+	type call struct {
+		PkgSrc     model.PackageOrSourceInput
+		Artifact   *model.ArtifactInputSpec
+		Occurrence *model.IsOccurrenceInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		InSrc        []*model.SourceInputSpec
+		InArt        []*model.ArtifactInputSpec
+		Calls        []call
+		ExpNeighbors map[string][]string
+	}{
+		{
+			Name:  "HappyPath",
+			InPkg: []*model.PkgInputSpec{p1},
+			InArt: []*model.ArtifactInputSpec{a1},
+			Calls: []call{
+				call{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: p1,
+					},
+					Artifact: a1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpNeighbors: map[string][]string{
+				"2": []string{"2"},
+				"3": []string{"2", "2"},
+				"4": []string{"2", "2"},
+				"5": []string{"2", "7"}, // pkg version
+				"6": []string{"7"},      // artifact
+				"7": []string{"2", "6"}, // isOccurence
+			},
+		},
+		{
+			Name:  "Two occurrences",
+			InPkg: []*model.PkgInputSpec{p1},
+			InArt: []*model.ArtifactInputSpec{a1, a2},
+			Calls: []call{
+				call{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: p1,
+					},
+					Artifact: a1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "test justification",
+					},
+				},
+				call{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: p1,
+					},
+					Artifact: a2,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpNeighbors: map[string][]string{
+				"5": []string{"2", "8", "9"}, // pkg version
+				"6": []string{"8"},           // artifact1
+				"7": []string{"9"},           // artifact2
+				"8": []string{"2", "6"},      // isOccurence 1
+				"9": []string{"2", "7"},      // isOccurence 2
+			},
+		},
+	}
+	ctx := context.Background()
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			b, err := inmem.GetBackend(nil)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
+			}
+			for _, s := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
+					t.Fatalf("Could not ingest source: %v", err)
+				}
+			}
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
+					t.Fatalf("Could not ingest artifact: %a", err)
+				}
+			}
+			for _, o := range test.Calls {
+				if _, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence); err != nil {
+					t.Fatalf("Could not ingest isOccurrence: %a", err)
+				}
+			}
+			for q, r := range test.ExpNeighbors {
+				got, err := b.Neighbors(ctx, q, nil)
+				if err != nil {
+					t.Fatalf("Could not query neighbors: %a", err)
+				}
+				gotIDs := convNodes(got)
+				slices.Sort(r)
+				slices.Sort(gotIDs)
+				if diff := cmp.Diff(r, gotIDs); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
 			}
 		})
 	}
