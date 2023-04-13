@@ -3,13 +3,15 @@
 This tutorial introduces the full GUAC ingestion pipeline and how to deploy it
 with the included Docker Compose configuration.
 
-## Demo GUAC Ingestion
+## GUAC Ingestion Pipeline
 
-The GUAC demonstrations use the full GUAC GraphQL server, but use a demo-level
-all-in-one ingestion command `guacone files`. This command runs the GUAC
-collector, parser, assembler, and ingestor components all at once. These
-components are designed to be run as separate asynchronous services that combine
-to form a robust and scalable ingestion pipeline.
+The full GUAC ingestion pipeline is a set of asynchronous services that combine
+to form a robust and scaleable ingestion pipeline. If you have run one of the
+[GUAC demonstrations](/demo), they use the full GUAC GraphQL server but use a
+demo-level all-in-one ingestion command `guacone files`. That command runs the
+GUAC collector, parser, assembler, and ingestor components all at once. These
+components are also designed to be run separately as services, which is what
+this tutorial will accomplish.
 
 ## GUAC Components
 
@@ -25,10 +27,10 @@ to GUAC will not affect the GraphQL interface that the server provides.
 
 | Name      | Short Description                                                                 |
 | --------- | --------------------------------------------------------------------------------- |
-| Ingestor  | Takes completed GUAC objects and performs GraphQL mutation queries to add to GUAC |
-| Assembler | Takes parsed document objects and assembles GUAC objects                          |
-| Parser    | Takes documents (ex: SBOMs) and parses the objects inside them                    |
 | Collector | Reads or watches locations for new documents and collects them when found         |
+| Parser    | Takes documents (ex: SBOMs) and parses the objects inside them                    |
+| Assembler | Takes parsed document objects and assembles GUAC objects                          |
+| Ingestor  | Takes completed GUAC objects and performs GraphQL mutation queries to add to GUAC |
 
 There are different collectors for the different types of locations that GUAC
 can watch: files, storage buckets, git repositories, etc. There are different
@@ -71,7 +73,7 @@ Optional: Also clone GUAC data, this is used as test data.
 git clone https://github.com/guacsec/guac-data.git
 ```
 
-The rest of the demo will assume you are in the GUAC directory
+The rest of the tutorial will assume you are in the GUAC directory
 
 ```bash
 cd guac
@@ -117,19 +119,21 @@ popd
 ```
 
 Notice how the collectors run and complete quickly. If you have run the
-`guacone files` command in a previous demo, you know that that is a slower
-process. In this case the collector completes quickly because the parsing,
-computation, and ingesting is happening within the ingestion pipeline services
-that are running.
+`guacone files` command in a previous [demo](/demo), you know that that is a
+slower process. In this case the collector completes quickly because the
+parsing, computation, and ingesting is happening within the ingestion pipeline
+services that are running.
 
 Switch back to the compose window and you can see the ingestor logging the
 activity. Shortly after that you will see that the OSV certifier recognized the
 new packages and is looking up vulnerability information for them.
 
-This command uses the `collector` GUAC binary from the container we built
-earlier. Because containers don't have access to localhost by default, we
-connect to the compose network and use the `nats` container name to connect to
-it.
+This command uses the `collector` GUAC binary from the `local-organic-guac`
+container we built earlier. Because containers don't have access to localhost by
+default, we connect to the existing compose network (`--network guac_default`)
+and use the `nats` container name to connect to it (`--natsaddr nats:4222`). The
+command uses a volume mount to mout the `guac-data` into the container for
+collecting (`-v $PWD:/data`).
 
 Alternatively, you may build the GUAC binaries for your local machine and run
 them natively.
@@ -139,12 +143,6 @@ make build
 ./bin/collector files ../guac-data/docs
 ```
 
-or
-
-```bash
-go run ./cmd/collector files ../guac-data/docs
-```
-
 ## What is running?
 
 Taking a look at the `docker-compose.yaml` we can see what is actually running:
@@ -152,7 +150,8 @@ Taking a look at the `docker-compose.yaml` we can see what is actually running:
 - **Nats**: Nats is used for communication between the ingestion components. It
   is available on port `4222`.
 
-- **Collector-Subscriber**: This component (help here).
+- **Collector-Subscriber**: This component helps communicate to the collectors
+  when additional information is needed.
 
 - **GraphQL Server**: Serving GUAC GraphQL queries and storing the data. As the
   in-memory backend is used, no separate backend is needed behind the server.
@@ -161,14 +160,14 @@ Taking a look at the `docker-compose.yaml` we can see what is actually running:
   pushes to the GraphQL Server. The ingestor also runs the assembler and parser
   internally.
 
-- **Image Collector**: This collector can pull OCI images from registries for
-  further inspection.
+- **Image Collector**: This collector can pull OCI image metadata (SBOMs and
+  attestations) from registries for further inspection.
 
 - **Deps.dev Collector**: This collector gathers further information from
   [Deps.dev](https://deps.dev/) for supported packages.
 
-- **OSV Certifier**: This certifier gathers OSV vulnerability information about
-  packages.
+- **OSV Certifier**: This certifier gathers OSV vulnerability information from
+  [osv.dev](https://osv.dev/) about packages.
 
 ## Next steps
 
