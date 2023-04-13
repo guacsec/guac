@@ -181,8 +181,10 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 // Query CertifyGood
 func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
 	funcName := "CertifyGood"
-	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject); err != nil {
-		return nil, err
+	if filter != nil {
+		if err := helper.ValidatePackageSourceOrArtifactQueryFilter(filter.Subject); err != nil {
+			return nil, err
+		}
 	}
 
 	c.m.RLock()

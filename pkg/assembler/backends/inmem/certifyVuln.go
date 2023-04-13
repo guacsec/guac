@@ -228,9 +228,12 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	c.m.RLock()
 	defer c.m.RUnlock()
 	funcName := "CertifyVuln"
-	// TODO: this panics if filter is missing (cannot retrieve all certifications)
-	if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, true); err != nil {
-		return nil, err
+
+	if filter != nil {
+		// TODO: this panics if filter is missing (cannot retrieve all certifications)
+		if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, true); err != nil {
+			return nil, err
+		}
 	}
 
 	if filter != nil && filter.ID != nil {

@@ -111,7 +111,7 @@ func Test_artifactStruct_Neighbors(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &artStruct{
+			a := &artStruct{
 				id:          tt.fields.id,
 				algorithm:   tt.fields.algorithm,
 				digest:      tt.fields.digest,
@@ -122,8 +122,82 @@ func Test_artifactStruct_Neighbors(t *testing.T) {
 				badLinks:    tt.fields.badLinks,
 				goodLinks:   tt.fields.goodLinks,
 			}
-			if got := b.Neighbors(tt.allowedEdges); !reflect.DeepEqual(got, tt.want) {
+			if got := a.Neighbors(tt.allowedEdges); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("builderStruct.Neighbors() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_artifactStruct_BuildModelNode(t *testing.T) {
+	type fields struct {
+		id        uint32
+		algorithm string
+		digest    string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    model.Node
+		wantErr bool
+	}{{
+		name: "sha256",
+		fields: fields{
+			id:        uint32(43),
+			algorithm: strings.ToLower("sha256"),
+			digest:    strings.ToLower("6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"),
+		},
+		want: &model.Artifact{
+			ID:        nodeID(uint32(43)),
+			Algorithm: strings.ToLower("sha256"),
+			Digest:    strings.ToLower("6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"),
+		},
+		wantErr: false,
+	}, {
+		name: "sha1",
+		fields: fields{
+			id:        uint32(53),
+			algorithm: strings.ToLower("sha1"),
+			digest:    strings.ToLower("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
+		},
+		want: &model.Artifact{
+			ID:        nodeID(uint32(53)),
+			Algorithm: strings.ToLower("sha1"),
+			Digest:    strings.ToLower("7a8f47318e4676dacb0142afa0b83029cd7befd9"),
+		},
+		wantErr: false,
+	}, {
+		name: "sha512",
+		fields: fields{
+			id:        uint32(63),
+			algorithm: strings.ToLower("sha512"),
+			digest:    strings.ToLower("374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7"),
+		},
+		want: &model.Artifact{
+			ID:        nodeID(uint32(63)),
+			Algorithm: strings.ToLower("sha512"),
+			Digest:    strings.ToLower("374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7"),
+		},
+		wantErr: false,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &demoClient{
+				artifacts: artMap{},
+				index:     indexType{},
+			}
+			a := &artStruct{
+				id:        tt.fields.id,
+				algorithm: tt.fields.algorithm,
+				digest:    tt.fields.digest,
+			}
+			got, err := a.BuildModelNode(c)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("artStruct.BuildModelNode() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -177,28 +251,8 @@ func Test_demoClient_IngestArtifact(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &demoClient{
-				artifacts:            artMap{},
-				builders:             builderMap{},
-				certifyBads:          badList{},
-				certifyGoods:         goodList{},
-				pkgEquals:            pkgEqualList{},
-				cves:                 cveMap{},
-				equalVulnerabilities: equalVulnerabilityList{},
-				ghsas:                ghsaMap{},
-				hasSBOMs:             hasSBOMList{},
-				hasSLSAs:             hasSLSAList{},
-				hasSources:           hasSrcList{},
-				hashEquals:           hashEqualList{},
-				index:                indexType{},
-				isDependencies:       isDependencyList{},
-				occurrences:          isOccurrenceList{},
-				osvs:                 osvMap{},
-				packages:             pkgTypeMap{},
-				scorecards:           scorecardList{},
-				sources:              srcTypeMap{},
-				vexs:                 vexList{},
-				vulnerabilities:      vulnerabilityList{},
-				noKnownVulnNode:      noKnownVuln{},
+				artifacts: artMap{},
+				index:     indexType{},
 			}
 
 			got, err := c.IngestArtifact(ctx, tt.artifactInput)
@@ -219,6 +273,7 @@ func Test_demoClient_Artifacts(t *testing.T) {
 		name          string
 		artifactInput *model.ArtifactInputSpec
 		artifactSpec  *model.ArtifactSpec
+		idInFilter    bool
 		want          []*model.Artifact
 		wantErr       bool
 	}{{
@@ -261,6 +316,7 @@ func Test_demoClient_Artifacts(t *testing.T) {
 			Algorithm: ptrfrom.String("sha512"),
 			Digest:    ptrfrom.String("374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7"),
 		},
+		idInFilter: true,
 		want: []*model.Artifact{{
 			Algorithm: "sha512",
 			Digest:    "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7",
@@ -273,33 +329,16 @@ func Test_demoClient_Artifacts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &demoClient{
-				artifacts:            artMap{},
-				builders:             builderMap{},
-				certifyBads:          badList{},
-				certifyGoods:         goodList{},
-				pkgEquals:            pkgEqualList{},
-				cves:                 cveMap{},
-				equalVulnerabilities: equalVulnerabilityList{},
-				ghsas:                ghsaMap{},
-				hasSBOMs:             hasSBOMList{},
-				hasSLSAs:             hasSLSAList{},
-				hasSources:           hasSrcList{},
-				hashEquals:           hashEqualList{},
-				index:                indexType{},
-				isDependencies:       isDependencyList{},
-				occurrences:          isOccurrenceList{},
-				osvs:                 osvMap{},
-				packages:             pkgTypeMap{},
-				scorecards:           scorecardList{},
-				sources:              srcTypeMap{},
-				vexs:                 vexList{},
-				vulnerabilities:      vulnerabilityList{},
-				noKnownVulnNode:      noKnownVuln{},
+				artifacts: artMap{},
+				index:     indexType{},
 			}
-			_, err := c.IngestArtifact(ctx, tt.artifactInput)
+			ingestedArt, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
+			}
+			if tt.idInFilter {
+				tt.artifactSpec.ID = &ingestedArt.ID
 			}
 			got, err := c.Artifacts(ctx, tt.artifactSpec)
 			if (err != nil) != tt.wantErr {
@@ -319,6 +358,7 @@ func Test_demoClient_buildArtifactResponse(t *testing.T) {
 		name          string
 		artifactInput *model.ArtifactInputSpec
 		artifactSpec  *model.ArtifactSpec
+		idInFilter    bool
 		want          *model.Artifact
 		wantErr       bool
 	}{{
@@ -361,6 +401,7 @@ func Test_demoClient_buildArtifactResponse(t *testing.T) {
 			Algorithm: ptrfrom.String("sha512"),
 			Digest:    ptrfrom.String("374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7"),
 		},
+		idInFilter: true,
 		want: &model.Artifact{
 			Algorithm: "sha512",
 			Digest:    "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7",
@@ -373,28 +414,8 @@ func Test_demoClient_buildArtifactResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &demoClient{
-				artifacts:            artMap{},
-				builders:             builderMap{},
-				certifyBads:          badList{},
-				certifyGoods:         goodList{},
-				pkgEquals:            pkgEqualList{},
-				cves:                 cveMap{},
-				equalVulnerabilities: equalVulnerabilityList{},
-				ghsas:                ghsaMap{},
-				hasSBOMs:             hasSBOMList{},
-				hasSLSAs:             hasSLSAList{},
-				hasSources:           hasSrcList{},
-				hashEquals:           hashEqualList{},
-				index:                indexType{},
-				isDependencies:       isDependencyList{},
-				occurrences:          isOccurrenceList{},
-				osvs:                 osvMap{},
-				packages:             pkgTypeMap{},
-				scorecards:           scorecardList{},
-				sources:              srcTypeMap{},
-				vexs:                 vexList{},
-				vulnerabilities:      vulnerabilityList{},
-				noKnownVulnNode:      noKnownVuln{},
+				artifacts: artMap{},
+				index:     indexType{},
 			}
 			art, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
@@ -405,6 +426,9 @@ func Test_demoClient_buildArtifactResponse(t *testing.T) {
 			if err != nil {
 				t.Errorf("failed to convert string to uint, error = %v", err)
 				return
+			}
+			if tt.idInFilter {
+				tt.artifactSpec.ID = &art.ID
 			}
 			got, err := c.buildArtifactResponse(uint32(artID), tt.artifactSpec)
 			if (err != nil) != tt.wantErr {
@@ -452,28 +476,8 @@ func Test_demoClient_getArtifactIDFromInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &demoClient{
-				artifacts:            artMap{},
-				builders:             builderMap{},
-				certifyBads:          badList{},
-				certifyGoods:         goodList{},
-				pkgEquals:            pkgEqualList{},
-				cves:                 cveMap{},
-				equalVulnerabilities: equalVulnerabilityList{},
-				ghsas:                ghsaMap{},
-				hasSBOMs:             hasSBOMList{},
-				hasSLSAs:             hasSLSAList{},
-				hasSources:           hasSrcList{},
-				hashEquals:           hashEqualList{},
-				index:                indexType{},
-				isDependencies:       isDependencyList{},
-				occurrences:          isOccurrenceList{},
-				osvs:                 osvMap{},
-				packages:             pkgTypeMap{},
-				scorecards:           scorecardList{},
-				sources:              srcTypeMap{},
-				vexs:                 vexList{},
-				vulnerabilities:      vulnerabilityList{},
-				noKnownVulnNode:      noKnownVuln{},
+				artifacts: artMap{},
+				index:     indexType{},
 			}
 			art, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
