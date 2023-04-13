@@ -135,7 +135,8 @@ func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.O
 		}
 		osv, err := c.buildOsvResponse(uint32(id), filter)
 		if err != nil {
-			return nil, err
+			// not found
+			return nil, nil
 		}
 		return []*model.Osv{osv}, nil
 	}

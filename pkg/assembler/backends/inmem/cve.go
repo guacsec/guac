@@ -138,11 +138,12 @@ func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.C
 		if err != nil {
 			return nil, err
 		}
-		osv, err := c.buildCveResponse(uint32(id), filter)
+		cve, err := c.buildCveResponse(uint32(id), filter)
 		if err != nil {
-			return nil, err
+			// not found
+			return nil, nil
 		}
-		return []*model.Cve{osv}, nil
+		return []*model.Cve{cve}, nil
 	}
 
 	var out []*model.Cve

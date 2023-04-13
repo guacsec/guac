@@ -131,11 +131,12 @@ func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model
 		}
 		ghsa, err := c.buildGhsaResponse(uint32(id), filter)
 		if err != nil {
-			return nil, err
+			// not found
+			return nil, nil
 		}
 		return []*model.Ghsa{ghsa}, nil
 	}
-	out := []*model.Ghsa{}
+	var out []*model.Ghsa
 	if filter != nil && filter.GhsaID != nil {
 		ghsaNode, hasGhsaIDNode := c.ghsas[strings.ToLower(*filter.GhsaID)]
 		if hasGhsaIDNode {
