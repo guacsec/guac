@@ -9,6 +9,7 @@ mkShell {
     go_1_19
     gopls
     gotests
+    nats-server
     protobuf
   ];
 }
