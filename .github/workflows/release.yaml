@@ -1,0 +1,49 @@
+#
+# Copyright 2022 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: release-guac-image
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  packages: write # To publish container images to GHCR
+
+jobs:
+  build-image-on-release:
+    name: Build and publish image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${GITHUB_WORKFLOW}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: setup pack 
+        uses: buildpacks/github-actions/setup-pack@7fc3d673350db0fff960cc94a3b9b80e5b663ae2 # v5.0.0
+      - name: Build and publish image
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          pack build ${IMAGE}:${GITHUB_REF_NAME} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish
+        shell: bash
+        env:
+          IMAGE: ghcr.io/guacsec/guac
+          BUILDER: paketobuildpacks/builder:base
+          BUILDPACK: paketo-buildpacks/go
+          BP_GO_TARGETS: "./cmd/collector:./cmd/guacone:./cmd/ingest:./cmd/graphql_playground"
