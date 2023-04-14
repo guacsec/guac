@@ -93,6 +93,18 @@ query GetCertifyVuln($spec: CertifyVulnSpec) {
   }
 }
 
+query GetCertifyBad($spec: CertifyBadSpec) {
+  CertifyBad(certifyBadSpec: $spec){
+      ...allCertifyBadTree
+  }
+}
+
+query GetCertifyGood($spec: CertifyGoodSpec) {
+  CertifyGood(certifyGoodSpec: $spec){
+      ...allCertifyGoodTree
+  }
+}
+
 query GetNeighbors ($nodeId: ID!, $edges: [Edge!]!) {
   neighbors(node: $nodeId, usingOnly: $edges) {
     __typename
