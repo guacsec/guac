@@ -5,17 +5,34 @@ with the included Docker Compose configuration.
 
 ## GUAC Ingestion Pipeline
 
+In previous demos, you may have had a closer look into a subset of these components.
+For example, the [GUAC GraphQL demo](graphql-demo.md) showcases the graphQL server
+in isolation.
+
+However, that's just one component of GUAC! In order to get the most value out of
+GUAC (for example, ingesting documents augmenting them with aditional data), we need
+to take advantage of the additional components of GUAC!
+
 The full GUAC ingestion pipeline is a set of asynchronous services that combine
-to form a robust and scaleable ingestion pipeline. If you have run one of the
-[GUAC demonstrations](/demo), they use the full GUAC GraphQL server but use a
-demo-level all-in-one ingestion command `guacone files`. That command runs the
-GUAC collector, parser, assembler, and ingestor components all at once. These
-components are also designed to be run separately as services, which is what
+to form a robust and scaleable ingestion pipeline. In some of our [demos](demos/),
+you may have seen these components work in concert! This document explains a little
+more of what goes on behind the hood!
+
+
+### A short deep-dive
+
+For those curious, In some demos, we used an level all-in-one ingestion command 
+`guacone files`. That command runs the GUAC collector and ingestor all at once. 
+These components are also designed to be run separately as services, which is what
 this tutorial will accomplish.
+
+Separating these components aims to let them scale better as well as allow certain
+aspects of the pipeline to be run more easily as services.
+
 
 ## GUAC Components
 
-### Server
+### GraphQL Server
 
 The GraphQL server serves the GUAC defined nodes through GraphQL queries. It is
 an abstraction layer for GUAC integrations and other GUAC components. This
@@ -23,24 +40,33 @@ tutorial uses the built-in in-memory backend for the server. Currently the
 server also supports a Neo4j backend. Any future backend database support added
 to GUAC will not affect the GraphQL interface that the server provides.
 
-### Ingestion
+### Ingestion Pipeline
 
-| Name      | Short Description                                                                 |
-| --------- | --------------------------------------------------------------------------------- |
-| Collector | Reads or watches locations for new documents and collects them when found         |
-| Parser    | Takes documents (ex: SBOMs) and parses the objects inside them                    |
-| Assembler | Takes parsed document objects and assembles GUAC objects                          |
-| Ingestor  | Takes completed GUAC objects and performs GraphQL mutation queries to add to GUAC |
+| Name       | Short Description                                                                  |
+| ---------- | ---------------------------------------------------------------------------------- |
+| Collector  | Reads or watches locations for new documents and collects them when found          |
+| Ingestor   | Takes documents (ex: SBOMs) and parses them into the GUAC data model/ontology      |
+| Assembler  | Takes GUAC objects and puts them in a datastore queryable by the GraphQL server    |
+| CollectSub | Takes identifiers of interest, and creates a subscription for collectors to follow |
 
+#### Collectors / Certifiers
+
+Collectors are meant to gather data from various sources, both internally within
+the organization, public sources (like open source) as well as third party vendors.
 There are different collectors for the different types of locations that GUAC
-can watch: files, storage buckets, git repositories, etc. There are different
-types of Parser/Assemblers for the different document types that GUAC can
-understand: SPDX, CycloneDX, etc. GUAC uses [Nats](https://nats.io/) for
-communication between components.
+can watch: files, storage buckets, git repositories, etc. 
 
-### Certifiers
+Collectors are able to be configured to use a CollectSub service to know which data sources
+are of interest. For example, a git collector may subscribe to the CollectSub service to
+know which git repositories it should get its data from. This is a way in which one can,
+at a glance get an idea of what data sources the instance of GUAC is looking at!
 
-Another class GUAC components are certifiers. Certifiers run outside the server,
+Collectors and certifiers then take the documents and pass them on to the ingestor
+via  [Nats](https://nats.io/),
+
+##### Certifiers
+
+Another class of GUAC collector components are certifiers. Certifiers run outside the server,
 but are not part of the ingestion pipeline. They watch the server for new nodes
 in the server, and then try to add additional information attached to those
 nodes.
@@ -50,6 +76,40 @@ GUAC for new packages, then try to discover OSV vulnerabilities for those
 packages. If any vulnerabilities are found, the certifier will attach a
 "CertifyVuln" node to the package that signifies that the package is connected
 to the OSV vulnerability.
+
+#### Ingestor
+
+Ingestors take in documents and parse them into the GUAC data model/ontology.
+The process extracts meaning from documents and translates to a common reasoning
+model (GUAC ontology). In the process, it also finds identifiers of interest in
+which it passes to the CollectSub service to request additional information for.
+
+Today, GUAC can understand multiple data formats such as: SPDX, CycloneDX, SLSA,
+etc. The ingestor listens for documents to parse via [Nats](https://nats.io/), and
+talks to the Assembler via a GraphQL API.
+
+#### Assembler
+
+The assembler takes the parsed GUAC ontology objects from the Ingestor and creates
+entries within a database which is used as a source of truth for GUAC queries.
+
+The assembler exposes a set of GraphQL mutate interfaces (and is physically part
+of the GraphQL server, but logically part of ingestion). 
+
+
+#### CollectSub
+
+The collect subcriber service provides a way to express a want for a datasource
+to be used, or indication that more data about a software identifier is desired.
+For example, in parsing an SBOM, if it sees the use of a package with a PURL, the
+ingestor creates and entry to the CollectSub service to indicate more information
+about the PURL is desired (via gRPC).
+
+The collectors all subscribe to this service and will automatically retrieve more
+information about the PURL (or other identifier/datasource) if it knows how to
+handle it. For example, the deps.dev collector would know how to handle PURLs,
+and then retrieve more information about the PURL entries created from the ingestor
+parsing the SBOM.
 
 ## Prerequisites
 
@@ -102,9 +162,26 @@ The full GUAC deployment is now running. The GraphQL server is listening on port
 GraphQL playground. GraphQL queries are served at the `/query` endpoint.
 
 Nats is listening on port `4222`, this is where any collectors that you run will
-need to connect to push any files they find. The GUAC `collector` command
+need to connect to push any docs they find. The GUAC `collector` command
 defaults to `nats://127.0.0.1:4222` for the Nats address, so this will work
 automatically.
+
+Once it is up, you should be able to verify that its running
+```bash
+docker compose ls --filter "name=guac"
+```
+with expected output:
+```bash
+NAME                STATUS              CONFIG FILES
+guac                running(7)          /Users/lumb/go/src/github.com/guacsec/guac/docker-compose.yml
+```
+
+### Note
+
+If you are running into trouble getting the server started up, you can try runnning
+`docker-compose down` first. Because docker compose caches the containers used,
+the unclean state can cause issues.
+
 
 ## Start Ingesting Data
 
