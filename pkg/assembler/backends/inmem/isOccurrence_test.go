@@ -615,13 +615,13 @@ func TestOccurrenceNeighbors(t *testing.T) {
 			}
 			for _, o := range test.Calls {
 				if _, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence); err != nil {
-					t.Fatalf("Could not ingest isOccurrence: %a", err)
+					t.Fatalf("Could not ingest isOccurrence: %s", err)
 				}
 			}
 			for q, r := range test.ExpNeighbors {
 				got, err := b.Neighbors(ctx, q, nil)
 				if err != nil {
-					t.Fatalf("Could not query neighbors: %a", err)
+					t.Fatalf("Could not query neighbors: %s", err)
 				}
 				gotIDs := convNodes(got)
 				slices.Sort(r)
