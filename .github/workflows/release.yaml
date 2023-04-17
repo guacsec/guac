@@ -35,7 +35,7 @@ jobs:
           username: ${GITHUB_WORKFLOW}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: setup pack 
-        uses: buildpacks/github-actions/setup-pack@7fc3d673350db0fff960cc94a3b9b80e5b663ae2 # v5.0.0
+        uses: buildpacks/github-actions/setup-pack@2c2fe0dad1a532cdcde622787d752df8fc3172f0 # v5.1.0
       - name: Build and publish image
         run: |
           #!/usr/bin/env bash
