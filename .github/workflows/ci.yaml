@@ -40,7 +40,7 @@ jobs:
           - 7687:7687
     steps:
       - name: Checkout code
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: setup-go
         uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
         with:
@@ -62,7 +62,7 @@ jobs:
     name: CI for unit tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: setup-go
         uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
         with:
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: setup-go
         uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
         with:
@@ -99,7 +99,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5 # tag=v3.2.0
         with:
@@ -108,7 +108,7 @@ jobs:
     name: E2E
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
+    - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
     - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9
       with:
         go-version: '~1.19'
