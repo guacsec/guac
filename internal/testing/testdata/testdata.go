@@ -904,75 +904,63 @@ var (
 	"Vulnerabilities":null,
 	"Scorecard":{
 	   "checks":[
-		  {
-			 "check":"Code-Review",
-			 "score":2
-		  },
-		  {
-			 "check":"Maintained",
-			 "score":0
-		  },
-		  {
-			 "check":"CII-Best-Practices",
-			 "score":0
-		  },
-		  {
-			 "check":"Vulnerabilities",
-			 "score":10
-		  },
-		  {
-			 "check":"Signed-Releases",
-			 "score":-1
-		  },
-		  {
-			 "check":"Branch-Protection",
-			 "score":0
-		  },
-		  {
-			 "check":"License",
-			 "score":10
-		  },
-		  {
-			 "check":"Pinned-Dependencies",
-			 "score":7
-		  },
-		  {
-			 "check":"Binary-Artifacts",
-			 "score":10
-		  },
-		  {
-			 "check":"Token-Permissions",
-			 "score":0
-		  },
-		  {
-			 "check":"Dangerous-Workflow",
-			 "score":10
-		  },
-		  {
-			 "check":"SAST",
-			 "score":0
-		  },
-		  {
-			 "check":"Packaging",
-			 "score":-1
-		  },
-		  {
-			 "check":"Dependency-Update-Tool",
-			 "score":0
-		  },
-		  {
-			 "check":"Fuzzing",
-			 "score":0
-		  },
-		  {
-			 "check":"Security-Policy",
-			 "score":0
-		  }
+		{
+			"check":"Maintained",
+			"score":5
+		},
+		{
+			"check":"CII-Best-Practices",
+			"score":0
+		},
+		{
+			"check":"Signed-Releases",
+			"score":-1
+		},
+		{
+			"check":"Binary-Artifacts",
+			"score":10
+		},
+		{
+			"check":"Packaging",
+			"score":-1
+		},
+		{
+			"check":"Dangerous-Workflow",
+			"score":10
+		},
+		{
+			"check":"Token-Permissions",
+			"score":0
+		},
+		{
+			"check":"Pinned-Dependencies",
+			"score":7
+		},
+		{
+			"check":"Vulnerabilities",
+			"score":10
+		},
+		{
+			"check":"Branch-Protection",
+			"score":0
+		},
+		{
+			"check":"Fuzzing",
+			"score":0
+		},
+		{
+			"check":"License",
+			"score":10
+		},
+		{
+			"check":"Security-Policy",
+			"score":0
+		}
 	   ],
-	   "aggregateScore":3.700000047683716,
+	   "aggregateScore":4.599999904632568,
 	   "timeScanned":"2022-11-21T17:45:50.52Z",
-	   "scorecardVersion":"v4.8.0-78-gfb07860",
-	   "scorecardCommit":"fb07860d86065cdcbd2d0d5c6b998ff4542d53fe",
+	   "scorecardVersion":"v4.10.5-27-gb81a70e",
+	   "scorecardCommit":"b81a70e0ea098a7cd6e3672e314cb95b2230e8db",
 	   "origin":"",
 	   "collector":""
 	},
@@ -999,74 +987,62 @@ var (
 		  "Scorecard":{
 			 "checks":[
 				{
-				   "check":"Code-Review",
-				   "score":2
+					"check":"Maintained",
+					"score":5
 				},
 				{
-				   "check":"Maintained",
-				   "score":0
+					"check":"CII-Best-Practices",
+					"score":0
 				},
 				{
-				   "check":"CII-Best-Practices",
-				   "score":0
+					"check":"Signed-Releases",
+					"score":-1
 				},
 				{
-				   "check":"Vulnerabilities",
-				   "score":10
+					"check":"Binary-Artifacts",
+					"score":10
 				},
 				{
-				   "check":"Signed-Releases",
-				   "score":-1
+					"check":"Packaging",
+					"score":-1
 				},
 				{
-				   "check":"Branch-Protection",
-				   "score":0
+					"check":"Dangerous-Workflow",
+					"score":10
 				},
 				{
-				   "check":"License",
-				   "score":10
+					"check":"Token-Permissions",
+					"score":0
 				},
 				{
-				   "check":"Pinned-Dependencies",
-				   "score":7
+					"check":"Pinned-Dependencies",
+					"score":7
 				},
 				{
-				   "check":"Binary-Artifacts",
-				   "score":10
+					"check":"Vulnerabilities",
+					"score":10
 				},
 				{
-				   "check":"Token-Permissions",
-				   "score":0
+					"check":"Branch-Protection",
+					"score":0
 				},
 				{
-				   "check":"Dangerous-Workflow",
-				   "score":10
+					"check":"Fuzzing",
+					"score":0
 				},
 				{
-				   "check":"SAST",
-				   "score":0
+					"check":"License",
+					"score":10
 				},
 				{
-				   "check":"Packaging",
-				   "score":-1
-				},
-				{
-				   "check":"Dependency-Update-Tool",
-				   "score":0
-				},
-				{
-				   "check":"Fuzzing",
-				   "score":0
-				},
-				{
-				   "check":"Security-Policy",
-				   "score":0
+					"check":"Security-Policy",
+					"score":0
 				}
 			 ],
-			 "aggregateScore":3.700000047683716,
+			 "aggregateScore":4.599999904632568,
 			 "timeScanned":"2022-11-21T17:45:50.52Z",
-			 "scorecardVersion":"v4.8.0-78-gfb07860",
-			 "scorecardCommit":"fb07860d86065cdcbd2d0d5c6b998ff4542d53fe",
+			 "scorecardVersion":"v4.10.5-27-gb81a70e",
+			 "scorecardCommit":"b81a70e0ea098a7cd6e3672e314cb95b2230e8db",
 			 "origin":"",
 			 "collector":""
 		  },
