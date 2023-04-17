@@ -34,7 +34,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/oauth2 v0.7.0
 	golang.org/x/sync v0.1.0 // indirect
@@ -174,7 +174,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
 	github.com/regclient/regclient v0.4.7
-	github.com/sigstore/sigstore v1.6.1
+	github.com/sigstore/sigstore v1.6.2
 	github.com/spdx/tools-golang v0.4.0
 	github.com/spf13/viper v1.15.0
 	github.com/vektah/gqlparser/v2 v2.5.1
