@@ -14,11 +14,14 @@ of GUAC (for example, augmenting documents with aditional data), we need to take
 advantage of the additional components of GUAC!
 
 The full GUAC component deployment is a set of asynchronous services that
-combine to form a robust and scaleable pipeline. In some of our [demos](demos/),
-you may have seen these components work in concert! This document explains a
-little more of what goes on behind the hood!
+combine to form a robust and scaleable pipeline. This is represented by the area
+in green in the diagrom below. In some of our [demos](demos/), you may have seen
+these components work in concert! This document explains a little more of what
+goes on behind the hood!
 
 ## GUAC Components
+
+![Guac Diagram](GUAC-diagram.svg)
 
 ### GraphQL Server
 
@@ -182,7 +185,7 @@ you may ingest what you wish to here instead.
 
 ```bash
 pushd ../guac-data/docs
-docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone files /data ----gql-endpoint http://guac-graphql:8080/query
+docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone files /data --gql-endpoint http://guac-graphql:8080/query
 popd
 ```
 
@@ -204,6 +207,32 @@ them natively.
 make build
 ./bin/guacone files ../guac-data/docs
 ```
+
+## Query GraphQL Endpoint
+
+You may now query the GraphQL endpoint to ensure the data is ingested, and
+everything is running.
+
+```bash
+curl 'http://localhost:8080/query' -s -X POST -H 'content-type: application/json' \
+  --data '{
+    "query": "{ packages(pkgSpec: {}) { type } }"
+  }' | jq
+```
+
+You should see the types of all the packages ingested
+
+```json
+{
+  "data": {
+    "packages": [
+      {
+        "type": "oci"
+      },
+...
+```
+
+Congratulations, you are now running a full GUAC deployment!
 
 ## What is running?
 
