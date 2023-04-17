@@ -34,7 +34,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/oauth2 v0.7.0
 	golang.org/x/sync v0.1.0 // indirect
@@ -96,7 +96,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.4.6 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.16.0 // indirect
+	github.com/klauspost/compress v1.16.4 // indirect
 	github.com/letsencrypt/boulder v0.0.0-20221109233200-85aa52084eaf // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -106,7 +106,7 @@ require (
 	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/buildkit v0.11.4 // indirect
-	github.com/nats-io/jwt/v2 v2.3.0 // indirect
+	github.com/nats-io/jwt/v2 v2.4.1 // indirect
 	github.com/nats-io/nkeys v0.4.4 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
@@ -167,7 +167,7 @@ require (
 	github.com/google/osv-scanner v1.3.1
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nats-io/nats-server/v2 v2.9.15
+	github.com/nats-io/nats-server/v2 v2.9.16
 	github.com/nats-io/nats.go v1.25.0
 	github.com/ossf/scorecard/v4 v4.10.5
 	github.com/package-url/packageurl-go v0.1.1-0.20220428063043-89078438f170
