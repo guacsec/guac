@@ -90,8 +90,6 @@ jobs:
         run: go install golang.org/x/tools/cmd/goimports@latest
       - name: Check format
         run: make fmt
-      - name: Check markdown format
-        run: make format
       - name: Check that all generated code is up to date
         run: make generated_up_to_date
   lint:
@@ -104,6 +102,11 @@ jobs:
         uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5 # tag=v3.2.0
         with:
           only-new-issues: true
+      - name: Check markdown format
+        run: make format
+      - name: Check that all linted text is up to date
+        run: make generated_up_to_date
+
   end-to-end:
     name: E2E
     runs-on: ubuntu-latest
