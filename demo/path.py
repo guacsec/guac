@@ -74,17 +74,13 @@ def bfs(startID, targetID):
     visited = []
     queue = []
     visited.append(startID)
-    queue.append({'id': startID, 'path': [ startID ], 'pathNodes': []})
+    queue.append({'id': startID, 'path': [ startID ], 'pathNodes': [ nodeQuery(startID) ]})
     while queue:
         node = queue.pop(0)
         ns = neighbors(node['id'])
         for n in ns:
             nodeID = guacID(n)
-            if len(node['pathNodes']) > 0 :
-                fromNode = node['pathNodes'][-1]
-            else:
-                fromNode = None
-            if not filter(node['id'], fromNode, n):
+            if not filter(node['id'], node['pathNodes'][-1], n):
                 continue
             if nodeID in visited:
                 continue
@@ -102,8 +98,6 @@ def bfs(startID, targetID):
 # implementation we try to find dependency links between packages
 def filter(fromID, fromNode, neighbor):
     if neighbor['__typename'] == 'Package':
-        if fromNode is None:
-            return True
         # From Package -> Package, only search downwards
         if fromNode['__typename'] == 'Package':
             return containsID(neighbor, fromID)
@@ -122,6 +116,12 @@ def neighbors(id):
     result = client.execute(queries, operation_name='GetNeighbors', variable_values=vars)
     return result['neighbors']
 
+# nodeQuery is a wrapper around the Node operation stored in the
+# queries.gql file
+def nodeQuery(id):
+    vars = { 'nodeId': id }
+    result = client.execute(queries, operation_name='Node', variable_values=vars)
+    return result['node']
 
 # Main takes two ID args and prints the shortest path between them
 def main(args):

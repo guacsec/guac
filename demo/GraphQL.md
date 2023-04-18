@@ -582,7 +582,8 @@ were hoping to find, for client-side searching, see the section below...
 The data we have ingested in GUAC is based on the SBOM files in the `guac-data`
 repo, but does not contain any vulnerability information. GUAC has built-in
 "certifiers" which can search the ingested data and attach vulnerability data to
-them. To run the certifiers, run:
+them. The OSV certifier will search for OSV vulnerability information. To run
+the OSV certifiers, run:
 
 ```bash
 go run ./cmd/guacone certifier
@@ -719,8 +720,6 @@ to find "downward" dependency relationships.
 # implementation we try to find dependency links between packages
 def filter(fromID, fromNode, neighbor):
     if neighbor['__typename'] == 'Package':
-        if fromNode is None:
-            return True
         # From Package -> Package, only search downwards
         if fromNode['__typename'] == 'Package':
             return containsID(neighbor, fromID)
