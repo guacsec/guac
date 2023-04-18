@@ -38,10 +38,6 @@ var exampleCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateFlags(
-			viper.GetString("gdbuser"),
-			viper.GetString("gdbpass"),
-			viper.GetString("gdbaddr"),
-			viper.GetString("realm"),
 			viper.GetString("natsaddr"),
 			viper.GetString("csub-addr"),
 			viper.GetString("gql-endpoint"),

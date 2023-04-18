@@ -42,7 +42,7 @@ var flags = struct {
 }{}
 
 var rootCmd = &cobra.Command{
-	Use:   "guac",
+	Use:   "guacgql",
 	Short: "GUAC GraphQL server",
 	Run: func(cmd *cobra.Command, args []string) {
 		flags.backend = viper.GetString("gql-backend")

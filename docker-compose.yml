@@ -97,7 +97,7 @@ services:
 
   guac-ingestor:
     image: "local-organic-guac"
-    command: "/opt/guac/ingest ingest"
+    command: "/opt/guac/guacingest"
     working_dir: /guac
     restart: on-failure
     depends_on:

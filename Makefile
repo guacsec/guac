@@ -52,7 +52,7 @@ lint: check-golangci-lint-tool-check
 .PHONY: build
 build: generate
 	go build -ldflags ${LDFLAGS} -o bin/guaccollect cmd/guaccollect/main.go
-	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
+	go build -ldflags ${LDFLAGS} -o bin/guacingest cmd/guacingest/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
 	go build -ldflags ${LDFLAGS} -o bin/pubsub_test cmd/pubsub_test/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacgql cmd/guacgql/main.go
