@@ -69,6 +69,22 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		poll:     false,
 		wantErr:  false,
 	}, {
+		name:     "github.com/makenowjust/heredoc go package",
+		packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
+		want: []*processor.Document{
+			{
+				Blob:   []byte(testdata.CollectedGoLangMakeNowJust),
+				Type:   processor.DocumentDepsDev,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: DepsCollector,
+					Source:    DepsCollector,
+				},
+			},
+		},
+		poll:    false,
+		wantErr: false,
+	}, {
 		name:     "yargs-parser package",
 		packages: []string{"pkg:npm/yargs-parser@4.2.1"},
 		want: []*processor.Document{
