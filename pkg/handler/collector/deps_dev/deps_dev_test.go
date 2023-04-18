@@ -69,8 +69,8 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		poll:     false,
 		wantErr:  false,
 	}, {
-		name:     "github.com/PuerkitoBio/purell go package",
-		packages: []string{"pkg:golang/github.com/PuerkitoBio/purell@v1.1.1"},
+		name:     "github.com/makenowjust/heredoc go package",
+		packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
 		want: []*processor.Document{
 			{
 				Blob:   []byte(testdata.CollectedGoLangMakeNowJust),
