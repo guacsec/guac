@@ -51,14 +51,14 @@ lint: check-golangci-lint-tool-check
 # Build a version
 .PHONY: build
 build: generate
-	go build -ldflags ${LDFLAGS} -o bin/collector cmd/collector/main.go
+	go build -ldflags ${LDFLAGS} -o bin/guaccollect cmd/guaccollect/main.go
 	go build -ldflags ${LDFLAGS} -o bin/ingest cmd/ingest/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
 	go build -ldflags ${LDFLAGS} -o bin/pubsub_test cmd/pubsub_test/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacgql cmd/guacgql/main.go
 
 .PHONY: proto
-proto: 
+proto:
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		pkg/collectsub/collectsub/collectsub.proto

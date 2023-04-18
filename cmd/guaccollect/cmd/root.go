@@ -28,19 +28,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-type options struct {
-	// path to folder with documents to collect
-	path string
-	// address for NATS connection
-	natsAddr string
-}
-
 var flags = struct {
 	// collect-sub flags
 	// collectsub address if used
 	collectSubAddr string
 	// flag to use collectsub service for datasources
 	useCollectSub bool
+	// poll csub or provided datasource
+	poll bool
 
 	// nats
 	natsAddr string
@@ -53,9 +48,10 @@ func init() {
 	persistentFlags := rootCmd.PersistentFlags()
 	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-	persistentFlags.BoolVar(&flags.useCollectSub, "use-csub", false, "use collectsub server for datasource (no positional arguments required)")
+	persistentFlags.BoolVar(&flags.useCollectSub, "use-csub", true, "use collectsub server for datasource")
+	persistentFlags.BoolVar(&flags.poll, "poll", true, "poll the csub or provided datasource regularly")
 
-	flagNames := []string{"natsaddr", "csub-addr", "use-csub"}
+	flagNames := []string{"natsaddr", "csub-addr", "use-csub", "poll"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {

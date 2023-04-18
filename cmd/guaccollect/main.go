@@ -16,7 +16,7 @@
 package main
 
 import (
-	"github.com/guacsec/guac/cmd/collector/cmd"
+	"github.com/guacsec/guac/cmd/guaccollect/cmd"
 )
 
 func main() {
