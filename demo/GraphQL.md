@@ -42,8 +42,8 @@ make
 
 The GUAC server can be run in different ways. For this demo, we will use the
 `guacone gql-server` command with the `--debug` flag command, which sets up a
-GraphQL endpoint and playground, and runs an in-memory backend to store the
-GUAC graph.
+GraphQL endpoint and playground, and runs an in-memory backend to store the GUAC
+graph.
 
 Run this command in a separate terminal (in the same path) and keep it running
 throughout the demo.
@@ -76,14 +76,15 @@ This can take a minute or two. This dataset consists of a set of document types:
 
 ## Running Queries
 
-The queries for this demo are stored in the `demo/queries.gql` file. Running
-the demo queries can be done graphically by opening the GraphQL Playground in a
-web browser, or using the command line.
+The queries for this demo are stored in the `demo/queries.gql` file. Running the
+demo queries can be done graphically by opening the GraphQL Playground in a web
+browser, or using the command line.
 
 The remainder of the demo will have cli commands. If you would like to use the
 GraphQL Playground instead, use these steps:
 
-1. Open the GraphQL Playground by visiting `http://localhost:8080/` in your web browser.
+1. Open the GraphQL Playground by visiting `http://localhost:8080/` in your web
+   browser.
 
 1. Open `demo/queries.gql` in a text editor and copy the full contents.
 
@@ -100,15 +101,16 @@ pip install gql[all]
 ```
 
 Note:
+
 - if you are using a shell like `zsh` it will not be able to run the command
-above properly. Instead, use a `bash` or `sh` shell.
+  above properly. Instead, use a `bash` or `sh` shell.
 - in your system, if you are using pyhton3, you may need to use the `pip3`
-command instead.
+  command instead.
 
 ## GraphQL
 
 The GUAC graph is queryable using GraphQL. GraphQL is a query language for APIs
-and a runtime for fulfilling those queries with your existing data. 
+and a runtime for fulfilling those queries with your existing data.
 
 > For some background reading, visit https://graphql.org/learn/ . Also, the full
 > GUAC schema can be saved with this command:
@@ -713,13 +715,13 @@ records how this link was found.
 
 ## Client-side search
 
-All of the above examples use a single GraphQL query. However, the query
-results are all easily parsed `json` that can be interpreted to build powerful
-scripts.  GUAC has a `neighbors` query that will return all the nodes with a
-relationship to the specified node. This can be used to search through
-relationships, finding the specific type of path you are looking for. The
-neighbor query also take in a set of edge filters of which to traverse.
-However, we are not using that field in this query.
+All of the above examples use a single GraphQL query. However, the query results
+are all easily parsed `json` that can be interpreted to build powerful scripts.
+GUAC has a `neighbors` query that will return all the nodes with a relationship
+to the specified node. This can be used to search through relationships, finding
+the specific type of path you are looking for. The neighbor query also take in a
+set of edge filters of which to traverse. However, we are not using that field
+in this query.
 
 The neighbors query looks like this:
 
