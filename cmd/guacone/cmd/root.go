@@ -32,8 +32,7 @@ var flags = struct {
 	keyID   string
 
 	// collect-sub flags
-	collectSubAddr       string
-	collectSubListenPort int
+	collectSubAddr string
 
 	// graphQL client flags
 	graphqlEndpoint string
@@ -53,7 +52,6 @@ func init() {
 
 	// collectsub flags
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
 
 	// graphql client flags
 	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
@@ -64,7 +62,7 @@ func init() {
 
 	flagNames := []string{
 		"verifier-keyPath", "verifier-keyID",
-		"csub-addr", "csub-listen-port",
+		"csub-addr",
 		"gql-endpoint",
 		"poll", "interval",
 	}

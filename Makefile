@@ -56,6 +56,7 @@ build: generate
 	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
 	go build -ldflags ${LDFLAGS} -o bin/pubsub_test cmd/pubsub_test/main.go
 	go build -ldflags ${LDFLAGS} -o bin/guacgql cmd/guacgql/main.go
+	go build -ldflags ${LDFLAGS} -o bin/guaccsub cmd/guaccsub/main.go
 
 .PHONY: proto
 proto:

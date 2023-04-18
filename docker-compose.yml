@@ -51,7 +51,7 @@ services:
 
   guac-collectsub:
     image: "local-organic-guac"
-    command: "/opt/guac/guacone csub-server"
+    command: "/opt/guac/guaccsub"
     working_dir: /guac
     restart: on-failure
     ports:
@@ -64,7 +64,7 @@ services:
 
   guac-graphql:
     image: "local-organic-guac"
-    command: "/opt/guac/guacgql --gql-debug"
+    command: "/opt/guac/guacgql"
     working_dir: /guac
     restart: on-failure
     depends_on:

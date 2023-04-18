@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The GUAC Authors.
+// Copyright 2023 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/guacsec/guac/pkg/collectsub/server"
 	"github.com/guacsec/guac/pkg/logging"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -29,31 +29,41 @@ import (
 )
 
 var flags = struct {
-	// collect-sub flags
-	// collectsub address if used
-	collectSubAddr string
-	// flag to use collectsub service for datasources
-	useCollectSub bool
-	// poll csub or provided datasource
-	poll bool
-
-	// nats
-	natsAddr string
+	port int
 }{}
+
+var rootCmd = &cobra.Command{
+	Use:   "guaccsub",
+	Short: "GUAC collect subscriber service for GUAC collectors",
+	Run: func(cmd *cobra.Command, args []string) {
+		flags.port = viper.GetInt("csub-listen-port")
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+
+		// Start csub listening server
+		csubServer, err := server.NewServer(flags.port)
+		if err != nil {
+			logger.Fatalf("unable to create csub server: %v", err)
+		}
+
+		if err := csubServer.Serve(ctx); err != nil {
+			logger.Fatalf("csub server terminated with error: %v", err)
+		}
+	},
+}
 
 var cfgFile string
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	persistentFlags := rootCmd.PersistentFlags()
-	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
-	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-	persistentFlags.BoolVar(&flags.useCollectSub, "use-csub", true, "use collectsub server for datasource")
-	persistentFlags.BoolVar(&flags.poll, "poll", true, "poll the csub or provided datasource regularly")
+	cmdFlags := rootCmd.Flags()
 
-	flagNames := []string{"natsaddr", "csub-addr", "use-csub", "poll"}
+	cmdFlags.IntVar(&flags.port, "csub-listen-port", 2782, "port to listen to on collect-sub service")
+
+	flagNames := []string{"csub-listen-port"}
 	for _, name := range flagNames {
-		if flag := persistentFlags.Lookup(name); flag != nil {
+		if flag := cmdFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
 				fmt.Fprintf(os.Stderr, "failed to bind flag: %v", err)
 				os.Exit(1)
@@ -83,19 +93,10 @@ func initConfig() {
 
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("guac")
-	// The following line is needed to replace - with _ in env variables
-	// e.g. GUAC_DB_ADDR will be read as GUAC_gdbaddr
-	// The POSIX standard does not allow - in env variables
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
 	if err := viper.ReadInConfig(); err == nil {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
-}
-
-var rootCmd = &cobra.Command{
-	Use:   "guaccollect",
-	Short: "guaccollect is an collector cmdline for GUAC",
 }
 
 func Execute() {
