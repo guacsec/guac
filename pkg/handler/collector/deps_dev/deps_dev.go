@@ -184,7 +184,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 			pkgtype = strings.ToLower(node.VersionKey.System.String())
 		}
 
-		purl := pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
+		purl := "pkg:" + pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
 
 		depPackageInput, err := helpers.PurlToPkg(purl)
 		if err != nil {
