@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The GUAC Authors.
+// Copyright 2023 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/guacsec/guac/pkg/collectsub/server"
 	"github.com/guacsec/guac/pkg/logging"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -28,46 +29,41 @@ import (
 )
 
 var flags = struct {
-	keyPath string
-	keyID   string
-
-	// collect-sub flags
-	collectSubAddr string
-
-	// graphQL client flags
-	graphqlEndpoint string
-
-	// run as poll certifier
-	poll     bool
-	interval int
+	port int
 }{}
+
+var rootCmd = &cobra.Command{
+	Use:   "guaccsub",
+	Short: "GUAC collect subscriber service for GUAC collectors",
+	Run: func(cmd *cobra.Command, args []string) {
+		flags.port = viper.GetInt("csub-listen-port")
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+
+		// Start csub listening server
+		csubServer, err := server.NewServer(flags.port)
+		if err != nil {
+			logger.Fatalf("unable to create csub server: %v", err)
+		}
+
+		if err := csubServer.Serve(ctx); err != nil {
+			logger.Fatalf("csub server terminated with error: %v", err)
+		}
+	},
+}
 
 var cfgFile string
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	persistentFlags := rootCmd.PersistentFlags()
-	persistentFlags.StringVar(&flags.keyPath, "verifier-keyPath", "", "path to pem file to verify dsse")
-	persistentFlags.StringVar(&flags.keyID, "verifier-keyID", "", "ID of the key to be stored")
+	cmdFlags := rootCmd.Flags()
 
-	// collectsub flags
-	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
+	cmdFlags.IntVar(&flags.port, "csub-listen-port", 2782, "port to listen to on collect-sub service")
 
-	// graphql client flags
-	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
-
-	// certifier flags
-	persistentFlags.BoolVarP(&flags.poll, "poll", "p", true, "sets the certifier to polling mode")
-	persistentFlags.IntVarP(&flags.interval, "interval", "i", 5, "if polling set interval in minutes")
-
-	flagNames := []string{
-		"verifier-keyPath", "verifier-keyID",
-		"csub-addr",
-		"gql-endpoint",
-		"poll", "interval",
-	}
+	flagNames := []string{"csub-listen-port"}
 	for _, name := range flagNames {
-		if flag := persistentFlags.Lookup(name); flag != nil {
+		if flag := cmdFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
 				fmt.Fprintf(os.Stderr, "failed to bind flag: %v", err)
 				os.Exit(1)
@@ -101,11 +97,6 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
-}
-
-var rootCmd = &cobra.Command{
-	Use:   "guacone",
-	Short: "guacone is an all in one flow cmdline for GUAC",
 }
 
 func Execute() {

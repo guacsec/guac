@@ -30,6 +30,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+type filesOptions struct {
+	// path to folder with documents to collect
+	path string
+	// address for NATS connection
+	natsAddr string
+	// poll location
+	poll bool
+}
+
 var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
 	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub",
@@ -37,6 +46,7 @@ var filesCmd = &cobra.Command{
 
 		opts, err := validateFlags(
 			viper.GetString("natsaddr"),
+			viper.GetBool("poll"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -48,7 +58,7 @@ var filesCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
+		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
@@ -57,10 +67,11 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(natsAddr string, args []string) (options, error) {
-	var opts options
+func validateFlags(natsAddr string, poll bool, args []string) (filesOptions, error) {
+	var opts filesOptions
 
 	opts.natsAddr = natsAddr
+	opts.poll = poll
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/guacsec/guac/cmd/collector/cmd/mockcollector"
+	"github.com/guacsec/guac/cmd/guaccollect/cmd/mockcollector"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"

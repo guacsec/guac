@@ -54,6 +54,7 @@ var ociCmd = &cobra.Command{
 			viper.GetString("natsaddr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("use-csub"),
+			viper.GetBool("poll"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -75,12 +76,12 @@ var ociCmd = &cobra.Command{
 	},
 }
 
-func validateOCIFlags(natsAddr string, csubAddr string, useCsub bool, args []string) (ociOptions, error) {
+func validateOCIFlags(natsAddr string, csubAddr string, useCsub bool, poll bool, args []string) (ociOptions, error) {
 	var opts ociOptions
 	opts.natsAddr = natsAddr
+	opts.poll = poll
 
 	if useCsub {
-		opts.poll = true
 		c, err := csubclient.NewClient(csubAddr)
 		if err != nil {
 			return opts, err
@@ -90,9 +91,8 @@ func validateOCIFlags(natsAddr string, csubAddr string, useCsub bool, args []str
 	}
 
 	// else direct CLI call, no polling
-	opts.poll = false
 	if len(args) < 1 {
-		return opts, fmt.Errorf("expected positional argument for image_path")
+		return opts, fmt.Errorf("expected positional argument(s) for image_path(s)")
 	}
 
 	sources := []datasource.Source{}

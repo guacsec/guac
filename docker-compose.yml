@@ -51,7 +51,7 @@ services:
 
   guac-collectsub:
     image: "local-organic-guac"
-    command: "/opt/guac/guacone csub-server"
+    command: "/opt/guac/guaccsub"
     working_dir: /guac
     restart: on-failure
     ports:
@@ -64,7 +64,7 @@ services:
 
   guac-graphql:
     image: "local-organic-guac"
-    command: "/opt/guac/guacgql --gql-debug"
+    command: "/opt/guac/guacgql"
     working_dir: /guac
     restart: on-failure
     depends_on:
@@ -97,7 +97,7 @@ services:
 
   guac-ingestor:
     image: "local-organic-guac"
-    command: "/opt/guac/ingest ingest"
+    command: "/opt/guac/guacingest"
     working_dir: /guac
     restart: on-failure
     depends_on:
@@ -109,7 +109,7 @@ services:
 
   oci-collector:
     image: "local-organic-guac"
-    command: "/opt/guac/collector image --use-csub"
+    command: "/opt/guac/guaccollect image"
     working_dir: /guac
     restart: on-failure
     depends_on:
@@ -119,7 +119,7 @@ services:
       - ./container_files/guac:/guac
   depsdev-collector:
     image: "local-organic-guac"
-    command: "/opt/guac/collector deps_dev --use-csub"
+    command: "/opt/guac/guaccollect deps_dev"
     working_dir: /guac
     restart: on-failure
     environment:

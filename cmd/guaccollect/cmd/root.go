@@ -28,35 +28,30 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
+	// collect-sub flags
+	// collectsub address if used
+	collectSubAddr string
+	// flag to use collectsub service for datasources
+	useCollectSub bool
+	// poll csub or provided datasource
+	poll bool
 
 	// nats
 	natsAddr string
-
-	// collectsub service
-	collectSubAddr string
-
-	// graphql client
-	graphqlEndpoint string
 }{}
+
+var cfgFile string
 
 func init() {
 	cobra.OnInitialize(initConfig)
 	persistentFlags := rootCmd.PersistentFlags()
-	persistentFlags.StringVar(&flags.dbAddr, "gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
-	persistentFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
-	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
-	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr", "csub-addr", "gql-endpoint"}
+	persistentFlags.BoolVar(&flags.useCollectSub, "use-csub", true, "use collectsub server for datasource")
+	persistentFlags.BoolVar(&flags.poll, "poll", true, "poll the csub or provided datasource regularly")
+
+	flagNames := []string{"natsaddr", "csub-addr", "use-csub", "poll"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
@@ -99,8 +94,8 @@ func initConfig() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "ingestor",
-	Short: "ingestor is an ingestor cmdline for GUAC",
+	Use:   "guaccollect",
+	Short: "guaccollect is an collector cmdline for GUAC",
 }
 
 func Execute() {

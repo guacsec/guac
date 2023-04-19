@@ -21,19 +21,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/guacsec/guac/internal/client/githubclient"
 	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
-	"github.com/guacsec/guac/pkg/handler/collector/github"
+	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-type githubOptions struct {
+type depsDevOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
 	// address for NATS connection
@@ -42,18 +41,19 @@ type githubOptions struct {
 	poll bool
 }
 
-var githubCmd = &cobra.Command{
-	Use:   "github [flags] release_url1 release_url2...",
-	Short: "takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph",
+var depsDevCmd = &cobra.Command{
+	Use:   "deps_dev [flags] purl1 purl2...",
+	Short: "takes purls and queries them against deps.dev to find additional metadata to add to GUAC graph",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateGithubFlags(
+		opts, err := validateDepsDevFlags(
 			viper.GetString("natsaddr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("use-csub"),
+			viper.GetBool("poll"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -61,43 +61,26 @@ var githubCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// GITHUB_TOKEN is the default token name
-		ghc, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_TOKEN"))
-		if err != nil {
-			logger.Errorf("unable to create github client: %v", err)
-		}
-
 		// Register collector
-		// TODO(lumjjb and mlieberman85): Return this to a longer duration (~10 minutes) so as
-		// to not keep hitting Github. This will require adding triggers to get new repos as
-		// they come up from the CollectSources so that there isn't a long delay from
-		// adding new data sources.
-		collectorOpts := []github.Opt{
-			github.WithCollectDataSource(opts.dataSource),
-			github.WithClient(ghc),
-		}
-		if opts.poll {
-			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
-		}
-		githubCollector, err := github.NewGithubCollector(collectorOpts...)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
 		if err != nil {
-			logger.Errorf("unable to create Github collector: %v", err)
+			logger.Errorf("unable to register oci collector: %v", err)
 		}
-		err = collector.RegisterDocumentCollector(githubCollector, github.GithubCollector)
+		err = collector.RegisterDocumentCollector(depsDevCollector, deps_dev.DepsCollector)
 		if err != nil {
-			logger.Errorf("unable to register Github collector: %v", err)
+			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
 		initializeNATsandCollector(ctx, opts.natsAddr)
 	},
 }
 
-func validateGithubFlags(natsAddr string, csubAddr string, useCsub bool, args []string) (githubOptions, error) {
-	var opts githubOptions
+func validateDepsDevFlags(natsAddr string, csubAddr string, useCsub bool, poll bool, args []string) (depsDevOptions, error) {
+	var opts depsDevOptions
 	opts.natsAddr = natsAddr
+	opts.poll = poll
 
 	if useCsub {
-		opts.poll = true
 		c, err := csubclient.NewClient(csubAddr)
 		if err != nil {
 			return opts, err
@@ -106,28 +89,20 @@ func validateGithubFlags(natsAddr string, csubAddr string, useCsub bool, args []
 		return opts, err
 	}
 
-	// else direct CLI call, no polling
-	opts.poll = false
+	// else direct CLI call
 	if len(args) < 1 {
-		return opts, fmt.Errorf("expected positional argument for release_url")
+		return opts, fmt.Errorf("expected positional argument(s) for purl(s)")
 	}
 
 	sources := []datasource.Source{}
 	for _, arg := range args {
-		// TODO (mlieberman85): Below should be a github url parser helper instead of in the github collector
-		if _, _, err := github.ParseGithubReleaseDataSource(datasource.Source{
-			Value: arg,
-		}); err != nil {
-			return opts, fmt.Errorf("release_url parsing error. require format https://github.com/<org>/<repo>/releases/<optional_tag>: %v", err)
-		}
-		sources = append(sources, datasource.Source{
-			Value: arg,
-		})
+		sources = append(sources, datasource.Source{Value: arg})
+
 	}
 
 	var err error
 	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
-		GithubReleaseDataSources: sources,
+		PurlDataSources: sources,
 	})
 	if err != nil {
 		return opts, err
@@ -137,5 +112,5 @@ func validateGithubFlags(natsAddr string, csubAddr string, useCsub bool, args []
 }
 
 func init() {
-	rootCmd.AddCommand(githubCmd)
+	rootCmd.AddCommand(depsDevCmd)
 }

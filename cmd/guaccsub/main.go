@@ -1,5 +1,5 @@
 //
-// Copyright 2022 The GUAC Authors.
+// Copyright 2023 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
 
 package main
 
+// This is the GUAC GraphQL server.
+
 import (
-	"github.com/guacsec/guac/cmd/ingest/cmd"
+	"github.com/guacsec/guac/cmd/guaccsub/cmd"
 )
 
 func main() {

@@ -28,34 +28,26 @@ import (
 	"github.com/spf13/viper"
 )
 
-type options struct {
-	// path to folder with documents to collect
-	path string
-	// address for NATS connection
-	natsAddr string
-}
+var cfgFile string
 
 var flags = struct {
-	// collect-sub flags
-	// collectsub address if used
-	collectSubAddr string
-	// flag to use collectsub service for datasources
-	useCollectSub bool
-
 	// nats
 	natsAddr string
-}{}
 
-var cfgFile string
+	// collectsub service
+	collectSubAddr string
+
+	// graphql client
+	graphqlEndpoint string
+}{}
 
 func init() {
 	cobra.OnInitialize(initConfig)
 	persistentFlags := rootCmd.PersistentFlags()
 	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-	persistentFlags.BoolVar(&flags.useCollectSub, "use-csub", false, "use collectsub server for datasource (no positional arguments required)")
-
-	flagNames := []string{"natsaddr", "csub-addr", "use-csub"}
+	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
+	flagNames := []string{"natsaddr", "csub-addr", "gql-endpoint"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
@@ -98,8 +90,11 @@ func initConfig() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "collector",
-	Short: "collector is an collector cmdline for GUAC",
+	Use:   "guacingest",
+	Short: "starts the GUAC processor, ingestor and assembler process",
+	Run: func(cmd *cobra.Command, args []string) {
+		ingest(cmd, args)
+	},
 }
 
 func Execute() {

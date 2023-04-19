@@ -46,4 +46,4 @@ jobs:
           IMAGE: ghcr.io/guacsec/guac
           BUILDER: paketobuildpacks/builder:base
           BUILDPACK: paketo-buildpacks/go
-          BP_GO_TARGETS: "./cmd/collector:./cmd/guacone:./cmd/ingest:./cmd/guacgql"
+          BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
