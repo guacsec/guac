@@ -28,22 +28,12 @@ import (
 )
 
 var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
-
 	keyPath string
 	keyID   string
 
 	// collect-sub flags
 	collectSubAddr       string
 	collectSubListenPort int
-
-	// graphQL server flags
-	graphqlBackend string
-	graphqlPort    int
-	graphqlDebug   bool
 
 	// graphQL client flags
 	graphqlEndpoint string
@@ -58,21 +48,12 @@ var cfgFile string
 func init() {
 	cobra.OnInitialize(initConfig)
 	persistentFlags := rootCmd.PersistentFlags()
-	persistentFlags.StringVar(&flags.dbAddr, "gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
-	persistentFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
-	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
-	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
 	persistentFlags.StringVar(&flags.keyPath, "verifier-keyPath", "", "path to pem file to verify dsse")
 	persistentFlags.StringVar(&flags.keyID, "verifier-keyID", "", "ID of the key to be stored")
 
 	// collectsub flags
 	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	persistentFlags.IntVar(&flags.collectSubListenPort, "csub-listen-port", 2782, "port to listen to on collect-sub service")
-
-	// graphql server flags
-	persistentFlags.StringVar(&flags.graphqlBackend, "gql-backend", "inmem", "backend used for graphql api server: [neo4j | inmem]")
-	persistentFlags.IntVar(&flags.graphqlPort, "gql-port", 8080, "port used for graphql api server")
-	persistentFlags.BoolVar(&flags.graphqlDebug, "gql-debug", false, "debug flag which enables the graphQL playground")
 
 	// graphql client flags
 	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
@@ -81,10 +62,10 @@ func init() {
 	persistentFlags.BoolVarP(&flags.poll, "poll", "p", true, "sets the certifier to polling mode")
 	persistentFlags.IntVarP(&flags.interval, "interval", "i", 5, "if polling set interval in minutes")
 
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm",
+	flagNames := []string{
 		"verifier-keyPath", "verifier-keyID",
 		"csub-addr", "csub-listen-port",
-		"gql-backend", "gql-port", "gql-debug", "gql-endpoint",
+		"gql-endpoint",
 		"poll", "interval",
 	}
 	for _, name := range flagNames {

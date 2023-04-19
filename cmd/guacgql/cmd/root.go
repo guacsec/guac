@@ -28,32 +28,34 @@ import (
 )
 
 var flags = struct {
-	// Select backend: only one of them must be true
-	neo4jBackend    bool
-	inMemoryBackend bool
+	// graphQL server flags
+	backend  string
+	port     int
+	debug    bool
+	testData bool
 
 	// Needed only if using neo4j backend
-	dbAddr      string
-	gdbuser     string
-	gdbpass     string
-	realm       string
-	addTestData bool // TODO(mihaimaruseac): Remove when all migration is done
-
-	// Playground config
-	playgroundPort int
-	// TODO(mihaimaruseac): Configure listen address?
+	nAddr  string
+	nUser  string
+	nPass  string
+	nRealm string
 }{}
 
 var rootCmd = &cobra.Command{
-	Use:   "graphql_playground",
-	Short: "GraphQL playground for testing GUAC GraphQL backends and GraphQL integration",
+	Use:   "guac",
+	Short: "GUAC GraphQL server",
 	Run: func(cmd *cobra.Command, args []string) {
-		flags.gdbuser = viper.GetString("gdbuser")
-		flags.gdbpass = viper.GetString("gdbpass")
-		flags.dbAddr = viper.GetString("gdbaddr")
-		flags.realm = viper.GetString("realm")
+		flags.backend = viper.GetString("gql-backend")
+		flags.port = viper.GetInt("gql-port")
+		flags.debug = viper.GetBool("gql-debug")
+		flags.testData = viper.GetBool("gql-testdata")
 
-		startServer()
+		flags.nUser = viper.GetString("gdbuser")
+		flags.nPass = viper.GetString("gdbpass")
+		flags.nAddr = viper.GetString("gdbaddr")
+		flags.nRealm = viper.GetString("realm")
+
+		startServer(cmd)
 	},
 }
 
@@ -63,20 +65,20 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	cmdFlags := rootCmd.Flags()
 
-	cmdFlags.BoolVar(&flags.neo4jBackend, "neo4j", false, "Use Neo4J backend")
-	cmdFlags.BoolVar(&flags.inMemoryBackend, "memory", true, "Use in-memory backend")
+	// graphql server flags
+	cmdFlags.StringVar(&flags.backend, "gql-backend", "inmem", "backend used for graphql api server: [neo4j | inmem]")
+	cmdFlags.IntVar(&flags.port, "gql-port", 8080, "port used for graphql api server")
+	cmdFlags.BoolVar(&flags.debug, "gql-debug", false, "debug flag which enables the graphQL playground")
+	cmdFlags.BoolVar(&flags.testData, "gql-testdata", false, "Populate backend with test data")
 
-	cmdFlags.StringVar(&flags.dbAddr, "gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
-	cmdFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
-	cmdFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
-	cmdFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
-	cmdFlags.BoolVar(&flags.addTestData, "testdata", false, "Populate backend with test data")
+	cmdFlags.StringVar(&flags.nAddr, "gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
+	cmdFlags.StringVar(&flags.nUser, "gdbuser", "", "neo4j user credential to connect to graph db")
+	cmdFlags.StringVar(&flags.nPass, "gdbpass", "", "neo4j password credential to connect to graph db")
+	cmdFlags.StringVar(&flags.nRealm, "realm", "neo4j", "realm to connect to graph db")
 
-	cmdFlags.IntVar(&flags.playgroundPort, "port", 8080, "Port to listen on for the GraphQL playground")
-
-	flagNames := []string{"neo4j", "memory",
-		"gdbaddr", "gdbuser", "gdbpass", "realm", "testdata",
-		"port"}
+	flagNames := []string{
+		"gdbaddr", "gdbuser", "gdbpass", "realm", "gql-testdata",
+		"gql-port", "gql-debug", "gql-backend"}
 	for _, name := range flagNames {
 		if flag := cmdFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
