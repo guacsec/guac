@@ -23,7 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
@@ -184,13 +183,13 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		} else {
 			pkgtype = strings.ToLower(node.VersionKey.System.String())
 		}
-		depPackageInput := &model.PkgInputSpec{
-			Type:       pkgtype,
-			Namespace:  ptrfrom.String(""),
-			Name:       node.VersionKey.Name,
-			Version:    &node.VersionKey.Version,
-			Qualifiers: []model.PackageQualifierInputSpec{},
-			Subpath:    ptrfrom.String(""),
+
+		purl := pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
+
+		depPackageInput, err := helpers.PurlToPkg(purl)
+		if err != nil {
+			logger.Debugf("failed to get dependency purl", err)
+			continue
 		}
 
 		// check if dependent package purl has already been queried. If found, append to the list of dependent packages for top level package
