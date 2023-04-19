@@ -182,5 +182,16 @@ func (d *depsDevParser) GetIdentities(ctx context.Context) []common.TrustInforma
 }
 
 func (d *depsDevParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	idstrings := &common.IdentifierStrings{}
+	for _, depComp := range d.packComponent.DepPackages {
+		pkg := depComp.CurrentPackage
+		qualifiers := []string{}
+		for _, v := range pkg.Qualifiers {
+			qualifiers = append(qualifiers, v.Key, v.Value)
+		}
+		purl := helpers.PkgToPurl(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version, *pkg.Subpath, qualifiers)
+
+		idstrings.PurlStrings = append(idstrings.PurlStrings, purl)
+	}
+	return idstrings, nil
 }

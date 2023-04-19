@@ -185,16 +185,14 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		}
 
 		purl := "pkg:" + pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
-
 		depPackageInput, err := helpers.PurlToPkg(purl)
 		if err != nil {
-			logger.Debugf("failed to get dependency purl", err)
+			logger.Infof("unable to parse purl: %v", purl)
 			continue
 		}
 
 		// check if dependent package purl has already been queried. If found, append to the list of dependent packages for top level package
-		if foundDepVal, ok := d.checkedPurls[helpers.PkgToPurl(depPackageInput.Type, *depPackageInput.Namespace, depPackageInput.Name,
-			*depPackageInput.Version, *depPackageInput.Subpath, []string{})]; ok {
+		if foundDepVal, ok := d.checkedPurls[purl]; ok {
 
 			logger.Debugf("dependant package purl %s already queried: %s", purl)
 			component.DepPackages = append(component.DepPackages, foundDepVal)
