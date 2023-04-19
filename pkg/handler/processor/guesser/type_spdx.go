@@ -30,7 +30,11 @@ func (_ *spdxTypeGuesser) GuessDocumentType(blob []byte, format processor.Format
 	case processor.FormatJSON:
 		spdxDoc, err := spdx_json.Load2_2(reader)
 		if err == nil {
-			if spdxDoc.DocumentName != "" {
+			// This is set to check for DocumentNamespace since there seem to
+			// be some SBOMs in the wild that don't use certain fields like
+			// document name.
+			// https://github.com/guacsec/guac/issues/743
+			if spdxDoc.DocumentNamespace != "" {
 				return processor.DocumentSPDX
 			}
 		}
