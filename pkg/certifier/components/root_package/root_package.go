@@ -137,7 +137,7 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, response *generated.
 		for _, namespace := range pkgType.Namespaces {
 			for _, name := range namespace.Names {
 				for _, version := range name.Versions {
-					response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{})
+					response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{generated.EdgePackageCertifyVuln, generated.EdgePackageIsOccurrence})
 					if err != nil {
 						return fmt.Errorf("failed neighbors query: %w", err)
 					}
