@@ -61,7 +61,7 @@ GUAC graph.
 In your original window, run:
 
 ```bash
-bin/guacone files ../guac-data/docs/
+bin/guacone collect files ../guac-data/docs/
 ```
 
 This can take a minute or two. This dataset consists of a set of document types:
@@ -611,7 +611,7 @@ them. The OSV certifier will search for OSV vulnerability information. To run
 the OSV certifiers, run:
 
 ```bash
-bin/guacone osv --poll=false
+bin/guacone certifier osv --poll=false
 ```
 
 The certifier will take a few minutes to run. A vulnerability "noun" node may be

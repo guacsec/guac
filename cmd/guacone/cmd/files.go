@@ -27,7 +27,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/helpers"
-	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -42,30 +42,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-type options struct {
+type fileOptions struct {
 	// path to the pem file
 	keyPath string
 	// ID related to the key being stored
 	keyID string
 	// path to folder with documents to collect
 	path string
-	// datasource for collectors
-	dataSource datasource.CollectSource
-
 	// gql endpoint
 	graphqlEndpoint string
-
-	// certifyBad/certifyGood
-	good          bool
-	certifyType   string
-	justification string
-	subject       string
-	// if type is package, true if attestation is at pkgName (for all versions) or false for a specific version
-	pkgName bool
-
-	// osv/scorecard certifier
-	poll     bool
-	interval int
 }
 
 var filesCmd = &cobra.Command{
@@ -75,7 +60,7 @@ var filesCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateFlags(
+		opts, err := validateFilesFlags(
 			viper.GetString("verifier-keyPath"),
 			viper.GetString("verifier-keyID"),
 			viper.GetString("gql-endpoint"),
@@ -131,7 +116,7 @@ var filesCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(ctx, opts)
+		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -195,8 +180,8 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(keyPath string, keyID string, graphqlEndpoint string, args []string) (options, error) {
-	var opts options
+func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, args []string) (fileOptions, error) {
+	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 
 	if keyPath != "" {
@@ -236,9 +221,9 @@ func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler
 	}, nil
 }
 
-func getAssembler(ctx context.Context, opts options) (func([]assembler.IngestPredicates) error, error) {
+func getAssembler(ctx context.Context, graphqlEndpoint string) (func([]assembler.IngestPredicates) error, error) {
 	httpClient := http.Client{}
-	gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
+	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
 	f := helpers.GetAssembler(ctx, gqlclient)
 	return f, nil
 }
@@ -252,5 +237,16 @@ func printErrors(filesWithErrors []string) string {
 }
 
 func init() {
-	rootCmd.AddCommand(filesCmd)
+	set, err := cli.BuildFlags([]string{"verifier-keyPath", "verifier-keyID"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	filesCmd.Flags().AddFlagSet(set)
+	if err := viper.BindPFlags(filesCmd.Flags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+
+	collectCmd.AddCommand(filesCmd)
 }
