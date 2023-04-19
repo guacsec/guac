@@ -43,10 +43,6 @@ import (
 )
 
 type options struct {
-	dbAddr string
-	user   string
-	pass   string
-	realm  string
 	// path to the pem file
 	keyPath string
 	// ID related to the key being stored
@@ -72,7 +68,7 @@ type options struct {
 	interval int
 }
 
-var exampleCmd = &cobra.Command{
+var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
 	Short: "take a folder of files and create a GUAC graph, this command talks directly to the graphQL endpoint",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -80,10 +76,6 @@ var exampleCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateFlags(
-			viper.GetString("gdbuser"),
-			viper.GetString("gdbpass"),
-			viper.GetString("gdbaddr"),
-			viper.GetString("realm"),
 			viper.GetString("verifier-keyPath"),
 			viper.GetString("verifier-keyID"),
 			viper.GetString("gql-endpoint"),
@@ -203,12 +195,8 @@ var exampleCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, keyPath string, keyID string, graphqlEndpoint string, args []string) (options, error) {
+func validateFlags(keyPath string, keyID string, graphqlEndpoint string, args []string) (options, error) {
 	var opts options
-	opts.user = user
-	opts.pass = pass
-	opts.dbAddr = dbAddr
-	opts.realm = realm
 	opts.graphqlEndpoint = graphqlEndpoint
 
 	if keyPath != "" {
@@ -264,5 +252,5 @@ func printErrors(filesWithErrors []string) string {
 }
 
 func init() {
-	rootCmd.AddCommand(exampleCmd)
+	rootCmd.AddCommand(filesCmd)
 }

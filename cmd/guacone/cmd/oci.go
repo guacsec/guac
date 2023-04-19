@@ -29,7 +29,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var ociCmd = &cobra.Command{
@@ -40,12 +39,7 @@ var ociCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateOCIFlags(
-			viper.GetString("gdbuser"),
-			viper.GetString("gdbpass"),
-			viper.GetString("gdbaddr"),
-			viper.GetString("realm"),
-			args)
+		opts, err := validateOCIFlags(args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -127,12 +121,8 @@ var ociCmd = &cobra.Command{
 	},
 }
 
-func validateOCIFlags(user string, pass string, dbAddr string, realm string, args []string) (options, error) {
+func validateOCIFlags(args []string) (options, error) {
 	var opts options
-	opts.user = user
-	opts.pass = pass
-	opts.dbAddr = dbAddr
-	opts.realm = realm
 
 	if len(args) < 1 {
 		return opts, fmt.Errorf("expected positional argument for image_path")

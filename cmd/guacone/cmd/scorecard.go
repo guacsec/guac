@@ -43,10 +43,6 @@ var scorecardCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateScorecardFlags(
-			viper.GetString("gdbuser"),
-			viper.GetString("gdbpass"),
-			viper.GetString("gdbaddr"),
-			viper.GetString("realm"),
 			viper.GetString("gql-endpoint"),
 			viper.GetBool("poll"),
 			viper.GetInt("interval"),
@@ -162,12 +158,8 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(user string, pass string, dbAddr string, realm string, graphqlEndpoint string, poll bool, interval int) (options, error) {
+func validateScorecardFlags(graphqlEndpoint string, poll bool, interval int) (options, error) {
 	var opts options
-	opts.user = user
-	opts.pass = pass
-	opts.dbAddr = dbAddr
-	opts.realm = realm
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.poll = poll
 	opts.interval = interval

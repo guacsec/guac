@@ -64,7 +64,7 @@ services:
 
   guac-graphql:
     image: "local-organic-guac"
-    command: "/opt/guac/guacone gql-server"
+    command: "/opt/guac/guacgql --gql-debug"
     working_dir: /guac
     restart: on-failure
     depends_on:

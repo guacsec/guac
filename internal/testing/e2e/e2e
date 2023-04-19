@@ -33,8 +33,8 @@ git checkout $guac_data_hash
 popd
 popd
 
-echo @@@@ Starting up graphql_playground server in background
-go run "${GUAC_DIR}/cmd/graphql_playground" &
+echo @@@@ Starting up guac server in background
+go run "${GUAC_DIR}/cmd/guacgql" &
 
 echo @@@@ Ingesting guac-data into server
 go run "${GUAC_DIR}/cmd/guacone" files "${GUAC_DIR}/guac-data/docs/"
