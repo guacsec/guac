@@ -5,8 +5,9 @@ just a few small guidelines you need to follow.
 
 Refer to the [Developer Setup](./SETUP.md) document to learn how to prepare your
 environment. You can also consult a [GraphQL Guide](./demo/GraphQL.md) which
-replaces the Neo4j components of `SETUP.md`. Optionally, you can also consult
-[docker compose documentation](./docs/Compose.md).
+replaces the deprecated Neo4j components of `SETUP.md` (which is scheduled for
+deletion). Optionally, you can also consult [docker compose
+documentation](./docs/Compose.md).
 
 ## Contributor License Agreement
 
@@ -72,7 +73,7 @@ The contribution ladder is summarized in the table below:
 |-----------------------|------------------|--------------|------------|---------------------|
 | Community Participant | Follow [Google's Open Source Community Guidelines](https://opensource.google/conduct/) | N/A | N/A | Read (default) |
 | Reviewer              | Review contributions from other members | Prove technical expertise in at least one GUAC topic area | Can approve PRs | Write |
-| Owner                 | Set direction and priorities for topic area. Approval of contributions | Deep technical expertise in topic area. Proven record of reviews and authorship. | Slack channel invitation | Write |
+| Owner                 | Set direction and priorities for topic area. Approval of contributions | Deep technical expertise in topic area. Proven record of reviews and authorship. | Invitation to owner&maintainers only channels| Write |
 | Maintainer            | Set direction and priorities of project. Participate in weekly syncs | Expertise in 3 out of the 5 topic areas | (almost) complete repository access | Maintain |
 
 Each level of the ladder is also described in more details below.
@@ -96,9 +97,6 @@ A reviewer will be responsible of reviewing contributions from other
 contributors that touch the corresponding topic area. They should ensure that
 the PRs are adequately tested, follow the guidelines for the specific topic
 area.
-
-Since reviewer gain write access to the repository, they can also contribute
-directly, without needing to create a fork.
 
 ### Owner
 
