@@ -41,12 +41,11 @@ const (
 )
 
 type PackageComponent struct {
-	CurrentPackage  *model.PkgInputSpec
-	Source          *model.SourceInputSpec
-	Vulnerabilities []*model.OSVInputSpec
-	Scorecard       *model.ScorecardInputSpec
-	DepPackages     []*PackageComponent
-	UpdateTime      time.Time
+	CurrentPackage *model.PkgInputSpec
+	Source         *model.SourceInputSpec
+	Scorecard      *model.ScorecardInputSpec
+	DepPackages    []*PackageComponent
+	UpdateTime     time.Time
 }
 
 type depsCollector struct {
@@ -55,6 +54,7 @@ type depsCollector struct {
 	poll              bool
 	interval          time.Duration
 	checkedPurls      map[string]*PackageComponent
+	ingestedSource    map[string]*model.SourceInputSpec
 }
 
 func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, interval time.Duration) (*depsCollector, error) {
@@ -80,6 +80,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		poll:              poll,
 		interval:          interval,
 		checkedPurls:      map[string]*PackageComponent{},
+		ingestedSource:    map[string]*model.SourceInputSpec{},
 	}, nil
 }
 
@@ -129,7 +130,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	// check if top level purl has already been queried
 	if _, ok := d.checkedPurls[purl]; ok {
-		logger.Debugf("purl %s already queried: %s", purl)
+		logger.Infof("purl %s already queried: %s", purl)
 		return nil
 	}
 
@@ -175,6 +176,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		if i == 0 {
 			continue
 		}
+
 		depComponent := &PackageComponent{}
 
 		pkgtype := ""
@@ -184,17 +186,21 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 			pkgtype = strings.ToLower(node.VersionKey.System.String())
 		}
 
-		purl := "pkg:" + pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
-		depPackageInput, err := helpers.PurlToPkg(purl)
+		depPurl := "pkg:" + pkgtype + "/" + node.VersionKey.Name + "@" + node.VersionKey.Version
+		depPackageInput, err := helpers.PurlToPkg(depPurl)
 		if err != nil {
-			logger.Infof("unable to parse purl: %v", purl)
+			logger.Infof("unable to parse purl: %v", depPurl)
 			continue
 		}
 
 		// check if dependent package purl has already been queried. If found, append to the list of dependent packages for top level package
-		if foundDepVal, ok := d.checkedPurls[purl]; ok {
-
-			logger.Debugf("dependant package purl %s already queried: %s", purl)
+		if foundDepVal, ok := d.checkedPurls[depPurl]; ok {
+			// if found, return the source as nothing as it has already been ingested once
+			foundDepVal.Source = nil
+			for _, foundDep := range foundDepVal.DepPackages {
+				foundDep.Source = nil
+			}
+			logger.Debugf("dependant package purl %s already queried: %s", depPurl)
 			component.DepPackages = append(component.DepPackages, foundDepVal)
 			continue
 		}
@@ -203,7 +209,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Namespace, depPackageInput.Name, depPackageInput.Version, depComponent)
 		if err != nil {
-			logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
+			logger.Debugf("failed to get additional metadata for package: %s, err: %w", depPurl, err)
 		}
 		component.DepPackages = append(component.DepPackages, depComponent)
 	}
@@ -232,6 +238,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 }
 
 func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType string, namespace *string, name string, version *string, pkgComponent *PackageComponent) error {
+	logger := logging.FromContext(ctx)
 
 	versionKey, err := getVersionKey(pkgType, namespace, name, version)
 	if err != nil {
@@ -250,9 +257,18 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 		if link.Label == sourceRepo {
 			src, err := helpers.VcsToSrc(link.Url)
 			if err != nil {
+				logger.Debugf("unable to parse source url: %v", link.Url)
 				continue
 			}
-			pkgComponent.Source = src
+
+			// check if source has already been ingest for this package (without version), if not add source to be ingest for hasSourceAt
+			// HasSourceAt is done at the pkgName level for all entries from deps.dev as it does not specify a tag or commit for each version
+			// of the package being ingested
+			purlWithoutVersion := "pkg:" + pkgType + "/" + strings.TrimSuffix(*namespace, "/") + "/" + name
+			if _, ok := d.ingestedSource[purlWithoutVersion]; !ok {
+				pkgComponent.Source = src
+				d.ingestedSource[purlWithoutVersion] = src
+			}
 
 			projectReq := &pb.GetProjectRequest{
 				ProjectKey: &pb.ProjectKey{
@@ -262,6 +278,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 
 			project, err := d.client.GetProject(ctx, projectReq)
 			if err != nil {
+				logger.Debugf("unable to get project for: %v", projectReq.ProjectKey.Id)
 				continue
 			}
 			if project.Scorecard != nil {
@@ -283,14 +300,6 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 		}
 	}
 
-	vulnerabilities := []*model.OSVInputSpec{}
-	for _, vuln := range versionResponse.AdvisoryKeys {
-		osv := model.OSVInputSpec{
-			OsvId: vuln.Id,
-		}
-		vulnerabilities = append(vulnerabilities, &osv)
-	}
-	pkgComponent.Vulnerabilities = append(pkgComponent.Vulnerabilities, vulnerabilities...)
 	// add time when data was obtained
 	pkgComponent.UpdateTime = time.Now().UTC()
 

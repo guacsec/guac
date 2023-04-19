@@ -233,44 +233,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 				},
 			},
-			CertifyVuln: []assembler.CertifyVulnIngest{
-				{
-					Pkg: &model.PkgInputSpec{
-						Type:      "npm",
-						Namespace: ptrfrom.String(""),
-						Name:      "yargs-parser",
-						Version:   ptrfrom.String("4.2.1"),
-						Subpath:   ptrfrom.String(""),
-					},
-					OSV: &model.OSVInputSpec{
-						OsvId: "GHSA-p9pc-299p-vxgp",
-					},
-					VulnData: &model.VulnerabilityMetaDataInput{
-						TimeScanned:    tm.UTC(),
-						DbUri:          "",
-						DbVersion:      "",
-						ScannerUri:     "osv.dev",
-						ScannerVersion: "",
-						Origin:         "",
-						Collector:      "",
-					},
-				},
-			},
-			IsVuln: []assembler.IsVulnIngest{
-				{
-					OSV: &model.OSVInputSpec{
-						OsvId: "GHSA-p9pc-299p-vxgp",
-					},
-					GHSA: &model.GHSAInputSpec{
-						GhsaId: "GHSA-p9pc-299p-vxgp",
-					},
-					IsVuln: &model.IsVulnerabilityInputSpec{
-						Justification: "decoded OSV data collected via deps.dev",
-						Origin:        "",
-						Collector:     "",
-					},
-				},
-			},
 			HasSourceAt: []assembler.HasSourceAtIngest{
 				{
 					Pkg: &model.PkgInputSpec{

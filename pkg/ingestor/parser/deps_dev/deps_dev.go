@@ -25,7 +25,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
@@ -80,8 +79,6 @@ func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler.IngestPredicates) {
 	hasSourceAt := createHasSourceAtIngest(packComponent.CurrentPackage, packComponent.Source, packComponent.UpdateTime.UTC())
 	scorecard := createScorecardIngest(packComponent.Source, packComponent.Scorecard)
-	isVulnList := createIsVulnerabilityIngest(packComponent.Vulnerabilities)
-	certifyVulnList := createCertifyVulnerabilityIngest(packComponent.CurrentPackage, packComponent.Vulnerabilities, packComponent.UpdateTime.UTC())
 
 	if hasSourceAt != nil {
 		preds.HasSourceAt = append(preds.HasSourceAt, *hasSourceAt)
@@ -89,8 +86,6 @@ func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler
 	if scorecard != nil {
 		preds.CertifyScorecard = append(preds.CertifyScorecard, *scorecard)
 	}
-	preds.IsVuln = append(preds.IsVuln, isVulnList...)
-	preds.CertifyVuln = append(preds.CertifyVuln, certifyVulnList...)
 }
 
 func createHasSourceAtIngest(pkg *model.PkgInputSpec, src *model.SourceInputSpec, knownSince time.Time) *assembler.HasSourceAtIngest {
@@ -108,45 +103,6 @@ func createHasSourceAtIngest(pkg *model.PkgInputSpec, src *model.SourceInputSpec
 		}
 	}
 	return nil
-}
-
-func createCertifyVulnerabilityIngest(pkg *model.PkgInputSpec, osvList []*model.OSVInputSpec, knownSince time.Time) []assembler.CertifyVulnIngest {
-	var cvi []assembler.CertifyVulnIngest
-	for _, o := range osvList {
-		cv := assembler.CertifyVulnIngest{
-			Pkg: pkg,
-			OSV: o,
-			VulnData: &model.VulnerabilityMetaDataInput{
-				TimeScanned:    knownSince,
-				DbUri:          "",
-				DbVersion:      "",
-				ScannerUri:     osv.URI,
-				ScannerVersion: "",
-			},
-		}
-		cvi = append(cvi, cv)
-	}
-	return cvi
-}
-
-func createIsVulnerabilityIngest(osvList []*model.OSVInputSpec) []assembler.IsVulnIngest {
-	var ivs []assembler.IsVulnIngest
-	for _, osv := range osvList {
-		cve, ghsa, err := helpers.OSVToGHSACVE(osv.OsvId)
-		if err != nil {
-			continue
-		}
-		iv := assembler.IsVulnIngest{
-			OSV:  osv,
-			CVE:  cve,
-			GHSA: ghsa,
-			IsVuln: &model.IsVulnerabilityInputSpec{
-				Justification: "decoded OSV data collected via deps.dev",
-			},
-		}
-		ivs = append(ivs, iv)
-	}
-	return ivs
 }
 
 func createScorecardIngest(src *model.SourceInputSpec, scorecard *model.ScorecardInputSpec) *assembler.CertifyScorecardIngest {

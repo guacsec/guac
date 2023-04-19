@@ -964,8 +964,7 @@ var (
 		   "tag":null,
 		   "type":"git"
 		},
-		"UpdateTime":"2022-11-21T17:45:50.52Z",
-		"Vulnerabilities":null
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
 	CollectedForeignTypes = `{
@@ -1057,8 +1056,7 @@ var (
 				 "tag":null,
 				 "type":"git"
 			  },
-			  "UpdateTime":"2022-11-21T17:45:50.52Z",
-			  "Vulnerabilities":null
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
 		   }
 		],
 		"Scorecard":{
@@ -1130,8 +1128,7 @@ var (
 		   "tag":null,
 		   "type":"git"
 		},
-		"UpdateTime":"2022-11-21T17:45:50.52Z",
-		"Vulnerabilities":null
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 	CollectedYargsParser = `{
 		"CurrentPackage":{
@@ -1161,8 +1158,7 @@ var (
 				 "tag":null,
 				 "type":"git"
 			  },
-			  "UpdateTime":"2022-11-21T17:45:50.52Z",
-			  "Vulnerabilities":null
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
 		   }
 		],
 		"Scorecard":null,
@@ -1173,12 +1169,7 @@ var (
 		   "tag":null,
 		   "type":"git"
 		},
-		"UpdateTime":"2022-11-21T17:45:50.52Z",
-		"Vulnerabilities":[
-		   {
-			  "osvId":"GHSA-p9pc-299p-vxgp"
-		   }
-		]
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 )
 
