@@ -30,7 +30,8 @@ use GitHub pull requests for this purpose. Consult
 information on using pull requests.
 
 We require all commits in a PR to contain a `Signed-off-by` line which can be
-added by using the `-s` flag of `git commit`.
+added by using the `-s` flag of `git commit`. This is to enforce [a Developer
+Certificate of Origin (DCO)](https://wiki.linuxfoundation.org/dco).
 
 We also require two reviewers on every PR as this follows good security
 practices. For reasoning, see [CNCF Supply Chain Best
