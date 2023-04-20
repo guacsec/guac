@@ -1,5 +1,5 @@
 //
-// Copyright 2023 The GUAC Authors.
+// Copyright 2022 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/logging"
 
@@ -30,32 +31,15 @@ import (
 var cfgFile string
 
 var flags = struct {
-	dbAddr  string
-	gdbuser string
-	gdbpass string
-	realm   string
-
-	// nats
-	natsAddr string
-
-	// run as poll certifier
-	poll     bool
-	interval int
+	// graphql client
+	graphqlEndpoint string
 }{}
 
 func init() {
 	cobra.OnInitialize(initConfig)
 	persistentFlags := rootCmd.PersistentFlags()
-	persistentFlags.StringVar(&flags.dbAddr, "gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
-	persistentFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
-	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
-	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
-	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
-	// certifier flags
-	persistentFlags.BoolVarP(&flags.poll, "poll", "p", true, "sets the certifier to polling mode")
-	persistentFlags.IntVarP(&flags.interval, "interval", "i", 5, "if polling set interval in minutes")
-
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr", "poll", "interval"}
+	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
+	flagNames := []string{"gql-endpoint"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {
@@ -87,6 +71,10 @@ func initConfig() {
 
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("guac")
+	// The following line is needed to replace - with _ in env variables
+	// e.g. GUAC_DB_ADDR will be read as GUAC_gdbaddr
+	// The POSIX standard does not allow - in env variables
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
 	if err := viper.ReadInConfig(); err == nil {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
@@ -94,8 +82,11 @@ func initConfig() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "guacone",
-	Short: "guacone is an all in one flow cmdline for GUAC",
+	Use:   "ingest",
+	Short: "example ingestor for ingesting a set of example documents and populating a graph for GUAC",
+	Run: func(cmd *cobra.Command, args []string) {
+		ingestExample(cmd, args)
+	},
 }
 
 func Execute() {
