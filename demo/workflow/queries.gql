@@ -1,5 +1,61 @@
+query IsDepedency {
+  IsDependency(
+    isDependencySpec: {dependentPackage: {namespace: "github.com/prometheus", name: "client_golang"}}
+  ) {
+    id
+    justification
+    package {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          versions {
+            id
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    dependentPackage {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          versions {
+            id
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    versionRange
+    origin
+    collector
+  }
+}
+
 query HasSourceAt {
-  HasSourceAt(hasSourceAtSpec: {origin: "testing backend"}) {
+  HasSourceAt(
+    hasSourceAtSpec: {package: {namespace: "cloud.google.com", name: "go"}}
+  ) {
     id
     justification
     knownSince
