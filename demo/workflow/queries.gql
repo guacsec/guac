@@ -1,0 +1,135 @@
+query HasSourceAt {
+  HasSourceAt(hasSourceAtSpec: {origin: "testing backend"}) {
+    id
+    justification
+    knownSince
+    package {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          versions {
+            id
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    source {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          tag
+          commit
+        }
+      }
+    }
+    origin
+    collector
+  }
+}
+
+query Scorecard {
+  scorecards(
+    scorecardSpec: {source: {namespace: "github.com/googleapis", name: "google-cloud-go"}}
+  ) {
+    id
+    source {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          tag
+          commit
+        }
+      }
+    }
+    scorecard {
+      timeScanned
+      aggregateScore
+      checks {
+        check
+        score
+      }
+      scorecardVersion
+      scorecardCommit
+      origin
+      collector
+    }
+  }
+}
+
+query CertifyVuln {
+  CertifyVuln(
+    certifyVulnSpec: {vulnerability: {osv: {osvId: "ghsa-cg3q-j54f-5p7p"}}}
+  ) {
+    id
+    package {
+      id
+      type
+      namespaces {
+        id
+        namespace
+        names {
+          id
+          name
+          versions {
+            id
+            version
+            qualifiers {
+              key
+              value
+            }
+            subpath
+          }
+        }
+      }
+    }
+    vulnerability {
+      __typename
+      ... on CVE {
+        id
+        year
+        cveId
+      }
+      ... on OSV {
+        id
+        osvId
+      }
+      ... on GHSA {
+        id
+        ghsaId
+      }
+      ... on NoVuln {
+        id
+      }
+    }
+    metadata {
+      dbUri
+      dbVersion
+      scannerUri
+      scannerVersion
+      timeScanned
+      origin
+      collector
+    }
+  }
+}
