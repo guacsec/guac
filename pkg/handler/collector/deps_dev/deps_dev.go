@@ -308,11 +308,20 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 
 func getVersionKey(pkgType string, namespace *string, name string, version *string) (*pb.VersionKey, error) {
 	queryName := ""
-	if namespace != nil && *namespace != "" {
-		queryName = strings.TrimSuffix(*namespace, "/") + "/" + name
+	if pkgType != "maven" {
+		if namespace != nil && *namespace != "" {
+			queryName = strings.TrimSuffix(*namespace, "/") + "/" + name
+		} else {
+			queryName = name
+		}
 	} else {
-		queryName = name
+		if namespace != nil && *namespace != "" {
+			queryName = strings.TrimSuffix(*namespace, ":") + ":" + name
+		} else {
+			queryName = name
+		}
 	}
+
 	sys, err := parseSystem(pkgType)
 	if err != nil {
 		return nil, err
