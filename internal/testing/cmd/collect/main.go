@@ -16,7 +16,7 @@
 package main
 
 import (
-	"github.com/guacsec/guac/cmd/pubsub_test/cmd"
+	"github.com/guacsec/guac/internal/testing/cmd/collect/cmd"
 )
 
 func main() {
