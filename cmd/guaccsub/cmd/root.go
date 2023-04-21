@@ -19,6 +19,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/server"
@@ -34,7 +37,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		port := viper.GetInt("csub-listen-port")
 
-		ctx := logging.WithLogger(context.Background())
+		ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 		logger := logging.FromContext(ctx)
 
 		// Start csub listening server
@@ -43,9 +46,21 @@ var rootCmd = &cobra.Command{
 			logger.Fatalf("unable to create csub server: %v", err)
 		}
 
-		if err := csubServer.Serve(ctx); err != nil {
-			logger.Fatalf("csub server terminated with error: %v", err)
-		}
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			logger.Infof("starting csub server")
+			if err := csubServer.Serve(ctx); err != nil {
+				logger.Errorf("csub server terminated with error: %v", err)
+			}
+		}()
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+		s := <-sigs
+		logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+		cf()
+		wg.Wait()
 	},
 }
 

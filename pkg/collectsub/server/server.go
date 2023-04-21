@@ -19,6 +19,8 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"sync"
+	"time"
 
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/server/db/simpledb"
@@ -80,14 +82,35 @@ func (s *server) Serve(ctx context.Context) error {
 	logger := logging.FromContext(ctx)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
-		return err
+		return fmt.Errorf("error opening port %d when starting csub server: %w", s.port, err)
 	}
 	gs := grpc.NewServer()
 	pb.RegisterColectSubscriberServiceServer(gs, s)
-	logger.Infof("server listening at %v", lis.Addr())
-	if err := gs.Serve(lis); err != nil {
-		return err
-	}
 
-	return nil
+	var wg sync.WaitGroup
+	var retErr error
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		logger.Infof("server listening at %v", lis.Addr())
+		if err := gs.Serve(lis); err != nil {
+			retErr = fmt.Errorf("csub grpc server error: %w", err)
+		}
+	}()
+	<-ctx.Done()
+	logger.Infof("context cancelled, gracefully shutting down csub grpc server")
+	gs.GracefulStop()
+	done := make(chan bool, 1)
+	go func() {
+		wg.Wait()
+		done <- true
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		logger.Warnf("forcibly shutting down csub grpc server")
+		gs.Stop()
+	}
+	wg.Wait()
+	return retErr
 }
