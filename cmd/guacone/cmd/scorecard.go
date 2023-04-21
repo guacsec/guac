@@ -35,6 +35,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+type scorecardOptions struct {
+	graphqlEndpoint string
+	poll            bool
+	interval        int
+}
+
 var scorecardCmd = &cobra.Command{
 	Use:   "scorecard [flags]",
 	Short: "runs the scorecard certifier",
@@ -101,7 +107,7 @@ var scorecardCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(ctx, opts)
+		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -158,8 +164,8 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(graphqlEndpoint string, poll bool, interval int) (options, error) {
-	var opts options
+func validateScorecardFlags(graphqlEndpoint string, poll bool, interval int) (scorecardOptions, error) {
+	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.poll = poll
 	opts.interval = interval
@@ -168,5 +174,5 @@ func validateScorecardFlags(graphqlEndpoint string, poll bool, interval int) (op
 }
 
 func init() {
-	rootCmd.AddCommand(scorecardCmd)
+	certifierCmd.AddCommand(scorecardCmd)
 }

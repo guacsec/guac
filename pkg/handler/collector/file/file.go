@@ -52,8 +52,11 @@ func NewFileCollector(ctx context.Context, path string, poll bool, interval time
 // for new artifacts as they are being uploaded by polling on an interval or run once and
 // grab all the artifacts and end.
 func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	if _, err := os.Stat(f.path); os.IsNotExist(err) {
-		return fmt.Errorf("path: %s does not exist", f.path)
+	if _, err := os.Stat(f.path); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("path: %s does not exist", f.path)
+		}
+		return fmt.Errorf("unknown error on os.Stat for FileCollector path: %w", err)
 	}
 
 	readFunc := func(path string, dirEntry fs.DirEntry, err error) error {
@@ -71,8 +74,12 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		if dirEntry.IsDir() {
 			return nil
 		}
-		if info, err := dirEntry.Info(); !info.ModTime().After(f.lastChecked) || err != nil {
-			return fmt.Errorf("file: %s has not been modified since last check", path)
+		info, err := dirEntry.Info()
+		if err != nil {
+			return fmt.Errorf("unknown error on dirEntry.Info while walking path: %w", err)
+		}
+		if !info.ModTime().After(f.lastChecked) {
+			return nil
 		}
 
 		blob, err := os.ReadFile(path)
@@ -95,27 +102,20 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		return nil
 	}
 
-	if f.poll {
-		for {
-			select {
-			// If the context has been canceled it contains an err which we can throw.
-			case <-ctx.Done():
-				return ctx.Err() // nolint:wrapcheck
-			default:
-				err := filepath.WalkDir(f.path, readFunc)
-				if err != nil {
-					return fmt.Errorf("error walking path: %s, err: %w", f.path, err)
-				}
-				f.lastChecked = time.Now()
-				time.Sleep(f.interval)
-			}
-		}
-	} else {
-		err := filepath.WalkDir(f.path, readFunc)
-		if err != nil {
+	for {
+		if err := filepath.WalkDir(f.path, readFunc); err != nil {
 			return fmt.Errorf("error walking path: %s, err: %w", f.path, err)
 		}
 		f.lastChecked = time.Now()
+		if !f.poll {
+			break
+		}
+		select {
+		// If the context has been canceled it contains an err which we can throw.
+		case <-ctx.Done():
+			return ctx.Err() // nolint:wrapcheck
+		case <-time.After(f.interval):
+		}
 	}
 
 	return nil

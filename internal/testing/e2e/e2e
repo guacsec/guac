@@ -37,10 +37,10 @@ echo @@@@ Starting up guac server in background
 go run "${GUAC_DIR}/cmd/guacgql" &
 
 echo @@@@ Ingesting guac-data into server
-go run "${GUAC_DIR}/cmd/guacone" files "${GUAC_DIR}/guac-data/docs/"
+go run "${GUAC_DIR}/cmd/guacone" collect files "${GUAC_DIR}/guac-data/docs/"
 
 echo @@@@ Running osv certifier
-go run "${GUAC_DIR}/cmd/guacone" osv -p=false
+go run "${GUAC_DIR}/cmd/guacone" certifier osv -p=false
 
 queries="${GUAC_DIR}/demo/queries.gql"
 
