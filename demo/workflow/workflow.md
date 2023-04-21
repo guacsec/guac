@@ -93,30 +93,27 @@ default       ingestor-5c75564464-s5v2s                 1/1     Running     2 (1
 For demo purposes, let's ingest Vault’s SBOM. To do this, we will use the help
 of the `guaccollect` file command.
 
-To do this we must first port-forward a the ports needed (graphqQL server,
-collector subscriber and NATS):
+To do this we must first port-forward a the ports needed, if not already done so
+(graphqQL server, collector subscriber and NATS):
 
-In one terminal window run:
+In multiple terminal window run:
 
 ```bash
 kubectl port-forward svc/guac-nats 4222:4222
-```
-
-In another terminal window run:
-
-```bash
 kubectl port-forward svc/collectsub 2782:2782
-```
-
-Finally in the third terminal window run:
-
-```bash
 kubectl port-forward svc/graphql-server 8080:8080
 ```
 
-As the pervious commands will hold up the terminal, open another terminal window
-and run the following command (this is assuming that you are running from the
-guac repo):
+or run them in the background via:
+
+```bash
+kubectl port-forward svc/guac-nats 4222:4222 &
+kubectl port-forward svc/collectsub 2782:2782 &
+kubectl port-forward svc/graphql-server 8080:8080 &
+```
+
+To ingest run the following command (this is assuming that you are running from
+the guac repo):
 
 ```bash
 ./bin/guaccollect files ../guac-data/top-dh-sboms/vault.json
