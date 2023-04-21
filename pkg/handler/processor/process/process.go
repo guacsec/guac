@@ -72,26 +72,27 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
 
+	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
 		if err != nil {
 			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %w", uuidString, err)
 			logger.Error(fmtErr)
-			return err
+			return nil
 		}
 		docTree, err := Process(ctx, &doc)
 		if err != nil {
 			fmtErr := fmt.Errorf("[processor: %s] failed process document: %w", uuidString, err)
 			logger.Error(fmtErr)
-			return fmtErr
+			return nil
 		}
 
 		err = transportFunc(docTree)
 		if err != nil {
 			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %w", uuidString, err)
 			logger.Error(fmtErr)
-			return fmtErr
+			return nil
 		}
 
 		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
