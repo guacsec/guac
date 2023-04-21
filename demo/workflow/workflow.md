@@ -1,20 +1,17 @@
 # Expanding your view of the software supply chain
 
-### **Bruce Wayne** : You're just SBOMs.
+**Bruce Wayne** : You're just SBOMs.
 
-<img width="1260" alt="3" src="https://user-images.githubusercontent.com/88045217/233477844-8f4f1743-654d-4c53-a6ff-23e0bcf3a6eb.jpg">
+**Henri Ducard (Ra's al Ghul)** : No, no, no. An SBOM is just a document lost in
+the scramble for its own importance. It can be misplaced or underutilized. But
+if you make the SBOM more than just a document, you devote the SBOM to be
+utilized properly to secure your software supply chain, and if the attackers
+cannot get to you via supply chain attacks, then the SBOM becomes something else
+entirely.
 
-### **Henri Ducard (Ra's al Ghul)** : No, no, no. An SBOM is just a document lost in the scramble for its own importance. It can be misplaced or underutilized. But if you make the SBOM more than just a document, you devote the SBOM to be utilized properly to secure your software supply chain, and if the attackers cannot get to you via supply chain attacks, then the SBOM becomes something else entirely.
+**Bruce Wayne** : Which is?
 
-<img width="1260" alt="3" src="https://user-images.githubusercontent.com/88045217/233478647-a62fccb0-1e87-4542-b089-2091155c553c.png">
-
-### **Bruce Wayne** : Which is?
-
-<img width="1260" alt="3" src="https://user-images.githubusercontent.com/88045217/233477213-f6d99be5-f669-4344-8c1e-123f063db3de.png">
-
-### **Henri Ducard (Ra's al Ghul)** : Legend, Mr. Wayne!
-
-<img width="1260" alt="3" src="https://user-images.githubusercontent.com/88045217/233479006-9fa20a7e-1a13-41d1-9f97-2345fcd85c69.png">
+**Henri Ducard (Ra's al Ghul)** : Legend, Mr. Wayne!
 
 Ra’s al Ghul understands that an SBOM alone can be forgotten but if you combine
 it with GUAC, you can start to get a greater understanding of your own software
@@ -22,6 +19,11 @@ supply chain environment.
 
 In this demo, we will go through the process of ingesting an SBOM and letting
 GUAC expand our horizons on what we know about our environment autonomously!
+
+<img width="1260" alt="3" src="https://user-images.githubusercontent.com/88045217/233640614-3976703c-d971-4b34-97e7-306f4efe5d31.png">
+
+We will demonstrate the various integrations of GUAC and how it works together
+with in the ingested SBOM.
 
 ## Requirements
 
@@ -31,6 +33,10 @@ GUAC expand our horizons on what we know about our environment autonomously!
   [colima](https://github.com/abiosoft/colima) (or another k8s service of your
   choice))
 - [Helm v3.9.4+](https://helm.sh/)
+
+**NOTE**: There is also a docker compose deployment to get GUAC running if you
+don't want to use Kubernetes. Follow the
+[docker compose deployment](../../docs/Compose.md) to get started!
 
 ## Clone GUAC
 
@@ -64,6 +70,10 @@ make
 
 Please refer to the [INSERT GUAC Helm Install Guide] to have a running instance.
 
+**NOTE**: There is also a docker compose deployment to get GUAC running if you
+don't want to use Kubernetes. Follow the
+[docker compose deployment](../../docs/Compose.md) to get started!
+
 Once that process is completed, you will see the following pods running (the pod
 names are auto-generated so they might differ):
 
@@ -76,18 +86,26 @@ default       guac-nats-0                               3/3     Running     0   
 default       depsdev-collector-8698956798-x74vr        1/1     Running     2 (11m ago)   11m
 default       oci-collector-7ff77d9b7-k24zk             1/1     Running     2 (11m ago)   11m
 default       ingestor-5c75564464-s5v2s                 1/1     Running     2 (11m ago)   11m
-default       ingest-guac-data-98rfq                    0/2     Completed   1             11m
 ```
 
 ## Ingesting Vault’s SBOM
 
 For demo purposes, let's ingest Vault’s SBOM. To do this, we will use the help
-of the `guacone` file command
+of the `guaccollect` file command.
+
+To do this we must first port-forward a the ports needed (graphqQL server,
+collector subscriber and NATS):
+
+```bash
+kubectl port-forward svc/guac-nats 4222:4222
+kubectl port-forward svc/collectsub 2782:2782
+kubectl port-forward svc/graphql-server 8080:8080
+```
 
 Run the following command:
 
 ```bash
-./bin/collector files ../guac-data/top-dh-sboms/vault.json
+./bin/guaccollect files ../guac-data/top-dh-sboms/vault.json
 ```
 
 File collector
@@ -712,6 +730,14 @@ above) between this and the version of Vault we are using. Here is a quick look
 at what the visualization would look like for that:
 
 <img width="1260" alt="3" src="https://user-images.githubusercontent.com/88045217/233479721-318cc19a-ea39-4524-adfe-890e4b2ddbd5.png">
+
+## Cleanup
+
+To delete all the GUAC resources from the cluster run:
+
+```bash
+helm uninstall <RELEASE NAME>
+```
 
 ## Expanded your view of the software supply chain
 
