@@ -96,19 +96,33 @@ of the `guaccollect` file command.
 To do this we must first port-forward a the ports needed (graphqQL server,
 collector subscriber and NATS):
 
+In one terminal window run:
+
 ```bash
 kubectl port-forward svc/guac-nats 4222:4222
+```
+
+In another terminal window run:
+
+```bash
 kubectl port-forward svc/collectsub 2782:2782
+```
+
+Finally in the third terminal window run:
+
+```bash
 kubectl port-forward svc/graphql-server 8080:8080
 ```
 
-Run the following command:
+As the pervious commands will hold up the terminal, open another terminal window
+and run the following command (this is assuming that you are running from the
+guac repo):
 
 ```bash
 ./bin/guaccollect files ../guac-data/top-dh-sboms/vault.json
 ```
 
-File collector
+Once the file collector has completed, you will see the following message:
 
 ```bash
 {"level":"info","ts":1681994359.2474601,"caller":"cmd/files.go:112","msg":"collector ended gracefully"}
@@ -238,16 +252,16 @@ We will further inspect these vulnerabilities in the following section.
 
 ## Examining the information collected
 
-To understand what was collected, we will utilize the graphQL playground. To
-access, we must first port-forward from kubernetes cluster.
+To understand what was collected, we will utilize the graphQL playground.
 
-Run the following command to port-forward:
+The playground will be accessible via: `http://localhost:8080/graphql`
+
+**NOTE**: If the playground is not accessible check that the port-forward is
+still running:
 
 ```bash
 kubectl port-forward svc/graphql-server 8080:8080
 ```
-
-The playground will be accessible via: `http://localhost:8080/graphql`
 
 From graphQL Playground, we can use the provided
 [graphQL queries](/demo/workflow/queries.gql) and paste that into the left
