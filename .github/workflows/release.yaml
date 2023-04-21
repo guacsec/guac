@@ -15,16 +15,24 @@
 name: release-guac-image
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   packages: write # To publish container images to GHCR
+  id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
   build-image-on-release:
     name: Build and publish image
     runs-on: ubuntu-latest
+    env:
+      IMAGE_URI: ghcr.io/${{ github.repository }}
+      BUILDER: paketobuildpacks/builder:base
+      BUILDPACK: paketo-buildpacks/go
+      BUILDPACK_SBOM_OUTPUT_DIR: sbom-output-dir
+      BUILDPACK_SPDX_SBOM: "launch/paketo-buildpacks_go-build/targets/sbom.spdx.json"
     steps:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
@@ -34,16 +42,42 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: setup pack
+      - name: Setup pack 
         uses: buildpacks/github-actions/setup-pack@2c2fe0dad1a532cdcde622787d752df8fc3172f0 # v5.1.0
+      - name: Install cosign
+        uses: sigstore/cosign-installer@main
+      - name: Install crane
+        uses: imjasonh/setup-crane@v0.1
       - name: Build and publish image
+        id: build_n_publish_image 
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          pack build ${IMAGE}:${GITHUB_REF_NAME} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish
+          VERSION=$(git describe --tags --always)
+          COMMIT=$(git rev-parse HEAD)
+          BUILD=$(date +%FT%T%z)
+          PKG=github.com/guacsec/guac/pkg/version
+          pack build ${IMAGE_URI}:${{ github.ref_name }} \
+            --builder ${BUILDER} \
+            --buildpack ${BUILDPACK} \
+            --publish \
+            --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR} \
+            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
+            --env BP_GO_TARGETS=${BP_GO_TARGETS}
+          echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})" >> $GITHUB_OUTPUT
         shell: bash
         env:
-          IMAGE: ghcr.io/guacsec/guac
-          BUILDER: paketobuildpacks/builder:base
-          BUILDPACK: paketo-buildpacks/go
           BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
+      - name: Sign and verify image
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST} --yes
+          cosign attach sbom --sbom ${BUILDPACK_SBOM_OUTPUT_DIR}/${BUILDPACK_SPDX_SBOM} ${IMAGE_URI_DIGEST}
+          cosign sign -a git_sha=$GITHUB_SHA --attachment sbom ${IMAGE_URI_DIGEST} --yes
+          cosign verify ${IMAGE_URI_DIGEST} --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
+        shell: bash
+        env:
+          IMAGE_URI_DIGEST: ${{ env.IMAGE_URI }}@${{ steps.build_n_publish_image.outputs.IMAGE_DIGEST }}
+          GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
+          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/release.yaml@${{ github.ref }}
