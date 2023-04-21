@@ -24,7 +24,6 @@ import (
 
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
@@ -139,7 +138,10 @@ func (d *depsDevParser) GetIdentities(ctx context.Context) []common.TrustInforma
 
 func (d *depsDevParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	idstrings := &common.IdentifierStrings{}
-	for _, depComp := range d.packComponent.DepPackages {
+	// TODO (pxp928): currently commented out based on issue https://github.com/guacsec/guac/issues/769
+	// this will be uncommented once that work is complete such that deps.dev collector does not keep spinning.
+	// TODO (pxp928): Unit test will also need to be fixed
+	/* 	for _, depComp := range d.packComponent.DepPackages {
 		pkg := depComp.CurrentPackage
 		qualifiers := []string{}
 		for _, v := range pkg.Qualifiers {
@@ -148,6 +150,6 @@ func (d *depsDevParser) GetIdentifiers(ctx context.Context) (*common.IdentifierS
 		purl := helpers.PkgToPurl(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version, *pkg.Subpath, qualifiers)
 
 		idstrings.PurlStrings = append(idstrings.PurlStrings, purl)
-	}
+	} */
 	return idstrings, nil
 }
