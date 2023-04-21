@@ -52,7 +52,7 @@ In your terminal window, run:
 
 ```bash
 pushd ../guac-data/docs/spdx/spdx_vuln.json
-docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone files /data --gql-endpoint http://guac-graphql:8080/query
+docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone collect files /data --gql-endpoint http://guac-graphql:8080/query
 popd
 ```
 
@@ -93,7 +93,7 @@ them.
 wait for the OSV certifier to re-scan or force it to run manually via:
 
 ```bash
-docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone osv -p=false --gql-endpoint http://guac-graphql:8080/query
+docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone certifier osv -p=false --gql-endpoint http://guac-graphql:8080/query
 ```
 
 Once the OSV certifier has completed running and you will see the following
@@ -142,7 +142,7 @@ five minute interval to keep re-scanning for any new packages in GUAC). To force
 the scan to occur immediately please run:
 
 ```bash
-docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone osv -p=false --gql-endpoint http://guac-graphql:8080/query
+docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone certifier osv -p=false --gql-endpoint http://guac-graphql:8080/query
 ```
 
 Successful output will show the following:
