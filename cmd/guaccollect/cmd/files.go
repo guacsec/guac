@@ -58,7 +58,7 @@ var filesCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, time.Second)
+		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
