@@ -69,11 +69,11 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		poll:     false,
 		wantErr:  false,
 	}, {
-		name:     "com.cognitect.aws:ds maven package",
-		packages: []string{"pkg:maven/com.cognitect.aws/ds@825.2.1233.0"},
+		name:     "org.webjars.npm:a maven package",
+		packages: []string{"pkg:maven/org.webjars.npm/a@2.1.2"},
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.CollectedGoLangMakeNowJust),
+				Blob:   []byte(testdata.CollectedMavenWebJars),
 				Type:   processor.DocumentDepsDev,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
@@ -89,7 +89,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		packages: []string{"pkg:pypi/wheel-axle-runtime@0.0.4.dev20230415195356"},
 		want: []*processor.Document{
 			{
-				Blob:   []byte(testdata.CollectedGoLangMakeNowJust),
+				Blob:   []byte(testdata.CollectedPypiWheelAxle),
 				Type:   processor.DocumentDepsDev,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{

@@ -37,6 +37,7 @@ const (
 	DepsCollector = "deps.dev"
 	goUpperCase   = "GO"
 	golang        = "golang"
+	maven         = "maven"
 	sourceRepo    = "SOURCE_REPO"
 )
 
@@ -308,7 +309,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 
 func getVersionKey(pkgType string, namespace *string, name string, version *string) (*pb.VersionKey, error) {
 	queryName := ""
-	if pkgType != "maven" {
+	if pkgType != maven {
 		if namespace != nil && *namespace != "" {
 			queryName = strings.TrimSuffix(*namespace, "/") + "/" + name
 		} else {
