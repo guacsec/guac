@@ -77,17 +77,24 @@ additional information from various sources (such as osv.dev and scorecard to
 start with) and keep the information specified up-to-date within GUAC.
 
 The certifier can be run in two modes, polling (for continuous updates on the
-information) or non-polling (run once and collect the data). For this demo, we
-will run it in non-polling as we want to capture the information and utilize it
-in our query.
+information) or non-polling (run once and collect the data). For this demo, the
+polling version of the osv certifier is already running as part of the docker
+compose.
 
-Particularly we will be running the OSV certifier, which will query osv.dev and
-determine if the various components that make up our images have vulnerabilities
-we should be worried about.
+The OSV certifier will query osv.dev and determine if the various components
+that make up our images have vulnerabilities we should be worried about.
 
 Switch back to the compose window and you will soon see that the OSV certifier
 recognized the new packages and is looking up vulnerability information for
 them.
+
+**NOTE**: The OSV certifier is set to run at a five minute interval
+(configurable by the user). If the quires below return an error you can either
+wait for the OSV certifier to re-scan or force it to run manually via:
+
+```bash
+docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone osv -p=false --gql-endpoint http://guac-graphql:8080/query
+```
 
 Once the OSV certifier has completed running and you will see the following
 message:
@@ -119,8 +126,7 @@ We will start off by running the following command:
 ./bin/guacone queryVuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest"
 ```
 
-**Note**: if you see the following error, you may have missed running the OSV
-certifier in the step above or it may not have been completed successfully.
+**Note**: if you see the following error:
 
 ```bash
 {"level":"fatal","ts":1681822176.390916,"caller":"cmd/query_vulnerability.go:179","msg":"error searching dependency packages match: error querying neighbor: error certify vulnerability node not found, incomplete data. Please ensure certifier has run"}
@@ -130,6 +136,14 @@ This error message is a check that all dependent packages have been scanned for
 vulnerabilities via the certifier (either OSV or some other) to ensure that
 there is no incomplete data or a false sense of security from a lack of
 information.
+
+The OSV certifier may not have completed the scan for all the packages (set to a
+five minute interval to keep re-scanning for any new packages in GUAC). To force
+the scan to occur immediately please run:
+
+```bash
+docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone osv -p=false --gql-endpoint http://guac-graphql:8080/query
+```
 
 Successful output will show the following:
 
