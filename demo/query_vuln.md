@@ -34,6 +34,14 @@ The rest of the demo will assume you are in the GUAC directory
 cd guac
 ```
 
+## Building the GUAC binaries
+
+Build the GUAC binaries using the `make` command.
+
+```bash
+make
+```
+
 ## Running the GUAC Visualizer
 
 To get the GUAC visualizer up and running please follow the
@@ -51,9 +59,7 @@ them into the GUAC graph.
 In your terminal window, run:
 
 ```bash
-pushd ../guac-data/docs/spdx
-docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone collect files /data/spdx_vuln.json --gql-endpoint http://guac-graphql:8080/query
-popd
+./bin/guacone collect files ../guac-data/docs/spdx/spdx_vuln.json
 ```
 
 This will ingest the vulnerable SPDX SBOM into GUAC so that various insights can
@@ -93,7 +99,7 @@ them.
 wait for the OSV certifier to re-scan or force it to run manually via:
 
 ```bash
-docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone certifier osv -p=false --gql-endpoint http://guac-graphql:8080/query
+./bin/guacone certifier osv -p=false
 ```
 
 Once the OSV certifier has completed running and you will see the following
