@@ -51,8 +51,8 @@ them into the GUAC graph.
 In your terminal window, run:
 
 ```bash
-pushd ../guac-data/docs/spdx/spdx_vuln.json
-docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone collect files /data --gql-endpoint http://guac-graphql:8080/query
+pushd ../guac-data/docs/spdx
+docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone collect files /data/spdx_vuln.json --gql-endpoint http://guac-graphql:8080/query
 popd
 ```
 
