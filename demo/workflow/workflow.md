@@ -731,14 +731,6 @@ at what the visualization would look like for that:
 
 <img width="1260" alt="3" src="https://user-images.githubusercontent.com/88045217/233479721-318cc19a-ea39-4524-adfe-890e4b2ddbd5.png">
 
-## Cleanup
-
-To delete all the GUAC resources from the cluster run:
-
-```bash
-helm uninstall <RELEASE NAME>
-```
-
 ## Expanded your view of the software supply chain
 
 Through this demo, we learned that GUAC services are designed to extract as much
@@ -746,3 +738,11 @@ information as possible about an SBOM that it ingests. Utilizing this
 information, we can quickly make up-to-date policy decisions or even integrate
 it into an IDE to provide information on if a package should not be used due to
 a low OpenSSF scorecard score or may contain a critical vulnerability!
+
+## Cleanup
+
+To delete all the GUAC resources from the cluster run:
+
+```bash
+helm uninstall <RELEASE NAME>
+```
