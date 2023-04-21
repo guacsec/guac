@@ -964,8 +964,7 @@ var (
 		   "tag":null,
 		   "type":"git"
 		},
-		"UpdateTime":"2022-11-21T17:45:50.52Z",
-		"Vulnerabilities":null
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
 	CollectedForeignTypes = `{
@@ -982,9 +981,7 @@ var (
 			  "CurrentPackage":{
 				 "name":"foreign-types-shared",
 				 "namespace":"",
-				 "qualifiers":[
-					
-				 ],
+				 "qualifiers":null,
 				 "subpath":"",
 				 "type":"cargo",
 				 "version":"0.1.1"
@@ -1059,8 +1056,7 @@ var (
 				 "tag":null,
 				 "type":"git"
 			  },
-			  "UpdateTime":"2022-11-21T17:45:50.52Z",
-			  "Vulnerabilities":null
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
 		   }
 		],
 		"Scorecard":{
@@ -1132,59 +1128,49 @@ var (
 		   "tag":null,
 		   "type":"git"
 		},
-		"UpdateTime":"2022-11-21T17:45:50.52Z",
-		"Vulnerabilities":null
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
-	CollectedYargsParser = `
- {
-	 "CurrentPackage":{
-		"type":"npm",
-		"namespace":"",
-		"name":"yargs-parser",
-		"version":"4.2.1",
-		"qualifiers":null,
-		"subpath":""
-	 },
-	 "Source":{
-		"type":"git",
-		"namespace":"github.com/yargs",
-		"name":"yargs-parser.git",
-		"tag":null,
-		"commit":null
-	 },
-	 "Vulnerabilities":[
-		{
-		   "osvId":"GHSA-p9pc-299p-vxgp"
-		}
-	 ],
-	 "Scorecard":null,
-	 "DepPackages":[
-		{
-		   "CurrentPackage":{
-			  "type":"npm",
-			  "namespace":"",
-			  "name":"camelcase",
-			  "version":"3.0.0",
-			  "qualifiers":[
-				 
-			  ],
-			  "subpath":""
-		   },
-		   "Source":{
-			  "type":"git",
-			  "namespace":"github.com/sindresorhus",
-			  "name":"camelcase.git",
-			  "tag":null,
-			  "commit":null
-		   },
-		   "Vulnerabilities":null,
-		   "Scorecard":null,
-		   "DepPackages":null,
-		   "UpdateTime":"2022-11-21T17:45:50.52Z"
-		}
-	 ],
-	 "UpdateTime":"2022-11-21T17:45:50.52Z"
-  }`
+	CollectedYargsParser = `{
+		"CurrentPackage":{
+		   "name":"yargs-parser",
+		   "namespace":"",
+		   "qualifiers":null,
+		   "subpath":"",
+		   "type":"npm",
+		   "version":"4.2.1"
+		},
+		"DepPackages":[
+		   {
+			  "CurrentPackage":{
+				 "name":"camelcase",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"3.0.0"
+			  },
+			  "DepPackages":null,
+			  "Scorecard":null,
+			  "Source":{
+				 "commit":null,
+				 "name":"camelcase.git",
+				 "namespace":"github.com/sindresorhus",
+				 "tag":null,
+				 "type":"git"
+			  },
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+		   }
+		],
+		"Scorecard":null,
+		"Source":{
+		   "commit":null,
+		   "name":"yargs-parser.git",
+		   "namespace":"github.com/yargs",
+		   "tag":null,
+		   "type":"git"
+		},
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
+	 }`
 )
 
 func GuacNodeSliceEqual(slice1, slice2 []assembler.GuacNode) bool {
