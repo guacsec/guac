@@ -32,7 +32,7 @@ For this demo, we will simulate ingesting an organization's software catalog. To
 do this, we will ingest a collection of SBOMs.
 
 ```bash
-bin/guacone files ../guac-data/docs/
+bin/guacone collect files ../guac-data/docs/
 ```
 
 This will ingest a collection of SBOMs and SLSA attestations into GUAC.

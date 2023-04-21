@@ -16,90 +16,27 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 
-	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/cli"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var flags = struct {
-	keyPath string
-	keyID   string
-
-	// collect-sub flags
-	collectSubAddr string
-
-	// graphQL client flags
-	graphqlEndpoint string
-
-	// run as poll certifier
-	poll     bool
-	interval int
-}{}
-
-var cfgFile string
-
 func init() {
-	cobra.OnInitialize(initConfig)
-	persistentFlags := rootCmd.PersistentFlags()
-	persistentFlags.StringVar(&flags.keyPath, "verifier-keyPath", "", "path to pem file to verify dsse")
-	persistentFlags.StringVar(&flags.keyID, "verifier-keyID", "", "ID of the key to be stored")
+	cobra.OnInitialize(cli.InitConfig)
 
-	// collectsub flags
-	persistentFlags.StringVar(&flags.collectSubAddr, "csub-addr", "localhost:2782", "address to connect to collect-sub service")
-
-	// graphql client flags
-	persistentFlags.StringVar(&flags.graphqlEndpoint, "gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
-
-	// certifier flags
-	persistentFlags.BoolVarP(&flags.poll, "poll", "p", true, "sets the certifier to polling mode")
-	persistentFlags.IntVarP(&flags.interval, "interval", "i", 5, "if polling set interval in minutes")
-
-	flagNames := []string{
-		"verifier-keyPath", "verifier-keyID",
-		"csub-addr",
-		"gql-endpoint",
-		"poll", "interval",
+	set, err := cli.BuildFlags([]string{"gql-endpoint"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
 	}
-	for _, name := range flagNames {
-		if flag := persistentFlags.Lookup(name); flag != nil {
-			if err := viper.BindPFlag(name, flag); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to bind flag: %v", err)
-				os.Exit(1)
-			}
-		}
-	}
-}
-
-func initConfig() {
-	ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
-
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to get user home directory: %v\n", err)
-			os.Exit(1)
-		}
-
-		viper.AddConfigPath(home)
-		viper.AddConfigPath(".")
-		viper.SetConfigName("guac")
-		viper.SetConfigType("yaml")
-	}
-
-	viper.AutomaticEnv()
-	viper.SetEnvPrefix("guac")
-
-	if err := viper.ReadInConfig(); err == nil {
-		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
+	rootCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
 	}
 }
 

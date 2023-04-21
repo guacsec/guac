@@ -29,7 +29,13 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/regclient/regclient/types/ref"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+type ociOptions struct {
+	graphqlEndpoint string
+	dataSource      datasource.CollectSource
+}
 
 var ociCmd = &cobra.Command{
 	Use:   "image [flags] image_path1 image_path2...",
@@ -64,7 +70,7 @@ var ociCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(ctx, opts)
+		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -121,8 +127,9 @@ var ociCmd = &cobra.Command{
 	},
 }
 
-func validateOCIFlags(args []string) (options, error) {
-	var opts options
+func validateOCIFlags(args []string) (ociOptions, error) {
+	var opts ociOptions
+	opts.graphqlEndpoint = viper.GetString("gql-endpoint")
 
 	if len(args) < 1 {
 		return opts, fmt.Errorf("expected positional argument for image_path")
@@ -149,5 +156,5 @@ func validateOCIFlags(args []string) (options, error) {
 }
 
 func init() {
-	rootCmd.AddCommand(ociCmd)
+	collectCmd.AddCommand(ociCmd)
 }
