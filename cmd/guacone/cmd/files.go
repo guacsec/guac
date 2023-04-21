@@ -120,6 +120,9 @@ var filesCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
+		_, err = csubClient.GetCollectEntries(ctx, nil)
+		logger.Errorf("err: %v", err)
+
 		// Get pipeline of components
 		processorFunc, err := getProcessor(ctx)
 		if err != nil {
@@ -170,7 +173,7 @@ var filesCmd = &cobra.Command{
 
 			err = collectSubEmitFunc(idstrings)
 			if err != nil {
-				logger.Errorf("unable to create entries in collectsub server, but continuing: %v", err)
+				logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
 			}
 
 			err = assemblerFunc(predicates)
