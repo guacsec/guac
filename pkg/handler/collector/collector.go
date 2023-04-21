@@ -93,6 +93,8 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 				return err
 			}
 			collectorsDone += 1
+		case <-ctx.Done():
+			collectorsDone = numCollectors
 		}
 	}
 	for len(docChan) > 0 {

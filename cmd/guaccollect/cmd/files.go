@@ -19,6 +19,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/guacsec/guac/pkg/emitter"
@@ -111,7 +114,7 @@ func initializeNATsandCollector(ctx context.Context, natsAddr string) {
 	emit := func(d *processor.Document) error {
 		err = collectorPubFunc(d)
 		if err != nil {
-			logger.Errorf("collector ended with error: %v", err)
+			logger.Errorf("error publishing document from collector: %v", err)
 			os.Exit(1)
 		}
 		return nil
@@ -124,12 +127,31 @@ func initializeNATsandCollector(ctx context.Context, natsAddr string) {
 			return true
 		}
 		logger.Errorf("collector ended with error: %v", err)
-		return false
+		// Continue to emit any documents still in the docChan
+		return true
 	}
 
-	if err := collector.Collect(ctx, emit, errHandler); err != nil {
-		logger.Fatal(err)
+	ctx, cf := context.WithCancel(ctx)
+	var wg sync.WaitGroup
+	done := make(chan bool, 1)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+			logger.Errorf("Unhandled error in the collector: %s", err)
+		}
+		done <- true
+	}()
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case s := <-sigs:
+		logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+	case <-done:
+		logger.Infof("All Collectors completed")
 	}
+	cf()
+	wg.Wait()
 }
 
 func init() {

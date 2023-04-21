@@ -69,15 +69,17 @@ func (g *gitDocumentCollector) RetrieveArtifacts(ctx context.Context, docChannel
 
 	if g.poll {
 		for {
-			if ctx.Err() != nil {
-				return nil
-			}
 			err := g.createOrPull(ctx, logger, docChannel)
 			if err != nil {
 				return fmt.Errorf("error creating or pulling git repo: %w", err)
 			}
 			g.lastChecked = time.Now()
-			time.Sleep(g.interval)
+			select {
+			// If the context has been canceled it contains an err which we can throw.
+			case <-ctx.Done():
+				return ctx.Err() // nolint:wrapcheck
+			case <-time.After(g.interval):
+			}
 		}
 	} else {
 		err := g.createOrPull(ctx, logger, docChannel)
