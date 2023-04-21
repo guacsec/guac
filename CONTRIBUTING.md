@@ -6,8 +6,8 @@ just a few small guidelines you need to follow.
 Refer to the [Developer Setup](./SETUP.md) document to learn how to prepare your
 environment. You can also consult a [GraphQL Guide](./demo/GraphQL.md) which
 replaces the deprecated Neo4j components of `SETUP.md` (which is scheduled for
-deletion). Optionally, you can also consult [docker compose
-documentation](./docs/Compose.md).
+deletion). Optionally, you can also consult
+[docker compose documentation](./docs/Compose.md).
 
 ## Contributor License Agreement
 
@@ -30,12 +30,12 @@ use GitHub pull requests for this purpose. Consult
 information on using pull requests.
 
 We require all commits in a PR to contain a `Signed-off-by` line which can be
-added by using the `-s` flag of `git commit`. This is to enforce [a Developer
-Certificate of Origin (DCO)](https://wiki.linuxfoundation.org/dco).
+added by using the `-s` flag of `git commit`. This is to enforce
+[a Developer Certificate of Origin (DCO)](https://wiki.linuxfoundation.org/dco).
 
 We also require two reviewers on every PR as this follows good security
-practices. For reasoning, see [CNCF Supply Chain Best
-Practices](https://github.com/cncf/tag-security/blob/main/supply-chain-security/supply-chain-security-paper/CNCF_SSCP_v1.pdf).
+practices. For reasoning, see
+[CNCF Supply Chain Best Practices](https://github.com/cncf/tag-security/blob/main/supply-chain-security/supply-chain-security-paper/CNCF_SSCP_v1.pdf).
 
 ## Community Guidelines
 
@@ -64,26 +64,27 @@ Since GUAC is a complex project, there are 5 topic areas of interest:
   documents, maintain ingestion logic, write new collectors, etc.
 - GraphQL: define the GraphQL interface used between ingestion pipeline and
   backend, and between backend and GUAC-based applications and front-ends.
-- Backends: define efficient code to interface with database backends (Neo4j, etc.).
+- Backends: define efficient code to interface with database backends (Neo4j,
+  etc.).
 - Front-end: GUAC visualisation libraries, Javascript, CSS
 - Clients: GUAC CLI, CI Checks, Policy Engines, IDE Plugins, etc.
 
 The contribution ladder is summarized in the table below:
 
-|         Role          | Responsibilities | Requirements | Privileges | GitHub access level |
-|-----------------------|------------------|--------------|------------|---------------------|
-| Community Participant | Follow [Google's Open Source Community Guidelines](https://opensource.google/conduct/) | N/A | N/A | Read (default) |
-| Reviewer              | Review contributions from other members | Prove technical expertise in at least one GUAC topic area | Can approve PRs | Write |
-| Owner                 | Set direction and priorities for topic area. Approval of contributions | Deep technical expertise in topic area. Proven record of reviews and authorship. | Invitation to owner&maintainers only channels| Write |
-| Maintainer            | Set direction and priorities of project. Participate in weekly syncs | Expertise in 3 out of the 5 topic areas | (almost) complete repository access | Maintain |
+| Role                  | Responsibilities                                                                       | Requirements                                                                     | Privileges                                    | GitHub access level |
+| --------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------- | ------------------- |
+| Community Participant | Follow [Google's Open Source Community Guidelines](https://opensource.google/conduct/) | N/A                                                                              | N/A                                           | Read (default)      |
+| Reviewer              | Review contributions from other members                                                | Prove technical expertise in at least one GUAC topic area                        | Can approve PRs                               | Write               |
+| Owner                 | Set direction and priorities for topic area. Approval of contributions                 | Deep technical expertise in topic area. Proven record of reviews and authorship. | Invitation to owner&maintainers only channels | Write               |
+| Maintainer            | Set direction and priorities of project. Participate in weekly syncs                   | Expertise in 3 out of the 5 topic areas                                          | (almost) complete repository access           | Maintain            |
 
 Each level of the ladder is also described in more details below.
 
 ### Community Participant
 
 Each new contributor to GUAC starts at this level. There is no longer a formal
-requirement to [register desire to contribute in issue
-#1](https://github.com/guacsec/guac/issues/1).
+requirement to
+[register desire to contribute in issue #1](https://github.com/guacsec/guac/issues/1).
 
 There are no requirements and no privileges. Every community participant can
 create issues, fork the repository, create PRs, add comments to issues and PRs.

@@ -9,9 +9,10 @@ indirect dependencies. We will so see if a purl is affected by a specific
 vulnerability and which dependencies need to be updated to remediate that
 particular vulnerability.
 
-## Requirements
+## Setup
 
-- go
+To get started, please follow the [docker compose setup](../docs/Compose.md) to
+get setup and started.
 
 ## Clone GUAC
 
@@ -33,34 +34,12 @@ The rest of the demo will assume you are in the GUAC directory
 cd guac
 ```
 
-## Building the GUAC binaries
-
-Build the GUAC binaries using the `make` command.
-
-```bash
-make
-```
-
-## Running the GUAC Server
-
-The GUAC server can be run in different ways. For this demo, we will use the
-`guacone gql-server` command with the `--debug` flag command, which sets up a
-GraphQL endpoint and playground, and runs an in-memory backend to store the GUAC
-graph.
-
-Run this command in a separate terminal (in the same path) and keep it running
-throughout the demo.
-
-```bash
-bin/guacone gql-server --gql-debug
-```
-
-Note: As the data is stored in-memory, whenever you restart the server, the
-graph will be empty.
-
 ## Running the GUAC Visualizer
 
-TODO: LINK TO GUAC VISUALIZER SET UP
+To get the GUAC visualizer up and running please follow the
+[GUAC visualizer setup](https://github.com/guacsec/guac-visualizer/blob/main/docs/setup.md).
+This will be used in this demo to show the various paths from package to
+vulnerability.
 
 ## Ingesting a vulnerability SPDX SBOM
 
@@ -69,10 +48,12 @@ vulnerabilities. To do this, we will use the help of the `guacone` command,
 which is an all-in-one utility that can take a collection of files and ingest
 them into the GUAC graph.
 
-In your original window, run:
+In your terminal window, run:
 
 ```bash
-bin/guacone files ../guac-data/docs/spdx/spdx_vuln.json
+pushd ../guac-data/docs/spdx/spdx_vuln.json
+docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone files /data --gql-endpoint http://guac-graphql:8080/query
+popd
 ```
 
 This will ingest the vulnerable SPDX SBOM into GUAC so that various insights can
@@ -104,11 +85,9 @@ Particularly we will be running the OSV certifier, which will query osv.dev and
 determine if the various components that make up our images have vulnerabilities
 we should be worried about.
 
-To do this, run (with -p=false specifying non-polling) :
-
-```bash
-./bin/guacone osv -p=false
-```
+Switch back to the compose window and you will soon see that the OSV certifier
+recognized the new packages and is looking up vulnerability information for
+them.
 
 Once the OSV certifier has completed running and you will see the following
 message:
@@ -155,8 +134,8 @@ information.
 Successful output will show the following:
 
 ```bash
-{"level":"info","ts":1681825038.986958,"caller":"cmd/query_vulnerability.go:189","msg":"found path 5,4,3,2,102,101,100,99,6,21034,21035,101,100,99,6,21036,21037,101,100,99,6,21038,21039,101,100,99,6,21040,21041,101,100,99,6,21042,21043,101,100,99,6,21044,21045,101,100,99,6,121,120,119,118,6,21085,21086,120,119,118,6"}
-{"level":"info","ts":1681825038.9869912,"caller":"cmd/query_vulnerability.go:190","msg":"Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,102,101,100,99,6,21034,21035,101,100,99,6,21036,21037,101,100,99,6,21038,21039,101,100,99,6,21040,21041,101,100,99,6,21042,21043,101,100,99,6,21044,21045,101,100,99,6,121,120,119,118,6,21085,21086,120,119,118,6]"}
+{"level":"info","ts":1682083927.505824,"caller":"cmd/query_vulnerability.go:184","msg":"found path 5,4,3,2,104,103,102,101,6,21059,21060,103,102,101,6,21061,21062,103,102,101,6,21063,21064,103,102,101,6,21065,21066,103,102,101,6,21067,21068,103,102,101,6,21069,21070,103,102,101,6,323,322,321,84,6,21055,21056,322,321,84,6"}
+{"level":"info","ts":1682083927.505867,"caller":"cmd/query_vulnerability.go:185","msg":"Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,104,103,102,101,6,21059,21060,103,102,101,6,21061,21062,103,102,101,6,21063,21064,103,102,101,6,21065,21066,103,102,101,6,21067,21068,103,102,101,6,21069,21070,103,102,101,6,323,322,321,84,6,21055,21056,322,321,84,6]"}
 ```
 
 From the output, you can see that there are vulnerabilities associated with the
@@ -203,8 +182,8 @@ successfully to provide accurate results.
 Successful output will show the following:
 
 ```bash
-{"level":"info","ts":1681826514.195683,"caller":"cmd/query_vulnerability.go:163","msg":"found path 21034,21035,101,100,99,6,102,5,4,3,2"}
-{"level":"info","ts":1681826514.1957152,"caller":"cmd/query_vulnerability.go:164","msg":"Visualizer url: http://localhost:3000/visualize?path=[21034,21035,101,100,99,6,102,5,4,3,2]"}
+{"level":"info","ts":1682083996.850477,"caller":"cmd/query_vulnerability.go:158","msg":"found path 21059,21060,103,102,101,6,104,5,4,3,2"}
+{"level":"info","ts":1682083996.850501,"caller":"cmd/query_vulnerability.go:159","msg":"Visualizer url: http://localhost:3000/visualize?path=[21059,21060,103,102,101,6,104,5,4,3,2]"}
 ```
 
 Based on the output we see that there is a path to the vulnerability, we can use
@@ -224,3 +203,11 @@ From this demo, we learned how we can quickly analyze the GUAC data to find if a
 specific PURL we are interested in contains a direct or in-direct vulnerability.
 We also learned that this is just one of many utilizations of GUAC’s graphQL API
 to create more tools such as these quickly and easily!
+
+## Cleanup
+
+To delete the all the GUAC components run:
+
+```bash
+docker-compose down
+```
