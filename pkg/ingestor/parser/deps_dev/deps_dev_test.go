@@ -233,44 +233,6 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 				},
 			},
-			CertifyVuln: []assembler.CertifyVulnIngest{
-				{
-					Pkg: &model.PkgInputSpec{
-						Type:      "npm",
-						Namespace: ptrfrom.String(""),
-						Name:      "yargs-parser",
-						Version:   ptrfrom.String("4.2.1"),
-						Subpath:   ptrfrom.String(""),
-					},
-					OSV: &model.OSVInputSpec{
-						OsvId: "GHSA-p9pc-299p-vxgp",
-					},
-					VulnData: &model.VulnerabilityMetaDataInput{
-						TimeScanned:    tm.UTC(),
-						DbUri:          "",
-						DbVersion:      "",
-						ScannerUri:     "osv.dev",
-						ScannerVersion: "",
-						Origin:         "",
-						Collector:      "",
-					},
-				},
-			},
-			IsVuln: []assembler.IsVulnIngest{
-				{
-					OSV: &model.OSVInputSpec{
-						OsvId: "GHSA-p9pc-299p-vxgp",
-					},
-					GHSA: &model.GHSAInputSpec{
-						GhsaId: "GHSA-p9pc-299p-vxgp",
-					},
-					IsVuln: &model.IsVulnerabilityInputSpec{
-						Justification: "decoded OSV data collected via deps.dev",
-						Origin:        "",
-						Collector:     "",
-					},
-				},
-			},
 			HasSourceAt: []assembler.HasSourceAtIngest{
 				{
 					Pkg: &model.PkgInputSpec{
@@ -326,12 +288,62 @@ func Test_depsDevParser_Parse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			d := NewDepsDevParser()
 			if err := d.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
-				t.Errorf("scorecard.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("deps.dev.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			preds := d.GetPredicates(ctx)
 			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
-				t.Errorf("scorecard.GetPredicate mismatch values (+got, -expected): %s", d)
+				t.Errorf("deps.dev.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
 }
+
+// TODO (pxp928): Unit test will also need to be fixed after issue https://github.com/guacsec/guac/issues/769 is resolved
+
+// func Test_depsDevParser_GetIdentifiers(t *testing.T) {
+// 	ctx := logging.WithLogger(context.Background())
+
+// 	tests := []struct {
+// 		name            string
+// 		doc             *processor.Document
+// 		wantIdentifiers *common.IdentifierStrings
+// 		wantErr         bool
+// 	}{{
+// 		name: "package foreign-types",
+// 		doc: &processor.Document{
+// 			Blob:              []byte(testdata.CollectedForeignTypes),
+// 			Type:              processor.DocumentDepsDev,
+// 			Format:            processor.FormatJSON,
+// 			SourceInformation: processor.SourceInformation{},
+// 		},
+// 		wantIdentifiers: &common.IdentifierStrings{
+// 			PurlStrings: []string{"pkg:cargo/foreign-types-shared@0.1.1"}},
+// 		wantErr: false,
+// 	}, {
+// 		name: "package yargs-parser",
+// 		doc: &processor.Document{
+// 			Blob:              []byte(testdata.CollectedYargsParser),
+// 			Type:              processor.DocumentDepsDev,
+// 			Format:            processor.FormatJSON,
+// 			SourceInformation: processor.SourceInformation{},
+// 		},
+// 		wantIdentifiers: &common.IdentifierStrings{
+// 			PurlStrings: []string{"pkg:npm/camelcase@3.0.0"}},
+// 		wantErr: false,
+// 	}}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			d := NewDepsDevParser()
+// 			if err := d.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
+// 				t.Errorf("deps.dev.Parse() error = %v, wantErr %v", err, tt.wantErr)
+// 			}
+// 			identifiers, err := d.GetIdentifiers(ctx)
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("deps.dev.GetIdentifiers() error = %v, wantErr %v", err, tt.wantErr)
+// 			}
+// 			if d := cmp.Diff(tt.wantIdentifiers, identifiers); len(d) != 0 {
+// 				t.Errorf("deps.dev.GetPredicate mismatch values (+got, -expected): %s", d)
+// 			}
+// 		})
+// 	}
+// }
