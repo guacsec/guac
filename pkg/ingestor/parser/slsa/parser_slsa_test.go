@@ -15,7 +15,6 @@
 
 package slsa
 
-// TODO(bulldozer): freeze test
 import (
 	"context"
 	"testing"
