@@ -120,9 +120,6 @@ var filesCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		_, err = csubClient.GetCollectEntries(ctx, nil)
-		logger.Errorf("err: %v", err)
-
 		// Get pipeline of components
 		processorFunc, err := getProcessor(ctx)
 		if err != nil {

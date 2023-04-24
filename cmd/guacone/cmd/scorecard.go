@@ -153,7 +153,7 @@ var scorecardCmd = &cobra.Command{
 
 			err = collectSubEmitFunc(idstrings)
 			if err != nil {
-				logger.Errorf("unable to create entries in collectsub server, but continuing: %v", err)
+				logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
 			}
 
 			err = assemblerFunc(predicates)
