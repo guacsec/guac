@@ -44,7 +44,7 @@ var filesCmd = &cobra.Command{
 	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		opts, err := validateFlags(
+		opts, err := validateFilesFlags(
 			viper.GetString("natsaddr"),
 			viper.GetBool("poll"),
 			args)
@@ -58,7 +58,7 @@ var filesCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, time.Second)
+		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
@@ -67,7 +67,7 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFlags(natsAddr string, poll bool, args []string) (filesOptions, error) {
+func validateFilesFlags(natsAddr string, poll bool, args []string) (filesOptions, error) {
 	var opts filesOptions
 
 	opts.natsAddr = natsAddr

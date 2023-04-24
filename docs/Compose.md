@@ -179,13 +179,13 @@ containers used, the unclean state can cause issues.
 
 ## Start Ingesting Data
 
-Now you can run the `guacone files` ingestion command to load data into your
-GUAC deployment. For example we can ingest the sample `guac-data` data. However,
-you may ingest what you wish to here instead.
+Now you can run the `guacone collect files` ingestion command to load data into
+your GUAC deployment. For example we can ingest the sample `guac-data` data.
+However, you may ingest what you wish to here instead.
 
 ```bash
 pushd ../guac-data/docs
-docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone files /data --gql-endpoint http://guac-graphql:8080/query
+docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone collect files /data --gql-endpoint http://guac-graphql:8080/query
 popd
 ```
 
@@ -205,7 +205,7 @@ them natively.
 
 ```bash
 make build
-./bin/guacone files ../guac-data/docs
+./bin/guacone collect files ../guac-data/docs
 ```
 
 ## Query GraphQL Endpoint

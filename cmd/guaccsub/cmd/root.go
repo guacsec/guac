@@ -20,29 +20,25 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/server"
 	"github.com/guacsec/guac/pkg/logging"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var flags = struct {
-	port int
-}{}
 
 var rootCmd = &cobra.Command{
 	Use:   "guaccsub",
 	Short: "GUAC collect subscriber service for GUAC collectors",
 	Run: func(cmd *cobra.Command, args []string) {
-		flags.port = viper.GetInt("csub-listen-port")
+		port := viper.GetInt("csub-listen-port")
 
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
 		// Start csub listening server
-		csubServer, err := server.NewServer(flags.port)
+		csubServer, err := server.NewServer(port)
 		if err != nil {
 			logger.Fatalf("unable to create csub server: %v", err)
 		}
@@ -53,49 +49,18 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-var cfgFile string
-
 func init() {
-	cobra.OnInitialize(initConfig)
-	cmdFlags := rootCmd.Flags()
+	cobra.OnInitialize(cli.InitConfig)
 
-	cmdFlags.IntVar(&flags.port, "csub-listen-port", 2782, "port to listen to on collect-sub service")
-
-	flagNames := []string{"csub-listen-port"}
-	for _, name := range flagNames {
-		if flag := cmdFlags.Lookup(name); flag != nil {
-			if err := viper.BindPFlag(name, flag); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to bind flag: %v", err)
-				os.Exit(1)
-			}
-		}
+	set, err := cli.BuildFlags([]string{"csub-listen-port"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
 	}
-}
-
-func initConfig() {
-	ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
-
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to get user home directory: %v\n", err)
-			os.Exit(1)
-		}
-
-		viper.AddConfigPath(home)
-		viper.AddConfigPath(".")
-		viper.SetConfigName("guac")
-		viper.SetConfigType("yaml")
-	}
-
-	viper.AutomaticEnv()
-	viper.SetEnvPrefix("guac")
-
-	if err := viper.ReadInConfig(); err == nil {
-		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
+	rootCmd.Flags().AddFlagSet(set)
+	if err := viper.BindPFlags(rootCmd.Flags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
 	}
 }
 

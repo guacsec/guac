@@ -22,6 +22,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/collectsub/input"
@@ -177,6 +178,17 @@ var csubGetCollectEntriesCmd = &cobra.Command{
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"csub-addr"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	csubClientCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(csubClientCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+
 	rootCmd.AddCommand(csubClientCmd)
 	csubClientCmd.AddCommand(csubAddCollectEntriesCmd)
 	csubClientCmd.AddCommand(csubGetCollectEntriesCmd)

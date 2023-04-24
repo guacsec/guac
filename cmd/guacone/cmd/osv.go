@@ -33,6 +33,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+type osvOptions struct {
+	graphqlEndpoint string
+	poll            bool
+	interval        int
+}
+
 var osvCmd = &cobra.Command{
 	Use:   "osv [flags]",
 	Short: "runs the osv certifier",
@@ -70,7 +76,7 @@ var osvCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(ctx, opts)
+		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
@@ -133,8 +139,8 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOSVFlags(graphqlEndpoint string, poll bool, interval int) (options, error) {
-	var opts options
+func validateOSVFlags(graphqlEndpoint string, poll bool, interval int) (osvOptions, error) {
+	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.poll = poll
 	opts.interval = interval
@@ -150,5 +156,5 @@ func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, e
 }
 
 func init() {
-	rootCmd.AddCommand(osvCmd)
+	certifierCmd.AddCommand(osvCmd)
 }

@@ -24,17 +24,23 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var certifyFlags = struct {
-	justification string
-	subjectType   string
+type certifyOptions struct {
+	// gql endpoint
+	graphqlEndpoint string
+	// // certifyBad/certifyGood
 	good          bool
-	pkgName       bool
-}{}
+	certifyType   string
+	justification string
+	subject       string
+	// // if type is package, true if attestation is at pkgName (for all versions) or false for a specific version
+	pkgName bool
+}
 
 var certifyCmd = &cobra.Command{
 	Use:              "certify [flags] purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)",
@@ -59,7 +65,7 @@ var certifyCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		assemblerFunc, err := getAssembler(ctx, opts)
+		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
 		if err != nil {
 			logger.Fatalf("error: %v", err)
 		}
@@ -147,8 +153,8 @@ var certifyCmd = &cobra.Command{
 	},
 }
 
-func validateCertifyFlags(graphqlEndpoint, certifyType, justification string, good, pkgName bool, args []string) (options, error) {
-	var opts options
+func validateCertifyFlags(graphqlEndpoint, certifyType, justification string, good, pkgName bool, args []string) (certifyOptions, error) {
+	var opts certifyOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.good = good
 	opts.pkgName = pkgName
@@ -170,19 +176,16 @@ func validateCertifyFlags(graphqlEndpoint, certifyType, justification string, go
 }
 
 func init() {
-	localFlags := certifyCmd.Flags()
-	localFlags.BoolVarP(&certifyFlags.good, "good", "g", true, "set true if certifyGood or false for certifyBad")
-	localFlags.StringVarP(&certifyFlags.subjectType, "type", "t", "", "package, source or artifact that is being certified")
-	localFlags.StringVarP(&certifyFlags.justification, "justification", "j", "", "justification for the certification (either good or bad)")
-	localFlags.BoolVarP(&certifyFlags.pkgName, "pkgName", "n", false, "if type is package, true if attestation is at pkgName (for all versions) or false for a specific version")
-	flagNames := []string{"good", "type", "justification", "pkgName"}
-	for _, name := range flagNames {
-		if flag := localFlags.Lookup(name); flag != nil {
-			if err := viper.BindPFlag(name, flag); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to bind flag: %v", err)
-				os.Exit(1)
-			}
-		}
+	set, err := cli.BuildFlags([]string{"good", "type", "justification", "pkgName"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
 	}
+	certifyCmd.Flags().AddFlagSet(set)
+	if err := viper.BindPFlags(certifyCmd.Flags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+
 	rootCmd.AddCommand(certifyCmd)
 }

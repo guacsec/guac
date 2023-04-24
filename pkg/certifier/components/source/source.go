@@ -55,7 +55,7 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 	for _, src := range sources {
 		for _, namespace := range src.Namespaces {
 			for _, names := range namespace.Names {
-				response, err := getNeighbors(ctx, s.client, names.Id, []generated.Edge{})
+				response, err := getNeighbors(ctx, s.client, names.Id, []generated.Edge{generated.EdgeSourceCertifyScorecard})
 				if err != nil {
 					return fmt.Errorf("failed neighbors query: %w", err)
 				}
