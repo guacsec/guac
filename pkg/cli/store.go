@@ -53,7 +53,7 @@ func init() {
 	set.String("verifier-keyID", "", "ID of the key to be stored")
 
 	set.BoolP("poll", "p", true, "sets the collector or certifier to polling mode")
-	set.IntP("interval", "i", 5, "if polling set interval in minutes")
+	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
 
 	set.BoolP("good", "g", true, "set true if certifyGood or false for certifyBad")
 	set.StringP("type", "t", "", "package, source or artifact that is being certified")

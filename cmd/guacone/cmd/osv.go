@@ -20,6 +20,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -38,7 +41,7 @@ type osvOptions struct {
 	graphqlEndpoint string
 	poll            bool
 	csubAddr        string
-	interval        int
+	interval        time.Duration
 }
 
 var osvCmd = &cobra.Command{
@@ -51,7 +54,7 @@ var osvCmd = &cobra.Command{
 		opts, err := validateOSVFlags(
 			viper.GetString("gql-endpoint"),
 			viper.GetBool("poll"),
-			viper.GetInt("interval"),
+			viper.GetString("interval"),
 			viper.GetString("csub-addr"),
 		)
 
@@ -76,36 +79,16 @@ var osvCmd = &cobra.Command{
 
 		httpClient := http.Client{}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-
-		processorFunc, err := getProcessor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		ingestorFunc, err := getIngestor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
+		processorFunc := getProcessor(ctx)
+		ingestorFunc := getIngestor(ctx)
 		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
 
-		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		packageQueryFunc, err := getPackageQuery(gqlclient)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
+		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
 
 		totalNum := 0
 		gotErr := false
@@ -149,35 +132,53 @@ var osvCmd = &cobra.Command{
 				return true
 			}
 			logger.Errorf("certifier ended with error: %v", err)
-			return false
+			gotErr = true
+			// process documents already captures
+			return true
 		}
 
-		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
-			logger.Fatal(err)
+		ctx, cf := context.WithCancel(ctx)
+		var wg sync.WaitGroup
+		done := make(chan bool, 1)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := certify.Certify(ctx, packageQuery, emit, errHandler, opts.poll, opts.interval); err != nil {
+				logger.Errorf("Unhandled error in the certifier: %s", err)
+			}
+			done <- true
+		}()
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case s := <-sigs:
+			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+		case <-done:
+			logger.Infof("All certifiers completed")
 		}
+		cf()
+		wg.Wait()
+
 		if gotErr {
-			logger.Fatalf("completed ingestion with errors")
+			logger.Errorf("completed ingestion with errors")
 		} else {
 			logger.Infof("completed ingesting %v documents", totalNum)
 		}
 	},
 }
 
-func validateOSVFlags(graphqlEndpoint string, poll bool, interval int, csubAddr string) (osvOptions, error) {
+func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAddr string) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.poll = poll
-	opts.interval = interval
+	i, err := time.ParseDuration(interval)
+	if err != nil {
+		return opts, err
+	}
+	opts.interval = i
 	opts.csubAddr = csubAddr
 
 	return opts, nil
-}
-
-func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, error) {
-	return func() certifier.QueryComponents {
-		packageQuery := root_package.NewPackageQuery(client, 0)
-		return packageQuery
-	}, nil
 }
 
 func init() {

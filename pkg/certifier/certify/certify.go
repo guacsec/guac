@@ -79,6 +79,8 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 					return err
 				}
 				componentsCaptured = true
+			case <-ctx.Done():
+				componentsCaptured = true
 			}
 		}
 		for len(compChan) > 0 {
@@ -146,6 +148,8 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 				return err
 			}
 			certifiersDone += 1
+		case <-ctx.Done():
+			certifiersDone = numCertifiers
 		}
 	}
 	for len(docChan) > 0 {

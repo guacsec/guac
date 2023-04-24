@@ -74,26 +74,14 @@ var ociCmd = &cobra.Command{
 		}
 
 		// Get pipeline of components
-		processorFunc, err := getProcessor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-		ingestorFunc, err := getIngestor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+		processorFunc := getProcessor(ctx)
+		ingestorFunc := getIngestor(ctx)
 		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
-		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
 		totalNum := 0
 		gotErr := false
