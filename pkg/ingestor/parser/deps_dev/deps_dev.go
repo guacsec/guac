@@ -122,8 +122,9 @@ func createTopLevelIsDeps(toplevel *model.PkgInputSpec, packages []*model.PkgInp
 				Pkg:    toplevel,
 				DepPkg: packNode,
 				IsDependency: &model.IsDependencyInputSpec{
-					Justification: "dependency data collected via deps.dev",
-					VersionRange:  *packNode.Version,
+					DependencyType: model.DependencyTypeDirect,
+					Justification:  "dependency data collected via deps.dev",
+					VersionRange:   *packNode.Version,
 				},
 			}
 			isDeps = append(isDeps, p)

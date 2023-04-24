@@ -183,6 +183,8 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 
 	toplevel := s.getPackageElement("DOCUMENT")
 	// adding top level package edge manually for all depends on package
+	// TODO: This is not based on the relationship so that can be inaccurate (can capture both direct and in-direct)...Remove this and be done below by the s.spdxDoc.Relationships?
+	// see https://spdx.github.io/spdx-ntia-sbom-howto/ section 4.1.2. Additional subdependencies
 	if toplevel != nil {
 		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages, "top-level package GUAC heuristic connecting to each file/package")...)
 	}
@@ -229,7 +231,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
-	// Create predicates for IsOccurence for all artifacts found
+	// Create predicates for IsOccurrence for all artifacts found
 	for id := range s.fileArtifacts {
 		for _, pkg := range s.filePackages[id] {
 			for _, art := range s.fileArtifacts[id] {

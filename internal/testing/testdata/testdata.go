@@ -342,88 +342,99 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: baselayoutPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "3.2.0-r22",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "3.2.0-r22",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    topLevelPack,
 			DepPkg: baselayoutdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "3.2.0-r22",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "3.2.0-r22",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    topLevelPack,
 			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "2.4-r1",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2.4-r1",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    topLevelPack,
 			DepPkg: worldFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    topLevelPack,
 			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    topLevelPack,
 			DepPkg: triggersFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    topLevelPack,
 			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    baselayoutPack,
 			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "2.4-r1",
-				Justification: isDepJustifyDependencyOfJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2.4-r1",
+				Justification:  isDepJustifyDependencyOfJustification,
 			},
 		},
 		{
 			Pkg:    rootFilePack,
 			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "",
-				Justification: isDepJustifyDependsOnJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "",
+				Justification:  isDepJustifyDependsOnJustification,
 			},
 		},
 		{
 			Pkg:    baselayoutPack,
 			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "",
-				Justification: isDepJustifyContainsJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "",
+				Justification:  isDepJustifyContainsJustification,
 			},
 		},
 		{
 			Pkg:    keysPack,
 			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "",
-				Justification: isDepJustifyContainedByJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "",
+				Justification:  isDepJustifyContainedByJustification,
 			},
 		},
 	}
@@ -470,24 +481,27 @@ var (
 			Pkg:    cdxTopLevelPack,
 			DepPkg: cdxBasefilesPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "11.1+deb11u5",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "11.1+deb11u5",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    cdxTopLevelPack,
 			DepPkg: cdxNetbasePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "6.3",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "6.3",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    cdxTopLevelPack,
 			DepPkg: cdxTzdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "2021a-1+deb11u6",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2021a-1+deb11u6",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 	}
@@ -507,24 +521,27 @@ var (
 			Pkg:    cdxTopQuarkusPack,
 			DepPkg: cdxResteasyPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "2.13.4.Final",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2.13.4.Final",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    cdxTopQuarkusPack,
 			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "2.13.4.Final",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2.13.4.Final",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 		{
 			Pkg:    cdxResteasyPack,
 			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "2.13.4.Final",
-				Justification: isCDXDepJustifyDependsJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "2.13.4.Final",
+				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 	}
@@ -577,8 +594,9 @@ var (
 			Pkg:    cdxWebAppPackage,
 			DepPkg: cdxBootstrapPackage,
 			IsDependency: &model.IsDependencyInputSpec{
-				VersionRange:  "4.0.0-beta.2",
-				Justification: isDepJustifyTopPkgJustification,
+				DependencyType: model.DependencyTypeDirect,
+				VersionRange:   "4.0.0-beta.2",
+				Justification:  isDepJustifyTopPkgJustification,
 			},
 		},
 	}
