@@ -17,6 +17,7 @@ package neo4j
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -27,7 +28,8 @@ import (
 )
 
 const (
-	versionRange string = "versionRange"
+	versionRange   string = "versionRange"
+	dependencyType string = "dependencyType"
 )
 
 // Query IsDependency
@@ -104,10 +106,16 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 					return nil, gqlerror.Errorf("isDependency Node not found in neo4j")
 				}
 
+				dependencyTypeEnum, err := convertDependencyTypeToEnum(isDependencyNode.Props[dependencyType].(string))
+				if err != nil {
+					return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)
+				}
+
 				isDependency := &model.IsDependency{
 					Package:          pkg,
 					DependentPackage: depPkg,
 					VersionRange:     isDependencyNode.Props[versionRange].(string),
+					DependencyType:   dependencyTypeEnum,
 					Origin:           isDependencyNode.Props[origin].(string),
 					Collector:        isDependencyNode.Props[collector].(string),
 				}
@@ -128,19 +136,21 @@ func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.
 
 func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDependencySpec, firstMatch *bool, queryValues map[string]any) {
 	if isDependencySpec.VersionRange != nil {
-
 		matchProperties(sb, *firstMatch, "isDependency", versionRange, "$"+versionRange)
 		*firstMatch = false
 		queryValues[versionRange] = isDependencySpec.VersionRange
 	}
+	if isDependencySpec.DependencyType != nil {
+		matchProperties(sb, *firstMatch, "isDependency", dependencyType, "$"+dependencyType)
+		*firstMatch = false
+		queryValues[dependencyType] = isDependencySpec.DependencyType.String()
+	}
 	if isDependencySpec.Origin != nil {
-
 		matchProperties(sb, *firstMatch, "isDependency", origin, "$"+origin)
 		*firstMatch = false
 		queryValues[origin] = isDependencySpec.Origin
 	}
 	if isDependencySpec.Collector != nil {
-
 		matchProperties(sb, *firstMatch, "isDependency", collector, "$"+collector)
 		*firstMatch = false
 		queryValues[collector] = isDependencySpec.Collector
@@ -174,6 +184,7 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 	}
 
 	queryValues[versionRange] = dependency.VersionRange
+	queryValues[dependencyType] = dependency.DependencyType.String()
 	queryValues[justification] = dependency.Justification
 	queryValues[origin] = dependency.Origin
 	queryValues[collector] = dependency.Collector
@@ -189,7 +200,7 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 	setPkgMatchValues(&sb, selectedPkgSpec, false, &firstMatch, queryValues)
 	setPkgMatchValues(&sb, &depPkgSpec, true, &firstMatch, queryValues)
 
-	merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,justification:$justification,origin:$origin,collector:$collector})" +
+	merge := "\nMERGE (version)<-[:subject]-(isDependency:IsDependency{versionRange:$versionRange,dependencyType:$dependencyType,justification:$justification,origin:$origin,collector:$collector})" +
 		"-[:dependency]->(objPkgName)"
 	sb.WriteString(merge)
 	sb.WriteString(returnValue)
@@ -229,10 +240,16 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 				return nil, gqlerror.Errorf("isDependency Node not found in neo4j")
 			}
 
+			dependencyTypeEnum, err := convertDependencyTypeToEnum(isDependencyNode.Props[dependencyType].(string))
+			if err != nil {
+				return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)
+			}
+
 			isDependency := &model.IsDependency{
 				Package:          pkg,
 				DependentPackage: depPkg,
 				VersionRange:     isDependencyNode.Props[versionRange].(string),
+				DependencyType:   dependencyTypeEnum,
 				Origin:           isDependencyNode.Props[origin].(string),
 				Collector:        isDependencyNode.Props[collector].(string),
 			}
@@ -244,4 +261,17 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 	}
 
 	return result.(*model.IsDependency), nil
+}
+
+func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {
+	if status == model.DependencyTypeDirect.String() {
+		return model.DependencyTypeDirect, nil
+	}
+	if status == model.DependencyTypeIndirect.String() {
+		return model.DependencyTypeIndirect, nil
+	}
+	if status == model.DependencyTypeUnknown.String() {
+		return model.DependencyTypeUnknown, nil
+	}
+	return model.DependencyTypeUnknown, fmt.Errorf("failed to convert DependencyType to enum")
 }

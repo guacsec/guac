@@ -510,17 +510,19 @@ type HashEqualSpec struct {
 // package (subject) - the package object type that represents the package
 // dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
 // versionRange (property) - string value for version range that applies to the dependent package
+// dependencyType - enum that represents the dependency as either direct, indirect or unknown
 // justification (property) - string value representing why the artifacts are the equal
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 type IsDependency struct {
-	ID               string   `json:"id"`
-	Package          *Package `json:"package"`
-	DependentPackage *Package `json:"dependentPackage"`
-	VersionRange     string   `json:"versionRange"`
-	Justification    string   `json:"justification"`
-	Origin           string   `json:"origin"`
-	Collector        string   `json:"collector"`
+	ID               string         `json:"id"`
+	Package          *Package       `json:"package"`
+	DependentPackage *Package       `json:"dependentPackage"`
+	VersionRange     string         `json:"versionRange"`
+	DependencyType   DependencyType `json:"dependencyType"`
+	Justification    string         `json:"justification"`
+	Origin           string         `json:"origin"`
+	Collector        string         `json:"collector"`
 }
 
 func (IsDependency) IsNode() {}
@@ -529,10 +531,11 @@ func (IsDependency) IsNode() {}
 //
 // All fields are required.
 type IsDependencyInputSpec struct {
-	VersionRange  string `json:"versionRange"`
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	VersionRange   string         `json:"versionRange"`
+	DependencyType DependencyType `json:"dependencyType"`
+	Justification  string         `json:"justification"`
+	Origin         string         `json:"origin"`
+	Collector      string         `json:"collector"`
 }
 
 // IsDependencySpec allows filtering the list of IsDependency to return.
@@ -540,13 +543,14 @@ type IsDependencyInputSpec struct {
 // Note: the package object must be defined to return its dependent packages.
 // Dependent Packages must represent the packageName (cannot be the packageVersion)
 type IsDependencySpec struct {
-	ID               *string      `json:"id,omitempty"`
-	Package          *PkgSpec     `json:"package,omitempty"`
-	DependentPackage *PkgNameSpec `json:"dependentPackage,omitempty"`
-	VersionRange     *string      `json:"versionRange,omitempty"`
-	Justification    *string      `json:"justification,omitempty"`
-	Origin           *string      `json:"origin,omitempty"`
-	Collector        *string      `json:"collector,omitempty"`
+	ID               *string         `json:"id,omitempty"`
+	Package          *PkgSpec        `json:"package,omitempty"`
+	DependentPackage *PkgNameSpec    `json:"dependentPackage,omitempty"`
+	VersionRange     *string         `json:"versionRange,omitempty"`
+	DependencyType   *DependencyType `json:"dependencyType,omitempty"`
+	Justification    *string         `json:"justification,omitempty"`
+	Origin           *string         `json:"origin,omitempty"`
+	Collector        *string         `json:"collector,omitempty"`
 }
 
 // IsOccurrence is an attestation represents when either a package or source is represented by an artifact
@@ -1243,6 +1247,53 @@ type VulnerabilitySpec struct {
 	Cve    *CVESpec  `json:"cve,omitempty"`
 	Ghsa   *GHSASpec `json:"ghsa,omitempty"`
 	NoVuln *bool     `json:"noVuln,omitempty"`
+}
+
+// DependencyType determines the type of the IsDependency.
+// Direct - direct dependency of the IsDependency Package
+// Indirect - transitive dependency of the IsDependency Package
+// Unknown - type of the dependency not known
+type DependencyType string
+
+const (
+	DependencyTypeDirect   DependencyType = "DIRECT"
+	DependencyTypeIndirect DependencyType = "INDIRECT"
+	DependencyTypeUnknown  DependencyType = "UNKNOWN"
+)
+
+var AllDependencyType = []DependencyType{
+	DependencyTypeDirect,
+	DependencyTypeIndirect,
+	DependencyTypeUnknown,
+}
+
+func (e DependencyType) IsValid() bool {
+	switch e {
+	case DependencyTypeDirect, DependencyTypeIndirect, DependencyTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e DependencyType) String() string {
+	return string(e)
+}
+
+func (e *DependencyType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DependencyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DependencyType", str)
+	}
+	return nil
+}
+
+func (e DependencyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // Edge allows filtering path/neighbors output to only contain a subset of all
