@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
+	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
@@ -36,6 +37,7 @@ import (
 type osvOptions struct {
 	graphqlEndpoint string
 	poll            bool
+	csubAddr        string
 	interval        int
 }
 
@@ -50,6 +52,7 @@ var osvCmd = &cobra.Command{
 			viper.GetString("gql-endpoint"),
 			viper.GetBool("poll"),
 			viper.GetInt("interval"),
+			viper.GetString("csub-addr"),
 		)
 
 		if err != nil {
@@ -60,6 +63,15 @@ var osvCmd = &cobra.Command{
 
 		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
 			logger.Fatalf("unable to register certifier: %w", err)
+		}
+
+		// initialize collectsub client
+		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		if err != nil {
+			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %w", err)
+			csubClient = nil
+		} else {
+			defer csubClient.Close()
 		}
 
 		httpClient := http.Client{}
@@ -76,6 +88,13 @@ var osvCmd = &cobra.Command{
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
+
+		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
+
 		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -101,13 +120,18 @@ var osvCmd = &cobra.Command{
 				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
 			}
 
-			graphs, err := ingestorFunc(docTree)
+			predicates, idstrings, err := ingestorFunc(docTree)
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest doc tree: %v", err)
 			}
 
-			err = assemblerFunc(graphs)
+			err = collectSubEmitFunc(idstrings)
+			if err != nil {
+				logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
+			}
+
+			err = assemblerFunc(predicates)
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to assemble graphs: %v", err)
@@ -139,11 +163,12 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOSVFlags(graphqlEndpoint string, poll bool, interval int) (osvOptions, error) {
+func validateOSVFlags(graphqlEndpoint string, poll bool, interval int, csubAddr string) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.poll = poll
 	opts.interval = interval
+	opts.csubAddr = csubAddr
 
 	return opts, nil
 }

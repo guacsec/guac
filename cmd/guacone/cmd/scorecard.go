@@ -24,6 +24,7 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
+	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/scorecard"
@@ -39,6 +40,7 @@ type scorecardOptions struct {
 	graphqlEndpoint string
 	poll            bool
 	interval        int
+	csubAddr        string
 }
 
 var scorecardCmd = &cobra.Command{
@@ -50,6 +52,7 @@ var scorecardCmd = &cobra.Command{
 
 		opts, err := validateScorecardFlags(
 			viper.GetString("gql-endpoint"),
+			viper.GetString("csub-addr"),
 			viper.GetBool("poll"),
 			viper.GetInt("interval"),
 		)
@@ -66,6 +69,15 @@ var scorecardCmd = &cobra.Command{
 			fmt.Printf("unable to create scorecard runner: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
+		}
+
+		// initialize collectsub client
+		csubClient, err := csub_client.NewClient(opts.csubAddr)
+		if err != nil {
+			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %w", err)
+			csubClient = nil
+		} else {
+			defer csubClient.Close()
 		}
 
 		httpClient := http.Client{}
@@ -102,11 +114,18 @@ var scorecardCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
+		if err != nil {
+			logger.Errorf("error: %v", err)
+			os.Exit(1)
+		}
+
 		ingestorFunc, err := getIngestor(ctx)
 		if err != nil {
 			logger.Errorf("error: %v", err)
 			os.Exit(1)
 		}
+
 		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -126,13 +145,18 @@ var scorecardCmd = &cobra.Command{
 				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
 			}
 
-			graphs, err := ingestorFunc(docTree)
+			predicates, idstrings, err := ingestorFunc(docTree)
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest doc tree: %v", err)
 			}
 
-			err = assemblerFunc(graphs)
+			err = collectSubEmitFunc(idstrings)
+			if err != nil {
+				logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
+			}
+
+			err = assemblerFunc(predicates)
 			if err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to assemble graphs: %v", err)
@@ -164,9 +188,10 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(graphqlEndpoint string, poll bool, interval int) (scorecardOptions, error) {
+func validateScorecardFlags(graphqlEndpoint string, csubAddr string, poll bool, interval int) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.csubAddr = csubAddr
 	opts.poll = poll
 	opts.interval = interval
 

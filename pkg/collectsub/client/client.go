@@ -18,7 +18,6 @@ package client
 import (
 	"context"
 	"fmt"
-	"log"
 
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"google.golang.org/grpc"
@@ -40,7 +39,7 @@ func NewClient(addr string) (Client, error) {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		return nil, err
 	}
 	c := pb.NewColectSubscriberServiceClient(conn)
 
