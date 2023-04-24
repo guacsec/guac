@@ -58,6 +58,155 @@ func Test_depsDevParser_Parse(t *testing.T) {
 		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
 	}{{
+		name: "package NPM React",
+		doc: &processor.Document{
+			Blob:              []byte(testdata.CollectedNPMReact),
+			Type:              processor.DocumentDepsDev,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		wantPredicates: &assembler.IngestPredicates{
+			IsDependency: []assembler.IsDependencyIngest{
+				{
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "loose-envify",
+						Version:   ptrfrom.String("1.4.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					DepPkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "js-tokens",
+						Version:   ptrfrom.String("4.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					IsDependency: &model.IsDependencyInputSpec{
+						DependencyType: model.DependencyTypeDirect,
+						VersionRange:   "^3.0.0 || ^4.0.0",
+						Justification:  "dependency data collected via deps.dev",
+						Origin:         "",
+						Collector:      "",
+					},
+				}, {
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "react",
+						Version:   ptrfrom.String("17.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					DepPkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "loose-envify",
+						Version:   ptrfrom.String("1.4.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					IsDependency: &model.IsDependencyInputSpec{
+						DependencyType: model.DependencyTypeDirect,
+						VersionRange:   "^1.1.0",
+						Justification:  "dependency data collected via deps.dev",
+						Origin:         "",
+						Collector:      "",
+					},
+				}, {
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "react",
+						Version:   ptrfrom.String("17.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					DepPkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "object-assign",
+						Version:   ptrfrom.String("4.1.1"),
+						Subpath:   ptrfrom.String(""),
+					},
+					IsDependency: &model.IsDependencyInputSpec{
+						DependencyType: model.DependencyTypeDirect,
+						VersionRange:   "^4.1.1",
+						Justification:  "dependency data collected via deps.dev",
+						Origin:         "",
+						Collector:      "",
+					},
+				},
+			},
+			HasSourceAt: []assembler.HasSourceAtIngest{
+				{
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "react",
+						Version:   ptrfrom.String("17.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					Src: &model.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/facebook",
+						Name:      "react.git",
+					},
+					HasSourceAt: &model.HasSourceAtInputSpec{
+						KnownSince:    tm.UTC(),
+						Justification: "collected via deps.dev",
+						Origin:        "",
+						Collector:     "",
+					},
+				}, {
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "js-tokens",
+						Version:   ptrfrom.String("4.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					Src: &model.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/lydell",
+						Name:      "js-tokens.git",
+					},
+					HasSourceAt: &model.HasSourceAtInputSpec{
+						KnownSince:    tm.UTC(),
+						Justification: "collected via deps.dev",
+						Origin:        "",
+						Collector:     "",
+					},
+				}, {
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "object-assign",
+						Version:   ptrfrom.String("4.1.1"),
+						Subpath:   ptrfrom.String(""),
+					},
+					PkgMatchFlag: model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					Src: &model.SourceInputSpec{
+						Type:      "git",
+						Namespace: "github.com/sindresorhus",
+						Name:      "object-assign.git",
+					},
+					HasSourceAt: &model.HasSourceAtInputSpec{
+						KnownSince:    tm.UTC(),
+						Justification: "collected via deps.dev",
+						Origin:        "",
+						Collector:     "",
+					},
+				},
+			},
+		},
+		wantErr: false,
+	}, {
 		name: "package foreign-types",
 		doc: &processor.Document{
 			Blob:              []byte(testdata.CollectedForeignTypes),
@@ -145,7 +294,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "0.1.1",
+						VersionRange:   "^0.1",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -228,7 +377,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
-						VersionRange:   "3.0.0",
+						VersionRange:   "^3.0.0",
 						Justification:  "dependency data collected via deps.dev",
 						Origin:         "",
 						Collector:      "",
@@ -300,52 +449,50 @@ func Test_depsDevParser_Parse(t *testing.T) {
 	}
 }
 
-// TODO (pxp928): Unit test will also need to be fixed after issue https://github.com/guacsec/guac/issues/769 is resolved
+func Test_depsDevParser_GetIdentifiers(t *testing.T) {
+	ctx := logging.WithLogger(context.Background())
 
-// func Test_depsDevParser_GetIdentifiers(t *testing.T) {
-// 	ctx := logging.WithLogger(context.Background())
-
-// 	tests := []struct {
-// 		name            string
-// 		doc             *processor.Document
-// 		wantIdentifiers *common.IdentifierStrings
-// 		wantErr         bool
-// 	}{{
-// 		name: "package foreign-types",
-// 		doc: &processor.Document{
-// 			Blob:              []byte(testdata.CollectedForeignTypes),
-// 			Type:              processor.DocumentDepsDev,
-// 			Format:            processor.FormatJSON,
-// 			SourceInformation: processor.SourceInformation{},
-// 		},
-// 		wantIdentifiers: &common.IdentifierStrings{
-// 			PurlStrings: []string{"pkg:cargo/foreign-types-shared@0.1.1"}},
-// 		wantErr: false,
-// 	}, {
-// 		name: "package yargs-parser",
-// 		doc: &processor.Document{
-// 			Blob:              []byte(testdata.CollectedYargsParser),
-// 			Type:              processor.DocumentDepsDev,
-// 			Format:            processor.FormatJSON,
-// 			SourceInformation: processor.SourceInformation{},
-// 		},
-// 		wantIdentifiers: &common.IdentifierStrings{
-// 			PurlStrings: []string{"pkg:npm/camelcase@3.0.0"}},
-// 		wantErr: false,
-// 	}}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			d := NewDepsDevParser()
-// 			if err := d.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
-// 				t.Errorf("deps.dev.Parse() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 			identifiers, err := d.GetIdentifiers(ctx)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("deps.dev.GetIdentifiers() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 			if d := cmp.Diff(tt.wantIdentifiers, identifiers); len(d) != 0 {
-// 				t.Errorf("deps.dev.GetPredicate mismatch values (+got, -expected): %s", d)
-// 			}
-// 		})
-// 	}
-// }
+	tests := []struct {
+		name            string
+		doc             *processor.Document
+		wantIdentifiers *common.IdentifierStrings
+		wantErr         bool
+	}{{
+		name: "package foreign-types",
+		doc: &processor.Document{
+			Blob:              []byte(testdata.CollectedForeignTypes),
+			Type:              processor.DocumentDepsDev,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		wantIdentifiers: &common.IdentifierStrings{
+			PurlStrings: []string{"pkg:cargo/foreign-types-shared@0.1.1"}},
+		wantErr: false,
+	}, {
+		name: "package yargs-parser",
+		doc: &processor.Document{
+			Blob:              []byte(testdata.CollectedYargsParser),
+			Type:              processor.DocumentDepsDev,
+			Format:            processor.FormatJSON,
+			SourceInformation: processor.SourceInformation{},
+		},
+		wantIdentifiers: &common.IdentifierStrings{
+			PurlStrings: []string{"pkg:npm/camelcase@3.0.0"}},
+		wantErr: false,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := NewDepsDevParser()
+			if err := d.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
+				t.Errorf("deps.dev.Parse() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			identifiers, err := d.GetIdentifiers(ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("deps.dev.GetIdentifiers() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if d := cmp.Diff(tt.wantIdentifiers, identifiers); len(d) != 0 {
+				t.Errorf("deps.dev.GetPredicate mismatch values (+got, -expected): %s", d)
+			}
+		})
+	}
+}

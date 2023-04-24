@@ -1147,6 +1147,110 @@ var (
 		   "type":"git"
 		},
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
+	}`
+
+	CollectedNPMReact = `{
+		"CurrentPackage":{
+		   "name":"react",
+		   "namespace":"",
+		   "qualifiers":null,
+		   "subpath":"",
+		   "type":"npm",
+		   "version":"17.0.0"
+		},
+		"DepPackages":[
+		   {
+			  "DepPackageComponent":{
+				 "CurrentPackage":{
+					"name":"loose-envify",
+					"namespace":"",
+					"qualifiers":null,
+					"subpath":"",
+					"type":"npm",
+					"version":"1.4.0"
+				 },
+				 "DepPackages":[
+					{
+					   "DepPackageComponent":{
+						  "CurrentPackage":{
+							 "name":"js-tokens",
+							 "namespace":"",
+							 "qualifiers":null,
+							 "subpath":"",
+							 "type":"npm",
+							 "version":"4.0.0"
+						  },
+						  "DepPackages":null,
+						  "Scorecard":null,
+						  "Source":{
+							 "commit":null,
+							 "name":"js-tokens.git",
+							 "namespace":"github.com/lydell",
+							 "tag":null,
+							 "type":"git"
+						  },
+						  "UpdateTime":"2022-11-21T17:45:50.52Z"
+					   },
+					   "IsDependency":{
+						  "collector":"",
+						  "dependencyType":"DIRECT",
+						  "justification":"dependency data collected via deps.dev",
+						  "origin":"",
+						  "versionRange":"^3.0.0 || ^4.0.0"
+					   }
+					}
+				 ],
+				 "Scorecard":null,
+				 "Source":null,
+				 "UpdateTime":"2022-11-21T17:45:50.52Z"
+			  },
+			  "IsDependency":{
+				 "collector":"",
+				 "dependencyType":"DIRECT",
+				 "justification":"dependency data collected via deps.dev",
+				 "origin":"",
+				 "versionRange":"^1.1.0"
+			  }
+		   },
+		   {
+			  "DepPackageComponent":{
+				 "CurrentPackage":{
+					"name":"object-assign",
+					"namespace":"",
+					"qualifiers":null,
+					"subpath":"",
+					"type":"npm",
+					"version":"4.1.1"
+				 },
+				 "DepPackages":null,
+				 "Scorecard":null,
+				 "Source":{
+					"commit":null,
+					"name":"object-assign.git",
+					"namespace":"github.com/sindresorhus",
+					"tag":null,
+					"type":"git"
+				 },
+				 "UpdateTime":"2022-11-21T17:45:50.52Z"
+			  },
+			  "IsDependency":{
+				 "collector":"",
+				 "dependencyType":"DIRECT",
+				 "justification":"dependency data collected via deps.dev",
+				 "origin":"",
+				 "versionRange":"^4.1.1"
+			  }
+		   }
+		],
+		"Scorecard":null,
+		"Source":{
+		   "commit":null,
+		   "name":"react.git",
+		   "namespace":"github.com/facebook",
+		   "tag":null,
+		   "type":"git"
+		},
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
 	CollectedGoLangMakeNowJust = `{
@@ -1242,85 +1346,94 @@ var (
 		},
 		"DepPackages":[
 		   {
-			  "CurrentPackage":{
-				 "name":"foreign-types-shared",
-				 "namespace":"",
-				 "qualifiers":null,
-				 "subpath":"",
-				 "type":"cargo",
-				 "version":"0.1.1"
+			  "DepPackageComponent":{
+				 "CurrentPackage":{
+					"name":"foreign-types-shared",
+					"namespace":"",
+					"qualifiers":null,
+					"subpath":"",
+					"type":"cargo",
+					"version":"0.1.1"
+				 },
+				 "DepPackages":null,
+				 "Scorecard":{
+					"aggregateScore":4.599999904632568,
+					"checks":[
+					   {
+						  "check":"Maintained",
+						  "score":5
+					   },
+					   {
+						  "check":"CII-Best-Practices",
+						  "score":0
+					   },
+					   {
+						  "check":"License",
+						  "score":10
+					   },
+					   {
+						  "check":"Signed-Releases",
+						  "score":-1
+					   },
+					   {
+						  "check":"Dangerous-Workflow",
+						  "score":10
+					   },
+					   {
+						  "check":"Pinned-Dependencies",
+						  "score":7
+					   },
+					   {
+						  "check":"Binary-Artifacts",
+						  "score":10
+					   },
+					   {
+						  "check":"Token-Permissions",
+						  "score":0
+					   },
+					   {
+						  "check":"Packaging",
+						  "score":-1
+					   },
+					   {
+						  "check":"Vulnerabilities",
+						  "score":10
+					   },
+					   {
+						  "check":"Fuzzing",
+						  "score":0
+					   },
+					   {
+						  "check":"Branch-Protection",
+						  "score":0
+					   },
+					   {
+						  "check":"Security-Policy",
+						  "score":0
+					   }
+					],
+					"collector":"",
+					"origin":"",
+					"scorecardCommit":"b16c74bd16a7aba296227115ca0110b9e0a87742",
+					"scorecardVersion":"v4.10.5-46-gb16c74b",
+					"timeScanned":"2022-11-21T17:45:50.52Z"
+				 },
+				 "Source":{
+					"commit":null,
+					"name":"foreign-types",
+					"namespace":"github.com/sfackler",
+					"tag":null,
+					"type":"git"
+				 },
+				 "UpdateTime":"2022-11-21T17:45:50.52Z"
 			  },
-			  "DepPackages":null,
-			  "Scorecard":{
-				 "aggregateScore":4.599999904632568,
-				 "checks":[
-					{
-					   "check":"Maintained",
-					   "score":5
-					},
-					{
-					   "check":"CII-Best-Practices",
-					   "score":0
-					},
-					{
-					   "check":"License",
-					   "score":10
-					},
-					{
-					   "check":"Signed-Releases",
-					   "score":-1
-					},
-					{
-					   "check":"Dangerous-Workflow",
-					   "score":10
-					},
-					{
-					   "check":"Pinned-Dependencies",
-					   "score":7
-					},
-					{
-					   "check":"Binary-Artifacts",
-					   "score":10
-					},
-					{
-					   "check":"Token-Permissions",
-					   "score":0
-					},
-					{
-					   "check":"Packaging",
-					   "score":-1
-					},
-					{
-					   "check":"Vulnerabilities",
-					   "score":10
-					},
-					{
-					   "check":"Fuzzing",
-					   "score":0
-					},
-					{
-					   "check":"Branch-Protection",
-					   "score":0
-					},
-					{
-					   "check":"Security-Policy",
-					   "score":0
-					}
-				 ],
+			  "IsDependency":{
 				 "collector":"",
+				 "dependencyType":"DIRECT",
+				 "justification":"dependency data collected via deps.dev",
 				 "origin":"",
-				 "scorecardCommit":"b16c74bd16a7aba296227115ca0110b9e0a87742",
-				 "scorecardVersion":"v4.10.5-46-gb16c74b",
-				 "timeScanned":"2022-11-21T17:45:50.52Z"
-			  },
-			  "Source":{
-				 "commit":null,
-				 "name":"foreign-types",
-				 "namespace":"github.com/sfackler",
-				 "tag":null,
-				 "type":"git"
-			  },
-			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+				 "versionRange":"^0.1"
+			  }
 		   }
 		],
 		"Scorecard":{
@@ -1405,24 +1518,33 @@ var (
 		},
 		"DepPackages":[
 		   {
-			  "CurrentPackage":{
-				 "name":"camelcase",
-				 "namespace":"",
-				 "qualifiers":null,
-				 "subpath":"",
-				 "type":"npm",
-				 "version":"3.0.0"
+			  "DepPackageComponent":{
+				 "CurrentPackage":{
+					"name":"camelcase",
+					"namespace":"",
+					"qualifiers":null,
+					"subpath":"",
+					"type":"npm",
+					"version":"3.0.0"
+				 },
+				 "DepPackages":null,
+				 "Scorecard":null,
+				 "Source":{
+					"commit":null,
+					"name":"camelcase.git",
+					"namespace":"github.com/sindresorhus",
+					"tag":null,
+					"type":"git"
+				 },
+				 "UpdateTime":"2022-11-21T17:45:50.52Z"
 			  },
-			  "DepPackages":null,
-			  "Scorecard":null,
-			  "Source":{
-				 "commit":null,
-				 "name":"camelcase.git",
-				 "namespace":"github.com/sindresorhus",
-				 "tag":null,
-				 "type":"git"
-			  },
-			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+			  "IsDependency":{
+				 "collector":"",
+				 "dependencyType":"DIRECT",
+				 "justification":"dependency data collected via deps.dev",
+				 "origin":"",
+				 "versionRange":"^3.0.0"
+			  }
 		   }
 		],
 		"Scorecard":null,

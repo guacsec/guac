@@ -101,6 +101,22 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		poll:    false,
 		wantErr: false,
 	}, {
+		name:     "NPM React package version 17.0.0",
+		packages: []string{"pkg:npm/react@17.0.0"},
+		want: []*processor.Document{
+			{
+				Blob:   []byte(testdata.CollectedNPMReact),
+				Type:   processor.DocumentDepsDev,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: DepsCollector,
+					Source:    DepsCollector,
+				},
+			},
+		},
+		poll:    false,
+		wantErr: false,
+	}, {
 		name:     "github.com/makenowjust/heredoc go package",
 		packages: []string{"pkg:golang/github.com/makenowjust/heredoc@v1.0.0"},
 		want: []*processor.Document{
@@ -242,9 +258,15 @@ func normalizeTimeStamp(blob []byte) ([]byte, error) {
 		packageComponent.Scorecard.TimeScanned = tm.UTC()
 	}
 	for _, depPack := range packageComponent.DepPackages {
-		depPack.UpdateTime = tm.UTC()
-		if depPack.Scorecard != nil {
-			depPack.Scorecard.TimeScanned = tm.UTC()
+		depPack.DepPackageComponent.UpdateTime = tm.UTC()
+		if depPack.DepPackageComponent.Scorecard != nil {
+			depPack.DepPackageComponent.Scorecard.TimeScanned = tm.UTC()
+		}
+		for _, inDirectPack := range depPack.DepPackageComponent.DepPackages {
+			inDirectPack.DepPackageComponent.UpdateTime = tm.UTC()
+			if inDirectPack.DepPackageComponent.Scorecard != nil {
+				inDirectPack.DepPackageComponent.Scorecard.TimeScanned = tm.UTC()
+			}
 		}
 	}
 	return json.Marshal(packageComponent)
