@@ -123,12 +123,7 @@ var filesCmd = &cobra.Command{
 		// Get pipeline of components
 		processorFunc := getProcessor(ctx)
 		ingestorFunc := getIngestor(ctx)
-		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
+		collectSubEmitFunc := getCollectSubEmit(ctx, csubClient)
 		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
 		totalNum := 0
@@ -238,7 +233,7 @@ func getAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.
 	return f
 }
 
-func getCollectSubEmit(ctx context.Context, csubClient csub_client.Client) (func([]*parser_common.IdentifierStrings) error, error) {
+func getCollectSubEmit(ctx context.Context, csubClient csub_client.Client) func([]*parser_common.IdentifierStrings) error {
 	return func(idstrings []*parser_common.IdentifierStrings) error {
 		if csubClient != nil {
 			entries := input.IdentifierStringsSliceToCollectEntries(idstrings)
@@ -249,7 +244,7 @@ func getCollectSubEmit(ctx context.Context, csubClient csub_client.Client) (func
 			}
 		}
 		return nil
-	}, nil
+	}
 }
 
 func printErrors(filesWithErrors []string) string {

@@ -99,9 +99,9 @@ func (s *server) Serve(ctx context.Context) error {
 	}()
 	<-ctx.Done()
 	logger.Infof("context cancelled, gracefully shutting down csub grpc server")
-	gs.GracefulStop()
 	done := make(chan bool, 1)
 	go func() {
+		gs.GracefulStop()
 		wg.Wait()
 		done <- true
 	}()

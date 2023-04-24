@@ -112,12 +112,7 @@ var scorecardCmd = &cobra.Command{
 			logger.Fatalf("unable to register certifier: %w", err)
 		}
 		processorFunc := getProcessor(ctx)
-		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
+		collectSubEmitFunc := getCollectSubEmit(ctx, csubClient)
 		ingestorFunc := getIngestor(ctx)
 		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
