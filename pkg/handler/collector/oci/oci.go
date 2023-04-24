@@ -83,7 +83,6 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 				if repoTags[imagePath] == nil || len(repoTags[imagePath]) > 0 {
 					repoTags[imagePath] = append(repoTags[imagePath], imageRef.Tag)
 				}
-
 			}
 		}
 		return nil
@@ -228,7 +227,9 @@ func (o *ociCollector) fetchOCIArtifacts(ctx context.Context, repo string, rc *r
 			// log error and continue
 			m, err = rc.ManifestGet(ctx, r)
 			if err != nil {
-				logger.Error(err)
+				// this is a normal behavior, not an error when the digest does not have an attestation
+				// explicitly logging it as info to avoid call-stack when logging
+				logger.Infof("unable to get manifest for %v: %v", imageTag, err)
 				continue
 			}
 
