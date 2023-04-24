@@ -84,8 +84,18 @@ var p1out = &model.Package{
 		Names: []*model.PackageName{{
 			Name: "tensorflow",
 			Versions: []*model.PackageVersion{{
+				Version:    "",
 				Qualifiers: []*model.PackageQualifier{},
 			}},
+		}},
+	}},
+}
+var p1outName = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name:     "tensorflow",
+			Versions: []*model.PackageVersion{},
 		}},
 	}},
 }
@@ -94,6 +104,18 @@ var p2 = &model.PkgInputSpec{
 	Type:    "pypi",
 	Name:    "tensorflow",
 	Version: ptrfrom.String("2.11.1"),
+}
+var p2out = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name: "tensorflow",
+			Versions: []*model.PackageVersion{{
+				Version:    "2.11.1",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
 }
 
 // var p3 = &model.PkgInputSpec{
@@ -120,6 +142,23 @@ var s1out = &model.Source{
 		Namespace: "github.com/jeff",
 		Names: []*model.SourceName{{
 			Name:   "myrepo",
+			Tag:    ptrfrom.String(""),
+			Commit: ptrfrom.String(""),
+		}},
+	}},
+}
+
+var s2 = &model.SourceInputSpec{
+	Type:      "git",
+	Namespace: "github.com/bob",
+	Name:      "bobsrepo",
+}
+var s2out = &model.Source{
+	Type: "git",
+	Namespaces: []*model.SourceNamespace{{
+		Namespace: "github.com/bob",
+		Names: []*model.SourceName{{
+			Name:   "bobsrepo",
 			Tag:    ptrfrom.String(""),
 			Commit: ptrfrom.String(""),
 		}},
@@ -494,7 +533,7 @@ func TestOccurrence(t *testing.T) {
 			}
 			for _, a := range test.InArt {
 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %a", err)
+					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
@@ -610,7 +649,7 @@ func TestOccurrenceNeighbors(t *testing.T) {
 			}
 			for _, a := range test.InArt {
 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %a", err)
+					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
