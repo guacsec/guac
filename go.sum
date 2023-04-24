@@ -1834,8 +1834,8 @@ github.com/prometheus/prometheus v0.42.0/go.mod h1:Pfqb/MLnnR2KK+0vchiaH39jXxvLM
 github.com/prometheus/tsdb v0.7.1/go.mod h1:qhTCs0VvXwvX/y3TZrWD7rabWM+ijKTux40TwIPHuXU=
 github.com/rakyll/embedmd v0.0.0-20171029212350-c8060a0752a2/go.mod h1:7jOTMgqac46PZcF54q6l2hkLEG8op93fZu61KmxWDV4=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
-github.com/regclient/regclient v0.4.7 h1:nfVjTuf9AMsCqCMwQit69anXGwUPH9SAfV4r2ptCxzM=
-github.com/regclient/regclient v0.4.7/go.mod h1:Q8W+IYHycJVt73Bw00HqRSNDesxYqnKJBfQx8JYzXCg=
+github.com/regclient/regclient v0.4.8 h1:h4uZRR4OT4oO+50qWu4bj+rzqRs/JwD3erb6lHIkYK4=
+github.com/regclient/regclient v0.4.8/go.mod h1:UC6i29I09h9KHyABGLGvsvGi7KYRY8ZKLyt7fzvW4oE=
 github.com/rhysd/actionlint v1.6.15 h1:IxQIp10aVce77jNnoHye7NFka8/7CRBSvKXoMRGryXM=
 github.com/rhysd/actionlint v1.6.15/go.mod h1:R4ZRjgsIrnsT1CPU/4MdiIBzfJgMKJFd4qqGUERI098=
 github.com/rivo/uniseg v0.2.0 h1:S1pD9weZBuJdFmowNwbpi7BJ8TNftyUImj/0WQi72jY=
