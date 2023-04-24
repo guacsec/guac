@@ -15,7 +15,6 @@
 
 package dsse
 
-// TODO(bulldozer): freeze tests
 import (
 	"context"
 	"testing"
