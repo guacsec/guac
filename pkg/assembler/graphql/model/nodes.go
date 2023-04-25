@@ -43,6 +43,24 @@ type Vulnerability interface {
 	IsVulnerability()
 }
 
+// Annotations are key-value pairs to provide additional information or metadata about SBOM
+type Annotations struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// AnnotationsSpec is the same as Annotations, but usable as mutation input.
+type AnnotationsInputSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// AnnotationsSpec is the same as Annotations, but usable as query input.
+type AnnotationsSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 // Artifact represents the artifact and contains a digest field
 //
 // Both field are mandatory and canonicalized to be lowercase.
@@ -364,17 +382,24 @@ type GHSASpec struct {
 //
 // subject - union type that can be either a package or source object type
 // uri (property) - identifier string for the SBOM
+// algorithm - cryptographic algorithm of the digest
+// digest - hash of the SBOM
+// downloadLocation - the download location of the SBOM
+// annotations - this field may be used to provide additional information or metadata about SBOM. Such as SBOM scorecard information
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
 //
 // Note: Only package object or source object can be defined. Not both.
 type HasSbom struct {
-	ID         string          `json:"id"`
-	Subject    PackageOrSource `json:"subject"`
-	URI        string          `json:"uri"`
-	Annotation string          `json:"annotation"`
-	Origin     string          `json:"origin"`
-	Collector  string          `json:"collector"`
+	ID               string          `json:"id"`
+	Subject          PackageOrSource `json:"subject"`
+	URI              string          `json:"uri"`
+	Algorithm        string          `json:"algorithm"`
+	Digest           string          `json:"digest"`
+	DownloadLocation string          `json:"downloadLocation"`
+	Annotations      []*Annotations  `json:"annotations"`
+	Origin           string          `json:"origin"`
+	Collector        string          `json:"collector"`
 }
 
 func (HasSbom) IsNode() {}
@@ -383,23 +408,28 @@ func (HasSbom) IsNode() {}
 //
 // All fields are required.
 type HasSBOMInputSpec struct {
-	URI        string `json:"uri"`
-	Annotation string `json:"annotation"`
-	Origin     string `json:"origin"`
-	Collector  string `json:"collector"`
+	URI              string                  `json:"uri"`
+	Algorithm        string                  `json:"algorithm"`
+	Digest           string                  `json:"digest"`
+	DownloadLocation string                  `json:"downloadLocation"`
+	Annotations      []*AnnotationsInputSpec `json:"annotations"`
+	Origin           string                  `json:"origin"`
+	Collector        string                  `json:"collector"`
 }
 
-// HashEqualSpec allows filtering the list of HasSBOM to return.
+// HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
-// Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
-// relationship.
+// Only the package or source can be added, not both
 type HasSBOMSpec struct {
-	ID         *string              `json:"id,omitempty"`
-	Subject    *PackageOrSourceSpec `json:"subject,omitempty"`
-	URI        *string              `json:"uri,omitempty"`
-	Annotation *string              `json:"annotation,omitempty"`
-	Origin     *string              `json:"origin,omitempty"`
-	Collector  *string              `json:"collector,omitempty"`
+	ID               *string              `json:"id,omitempty"`
+	Subject          *PackageOrSourceSpec `json:"subject,omitempty"`
+	URI              *string              `json:"uri,omitempty"`
+	Algorithm        *string              `json:"algorithm,omitempty"`
+	Digest           *string              `json:"digest,omitempty"`
+	DownloadLocation *string              `json:"downloadLocation,omitempty"`
+	Annotations      []*AnnotationsSpec   `json:"annotations,omitempty"`
+	Origin           *string              `json:"origin,omitempty"`
+	Collector        *string              `json:"collector,omitempty"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.

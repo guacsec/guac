@@ -21,6 +21,10 @@ HasSBOM is an attestation represents that a package object or source object has 
 
 subject - union type that can be either a package or source object type
 uri (property) - identifier string for the SBOM
+algorithm - cryptographic algorithm of the digest
+digest - hash of the SBOM 
+downloadLocation - the download location of the SBOM
+annotations - this field may be used to provide additional information or metadata about SBOM. Such as SBOM scorecard information
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
 
@@ -30,24 +34,47 @@ type HasSBOM {
   id: ID!
   subject: PackageOrSource!
   uri: String!
-  annotation: String!
+  algorithm: String!
+  digest: String!
+  downloadLocation: String!
+  annotations: [Annotations!]!
   origin: String!
   collector: String!
 }
 
-"""
-HashEqualSpec allows filtering the list of HasSBOM to return.
 
-Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
-relationship.
+"""
+Annotations are key-value pairs to provide additional information or metadata about SBOM
+"""
+type Annotations {
+  key: String!
+  value: String!
+}
+
+
+"""
+HasSBOMSpec allows filtering the list of HasSBOM to return.
+
+Only the package or source can be added, not both
 """
 input HasSBOMSpec {
   id: ID
   subject: PackageOrSourceSpec
   uri: String
-  annotation: String
+  algorithm: String
+  digest: String
+  downloadLocation: String
+  annotations: [AnnotationsSpec!] = []
   origin: String
   collector: String
+}
+
+"""
+AnnotationsSpec is the same as Annotations, but usable as query input.
+"""
+input AnnotationsSpec {
+  key: String!
+  value: String!
 }
 
 """
@@ -57,9 +84,20 @@ All fields are required.
 """
 input HasSBOMInputSpec {
   uri: String!
-  annotation: String!
+  algorithm: String!
+  digest: String!
+  downloadLocation: String!
+  annotations: [AnnotationsInputSpec!]!
   origin: String!
   collector: String!
+}
+
+"""
+AnnotationsSpec is the same as Annotations, but usable as mutation input.
+"""
+input AnnotationsInputSpec {
+  key: String!
+  value: String!
 }
 
 extend type Query {

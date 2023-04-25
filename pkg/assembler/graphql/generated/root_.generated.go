@@ -38,6 +38,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Annotations struct {
+		Key   func(childComplexity int) int
+		Value func(childComplexity int) int
+	}
+
 	Artifact struct {
 		Algorithm func(childComplexity int) int
 		Digest    func(childComplexity int) int
@@ -103,12 +108,15 @@ type ComplexityRoot struct {
 	}
 
 	HasSBOM struct {
-		Annotation func(childComplexity int) int
-		Collector  func(childComplexity int) int
-		ID         func(childComplexity int) int
-		Origin     func(childComplexity int) int
-		Subject    func(childComplexity int) int
-		URI        func(childComplexity int) int
+		Algorithm        func(childComplexity int) int
+		Annotations      func(childComplexity int) int
+		Collector        func(childComplexity int) int
+		Digest           func(childComplexity int) int
+		DownloadLocation func(childComplexity int) int
+		ID               func(childComplexity int) int
+		Origin           func(childComplexity int) int
+		Subject          func(childComplexity int) int
+		URI              func(childComplexity int) int
 	}
 
 	HasSLSA struct {
@@ -337,6 +345,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Annotations.key":
+		if e.complexity.Annotations.Key == nil {
+			break
+		}
+
+		return e.complexity.Annotations.Key(childComplexity), true
+
+	case "Annotations.value":
+		if e.complexity.Annotations.Value == nil {
+			break
+		}
+
+		return e.complexity.Annotations.Value(childComplexity), true
 
 	case "Artifact.algorithm":
 		if e.complexity.Artifact.Algorithm == nil {
@@ -597,12 +619,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GHSA.ID(childComplexity), true
 
-	case "HasSBOM.annotation":
-		if e.complexity.HasSBOM.Annotation == nil {
+	case "HasSBOM.algorithm":
+		if e.complexity.HasSBOM.Algorithm == nil {
 			break
 		}
 
-		return e.complexity.HasSBOM.Annotation(childComplexity), true
+		return e.complexity.HasSBOM.Algorithm(childComplexity), true
+
+	case "HasSBOM.annotations":
+		if e.complexity.HasSBOM.Annotations == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.Annotations(childComplexity), true
 
 	case "HasSBOM.collector":
 		if e.complexity.HasSBOM.Collector == nil {
@@ -610,6 +639,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.Collector(childComplexity), true
+
+	case "HasSBOM.digest":
+		if e.complexity.HasSBOM.Digest == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.Digest(childComplexity), true
+
+	case "HasSBOM.downloadLocation":
+		if e.complexity.HasSBOM.DownloadLocation == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.DownloadLocation(childComplexity), true
 
 	case "HasSBOM.id":
 		if e.complexity.HasSBOM.ID == nil {
@@ -1840,6 +1883,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAnnotationsInputSpec,
+		ec.unmarshalInputAnnotationsSpec,
 		ec.unmarshalInputArtifactInputSpec,
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderInputSpec,
@@ -2834,6 +2879,10 @@ HasSBOM is an attestation represents that a package object or source object has 
 
 subject - union type that can be either a package or source object type
 uri (property) - identifier string for the SBOM
+algorithm - cryptographic algorithm of the digest
+digest - hash of the SBOM 
+downloadLocation - the download location of the SBOM
+annotations - this field may be used to provide additional information or metadata about SBOM. Such as SBOM scorecard information
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
 
@@ -2843,24 +2892,47 @@ type HasSBOM {
   id: ID!
   subject: PackageOrSource!
   uri: String!
-  annotation: String!
+  algorithm: String!
+  digest: String!
+  downloadLocation: String!
+  annotations: [Annotations!]!
   origin: String!
   collector: String!
 }
 
-"""
-HashEqualSpec allows filtering the list of HasSBOM to return.
 
-Only the package or source can be added, not both. HasSourceAt will be used to create the package to source
-relationship.
+"""
+Annotations are key-value pairs to provide additional information or metadata about SBOM
+"""
+type Annotations {
+  key: String!
+  value: String!
+}
+
+
+"""
+HasSBOMSpec allows filtering the list of HasSBOM to return.
+
+Only the package or source can be added, not both
 """
 input HasSBOMSpec {
   id: ID
   subject: PackageOrSourceSpec
   uri: String
-  annotation: String
+  algorithm: String
+  digest: String
+  downloadLocation: String
+  annotations: [AnnotationsSpec!] = []
   origin: String
   collector: String
+}
+
+"""
+AnnotationsSpec is the same as Annotations, but usable as query input.
+"""
+input AnnotationsSpec {
+  key: String!
+  value: String!
 }
 
 """
@@ -2870,9 +2942,20 @@ All fields are required.
 """
 input HasSBOMInputSpec {
   uri: String!
-  annotation: String!
+  algorithm: String!
+  digest: String!
+  downloadLocation: String!
+  annotations: [AnnotationsInputSpec!]!
   origin: String!
   collector: String!
+}
+
+"""
+AnnotationsSpec is the same as Annotations, but usable as mutation input.
+"""
+input AnnotationsInputSpec {
+  key: String!
+  value: String!
 }
 
 extend type Query {
