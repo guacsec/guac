@@ -87,41 +87,38 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 
 // RetrieveArtifacts get the metadata from deps.dev based on the purl provided
 func (d *depsCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	populatePurls := func() error {
-		ds, err := d.collectDataSource.GetDataSources(ctx)
-		if err != nil {
-			return fmt.Errorf("unable to retrieve datasource: %w", err)
-		}
-		for _, purl := range ds.PurlDataSources {
-			err := d.fetchDependencies(ctx, purl.Value, docChannel)
-			if err != nil {
-				return fmt.Errorf("failed to fetch dependencies: %w", err)
-			}
-		}
-		return nil
-	}
-
 	if d.poll {
 		for {
+			if err := d.populatePurls(ctx, docChannel); err != nil {
+				return fmt.Errorf("unable to retrieve purls from collector subscriber: %w", err)
+			}
 			select {
 			// If the context has been canceled it contains an err which we can throw.
 			case <-ctx.Done():
 				return ctx.Err() // nolint:wrapcheck
-			default:
-				err := populatePurls()
-				if err != nil {
-					return fmt.Errorf("unable to retrieve purls from collector subscriber: %w", err)
-				}
-				time.Sleep(d.interval)
+			case <-time.After(d.interval):
 			}
 		}
 	} else {
-		err := populatePurls()
-		if err != nil {
+		if err := d.populatePurls(ctx, docChannel); err != nil {
 			return fmt.Errorf("unable to retrieve purls from collector subscriber: %w", err)
 		}
 	}
 
+	return nil
+}
+
+func (d *depsCollector) populatePurls(ctx context.Context, docChannel chan<- *processor.Document) error {
+	ds, err := d.collectDataSource.GetDataSources(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve datasource: %w", err)
+	}
+	for _, purl := range ds.PurlDataSources {
+		err := d.fetchDependencies(ctx, purl.Value, docChannel)
+		if err != nil {
+			return fmt.Errorf("failed to fetch dependencies: %w", err)
+		}
+	}
 	return nil
 }
 

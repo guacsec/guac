@@ -21,7 +21,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -57,7 +59,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	ctx := logging.WithLogger(context.Background())
+	ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 	logger := logging.FromContext(ctx)
 
 	// initialize jetstream
@@ -129,20 +131,25 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := processorFunc()
-		if err != nil {
-			logger.Errorf("processor ended with error: %w", err)
+		if err := processorFunc(); err != nil {
+			logger.Errorf("processor ended with error: %v", err)
 		}
 	}()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := ingestorFunc()
-		if err != nil {
-			logger.Errorf("parser ended with error: %w", err)
+		if err := ingestorFunc(); err != nil {
+			logger.Errorf("parser ended with error: %v", err)
 		}
 	}()
+
+	logger.Infof("starting processor and parser")
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	s := <-sigs
+	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+	cf()
 
 	wg.Wait()
 }

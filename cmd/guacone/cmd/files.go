@@ -121,28 +121,10 @@ var filesCmd = &cobra.Command{
 		}
 
 		// Get pipeline of components
-		processorFunc, err := getProcessor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-		ingestorFunc, err := getIngestor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+		processorFunc := getProcessor(ctx)
+		ingestorFunc := getIngestor(ctx)
+		collectSubEmitFunc := getCollectSubEmit(ctx, csubClient)
+		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
 		totalNum := 0
 		totalSuccess := 0
@@ -232,25 +214,26 @@ func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, cs
 	return opts, nil
 }
 
-func getProcessor(ctx context.Context) (func(*processor.Document) (processor.DocumentTree, error), error) {
+func getProcessor(ctx context.Context) func(*processor.Document) (processor.DocumentTree, error) {
 	return func(d *processor.Document) (processor.DocumentTree, error) {
 		return process.Process(ctx, d)
-	}, nil
-}
-func getIngestor(ctx context.Context) (func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error), error) {
-	return func(doc processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
-		return parser.ParseDocumentTree(ctx, doc)
-	}, nil
+	}
 }
 
-func getAssembler(ctx context.Context, graphqlEndpoint string) (func([]assembler.IngestPredicates) error, error) {
+func getIngestor(ctx context.Context) func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
+	return func(doc processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
+		return parser.ParseDocumentTree(ctx, doc)
+	}
+}
+
+func getAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.IngestPredicates) error {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
 	f := helpers.GetAssembler(ctx, gqlclient)
-	return f, nil
+	return f
 }
 
-func getCollectSubEmit(ctx context.Context, csubClient csub_client.Client) (func([]*parser_common.IdentifierStrings) error, error) {
+func getCollectSubEmit(ctx context.Context, csubClient csub_client.Client) func([]*parser_common.IdentifierStrings) error {
 	return func(idstrings []*parser_common.IdentifierStrings) error {
 		if csubClient != nil {
 			entries := input.IdentifierStringsSliceToCollectEntries(idstrings)
@@ -261,7 +244,7 @@ func getCollectSubEmit(ctx context.Context, csubClient csub_client.Client) (func
 			}
 		}
 		return nil
-	}, nil
+	}
 }
 
 func printErrors(filesWithErrors []string) string {
