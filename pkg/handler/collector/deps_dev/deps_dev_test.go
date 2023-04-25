@@ -257,16 +257,10 @@ func normalizeTimeStamp(blob []byte) ([]byte, error) {
 	if packageComponent.Scorecard != nil {
 		packageComponent.Scorecard.TimeScanned = tm.UTC()
 	}
-	for _, depPack := range packageComponent.DepPackages {
-		depPack.DepPackageComponent.UpdateTime = tm.UTC()
-		if depPack.DepPackageComponent.Scorecard != nil {
-			depPack.DepPackageComponent.Scorecard.TimeScanned = tm.UTC()
-		}
-		for _, inDirectPack := range depPack.DepPackageComponent.DepPackages {
-			inDirectPack.DepPackageComponent.UpdateTime = tm.UTC()
-			if inDirectPack.DepPackageComponent.Scorecard != nil {
-				inDirectPack.DepPackageComponent.Scorecard.TimeScanned = tm.UTC()
-			}
+	for _, depPackage := range packageComponent.DepPackages {
+		depPackage.UpdateTime = tm.UTC()
+		if depPackage.Scorecard != nil {
+			depPackage.Scorecard.TimeScanned = tm.UTC()
 		}
 	}
 	return json.Marshal(packageComponent)

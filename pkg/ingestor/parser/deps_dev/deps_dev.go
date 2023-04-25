@@ -59,17 +59,25 @@ func parseDepsDevBlob(p []byte) (*deps_dev.PackageComponent, error) {
 
 func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	preds := &assembler.IngestPredicates{}
-	visited := map[string]bool{}
-	// create and append predicates for the top level package and all other packages below it (direct and indirect)
-	appendPredicates(d.packComponent, preds, visited)
+	// create and append predicates for the top level package
+	appendPredicates(d.packComponent, preds)
+
+	for _, depComp := range d.packComponent.DepPackages {
+		appendPredicates(depComp, preds)
+	}
+
+	for _, isDepComp := range d.packComponent.IsDepPackages {
+		preds.IsDependency = append(preds.IsDependency, assembler.IsDependencyIngest{
+			Pkg:          isDepComp.CurrentPackageInput,
+			DepPkg:       isDepComp.DepPackageInput,
+			IsDependency: isDepComp.IsDependency,
+		})
+	}
+
 	return preds
 }
 
-func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler.IngestPredicates, visited map[string]bool) {
-	currentPkgPurl := pkgInputSpecToPurl(packComponent.CurrentPackage)
-	if _, ok := visited[currentPkgPurl]; ok {
-		return
-	}
+func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler.IngestPredicates) {
 	hasSourceAt := createHasSourceAtIngest(packComponent.CurrentPackage, packComponent.Source, packComponent.UpdateTime.UTC())
 	scorecard := createScorecardIngest(packComponent.Source, packComponent.Scorecard)
 	if hasSourceAt != nil {
@@ -78,16 +86,6 @@ func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler
 	if scorecard != nil {
 		preds.CertifyScorecard = append(preds.CertifyScorecard, *scorecard)
 	}
-
-	for _, depComp := range packComponent.DepPackages {
-		preds.IsDependency = append(preds.IsDependency, assembler.IsDependencyIngest{
-			Pkg:          packComponent.CurrentPackage,
-			DepPkg:       depComp.DepPackageComponent.CurrentPackage,
-			IsDependency: depComp.IsDependency,
-		})
-		appendPredicates(depComp.DepPackageComponent, preds, visited)
-	}
-	visited[currentPkgPurl] = true
 }
 
 func createHasSourceAtIngest(pkg *model.PkgInputSpec, src *model.SourceInputSpec, knownSince time.Time) *assembler.HasSourceAtIngest {
@@ -124,7 +122,7 @@ func (d *depsDevParser) GetIdentities(ctx context.Context) []common.TrustInforma
 func (d *depsDevParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	idstrings := &common.IdentifierStrings{}
 	for _, depComp := range d.packComponent.DepPackages {
-		pkg := depComp.DepPackageComponent.CurrentPackage
+		pkg := depComp.CurrentPackage
 		idstrings.PurlStrings = append(idstrings.PurlStrings, pkgInputSpecToPurl(pkg))
 	}
 	return idstrings, nil

@@ -923,8 +923,9 @@ var (
 				 "version":"3.12.0"
 			  },
 			  "DepPackages":null,
+			  "IsDepPackages":null,
 			  "Scorecard":{
-				 "aggregateScore":6.699999809265137,
+				 "aggregateScore":6.300000190734863,
 				 "checks":[
 					{
 					   "check":"Maintained",
@@ -943,19 +944,27 @@ var (
 					   "score":10
 					},
 					{
-					   "check":"Binary-Artifacts",
-					   "score":10
-					},
-					{
 					   "check":"Token-Permissions",
 					   "score":0
+					},
+					{
+					   "check":"Dangerous-Workflow",
+					   "score":10
 					},
 					{
 					   "check":"Pinned-Dependencies",
 					   "score":7
 					},
 					{
-					   "check":"Dangerous-Workflow",
+					   "check":"Binary-Artifacts",
+					   "score":10
+					},
+					{
+					   "check":"Vulnerabilities",
+					   "score":10
+					},
+					{
+					   "check":"Fuzzing",
 					   "score":10
 					},
 					{
@@ -967,22 +976,14 @@ var (
 					   "score":0
 					},
 					{
-					   "check":"Vulnerabilities",
-					   "score":10
-					},
-					{
-					   "check":"Fuzzing",
-					   "score":10
-					},
-					{
 					   "check":"Packaging",
 					   "score":10
 					}
 				 ],
 				 "collector":"",
 				 "origin":"",
-				 "scorecardCommit":"ccb461cd4962de6a03ea5d497ae2309353ae5915",
-				 "scorecardVersion":"v4.10.5-52-gccb461c",
+				 "scorecardCommit":"6c5de2c32a4b8f60211e8e8eb94f8d3370a11b93",
+				 "scorecardVersion":"v4.10.5-77-g6c5de2c",
 				 "timeScanned":"2022-11-21T17:45:50.52Z"
 			  },
 			  "Source":{
@@ -995,12 +996,39 @@ var (
 			  "UpdateTime":"2022-11-21T17:45:50.52Z"
 		   }
 		],
+		"IsDepPackages":[
+		   {
+			  "CurrentPackageInput":{
+				 "name":"wheel-axle-runtime",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"pypi",
+				 "version":"0.0.4.dev20230415195356"
+			  },
+			  "DepPackageInput":{
+				 "name":"filelock",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"pypi",
+				 "version":"3.12.0"
+			  },
+			  "IsDependency":{
+				 "collector":"",
+				 "dependencyType":"DIRECT",
+				 "justification":"dependency data collected via deps.dev",
+				 "origin":"",
+				 "versionRange":""
+			  }
+		   }
+		],
 		"Scorecard":{
-		   "aggregateScore":5,
+		   "aggregateScore":4.800000190734863,
 		   "checks":[
 			  {
 				 "check":"Maintained",
-				 "score":5
+				 "score":6
 			  },
 			  {
 				 "check":"CII-Best-Practices",
@@ -1011,12 +1039,20 @@ var (
 				 "score":10
 			  },
 			  {
+				 "check":"Signed-Releases",
+				 "score":-1
+			  },
+			  {
 				 "check":"Branch-Protection",
 				 "score":-1
 			  },
 			  {
-				 "check":"Signed-Releases",
+				 "check":"Packaging",
 				 "score":-1
+			  },
+			  {
+				 "check":"Pinned-Dependencies",
+				 "score":7
 			  },
 			  {
 				 "check":"Dangerous-Workflow",
@@ -1027,16 +1063,8 @@ var (
 				 "score":9
 			  },
 			  {
-				 "check":"Packaging",
-				 "score":-1
-			  },
-			  {
 				 "check":"Token-Permissions",
 				 "score":0
-			  },
-			  {
-				 "check":"Pinned-Dependencies",
-				 "score":7
 			  },
 			  {
 				 "check":"Fuzzing",
@@ -1053,8 +1081,8 @@ var (
 		   ],
 		   "collector":"",
 		   "origin":"",
-		   "scorecardCommit":"fade79ba6b60232f6ac38070f9f4a388f7580d90",
-		   "scorecardVersion":"v4.10.5-30-gfade79b",
+		   "scorecardCommit":"4e95816f4f0510f29ac1e680f4bea4cbe9666b1d",
+		   "scorecardVersion":"v4.10.5-72-g4e95816",
 		   "timeScanned":"2022-11-21T17:45:50.52Z"
 		},
 		"Source":{
@@ -1077,6 +1105,7 @@ var (
 		   "version":"2.1.2"
 		},
 		"DepPackages":null,
+		"IsDepPackages":null,
 		"Scorecard":{
 		   "aggregateScore":5,
 		   "checks":[
@@ -1097,15 +1126,11 @@ var (
 				 "score":-1
 			  },
 			  {
-				 "check":"Pinned-Dependencies",
-				 "score":10
-			  },
-			  {
-				 "check":"Dangerous-Workflow",
-				 "score":10
-			  },
-			  {
 				 "check":"Binary-Artifacts",
+				 "score":10
+			  },
+			  {
+				 "check":"Token-Permissions",
 				 "score":10
 			  },
 			  {
@@ -1113,11 +1138,15 @@ var (
 				 "score":-1
 			  },
 			  {
+				 "check":"Dangerous-Workflow",
+				 "score":10
+			  },
+			  {
 				 "check":"Branch-Protection",
 				 "score":0
 			  },
 			  {
-				 "check":"Token-Permissions",
+				 "check":"Pinned-Dependencies",
 				 "score":10
 			  },
 			  {
@@ -1125,18 +1154,18 @@ var (
 				 "score":0
 			  },
 			  {
-				 "check":"Vulnerabilities",
-				 "score":10
-			  },
-			  {
 				 "check":"Security-Policy",
 				 "score":0
+			  },
+			  {
+				 "check":"Vulnerabilities",
+				 "score":10
 			  }
 		   ],
 		   "collector":"",
 		   "origin":"",
-		   "scorecardCommit":"fade79ba6b60232f6ac38070f9f4a388f7580d90",
-		   "scorecardVersion":"v4.10.5-30-gfade79b",
+		   "scorecardCommit":"1c441f3773712e6d12de6b353c25b4c093c11015",
+		   "scorecardVersion":"v4.10.5-58-g1c441f3",
 		   "timeScanned":"2022-11-21T17:45:50.52Z"
 		},
 		"Source":{
@@ -1147,7 +1176,7 @@ var (
 		   "type":"git"
 		},
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
-	}`
+	 }`
 
 	CollectedNPMReact = `{
 		"CurrentPackage":{
@@ -1160,49 +1189,80 @@ var (
 		},
 		"DepPackages":[
 		   {
-			  "DepPackageComponent":{
-				 "CurrentPackage":{
-					"name":"loose-envify",
-					"namespace":"",
-					"qualifiers":null,
-					"subpath":"",
-					"type":"npm",
-					"version":"1.4.0"
-				 },
-				 "DepPackages":[
-					{
-					   "DepPackageComponent":{
-						  "CurrentPackage":{
-							 "name":"js-tokens",
-							 "namespace":"",
-							 "qualifiers":null,
-							 "subpath":"",
-							 "type":"npm",
-							 "version":"4.0.0"
-						  },
-						  "DepPackages":null,
-						  "Scorecard":null,
-						  "Source":{
-							 "commit":null,
-							 "name":"js-tokens.git",
-							 "namespace":"github.com/lydell",
-							 "tag":null,
-							 "type":"git"
-						  },
-						  "UpdateTime":"2022-11-21T17:45:50.52Z"
-					   },
-					   "IsDependency":{
-						  "collector":"",
-						  "dependencyType":"DIRECT",
-						  "justification":"dependency data collected via deps.dev",
-						  "origin":"",
-						  "versionRange":"^3.0.0 || ^4.0.0"
-					   }
-					}
-				 ],
-				 "Scorecard":null,
-				 "Source":null,
-				 "UpdateTime":"2022-11-21T17:45:50.52Z"
+			  "CurrentPackage":{
+				 "name":"js-tokens",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"4.0.0"
+			  },
+			  "DepPackages":null,
+			  "IsDepPackages":null,
+			  "Scorecard":null,
+			  "Source":{
+				 "commit":null,
+				 "name":"js-tokens.git",
+				 "namespace":"github.com/lydell",
+				 "tag":null,
+				 "type":"git"
+			  },
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+		   },
+		   {
+			  "CurrentPackage":{
+				 "name":"loose-envify",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"1.4.0"
+			  },
+			  "DepPackages":null,
+			  "IsDepPackages":null,
+			  "Scorecard":null,
+			  "Source":null,
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+		   },
+		   {
+			  "CurrentPackage":{
+				 "name":"object-assign",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"4.1.1"
+			  },
+			  "DepPackages":null,
+			  "IsDepPackages":null,
+			  "Scorecard":null,
+			  "Source":{
+				 "commit":null,
+				 "name":"object-assign.git",
+				 "namespace":"github.com/sindresorhus",
+				 "tag":null,
+				 "type":"git"
+			  },
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+		   }
+		],
+		"IsDepPackages":[
+		   {
+			  "CurrentPackageInput":{
+				 "name":"react",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"17.0.0"
+			  },
+			  "DepPackageInput":{
+				 "name":"loose-envify",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"1.4.0"
 			  },
 			  "IsDependency":{
 				 "collector":"",
@@ -1213,25 +1273,21 @@ var (
 			  }
 		   },
 		   {
-			  "DepPackageComponent":{
-				 "CurrentPackage":{
-					"name":"object-assign",
-					"namespace":"",
-					"qualifiers":null,
-					"subpath":"",
-					"type":"npm",
-					"version":"4.1.1"
-				 },
-				 "DepPackages":null,
-				 "Scorecard":null,
-				 "Source":{
-					"commit":null,
-					"name":"object-assign.git",
-					"namespace":"github.com/sindresorhus",
-					"tag":null,
-					"type":"git"
-				 },
-				 "UpdateTime":"2022-11-21T17:45:50.52Z"
+			  "CurrentPackageInput":{
+				 "name":"react",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"17.0.0"
+			  },
+			  "DepPackageInput":{
+				 "name":"object-assign",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"4.1.1"
 			  },
 			  "IsDependency":{
 				 "collector":"",
@@ -1239,6 +1295,31 @@ var (
 				 "justification":"dependency data collected via deps.dev",
 				 "origin":"",
 				 "versionRange":"^4.1.1"
+			  }
+		   },
+		   {
+			  "CurrentPackageInput":{
+				 "name":"loose-envify",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"1.4.0"
+			  },
+			  "DepPackageInput":{
+				 "name":"js-tokens",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"4.0.0"
+			  },
+			  "IsDependency":{
+				 "collector":"",
+				 "dependencyType":"DIRECT",
+				 "justification":"dependency data collected via deps.dev",
+				 "origin":"",
+				 "versionRange":"^3.0.0 || ^4.0.0"
 			  }
 		   }
 		],
@@ -1263,6 +1344,7 @@ var (
 		   "version":"v1.0.0"
 		},
 		"DepPackages":null,
+		"IsDepPackages":null,
 		"Scorecard":{
 		   "aggregateScore":4.300000190734863,
 		   "checks":[
@@ -1287,12 +1369,16 @@ var (
 				 "score":10
 			  },
 			  {
-				 "check":"Dangerous-Workflow",
-				 "score":10
-			  },
-			  {
 				 "check":"Packaging",
 				 "score":-1
+			  },
+			  {
+				 "check":"Token-Permissions",
+				 "score":0
+			  },
+			  {
+				 "check":"Dangerous-Workflow",
+				 "score":10
 			  },
 			  {
 				 "check":"Branch-Protection",
@@ -1303,16 +1389,12 @@ var (
 				 "score":9
 			  },
 			  {
-				 "check":"Token-Permissions",
-				 "score":0
+				 "check":"Vulnerabilities",
+				 "score":10
 			  },
 			  {
 				 "check":"Fuzzing",
 				 "score":0
-			  },
-			  {
-				 "check":"Vulnerabilities",
-				 "score":10
 			  },
 			  {
 				 "check":"Security-Policy",
@@ -1321,8 +1403,8 @@ var (
 		   ],
 		   "collector":"",
 		   "origin":"",
-		   "scorecardCommit":"fade79ba6b60232f6ac38070f9f4a388f7580d90",
-		   "scorecardVersion":"v4.10.5-30-gfade79b",
+		   "scorecardCommit":"1c441f3773712e6d12de6b353c25b4c093c11015",
+		   "scorecardVersion":"v4.10.5-58-g1c441f3",
 		   "timeScanned":"2022-11-21T17:45:50.52Z"
 		},
 		"Source":{
@@ -1346,86 +1428,105 @@ var (
 		},
 		"DepPackages":[
 		   {
-			  "DepPackageComponent":{
-				 "CurrentPackage":{
-					"name":"foreign-types-shared",
-					"namespace":"",
-					"qualifiers":null,
-					"subpath":"",
-					"type":"cargo",
-					"version":"0.1.1"
-				 },
-				 "DepPackages":null,
-				 "Scorecard":{
-					"aggregateScore":4.599999904632568,
-					"checks":[
-					   {
-						  "check":"Maintained",
-						  "score":5
-					   },
-					   {
-						  "check":"CII-Best-Practices",
-						  "score":0
-					   },
-					   {
-						  "check":"License",
-						  "score":10
-					   },
-					   {
-						  "check":"Signed-Releases",
-						  "score":-1
-					   },
-					   {
-						  "check":"Dangerous-Workflow",
-						  "score":10
-					   },
-					   {
-						  "check":"Pinned-Dependencies",
-						  "score":7
-					   },
-					   {
-						  "check":"Binary-Artifacts",
-						  "score":10
-					   },
-					   {
-						  "check":"Token-Permissions",
-						  "score":0
-					   },
-					   {
-						  "check":"Packaging",
-						  "score":-1
-					   },
-					   {
-						  "check":"Vulnerabilities",
-						  "score":10
-					   },
-					   {
-						  "check":"Fuzzing",
-						  "score":0
-					   },
-					   {
-						  "check":"Branch-Protection",
-						  "score":0
-					   },
-					   {
-						  "check":"Security-Policy",
-						  "score":0
-					   }
-					],
-					"collector":"",
-					"origin":"",
-					"scorecardCommit":"b16c74bd16a7aba296227115ca0110b9e0a87742",
-					"scorecardVersion":"v4.10.5-46-gb16c74b",
-					"timeScanned":"2022-11-21T17:45:50.52Z"
-				 },
-				 "Source":{
-					"commit":null,
-					"name":"foreign-types",
-					"namespace":"github.com/sfackler",
-					"tag":null,
-					"type":"git"
-				 },
-				 "UpdateTime":"2022-11-21T17:45:50.52Z"
+			  "CurrentPackage":{
+				 "name":"foreign-types-shared",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"cargo",
+				 "version":"0.1.1"
+			  },
+			  "DepPackages":null,
+			  "IsDepPackages":null,
+			  "Scorecard":{
+				 "aggregateScore":4.599999904632568,
+				 "checks":[
+					{
+					   "check":"Maintained",
+					   "score":5
+					},
+					{
+					   "check":"CII-Best-Practices",
+					   "score":0
+					},
+					{
+					   "check":"Signed-Releases",
+					   "score":-1
+					},
+					{
+					   "check":"Packaging",
+					   "score":-1
+					},
+					{
+					   "check":"Dangerous-Workflow",
+					   "score":10
+					},
+					{
+					   "check":"Binary-Artifacts",
+					   "score":10
+					},
+					{
+					   "check":"Token-Permissions",
+					   "score":0
+					},
+					{
+					   "check":"Pinned-Dependencies",
+					   "score":7
+					},
+					{
+					   "check":"Fuzzing",
+					   "score":0
+					},
+					{
+					   "check":"Vulnerabilities",
+					   "score":10
+					},
+					{
+					   "check":"Branch-Protection",
+					   "score":0
+					},
+					{
+					   "check":"License",
+					   "score":10
+					},
+					{
+					   "check":"Security-Policy",
+					   "score":0
+					}
+				 ],
+				 "collector":"",
+				 "origin":"",
+				 "scorecardCommit":"6c5de2c32a4b8f60211e8e8eb94f8d3370a11b93",
+				 "scorecardVersion":"v4.10.5-77-g6c5de2c",
+				 "timeScanned":"2022-11-21T17:45:50.52Z"
+			  },
+			  "Source":{
+				 "commit":null,
+				 "name":"foreign-types",
+				 "namespace":"github.com/sfackler",
+				 "tag":null,
+				 "type":"git"
+			  },
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+		   }
+		],
+		"IsDepPackages":[
+		   {
+			  "CurrentPackageInput":{
+				 "name":"foreign-types",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"cargo",
+				 "version":"0.3.2"
+			  },
+			  "DepPackageInput":{
+				 "name":"foreign-types-shared",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"cargo",
+				 "version":"0.1.1"
 			  },
 			  "IsDependency":{
 				 "collector":"",
@@ -1448,20 +1549,16 @@ var (
 				 "score":0
 			  },
 			  {
-				 "check":"License",
-				 "score":10
+				 "check":"Signed-Releases",
+				 "score":-1
 			  },
 			  {
-				 "check":"Signed-Releases",
+				 "check":"Packaging",
 				 "score":-1
 			  },
 			  {
 				 "check":"Dangerous-Workflow",
 				 "score":10
-			  },
-			  {
-				 "check":"Pinned-Dependencies",
-				 "score":7
 			  },
 			  {
 				 "check":"Binary-Artifacts",
@@ -1472,20 +1569,24 @@ var (
 				 "score":0
 			  },
 			  {
-				 "check":"Packaging",
-				 "score":-1
-			  },
-			  {
-				 "check":"Vulnerabilities",
-				 "score":10
+				 "check":"Pinned-Dependencies",
+				 "score":7
 			  },
 			  {
 				 "check":"Fuzzing",
 				 "score":0
 			  },
 			  {
+				 "check":"Vulnerabilities",
+				 "score":10
+			  },
+			  {
 				 "check":"Branch-Protection",
 				 "score":0
+			  },
+			  {
+				 "check":"License",
+				 "score":10
 			  },
 			  {
 				 "check":"Security-Policy",
@@ -1494,8 +1595,8 @@ var (
 		   ],
 		   "collector":"",
 		   "origin":"",
-		   "scorecardCommit":"b16c74bd16a7aba296227115ca0110b9e0a87742",
-		   "scorecardVersion":"v4.10.5-46-gb16c74b",
+		   "scorecardCommit":"6c5de2c32a4b8f60211e8e8eb94f8d3370a11b93",
+		   "scorecardVersion":"v4.10.5-77-g6c5de2c",
 		   "timeScanned":"2022-11-21T17:45:50.52Z"
 		},
 		"Source":{
@@ -1518,25 +1619,44 @@ var (
 		},
 		"DepPackages":[
 		   {
-			  "DepPackageComponent":{
-				 "CurrentPackage":{
-					"name":"camelcase",
-					"namespace":"",
-					"qualifiers":null,
-					"subpath":"",
-					"type":"npm",
-					"version":"3.0.0"
-				 },
-				 "DepPackages":null,
-				 "Scorecard":null,
-				 "Source":{
-					"commit":null,
-					"name":"camelcase.git",
-					"namespace":"github.com/sindresorhus",
-					"tag":null,
-					"type":"git"
-				 },
-				 "UpdateTime":"2022-11-21T17:45:50.52Z"
+			  "CurrentPackage":{
+				 "name":"camelcase",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"3.0.0"
+			  },
+			  "DepPackages":null,
+			  "IsDepPackages":null,
+			  "Scorecard":null,
+			  "Source":{
+				 "commit":null,
+				 "name":"camelcase.git",
+				 "namespace":"github.com/sindresorhus",
+				 "tag":null,
+				 "type":"git"
+			  },
+			  "UpdateTime":"2022-11-21T17:45:50.52Z"
+		   }
+		],
+		"IsDepPackages":[
+		   {
+			  "CurrentPackageInput":{
+				 "name":"yargs-parser",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"4.2.1"
+			  },
+			  "DepPackageInput":{
+				 "name":"camelcase",
+				 "namespace":"",
+				 "qualifiers":null,
+				 "subpath":"",
+				 "type":"npm",
+				 "version":"3.0.0"
 			  },
 			  "IsDependency":{
 				 "collector":"",

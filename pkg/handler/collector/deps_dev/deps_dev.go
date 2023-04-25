@@ -41,8 +41,9 @@ const (
 	sourceRepo    = "SOURCE_REPO"
 )
 
-type DepPackage struct {
-	DepPackageComponent *PackageComponent
+type IsDepPackage struct {
+	CurrentPackageInput *model.PkgInputSpec
+	DepPackageInput     *model.PkgInputSpec
 	IsDependency        *model.IsDependencyInputSpec
 }
 
@@ -50,7 +51,8 @@ type PackageComponent struct {
 	CurrentPackage *model.PkgInputSpec
 	Source         *model.SourceInputSpec
 	Scorecard      *model.ScorecardInputSpec
-	DepPackages    []*DepPackage
+	IsDepPackages  []*IsDepPackage
+	DepPackages    []*PackageComponent
 	UpdateTime     time.Time
 }
 
@@ -133,7 +135,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	// check if top level purl has already been queried
 	if _, ok := d.checkedPurls[purl]; ok {
-		logger.Infof("purl %s already queried: %s", purl)
+		logger.Infof("purl %s already queried", purl)
 		return nil
 	}
 
@@ -204,13 +206,9 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		if foundDepVal, ok := d.checkedPurls[depPurl]; ok {
 			// if found, return the source as nothing as it has already been ingested once
 			foundDepVal.Source = nil
-			for _, foundDep := range foundDepVal.DepPackages {
-				foundDep.DepPackageComponent.Source = nil
-			}
-			logger.Debugf("dependant package purl %s already queried: %s", depPurl)
+			logger.Debugf("dependant package purl %s already queried", depPurl)
 
-			depComponent = foundDepVal
-			dependencyNodes = append(dependencyNodes, depComponent)
+			dependencyNodes = append(dependencyNodes, foundDepVal)
 			continue
 		}
 		depComponent.CurrentPackage = depPackageInput
@@ -222,17 +220,20 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		d.checkedPurls[depPurl] = depComponent
 	}
 
+	component.DepPackages = append(component.DepPackages, dependencyNodes[1:]...)
+
 	for _, edge := range deps.Edges {
 		isDep := &model.IsDependencyInputSpec{
 			VersionRange:   edge.Requirement,
 			DependencyType: model.DependencyTypeDirect,
 			Justification:  "dependency data collected via deps.dev",
 		}
-		foundDepPackage := &DepPackage{
-			DepPackageComponent: dependencyNodes[edge.ToNode],
+		foundDepPackage := &IsDepPackage{
+			CurrentPackageInput: dependencyNodes[edge.FromNode].CurrentPackage,
+			DepPackageInput:     dependencyNodes[edge.ToNode].CurrentPackage,
 			IsDependency:        isDep,
 		}
-		dependencyNodes[edge.FromNode].DepPackages = append(dependencyNodes[edge.FromNode].DepPackages, foundDepPackage)
+		component.IsDepPackages = append(component.IsDepPackages, foundDepPackage)
 	}
 
 	logger.Infof("obtained additional metadata for package: %s", purl)
