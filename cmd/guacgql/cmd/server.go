@@ -20,6 +20,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -53,20 +56,39 @@ func startServer(cmd *cobra.Command) {
 		os.Exit(1)
 	}
 	http.Handle("/query", srv)
+	if flags.debug {
+		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
+	}
 
 	// Ingest additional test data in a go-routine.
 	if flags.testData {
 		go ingestData(flags.port)
 	}
 
-	if flags.debug {
-		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
-	}
-
-	// blocking until termination
+	server := &http.Server{Addr: fmt.Sprintf(":%d", flags.port)}
 	logger.Info("starting server")
-	logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", flags.port), nil))
+	go func() {
+		logger.Infof("server finished: %s", server.ListenAndServe())
+	}()
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	s := <-sigs
+	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+	done := make(chan bool, 1)
+	ctx, cf := context.WithCancel(ctx)
+	go func() {
+		_ = server.Shutdown(ctx)
+		done <- true
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		logger.Warnf("forcibly shutting down gql http server")
+		cf()
+		server.Close()
+	}
+	cf()
 }
 
 func validateFlags() error {

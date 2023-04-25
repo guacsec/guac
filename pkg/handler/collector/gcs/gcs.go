@@ -133,10 +133,15 @@ func (g *gcs) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processo
 
 	if g.poll {
 		for {
-			time.Sleep(g.interval)
 			err := gcsGetArtifacts()
 			if err != nil {
 				return err
+			}
+			select {
+			// If the context has been canceled it contains an err which we can throw.
+			case <-ctx.Done():
+				return ctx.Err() // nolint:wrapcheck
+			case <-time.After(g.interval):
 			}
 		}
 	} else {

@@ -20,6 +20,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -39,7 +42,7 @@ import (
 type scorecardOptions struct {
 	graphqlEndpoint string
 	poll            bool
-	interval        int
+	interval        time.Duration
 	csubAddr        string
 }
 
@@ -54,7 +57,7 @@ var scorecardCmd = &cobra.Command{
 			viper.GetString("gql-endpoint"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("poll"),
-			viper.GetInt("interval"),
+			viper.GetString("interval"),
 		)
 
 		if err != nil {
@@ -108,29 +111,10 @@ var scorecardCmd = &cobra.Command{
 		if err := certify.RegisterCertifier(scCertifier, certifier.CertifierScorecard); err != nil {
 			logger.Fatalf("unable to register certifier: %w", err)
 		}
-		processorFunc, err := getProcessor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		collectSubEmitFunc, err := getCollectSubEmit(ctx, csubClient)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		ingestorFunc, err := getIngestor(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
+		processorFunc := getProcessor(ctx)
+		collectSubEmitFunc := getCollectSubEmit(ctx, csubClient)
+		ingestorFunc := getIngestor(ctx)
+		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
 		totalNum := 0
 		gotErr := false
@@ -174,26 +158,50 @@ var scorecardCmd = &cobra.Command{
 				return true
 			}
 			logger.Errorf("certifier ended with error: %v", err)
-			return false
+			gotErr = true
+			return true
 		}
 
-		if err := certify.Certify(ctx, query, emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
-			logger.Fatal(err)
+		ctx, cf := context.WithCancel(ctx)
+		var wg sync.WaitGroup
+		done := make(chan bool, 1)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := certify.Certify(ctx, query, emit, errHandler, opts.poll, opts.interval); err != nil {
+				logger.Errorf("Unhandled error in the certifier: %s", err)
+			}
+			done <- true
+		}()
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case s := <-sigs:
+			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+		case <-done:
+			logger.Infof("All certifiers completed")
 		}
+		cf()
+		wg.Wait()
+
 		if gotErr {
-			logger.Fatalf("completed ingestion with errors")
+			logger.Errorf("completed ingestion with errors")
 		} else {
 			logger.Infof("completed ingesting %v documents", totalNum)
 		}
 	},
 }
 
-func validateScorecardFlags(graphqlEndpoint string, csubAddr string, poll bool, interval int) (scorecardOptions, error) {
+func validateScorecardFlags(graphqlEndpoint string, csubAddr string, poll bool, interval string) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.csubAddr = csubAddr
 	opts.poll = poll
-	opts.interval = interval
+	i, err := time.ParseDuration(interval)
+	if err != nil {
+		return opts, err
+	}
+	opts.interval = i
 
 	return opts, nil
 }

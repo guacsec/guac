@@ -128,7 +128,11 @@ func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan
 		for repo, tags := range g.repoToReleaseTags {
 			g.fetchAssets(ctx, repo.Owner, repo.Repo, tags, docChannel)
 		}
-		time.Sleep(g.interval)
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(g.interval):
+		}
 	} else {
 		for repo, tags := range g.repoToReleaseTags {
 			g.fetchAssets(ctx, repo.Owner, repo.Repo, tags, docChannel)
@@ -199,6 +203,9 @@ func (g *githubCollector) fetchAssets(ctx context.Context, owner string, repo st
 func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release client.Release, docChannel chan<- *processor.Document) {
 	logger := logging.FromContext(ctx)
 	for _, asset := range release.Assets {
+		if ctx.Err() != nil {
+			return
+		}
 		if checkSuffixes(asset.URL, g.assetSuffixes) {
 			content, err := g.client.GetReleaseAsset(asset)
 			if err != nil {

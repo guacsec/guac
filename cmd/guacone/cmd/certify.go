@@ -65,10 +65,7 @@ var certifyCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		assemblerFunc, err := getAssembler(ctx, opts.graphqlEndpoint)
-		if err != nil {
-			logger.Fatalf("error: %v", err)
-		}
+		assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
 		preds := &assembler.IngestPredicates{}
 		var pkgInput *model.PkgInputSpec

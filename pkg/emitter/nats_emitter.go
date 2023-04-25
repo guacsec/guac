@@ -186,15 +186,22 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 			// if the context is canceled we want to break out of the loop
 			if ctx.Err() != nil {
 				errChan <- ctx.Err()
+				return
 			}
-			msgs, err := sub.Fetch(1)
+			msgs, err := sub.Fetch(1, nats.Context(ctx))
 			if err != nil {
-				if errors.Is(err, nats.ErrTimeout) {
+				if errors.Is(err, nats.ErrTimeout) || errors.Is(err, context.DeadlineExceeded) {
 					// if we get a timeout, we want to try again
-					time.Sleep(backOffTimer)
+					select {
+					case <-ctx.Done():
+						errChan <- ctx.Err()
+						return
+					case <-time.After(backOffTimer):
+					}
 					continue
 				} else {
 					errChan <- fmt.Errorf("[%s: %s] unexpected NATS fetch error: %w", durable, id, err)
+					return
 				}
 			}
 			if len(msgs) > 0 {
@@ -203,6 +210,7 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 					fmtErr := fmt.Errorf("[%s: %v] unable to Ack: %w", durable, id, err)
 					logger.Error(fmtErr)
 					errChan <- fmtErr
+					return
 				}
 				dataChan <- msgs[0].Data
 			}
