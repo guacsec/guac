@@ -27,13 +27,14 @@ import (
 // Internal data: link between packages and dependent packages (isDependency)
 type isDependencyList []*isDependencyLink
 type isDependencyLink struct {
-	id            uint32
-	packageID     uint32
-	depPackageID  uint32
-	versionRange  string
-	justification string
-	origin        string
-	collector     string
+	id             uint32
+	packageID      uint32
+	depPackageID   uint32
+	versionRange   string
+	dependencyType model.DependencyType
+	justification  string
+	origin         string
+	collector      string
 }
 
 func (n *isDependencyLink) ID() uint32 { return n.id }
@@ -99,7 +100,8 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		if packageID == v.packageID && depPackageID == v.depPackageID && dependency.Justification == v.justification &&
-			dependency.Origin == v.origin && dependency.Collector == v.collector && dependency.VersionRange == v.versionRange {
+			dependency.Origin == v.origin && dependency.Collector == v.collector &&
+			dependency.VersionRange == v.versionRange && dependency.DependencyType == v.dependencyType {
 
 			collectedIsDependencyLink = *v
 			duplicate = true
@@ -115,13 +117,14 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 		}
 		// store the link
 		collectedIsDependencyLink = isDependencyLink{
-			id:            c.getNextID(),
-			packageID:     packageID,
-			depPackageID:  depPackageID,
-			versionRange:  dependency.VersionRange,
-			justification: dependency.Justification,
-			origin:        dependency.Origin,
-			collector:     dependency.Collector,
+			id:             c.getNextID(),
+			packageID:      packageID,
+			depPackageID:   depPackageID,
+			versionRange:   dependency.VersionRange,
+			dependencyType: dependency.DependencyType,
+			justification:  dependency.Justification,
+			origin:         dependency.Origin,
+			collector:      dependency.Collector,
 		}
 		c.index[collectedIsDependencyLink.id] = &collectedIsDependencyLink
 		c.isDependencies = append(c.isDependencies, &collectedIsDependencyLink)
@@ -257,6 +260,7 @@ func (c *demoClient) buildIsDependency(link *isDependencyLink, filter *model.IsD
 		Package:          p,
 		DependentPackage: dep,
 		VersionRange:     link.versionRange,
+		DependencyType:   link.dependencyType,
 		Justification:    link.justification,
 		Origin:           link.origin,
 		Collector:        link.collector,
@@ -277,6 +281,9 @@ func (c *demoClient) addDepIfMatch(out []*model.IsDependency,
 		return out, nil
 	}
 	if filter != nil && noMatch(filter.VersionRange, link.versionRange) {
+		return out, nil
+	}
+	if filter != nil && filter.DependencyType != nil && *filter.DependencyType == link.dependencyType {
 		return out, nil
 	}
 

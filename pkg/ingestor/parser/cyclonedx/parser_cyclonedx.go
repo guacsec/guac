@@ -181,6 +181,8 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 
 	toplevel := c.getPackageElement(string(c.cdxBom.Metadata.Component.BOMRef))
 	// adding top level package edge manually for all depends on package
+	// TODO: This is not based on the relationship so that can be inaccurate (can capture both direct and in-direct)...Remove this and be done below by the *c.cdxBom.Dependencies?
+	// see https://github.com/CycloneDX/specification/issues/33
 	if toplevel != nil {
 		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
 	}

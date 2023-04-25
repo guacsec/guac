@@ -3840,6 +3840,18 @@ func (v *CertifyOSVResponse) GetIngestVulnerability() CertifyOSVIngestVulnerabil
 	return v.IngestVulnerability
 }
 
+// DependencyType determines the type of the IsDependency.
+// Direct - direct dependency of the IsDependency Package
+// Indirect - transitive dependency of the IsDependency Package
+// Unknown - type of the dependency not known
+type DependencyType string
+
+const (
+	DependencyTypeDirect   DependencyType = "DIRECT"
+	DependencyTypeIndirect DependencyType = "INDIRECT"
+	DependencyTypeUnknown  DependencyType = "UNKNOWN"
+)
+
 // Edge allows filtering path/neighbors output to only contain a subset of all
 // possible GUAC links.
 //
@@ -5094,6 +5106,7 @@ func (v *IsDependencyDependentPkgPackage) __premarshalJSON() (*__premarshalIsDep
 // package (subject) - the package object type that represents the package
 // dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
 // versionRange (property) - string value for version range that applies to the dependent package
+// dependencyType - enum that represents the dependency as either direct, indirect or unknown
 // justification (property) - string value representing why the artifacts are the equal
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -5117,6 +5130,11 @@ func (v *IsDependencyIngestDependencyIsDependency) GetPackage() allIsDependencyT
 // GetDependentPackage returns IsDependencyIngestDependencyIsDependency.DependentPackage, and is useful for accessing the field via an interface.
 func (v *IsDependencyIngestDependencyIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
 	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetDependencyType returns IsDependencyIngestDependencyIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *IsDependencyIngestDependencyIsDependency) GetDependencyType() DependencyType {
+	return v.allIsDependencyTree.DependencyType
 }
 
 // GetVersionRange returns IsDependencyIngestDependencyIsDependency.VersionRange, and is useful for accessing the field via an interface.
@@ -5168,6 +5186,8 @@ type __premarshalIsDependencyIngestDependencyIsDependency struct {
 
 	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
 
+	DependencyType DependencyType `json:"dependencyType"`
+
 	VersionRange string `json:"versionRange"`
 
 	Origin string `json:"origin"`
@@ -5190,6 +5210,7 @@ func (v *IsDependencyIngestDependencyIsDependency) __premarshalJSON() (*__premar
 	retval.Justification = v.allIsDependencyTree.Justification
 	retval.Package = v.allIsDependencyTree.Package
 	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.DependencyType = v.allIsDependencyTree.DependencyType
 	retval.VersionRange = v.allIsDependencyTree.VersionRange
 	retval.Origin = v.allIsDependencyTree.Origin
 	retval.Collector = v.allIsDependencyTree.Collector
@@ -5200,14 +5221,18 @@ func (v *IsDependencyIngestDependencyIsDependency) __premarshalJSON() (*__premar
 //
 // All fields are required.
 type IsDependencyInputSpec struct {
-	VersionRange  string `json:"versionRange"`
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	VersionRange   string         `json:"versionRange"`
+	DependencyType DependencyType `json:"dependencyType"`
+	Justification  string         `json:"justification"`
+	Origin         string         `json:"origin"`
+	Collector      string         `json:"collector"`
 }
 
 // GetVersionRange returns IsDependencyInputSpec.VersionRange, and is useful for accessing the field via an interface.
 func (v *IsDependencyInputSpec) GetVersionRange() string { return v.VersionRange }
+
+// GetDependencyType returns IsDependencyInputSpec.DependencyType, and is useful for accessing the field via an interface.
+func (v *IsDependencyInputSpec) GetDependencyType() DependencyType { return v.DependencyType }
 
 // GetJustification returns IsDependencyInputSpec.Justification, and is useful for accessing the field via an interface.
 func (v *IsDependencyInputSpec) GetJustification() string { return v.Justification }
@@ -7731,6 +7756,7 @@ func (v *NeighborsNeighborsHashEqual) __premarshalJSON() (*__premarshalNeighbors
 // package (subject) - the package object type that represents the package
 // dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
 // versionRange (property) - string value for version range that applies to the dependent package
+// dependencyType - enum that represents the dependency as either direct, indirect or unknown
 // justification (property) - string value representing why the artifacts are the equal
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -7758,6 +7784,11 @@ func (v *NeighborsNeighborsIsDependency) GetPackage() allIsDependencyTreePackage
 // GetDependentPackage returns NeighborsNeighborsIsDependency.DependentPackage, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
 	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetDependencyType returns NeighborsNeighborsIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsIsDependency) GetDependencyType() DependencyType {
+	return v.allIsDependencyTree.DependencyType
 }
 
 // GetVersionRange returns NeighborsNeighborsIsDependency.VersionRange, and is useful for accessing the field via an interface.
@@ -7809,6 +7840,8 @@ type __premarshalNeighborsNeighborsIsDependency struct {
 
 	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
 
+	DependencyType DependencyType `json:"dependencyType"`
+
 	VersionRange string `json:"versionRange"`
 
 	Origin string `json:"origin"`
@@ -7832,6 +7865,7 @@ func (v *NeighborsNeighborsIsDependency) __premarshalJSON() (*__premarshalNeighb
 	retval.Justification = v.allIsDependencyTree.Justification
 	retval.Package = v.allIsDependencyTree.Package
 	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.DependencyType = v.allIsDependencyTree.DependencyType
 	retval.VersionRange = v.allIsDependencyTree.VersionRange
 	retval.Origin = v.allIsDependencyTree.Origin
 	retval.Collector = v.allIsDependencyTree.Collector
@@ -10556,6 +10590,7 @@ func (v *NodeNodeHashEqual) __premarshalJSON() (*__premarshalNodeNodeHashEqual, 
 // package (subject) - the package object type that represents the package
 // dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
 // versionRange (property) - string value for version range that applies to the dependent package
+// dependencyType - enum that represents the dependency as either direct, indirect or unknown
 // justification (property) - string value representing why the artifacts are the equal
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -10581,6 +10616,11 @@ func (v *NodeNodeIsDependency) GetPackage() allIsDependencyTreePackage {
 // GetDependentPackage returns NodeNodeIsDependency.DependentPackage, and is useful for accessing the field via an interface.
 func (v *NodeNodeIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
 	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetDependencyType returns NodeNodeIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *NodeNodeIsDependency) GetDependencyType() DependencyType {
+	return v.allIsDependencyTree.DependencyType
 }
 
 // GetVersionRange returns NodeNodeIsDependency.VersionRange, and is useful for accessing the field via an interface.
@@ -10628,6 +10668,8 @@ type __premarshalNodeNodeIsDependency struct {
 
 	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
 
+	DependencyType DependencyType `json:"dependencyType"`
+
 	VersionRange string `json:"versionRange"`
 
 	Origin string `json:"origin"`
@@ -10651,6 +10693,7 @@ func (v *NodeNodeIsDependency) __premarshalJSON() (*__premarshalNodeNodeIsDepend
 	retval.Justification = v.allIsDependencyTree.Justification
 	retval.Package = v.allIsDependencyTree.Package
 	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.DependencyType = v.allIsDependencyTree.DependencyType
 	retval.VersionRange = v.allIsDependencyTree.VersionRange
 	retval.Origin = v.allIsDependencyTree.Origin
 	retval.Collector = v.allIsDependencyTree.Collector
@@ -12767,6 +12810,7 @@ func (v *PathPathHashEqual) __premarshalJSON() (*__premarshalPathPathHashEqual, 
 // package (subject) - the package object type that represents the package
 // dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
 // versionRange (property) - string value for version range that applies to the dependent package
+// dependencyType - enum that represents the dependency as either direct, indirect or unknown
 // justification (property) - string value representing why the artifacts are the equal
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -12792,6 +12836,11 @@ func (v *PathPathIsDependency) GetPackage() allIsDependencyTreePackage {
 // GetDependentPackage returns PathPathIsDependency.DependentPackage, and is useful for accessing the field via an interface.
 func (v *PathPathIsDependency) GetDependentPackage() allIsDependencyTreeDependentPackage {
 	return v.allIsDependencyTree.DependentPackage
+}
+
+// GetDependencyType returns PathPathIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *PathPathIsDependency) GetDependencyType() DependencyType {
+	return v.allIsDependencyTree.DependencyType
 }
 
 // GetVersionRange returns PathPathIsDependency.VersionRange, and is useful for accessing the field via an interface.
@@ -12839,6 +12888,8 @@ type __premarshalPathPathIsDependency struct {
 
 	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
 
+	DependencyType DependencyType `json:"dependencyType"`
+
 	VersionRange string `json:"versionRange"`
 
 	Origin string `json:"origin"`
@@ -12862,6 +12913,7 @@ func (v *PathPathIsDependency) __premarshalJSON() (*__premarshalPathPathIsDepend
 	retval.Justification = v.allIsDependencyTree.Justification
 	retval.Package = v.allIsDependencyTree.Package
 	retval.DependentPackage = v.allIsDependencyTree.DependentPackage
+	retval.DependencyType = v.allIsDependencyTree.DependencyType
 	retval.VersionRange = v.allIsDependencyTree.VersionRange
 	retval.Origin = v.allIsDependencyTree.Origin
 	retval.Collector = v.allIsDependencyTree.Collector
@@ -19955,6 +20007,7 @@ func (v *allHashEqualTreeArtifactsArtifact) __premarshalJSON() (*__premarshalall
 // package (subject) - the package object type that represents the package
 // dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
 // versionRange (property) - string value for version range that applies to the dependent package
+// dependencyType - enum that represents the dependency as either direct, indirect or unknown
 // justification (property) - string value representing why the artifacts are the equal
 // origin (property) - where this attestation was generated from (based on which document)
 // collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -19963,6 +20016,7 @@ type allIsDependencyTree struct {
 	Justification    string                              `json:"justification"`
 	Package          allIsDependencyTreePackage          `json:"package"`
 	DependentPackage allIsDependencyTreeDependentPackage `json:"dependentPackage"`
+	DependencyType   DependencyType                      `json:"dependencyType"`
 	VersionRange     string                              `json:"versionRange"`
 	Origin           string                              `json:"origin"`
 	Collector        string                              `json:"collector"`
@@ -19981,6 +20035,9 @@ func (v *allIsDependencyTree) GetPackage() allIsDependencyTreePackage { return v
 func (v *allIsDependencyTree) GetDependentPackage() allIsDependencyTreeDependentPackage {
 	return v.DependentPackage
 }
+
+// GetDependencyType returns allIsDependencyTree.DependencyType, and is useful for accessing the field via an interface.
+func (v *allIsDependencyTree) GetDependencyType() DependencyType { return v.DependencyType }
 
 // GetVersionRange returns allIsDependencyTree.VersionRange, and is useful for accessing the field via an interface.
 func (v *allIsDependencyTree) GetVersionRange() string { return v.VersionRange }
@@ -22411,6 +22468,7 @@ fragment allIsDependencyTree on IsDependency {
 	dependentPackage {
 		... AllPkgTree
 	}
+	dependencyType
 	versionRange
 	origin
 	collector
@@ -22973,6 +23031,7 @@ fragment allIsDependencyTree on IsDependency {
 	dependentPackage {
 		... AllPkgTree
 	}
+	dependencyType
 	versionRange
 	origin
 	collector
@@ -23364,6 +23423,7 @@ fragment allIsDependencyTree on IsDependency {
 	dependentPackage {
 		... AllPkgTree
 	}
+	dependencyType
 	versionRange
 	origin
 	collector
@@ -23846,6 +23906,7 @@ fragment allIsDependencyTree on IsDependency {
 	dependentPackage {
 		... AllPkgTree
 	}
+	dependencyType
 	versionRange
 	origin
 	collector

@@ -41,10 +41,17 @@ const (
 	sourceRepo    = "SOURCE_REPO"
 )
 
+type IsDepPackage struct {
+	CurrentPackageInput *model.PkgInputSpec
+	DepPackageInput     *model.PkgInputSpec
+	IsDependency        *model.IsDependencyInputSpec
+}
+
 type PackageComponent struct {
 	CurrentPackage *model.PkgInputSpec
 	Source         *model.SourceInputSpec
 	Scorecard      *model.ScorecardInputSpec
+	IsDepPackages  []*IsDepPackage
 	DepPackages    []*PackageComponent
 	UpdateTime     time.Time
 }
@@ -128,19 +135,19 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	// check if top level purl has already been queried
 	if _, ok := d.checkedPurls[purl]; ok {
-		logger.Infof("purl %s already queried: %s", purl)
+		logger.Infof("purl %s already queried", purl)
 		return nil
 	}
 
 	packageInput, err := helpers.PurlToPkg(purl)
 	if err != nil {
-		logger.Debugf("failed to parse purl to pkg: %s", purl)
+		logger.Infof("failed to parse purl to pkg: %s", purl)
 		return nil
 	}
 
 	// if version is not specified, cannot obtain accurate information from deps.dev. Log as info and skip the purl.
 	if *packageInput.Version == "" {
-		logger.Debugf("purl does not contain version, skipping deps.dev query: %s", purl)
+		logger.Infof("purl does not contain version, skipping deps.dev query: %s", purl)
 		return nil
 	}
 
@@ -155,7 +162,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	// DependenciesResponse structs.
 	versionKey, err := getVersionKey(packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version)
 	if err != nil {
-		logger.Debugf("failed to getVersionKey with the following error: %w", err)
+		logger.Infof("failed to getVersionKey with the following error: %w", err)
 		return nil
 	}
 
@@ -168,6 +175,11 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		logger.Debugf("failed to get dependencies", err)
 		return nil
 	}
+
+	dependencyNodes := []*PackageComponent{}
+
+	// append the i=0 node as the root node of the graph
+	dependencyNodes = append(dependencyNodes, component)
 
 	for i, node := range deps.Nodes {
 		// the nodes of the dependency graph. The first node is the root of the graph, which is captured above so skip.
@@ -190,26 +202,38 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 			logger.Infof("unable to parse purl: %v", depPurl)
 			continue
 		}
-
 		// check if dependent package purl has already been queried. If found, append to the list of dependent packages for top level package
 		if foundDepVal, ok := d.checkedPurls[depPurl]; ok {
 			// if found, return the source as nothing as it has already been ingested once
 			foundDepVal.Source = nil
-			for _, foundDep := range foundDepVal.DepPackages {
-				foundDep.Source = nil
-			}
-			logger.Debugf("dependant package purl %s already queried: %s", depPurl)
-			component.DepPackages = append(component.DepPackages, foundDepVal)
+			logger.Debugf("dependant package purl %s already queried", depPurl)
+
+			dependencyNodes = append(dependencyNodes, foundDepVal)
 			continue
 		}
-
 		depComponent.CurrentPackage = depPackageInput
-
 		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Namespace, depPackageInput.Name, depPackageInput.Version, depComponent)
 		if err != nil {
 			logger.Debugf("failed to get additional metadata for package: %s, err: %w", depPurl, err)
 		}
-		component.DepPackages = append(component.DepPackages, depComponent)
+		dependencyNodes = append(dependencyNodes, depComponent)
+		d.checkedPurls[depPurl] = depComponent
+	}
+
+	component.DepPackages = append(component.DepPackages, dependencyNodes[1:]...)
+
+	for _, edge := range deps.Edges {
+		isDep := &model.IsDependencyInputSpec{
+			VersionRange:   edge.Requirement,
+			DependencyType: model.DependencyTypeDirect,
+			Justification:  "dependency data collected via deps.dev",
+		}
+		foundDepPackage := &IsDepPackage{
+			CurrentPackageInput: dependencyNodes[edge.FromNode].CurrentPackage,
+			DepPackageInput:     dependencyNodes[edge.ToNode].CurrentPackage,
+			IsDependency:        isDep,
+		}
+		component.IsDepPackages = append(component.IsDepPackages, foundDepPackage)
 	}
 
 	logger.Infof("obtained additional metadata for package: %s", purl)
@@ -255,7 +279,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 		if link.Label == sourceRepo {
 			src, err := helpers.VcsToSrc(link.Url)
 			if err != nil {
-				logger.Debugf("unable to parse source url: %v", link.Url)
+				logger.Infof("unable to parse source url: %v", link.Url)
 				continue
 			}
 

@@ -137,6 +137,7 @@ type ComplexityRoot struct {
 
 	IsDependency struct {
 		Collector        func(childComplexity int) int
+		DependencyType   func(childComplexity int) int
 		DependentPackage func(childComplexity int) int
 		ID               func(childComplexity int) int
 		Justification    func(childComplexity int) int
@@ -749,6 +750,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsDependency.Collector(childComplexity), true
+
+	case "IsDependency.dependencyType":
+		if e.complexity.IsDependency.DependencyType == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.DependencyType(childComplexity), true
 
 	case "IsDependency.dependentPackage":
 		if e.complexity.IsDependency.DependentPackage == nil {
@@ -3203,12 +3211,26 @@ extend type Mutation {
 
 # Defines a GraphQL schema for the IsDependency. It contains the package object, dependent package object
 # version range of the dependent package that it applies to, justification, origin and collector.
+
+"""
+DependencyType determines the type of the IsDependency.
+Direct - direct dependency of the IsDependency Package
+Indirect - transitive dependency of the IsDependency Package
+Unknown - type of the dependency not known
+"""
+enum DependencyType {
+  DIRECT
+  INDIRECT
+  UNKNOWN
+}
+
 """
 IsDependency is an attestation that represents when a package is dependent on another package
 
 package (subject) - the package object type that represents the package
 dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
 versionRange (property) - string value for version range that applies to the dependent package
+dependencyType - enum that represents the dependency as either direct, indirect or unknown
 justification (property) - string value representing why the artifacts are the equal
 origin (property) - where this attestation was generated from (based on which document)
 collector (property) - the GUAC collector that collected the document that generated this attestation
@@ -3218,6 +3240,7 @@ type IsDependency {
   package: Package!
   dependentPackage: Package!
   versionRange: String!
+  dependencyType: DependencyType!
   justification: String!
   origin: String!
   collector: String!
@@ -3234,6 +3257,7 @@ input IsDependencySpec {
   package: PkgSpec
   dependentPackage: PkgNameSpec
   versionRange: String
+  dependencyType: DependencyType
   justification: String
   origin: String
   collector: String
@@ -3258,6 +3282,7 @@ All fields are required.
 """
 input IsDependencyInputSpec {
   versionRange: String!
+  dependencyType: DependencyType!
   justification: String!
   origin: String!
   collector: String!

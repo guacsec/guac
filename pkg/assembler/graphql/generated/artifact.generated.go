@@ -2123,6 +2123,8 @@ func (ec *executionContext) fieldContext_Mutation_ingestDependency(ctx context.C
 				return ec.fieldContext_IsDependency_dependentPackage(ctx, field)
 			case "versionRange":
 				return ec.fieldContext_IsDependency_versionRange(ctx, field)
+			case "dependencyType":
+				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
 			case "justification":
 				return ec.fieldContext_IsDependency_justification(ctx, field)
 			case "origin":
@@ -3443,6 +3445,8 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 				return ec.fieldContext_IsDependency_dependentPackage(ctx, field)
 			case "versionRange":
 				return ec.fieldContext_IsDependency_versionRange(ctx, field)
+			case "dependencyType":
+				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
 			case "justification":
 				return ec.fieldContext_IsDependency_justification(ctx, field)
 			case "origin":

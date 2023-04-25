@@ -229,7 +229,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
-	// Create predicates for IsOccurence for all artifacts found
+	// Create predicates for IsOccurrence for all artifacts found
 	for id := range s.fileArtifacts {
 		for _, pkg := range s.filePackages[id] {
 			for _, art := range s.fileArtifacts[id] {
