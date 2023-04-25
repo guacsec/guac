@@ -342,7 +342,7 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: baselayoutPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "3.2.0-r22",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -351,7 +351,7 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: baselayoutdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "3.2.0-r22",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -360,7 +360,7 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.4-r1",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -369,7 +369,7 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: worldFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -378,7 +378,7 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -387,7 +387,7 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: triggersFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -396,7 +396,7 @@ var (
 			Pkg:    topLevelPack,
 			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -405,7 +405,7 @@ var (
 			Pkg:    baselayoutPack,
 			DepPkg: keysPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.4-r1",
 				Justification:  isDepJustifyDependencyOfJustification,
 			},
@@ -414,7 +414,7 @@ var (
 			Pkg:    rootFilePack,
 			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
 				Justification:  isDepJustifyDependsOnJustification,
 			},
@@ -423,7 +423,7 @@ var (
 			Pkg:    baselayoutPack,
 			DepPkg: rootFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
 				Justification:  isDepJustifyContainsJustification,
 			},
@@ -432,7 +432,7 @@ var (
 			Pkg:    keysPack,
 			DepPkg: rsaPubFilePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
 				Justification:  isDepJustifyContainedByJustification,
 			},
@@ -481,7 +481,7 @@ var (
 			Pkg:    cdxTopLevelPack,
 			DepPkg: cdxBasefilesPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "11.1+deb11u5",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -490,7 +490,7 @@ var (
 			Pkg:    cdxTopLevelPack,
 			DepPkg: cdxNetbasePack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "6.3",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -499,7 +499,7 @@ var (
 			Pkg:    cdxTopLevelPack,
 			DepPkg: cdxTzdataPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2021a-1+deb11u6",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -521,7 +521,7 @@ var (
 			Pkg:    cdxTopQuarkusPack,
 			DepPkg: cdxResteasyPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.13.4.Final",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -530,7 +530,7 @@ var (
 			Pkg:    cdxTopQuarkusPack,
 			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.13.4.Final",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
@@ -539,7 +539,7 @@ var (
 			Pkg:    cdxResteasyPack,
 			DepPkg: cdxReactiveCommonPack,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
@@ -594,7 +594,7 @@ var (
 			Pkg:    cdxWebAppPackage,
 			DepPkg: cdxBootstrapPackage,
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeDirect,
+				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "4.0.0-beta.2",
 				Justification:  isDepJustifyTopPkgJustification,
 			},
