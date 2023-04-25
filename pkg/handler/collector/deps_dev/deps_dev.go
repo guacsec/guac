@@ -223,8 +223,14 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	component.DepPackages = append(component.DepPackages, dependencyNodes[1:]...)
 
 	for _, edge := range deps.Edges {
+		versionRange := ""
+		if edge.Requirement == "" {
+			versionRange = *dependencyNodes[edge.ToNode].CurrentPackage.Version
+		} else {
+			versionRange = edge.Requirement
+		}
 		isDep := &model.IsDependencyInputSpec{
-			VersionRange:   edge.Requirement,
+			VersionRange:   versionRange,
 			DependencyType: model.DependencyTypeDirect,
 			Justification:  "dependency data collected via deps.dev",
 		}
