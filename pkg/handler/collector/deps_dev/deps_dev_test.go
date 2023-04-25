@@ -227,9 +227,13 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			}
 
 			for i := range collectedDocs {
-				collectedDocs[i].Blob, err = normalizeTimeStamp(collectedDocs[i].Blob)
+				collectedDocs[i].Blob, err = normalizeTimeStampAndScorecard(collectedDocs[i].Blob)
 				if err != nil {
-					t.Fatalf("unexpected error while normalizing timestamp: %v", err)
+					t.Fatalf("unexpected error while normalizing: %v", err)
+				}
+				tt.want[i].Blob, err = normalizeTimeStampAndScorecard(tt.want[i].Blob)
+				if err != nil {
+					t.Fatalf("unexpected error while normalizing: %v", err)
 				}
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDocs[i]), dochelper.DocNode(tt.want[i]))
 				if !result {
@@ -244,7 +248,9 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 	}
 }
 
-func normalizeTimeStamp(blob []byte) ([]byte, error) {
+// Scorecard and timestamp data constantly changes, causing CI to keep erroring every few days.
+// This normalizes the time and removes the scorecard compare
+func normalizeTimeStampAndScorecard(blob []byte) ([]byte, error) {
 	tm, err := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	if err != nil {
 		return nil, err
@@ -255,12 +261,12 @@ func normalizeTimeStamp(blob []byte) ([]byte, error) {
 	}
 	packageComponent.UpdateTime = tm.UTC()
 	if packageComponent.Scorecard != nil {
-		packageComponent.Scorecard.TimeScanned = tm.UTC()
+		packageComponent.Scorecard = nil
 	}
 	for _, depPackage := range packageComponent.DepPackages {
 		depPackage.UpdateTime = tm.UTC()
 		if depPackage.Scorecard != nil {
-			depPackage.Scorecard.TimeScanned = tm.UTC()
+			depPackage.Scorecard = nil
 		}
 	}
 	return json.Marshal(packageComponent)

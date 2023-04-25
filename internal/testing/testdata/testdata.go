@@ -1019,7 +1019,7 @@ var (
 				 "dependencyType":"DIRECT",
 				 "justification":"dependency data collected via deps.dev",
 				 "origin":"",
-				 "versionRange":"3.12.0"
+				 "versionRange":""
 			  }
 		   }
 		],
