@@ -23,6 +23,7 @@ import (
 
 	"github.com/google/go-github/v50/github"
 	"github.com/guacsec/guac/internal/client"
+	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/oauth2"
 )
 
@@ -56,7 +57,12 @@ var _ GithubClient = &githubClient{}
 
 func NewGithubClient(ctx context.Context, token string) (*githubClient, error) {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
-	tc := oauth2.NewClient(ctx, ts)
+	tc := &http.Client{
+		Transport: &oauth2.Transport{
+			Source: ts,
+			Base:   version.UATransport,
+		},
+	}
 	gc := github.NewClient(tc)
 
 	// Run a simple API call to verify authentication to Github API.
