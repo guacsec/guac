@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -39,8 +40,9 @@ var flags = struct {
 }{}
 
 var rootCmd = &cobra.Command{
-	Use:   "guacgql",
-	Short: "GUAC GraphQL server",
+	Use:     "guacgql",
+	Short:   "GUAC GraphQL server",
+	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		flags.backend = viper.GetString("gql-backend")
 		flags.port = viper.GetInt("gql-port")
