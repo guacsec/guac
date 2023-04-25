@@ -1059,10 +1059,10 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 			Tag:       &sourceTag,
 		},
 		hasSBOM: model.HasSBOMInputSpec{
-			Annotation: "this SBOM has a score of 10",
-			Uri:        "uri:location of source SBOM",
-			Origin:     "Demo ingestion",
-			Collector:  "Demo ingestion",
+			//Annotation: "this SBOM has a score of 10",
+			Uri:       "uri:location of source SBOM",
+			Origin:    "Demo ingestion",
+			Collector: "Demo ingestion",
 		},
 	}}
 	for _, ingest := range ingestHasSBOM {
