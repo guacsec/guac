@@ -19,11 +19,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"reflect"
+	"sort"
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
@@ -58,19 +59,20 @@ func parseDepsDevBlob(p []byte) (*deps_dev.PackageComponent, error) {
 
 func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	preds := &assembler.IngestPredicates{}
-
 	// create and append predicates for the top level package
 	appendPredicates(d.packComponent, preds)
 
-	depPackages := []*model.PkgInputSpec{}
 	for _, depComp := range d.packComponent.DepPackages {
-		depPackages = append(depPackages, depComp.CurrentPackage)
-
-		// create and append predicates for dependent packages
 		appendPredicates(depComp, preds)
-
 	}
-	preds.IsDependency = append(preds.IsDependency, createTopLevelIsDeps(d.packComponent.CurrentPackage, depPackages)...)
+
+	for _, isDepComp := range d.packComponent.IsDepPackages {
+		preds.IsDependency = append(preds.IsDependency, assembler.IsDependencyIngest{
+			Pkg:          isDepComp.CurrentPackageInput,
+			DepPkg:       isDepComp.DepPackageInput,
+			IsDependency: isDepComp.IsDependency,
+		})
+	}
 
 	return preds
 }
@@ -78,7 +80,6 @@ func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 func appendPredicates(packComponent *deps_dev.PackageComponent, preds *assembler.IngestPredicates) {
 	hasSourceAt := createHasSourceAtIngest(packComponent.CurrentPackage, packComponent.Source, packComponent.UpdateTime.UTC())
 	scorecard := createScorecardIngest(packComponent.Source, packComponent.Scorecard)
-
 	if hasSourceAt != nil {
 		preds.HasSourceAt = append(preds.HasSourceAt, *hasSourceAt)
 	}
@@ -114,42 +115,30 @@ func createScorecardIngest(src *model.SourceInputSpec, scorecard *model.Scorecar
 	return nil
 }
 
-func createTopLevelIsDeps(toplevel *model.PkgInputSpec, packages []*model.PkgInputSpec) []assembler.IsDependencyIngest {
-	isDeps := []assembler.IsDependencyIngest{}
-	for _, packNode := range packages {
-		if !reflect.DeepEqual(*packNode, *toplevel) {
-			p := assembler.IsDependencyIngest{
-				Pkg:    toplevel,
-				DepPkg: packNode,
-				IsDependency: &model.IsDependencyInputSpec{
-					Justification: "dependency data collected via deps.dev",
-					VersionRange:  *packNode.Version,
-				},
-			}
-			isDeps = append(isDeps, p)
-		}
-	}
-	return isDeps
-}
-
 func (d *depsDevParser) GetIdentities(ctx context.Context) []common.TrustInformation {
 	return nil
 }
 
 func (d *depsDevParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
 	idstrings := &common.IdentifierStrings{}
-	// TODO (pxp928): currently commented out based on issue https://github.com/guacsec/guac/issues/769
-	// this will be uncommented once that work is complete such that deps.dev collector does not keep spinning.
-	// TODO (pxp928): Unit test will also need to be fixed
-	/* 	for _, depComp := range d.packComponent.DepPackages {
+	for _, depComp := range d.packComponent.DepPackages {
 		pkg := depComp.CurrentPackage
-		qualifiers := []string{}
-		for _, v := range pkg.Qualifiers {
-			qualifiers = append(qualifiers, v.Key, v.Value)
-		}
-		purl := helpers.PkgToPurl(pkg.Type, *pkg.Namespace, pkg.Name, *pkg.Version, *pkg.Subpath, qualifiers)
-
-		idstrings.PurlStrings = append(idstrings.PurlStrings, purl)
-	} */
+		idstrings.PurlStrings = append(idstrings.PurlStrings, pkgInputSpecToPurl(pkg))
+	}
 	return idstrings, nil
+}
+
+func pkgInputSpecToPurl(currentPkg *model.PkgInputSpec) string {
+	qualifiersMap := map[string]string{}
+	keys := []string{}
+	for _, kv := range currentPkg.Qualifiers {
+		qualifiersMap[kv.Key] = kv.Value
+		keys = append(keys, kv.Key)
+	}
+	sort.Strings(keys)
+	qualifiers := []string{}
+	for _, k := range keys {
+		qualifiers = append(qualifiers, k, qualifiersMap[k])
+	}
+	return helpers.PkgToPurl(currentPkg.Type, *currentPkg.Namespace, currentPkg.Name, *currentPkg.Version, *currentPkg.Subpath, qualifiers)
 }

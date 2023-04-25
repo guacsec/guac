@@ -22,6 +22,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
+// TODO: change the DependencyType based on the relationship, currently set to unknown
 func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputSpec, relatedFileNodes []*model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
 	if len(relatedFileNodes) > 0 {
 		for _, rfileNode := range relatedFileNodes {
@@ -30,8 +31,9 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 				Pkg:    foundNode,
 				DepPkg: rfileNode,
 				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-					VersionRange:  *rfileNode.Version,
+					DependencyType: model.DependencyTypeUnknown,
+					Justification:  justification,
+					VersionRange:   *rfileNode.Version,
 				},
 			}, nil
 		}
@@ -41,8 +43,9 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 				Pkg:    foundNode,
 				DepPkg: rpackNode,
 				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-					VersionRange:  *rpackNode.Version,
+					DependencyType: model.DependencyTypeUnknown,
+					Justification:  justification,
+					VersionRange:   *rpackNode.Version,
 				},
 			}, nil
 
@@ -51,6 +54,7 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 	return nil, nil
 }
 
+// TODO: change the DependencyType based on the relationship, currently set to unknown
 func CreateTopLevelIsDeps(toplevel *model.PkgInputSpec, packages map[string][]*model.PkgInputSpec, files map[string][]*model.PkgInputSpec, justification string) []assembler.IsDependencyIngest {
 	isDeps := []assembler.IsDependencyIngest{}
 	for _, packNodes := range packages {
@@ -60,8 +64,9 @@ func CreateTopLevelIsDeps(toplevel *model.PkgInputSpec, packages map[string][]*m
 					Pkg:    toplevel,
 					DepPkg: packNode,
 					IsDependency: &model.IsDependencyInputSpec{
-						Justification: justification,
-						VersionRange:  *packNode.Version,
+						DependencyType: model.DependencyTypeUnknown,
+						Justification:  justification,
+						VersionRange:   *packNode.Version,
 					},
 				}
 				isDeps = append(isDeps, p)
@@ -75,8 +80,9 @@ func CreateTopLevelIsDeps(toplevel *model.PkgInputSpec, packages map[string][]*m
 				Pkg:    toplevel,
 				DepPkg: fileNode,
 				IsDependency: &model.IsDependencyInputSpec{
-					Justification: justification,
-					VersionRange:  *fileNode.Version,
+					DependencyType: model.DependencyTypeUnknown,
+					Justification:  justification,
+					VersionRange:   *fileNode.Version,
 				},
 			}
 			isDeps = append(isDeps, p)
