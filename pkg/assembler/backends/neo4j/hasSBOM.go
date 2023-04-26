@@ -30,6 +30,7 @@ const (
 	uri string = "uri"
 )
 
+// TODO: noe4j backend does not match the schema. This needs updating before use!
 func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
 	// TODO: Fix validation
