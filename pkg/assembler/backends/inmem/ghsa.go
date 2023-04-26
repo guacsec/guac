@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -131,8 +132,11 @@ func (c *demoClient) Ghsa(ctx context.Context, filter *model.GHSASpec) ([]*model
 		}
 		ghsa, err := c.buildGhsaResponse(uint32(id), filter)
 		if err != nil {
-			// not found
-			return nil, nil
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
+			return nil, err
 		}
 		return []*model.Ghsa{ghsa}, nil
 	}
