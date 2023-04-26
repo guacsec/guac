@@ -1,7 +1,5 @@
 fragment allHasSBOMTree on HasSBOM {
   id
-  uri
-  annotation
   subject {
     __typename
     ... on Package {
@@ -39,6 +37,14 @@ fragment allHasSBOMTree on HasSBOM {
         }
       }
     }
+  }
+  uri
+  algorithm
+  digest
+  downloadLocation
+  annotations {
+      key
+      value
   }
   origin
   collector
