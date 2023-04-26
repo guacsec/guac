@@ -211,8 +211,6 @@ fragment allHashEqualTree on HashEqual {
 
 fragment allHasSBOMTree on HasSBOM {
   id
-  uri
-  annotation
   subject {
     __typename
     ... on Package {
@@ -221,6 +219,14 @@ fragment allHasSBOMTree on HasSBOM {
     ... on Source {
       ...AllSourceTree
       }
+  }
+  uri
+  algorithm
+  digest
+  downloadLocation
+  annotations {
+      key
+      value
   }
   origin
   collector

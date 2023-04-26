@@ -27,10 +27,10 @@ import (
 )
 
 const (
-	uri        string = "uri"
-	annotation string = "annotation"
+	uri string = "uri"
 )
 
+// TODO: noe4j backend does not match the schema. This needs updating before use!
 func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
 	// TODO: Fix validation
@@ -91,7 +91,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 						return nil, gqlerror.Errorf("hasSBOM Node not found in neo4j")
 					}
 
-					hasSBOM := generateModelHasSBOM(pkg, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[annotation].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
+					hasSBOM := generateModelHasSBOM(pkg, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
 
 					collectedHasSBOM = append(collectedHasSBOM, hasSBOM)
 				}
@@ -149,7 +149,7 @@ func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpe
 						return nil, gqlerror.Errorf("hasSBOM Node not found in neo4j")
 					}
 
-					hasSBOM := generateModelHasSBOM(src, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[annotation].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
+					hasSBOM := generateModelHasSBOM(src, hasSBOMNode.Props[uri].(string), hasSBOMNode.Props[origin].(string), hasSBOMNode.Props[collector].(string))
 
 					collectedHasSBOM = append(collectedHasSBOM, hasSBOM)
 				}
@@ -174,11 +174,6 @@ func setHasSBOMValues(sb *strings.Builder, hasSBOMSpec *model.HasSBOMSpec, first
 		*firstMatch = false
 		queryValues[uri] = hasSBOMSpec.URI
 	}
-	if hasSBOMSpec.Annotation != nil {
-		matchProperties(sb, *firstMatch, "hasSBOM", annotation, "$"+annotation)
-		*firstMatch = false
-		queryValues[annotation] = hasSBOMSpec.Annotation
-	}
 	if hasSBOMSpec.Origin != nil {
 		matchProperties(sb, *firstMatch, "hasSBOM", origin, "$"+origin)
 		*firstMatch = false
@@ -191,13 +186,12 @@ func setHasSBOMValues(sb *strings.Builder, hasSBOMSpec *model.HasSBOMSpec, first
 	}
 }
 
-func generateModelHasSBOM(subject model.PackageOrSource, uri, annotation, origin, collector string) *model.HasSbom {
+func generateModelHasSBOM(subject model.PackageOrSource, uri, origin, collector string) *model.HasSbom {
 	hasSBOM := model.HasSbom{
-		Subject:    subject,
-		URI:        uri,
-		Annotation: annotation,
-		Origin:     origin,
-		Collector:  collector,
+		Subject:   subject,
+		URI:       uri,
+		Origin:    origin,
+		Collector: collector,
 	}
 	return &hasSBOM
 }
