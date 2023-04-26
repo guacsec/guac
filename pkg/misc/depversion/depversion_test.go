@@ -18,7 +18,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=0"},
+					{">=0.0.0"},
 				},
 			},
 		},
@@ -64,6 +64,15 @@ func Test_VersionRangeParse(t *testing.T) {
 			},
 		},
 		{
+			input: "[1.5.0,1.7.0]",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.5.0,<=1.7.0"},
+				},
+			},
+		},
+
+		{
 			input: "[1.5.0,)",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
@@ -83,7 +92,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "^0.11",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=0.11,<1"},
+					{">=0.11,<1.0.0"},
 				},
 			},
 		},
@@ -91,7 +100,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "^1",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=1,<2"},
+					{">=1,<2.0.0"},
 				},
 			},
 		},
@@ -99,7 +108,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "^1.0.25",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=1.0.25,<2"},
+					{">=1.0.25,<2.0.0"},
 				},
 			},
 		},
@@ -107,8 +116,8 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "^3.0.0 || ^4.0.0",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=3.0.0,<4"},
-					{">=4.0.0,<5"},
+					{">=3.0.0,<4.0.0"},
+					{">=4.0.0,<5.0.0"},
 				},
 			},
 		},
@@ -135,7 +144,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "1.0.0 - 2.9999.9999",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{"=1.1.2"},
+					{">=1.0.0,<=2.9999.9999"},
 				},
 			},
 		},
@@ -143,7 +152,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: ">=1.0.2 <2.1.2",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=1.0.2 <2.1.2"},
+					{">=1.0.2,<2.1.2"},
 				},
 			},
 		},
@@ -151,7 +160,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: ">1.0.2 <=2.3.4",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">1.0.2 <=2.3.4"},
+					{">1.0.2,<=2.3.4"},
 				},
 			},
 		},
@@ -183,7 +192,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "~1.2",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=1.2,<1.3"},
+					{">=1.2,<1.3.0"},
 				},
 			},
 		},
@@ -191,7 +200,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "~1.2.3",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=1.2.3,<2"},
+					{">=1.2.3,<1.3.0"},
 				},
 			},
 		},
@@ -199,7 +208,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "2.x",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=2.0,<3"},
+					{">=2.0.0,<3.0.0"},
 				},
 			},
 		},
@@ -207,7 +216,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "3.3.x",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=3.3.0,<3.4"},
+					{">=3.3.0,<3.4.0"},
 				},
 			},
 		},
@@ -216,7 +225,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			input: "latest",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
-					{">=0"},
+					{">=0.0.0"},
 				},
 			},
 		},
@@ -237,7 +246,7 @@ func Test_VersionRangeParse(t *testing.T) {
 				return
 			}
 
-			if diff := cmp.Diff(got, tt.expect); len(diff) > 0 {
+			if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
