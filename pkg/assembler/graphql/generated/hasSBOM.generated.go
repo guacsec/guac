@@ -28,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Annotations_key(ctx context.Context, field graphql.CollectedField, obj *model.Annotations) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Annotations_key(ctx, field)
+func (ec *executionContext) _Annotation_key(ctx context.Context, field graphql.CollectedField, obj *model.Annotation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Annotation_key(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -59,9 +59,9 @@ func (ec *executionContext) _Annotations_key(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Annotations_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Annotation_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Annotations",
+		Object:     "Annotation",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -72,8 +72,8 @@ func (ec *executionContext) fieldContext_Annotations_key(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Annotations_value(ctx context.Context, field graphql.CollectedField, obj *model.Annotations) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Annotations_value(ctx, field)
+func (ec *executionContext) _Annotation_value(ctx context.Context, field graphql.CollectedField, obj *model.Annotation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Annotation_value(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -103,9 +103,9 @@ func (ec *executionContext) _Annotations_value(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Annotations_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Annotation_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Annotations",
+		Object:     "Annotation",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -406,9 +406,9 @@ func (ec *executionContext) _HasSBOM_annotations(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Annotations)
+	res := resTmp.([]*model.Annotation)
 	fc.Result = res
-	return ec.marshalNAnnotations2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsᚄ(ctx, field.Selections, res)
+	return ec.marshalNAnnotation2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HasSBOM_annotations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -420,11 +420,11 @@ func (ec *executionContext) fieldContext_HasSBOM_annotations(ctx context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "key":
-				return ec.fieldContext_Annotations_key(ctx, field)
+				return ec.fieldContext_Annotation_key(ctx, field)
 			case "value":
-				return ec.fieldContext_Annotations_value(ctx, field)
+				return ec.fieldContext_Annotation_value(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Annotations", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Annotation", field.Name)
 		},
 	}
 	return fc, nil
@@ -522,8 +522,8 @@ func (ec *executionContext) fieldContext_HasSBOM_collector(ctx context.Context, 
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAnnotationsInputSpec(ctx context.Context, obj interface{}) (model.AnnotationsInputSpec, error) {
-	var it model.AnnotationsInputSpec
+func (ec *executionContext) unmarshalInputAnnotationInputSpec(ctx context.Context, obj interface{}) (model.AnnotationInputSpec, error) {
+	var it model.AnnotationInputSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -558,8 +558,8 @@ func (ec *executionContext) unmarshalInputAnnotationsInputSpec(ctx context.Conte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputAnnotationsSpec(ctx context.Context, obj interface{}) (model.AnnotationsSpec, error) {
-	var it model.AnnotationsSpec
+func (ec *executionContext) unmarshalInputAnnotationSpec(ctx context.Context, obj interface{}) (model.AnnotationSpec, error) {
+	var it model.AnnotationSpec
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -644,7 +644,7 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annotations"))
-			it.Annotations, err = ec.unmarshalNAnnotationsInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsInputSpecᚄ(ctx, v)
+			it.Annotations, err = ec.unmarshalNAnnotationInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationInputSpecᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -740,7 +740,7 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annotations"))
-			it.Annotations, err = ec.unmarshalOAnnotationsSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsSpecᚄ(ctx, v)
+			it.Annotations, err = ec.unmarshalOAnnotationSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationSpecᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -774,26 +774,26 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 
 // region    **************************** object.gotpl ****************************
 
-var annotationsImplementors = []string{"Annotations"}
+var annotationImplementors = []string{"Annotation"}
 
-func (ec *executionContext) _Annotations(ctx context.Context, sel ast.SelectionSet, obj *model.Annotations) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, annotationsImplementors)
+func (ec *executionContext) _Annotation(ctx context.Context, sel ast.SelectionSet, obj *model.Annotation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, annotationImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Annotations")
+			out.Values[i] = graphql.MarshalString("Annotation")
 		case "key":
 
-			out.Values[i] = ec._Annotations_key(ctx, field, obj)
+			out.Values[i] = ec._Annotation_key(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "value":
 
-			out.Values[i] = ec._Annotations_value(ctx, field, obj)
+			out.Values[i] = ec._Annotation_value(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -897,7 +897,7 @@ func (ec *executionContext) _HasSBOM(ctx context.Context, sel ast.SelectionSet, 
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAnnotations2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Annotations) graphql.Marshaler {
+func (ec *executionContext) marshalNAnnotation2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Annotation) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -921,7 +921,7 @@ func (ec *executionContext) marshalNAnnotations2ᚕᚖgithubᚗcomᚋguacsecᚋg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAnnotations2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotations(ctx, sel, v[i])
+			ret[i] = ec.marshalNAnnotation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotation(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -941,26 +941,26 @@ func (ec *executionContext) marshalNAnnotations2ᚕᚖgithubᚗcomᚋguacsecᚋg
 	return ret
 }
 
-func (ec *executionContext) marshalNAnnotations2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotations(ctx context.Context, sel ast.SelectionSet, v *model.Annotations) graphql.Marshaler {
+func (ec *executionContext) marshalNAnnotation2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotation(ctx context.Context, sel ast.SelectionSet, v *model.Annotation) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._Annotations(ctx, sel, v)
+	return ec._Annotation(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAnnotationsInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.AnnotationsInputSpec, error) {
+func (ec *executionContext) unmarshalNAnnotationInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.AnnotationInputSpec, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]*model.AnnotationsInputSpec, len(vSlice))
+	res := make([]*model.AnnotationInputSpec, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNAnnotationsInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsInputSpec(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNAnnotationInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationInputSpec(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -968,13 +968,13 @@ func (ec *executionContext) unmarshalNAnnotationsInputSpec2ᚕᚖgithubᚗcomᚋ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNAnnotationsInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsInputSpec(ctx context.Context, v interface{}) (*model.AnnotationsInputSpec, error) {
-	res, err := ec.unmarshalInputAnnotationsInputSpec(ctx, v)
+func (ec *executionContext) unmarshalNAnnotationInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationInputSpec(ctx context.Context, v interface{}) (*model.AnnotationInputSpec, error) {
+	res, err := ec.unmarshalInputAnnotationInputSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNAnnotationsSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsSpec(ctx context.Context, v interface{}) (*model.AnnotationsSpec, error) {
-	res, err := ec.unmarshalInputAnnotationsSpec(ctx, v)
+func (ec *executionContext) unmarshalNAnnotationSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationSpec(ctx context.Context, v interface{}) (*model.AnnotationSpec, error) {
+	res, err := ec.unmarshalInputAnnotationSpec(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -1041,7 +1041,7 @@ func (ec *executionContext) unmarshalNHasSBOMInputSpec2githubᚗcomᚋguacsecᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOAnnotationsSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsSpecᚄ(ctx context.Context, v interface{}) ([]*model.AnnotationsSpec, error) {
+func (ec *executionContext) unmarshalOAnnotationSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationSpecᚄ(ctx context.Context, v interface{}) ([]*model.AnnotationSpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1050,10 +1050,10 @@ func (ec *executionContext) unmarshalOAnnotationsSpec2ᚕᚖgithubᚗcomᚋguacs
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]*model.AnnotationsSpec, len(vSlice))
+	res := make([]*model.AnnotationSpec, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNAnnotationsSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationsSpec(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNAnnotationSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐAnnotationSpec(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}

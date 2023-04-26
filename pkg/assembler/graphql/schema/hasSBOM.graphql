@@ -37,16 +37,16 @@ type HasSBOM {
   algorithm: String!
   digest: String!
   downloadLocation: String!
-  annotations: [Annotations!]!
+  annotations: [Annotation!]!
   origin: String!
   collector: String!
 }
 
 
 """
-Annotations are key-value pairs to provide additional information or metadata about SBOM
+Annotation are key-value pairs to provide additional information or metadata about SBOM
 """
-type Annotations {
+type Annotation {
   key: String!
   value: String!
 }
@@ -64,15 +64,15 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
-  annotations: [AnnotationsSpec!] = []
+  annotations: [AnnotationSpec!] = []
   origin: String
   collector: String
 }
 
 """
-AnnotationsSpec is the same as Annotations, but usable as query input.
+AnnotationSpec is the same as Annotations, but usable as query input.
 """
-input AnnotationsSpec {
+input AnnotationSpec {
   key: String!
   value: String!
 }
@@ -87,7 +87,7 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
-  annotations: [AnnotationsInputSpec!]!
+  annotations: [AnnotationInputSpec!]!
   origin: String!
   collector: String!
 }
@@ -95,7 +95,7 @@ input HasSBOMInputSpec {
 """
 AnnotationsSpec is the same as Annotations, but usable as mutation input.
 """
-input AnnotationsInputSpec {
+input AnnotationInputSpec {
   key: String!
   value: String!
 }

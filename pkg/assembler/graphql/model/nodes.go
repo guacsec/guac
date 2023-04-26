@@ -43,20 +43,20 @@ type Vulnerability interface {
 	IsVulnerability()
 }
 
-// Annotations are key-value pairs to provide additional information or metadata about SBOM
-type Annotations struct {
+// Annotation are key-value pairs to provide additional information or metadata about SBOM
+type Annotation struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 // AnnotationsSpec is the same as Annotations, but usable as mutation input.
-type AnnotationsInputSpec struct {
+type AnnotationInputSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// AnnotationsSpec is the same as Annotations, but usable as query input.
-type AnnotationsSpec struct {
+// AnnotationSpec is the same as Annotations, but usable as query input.
+type AnnotationSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
@@ -397,7 +397,7 @@ type HasSbom struct {
 	Algorithm        string          `json:"algorithm"`
 	Digest           string          `json:"digest"`
 	DownloadLocation string          `json:"downloadLocation"`
-	Annotations      []*Annotations  `json:"annotations"`
+	Annotations      []*Annotation   `json:"annotations"`
 	Origin           string          `json:"origin"`
 	Collector        string          `json:"collector"`
 }
@@ -408,13 +408,13 @@ func (HasSbom) IsNode() {}
 //
 // All fields are required.
 type HasSBOMInputSpec struct {
-	URI              string                  `json:"uri"`
-	Algorithm        string                  `json:"algorithm"`
-	Digest           string                  `json:"digest"`
-	DownloadLocation string                  `json:"downloadLocation"`
-	Annotations      []*AnnotationsInputSpec `json:"annotations"`
-	Origin           string                  `json:"origin"`
-	Collector        string                  `json:"collector"`
+	URI              string                 `json:"uri"`
+	Algorithm        string                 `json:"algorithm"`
+	Digest           string                 `json:"digest"`
+	DownloadLocation string                 `json:"downloadLocation"`
+	Annotations      []*AnnotationInputSpec `json:"annotations"`
+	Origin           string                 `json:"origin"`
+	Collector        string                 `json:"collector"`
 }
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
@@ -427,7 +427,7 @@ type HasSBOMSpec struct {
 	Algorithm        *string              `json:"algorithm,omitempty"`
 	Digest           *string              `json:"digest,omitempty"`
 	DownloadLocation *string              `json:"downloadLocation,omitempty"`
-	Annotations      []*AnnotationsSpec   `json:"annotations,omitempty"`
+	Annotations      []*AnnotationSpec    `json:"annotations,omitempty"`
 	Origin           *string              `json:"origin,omitempty"`
 	Collector        *string              `json:"collector,omitempty"`
 }

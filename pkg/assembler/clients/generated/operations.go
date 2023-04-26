@@ -1528,16 +1528,16 @@ func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetTag() *string
 func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() *string { return v.Commit }
 
 // AnnotationsSpec is the same as Annotations, but usable as mutation input.
-type AnnotationsInputSpec struct {
+type AnnotationInputSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// GetKey returns AnnotationsInputSpec.Key, and is useful for accessing the field via an interface.
-func (v *AnnotationsInputSpec) GetKey() string { return v.Key }
+// GetKey returns AnnotationInputSpec.Key, and is useful for accessing the field via an interface.
+func (v *AnnotationInputSpec) GetKey() string { return v.Key }
 
-// GetValue returns AnnotationsInputSpec.Value, and is useful for accessing the field via an interface.
-func (v *AnnotationsInputSpec) GetValue() string { return v.Value }
+// GetValue returns AnnotationInputSpec.Value, and is useful for accessing the field via an interface.
+func (v *AnnotationInputSpec) GetValue() string { return v.Value }
 
 // ArtifactInputSpec is the same as Artifact, but used as mutation input.
 //
@@ -4044,13 +4044,13 @@ func (v *GHSAsResponse) GetGhsa() []GHSAsGhsaGHSA { return v.Ghsa }
 //
 // All fields are required.
 type HasSBOMInputSpec struct {
-	Uri              string                 `json:"uri"`
-	Algorithm        string                 `json:"algorithm"`
-	Digest           string                 `json:"digest"`
-	DownloadLocation string                 `json:"downloadLocation"`
-	Annotations      []AnnotationsInputSpec `json:"annotations"`
-	Origin           string                 `json:"origin"`
-	Collector        string                 `json:"collector"`
+	Uri              string                `json:"uri"`
+	Algorithm        string                `json:"algorithm"`
+	Digest           string                `json:"digest"`
+	DownloadLocation string                `json:"downloadLocation"`
+	Annotations      []AnnotationInputSpec `json:"annotations"`
+	Origin           string                `json:"origin"`
+	Collector        string                `json:"collector"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
@@ -4066,7 +4066,7 @@ func (v *HasSBOMInputSpec) GetDigest() string { return v.Digest }
 func (v *HasSBOMInputSpec) GetDownloadLocation() string { return v.DownloadLocation }
 
 // GetAnnotations returns HasSBOMInputSpec.Annotations, and is useful for accessing the field via an interface.
-func (v *HasSBOMInputSpec) GetAnnotations() []AnnotationsInputSpec { return v.Annotations }
+func (v *HasSBOMInputSpec) GetAnnotations() []AnnotationInputSpec { return v.Annotations }
 
 // GetOrigin returns HasSBOMInputSpec.Origin, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
@@ -4116,7 +4116,7 @@ func (v *HasSBOMPkgIngestHasSBOM) GetDownloadLocation() string {
 }
 
 // GetAnnotations returns HasSBOMPkgIngestHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *HasSBOMPkgIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotations {
+func (v *HasSBOMPkgIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
 	return v.allHasSBOMTree.Annotations
 }
 
@@ -4164,7 +4164,7 @@ type __premarshalHasSBOMPkgIngestHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotations `json:"annotations"`
+	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
 
 	Origin string `json:"origin"`
 
@@ -4341,7 +4341,7 @@ func (v *HasSBOMSrcIngestHasSBOM) GetDownloadLocation() string {
 }
 
 // GetAnnotations returns HasSBOMSrcIngestHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotations {
+func (v *HasSBOMSrcIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
 	return v.allHasSBOMTree.Annotations
 }
 
@@ -4389,7 +4389,7 @@ type __premarshalHasSBOMSrcIngestHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotations `json:"annotations"`
+	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
 
 	Origin string `json:"origin"`
 
@@ -7482,7 +7482,7 @@ func (v *NeighborsNeighborsHasSBOM) GetDownloadLocation() string {
 }
 
 // GetAnnotations returns NeighborsNeighborsHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotations {
+func (v *NeighborsNeighborsHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
 	return v.allHasSBOMTree.Annotations
 }
 
@@ -7532,7 +7532,7 @@ type __premarshalNeighborsNeighborsHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotations `json:"annotations"`
+	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
 
 	Origin string `json:"origin"`
 
@@ -10350,7 +10350,7 @@ func (v *NodeNodeHasSBOM) GetDigest() string { return v.allHasSBOMTree.Digest }
 func (v *NodeNodeHasSBOM) GetDownloadLocation() string { return v.allHasSBOMTree.DownloadLocation }
 
 // GetAnnotations returns NodeNodeHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *NodeNodeHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotations {
+func (v *NodeNodeHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
 	return v.allHasSBOMTree.Annotations
 }
 
@@ -10400,7 +10400,7 @@ type __premarshalNodeNodeHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotations `json:"annotations"`
+	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
 
 	Origin string `json:"origin"`
 
@@ -12594,7 +12594,7 @@ func (v *PathPathHasSBOM) GetDigest() string { return v.allHasSBOMTree.Digest }
 func (v *PathPathHasSBOM) GetDownloadLocation() string { return v.allHasSBOMTree.DownloadLocation }
 
 // GetAnnotations returns PathPathHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *PathPathHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotations {
+func (v *PathPathHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
 	return v.allHasSBOMTree.Annotations
 }
 
@@ -12644,7 +12644,7 @@ type __premarshalPathPathHasSBOM struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotations `json:"annotations"`
+	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
 
 	Origin string `json:"origin"`
 
@@ -19490,15 +19490,15 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) __premarshalJSON() (*__premarsh
 //
 // Note: Only package object or source object can be defined. Not both.
 type allHasSBOMTree struct {
-	Id               string                               `json:"id"`
-	Subject          allHasSBOMTreeSubjectPackageOrSource `json:"-"`
-	Uri              string                               `json:"uri"`
-	Algorithm        string                               `json:"algorithm"`
-	Digest           string                               `json:"digest"`
-	DownloadLocation string                               `json:"downloadLocation"`
-	Annotations      []allHasSBOMTreeAnnotations          `json:"annotations"`
-	Origin           string                               `json:"origin"`
-	Collector        string                               `json:"collector"`
+	Id               string                                `json:"id"`
+	Subject          allHasSBOMTreeSubjectPackageOrSource  `json:"-"`
+	Uri              string                                `json:"uri"`
+	Algorithm        string                                `json:"algorithm"`
+	Digest           string                                `json:"digest"`
+	DownloadLocation string                                `json:"downloadLocation"`
+	Annotations      []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
+	Origin           string                                `json:"origin"`
+	Collector        string                                `json:"collector"`
 }
 
 // GetId returns allHasSBOMTree.Id, and is useful for accessing the field via an interface.
@@ -19520,7 +19520,7 @@ func (v *allHasSBOMTree) GetDigest() string { return v.Digest }
 func (v *allHasSBOMTree) GetDownloadLocation() string { return v.DownloadLocation }
 
 // GetAnnotations returns allHasSBOMTree.Annotations, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTree) GetAnnotations() []allHasSBOMTreeAnnotations { return v.Annotations }
+func (v *allHasSBOMTree) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation { return v.Annotations }
 
 // GetOrigin returns allHasSBOMTree.Origin, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTree) GetOrigin() string { return v.Origin }
@@ -19574,7 +19574,7 @@ type __premarshalallHasSBOMTree struct {
 
 	DownloadLocation string `json:"downloadLocation"`
 
-	Annotations []allHasSBOMTreeAnnotations `json:"annotations"`
+	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
 
 	Origin string `json:"origin"`
 
@@ -19615,20 +19615,20 @@ func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error)
 	return &retval, nil
 }
 
-// allHasSBOMTreeAnnotations includes the requested fields of the GraphQL type Annotations.
+// allHasSBOMTreeAnnotationsAnnotation includes the requested fields of the GraphQL type Annotation.
 // The GraphQL type's documentation follows.
 //
-// Annotations are key-value pairs to provide additional information or metadata about SBOM
-type allHasSBOMTreeAnnotations struct {
+// Annotation are key-value pairs to provide additional information or metadata about SBOM
+type allHasSBOMTreeAnnotationsAnnotation struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// GetKey returns allHasSBOMTreeAnnotations.Key, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeAnnotations) GetKey() string { return v.Key }
+// GetKey returns allHasSBOMTreeAnnotationsAnnotation.Key, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeAnnotationsAnnotation) GetKey() string { return v.Key }
 
-// GetValue returns allHasSBOMTreeAnnotations.Value, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeAnnotations) GetValue() string { return v.Value }
+// GetValue returns allHasSBOMTreeAnnotationsAnnotation.Value, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeAnnotationsAnnotation) GetValue() string { return v.Value }
 
 // allHasSBOMTreeSubjectPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.

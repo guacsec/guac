@@ -38,7 +38,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Annotations struct {
+	Annotation struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
 	}
@@ -346,19 +346,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Annotations.key":
-		if e.complexity.Annotations.Key == nil {
+	case "Annotation.key":
+		if e.complexity.Annotation.Key == nil {
 			break
 		}
 
-		return e.complexity.Annotations.Key(childComplexity), true
+		return e.complexity.Annotation.Key(childComplexity), true
 
-	case "Annotations.value":
-		if e.complexity.Annotations.Value == nil {
+	case "Annotation.value":
+		if e.complexity.Annotation.Value == nil {
 			break
 		}
 
-		return e.complexity.Annotations.Value(childComplexity), true
+		return e.complexity.Annotation.Value(childComplexity), true
 
 	case "Artifact.algorithm":
 		if e.complexity.Artifact.Algorithm == nil {
@@ -1883,8 +1883,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputAnnotationsInputSpec,
-		ec.unmarshalInputAnnotationsSpec,
+		ec.unmarshalInputAnnotationInputSpec,
+		ec.unmarshalInputAnnotationSpec,
 		ec.unmarshalInputArtifactInputSpec,
 		ec.unmarshalInputArtifactSpec,
 		ec.unmarshalInputBuilderInputSpec,
@@ -2895,16 +2895,16 @@ type HasSBOM {
   algorithm: String!
   digest: String!
   downloadLocation: String!
-  annotations: [Annotations!]!
+  annotations: [Annotation!]!
   origin: String!
   collector: String!
 }
 
 
 """
-Annotations are key-value pairs to provide additional information or metadata about SBOM
+Annotation are key-value pairs to provide additional information or metadata about SBOM
 """
-type Annotations {
+type Annotation {
   key: String!
   value: String!
 }
@@ -2922,15 +2922,15 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
-  annotations: [AnnotationsSpec!] = []
+  annotations: [AnnotationSpec!] = []
   origin: String
   collector: String
 }
 
 """
-AnnotationsSpec is the same as Annotations, but usable as query input.
+AnnotationSpec is the same as Annotations, but usable as query input.
 """
-input AnnotationsSpec {
+input AnnotationSpec {
   key: String!
   value: String!
 }
@@ -2945,7 +2945,7 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
-  annotations: [AnnotationsInputSpec!]!
+  annotations: [AnnotationInputSpec!]!
   origin: String!
   collector: String!
 }
@@ -2953,7 +2953,7 @@ input HasSBOMInputSpec {
 """
 AnnotationsSpec is the same as Annotations, but usable as mutation input.
 """
-input AnnotationsInputSpec {
+input AnnotationInputSpec {
   key: String!
   value: String!
 }

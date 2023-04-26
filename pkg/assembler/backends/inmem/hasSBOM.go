@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"reflect"
 	"strconv"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -27,12 +28,16 @@ import (
 
 type hasSBOMList []*hasSBOMStruct
 type hasSBOMStruct struct {
-	id        uint32
-	pkg       uint32
-	src       uint32
-	uri       string
-	origin    string
-	collector string
+	id               uint32
+	pkg              uint32
+	src              uint32
+	uri              string
+	algorithm        string
+	digest           string
+	downloadLocation string
+	annotations      map[string]string
+	origin           string
+	collector        string
 }
 
 func (n *hasSBOMStruct) ID() uint32 { return n.id }
@@ -140,6 +145,10 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 		if h.pkg == packageID &&
 			h.src == sourceID &&
 			h.uri == input.URI &&
+			h.algorithm == input.Algorithm &&
+			h.digest == input.Digest &&
+			h.downloadLocation == input.DownloadLocation &&
+			reflect.DeepEqual(h.annotations, getAnnotationsFromInput(input.Annotations)) &&
 			h.origin == input.Origin &&
 			h.collector == input.Collector {
 			return c.convHasSBOM(h)
@@ -154,12 +163,16 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 	}
 
 	h := &hasSBOMStruct{
-		id:        c.getNextID(),
-		pkg:       packageID,
-		src:       sourceID,
-		uri:       input.URI,
-		origin:    input.Origin,
-		collector: input.Collector,
+		id:               c.getNextID(),
+		pkg:              packageID,
+		src:              sourceID,
+		uri:              input.URI,
+		algorithm:        input.Algorithm,
+		digest:           input.Digest,
+		downloadLocation: input.DownloadLocation,
+		annotations:      getAnnotationsFromInput(input.Annotations),
+		origin:           input.Origin,
+		collector:        input.Collector,
 	}
 	c.index[h.id] = h
 	c.hasSBOMs = append(c.hasSBOMs, h)
@@ -173,10 +186,14 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 
 func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 	out := &model.HasSbom{
-		ID:        nodeID(in.id),
-		URI:       in.uri,
-		Origin:    in.origin,
-		Collector: in.collector,
+		ID:               nodeID(in.id),
+		URI:              in.uri,
+		Algorithm:        in.algorithm,
+		Digest:           in.digest,
+		DownloadLocation: in.downloadLocation,
+		Annotations:      getCollectedHasSBOMAnnotations(in.annotations),
+		Origin:           in.origin,
+		Collector:        in.collector,
 	}
 	if in.pkg != 0 {
 		p, err := c.buildPackageResponse(in.pkg, nil)
@@ -274,6 +291,10 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 	filter *model.HasSBOMSpec, link *hasSBOMStruct) (
 	[]*model.HasSbom, error) {
 	if noMatch(filter.URI, link.uri) ||
+		noMatch(filter.Algorithm, link.algorithm) ||
+		noMatch(filter.Digest, link.digest) ||
+		noMatch(filter.DownloadLocation, link.downloadLocation) ||
+		noMatchAnnotations(filter.Annotations, link.annotations) ||
 		noMatch(filter.Origin, link.origin) ||
 		noMatch(filter.Collector, link.collector) {
 		return out, nil
@@ -308,4 +329,46 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 		return nil, err
 	}
 	return append(out, sb), nil
+}
+
+func getCollectedHasSBOMAnnotations(annotationMap map[string]string) []*model.Annotation {
+	annotations := []*model.Annotation{}
+	for key, val := range annotationMap {
+		annotation := &model.Annotation{
+			Key:   key,
+			Value: val,
+		}
+		annotations = append(annotations, annotation)
+
+	}
+	return annotations
+}
+
+func getAnnotationsFromInput(annotationInput []*model.AnnotationInputSpec) map[string]string {
+	annotationMap := map[string]string{}
+	if annotationInput == nil {
+		return annotationMap
+	}
+	for _, kv := range annotationInput {
+		annotationMap[kv.Key] = kv.Value
+	}
+	return annotationMap
+}
+
+func getAnnotationsFromFilter(annotationFilter []*model.AnnotationSpec) map[string]string {
+	annotationMap := map[string]string{}
+	if annotationFilter == nil {
+		return annotationMap
+	}
+	for _, kv := range annotationFilter {
+		annotationMap[kv.Key] = kv.Value
+	}
+	return annotationMap
+}
+
+func noMatchAnnotations(annotationFilter []*model.AnnotationSpec, v map[string]string) bool {
+	if annotationFilter == nil && len(annotationFilter) > 0 {
+		return !reflect.DeepEqual(v, getAnnotationsFromFilter(annotationFilter))
+	}
+	return false
 }
