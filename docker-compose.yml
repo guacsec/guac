@@ -131,7 +131,7 @@ services:
       - ./container_files/guac:/guac
   osv-certifier:
     image: "local-organic-guac"
-    command: "/opt/guac/guacone certifier osv --poll --interval 5"
+    command: "/opt/guac/guacone certifier osv"
     working_dir: /guac
     restart: on-failure
     depends_on:

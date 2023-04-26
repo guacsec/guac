@@ -16,3 +16,7 @@ gql-backend: inmem
 gql-port: 8080
 gql-debug: true
 gql-endpoint: http://guac-graphql:8080/query
+
+# certifier polling
+poll: true
+interval: 5m
