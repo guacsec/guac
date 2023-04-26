@@ -102,9 +102,10 @@ func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Docu
 		Pkg: topLevel,
 		HasSBOM: &model.HasSBOMInputSpec{
 			Uri:              sbomDoc.SourceInformation.Source,
-			DownloadLocation: sbomDoc.SourceInformation.Source,
 			Algorithm:        "sha256",
 			Digest:           hash,
+			DownloadLocation: sbomDoc.SourceInformation.Source,
+			Annotations:      []model.AnnotationInputSpec{},
 		},
 	}
 }
