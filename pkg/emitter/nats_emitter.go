@@ -18,7 +18,7 @@ package emitter
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -236,6 +236,5 @@ func Publish(ctx context.Context, subj string, data []byte) error {
 
 func getHash(data []byte) string {
 	sha256sum := sha256.Sum256(data)
-	hash := base64.RawStdEncoding.EncodeToString(sha256sum[:])
-	return hash
+	return hex.EncodeToString(sha256sum[:])
 }

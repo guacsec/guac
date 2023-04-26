@@ -185,6 +185,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	// adding top level package edge manually for all depends on package
 	if toplevel != nil {
 		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], s.packagePackages, s.filePackages, "top-level package GUAC heuristic connecting to each file/package")...)
+		preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(toplevel[0], s.doc))
 	}
 	for _, rel := range s.spdxDoc.Relationships {
 		var foundId string

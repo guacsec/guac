@@ -462,9 +462,22 @@ var (
 		},
 	}
 
+	SpdxHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Pkg: topLevelPack,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "TestSource",
+				Algorithm:        "sha256",
+				Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
+				DownloadLocation: "TestSource",
+			},
+		},
+	}
+
 	SpdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: SpdxDeps,
 		IsOccurrence: SpdxOccurences,
+		HasSBOM:      SpdxHasSBOM,
 	}
 
 	// CycloneDX Testdata
@@ -506,8 +519,21 @@ var (
 		},
 	}
 
+	CdxHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Pkg: cdxTopLevelPack,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "TestSource",
+				Algorithm:        "sha256",
+				Digest:           "01942b5eefd3c15b50318c66d8d16627be573197c877e8a286a8cb12de7939cb",
+				DownloadLocation: "TestSource",
+			},
+		},
+	}
+
 	CdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: CdxDeps,
+		HasSBOM:      CdxHasSBOM,
 	}
 
 	cdxTopQuarkusPack, _ = asmhelpers.PurlToPkg("pkg:maven/org.acme/getting-started@1.0.0-SNAPSHOT?type=jar")
@@ -580,9 +606,22 @@ var (
 		},
 	}
 
+	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Pkg: cdxTopQuarkusPack,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "TestSource",
+				Algorithm:        "sha256",
+				Digest:           "036a9f51468f5ce6eec7c310583164ed0ab9f58d7c03380a3fe19d420609e3de",
+				DownloadLocation: "TestSource",
+			},
+		},
+	}
+
 	CdxQuarkusIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: CdxQuarkusDeps,
 		IsOccurrence: CdxQuarkusOccurrence,
+		HasSBOM:      CdxQuarkusHasSBOM,
 	}
 
 	cdxWebAppPackage, _ = asmhelpers.PurlToPkg("pkg:npm/web-app@1.0.0")
@@ -601,11 +640,40 @@ var (
 		},
 	}
 
-	CdxNpmIngestionPredicates = assembler.IngestPredicates{
-		IsDependency: CdxNpmDeps,
+	CdxNpmHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Pkg: cdxWebAppPackage,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "TestSource",
+				Algorithm:        "sha256",
+				Digest:           "35363f03c80f26a88db6f2400771bdcc6624bb7b61b96da8503be0f757605fde",
+				DownloadLocation: "TestSource",
+			},
+		},
 	}
 
-	CdxEmptyIngestionPredicates = assembler.IngestPredicates{}
+	CdxNpmIngestionPredicates = assembler.IngestPredicates{
+		IsDependency: CdxNpmDeps,
+		HasSBOM:      CdxNpmHasSBOM,
+	}
+
+	quarkusParentPackage, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-parent@999-SNAPSHOT?type=pom")
+
+	quarkusParentPackageHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Pkg: quarkusParentPackage,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "TestSource",
+				Algorithm:        "sha256",
+				Digest:           "fcd4d1f9c83c274fbc2dabdca4e7de749b23fab1aa15dc2854880a13479fa74e",
+				DownloadLocation: "TestSource",
+			},
+		},
+	}
+
+	CdxEmptyIngestionPredicates = assembler.IngestPredicates{
+		HasSBOM: quarkusParentPackageHasSBOM,
+	}
 
 	// ceritifer testdata
 
