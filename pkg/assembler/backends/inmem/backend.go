@@ -18,6 +18,7 @@ package inmem
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -59,6 +60,10 @@ type node interface {
 type indexType map[uint32]node
 
 var errNotFound = errors.New("Not found")
+
+// Scorecard scores are in range of 1-10, so a single step at 100 should be
+// plenty big
+var epsilon = math.Nextafter(100, 100.1) - 100
 
 // atomic add to ensure ID is not duplicated
 func (c *demoClient) getNextID() uint32 {
@@ -182,6 +187,17 @@ func toLower(filter *string) *string {
 		return &lower
 	}
 	return nil
+}
+
+func noMatchFloat(filter *float64, value float64) bool {
+	if filter != nil {
+		return math.Abs(*filter-value) > epsilon
+	}
+	return false
+}
+
+func floatEqual(x float64, y float64) bool {
+	return math.Abs(x-y) < epsilon
 }
 
 func byID[E node](id uint32, c *demoClient) (E, error) {
