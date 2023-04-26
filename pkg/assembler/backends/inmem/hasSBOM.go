@@ -19,9 +19,11 @@ import (
 	"context"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -137,6 +139,9 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 		search = src.hasSBOMs
 	}
 
+	algorithm := strings.ToLower(input.Algorithm)
+	digest := strings.ToLower(input.Digest)
+
 	for _, id := range search {
 		h, err := byID[*hasSBOMStruct](id, c)
 		if err != nil {
@@ -145,8 +150,8 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 		if h.pkg == packageID &&
 			h.src == sourceID &&
 			h.uri == input.URI &&
-			h.algorithm == input.Algorithm &&
-			h.digest == input.Digest &&
+			h.algorithm == algorithm &&
+			h.digest == digest &&
 			h.downloadLocation == input.DownloadLocation &&
 			reflect.DeepEqual(h.annotations, getAnnotationsFromInput(input.Annotations)) &&
 			h.origin == input.Origin &&
@@ -167,8 +172,8 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrS
 		pkg:              packageID,
 		src:              sourceID,
 		uri:              input.URI,
-		algorithm:        input.Algorithm,
-		digest:           input.Digest,
+		algorithm:        algorithm,
+		digest:           digest,
 		downloadLocation: input.DownloadLocation,
 		annotations:      getAnnotationsFromInput(input.Annotations),
 		origin:           input.Origin,
@@ -290,9 +295,13 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 	filter *model.HasSBOMSpec, link *hasSBOMStruct) (
 	[]*model.HasSbom, error) {
+
+	algorithm := strings.ToLower(nilToEmpty(filter.Algorithm))
+	digest := strings.ToLower(nilToEmpty(filter.Digest))
+
 	if noMatch(filter.URI, link.uri) ||
-		noMatch(filter.Algorithm, link.algorithm) ||
-		noMatch(filter.Digest, link.digest) ||
+		noMatch(ptrfrom.String(algorithm), link.algorithm) ||
+		noMatch(ptrfrom.String(digest), link.digest) ||
 		noMatch(filter.DownloadLocation, link.downloadLocation) ||
 		noMatchAnnotations(filter.Annotations, link.annotations) ||
 		noMatch(filter.Origin, link.origin) ||

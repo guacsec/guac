@@ -75,6 +75,11 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			if err := ingestCertifyGood(ctx, gqlclient, p.CertifyGood); err != nil {
 				return err
 			}
+
+			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
+			if err := ingestHasSBOM(ctx, gqlclient, p.HasSBOM); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -259,6 +264,33 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, goodList []as
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func ingestHasSBOM(ctx context.Context, client graphql.Client, hasSBOMIngestList []assembler.HasSBOMIngest) error {
+	for _, hb := range hasSBOMIngestList {
+		if hb.Pkg != nil && hb.Src != nil {
+			return fmt.Errorf("unable to create hasSBOM with both Pkg and Src subject specified")
+		}
+
+		if hb.Pkg == nil && hb.Src == nil {
+			return fmt.Errorf("unable to create hasSBOM without either Pkg and Src ssubject specified")
+		}
+
+		if hb.Pkg != nil {
+			_, err := model.HasSBOMPkg(ctx, client, *hb.Pkg, *hb.HasSBOM)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := model.HasSBOMSrc(ctx, client, *hb.Src, *hb.HasSBOM)
+			if err != nil {
+				return err
+			}
+
+		}
+
 	}
 	return nil
 }

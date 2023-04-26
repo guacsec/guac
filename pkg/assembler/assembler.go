@@ -156,6 +156,7 @@ type IngestPredicates struct {
 	HasSourceAt      []HasSourceAtIngest
 	CertifyBad       []CertifyBadIngest
 	CertifyGood      []CertifyGoodIngest
+	HasSBOM          []HasSBOMIngest
 }
 
 type CertifyScorecardIngest struct {
@@ -236,6 +237,14 @@ type CertifyGoodIngest struct {
 	Src          *generated.SourceInputSpec
 	Artifact     *generated.ArtifactInputSpec
 	CertifyGood  *generated.CertifyGoodInputSpec
+}
+
+type HasSBOMIngest struct {
+	// hasSBOM describes either pkg or src
+	Pkg *generated.PkgInputSpec
+	Src *generated.SourceInputSpec
+
+	HasSBOM *generated.HasSBOMInputSpec
 }
 
 // AssemblerInput represents the inputs to add to the graph
