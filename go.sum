@@ -2025,6 +2025,8 @@ github.com/opencontainers/selinux v1.8.2/go.mod h1:MUIHuUEvKB1wtJjQdOyYRgOnLD2xA
 github.com/opencontainers/selinux v1.10.0/go.mod h1:2i0OySw99QjzBBQByd1Gr9gSjvuho1lHsJxIJ3gGbJI=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/opentracing/opentracing-go v1.2.0/go.mod h1:GxEUsuufX4nBwe+T+Wl9TAgYrxe9dPLANfrWvHYVTgc=
+github.com/openvex/go-vex v0.2.1-0.20230519031452-e31eaf94ec95 h1:KaiVXuu3VOhiuDXhe4OiJ+GKpoy1M+ZQEu84If/LEIA=
+github.com/openvex/go-vex v0.2.1-0.20230519031452-e31eaf94ec95/go.mod h1:Efz888wbK/6oFFyJfhfz6MbJs4fOmZmT+Hmmedw5Wmk=
 github.com/openzipkin/zipkin-go v0.2.5/go.mod h1:KpXfKdgRDnnhsxw4pNIH9Md5lyFqKUa4YDFlwRYAMyE=
 github.com/ossf/scorecard/v4 v4.11.0 h1:S2HSgxmIDKB8JT6/7wsEaA7gFaRDYhVX+JQIkZmVL5g=
 github.com/ossf/scorecard/v4 v4.11.0/go.mod h1:70Tk4U+7VfTXVsS3SIKpYGPE63Fez1XlNrsiwM1069A=

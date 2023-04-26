@@ -161,9 +161,9 @@ type IngestPredicates struct {
 	CertifyBad       []CertifyBadIngest
 	CertifyGood      []CertifyGoodIngest
 	HasSBOM          []HasSBOMIngest
-	Vex              []VexIngest
 	HashEqual        []HashEqualIngest
 	PkgEqual         []PkgEqualIngest
+	Vex              []VexIngest
 }
 
 type CertifyScorecardIngest struct {
