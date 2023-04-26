@@ -196,10 +196,11 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 			Name:      "openssl",
 		},
 		dependency: model.IsDependencyInputSpec{
-			VersionRange:  "3.0.3",
-			Justification: "deb: part of SBOM - openssl",
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			VersionRange:   "3.0.3",
+			DependencyType: model.DependencyTypeDirect,
+			Justification:  "deb: part of SBOM - openssl",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
 		},
 	}, {
 		name: "docker: part of SBOM - openssl",
@@ -214,10 +215,11 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 			Name:      "openssl",
 		},
 		dependency: model.IsDependencyInputSpec{
-			VersionRange:  "3.0.3",
-			Justification: "docker: part of SBOM - openssl",
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			VersionRange:   "3.0.3",
+			DependencyType: model.DependencyTypeIndirect,
+			Justification:  "docker: part of SBOM - openssl",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
 		},
 	}, {
 		name: "deb: part of SBOM - openssl (duplicate)",
@@ -236,10 +238,11 @@ func ingestDependency(ctx context.Context, client graphql.Client) {
 			Name:      "openssl",
 		},
 		dependency: model.IsDependencyInputSpec{
-			VersionRange:  "3.0.3",
-			Justification: "deb: part of SBOM - openssl",
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			VersionRange:   "3.0.3",
+			DependencyType: model.DependencyTypeDirect,
+			Justification:  "deb: part of SBOM - openssl",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
 		},
 	}}
 	for _, ingest := range ingestDependencies {
@@ -1046,7 +1049,16 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
 		},
 		hasSBOM: model.HasSBOMInputSpec{
-			Uri:       "uri:location of package SBOM",
+			Uri:              "uri:location of package SBOM",
+			Algorithm:        "sha256",
+			Digest:           "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			DownloadLocation: "uri: download location of the SBOM",
+			Annotations: []model.AnnotationInputSpec{
+				{
+					Key:   "scorecard",
+					Value: "7",
+				},
+			},
 			Origin:    "Demo ingestion",
 			Collector: "Demo ingestion",
 		},
@@ -1059,8 +1071,61 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 			Tag:       &sourceTag,
 		},
 		hasSBOM: model.HasSBOMInputSpec{
-			//Annotation: "this SBOM has a score of 10",
-			Uri:       "uri:location of source SBOM",
+			Uri:              "uri:location of source SBOM",
+			Algorithm:        "sha1",
+			Digest:           "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+			DownloadLocation: "uri: download location of the SBOM",
+			Annotations: []model.AnnotationInputSpec{
+				{
+					Key:   "scorecard",
+					Value: "10",
+				},
+			},
+			Origin:    "Demo ingestion",
+			Collector: "Demo ingestion",
+		},
+	}, {
+		name: "uri:location of package SBOM (duplicate)",
+		pkg: &model.PkgInputSpec{
+			Type:       "conan",
+			Namespace:  &opensslNs,
+			Name:       "openssl",
+			Version:    &opensslVersion,
+			Qualifiers: []model.PackageQualifierInputSpec{{Key: "user", Value: "bincrafters"}, {Key: "channel", Value: "stable"}},
+		},
+		hasSBOM: model.HasSBOMInputSpec{
+			Uri:              "uri:location of package SBOM",
+			Algorithm:        "sha256",
+			Digest:           "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			DownloadLocation: "uri: download location of the SBOM",
+			Annotations: []model.AnnotationInputSpec{
+				{
+					Key:   "scorecard",
+					Value: "7",
+				},
+			},
+			Origin:    "Demo ingestion",
+			Collector: "Demo ingestion",
+		},
+	}, {
+		name: "uri:location of source SBOM (duplicate)",
+		source: &model.SourceInputSpec{
+			Type:      "git",
+			Namespace: "github",
+			Name:      "github.com/guacsec/guac",
+			Tag:       &sourceTag,
+		},
+		hasSBOM: model.HasSBOMInputSpec{
+			Uri:              "uri:location of source SBOM",
+			Algorithm:        "sha1",
+			Digest:           "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+			DownloadLocation: "uri: download location of the SBOM",
+			Annotations: []model.AnnotationInputSpec{
+				{
+					Key:   "scorecard",
+					Value: "10",
+				},
+			},
 			Origin:    "Demo ingestion",
 			Collector: "Demo ingestion",
 		},
@@ -1579,10 +1644,11 @@ func ingestReachabilityTestData(ctx context.Context, client graphql.Client) {
 			Name:      "openssl",
 		},
 		dependency: model.IsDependencyInputSpec{
-			VersionRange:  "3.0.3",
-			Justification: "deb: part of SBOM - openssl",
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
+			VersionRange:   "3.0.3",
+			DependencyType: model.DependencyTypeDirect,
+			Justification:  "deb: part of SBOM - openssl",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
 		},
 		depPkgWithVersion: model.PkgInputSpec{
 			Type:      "conan",

@@ -227,7 +227,7 @@ fragment allHasSBOMTree on HasSBOM {
   annotations {
       key
       value
-    }
+  }
   origin
   collector
 }
