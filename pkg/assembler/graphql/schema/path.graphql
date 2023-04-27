@@ -130,7 +130,7 @@ enum Edge {
 
 extend type Query {
   """
-  path query returns a path between subject and target, of a maximum length
+  path query returns a path between subject and target, of a maximum length.
 
   Since we want to uniquely identify endpoints, nodes must be specified by
   valid IDs only (instead of using filters/input spec structs).
@@ -141,7 +141,7 @@ extend type Query {
   path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
 
   """
-  neighbors returns all the direct neighbors of a node
+  neighbors returns all the direct neighbors of a node.
 
   Similarly, the input is only specified by its ID.
 
@@ -151,7 +151,7 @@ extend type Query {
   neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
 
   """
-  node returns a single node, regardless of type
+  node returns a single node, regardless of type.
 
   The input is only specified by its ID.
   """

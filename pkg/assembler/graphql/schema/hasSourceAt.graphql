@@ -15,30 +15,26 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector.
-"""
-HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+# Defines a GraphQL schema for the linking packages and sources
 
-package (subject) - the package object type that represents the package
-source (object) - the source object type that represents the source
-knownSince (property) - timestamp when this was last checked (exact time)
-justification (property) - string value representing why the package has a source specified
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"HasSourceAt records that a package's repository is a given source."
 type HasSourceAt {
   id: ID!
+  "The subject of the attestation: can be a PackageName or a PackageVersion"
   package: Package!
+  "Source repository from which the package is built"
   source: Source!
+  "Timestamp since this link between package and source was certified"
   knownSince: Time!
+  "Justification for the attested relationship"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
-"""
-HasSourceAtSpec allows filtering the list of HasSourceAt to return.
-"""
+"HasSourceAtSpec allows filtering the list of HasSourceAt to return."
 input HasSourceAtSpec {
   id: ID
   package: PkgSpec
@@ -49,11 +45,7 @@ input HasSourceAtSpec {
   collector: String
 }
 
-"""
-HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
-
-All fields are required.
-"""
+"HasSourceAtInputSpec is the same as HasSourceAt but for mutation input."
 input HasSourceAtInputSpec {
   knownSince: Time!
   justification: String!
@@ -61,13 +53,12 @@ input HasSourceAtInputSpec {
   collector: String!
 }
 
-
 extend type Query {
-  "Returns all HasSourceAt"
+  "Returns all source mappings that match the filter."
   HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
 }
 
 extend type Mutation {
-  "Adds a certification that a package (either at the version level or package name level) is associated with the source"
+  "Adds a certification that a package (PackageName or PackageVersion) is built from the source."
   ingestHasSourceAt(pkg: PkgInputSpec!, pkgMatchType: MatchFlags!, source: SourceInputSpec!, hasSourceAt: HasSourceAtInputSpec!): HasSourceAt!
 }

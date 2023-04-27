@@ -15,28 +15,27 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the PkgEqual. It contains a list of packages that are similar
-# along with the justification, origin and collector.
-"""
-PkgEqual is an attestation that represents when a package objects are similar
+# Defines a GraphQL schema for package equality
 
-packages (subject) - list of package objects
-justification (property) - string value representing why the packages are similar
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"PkgEqual is an attestation that a set of packages are similar."
 type PkgEqual {
   id: ID!
+  "Collection of packages that are similar"
   packages: [Package!]!
+  "Justification for the claim that the packages are similar"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-PkgEqualSpec allows filtering the list of PkgEqual to return.
+PkgEqualSpec allows filtering the list of package equality statements to return
+in a query.
 
-Specifying just the package allows to query for all similar packages (if they exist)
+Specifying just one package allows to query for all similar packages (if any
+exists).
 """
 input PkgEqualSpec {
   id: ID
@@ -46,11 +45,7 @@ input PkgEqualSpec {
   collector: String
 }
 
-"""
-PkgEqualInputSpec is the same as PkgEqual but for mutation input.
-
-All fields are required.
-"""
+"PkgEqualInputSpec represents the input to certify that packages are similar."
 input PkgEqualInputSpec {
   justification: String!
   origin: String!
@@ -58,11 +53,11 @@ input PkgEqualInputSpec {
 }
 
 extend type Query {
-  "Returns all PkgEqual"
+  "Returns all package equality statements matching a filter."
   PkgEqual(pkgEqualSpec: PkgEqualSpec): [PkgEqual!]!
 }
 
 extend type Mutation {
-  "Adds a certification that two packages are similar"
-  ingestPkgEqual(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
+  "Adds a certification that two packages are similar."
+  ingestPkgEqual(pkg: PkgInputSpec!, otherPackage: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
 }

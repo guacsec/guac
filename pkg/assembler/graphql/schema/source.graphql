@@ -15,20 +15,20 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the source trie/tree. This tree is a derivative
-# of the pURL specification where it has a type, namespace, name and finally a
-# qualifier that contain the tag or commit.
+# Defines a GraphQL schema for the source trie/tree
 
 """
-Source represents a source.
+Source represents the root of the source trie/tree.
 
-This can be the version control system that is being used.
+We map source information to a trie, as a derivative of the pURL specification:
+each path in the trie represents a type, namespace, name and an optional
+qualifier that stands for tag/commit information.
 
-This node is a singleton: backends guarantee that there is exactly one node
-with the same `type` value.
+This node represents the type part of the trie path. It is used to represent
+the version control system that is being used.
 
-Also note that this is named `Source`, not `SourceType`. This is only to make
-queries more readable.
+Since this node is at the root of the source trie, it is named Source, not
+SourceType.
 """
 type Source {
   id: ID!
@@ -41,7 +41,7 @@ SourceNamespace is a namespace for sources.
 
 This is the location of the repository (such as github/gitlab/bitbucket).
 
-The `namespace` field is mandatory.
+The namespace field is mandatory.
 """
 type SourceNamespace {
   id: ID!
@@ -50,13 +50,12 @@ type SourceNamespace {
 }
 
 """
-SourceName is a url of the repository and its tag or commit.
+SourceName represents the url of the repository.
 
-The `name` field is mandatory. The `tag` and `commit` fields are optional, but
-it is an error to specify both.
+The name field is mandatory. The tag and commit fields are optional, but it is
+an error to specify both.
 
-This is the only source trie node that can be referenced by other parts of
-GUAC.
+This is the only source trie node that can be referenced by other parts of GUAC.
 """
 type SourceName {
   id: ID!
@@ -66,14 +65,14 @@ type SourceName {
 }
 
 """
-SourceSpec allows filtering the list of sources to return.
+SourceSpec allows filtering the list of sources to return in a query.
 
 Empty string at a field means matching with the empty string. Missing field
 means retrieving all possible matches.
 
-It is an error to specify both `tag` and `commit` fields, except it both are
-set as empty string (in which case the returned sources are only those for
-which there is no tag/commit information).
+It is an error to specify both tag and commit fields, except it both are set as
+empty string (in which case the returned sources are only those for which there
+is no tag/commit information).
 """
 input SourceSpec {
   id: ID
@@ -85,14 +84,14 @@ input SourceSpec {
 }
 
 """
-SourceInputSpec specifies a source for a mutation.
+SourceInputSpec specifies a source for mutations.
 
 This is different than SourceSpec because we want to encode that all fields
-except tag and commit are mandatory fields. All optional fields are given
-empty default values.
+except tag and commit are mandatory fields. All optional fields are given empty
+default values.
 
-It is an error to set both `tag` and `commit` fields to values different than
-the default.
+It is an error to set both tag and commit fields to values different than the
+default.
 """
 input SourceInputSpec {
   type: String!
@@ -103,11 +102,11 @@ input SourceInputSpec {
 }
 
 extend type Query {
-  "Returns all sources"
+  "Returns all sources matching a filter."
   sources(sourceSpec: SourceSpec): [Source!]!
 }
 
 extend type Mutation {
-  "Ingest a new source. Returns the ingested source trie"
+  "Ingests a new source and returns the corresponding source trie path."
   ingestSource(source: SourceInputSpec!): Source!
 }

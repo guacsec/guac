@@ -15,47 +15,41 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector.
-"""
-HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+# Defines a GraphQL schema for recording presence of SBOMs
 
-subject - union type that can be either a package or source object type
-uri (property) - identifier string for the SBOM
-algorithm - cryptographic algorithm of the digest
-digest - hash of the SBOM 
-downloadLocation - the download location of the SBOM
-annotations - this field may be used to provide additional information or metadata about SBOM. Such as SBOM scorecard information
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-
-Note: Only package object or source object can be defined. Not both.
-"""
 type HasSBOM {
   id: ID!
+  "SBOM subject"
   subject: PackageOrSource!
+  "Identifier for the SBOM document"
   uri: String!
+  "Algorithm by which SBOMs digest was computed"
   algorithm: String!
+  "Digest of SBOM"
   digest: String!
+  "Location from which the SBOM can be downloaded"
   downloadLocation: String!
+  "SBOM annotations (e.g., SBOM Scorecard information)"
   annotations: [Annotation!]!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
-
 """
-Annotation are key-value pairs to provide additional information or metadata about SBOM
+Annotation is a key-value pair to provide additional information or metadata
+about an SBOM.
 """
 type Annotation {
   key: String!
   value: String!
 }
 
-
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
-Only the package or source can be added, not both
+Only the package or source can be added, not both.
 """
 input HasSBOMSpec {
   id: ID
@@ -69,19 +63,13 @@ input HasSBOMSpec {
   collector: String
 }
 
-"""
-AnnotationSpec is the same as Annotations, but usable as query input.
-"""
+"AnnotationSpec allows creating query filters for Annotation objects."
 input AnnotationSpec {
   key: String!
   value: String!
 }
 
-"""
-HasSBOMInputSpec is the same as HasSBOM but for mutation input.
-
-All fields are required.
-"""
+"HasSBOMInputSpec is the same as HasSBOM but for mutation input."
 input HasSBOMInputSpec {
   uri: String!
   algorithm: String!
@@ -92,20 +80,18 @@ input HasSBOMInputSpec {
   collector: String!
 }
 
-"""
-AnnotationsSpec is the same as Annotations, but usable as mutation input.
-"""
+"AnnotationInputSpec allows ingesting Annotation objects."
 input AnnotationInputSpec {
   key: String!
   value: String!
 }
 
 extend type Query {
-  "Returns all HasSBOM"
+  "Returns all SBOM certifications."
   HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
 }
 
 extend type Mutation {
-  "Certifies that a package or a source has SBOM at the URI"
+  "Certifies that a package or a source has an SBOM."
   ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
 }

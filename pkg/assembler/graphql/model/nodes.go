@@ -28,7 +28,7 @@ type PackageOrArtifact interface {
 	IsPackageOrArtifact()
 }
 
-// PackageOrSource is a union of Package and Source. Any of these objects can be specified
+// PackageOrSource is a union of Package and Source.
 type PackageOrSource interface {
 	IsPackageOrSource()
 }
@@ -43,31 +43,32 @@ type Vulnerability interface {
 	IsVulnerability()
 }
 
-// Annotation are key-value pairs to provide additional information or metadata about SBOM
+// Annotation is a key-value pair to provide additional information or metadata
+// about an SBOM.
 type Annotation struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// AnnotationsSpec is the same as Annotations, but usable as mutation input.
+// AnnotationInputSpec allows ingesting Annotation objects.
 type AnnotationInputSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// AnnotationSpec is the same as Annotations, but usable as query input.
+// AnnotationSpec allows creating query filters for Annotation objects.
 type AnnotationSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// Artifact represents the artifact and contains a digest field
+// Artifact represents an artifact identified by a checksum hash.
 //
-// Both field are mandatory and canonicalized to be lowercase.
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
 //
-// If having a `checksum` Go object, `algorithm` can be
-// `strings.ToLower(string(checksum.Algorithm))` and `digest` can be
-// `checksum.Value`.
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
 type Artifact struct {
 	ID        string `json:"id"`
 	Algorithm string `json:"algorithm"`
@@ -80,26 +81,26 @@ func (Artifact) IsPackageOrArtifact() {}
 
 func (Artifact) IsNode() {}
 
-// ArtifactInputSpec is the same as Artifact, but used as mutation input.
+// ArtifactInputSpec specifies an artifact for mutations.
 //
-// Both arguments will be canonicalized to lowercase.
+// The checksum fields are canonicalized to be lowercase.
 type ArtifactInputSpec struct {
 	Algorithm string `json:"algorithm"`
 	Digest    string `json:"digest"`
 }
 
-// ArtifactSpec allows filtering the list of artifacts to return.
+// ArtifactSpec allows filtering the list of artifacts to return in a query.
 //
-// Both arguments will be canonicalized to lowercase.
+// The checksum fields are canonicalized to be lowercase.
 type ArtifactSpec struct {
 	ID        *string `json:"id,omitempty"`
 	Algorithm *string `json:"algorithm,omitempty"`
 	Digest    *string `json:"digest,omitempty"`
 }
 
-// Builder represents the builder such as (FRSCA or github actions).
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
 //
-// Currently builders are identified by the `uri` field, which is mandatory.
+// Currently builders are identified by the uri field.
 type Builder struct {
 	ID  string `json:"id"`
 	URI string `json:"uri"`
@@ -107,22 +108,25 @@ type Builder struct {
 
 func (Builder) IsNode() {}
 
-// BuilderInputSpec is the same as Builder, but used for mutation ingestion.
+// BuilderInputSpec specifies a builder for mutations.
 type BuilderInputSpec struct {
 	URI string `json:"uri"`
 }
 
-// BuilderSpec allows filtering the list of builders to return.
+// BuilderSpec allows filtering the list of builders to return in a query.
 type BuilderSpec struct {
 	ID  *string `json:"id,omitempty"`
 	URI *string `json:"uri,omitempty"`
 }
 
-// CVE represents common vulnerabilities and exposures. It contains the year along
-// with the CVE ID.
+// CVE represents a vulnerability in the Common Vulnerabilities and Exposures
+// schema.
 //
-// The `year` is mandatory.
-// The `cveId` field is mandatory and canonicalized to be lowercase.
+// The vulnerability identifier contains a year field, so we are extracting that
+// to allow matching for vulnerabilities found in a given year.
+//
+// The vulnerability identifier field is mandatory and canonicalized to be
+// lowercase.
 //
 // This node can be referred to by other parts of GUAC.
 type Cve struct {
@@ -137,27 +141,30 @@ func (Cve) IsCveOrGhsa() {}
 
 func (Cve) IsNode() {}
 
-// CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
+// CVEInputSpec specifies a CVE vulnerability for mutations.
 type CVEInputSpec struct {
 	Year  int    `json:"year"`
 	CveID string `json:"cveId"`
 }
 
-// CVESpec allows filtering the list of cves to return.
+// CVESpec allows filtering the list of advisories to return in a query.
 type CVESpec struct {
 	ID    *string `json:"id,omitempty"`
 	Year  *int    `json:"year,omitempty"`
 	CveID *string `json:"cveId,omitempty"`
 }
 
-// CertifyBad is an attestation represents when a package, source or artifact is considered bad
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
 //
-// subject - union type that can be either a package, source or artifact object type
-// justification (property) - string value representing why the subject is considered bad
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
 //
-// Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
 type CertifyBad struct {
 	ID            string                  `json:"id"`
 	Subject       PackageSourceOrArtifact `json:"subject"`
@@ -168,19 +175,23 @@ type CertifyBad struct {
 
 func (CertifyBad) IsNode() {}
 
-// CertifyBadInputSpec is the same as CertifyBad but for mutation input.
-//
-// All fields are required.
+// CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
+// evidence.
 type CertifyBadInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
 }
 
-// CertifyBadSpec allows filtering the list of CertifyBad to return.
-// Note: Package, Source or artifact must be specified but not at the same time
-// For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-// For source - a SourceName must be specified (name, tag or commit)
+// CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
 type CertifyBadSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
@@ -189,14 +200,17 @@ type CertifyBadSpec struct {
 	Collector     *string                      `json:"collector,omitempty"`
 }
 
-// CertifyGood is an attestation represents when a package, source or artifact is considered good
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
 //
-// subject - union type that can be either a package, source or artifact object type
-// justification (property) - string value representing why the subject is considered good
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
 //
-// Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
 type CertifyGood struct {
 	ID            string                  `json:"id"`
 	Subject       PackageSourceOrArtifact `json:"subject"`
@@ -207,19 +221,22 @@ type CertifyGood struct {
 
 func (CertifyGood) IsNode() {}
 
-// CertifyGoodInputSpec is the same as CertifyGood but for mutation input.
-//
-// All fields are required.
+// CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
 }
 
-// CertifyGoodSpec allows filtering the list of CertifyGood to return.
-// Note: Package, Source or artifact must be specified but not at the same time
-// For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-// For source - a SourceName must be specified (name, tag or commit)
+// CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
 type CertifyGoodSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
@@ -228,7 +245,7 @@ type CertifyGoodSpec struct {
 	Collector     *string                      `json:"collector,omitempty"`
 }
 
-// CertifyScorecard is an attestation which represents the scorecard of a
+// CertifyScorecard is an attestation to attach a Scorecard analysis to a
 // particular source repository.
 type CertifyScorecard struct {
 	ID string `json:"id"`
@@ -240,7 +257,7 @@ type CertifyScorecard struct {
 
 func (CertifyScorecard) IsNode() {}
 
-// CertifyScorecardSpec allows filtering the list of CertifyScorecard to return.
+// CertifyScorecardSpec allows filtering the list of Scorecards to return.
 type CertifyScorecardSpec struct {
 	ID               *string               `json:"id,omitempty"`
 	Source           *SourceSpec           `json:"source,omitempty"`
@@ -253,19 +270,19 @@ type CertifyScorecardSpec struct {
 	Collector        *string               `json:"collector,omitempty"`
 }
 
-// CertifyVEXStatement is an attestation that represents when a package or
-// artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
+// CertifyVEXStatement is an attestation to attach VEX statements to a package or
+// artifact to clarify the impact of a specific vulnerability (CVE, GHSA or OSV).
 type CertifyVEXStatement struct {
 	ID string `json:"id"`
 	// Subject of attestation
 	Subject PackageOrArtifact `json:"subject"`
 	// Attested vulnerability
 	Vulnerability Vulnerability `json:"vulnerability"`
-	// status of the vulnerabilities with respect to the products and components listed in the statement
+	// Status of the vulnerabilities with respect to the subject
 	Status VexStatus `json:"status"`
-	// Justification for VEX
+	// Justification from VEX statement
 	VexJustification VexJustification `json:"vexJustification"`
-	// impact_statement or action_statement depending on the status filed
+	// VEX statement: impact_statement or action_statement depending on status
 	Statement string `json:"statement"`
 	// statusNotes may convey information about how status was determined
 	StatusNotes string `json:"statusNotes"`
@@ -279,13 +296,13 @@ type CertifyVEXStatement struct {
 
 func (CertifyVEXStatement) IsNode() {}
 
-// CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to
-// return.
+// CertifyVEXStatementSpec allows filtering the list of VEX statements to
+// return in a query.
 //
 // Only one subject type (package or artifact) and one vulnerability type (CVE,
 // GHSA or OSV) may be specified.
 //
-// Note that setting `noVuln` in VulnerabilitySpec is invalid for VEX statements!
+// Note that setting noVuln in VulnerabilitySpec is invalid for VEX statements!
 type CertifyVEXStatementSpec struct {
 	ID               *string                `json:"id,omitempty"`
 	Subject          *PackageOrArtifactSpec `json:"subject,omitempty"`
@@ -299,9 +316,10 @@ type CertifyVEXStatementSpec struct {
 	Collector        *string                `json:"collector,omitempty"`
 }
 
-// CertifyVuln is an attestation that represents when a package has a
-// vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
-// the time of scanning no vulnerability was found.
+// CertifyVuln is an attestation to attach vulnerability information to a package.
+//
+// This information is obtained via a scanner. If there is no vulnerability
+// detected (no OSV, CVE, or GHSA), we attach the special NoVuln node.
 type CertifyVuln struct {
 	ID string `json:"id"`
 	// The package that is attested
@@ -314,12 +332,14 @@ type CertifyVuln struct {
 
 func (CertifyVuln) IsNode() {}
 
-// CertifyVulnSpec allows filtering the list of CertifyVuln to return.
+// CertifyVulnSpec allows filtering the list of vulnerability certifications to
+// return in a query.
 //
 // Specifying just the package allows to query for all vulnerabilities associated
 // with the package.
 //
-// Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be specified.
+// Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be
+// specified.
 type CertifyVulnSpec struct {
 	ID             *string            `json:"id,omitempty"`
 	Package        *PkgSpec           `json:"package,omitempty"`
@@ -333,17 +353,17 @@ type CertifyVulnSpec struct {
 	Collector      *string            `json:"collector,omitempty"`
 }
 
-// CveOrGhsaInput allows using CveOrGhsa union as
-// input type to be used in mutations.
-// Exactly one of the value must be set to non-nil.
+// CveOrGhsaInput allows using CveOrGhsa union as input type for mutations.
+//
+// Exactly one field must be specified.
 type CveOrGhsaInput struct {
 	Cve  *CVEInputSpec  `json:"cve,omitempty"`
 	Ghsa *GHSAInputSpec `json:"ghsa,omitempty"`
 }
 
-// CveOrGhsaSpec allows using CveOrGhsa union as
-// input type to be used in read queries.
-// Exactly one of the value must be set to non-nil.
+// CveOrGhsaSpec allows using CveOrGhsa union as input type for queries.
+//
+// Exactly one field must be specified.
 type CveOrGhsaSpec struct {
 	Cve  *CVESpec  `json:"cve,omitempty"`
 	Ghsa *GHSASpec `json:"ghsa,omitempty"`
@@ -351,7 +371,7 @@ type CveOrGhsaSpec struct {
 
 // GHSA represents GitHub security advisories.
 //
-// The `id` field is mandatory and canonicalized to be lowercase.
+// The advisory id field is mandatory and canonicalized to be lowercase.
 //
 // This node can be referred to by other parts of GUAC.
 type Ghsa struct {
@@ -365,48 +385,40 @@ func (Ghsa) IsCveOrGhsa() {}
 
 func (Ghsa) IsNode() {}
 
-// GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
+// GHSAInputSpec specifies a GitHub Security Advisory for mutations.
 type GHSAInputSpec struct {
 	GhsaID string `json:"ghsaId"`
 }
 
-// GHSASpec allows filtering the list of GHSA to return.
-//
-// The argument will be canonicalized to lowercase.
+// GHSASpec allows filtering the list of advisories to return in a query.
 type GHSASpec struct {
 	ID     *string `json:"id,omitempty"`
 	GhsaID *string `json:"ghsaId,omitempty"`
 }
 
-// HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
-//
-// subject - union type that can be either a package or source object type
-// uri (property) - identifier string for the SBOM
-// algorithm - cryptographic algorithm of the digest
-// digest - hash of the SBOM
-// downloadLocation - the download location of the SBOM
-// annotations - this field may be used to provide additional information or metadata about SBOM. Such as SBOM scorecard information
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
-//
-// Note: Only package object or source object can be defined. Not both.
 type HasSbom struct {
-	ID               string          `json:"id"`
-	Subject          PackageOrSource `json:"subject"`
-	URI              string          `json:"uri"`
-	Algorithm        string          `json:"algorithm"`
-	Digest           string          `json:"digest"`
-	DownloadLocation string          `json:"downloadLocation"`
-	Annotations      []*Annotation   `json:"annotations"`
-	Origin           string          `json:"origin"`
-	Collector        string          `json:"collector"`
+	ID string `json:"id"`
+	// SBOM subject
+	Subject PackageOrSource `json:"subject"`
+	// Identifier for the SBOM document
+	URI string `json:"uri"`
+	// Algorithm by which SBOMs digest was computed
+	Algorithm string `json:"algorithm"`
+	// Digest of SBOM
+	Digest string `json:"digest"`
+	// Location from which the SBOM can be downloaded
+	DownloadLocation string `json:"downloadLocation"`
+	// SBOM annotations (e.g., SBOM Scorecard information)
+	Annotations []*Annotation `json:"annotations"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 func (HasSbom) IsNode() {}
 
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
-//
-// All fields are required.
 type HasSBOMInputSpec struct {
 	URI              string                 `json:"uri"`
 	Algorithm        string                 `json:"algorithm"`
@@ -419,7 +431,7 @@ type HasSBOMInputSpec struct {
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
-// Only the package or source can be added, not both
+// Only the package or source can be added, not both.
 type HasSBOMSpec struct {
 	ID               *string              `json:"id,omitempty"`
 	Subject          *PackageOrSourceSpec `json:"subject,omitempty"`
@@ -435,9 +447,9 @@ type HasSBOMSpec struct {
 // HasSLSA records that a subject node has a SLSA attestation.
 type HasSlsa struct {
 	ID string `json:"id"`
-	// The subject of SLSA attestation: package, source, or artifact.
+	// The subject of SLSA attestation
 	Subject *Artifact `json:"subject"`
-	// The SLSA attestation.
+	// The SLSA attestation
 	Slsa *Slsa `json:"slsa"`
 }
 
@@ -458,29 +470,26 @@ type HasSLSASpec struct {
 	Collector   *string              `json:"collector,omitempty"`
 }
 
-// HasSourceAt is an attestation represents that a package object has a source object since a timestamp
-//
-// package (subject) - the package object type that represents the package
-// source (object) - the source object type that represents the source
-// knownSince (property) - timestamp when this was last checked (exact time)
-// justification (property) - string value representing why the package has a source specified
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// HasSourceAt records that a package's repository is a given source.
 type HasSourceAt struct {
-	ID            string    `json:"id"`
-	Package       *Package  `json:"package"`
-	Source        *Source   `json:"source"`
-	KnownSince    time.Time `json:"knownSince"`
-	Justification string    `json:"justification"`
-	Origin        string    `json:"origin"`
-	Collector     string    `json:"collector"`
+	ID string `json:"id"`
+	// The subject of the attestation: can be a PackageName or a PackageVersion
+	Package *Package `json:"package"`
+	// Source repository from which the package is built
+	Source *Source `json:"source"`
+	// Timestamp since this link between package and source was certified
+	KnownSince time.Time `json:"knownSince"`
+	// Justification for the attested relationship
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 func (HasSourceAt) IsNode() {}
 
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
-//
-// All fields are required.
 type HasSourceAtInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
 	Justification string    `json:"justification"`
@@ -499,34 +508,33 @@ type HasSourceAtSpec struct {
 	Collector     *string     `json:"collector,omitempty"`
 }
 
-// HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
-//
-// artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
-// justification (property) - string value representing why the artifacts are the equal
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// HashEqual is an attestation that a set of artifacts are identical.
 type HashEqual struct {
-	ID            string      `json:"id"`
-	Artifacts     []*Artifact `json:"artifacts"`
-	Justification string      `json:"justification"`
-	Origin        string      `json:"origin"`
-	Collector     string      `json:"collector"`
+	ID string `json:"id"`
+	// Collection of artifacts that are similar
+	Artifacts []*Artifact `json:"artifacts"`
+	// Justification for the claim that the artifacts are similar
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 func (HashEqual) IsNode() {}
 
-// HashEqualInputSpec is the same as HashEqual but for mutation input.
-//
-// All fields are required.
+// HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
 }
 
-// HashEqualSpec allows filtering the list of HashEqual to return.
+// HashEqualSpec allows filtering the list of artifact equality statements to
+// return in a query.
 //
-// Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
+// Specifying just one artifact allows to query for all similar artifacts (if any
+// exists).
 type HashEqualSpec struct {
 	ID            *string         `json:"id,omitempty"`
 	Artifacts     []*ArtifactSpec `json:"artifacts,omitempty"`
@@ -535,31 +543,28 @@ type HashEqualSpec struct {
 	Collector     *string         `json:"collector,omitempty"`
 }
 
-// IsDependency is an attestation that represents when a package is dependent on another package
-//
-// package (subject) - the package object type that represents the package
-// dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
-// versionRange (property) - string value for version range that applies to the dependent package
-// dependencyType - enum that represents the dependency as either direct, indirect or unknown
-// justification (property) - string value representing why the artifacts are the equal
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// IsDependency is an attestation to record that a package depends on another.
 type IsDependency struct {
-	ID               string         `json:"id"`
-	Package          *Package       `json:"package"`
-	DependentPackage *Package       `json:"dependentPackage"`
-	VersionRange     string         `json:"versionRange"`
-	DependencyType   DependencyType `json:"dependencyType"`
-	Justification    string         `json:"justification"`
-	Origin           string         `json:"origin"`
-	Collector        string         `json:"collector"`
+	ID string `json:"id"`
+	// Package that has the dependency
+	Package *Package `json:"package"`
+	// Package for the dependency; MUST BE PackageName, not PackageVersion
+	DependentPackage *Package `json:"dependentPackage"`
+	// Version range for the dependency link
+	VersionRange string `json:"versionRange"`
+	// Type of dependency
+	DependencyType DependencyType `json:"dependencyType"`
+	// Justification for the attested relationship
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 func (IsDependency) IsNode() {}
 
-// IsDependencyInputSpec is the same as IsDependency but for mutation input.
-//
-// All fields are required.
+// IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
 	VersionRange   string         `json:"versionRange"`
 	DependencyType DependencyType `json:"dependencyType"`
@@ -568,10 +573,12 @@ type IsDependencyInputSpec struct {
 	Collector      string         `json:"collector"`
 }
 
-// IsDependencySpec allows filtering the list of IsDependency to return.
+// IsDependencySpec allows filtering the list of dependencies to return.
 //
-// Note: the package object must be defined to return its dependent packages.
-// Dependent Packages must represent the packageName (cannot be the packageVersion)
+// To obtain the list of dependency packages, caller must fill in the package
+// field.
+//
+// Dependent packages must be defined at PackageName, not PackageVersion.
 type IsDependencySpec struct {
 	ID               *string         `json:"id,omitempty"`
 	Package          *PkgSpec        `json:"package,omitempty"`
@@ -583,40 +590,34 @@ type IsDependencySpec struct {
 	Collector        *string         `json:"collector,omitempty"`
 }
 
-// IsOccurrence is an attestation represents when either a package or source is represented by an artifact
+// IsOccurrence is an attestation to link an artifact to a package or source.
 //
-// Note: Package or Source must be specified but not both at the same time.
 // Attestation must occur at the PackageVersion or at the SourceName.
 type IsOccurrence struct {
 	ID string `json:"id"`
-	// subject - union type that can be either a package or source object type
+	// Package or source from which the artifact originates
 	Subject PackageOrSource `json:"subject"`
-	// artifact (object) - artifact that represent the the package or source
+	// The artifact in the relationship
 	Artifact *Artifact `json:"artifact"`
-	// justification (property) - string value representing why the package or source is represented by the specified artifact
+	// Justification for the attested relationship
 	Justification string `json:"justification"`
-	// origin (property) - where this attestation was generated from (based on which document)
+	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
-	// collector (property) - the GUAC collector that collected the document that generated this attestation
+	// GUAC collector for the document
 	Collector string `json:"collector"`
 }
 
 func (IsOccurrence) IsNode() {}
 
-// IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
-//
-// All fields are required.
+// IsOccurrenceInputSpec represents the input to record an artifact's origin.
 type IsOccurrenceInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
 }
 
-// IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
-// Note: Package or Source must be specified but not both at the same time
-// For package - PackageVersion must be specified (version, qualifiers and subpath)
-// or it defaults to empty string for version, subpath and empty list for qualifiers
-// For source - a SourceName must be specified (name, tag or commit)
+// IsOccurrenceSpec allows filtering the list of artifact occurences to return in
+// a query.
 type IsOccurrenceSpec struct {
 	ID            *string              `json:"id,omitempty"`
 	Subject       *PackageOrSourceSpec `json:"subject,omitempty"`
@@ -626,35 +627,32 @@ type IsOccurrenceSpec struct {
 	Collector     *string              `json:"collector,omitempty"`
 }
 
-// IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
-//
-// osv (subject) - the osv object type that represents OSV and its ID
-// vulnerability (object) - union type that consists of cve or ghsa
-// justification (property) - the reason why the osv ID represents the cve or ghsa
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// IsVulnerability is an attestation to link CVE/GHSA with data in OSV.
 type IsVulnerability struct {
-	ID            string    `json:"id"`
-	Osv           *Osv      `json:"osv"`
+	ID string `json:"id"`
+	// The OSV that encapsulates the vulnerability
+	Osv *Osv `json:"osv"`
+	// The upstream vulnerability information
 	Vulnerability CveOrGhsa `json:"vulnerability"`
-	Justification string    `json:"justification"`
-	Origin        string    `json:"origin"`
-	Collector     string    `json:"collector"`
+	// Justification for the attested relationship
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 func (IsVulnerability) IsNode() {}
 
-// IsVulnerabilityInputSpec is the same as IsVulnerability but for mutation input.
-//
-// All fields are required.
+// IsVulnerabilityInputSpec represents the input to link CVE/GHSA with OSV data.
 type IsVulnerabilityInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
 }
 
-// IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
-// Only CVE or GHSA can be specified at once.
+// IsVulnerabilitySpec allows filtering the list of vulnerability links to return
+// in a query.
 type IsVulnerabilitySpec struct {
 	ID            *string        `json:"id,omitempty"`
 	Osv           *OSVSpec       `json:"osv,omitempty"`
@@ -673,8 +671,6 @@ type MatchFlags struct {
 // found during a vulnerability scan.
 //
 // Backends guarantee that this is a singleton node.
-//
-// We define an ID field due to GraphQL restrictions.
 type NoVuln struct {
 	ID string `json:"id"`
 }
@@ -685,7 +681,7 @@ func (NoVuln) IsNode() {}
 
 // OSV represents an Open Source Vulnerability.
 //
-// The `osvId` field is mandatory and canonicalized to be lowercase.
+// The osvId field is mandatory and canonicalized to be lowercase.
 //
 // This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
 // CVE ID).
@@ -700,29 +696,31 @@ func (Osv) IsVulnerability() {}
 
 func (Osv) IsNode() {}
 
-// OSVInputSpec is the same as OSVSpec, but used for mutation ingestion.
+// OSVInputSpec specifies a OSV vulnerability for mutations.
 type OSVInputSpec struct {
 	OsvID string `json:"osvId"`
 }
 
-// OSVSpec allows filtering the list of OSV to return.
+// OSVSpec allows filtering the list of advisories to return in a query.
 type OSVSpec struct {
 	ID    *string `json:"id,omitempty"`
 	OsvID *string `json:"osvId,omitempty"`
 }
 
-// Package represents a package.
+// Package represents the root of the package trie/tree.
 //
-// In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
-// The `type` field matches the pURL types but we might also use `"guac"` for the
-// cases where the pURL representation is not complete or when we have custom
-// rules.
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
 //
-// This node is a singleton: backends guarantee that there is exactly one node
-// with the same `type` value.
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
 //
-// Also note that this is named `Package`, not `PackageType`. This is only to make
-// queries more readable.
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
 type Package struct {
 	ID         string              `json:"id"`
 	Type       string              `json:"type"`
@@ -740,7 +738,7 @@ func (Package) IsNode() {}
 // PackageName is a name for packages.
 //
 // In the pURL representation, each PackageName matches the
-// `pkg:<type>/<namespace>/<name>` pURL.
+// pkg:<type>/<namespace>/<name> pURL.
 //
 // Names are always mandatory.
 //
@@ -755,7 +753,7 @@ type PackageName struct {
 // PackageNamespace is a namespace for packages.
 //
 // In the pURL representation, each PackageNamespace matches the
-// `pkg:<type>/<namespace>/` partial pURL.
+// pkg:<type>/<namespace>/ partial pURL.
 //
 // Namespaces are optional and type specific. Because they are optional, we use
 // empty string to denote missing namespaces.
@@ -783,17 +781,17 @@ type PackageOrArtifactSpec struct {
 	Artifact *ArtifactSpec `json:"artifact,omitempty"`
 }
 
-// PackageOrSourceInput allows using PackageOrSource union as
-// input type to be used in mutations.
-// Exactly one of the value must be set to non-nil.
+// PackageOrSourceInput allows using PackageOrSource union as input for mutations.
+//
+// Exactly one field must be specified.
 type PackageOrSourceInput struct {
 	Package *PkgInputSpec    `json:"package,omitempty"`
 	Source  *SourceInputSpec `json:"source,omitempty"`
 }
 
-// PackageOrSourceSpec allows using PackageOrSource union as
-// input type to be used in read queries.
-// Exactly one of the value must be set to non-nil.
+// PackageOrSourceSpec allows using PackageOrSource union as input for queries.
+//
+// Exactly one field must be specified.
 type PackageOrSourceSpec struct {
 	Package *PkgSpec    `json:"package,omitempty"`
 	Source  *SourceSpec `json:"source,omitempty"`
@@ -801,8 +799,8 @@ type PackageOrSourceSpec struct {
 
 // PackageQualifier is a qualifier for a package, a key-value pair.
 //
-// In the pURL representation, it is a part of the `<qualifiers>` part of the
-// `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` pURL.
+// In the pURL representation, it is a part of the <qualifiers> part of the
+// pkg:<type>/<namespace>/<name>@<version>?<qualifiers> pURL.
 //
 // Qualifiers are optional, each Package type defines own rules for handling them,
 // and multiple qualifiers could be attached to the same package.
@@ -813,30 +811,19 @@ type PackageQualifier struct {
 	Value string `json:"value"`
 }
 
-// PackageQualifierInputSpec is the same as PackageQualifier, but usable as
-// mutation input.
-//
-// GraphQL does not allow input types to contain composite types and does not allow
-// composite types to contain input types. So, although in this case these two
-// types are semantically the same, we have to duplicate the definition.
-//
-// Both fields are mandatory.
+// PackageQualifierInputSpec allows specifying package qualifiers in mutations.
 type PackageQualifierInputSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// PackageQualifierSpec is the same as PackageQualifier, but usable as query
-// input.
+// PackageQualifierSpec allows filtering package qualifiers in a query.
 //
-// GraphQL does not allow input types to contain composite types and does not allow
-// composite types to contain input types. So, although in this case these two
-// types are semantically the same, we have to duplicate the definition.
-//
-// Keys are mandatory, but values could also be `null` if we want to match all
+// Keys are mandatory, but values could also be null if we want to match all
 // values for a specific key.
 //
-// TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
+// NOTE: Before the schema becomes stable, we might change the nulability
+// requirements of these fields.
 type PackageQualifierSpec struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value,omitempty"`
@@ -865,10 +852,12 @@ type PackageSourceOrArtifactSpec struct {
 // PackageVersion is a package version.
 //
 // In the pURL representation, each PackageName matches the
-// `pkg:<type>/<namespace>/<name>@<version>` pURL.
+// pkg:<type>/<namespace>/<name>@<version> pURL.
 //
-// Versions are optional and each Package type defines own rules for handling them.
-// For this level of GUAC, these are just opaque strings.
+// Versions are optional and each Package type defines own rules for handling
+// them. For this level of GUAC, these are just opaque strings.
+//
+// NOTE: The handling of versions might change before this schema becomes stable.
 //
 // This node can be referred to by other parts of GUAC.
 //
@@ -876,9 +865,9 @@ type PackageSourceOrArtifactSpec struct {
 // empty list and lack of subpath by empty string (to be consistent with
 // optionality of namespace and version). Two nodes that have different qualifiers
 // and/or subpath but the same version mean two different packages in the trie
-// (they are different). Two nodes that have same version but qualifiers of one are
-// a subset of the qualifier of the other also mean two different packages in the
-// trie.
+// (they are different). Two nodes that have same version but qualifiers of one
+// are a subset of the qualifier of the other also mean two different packages in
+// the trie.
 type PackageVersion struct {
 	ID         string              `json:"id"`
 	Version    string              `json:"version"`
@@ -886,34 +875,33 @@ type PackageVersion struct {
 	Subpath    string              `json:"subpath"`
 }
 
-// PkgEqual is an attestation that represents when a package objects are similar
-//
-// packages (subject) - list of package objects
-// justification (property) - string value representing why the packages are similar
-// origin (property) - where this attestation was generated from (based on which document)
-// collector (property) - the GUAC collector that collected the document that generated this attestation
+// PkgEqual is an attestation that a set of packages are similar.
 type PkgEqual struct {
-	ID            string     `json:"id"`
-	Packages      []*Package `json:"packages"`
-	Justification string     `json:"justification"`
-	Origin        string     `json:"origin"`
-	Collector     string     `json:"collector"`
+	ID string `json:"id"`
+	// Collection of packages that are similar
+	Packages []*Package `json:"packages"`
+	// Justification for the claim that the packages are similar
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 func (PkgEqual) IsNode() {}
 
-// PkgEqualInputSpec is the same as PkgEqual but for mutation input.
-//
-// All fields are required.
+// PkgEqualInputSpec represents the input to certify that packages are similar.
 type PkgEqualInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
 }
 
-// PkgEqualSpec allows filtering the list of PkgEqual to return.
+// PkgEqualSpec allows filtering the list of package equality statements to return
+// in a query.
 //
-// Specifying just the package allows to query for all similar packages (if they exist)
+// Specifying just one package allows to query for all similar packages (if any
+// exists).
 type PkgEqualSpec struct {
 	ID            *string    `json:"id,omitempty"`
 	Packages      []*PkgSpec `json:"packages,omitempty"`
@@ -922,10 +910,10 @@ type PkgEqualSpec struct {
 	Collector     *string    `json:"collector,omitempty"`
 }
 
-// PkgInputSpec specifies a package for a mutation.
+// PkgInputSpec specifies a package for mutations.
 //
 // This is different than PkgSpec because we want to encode mandatory fields:
-// `type` and `name`. All optional fields are given empty default values.
+// type and name. All optional fields are given empty default values.
 type PkgInputSpec struct {
 	Type       string                       `json:"type"`
 	Namespace  *string                      `json:"namespace,omitempty"`
@@ -935,9 +923,12 @@ type PkgInputSpec struct {
 	Subpath    *string                      `json:"subpath,omitempty"`
 }
 
-// PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
-// as the IsDependency attestation should only be allowed to be made to the packageName node and not the
-// packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
+// PkgNameSpec is used to query for dependent packages.
+//
+// This is different from PkgSpec as the IsDependency attestation should only be
+// allowed to be made to the packageName node and not the packageVersion node.
+// Versions will be handled by the version_range in the IsDependency attestation
+// node.
 type PkgNameSpec struct {
 	ID        *string `json:"id,omitempty"`
 	Type      *string `json:"type,omitempty"`
@@ -945,18 +936,18 @@ type PkgNameSpec struct {
 	Name      *string `json:"name,omitempty"`
 }
 
-// PkgSpec allows filtering the list of packages to return.
+// PkgSpec allows filtering the list of sources to return in a query.
 //
-// Each field matches a qualifier from pURL. Use `null` to match on all values at
+// Each field matches a qualifier from pURL. Use null to match on all values at
 // that level. For example, to get all packages in GUAC backend, use a PkgSpec
-// where every field is `null`.
+// where every field is null.
 //
 // Empty string at a field means matching with the empty string. If passing in
 // qualifiers, all of the values in the list must match. Since we want to return
-// nodes with any number of qualifiers if no qualifiers are passed in the input, we
-// must also return the same set of nodes it the qualifiers list is empty. To match
-// on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
-// true. If this field is true, then the qualifiers argument is ignored.
+// nodes with any number of qualifiers if no qualifiers are passed in the input,
+// we must also return the same set of nodes it the qualifiers list is empty. To
+// match on nodes that don't contain any qualifier, set matchOnlyEmptyQualifiers
+// to true. If this field is true, then the qualifiers argument is ignored.
 type PkgSpec struct {
 	ID                       *string                 `json:"id,omitempty"`
 	Type                     *string                 `json:"type,omitempty"`
@@ -977,7 +968,7 @@ type PkgSpec struct {
 // (time of scan, version of scanners, etc.) as well as how this information got
 // included into GUAC (origin document and the collector for that document).
 type Slsa struct {
-	// Sources of the build resulting in subject (materials)
+	// Materials of the build resulting in subject
 	BuiltFrom []*Artifact `json:"builtFrom"`
 	// Builder performing the build
 	BuiltBy *Builder `json:"builtBy"`
@@ -998,8 +989,6 @@ type Slsa struct {
 }
 
 // SLSAInputSpec is the same as SLSA but for mutation input.
-//
-// All fields are required.
 type SLSAInputSpec struct {
 	BuildType     string                    `json:"buildType"`
 	SlsaPredicate []*SLSAPredicateInputSpec `json:"slsaPredicate"`
@@ -1037,15 +1026,12 @@ type SLSAInputSpec struct {
 // ```
 //
 // This node cannot be directly referred by other parts of GUAC.
-//
-// TODO(mihaimaruseac): Can we define these directly?
 type SLSAPredicate struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// SLSAPredicateInputSpec is the same as SLSAPredicateSpec, but for mutation
-// input.
+// SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec.
 type SLSAPredicateInputSpec struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
@@ -1100,7 +1086,7 @@ type ScorecardCheck struct {
 	Score int    `json:"score"`
 }
 
-// ScorecardCheckInputSpec is the same as ScorecardCheck, but for mutation input.
+// ScorecardCheckInputSpec represents the mutation input for a Scorecard check.
 type ScorecardCheckInputSpec struct {
 	Check string `json:"check"`
 	Score int    `json:"score"`
@@ -1112,9 +1098,7 @@ type ScorecardCheckSpec struct {
 	Score int    `json:"score"`
 }
 
-// ScorecardInputSpec is the same as Scorecard but for mutation input.
-//
-// All fields are required.
+// ScorecardInputSpec represents the mutation input to ingest a Scorecard.
 type ScorecardInputSpec struct {
 	Checks           []*ScorecardCheckInputSpec `json:"checks"`
 	AggregateScore   float64                    `json:"aggregateScore"`
@@ -1125,15 +1109,17 @@ type ScorecardInputSpec struct {
 	Collector        string                     `json:"collector"`
 }
 
-// Source represents a source.
+// Source represents the root of the source trie/tree.
 //
-// This can be the version control system that is being used.
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
 //
-// This node is a singleton: backends guarantee that there is exactly one node
-// with the same `type` value.
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
 //
-// Also note that this is named `Source`, not `SourceType`. This is only to make
-// queries more readable.
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
 type Source struct {
 	ID         string             `json:"id"`
 	Type       string             `json:"type"`
@@ -1146,14 +1132,14 @@ func (Source) IsPackageOrSource() {}
 
 func (Source) IsNode() {}
 
-// SourceInputSpec specifies a source for a mutation.
+// SourceInputSpec specifies a source for mutations.
 //
 // This is different than SourceSpec because we want to encode that all fields
-// except tag and commit are mandatory fields. All optional fields are given
-// empty default values.
+// except tag and commit are mandatory fields. All optional fields are given empty
+// default values.
 //
-// It is an error to set both `tag` and `commit` fields to values different than
-// the default.
+// It is an error to set both tag and commit fields to values different than the
+// default.
 type SourceInputSpec struct {
 	Type      string  `json:"type"`
 	Namespace string  `json:"namespace"`
@@ -1162,13 +1148,12 @@ type SourceInputSpec struct {
 	Commit    *string `json:"commit,omitempty"`
 }
 
-// SourceName is a url of the repository and its tag or commit.
+// SourceName represents the url of the repository.
 //
-// The `name` field is mandatory. The `tag` and `commit` fields are optional, but
-// it is an error to specify both.
+// The name field is mandatory. The tag and commit fields are optional, but it is
+// an error to specify both.
 //
-// This is the only source trie node that can be referenced by other parts of
-// GUAC.
+// This is the only source trie node that can be referenced by other parts of GUAC.
 type SourceName struct {
 	ID     string  `json:"id"`
 	Name   string  `json:"name"`
@@ -1180,21 +1165,21 @@ type SourceName struct {
 //
 // This is the location of the repository (such as github/gitlab/bitbucket).
 //
-// The `namespace` field is mandatory.
+// The namespace field is mandatory.
 type SourceNamespace struct {
 	ID        string        `json:"id"`
 	Namespace string        `json:"namespace"`
 	Names     []*SourceName `json:"names"`
 }
 
-// SourceSpec allows filtering the list of sources to return.
+// SourceSpec allows filtering the list of sources to return in a query.
 //
 // Empty string at a field means matching with the empty string. Missing field
 // means retrieving all possible matches.
 //
-// It is an error to specify both `tag` and `commit` fields, except it both are
-// set as empty string (in which case the returned sources are only those for
-// which there is no tag/commit information).
+// It is an error to specify both tag and commit fields, except it both are set as
+// empty string (in which case the returned sources are only those for which there
+// is no tag/commit information).
 type SourceSpec struct {
 	ID        *string `json:"id,omitempty"`
 	Type      *string `json:"type,omitempty"`
@@ -1204,9 +1189,7 @@ type SourceSpec struct {
 	Commit    *string `json:"commit,omitempty"`
 }
 
-// VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
-//
-// All fields are required.
+// VexStatementInputSpec represents the input to ingest VEX statements.
 type VexStatementInputSpec struct {
 	Status           VexStatus        `json:"status"`
 	VexJustification VexJustification `json:"vexJustification"`
@@ -1220,8 +1203,8 @@ type VexStatementInputSpec struct {
 // VulnerabilityInput allows using Vulnerability union as
 // input type to be used in mutations.
 //
-// Either `noVuln` must be set to true or one of `osv`, `cve`, or `ghsa` must be
-// set to non-nil. If `noVuln` is set then this is an ingestion of a known lack of
+// Either noVuln must be set to true or one of osv, cve, or ghsa must be
+// set to non-nil. If noVuln is set then this is an ingestion of a known lack of
 // vulnerabilities, so the special NoVuln node will be used by the backend.
 // Otherwise, the specific vulnerability type will be linked to this attestation.
 type VulnerabilityInput struct {
@@ -1251,9 +1234,8 @@ type VulnerabilityMetaData struct {
 	Collector string `json:"collector"`
 }
 
-// VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
-//
-// All fields are required.
+// VulnerabilityMetaDataInput represents the input for certifying vulnerability
+// scans in mutations.
 type VulnerabilityMetaDataInput struct {
 	TimeScanned    time.Time `json:"timeScanned"`
 	DbURI          string    `json:"dbUri"`
@@ -1267,8 +1249,8 @@ type VulnerabilityMetaDataInput struct {
 // VulnerabilitySpec allows using Vulnerability union as input type to be used in
 // read queries.
 //
-// Either `noVuln` must be set to true or exactly one of `osv`, `cve` or `ghsa`
-// must be set to non-nil. Setting `noVuln` to true means retrieving nodes where
+// Either noVuln must be set to true or exactly one of osv, cve or ghsa
+// must be set to non-nil. Setting noVuln to true means retrieving nodes where
 // there is no vulnerability attached (thus, the special NoVuln node). Setting one
 // of the other fields means retrieving certifications for the corresponding
 // vulnerability types.
@@ -1279,16 +1261,16 @@ type VulnerabilitySpec struct {
 	NoVuln *bool     `json:"noVuln,omitempty"`
 }
 
-// DependencyType determines the type of the IsDependency.
-// Direct - direct dependency of the IsDependency Package
-// Indirect - transitive dependency of the IsDependency Package
-// Unknown - type of the dependency not known
+// DependencyType determines the type of the dependency.
 type DependencyType string
 
 const (
-	DependencyTypeDirect   DependencyType = "DIRECT"
+	// direct dependency
+	DependencyTypeDirect DependencyType = "DIRECT"
+	// indirect dependency
 	DependencyTypeIndirect DependencyType = "INDIRECT"
-	DependencyTypeUnknown  DependencyType = "UNKNOWN"
+	// type not known/not specified
+	DependencyTypeUnknown DependencyType = "UNKNOWN"
 )
 
 var AllDependencyType = []DependencyType{
@@ -1504,7 +1486,7 @@ func (e Edge) MarshalGQL(w io.Writer) {
 }
 
 // PkgMatchType is an enum to determine if the attestation should be done at the
-// specific version or package name
+// specific version or package name.
 type PkgMatchType string
 
 const (
@@ -1546,6 +1528,7 @@ func (e PkgMatchType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Records the justification included in the VEX statement.
 type VexJustification string
 
 const (
@@ -1595,6 +1578,7 @@ func (e VexJustification) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Records the status of a VEX statement subject.
 type VexStatus string
 
 const (

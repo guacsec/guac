@@ -15,16 +15,16 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest certification that two packages are similar into GUAC
+# Defines the GraphQL operations to certify that two packages are identical
 
-mutation PkgEqual($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
+mutation PkgEqual($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
   pkg: ingestPackage(pkg: $pkg) {
     ...AllPkgTree
   }
-  dependentPkg: ingestPackage(pkg: $depPkg) {
+  otherPackage: ingestPackage(pkg: $otherPackage) {
     ...AllPkgTree
   }
-  ingestPkgEqual(pkg: $pkg, depPkg: $depPkg, pkgEqual: $pkgEqual) {
+  ingestPkgEqual(pkg: $pkg, otherPackage: $otherPackage, pkgEqual: $pkgEqual) {
     ...allPkgEqual
   }
 }

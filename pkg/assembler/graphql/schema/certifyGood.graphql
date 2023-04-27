@@ -15,19 +15,20 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyGood. It contains the subject (which
-#  can be either a package, source or artifact), justification, origin of the
-#  attestation, and collector
+# Defines a GraphQL schema for the CertifyGood
 
 """
-CertifyGood is an attestation represents when a package, source or artifact is considered good
+CertifyGood is an attestation that a package, source, or artifact is considered
+good.
 
-subject - union type that can be either a package, source or artifact object type
-justification (property) - string value representing why the subject is considered good
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
+All evidence trees record a justification for the property they represent as
+well as the document that contains the attestation (origin) and the collector
+that collected the document (collector).
 
-Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+The certification applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
 """
 type CertifyGood {
   id: ID!
@@ -38,10 +39,15 @@ type CertifyGood {
 }
 
 """
-CertifyGoodSpec allows filtering the list of CertifyGood to return.
-Note: Package, Source or artifact must be specified but not at the same time
-For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-For source - a SourceName must be specified (name, tag or commit)
+CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
 """
 input CertifyGoodSpec {
   id: ID
@@ -52,9 +58,7 @@ input CertifyGoodSpec {
 }
 
 """
-CertifyGoodInputSpec is the same as CertifyGood but for mutation input.
-
-All fields are required.
+CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 """
 input CertifyGoodInputSpec {
   justification: String!
@@ -63,11 +67,11 @@ input CertifyGoodInputSpec {
 }
 
 extend type Query {
-  "Returns all CertifyGood"
+  "Returns all CertifyGood attestations matching a filter."
   CertifyGood(certifyGoodSpec: CertifyGoodSpec): [CertifyGood!]!
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered good"
+  "Adds a certification that a package, source or artifact is considered good."
   ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
 }
