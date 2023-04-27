@@ -15,7 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest VEX Statement into GUAC
+# Defines the GraphQL operations to ingest VEX statements into GUAC
 
 mutation VexPackageAndCve($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestPackage(pkg: $pkg) {

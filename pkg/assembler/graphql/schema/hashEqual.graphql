@@ -15,27 +15,27 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector.
-"""
-HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
+# Defines a GraphQL schema for the artifact equality
 
-artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
-justification (property) - string value representing why the artifacts are the equal
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"HashEqual is an attestation that a set of artifacts are identical."
 type HashEqual {
   id: ID!
+  "Collection of artifacts that are similar"
   artifacts: [Artifact!]!
+  "Justification for the claim that the artifacts are similar"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-HashEqualSpec allows filtering the list of HashEqual to return.
+HashEqualSpec allows filtering the list of artifact equality statements to
+return in a query.
 
-Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
+Specifying just one artifact allows to query for all similar artifacts (if any
+exists).
 """
 input HashEqualSpec {
   id: ID
@@ -46,11 +46,7 @@ input HashEqualSpec {
 }
 
 
-"""
-HashEqualInputSpec is the same as HashEqual but for mutation input.
-
-All fields are required.
-"""
+"HashEqualInputSpec represents the input to certify that packages are similar."
 input HashEqualInputSpec {
   justification: String!
   origin: String!
@@ -59,11 +55,11 @@ input HashEqualInputSpec {
 
 
 extend type Query {
-  "Returns all HashEqual"
+  "Returns all artifact equality statements matching a filter."
   HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
 }
 
 extend type Mutation {
-  "certify that two artifacts are the same (hashes are equal)"
-  ingestHashEqual(artifact: ArtifactInputSpec!, equalArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+  "Adds a certification that two artifacts are similar."
+  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
 }

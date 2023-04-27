@@ -15,7 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema to certify Scorecard for a source repository.
+# Defines a GraphQL schema to certify Scorecard for a source repository
 
 """
 Define the Time scalar, to be used across GUAC. It follows RFC3339Nano format.
@@ -27,7 +27,7 @@ For GUAC, we assume that all times are stored in UTC format.
 scalar Time
 
 """
-CertifyScorecard is an attestation which represents the scorecard of a
+CertifyScorecard is an attestation to attach a Scorecard analysis to a
 particular source repository.
 """
 type CertifyScorecard {
@@ -83,7 +83,7 @@ type ScorecardCheck {
   score: Int!
 }
 
-"CertifyScorecardSpec allows filtering the list of CertifyScorecard to return."
+"CertifyScorecardSpec allows filtering the list of Scorecards to return."
 input CertifyScorecardSpec {
   id: ID
   source: SourceSpec
@@ -102,11 +102,7 @@ input ScorecardCheckSpec {
   score: Int!
 }
 
-"""
-ScorecardInputSpec is the same as Scorecard but for mutation input.
-
-All fields are required.
-"""
+"ScorecardInputSpec represents the mutation input to ingest a Scorecard."
 input ScorecardInputSpec {
   checks: [ScorecardCheckInputSpec!]!
   aggregateScore: Float!
@@ -117,20 +113,18 @@ input ScorecardInputSpec {
   collector: String!
 }
 
-"""
-ScorecardCheckInputSpec is the same as ScorecardCheck, but for mutation input.
-"""
+"ScorecardCheckInputSpec represents the mutation input for a Scorecard check."
 input ScorecardCheckInputSpec {
   check: String!
   score: Int!
 }
 
 extend type Query {
-  "Returns all Scorecard certifications matching the filter"
+  "Returns all Scorecard certifications matching the filter."
   scorecards(scorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
 }
 
 extend type Mutation {
-  "Certifies the Scorecard scanning of a source repository"
+  "Adds a certification that a source repository has a Scorecard."
   certifyScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
 }

@@ -15,8 +15,8 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyBad. It contains the subject (which can be either a package, source or artifact),
-#  justification, origin of the attestation, and collector
+# Defines a GraphQL schema for the CertifyBad
+
 "PackageSourceOrArtifact is a union of Package, Source, and Artifact."
 union PackageSourceOrArtifact = Package | Source | Artifact
 
@@ -45,14 +45,17 @@ input PackageSourceOrArtifactInput {
 }
 
 """
-CertifyBad is an attestation represents when a package, source or artifact is considered bad
+CertifyBad is an attestation that a package, source, or artifact is considered
+bad.
 
-subject - union type that can be either a package, source or artifact object type
-justification (property) - string value representing why the subject is considered bad
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
+All evidence trees record a justification for the property they represent as
+well as the document that contains the attestation (origin) and the collector
+that collected the document (collector).
 
-Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+The certification applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
 """
 type CertifyBad {
   id: ID!
@@ -63,10 +66,15 @@ type CertifyBad {
 }
 
 """
-CertifyBadSpec allows filtering the list of CertifyBad to return.
-Note: Package, Source or artifact must be specified but not at the same time
-For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-For source - a SourceName must be specified (name, tag or commit)
+CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
 """
 input CertifyBadSpec {
   id: ID
@@ -77,9 +85,8 @@ input CertifyBadSpec {
 }
 
 """
-CertifyBadInputSpec is the same as CertifyBad but for mutation input.
-
-All fields are required.
+CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
+evidence.
 """
 input CertifyBadInputSpec {
   justification: String!
@@ -89,7 +96,7 @@ input CertifyBadInputSpec {
 
 """
 PkgMatchType is an enum to determine if the attestation should be done at the
-specific version or package name
+specific version or package name.
 """
 enum PkgMatchType {
   ALL_VERSIONS
@@ -102,11 +109,11 @@ input MatchFlags {
 }
 
 extend type Query {
-  "Returns all CertifyBad"
+  "Returns all CertifyBad attestations matching a filter."
   CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered bad"
+  "Adds a certification that a package, source or artifact is considered bad."
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
 }

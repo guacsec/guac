@@ -15,14 +15,10 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the GitHub Security Advisory (GSHA) trie/tree.
-# It contains the ID associated with a vulnerability in the GitHub numbering
-# schema (GHSA ID).
-
 """
 GHSA represents GitHub security advisories.
 
-The `id` field is mandatory and canonicalized to be lowercase.
+The advisory id field is mandatory and canonicalized to be lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -31,29 +27,23 @@ type GHSA {
   ghsaId: String!
 }
 
-"""
-GHSASpec allows filtering the list of GHSA to return.
-
-The argument will be canonicalized to lowercase.
-"""
+"GHSASpec allows filtering the list of advisories to return in a query."
 input GHSASpec {
   id: ID
   ghsaId: String
 }
 
-"""
-GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
-"""
+"GHSAInputSpec specifies a GitHub Security Advisory for mutations."
 input GHSAInputSpec {
   ghsaId: String!
 }
 
 extend type Query {
-  "Returns all GHSA nodes"
+  "Returns all GitHub Security Advisories matching a filter."
   ghsa(ghsaSpec: GHSASpec): [GHSA!]!
 }
 
 extend type Mutation {
-  "Ingest a new GHSA. Returns the ingested object"
+  "Ingests a new GitHub Security Advisory and returns it."
   ingestGHSA(ghsa: GHSAInputSpec): GHSA!
 }

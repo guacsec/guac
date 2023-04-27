@@ -183,13 +183,13 @@ type ComplexityRoot struct {
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
-		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
+		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
 		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
-		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
+		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
 		IngestSlsa            func(childComplexity int, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) int
 		IngestSource          func(childComplexity int, source model.SourceInputSpec) int
 		IngestVEXStatement    func(childComplexity int, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) int
@@ -1057,7 +1057,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.ArtifactInputSpec), args["equalArtifact"].(model.ArtifactInputSpec), args["hashEqual"].(model.HashEqualInputSpec)), true
+		return e.complexity.Mutation.IngestHashEqual(childComplexity, args["artifact"].(model.ArtifactInputSpec), args["otherArtifact"].(model.ArtifactInputSpec), args["hashEqual"].(model.HashEqualInputSpec)), true
 
 	case "Mutation.ingestIsVulnerability":
 		if e.complexity.Mutation.IngestIsVulnerability == nil {
@@ -1129,7 +1129,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.PkgInputSpec), args["depPkg"].(model.PkgInputSpec), args["pkgEqual"].(model.PkgEqualInputSpec)), true
+		return e.complexity.Mutation.IngestPkgEqual(childComplexity, args["pkg"].(model.PkgInputSpec), args["otherPackage"].(model.PkgInputSpec), args["pkgEqual"].(model.PkgEqualInputSpec)), true
 
 	case "Mutation.ingestSLSA":
 		if e.complexity.Mutation.IngestSlsa == nil {
@@ -2020,17 +2020,16 @@ var sources = []*ast.Source{
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the artifact. It contains the algorithm and
-# digest fields
+# Defines a GraphQL schema for the artifact
 
 """
-Artifact represents the artifact and contains a digest field
+Artifact represents an artifact identified by a checksum hash.
 
-Both field are mandatory and canonicalized to be lowercase.
+The checksum is split into the digest value and the algorithm used to generate
+it. Both fields are mandatory and canonicalized to be lowercase.
 
-If having a ` + "`" + `checksum` + "`" + ` Go object, ` + "`" + `algorithm` + "`" + ` can be
-` + "`" + `strings.ToLower(string(checksum.Algorithm))` + "`" + ` and ` + "`" + `digest` + "`" + ` can be
-` + "`" + `checksum.Value` + "`" + `.
+If having a checksum Go object, algorithm can be
+strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
 """
 type Artifact {
   id: ID!
@@ -2039,9 +2038,9 @@ type Artifact {
 }
 
 """
-ArtifactSpec allows filtering the list of artifacts to return.
+ArtifactSpec allows filtering the list of artifacts to return in a query.
 
-Both arguments will be canonicalized to lowercase.
+The checksum fields are canonicalized to be lowercase.
 """
 input ArtifactSpec {
   id: ID
@@ -2050,9 +2049,9 @@ input ArtifactSpec {
 }
 
 """
-ArtifactInputSpec is the same as Artifact, but used as mutation input.
+ArtifactInputSpec specifies an artifact for mutations.
 
-Both arguments will be canonicalized to lowercase.
+The checksum fields are canonicalized to be lowercase.
 """
 input ArtifactInputSpec {
   algorithm: String!
@@ -2060,12 +2059,12 @@ input ArtifactInputSpec {
 }
 
 extend type Query {
-  "Returns all artifacts"
+  "Returns all artifacts matching a filter."
   artifacts(artifactSpec: ArtifactSpec): [Artifact!]!
 }
 
 extend type Mutation {
-  "Ingest a new artifact. Returns the ingested artifact"
+  "Ingests a new artifact and returns it."
   ingestArtifact(artifact: ArtifactInputSpec): Artifact!
 }
 `, BuiltIn: false},
@@ -2086,40 +2085,36 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the builder. It only contains the uri
+# Defines a GraphQL schema for the builder
 
 """
-Builder represents the builder such as (FRSCA or github actions).
+Builder represents the builder (e.g., FRSCA or GitHub Actions).
 
-Currently builders are identified by the ` + "`" + `uri` + "`" + ` field, which is mandatory.
+Currently builders are identified by the uri field.
 """
 type Builder {
   id: ID!
   uri: String!
 }
 
-"""
-BuilderSpec allows filtering the list of builders to return.
-"""
+"BuilderSpec allows filtering the list of builders to return in a query."
 input BuilderSpec {
   id: ID
   uri: String
 }
 
-"""
-BuilderInputSpec is the same as Builder, but used for mutation ingestion.
-"""
+"BuilderInputSpec specifies a builder for mutations."
 input BuilderInputSpec {
   uri: String!
 }
 
 extend type Query {
-  "Returns all builders"
+  "Returns all builders matching a filter."
   builders(builderSpec: BuilderSpec): [Builder!]!
 }
 
 extend type Mutation {
-  "Ingest a new builder. Returns the ingested builder"
+  "Ingests a new builder and returns it."
   ingestBuilder(builder: BuilderInputSpec): Builder!
 }
 `, BuiltIn: false},
@@ -2140,8 +2135,8 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyBad. It contains the subject (which can be either a package, source or artifact),
-#  justification, origin of the attestation, and collector
+# Defines a GraphQL schema for the CertifyBad
+
 "PackageSourceOrArtifact is a union of Package, Source, and Artifact."
 union PackageSourceOrArtifact = Package | Source | Artifact
 
@@ -2170,14 +2165,17 @@ input PackageSourceOrArtifactInput {
 }
 
 """
-CertifyBad is an attestation represents when a package, source or artifact is considered bad
+CertifyBad is an attestation that a package, source, or artifact is considered
+bad.
 
-subject - union type that can be either a package, source or artifact object type
-justification (property) - string value representing why the subject is considered bad
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
+All evidence trees record a justification for the property they represent as
+well as the document that contains the attestation (origin) and the collector
+that collected the document (collector).
 
-Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+The certification applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
 """
 type CertifyBad {
   id: ID!
@@ -2188,10 +2186,15 @@ type CertifyBad {
 }
 
 """
-CertifyBadSpec allows filtering the list of CertifyBad to return.
-Note: Package, Source or artifact must be specified but not at the same time
-For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-For source - a SourceName must be specified (name, tag or commit)
+CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
 """
 input CertifyBadSpec {
   id: ID
@@ -2202,9 +2205,8 @@ input CertifyBadSpec {
 }
 
 """
-CertifyBadInputSpec is the same as CertifyBad but for mutation input.
-
-All fields are required.
+CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
+evidence.
 """
 input CertifyBadInputSpec {
   justification: String!
@@ -2214,7 +2216,7 @@ input CertifyBadInputSpec {
 
 """
 PkgMatchType is an enum to determine if the attestation should be done at the
-specific version or package name
+specific version or package name.
 """
 enum PkgMatchType {
   ALL_VERSIONS
@@ -2227,12 +2229,12 @@ input MatchFlags {
 }
 
 extend type Query {
-  "Returns all CertifyBad"
+  "Returns all CertifyBad attestations matching a filter."
   CertifyBad(certifyBadSpec: CertifyBadSpec): [CertifyBad!]!
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered bad"
+  "Adds a certification that a package, source or artifact is considered bad."
   ingestCertifyBad(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyBad: CertifyBadInputSpec!): CertifyBad!
 }
 `, BuiltIn: false},
@@ -2253,19 +2255,20 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CertifyGood. It contains the subject (which
-#  can be either a package, source or artifact), justification, origin of the
-#  attestation, and collector
+# Defines a GraphQL schema for the CertifyGood
 
 """
-CertifyGood is an attestation represents when a package, source or artifact is considered good
+CertifyGood is an attestation that a package, source, or artifact is considered
+good.
 
-subject - union type that can be either a package, source or artifact object type
-justification (property) - string value representing why the subject is considered good
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
+All evidence trees record a justification for the property they represent as
+well as the document that contains the attestation (origin) and the collector
+that collected the document (collector).
 
-Note: Attestation must occur at the PackageName or the PackageVersion or at the SourceName.
+The certification applies to a subject which is a package, source, or artifact.
+If the attestation targets a package, it must target a PackageName or a
+PackageVersion. If the attestation targets a source, it must target a
+SourceName.
 """
 type CertifyGood {
   id: ID!
@@ -2276,10 +2279,15 @@ type CertifyGood {
 }
 
 """
-CertifyGoodSpec allows filtering the list of CertifyGood to return.
-Note: Package, Source or artifact must be specified but not at the same time
-For package - a PackageName or PackageVersion must be specified (name or name, version, qualifiers and subpath)
-For source - a SourceName must be specified (name, tag or commit)
+CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+query.
+
+If a package is specified in the subject filter, then it must be specified up
+to PackageName or PackageVersion. That is, user must specify package name, or
+name and one of version, qualifiers, or subpath.
+
+If a source is specified in the subject filter, then it must specify a name,
+and optionally a tag and a commit.
 """
 input CertifyGoodSpec {
   id: ID
@@ -2290,9 +2298,7 @@ input CertifyGoodSpec {
 }
 
 """
-CertifyGoodInputSpec is the same as CertifyGood but for mutation input.
-
-All fields are required.
+CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 """
 input CertifyGoodInputSpec {
   justification: String!
@@ -2301,12 +2307,12 @@ input CertifyGoodInputSpec {
 }
 
 extend type Query {
-  "Returns all CertifyGood"
+  "Returns all CertifyGood attestations matching a filter."
   CertifyGood(certifyGoodSpec: CertifyGoodSpec): [CertifyGood!]!
 }
 
 extend type Mutation {
-  "Adds a certification that a package, source or artifact is considered good"
+  "Adds a certification that a package, source or artifact is considered good."
   ingestCertifyGood(subject: PackageSourceOrArtifactInput!, pkgMatchType: MatchFlags, certifyGood: CertifyGoodInputSpec!): CertifyGood!
 }
 `, BuiltIn: false},
@@ -2327,7 +2333,7 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema to certify Scorecard for a source repository.
+# Defines a GraphQL schema to certify Scorecard for a source repository
 
 """
 Define the Time scalar, to be used across GUAC. It follows RFC3339Nano format.
@@ -2339,7 +2345,7 @@ For GUAC, we assume that all times are stored in UTC format.
 scalar Time
 
 """
-CertifyScorecard is an attestation which represents the scorecard of a
+CertifyScorecard is an attestation to attach a Scorecard analysis to a
 particular source repository.
 """
 type CertifyScorecard {
@@ -2395,7 +2401,7 @@ type ScorecardCheck {
   score: Int!
 }
 
-"CertifyScorecardSpec allows filtering the list of CertifyScorecard to return."
+"CertifyScorecardSpec allows filtering the list of Scorecards to return."
 input CertifyScorecardSpec {
   id: ID
   source: SourceSpec
@@ -2414,11 +2420,7 @@ input ScorecardCheckSpec {
   score: Int!
 }
 
-"""
-ScorecardInputSpec is the same as Scorecard but for mutation input.
-
-All fields are required.
-"""
+"ScorecardInputSpec represents the mutation input to ingest a Scorecard."
 input ScorecardInputSpec {
   checks: [ScorecardCheckInputSpec!]!
   aggregateScore: Float!
@@ -2429,21 +2431,19 @@ input ScorecardInputSpec {
   collector: String!
 }
 
-"""
-ScorecardCheckInputSpec is the same as ScorecardCheck, but for mutation input.
-"""
+"ScorecardCheckInputSpec represents the mutation input for a Scorecard check."
 input ScorecardCheckInputSpec {
   check: String!
   score: Int!
 }
 
 extend type Query {
-  "Returns all Scorecard certifications matching the filter"
+  "Returns all Scorecard certifications matching the filter."
   scorecards(scorecardSpec: CertifyScorecardSpec): [CertifyScorecard!]!
 }
 
 extend type Mutation {
-  "Certifies the Scorecard scanning of a source repository"
+  "Adds a certification that a source repository has a Scorecard."
   certifyScorecard(source: SourceInputSpec!, scorecard: ScorecardInputSpec!): CertifyScorecard!
 }
 `, BuiltIn: false},
@@ -2464,7 +2464,7 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for certifying VEX statements.
+# Defines a GraphQL schema for certifying VEX statements
 
 "PackageOrArtifact is a union of Package and Artifact."
 union PackageOrArtifact = Package | Artifact
@@ -2491,6 +2491,7 @@ input PackageOrArtifactInput {
   artifact: ArtifactInputSpec
 }
 
+"Records the status of a VEX statement subject."
 enum VexStatus {
   NOT_AFFECTED
   AFFECTED
@@ -2498,6 +2499,7 @@ enum VexStatus {
   UNDER_INVESTIGATION
 }
 
+"Records the justification included in the VEX statement."
 enum VexJustification {
   COMPONENT_NOT_PRESENT
   VULNERABLE_CODE_NOT_PRESENT
@@ -2508,8 +2510,8 @@ enum VexJustification {
 }
 
 """
-CertifyVEXStatement is an attestation that represents when a package or
-artifact has a VEX about a specific vulnerability (CVE, GHSA or OSV).
+CertifyVEXStatement is an attestation to attach VEX statements to a package or
+artifact to clarify the impact of a specific vulnerability (CVE, GHSA or OSV).
 """
 type CertifyVEXStatement {
   id: ID!
@@ -2517,11 +2519,11 @@ type CertifyVEXStatement {
   subject: PackageOrArtifact!
   "Attested vulnerability"
   vulnerability: Vulnerability!
-  "status of the vulnerabilities with respect to the products and components listed in the statement"
+  "Status of the vulnerabilities with respect to the subject"
   status: VexStatus!
-  "Justification for VEX"
+  "Justification from VEX statement"
   vexJustification: VexJustification!
-  "impact_statement or action_statement depending on the status filed"
+  "VEX statement: impact_statement or action_statement depending on status"
   statement: String!
   "statusNotes may convey information about how status was determined"
   statusNotes: String!
@@ -2534,13 +2536,13 @@ type CertifyVEXStatement {
 }
 
 """
-CertifyVEXStatementSpec allows filtering the list of CertifyVEXStatement to
-return.
+CertifyVEXStatementSpec allows filtering the list of VEX statements to
+return in a query.
 
 Only one subject type (package or artifact) and one vulnerability type (CVE,
 GHSA or OSV) may be specified.
 
-Note that setting ` + "`" + `noVuln` + "`" + ` in VulnerabilitySpec is invalid for VEX statements!
+Note that setting noVuln in VulnerabilitySpec is invalid for VEX statements!
 """
 input CertifyVEXStatementSpec {
   id: ID
@@ -2555,11 +2557,7 @@ input CertifyVEXStatementSpec {
   collector: String
 }
 
-"""
-VexStatementInputSpec is the same as CertifyVEXStatement but for mutation input.
-
-All fields are required.
-"""
+"VexStatementInputSpec represents the input to ingest VEX statements."
 input VexStatementInputSpec {
   status: VexStatus!
   vexJustification: VexJustification!
@@ -2571,16 +2569,12 @@ input VexStatementInputSpec {
 }
 
 extend type Query {
-  "Returns all CertifyVEXStatement."
+  "Returns all VEX certifications matching the input filter."
   CertifyVEXStatement(certifyVEXStatementSpec: CertifyVEXStatementSpec): [CertifyVEXStatement!]!
 }
 
 extend type Mutation {
-  """
-  Certify that a package or an artifact has an associated VEX for a vulnerability.
-
-  Note that setting ` + "`" + `noVuln` + "`" + ` in VulnerabilityInput is invalid for VEX statements!
-  """
+  "Adds a VEX certification for a package."
   ingestVEXStatement(subject: PackageOrArtifactInput!, vulnerability: VulnerabilityInput!, vexStatement: VexStatementInputSpec!): CertifyVEXStatement!
 }
 `, BuiltIn: false},
@@ -2601,15 +2595,13 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the vulnerability certifications.
+# Defines a GraphQL schema for the vulnerability certifications
 
 """
 NoVuln is a special vulnerability node to attest that no vulnerability has been
 found during a vulnerability scan.
 
 Backends guarantee that this is a singleton node.
-
-We define an ID field due to GraphQL restrictions.
 """
 type NoVuln {
   id: ID!
@@ -2622,8 +2614,8 @@ union Vulnerability = OSV | CVE | GHSA | NoVuln
 VulnerabilitySpec allows using Vulnerability union as input type to be used in
 read queries.
 
-Either ` + "`" + `noVuln` + "`" + ` must be set to true or exactly one of ` + "`" + `osv` + "`" + `, ` + "`" + `cve` + "`" + ` or ` + "`" + `ghsa` + "`" + `
-must be set to non-nil. Setting ` + "`" + `noVuln` + "`" + ` to true means retrieving nodes where
+Either noVuln must be set to true or exactly one of osv, cve or ghsa
+must be set to non-nil. Setting noVuln to true means retrieving nodes where
 there is no vulnerability attached (thus, the special NoVuln node). Setting one
 of the other fields means retrieving certifications for the corresponding
 vulnerability types.
@@ -2639,8 +2631,8 @@ input VulnerabilitySpec {
 VulnerabilityInput allows using Vulnerability union as
 input type to be used in mutations.
 
-Either ` + "`" + `noVuln` + "`" + ` must be set to true or one of ` + "`" + `osv` + "`" + `, ` + "`" + `cve` + "`" + `, or ` + "`" + `ghsa` + "`" + ` must be
-set to non-nil. If ` + "`" + `noVuln` + "`" + ` is set then this is an ingestion of a known lack of
+Either noVuln must be set to true or one of osv, cve, or ghsa must be
+set to non-nil. If noVuln is set then this is an ingestion of a known lack of
 vulnerabilities, so the special NoVuln node will be used by the backend.
 Otherwise, the specific vulnerability type will be linked to this attestation.
 """
@@ -2652,9 +2644,10 @@ input VulnerabilityInput {
 }
 
 """
-CertifyVuln is an attestation that represents when a package has a
-vulnerability (OSV, CVE, or GHSA) or the special NoVuln value to attest that at
-the time of scanning no vulnerability was found.
+CertifyVuln is an attestation to attach vulnerability information to a package.
+
+This information is obtained via a scanner. If there is no vulnerability
+detected (no OSV, CVE, or GHSA), we attach the special NoVuln node.
 """
 type CertifyVuln {
   id: ID!
@@ -2689,12 +2682,14 @@ type VulnerabilityMetaData {
 }
 
 """
-CertifyVulnSpec allows filtering the list of CertifyVuln to return.
+CertifyVulnSpec allows filtering the list of vulnerability certifications to
+return in a query.
 
 Specifying just the package allows to query for all vulnerabilities associated
 with the package.
 
-Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be specified.
+Only one vulnerability type (OSV, CVE, GHSA, or special NoVuln) may be
+specified.
 """
 input CertifyVulnSpec {
   id: ID
@@ -2710,9 +2705,8 @@ input CertifyVulnSpec {
 }
 
 """
-VulnerabilityInputSpec is the same as VulnerabilityMetaData but for mutation input.
-
-All fields are required.
+VulnerabilityMetaDataInput represents the input for certifying vulnerability
+scans in mutations.
 """
 input VulnerabilityMetaDataInput {
   timeScanned: Time!
@@ -2730,7 +2724,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Certify that a package is vulnerable to a vulnerability (OSV, CVE or GHSA) or no vulnerability has been detected."
+  "Adds a certification that a package has been scanned for vulnerabilities."
   ingestVulnerability(pkg: PkgInputSpec!, vulnerability: VulnerabilityInput!, certifyVuln: VulnerabilityMetaDataInput!): CertifyVuln!
 }
 `, BuiltIn: false},
@@ -2751,15 +2745,17 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CVE trie/tree. It contains the year
-# along with the ID associated with vulnerability (CVE ID).
+# Defines a GraphQL schema for a vulnerability in CVE schema
 
 """
-CVE represents common vulnerabilities and exposures. It contains the year along
-with the CVE ID.
+CVE represents a vulnerability in the Common Vulnerabilities and Exposures
+schema.
 
-The ` + "`" + `year` + "`" + ` is mandatory.
-The ` + "`" + `cveId` + "`" + ` field is mandatory and canonicalized to be lowercase.
+The vulnerability identifier contains a year field, so we are extracting that
+to allow matching for vulnerabilities found in a given year.
+
+The vulnerability identifier field is mandatory and canonicalized to be
+lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -2769,30 +2765,26 @@ type CVE {
   cveId: String!
 }
 
-"""
-CVESpec allows filtering the list of cves to return.
-"""
+"CVESpec allows filtering the list of advisories to return in a query."
 input CVESpec {
   id: ID
   year: Int
   cveId: String
 }
 
-"""
-CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
-"""
+"CVEInputSpec specifies a CVE vulnerability for mutations."
 input CVEInputSpec {
   year: Int!
   cveId: String!
 }
 
 extend type Query {
-  "Returns all CVEs"
+  "Returns all CVEs matching a filter."
   cve(cveSpec: CVESpec): [CVE!]!
 }
 
 extend type Mutation {
-  "Ingest a new CVE. Returns the ingested object"
+  "Ingests new CVE and returns it."
   ingestCVE(cve: CVEInputSpec): CVE!
 }
 `, BuiltIn: false},
@@ -2813,14 +2805,10 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the GitHub Security Advisory (GSHA) trie/tree.
-# It contains the ID associated with a vulnerability in the GitHub numbering
-# schema (GHSA ID).
-
 """
 GHSA represents GitHub security advisories.
 
-The ` + "`" + `id` + "`" + ` field is mandatory and canonicalized to be lowercase.
+The advisory id field is mandatory and canonicalized to be lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -2829,30 +2817,24 @@ type GHSA {
   ghsaId: String!
 }
 
-"""
-GHSASpec allows filtering the list of GHSA to return.
-
-The argument will be canonicalized to lowercase.
-"""
+"GHSASpec allows filtering the list of advisories to return in a query."
 input GHSASpec {
   id: ID
   ghsaId: String
 }
 
-"""
-GHSAInputSpec is the same as GHSASpec, but used for mutation ingestion.
-"""
+"GHSAInputSpec specifies a GitHub Security Advisory for mutations."
 input GHSAInputSpec {
   ghsaId: String!
 }
 
 extend type Query {
-  "Returns all GHSA nodes"
+  "Returns all GitHub Security Advisories matching a filter."
   ghsa(ghsaSpec: GHSASpec): [GHSA!]!
 }
 
 extend type Mutation {
-  "Ingest a new GHSA. Returns the ingested object"
+  "Ingests a new GitHub Security Advisory and returns it."
   ingestGHSA(ghsa: GHSAInputSpec): GHSA!
 }
 `, BuiltIn: false},
@@ -2873,47 +2855,41 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSBOM. It contains the subject (which can be either a package or source), uri, origin and collector.
-"""
-HasSBOM is an attestation represents that a package object or source object has an SBOM associated with a uri
+# Defines a GraphQL schema for recording presence of SBOMs
 
-subject - union type that can be either a package or source object type
-uri (property) - identifier string for the SBOM
-algorithm - cryptographic algorithm of the digest
-digest - hash of the SBOM 
-downloadLocation - the download location of the SBOM
-annotations - this field may be used to provide additional information or metadata about SBOM. Such as SBOM scorecard information
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-
-Note: Only package object or source object can be defined. Not both.
-"""
 type HasSBOM {
   id: ID!
+  "SBOM subject"
   subject: PackageOrSource!
+  "Identifier for the SBOM document"
   uri: String!
+  "Algorithm by which SBOMs digest was computed"
   algorithm: String!
+  "Digest of SBOM"
   digest: String!
+  "Location from which the SBOM can be downloaded"
   downloadLocation: String!
+  "SBOM annotations (e.g., SBOM Scorecard information)"
   annotations: [Annotation!]!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
-
 """
-Annotation are key-value pairs to provide additional information or metadata about SBOM
+Annotation is a key-value pair to provide additional information or metadata
+about an SBOM.
 """
 type Annotation {
   key: String!
   value: String!
 }
 
-
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
-Only the package or source can be added, not both
+Only the package or source can be added, not both.
 """
 input HasSBOMSpec {
   id: ID
@@ -2927,19 +2903,13 @@ input HasSBOMSpec {
   collector: String
 }
 
-"""
-AnnotationSpec is the same as Annotations, but usable as query input.
-"""
+"AnnotationSpec allows creating query filters for Annotation objects."
 input AnnotationSpec {
   key: String!
   value: String!
 }
 
-"""
-HasSBOMInputSpec is the same as HasSBOM but for mutation input.
-
-All fields are required.
-"""
+"HasSBOMInputSpec is the same as HasSBOM but for mutation input."
 input HasSBOMInputSpec {
   uri: String!
   algorithm: String!
@@ -2950,21 +2920,19 @@ input HasSBOMInputSpec {
   collector: String!
 }
 
-"""
-AnnotationsSpec is the same as Annotations, but usable as mutation input.
-"""
+"AnnotationInputSpec allows ingesting Annotation objects."
 input AnnotationInputSpec {
   key: String!
   value: String!
 }
 
 extend type Query {
-  "Returns all HasSBOM"
+  "Returns all SBOM certifications."
   HasSBOM(hasSBOMSpec: HasSBOMSpec): [HasSBOM!]!
 }
 
 extend type Mutation {
-  "Certifies that a package or a source has SBOM at the URI"
+  "Certifies that a package or a source has an SBOM."
   ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
 }
 `, BuiltIn: false},
@@ -2985,14 +2953,14 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for specifiying SLSA provenance.
+# Defines a GraphQL schema for specifiying SLSA provenance
 
 "HasSLSA records that a subject node has a SLSA attestation."
 type HasSLSA {
   id: ID!
-  "The subject of SLSA attestation: package, source, or artifact."
+  "The subject of SLSA attestation"
   subject: Artifact!
-  "The SLSA attestation."
+  "The SLSA attestation"
   slsa: SLSA!
 }
 
@@ -3007,7 +2975,7 @@ We also include fields to specify under what conditions the check was performed
 included into GUAC (origin document and the collector for that document).
 """
 type SLSA {
-  "Sources of the build resulting in subject (materials)"
+  "Materials of the build resulting in subject"
   builtFrom: [Artifact!]!
   "Builder performing the build"
   builtBy: Builder!
@@ -3053,8 +3021,6 @@ value = "https://github.com/octocat/hello-world"
 ` + "`" + `` + "`" + `` + "`" + `
 
 This node cannot be directly referred by other parts of GUAC.
-
-TODO(mihaimaruseac): Can we define these directly?
 """
 type SLSAPredicate {
   key: String!
@@ -3082,11 +3048,7 @@ input SLSAPredicateSpec {
   value: String!
 }
 
-"""
-SLSAInputSpec is the same as SLSA but for mutation input.
-
-All fields are required.
-"""
+"SLSAInputSpec is the same as SLSA but for mutation input."
 input SLSAInputSpec {
   buildType: String!
   slsaPredicate: [SLSAPredicateInputSpec!]!
@@ -3097,37 +3059,22 @@ input SLSAInputSpec {
   collector: String!
 }
 
-"""
-SLSAPredicateInputSpec is the same as SLSAPredicateSpec, but for mutation
-input.
-"""
+"SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec."
 input SLSAPredicateInputSpec {
   key: String!
   value: String!
 }
 
 extend type Query {
-  "Returns all SLSA attestations matching the filter"
+  "Returns all SLSA attestations matching the filter."
   HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
 }
 
 extend type Mutation {
-  """
-  Ingests a SLSA attestation.
-
-  Note that materials and builder are extracted as separate arguments. This is
-  because this ingestion method assumes that the subject and the materials are
-  already ingested and only creates the SLSA node.
-  """
+  "Ingests a SLSA attestation."
   ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
 
-  """
-  Ingests a set of packages, sources, and artifacts.
-
-  This is a helper mutation for ingesting SLSA nodes. It should be more
-  efficient to call this method to ingest a set materials instead of ingesting
-  them one by one.
-  """
+  "Helper mutation to ingest multiple artifacts as materials for SLSA."
   ingestMaterials(materials: [ArtifactInputSpec!]!): [Artifact!]!
 }
 `, BuiltIn: false},
@@ -3148,30 +3095,26 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HasSourceAt. It contains the package object, source object, since (timestamp), justification, origin and collector.
-"""
-HasSourceAt is an attestation represents that a package object has a source object since a timestamp
+# Defines a GraphQL schema for the linking packages and sources
 
-package (subject) - the package object type that represents the package
-source (object) - the source object type that represents the source
-knownSince (property) - timestamp when this was last checked (exact time)
-justification (property) - string value representing why the package has a source specified
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"HasSourceAt records that a package's repository is a given source."
 type HasSourceAt {
   id: ID!
+  "The subject of the attestation: can be a PackageName or a PackageVersion"
   package: Package!
+  "Source repository from which the package is built"
   source: Source!
+  "Timestamp since this link between package and source was certified"
   knownSince: Time!
+  "Justification for the attested relationship"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
-"""
-HasSourceAtSpec allows filtering the list of HasSourceAt to return.
-"""
+"HasSourceAtSpec allows filtering the list of HasSourceAt to return."
 input HasSourceAtSpec {
   id: ID
   package: PkgSpec
@@ -3182,11 +3125,7 @@ input HasSourceAtSpec {
   collector: String
 }
 
-"""
-HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
-
-All fields are required.
-"""
+"HasSourceAtInputSpec is the same as HasSourceAt but for mutation input."
 input HasSourceAtInputSpec {
   knownSince: Time!
   justification: String!
@@ -3194,14 +3133,13 @@ input HasSourceAtInputSpec {
   collector: String!
 }
 
-
 extend type Query {
-  "Returns all HasSourceAt"
+  "Returns all source mappings that match the filter."
   HasSourceAt(hasSourceAtSpec: HasSourceAtSpec): [HasSourceAt!]!
 }
 
 extend type Mutation {
-  "Adds a certification that a package (either at the version level or package name level) is associated with the source"
+  "Adds a certification that a package (PackageName or PackageVersion) is built from the source."
   ingestHasSourceAt(pkg: PkgInputSpec!, pkgMatchType: MatchFlags!, source: SourceInputSpec!, hasSourceAt: HasSourceAtInputSpec!): HasSourceAt!
 }
 `, BuiltIn: false},
@@ -3222,27 +3160,27 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the HashEqual. It contains the justification, artifacts, origin and collector.
-"""
-HashEqual is an attestation that represents when two artifact hash are similar based on a justification.
+# Defines a GraphQL schema for the artifact equality
 
-artifacts (subject) - the artifacts (represented by algorithm and digest) that are equal
-justification (property) - string value representing why the artifacts are the equal
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"HashEqual is an attestation that a set of artifacts are identical."
 type HashEqual {
   id: ID!
+  "Collection of artifacts that are similar"
   artifacts: [Artifact!]!
+  "Justification for the claim that the artifacts are similar"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-HashEqualSpec allows filtering the list of HashEqual to return.
+HashEqualSpec allows filtering the list of artifact equality statements to
+return in a query.
 
-Specifying just the artifacts allows to query for all equivalent artifacts (if they exist)
+Specifying just one artifact allows to query for all similar artifacts (if any
+exists).
 """
 input HashEqualSpec {
   id: ID
@@ -3253,11 +3191,7 @@ input HashEqualSpec {
 }
 
 
-"""
-HashEqualInputSpec is the same as HashEqual but for mutation input.
-
-All fields are required.
-"""
+"HashEqualInputSpec represents the input to certify that packages are similar."
 input HashEqualInputSpec {
   justification: String!
   origin: String!
@@ -3266,13 +3200,13 @@ input HashEqualInputSpec {
 
 
 extend type Query {
-  "Returns all HashEqual"
+  "Returns all artifact equality statements matching a filter."
   HashEqual(hashEqualSpec: HashEqualSpec): [HashEqual!]!
 }
 
 extend type Mutation {
-  "certify that two artifacts are the same (hashes are equal)"
-  ingestHashEqual(artifact: ArtifactInputSpec!, equalArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
+  "Adds a certification that two artifacts are similar."
+  ingestHashEqual(artifact: ArtifactInputSpec!, otherArtifact: ArtifactInputSpec!, hashEqual: HashEqualInputSpec!): HashEqual!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isDependency.graphql", Input: `#
@@ -3292,48 +3226,44 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the IsDependency. It contains the package object, dependent package object
-# version range of the dependent package that it applies to, justification, origin and collector.
+# Defines a GraphQL schema for specifying dependencies
 
-"""
-DependencyType determines the type of the IsDependency.
-Direct - direct dependency of the IsDependency Package
-Indirect - transitive dependency of the IsDependency Package
-Unknown - type of the dependency not known
-"""
+"DependencyType determines the type of the dependency."
 enum DependencyType {
+  "direct dependency"
   DIRECT
+  "indirect dependency"
   INDIRECT
+  "type not known/not specified"
   UNKNOWN
 }
 
-"""
-IsDependency is an attestation that represents when a package is dependent on another package
-
-package (subject) - the package object type that represents the package
-dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
-versionRange (property) - string value for version range that applies to the dependent package
-dependencyType - enum that represents the dependency as either direct, indirect or unknown
-justification (property) - string value representing why the artifacts are the equal
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"IsDependency is an attestation to record that a package depends on another."
 type IsDependency {
   id: ID!
+  "Package that has the dependency"
   package: Package!
+  "Package for the dependency; MUST BE PackageName, not PackageVersion"
   dependentPackage: Package!
+  "Version range for the dependency link"
   versionRange: String!
+  "Type of dependency"
   dependencyType: DependencyType!
+  "Justification for the attested relationship"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-IsDependencySpec allows filtering the list of IsDependency to return.
+IsDependencySpec allows filtering the list of dependencies to return.
 
-Note: the package object must be defined to return its dependent packages.
-Dependent Packages must represent the packageName (cannot be the packageVersion)
+To obtain the list of dependency packages, caller must fill in the package
+field.
+
+Dependent packages must be defined at PackageName, not PackageVersion.
 """
 input IsDependencySpec {
   id: ID
@@ -3347,9 +3277,12 @@ input IsDependencySpec {
 }
 
 """
-PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
-as the IsDependency attestation should only be allowed to be made to the packageName node and not the
-packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
+PkgNameSpec is used to query for dependent packages.
+
+This is different from PkgSpec as the IsDependency attestation should only be
+allowed to be made to the packageName node and not the packageVersion node.
+Versions will be handled by the version_range in the IsDependency attestation
+node.
 """
 input PkgNameSpec {
   id: ID
@@ -3358,11 +3291,7 @@ input PkgNameSpec {
   name: String
 }
 
-"""
-IsDependencyInputSpec is the same as IsDependency but for mutation input.
-
-All fields are required.
-"""
+"IsDependencyInputSpec is the input to record a new dependency."
 input IsDependencyInputSpec {
   versionRange: String!
   dependencyType: DependencyType!
@@ -3372,12 +3301,12 @@ input IsDependencyInputSpec {
 }
 
 extend type Query {
-  "Returns all IsDependency"
+  "Returns all package dependencies that match the filter."
   IsDependency(isDependencySpec: IsDependencySpec): [IsDependency!]!
 }
 
 extend type Mutation {
-  "Adds dependency between two packages"
+  "Adds a dependency between two packages"
   ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
 }
 `, BuiltIn: false},
@@ -3398,40 +3327,53 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the IsOccurrence. It contains the subject (which can be either a package or source),
-#  occurrenceArtifact, justification,  origin of the attestation, and collector
+# Defines a GraphQL schema for occurence certifications
 
-"""
-PackageOrSource is a union of Package and Source. Any of these objects can be specified
-"""
+"PackageOrSource is a union of Package and Source."
 union PackageOrSource = Package | Source
 
 """
-IsOccurrence is an attestation represents when either a package or source is represented by an artifact
+PackageOrSourceSpec allows using PackageOrSource union as input for queries.
 
-Note: Package or Source must be specified but not both at the same time.
+Exactly one field must be specified.
+"""
+input PackageOrSourceSpec {
+  package: PkgSpec
+  source: SourceSpec
+}
+
+"""
+PackageOrSourceInput allows using PackageOrSource union as input for mutations.
+
+Exactly one field must be specified.
+"""
+input PackageOrSourceInput {
+  package: PkgInputSpec
+  source: SourceInputSpec
+}
+
+"""
+IsOccurrence is an attestation to link an artifact to a package or source.
+
 Attestation must occur at the PackageVersion or at the SourceName.
 """
 type IsOccurrence {
   id: ID!
-  "subject - union type that can be either a package or source object type"
+  "Package or source from which the artifact originates"
   subject: PackageOrSource!
-  "artifact (object) - artifact that represent the the package or source"
+  "The artifact in the relationship"
   artifact: Artifact!
-  "justification (property) - string value representing why the package or source is represented by the specified artifact"
+  "Justification for the attested relationship"
   justification: String!
-  "origin (property) - where this attestation was generated from (based on which document)"
+  "Document from which this attestation is generated from"
   origin: String!
-  "collector (property) - the GUAC collector that collected the document that generated this attestation"
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-IsOccurrenceSpec allows filtering the list of IsOccurrence to return.
-Note: Package or Source must be specified but not both at the same time
-For package - PackageVersion must be specified (version, qualifiers and subpath)
-or it defaults to empty string for version, subpath and empty list for qualifiers
-For source - a SourceName must be specified (name, tag or commit)
+IsOccurrenceSpec allows filtering the list of artifact occurences to return in
+a query.
 """
 input IsOccurrenceSpec {
   id: ID
@@ -3442,32 +3384,7 @@ input IsOccurrenceSpec {
   collector: String
 }
 
-"""
-PackageOrSourceSpec allows using PackageOrSource union as
-input type to be used in read queries.
-Exactly one of the value must be set to non-nil.
-"""
-input PackageOrSourceSpec {
-  package: PkgSpec
-  source: SourceSpec
-}
-
-"""
-PackageOrSourceInput allows using PackageOrSource union as
-input type to be used in mutations.
-Exactly one of the value must be set to non-nil.
-"""
-input PackageOrSourceInput {
-  package: PkgInputSpec
-  source: SourceInputSpec
-}
-
-
-"""
-IsOccurrenceInputSpec is the same as IsOccurrence but for mutation input.
-
-All fields are required.
-"""
+"IsOccurrenceInputSpec represents the input to record an artifact's origin."
 input IsOccurrenceInputSpec {
   justification: String!
   origin: String!
@@ -3475,12 +3392,12 @@ input IsOccurrenceInputSpec {
 }
 
 extend type Query {
-  "Returns all IsOccurrence"
+  "Returns all artifacts-source/package mappings that match a filter."
   IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec): [IsOccurrence!]!
 }
 
 extend type Mutation {
-  "Adds an artifact as an occurrence for either a package or a source"
+  "Ingest that an artifact is produced from a package or source."
   ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
 }
 `, BuiltIn: false},
@@ -3501,17 +3418,15 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the IsVulnerability. It contains a OSV, vulnerability that can be of type
-# cve or ghsa, justification, origin and collector
-"""
-CveOrGhsa is a union of CVE and GHSA.
-"""
+# Defines a GraphQL schema to link CVE/GHSA to the OSV data
+
+"CveOrGhsa is a union of CVE and GHSA."
 union CveOrGhsa = CVE | GHSA
 
 """
-CveOrGhsaSpec allows using CveOrGhsa union as
-input type to be used in read queries.
-Exactly one of the value must be set to non-nil.
+CveOrGhsaSpec allows using CveOrGhsa union as input type for queries.
+
+Exactly one field must be specified.
 """
 input CveOrGhsaSpec {
   cve: CVESpec
@@ -3519,26 +3434,33 @@ input CveOrGhsaSpec {
 }
 
 """
-IsVulnerability is an attestation that represents when an OSV ID represents a CVE or GHSA
+CveOrGhsaInput allows using CveOrGhsa union as input type for mutations.
 
-osv (subject) - the osv object type that represents OSV and its ID
-vulnerability (object) - union type that consists of cve or ghsa
-justification (property) - the reason why the osv ID represents the cve or ghsa
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
+Exactly one field must be specified.
 """
+input CveOrGhsaInput {
+  cve: CVEInputSpec
+  ghsa: GHSAInputSpec
+}
+
+"IsVulnerability is an attestation to link CVE/GHSA with data in OSV."
 type IsVulnerability {
   id: ID!
+  "The OSV that encapsulates the vulnerability"
   osv: OSV!
+  "The upstream vulnerability information"
   vulnerability: CveOrGhsa!
+  "Justification for the attested relationship"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-IsVulnerabilitySpec allows filtering the list of IsVulnerability to return.
-Only CVE or GHSA can be specified at once.
+IsVulnerabilitySpec allows filtering the list of vulnerability links to return
+in a query.
 """
 input IsVulnerabilitySpec {
   id: ID
@@ -3549,35 +3471,20 @@ input IsVulnerabilitySpec {
   collector: String
 }
 
-"""
-IsVulnerabilityInputSpec is the same as IsVulnerability but for mutation input.
-
-All fields are required.
-"""
+"IsVulnerabilityInputSpec represents the input to link CVE/GHSA with OSV data."
 input IsVulnerabilityInputSpec {
   justification: String!
   origin: String!
   collector: String!
 }
 
-"""
-CveOrGhsaInput allows using CveOrGhsa union as
-input type to be used in mutations.
-Exactly one of the value must be set to non-nil.
-"""
-input CveOrGhsaInput {
-  cve: CVEInputSpec
-  ghsa: GHSAInputSpec
-}
-
-
 extend type Query {
-  "Returns all IsVulnerability"
+  "Returns all OSV-CVE/GHSA vulnerability mappings that match a filter."
   IsVulnerability(isVulnerabilitySpec: IsVulnerabilitySpec): [IsVulnerability!]!
 }
 
 extend type Mutation {
-  "certify that a OSV is associated with either a CVE or GHSA"
+  "Ingest a mapping between an OSV entry and a CVE/GHSA vulnerability."
   ingestIsVulnerability(osv: OSVInputSpec!, vulnerability: CveOrGhsaInput!, isVulnerability: IsVulnerabilityInputSpec!): IsVulnerability!
 }
 `, BuiltIn: false},
@@ -3598,13 +3505,12 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the OSV trie/tree. It contains the OSV ID
-# associated with the vulnerability.
+# Defines a GraphQL schema for a vulnerability in OSV schema
 
 """
 OSV represents an Open Source Vulnerability.
 
-The ` + "`" + `osvId` + "`" + ` field is mandatory and canonicalized to be lowercase.
+The osvId field is mandatory and canonicalized to be lowercase.
 
 This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
 CVE ID).
@@ -3616,28 +3522,24 @@ type OSV {
   osvId: String!
 }
 
-"""
-OSVSpec allows filtering the list of OSV to return.
-"""
+"OSVSpec allows filtering the list of advisories to return in a query."
 input OSVSpec {
   id: ID
   osvId: String
 }
 
-"""
-OSVInputSpec is the same as OSVSpec, but used for mutation ingestion.
-"""
+"OSVInputSpec specifies a OSV vulnerability for mutations."
 input OSVInputSpec {
   osvId: String!
 }
 
 extend type Query {
-  "Returns all OSV"
+  "Returns all OSV vulnerabilities matching a filter."
   osv(osvSpec: OSVSpec): [OSV!]!
 }
 
 extend type Mutation {
-  "Ingest a new OSV. Returns the ingested object"
+  "Ingests a new OSV vulnerability and returns it."
   ingestOSV(osv: OSVInputSpec): OSV!
 }
 `, BuiltIn: false},
@@ -3658,25 +3560,23 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the package trie/tree. This tree closely matches
-# the pURL specification (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst)
-# but deviates from it where GUAC rules state otherwise. In principle, we want
-# this to represent a trie for packages, so information that represents a
-# smaller collection of packages is being pushed downwards in the trie.
+# Defines a GraphQL schema for the package trie/tree
 
 """
-Package represents a package.
+Package represents the root of the package trie/tree.
 
-In the pURL representation, each Package matches a ` + "`" + `pkg:<type>` + "`" + ` partial pURL.
-The ` + "`" + `type` + "`" + ` field matches the pURL types but we might also use ` + "`" + `"guac"` + "`" + ` for the
-cases where the pURL representation is not complete or when we have custom
-rules.
+We map package information to a trie, closely matching the pURL specification
+(https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+but deviating from it where GUAC heuristics allow for better representation of
+package information. Each path in the trie fully represents a package; we split
+the trie based on the pURL components.
 
-This node is a singleton: backends guarantee that there is exactly one node
-with the same ` + "`" + `type` + "`" + ` value.
+This node matches a pkg:<type> partial pURL. The type field matches the
+pURL types but we might also use "guac" for the cases where the pURL
+representation is not complete or when we have custom rules.
 
-Also note that this is named ` + "`" + `Package` + "`" + `, not ` + "`" + `PackageType` + "`" + `. This is only to make
-queries more readable.
+Since this node is at the root of the package trie, it is named Package, not
+PackageType.
 """
 type Package {
   id: ID!
@@ -3688,7 +3588,7 @@ type Package {
 PackageNamespace is a namespace for packages.
 
 In the pURL representation, each PackageNamespace matches the
-` + "`" + `pkg:<type>/<namespace>/` + "`" + ` partial pURL.
+pkg:<type>/<namespace>/ partial pURL.
 
 Namespaces are optional and type specific. Because they are optional, we use
 empty string to denote missing namespaces.
@@ -3703,7 +3603,7 @@ type PackageNamespace {
 PackageName is a name for packages.
 
 In the pURL representation, each PackageName matches the
-` + "`" + `pkg:<type>/<namespace>/<name>` + "`" + ` pURL.
+pkg:<type>/<namespace>/<name> pURL.
 
 Names are always mandatory.
 
@@ -3720,10 +3620,12 @@ type PackageName {
 PackageVersion is a package version.
 
 In the pURL representation, each PackageName matches the
-` + "`" + `pkg:<type>/<namespace>/<name>@<version>` + "`" + ` pURL.
+pkg:<type>/<namespace>/<name>@<version> pURL.
 
-Versions are optional and each Package type defines own rules for handling them.
-For this level of GUAC, these are just opaque strings.
+Versions are optional and each Package type defines own rules for handling
+them. For this level of GUAC, these are just opaque strings.
+
+NOTE: The handling of versions might change before this schema becomes stable.
 
 This node can be referred to by other parts of GUAC.
 
@@ -3731,9 +3633,9 @@ Subpath and qualifiers are optional. Lack of qualifiers is represented by an
 empty list and lack of subpath by empty string (to be consistent with
 optionality of namespace and version). Two nodes that have different qualifiers
 and/or subpath but the same version mean two different packages in the trie
-(they are different). Two nodes that have same version but qualifiers of one are
-a subset of the qualifier of the other also mean two different packages in the
-trie.
+(they are different). Two nodes that have same version but qualifiers of one
+are a subset of the qualifier of the other also mean two different packages in
+the trie.
 """
 type PackageVersion {
   id: ID!
@@ -3745,8 +3647,8 @@ type PackageVersion {
 """
 PackageQualifier is a qualifier for a package, a key-value pair.
 
-In the pURL representation, it is a part of the ` + "`" + `<qualifiers>` + "`" + ` part of the
-` + "`" + `pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` + "`" + ` pURL.
+In the pURL representation, it is a part of the <qualifiers> part of the
+pkg:<type>/<namespace>/<name>@<version>?<qualifiers> pURL.
 
 Qualifiers are optional, each Package type defines own rules for handling them,
 and multiple qualifiers could be attached to the same package.
@@ -3759,18 +3661,18 @@ type PackageQualifier {
 }
 
 """
-PkgSpec allows filtering the list of packages to return.
+PkgSpec allows filtering the list of sources to return in a query.
 
-Each field matches a qualifier from pURL. Use ` + "`" + `null` + "`" + ` to match on all values at
+Each field matches a qualifier from pURL. Use null to match on all values at
 that level. For example, to get all packages in GUAC backend, use a PkgSpec
-where every field is ` + "`" + `null` + "`" + `.
+where every field is null.
 
 Empty string at a field means matching with the empty string. If passing in
 qualifiers, all of the values in the list must match. Since we want to return
-nodes with any number of qualifiers if no qualifiers are passed in the input, we
-must also return the same set of nodes it the qualifiers list is empty. To match
-on nodes that don't contain any qualifier, set ` + "`" + `matchOnlyEmptyQualifiers` + "`" + ` to
-true. If this field is true, then the qualifiers argument is ignored.
+nodes with any number of qualifiers if no qualifiers are passed in the input,
+we must also return the same set of nodes it the qualifiers list is empty. To
+match on nodes that don't contain any qualifier, set matchOnlyEmptyQualifiers
+to true. If this field is true, then the qualifiers argument is ignored.
 """
 input PkgSpec {
   id: ID
@@ -3784,17 +3686,13 @@ input PkgSpec {
 }
 
 """
-PackageQualifierSpec is the same as PackageQualifier, but usable as query
-input.
+PackageQualifierSpec allows filtering package qualifiers in a query.
 
-GraphQL does not allow input types to contain composite types and does not allow
-composite types to contain input types. So, although in this case these two
-types are semantically the same, we have to duplicate the definition.
-
-Keys are mandatory, but values could also be ` + "`" + `null` + "`" + ` if we want to match all
+Keys are mandatory, but values could also be null if we want to match all
 values for a specific key.
 
-TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
+NOTE: Before the schema becomes stable, we might change the nulability
+requirements of these fields.
 """
 input PackageQualifierSpec {
   key: String!
@@ -3802,10 +3700,10 @@ input PackageQualifierSpec {
 }
 
 """
-PkgInputSpec specifies a package for a mutation.
+PkgInputSpec specifies a package for mutations.
 
 This is different than PkgSpec because we want to encode mandatory fields:
-` + "`" + `type` + "`" + ` and ` + "`" + `name` + "`" + `. All optional fields are given empty default values.
+type and name. All optional fields are given empty default values.
 """
 input PkgInputSpec {
   type: String!
@@ -3816,28 +3714,19 @@ input PkgInputSpec {
   subpath: String = ""
 }
 
-"""
-PackageQualifierInputSpec is the same as PackageQualifier, but usable as
-mutation input.
-
-GraphQL does not allow input types to contain composite types and does not allow
-composite types to contain input types. So, although in this case these two
-types are semantically the same, we have to duplicate the definition.
-
-Both fields are mandatory.
-"""
+"PackageQualifierInputSpec allows specifying package qualifiers in mutations."
 input PackageQualifierInputSpec {
   key: String!
   value: String!
 }
 
 extend type Query {
-  "Returns all packages"
+  "Returns all packages matching a filter."
   packages(pkgSpec: PkgSpec): [Package!]!
 }
 
 extend type Mutation {
-  "Ingest a new package. Returns the ingested package trie"
+  "Ingests a new package and returns the corresponding package trie path."
   ingestPackage(pkg: PkgInputSpec!): Package!
 }
 `, BuiltIn: false},
@@ -3973,7 +3862,7 @@ enum Edge {
 
 extend type Query {
   """
-  path query returns a path between subject and target, of a maximum length
+  path query returns a path between subject and target, of a maximum length.
 
   Since we want to uniquely identify endpoints, nodes must be specified by
   valid IDs only (instead of using filters/input spec structs).
@@ -3984,7 +3873,7 @@ extend type Query {
   path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
 
   """
-  neighbors returns all the direct neighbors of a node
+  neighbors returns all the direct neighbors of a node.
 
   Similarly, the input is only specified by its ID.
 
@@ -3994,7 +3883,7 @@ extend type Query {
   neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
 
   """
-  node returns a single node, regardless of type
+  node returns a single node, regardless of type.
 
   The input is only specified by its ID.
   """
@@ -4018,28 +3907,27 @@ extend type Query {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the PkgEqual. It contains a list of packages that are similar
-# along with the justification, origin and collector.
-"""
-PkgEqual is an attestation that represents when a package objects are similar
+# Defines a GraphQL schema for package equality
 
-packages (subject) - list of package objects
-justification (property) - string value representing why the packages are similar
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"PkgEqual is an attestation that a set of packages are similar."
 type PkgEqual {
   id: ID!
+  "Collection of packages that are similar"
   packages: [Package!]!
+  "Justification for the claim that the packages are similar"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-PkgEqualSpec allows filtering the list of PkgEqual to return.
+PkgEqualSpec allows filtering the list of package equality statements to return
+in a query.
 
-Specifying just the package allows to query for all similar packages (if they exist)
+Specifying just one package allows to query for all similar packages (if any
+exists).
 """
 input PkgEqualSpec {
   id: ID
@@ -4049,11 +3937,7 @@ input PkgEqualSpec {
   collector: String
 }
 
-"""
-PkgEqualInputSpec is the same as PkgEqual but for mutation input.
-
-All fields are required.
-"""
+"PkgEqualInputSpec represents the input to certify that packages are similar."
 input PkgEqualInputSpec {
   justification: String!
   origin: String!
@@ -4061,13 +3945,13 @@ input PkgEqualInputSpec {
 }
 
 extend type Query {
-  "Returns all PkgEqual"
+  "Returns all package equality statements matching a filter."
   PkgEqual(pkgEqualSpec: PkgEqualSpec): [PkgEqual!]!
 }
 
 extend type Mutation {
-  "Adds a certification that two packages are similar"
-  ingestPkgEqual(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
+  "Adds a certification that two packages are similar."
+  ingestPkgEqual(pkg: PkgInputSpec!, otherPackage: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
@@ -4087,20 +3971,20 @@ extend type Mutation {
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the source trie/tree. This tree is a derivative
-# of the pURL specification where it has a type, namespace, name and finally a
-# qualifier that contain the tag or commit.
+# Defines a GraphQL schema for the source trie/tree
 
 """
-Source represents a source.
+Source represents the root of the source trie/tree.
 
-This can be the version control system that is being used.
+We map source information to a trie, as a derivative of the pURL specification:
+each path in the trie represents a type, namespace, name and an optional
+qualifier that stands for tag/commit information.
 
-This node is a singleton: backends guarantee that there is exactly one node
-with the same ` + "`" + `type` + "`" + ` value.
+This node represents the type part of the trie path. It is used to represent
+the version control system that is being used.
 
-Also note that this is named ` + "`" + `Source` + "`" + `, not ` + "`" + `SourceType` + "`" + `. This is only to make
-queries more readable.
+Since this node is at the root of the source trie, it is named Source, not
+SourceType.
 """
 type Source {
   id: ID!
@@ -4113,7 +3997,7 @@ SourceNamespace is a namespace for sources.
 
 This is the location of the repository (such as github/gitlab/bitbucket).
 
-The ` + "`" + `namespace` + "`" + ` field is mandatory.
+The namespace field is mandatory.
 """
 type SourceNamespace {
   id: ID!
@@ -4122,13 +4006,12 @@ type SourceNamespace {
 }
 
 """
-SourceName is a url of the repository and its tag or commit.
+SourceName represents the url of the repository.
 
-The ` + "`" + `name` + "`" + ` field is mandatory. The ` + "`" + `tag` + "`" + ` and ` + "`" + `commit` + "`" + ` fields are optional, but
-it is an error to specify both.
+The name field is mandatory. The tag and commit fields are optional, but it is
+an error to specify both.
 
-This is the only source trie node that can be referenced by other parts of
-GUAC.
+This is the only source trie node that can be referenced by other parts of GUAC.
 """
 type SourceName {
   id: ID!
@@ -4138,14 +4021,14 @@ type SourceName {
 }
 
 """
-SourceSpec allows filtering the list of sources to return.
+SourceSpec allows filtering the list of sources to return in a query.
 
 Empty string at a field means matching with the empty string. Missing field
 means retrieving all possible matches.
 
-It is an error to specify both ` + "`" + `tag` + "`" + ` and ` + "`" + `commit` + "`" + ` fields, except it both are
-set as empty string (in which case the returned sources are only those for
-which there is no tag/commit information).
+It is an error to specify both tag and commit fields, except it both are set as
+empty string (in which case the returned sources are only those for which there
+is no tag/commit information).
 """
 input SourceSpec {
   id: ID
@@ -4157,14 +4040,14 @@ input SourceSpec {
 }
 
 """
-SourceInputSpec specifies a source for a mutation.
+SourceInputSpec specifies a source for mutations.
 
 This is different than SourceSpec because we want to encode that all fields
-except tag and commit are mandatory fields. All optional fields are given
-empty default values.
+except tag and commit are mandatory fields. All optional fields are given empty
+default values.
 
-It is an error to set both ` + "`" + `tag` + "`" + ` and ` + "`" + `commit` + "`" + ` fields to values different than
-the default.
+It is an error to set both tag and commit fields to values different than the
+default.
 """
 input SourceInputSpec {
   type: String!
@@ -4175,12 +4058,12 @@ input SourceInputSpec {
 }
 
 extend type Query {
-  "Returns all sources"
+  "Returns all sources matching a filter."
   sources(sourceSpec: SourceSpec): [Source!]!
 }
 
 extend type Mutation {
-  "Ingest a new source. Returns the ingested source trie"
+  "Ingests a new source and returns the corresponding source trie path."
   ingestSource(source: SourceInputSpec!): Source!
 }
 `, BuiltIn: false},

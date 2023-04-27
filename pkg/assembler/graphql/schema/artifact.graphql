@@ -15,17 +15,16 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the artifact. It contains the algorithm and
-# digest fields
+# Defines a GraphQL schema for the artifact
 
 """
-Artifact represents the artifact and contains a digest field
+Artifact represents an artifact identified by a checksum hash.
 
-Both field are mandatory and canonicalized to be lowercase.
+The checksum is split into the digest value and the algorithm used to generate
+it. Both fields are mandatory and canonicalized to be lowercase.
 
-If having a `checksum` Go object, `algorithm` can be
-`strings.ToLower(string(checksum.Algorithm))` and `digest` can be
-`checksum.Value`.
+If having a checksum Go object, algorithm can be
+strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
 """
 type Artifact {
   id: ID!
@@ -34,9 +33,9 @@ type Artifact {
 }
 
 """
-ArtifactSpec allows filtering the list of artifacts to return.
+ArtifactSpec allows filtering the list of artifacts to return in a query.
 
-Both arguments will be canonicalized to lowercase.
+The checksum fields are canonicalized to be lowercase.
 """
 input ArtifactSpec {
   id: ID
@@ -45,9 +44,9 @@ input ArtifactSpec {
 }
 
 """
-ArtifactInputSpec is the same as Artifact, but used as mutation input.
+ArtifactInputSpec specifies an artifact for mutations.
 
-Both arguments will be canonicalized to lowercase.
+The checksum fields are canonicalized to be lowercase.
 """
 input ArtifactInputSpec {
   algorithm: String!
@@ -55,11 +54,11 @@ input ArtifactInputSpec {
 }
 
 extend type Query {
-  "Returns all artifacts"
+  "Returns all artifacts matching a filter."
   artifacts(artifactSpec: ArtifactSpec): [Artifact!]!
 }
 
 extend type Mutation {
-  "Ingest a new artifact. Returns the ingested artifact"
+  "Ingests a new artifact and returns it."
   ingestArtifact(artifact: ArtifactInputSpec): Artifact!
 }
