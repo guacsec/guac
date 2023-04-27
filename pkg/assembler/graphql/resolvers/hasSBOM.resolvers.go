@@ -11,7 +11,7 @@ import (
 )
 
 // IngestHasSbom is the resolver for the ingestHasSBOM field.
-func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
+func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
 	return r.Backend.IngestHasSbom(ctx, subject, hasSbom)
 }
 

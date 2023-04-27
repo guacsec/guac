@@ -35,6 +35,7 @@ type artStruct struct {
 	digest      string
 	hashEquals  []uint32
 	occurrences []uint32
+	hasSBOMs    []uint32
 	hasSLSAs    []uint32
 	vexLinks    []uint32
 	badLinks    []uint32
@@ -50,6 +51,9 @@ func (n *artStruct) Neighbors(allowedEdges edgeMap) []uint32 {
 	}
 	if allowedEdges[model.EdgeArtifactIsOccurrence] {
 		out = append(out, n.occurrences...)
+	}
+	if allowedEdges[model.EdgeArtifactHasSbom] {
+		out = append(out, n.hasSBOMs...)
 	}
 	if allowedEdges[model.EdgeArtifactHasSlsa] {
 		out = append(out, n.hasSLSAs...)
@@ -72,6 +76,7 @@ func (n *artStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 func (n *artStruct) setHashEquals(id uint32)       { n.hashEquals = append(n.hashEquals, id) }
 func (n *artStruct) setOccurrences(id uint32)      { n.occurrences = append(n.occurrences, id) }
+func (n *artStruct) setHasSBOMs(id uint32)         { n.hasSBOMs = append(n.hasSBOMs, id) }
 func (n *artStruct) setHasSLSAs(id uint32)         { n.hasSLSAs = append(n.hasSLSAs, id) }
 func (n *artStruct) setVexLinks(id uint32)         { n.vexLinks = append(n.vexLinks, id) }
 func (n *artStruct) setCertifyBadLinks(id uint32)  { n.badLinks = append(n.badLinks, id) }

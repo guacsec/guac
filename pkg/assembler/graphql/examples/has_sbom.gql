@@ -23,19 +23,10 @@ fragment allHasSBOMTree on HasSBOM {
         }
       }
     }
-   ...on Source {
+    ... on Artifact {
       id
-      type
-      namespaces {
-        id
-        namespace
-        names {
-          id
-          name
-          tag
-          commit
-        }
-      }
+      algorithm
+      digest
     }
   }
   uri
@@ -57,7 +48,7 @@ query HasSBOMQ1 {
 }
 
 query HasSBOMQ2 {
-  HasSBOM(hasSBOMSpec: {origin: "testing backend"}) {
+  HasSBOM(hasSBOMSpec: {origin: "Demo ingestion"}) {
     ...allHasSBOMTree
   }
 }
@@ -69,13 +60,13 @@ query HasSBOMQ3 {
 }
 
 query HasSBOMQ4 {
-  HasSBOM(hasSBOMSpec: {subject: {source: {name: "github.com/guacsec/guac"}}}) {
+  HasSBOM(hasSBOMSpec: {subject: {artifact: {algorithm: "sha256"}}}) {
     ...allHasSBOMTree
   }
 }
 
 query HasSBOMQ5 {
-  HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}, source: {name: "github.com/guacsec/guac"}}}) {
+  HasSBOM(hasSBOMSpec: {subject: {package: {name: "openssl"}, artifact: {algorithm: "sha256"}}}) {
     ...allHasSBOMTree
   }
 }

@@ -213,12 +213,12 @@ fragment allHasSBOMTree on HasSBOM {
   id
   subject {
     __typename
+    ... on Artifact {
+      ...allArtifactTree
+    }
     ... on Package {
       ...AllPkgTree
     }
-    ... on Source {
-      ...AllSourceTree
-      }
   }
   uri
   algorithm

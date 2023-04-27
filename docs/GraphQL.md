@@ -597,13 +597,13 @@ type SLSA {
 ```
 
 Finally, the last evidence tree defined in GUAC is attaching SBOM information to
-packages and sources:
+packages and artifacts:
 
 ```gql
 type HasSBOM {
   id: ID!
   "SBOM subject"
-  subject: PackageOrSource!
+  subject: PackageOrArtifact!
   "Identifier for the SBOM document"
   uri: String!
   "Algorithm by which SBOMs digest was computed"
@@ -674,6 +674,7 @@ enum Edge {
   ARTIFACT_CERTIFY_GOOD
   ARTIFACT_CERTIFY_VEX_STATEMENT
   ARTIFACT_HASH_EQUAL
+  ARTIFACT_HAS_SBOM
   ARTIFACT_HAS_SLSA
   ARTIFACT_IS_OCCURRENCE
   BUILDER_HAS_SLSA
@@ -699,7 +700,6 @@ enum Edge {
   SOURCE_CERTIFY_BAD
   SOURCE_CERTIFY_GOOD
   SOURCE_CERTIFY_SCORECARD
-  SOURCE_HAS_SBOM
   SOURCE_HAS_SOURCE_AT
   SOURCE_IS_OCCURRENCE
 
@@ -721,8 +721,8 @@ enum Edge {
   CERTIFY_VULN_OSV
   CERTIFY_VULN_PACKAGE
   HASH_EQUAL_ARTIFACT
+  HAS_SBOM_ARTIFACT
   HAS_SBOM_PACKAGE
-  HAS_SBOM_SOURCE
   HAS_SLSA_BUILT_BY
   HAS_SLSA_MATERIALS
   HAS_SLSA_SUBJECT

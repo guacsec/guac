@@ -399,7 +399,7 @@ type GHSASpec struct {
 type HasSbom struct {
 	ID string `json:"id"`
 	// SBOM subject
-	Subject PackageOrSource `json:"subject"`
+	Subject PackageOrArtifact `json:"subject"`
 	// Identifier for the SBOM document
 	URI string `json:"uri"`
 	// Algorithm by which SBOMs digest was computed
@@ -431,17 +431,17 @@ type HasSBOMInputSpec struct {
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
-// Only the package or source can be added, not both.
+// Only the package or artifact can be added, not both.
 type HasSBOMSpec struct {
-	ID               *string              `json:"id,omitempty"`
-	Subject          *PackageOrSourceSpec `json:"subject,omitempty"`
-	URI              *string              `json:"uri,omitempty"`
-	Algorithm        *string              `json:"algorithm,omitempty"`
-	Digest           *string              `json:"digest,omitempty"`
-	DownloadLocation *string              `json:"downloadLocation,omitempty"`
-	Annotations      []*AnnotationSpec    `json:"annotations,omitempty"`
-	Origin           *string              `json:"origin,omitempty"`
-	Collector        *string              `json:"collector,omitempty"`
+	ID               *string                `json:"id,omitempty"`
+	Subject          *PackageOrArtifactSpec `json:"subject,omitempty"`
+	URI              *string                `json:"uri,omitempty"`
+	Algorithm        *string                `json:"algorithm,omitempty"`
+	Digest           *string                `json:"digest,omitempty"`
+	DownloadLocation *string                `json:"downloadLocation,omitempty"`
+	Annotations      []*AnnotationSpec      `json:"annotations,omitempty"`
+	Origin           *string                `json:"origin,omitempty"`
+	Collector        *string                `json:"collector,omitempty"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.
@@ -1325,6 +1325,7 @@ const (
 	EdgeArtifactCertifyGood         Edge = "ARTIFACT_CERTIFY_GOOD"
 	EdgeArtifactCertifyVexStatement Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
 	EdgeArtifactHashEqual           Edge = "ARTIFACT_HASH_EQUAL"
+	EdgeArtifactHasSbom             Edge = "ARTIFACT_HAS_SBOM"
 	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
 	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
@@ -1350,7 +1351,6 @@ const (
 	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
-	EdgeSourceHasSbom               Edge = "SOURCE_HAS_SBOM"
 	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
 	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
@@ -1371,8 +1371,8 @@ const (
 	EdgeCertifyVulnOsv              Edge = "CERTIFY_VULN_OSV"
 	EdgeCertifyVulnPackage          Edge = "CERTIFY_VULN_PACKAGE"
 	EdgeHashEqualArtifact           Edge = "HASH_EQUAL_ARTIFACT"
+	EdgeHasSbomArtifact             Edge = "HAS_SBOM_ARTIFACT"
 	EdgeHasSbomPackage              Edge = "HAS_SBOM_PACKAGE"
-	EdgeHasSbomSource               Edge = "HAS_SBOM_SOURCE"
 	EdgeHasSlsaBuiltBy              Edge = "HAS_SLSA_BUILT_BY"
 	EdgeHasSlsaMaterials            Edge = "HAS_SLSA_MATERIALS"
 	EdgeHasSlsaSubject              Edge = "HAS_SLSA_SUBJECT"
@@ -1393,6 +1393,7 @@ var AllEdge = []Edge{
 	EdgeArtifactCertifyGood,
 	EdgeArtifactCertifyVexStatement,
 	EdgeArtifactHashEqual,
+	EdgeArtifactHasSbom,
 	EdgeArtifactHasSlsa,
 	EdgeArtifactIsOccurrence,
 	EdgeBuilderHasSlsa,
@@ -1418,7 +1419,6 @@ var AllEdge = []Edge{
 	EdgeSourceCertifyBad,
 	EdgeSourceCertifyGood,
 	EdgeSourceCertifyScorecard,
-	EdgeSourceHasSbom,
 	EdgeSourceHasSourceAt,
 	EdgeSourceIsOccurrence,
 	EdgeCertifyBadArtifact,
@@ -1439,8 +1439,8 @@ var AllEdge = []Edge{
 	EdgeCertifyVulnOsv,
 	EdgeCertifyVulnPackage,
 	EdgeHashEqualArtifact,
+	EdgeHasSbomArtifact,
 	EdgeHasSbomPackage,
-	EdgeHasSbomSource,
 	EdgeHasSlsaBuiltBy,
 	EdgeHasSlsaMaterials,
 	EdgeHasSlsaSubject,
@@ -1458,7 +1458,7 @@ var AllEdge = []Edge{
 
 func (e Edge) IsValid() bool {
 	switch e {
-	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeBuilderHasSlsa, EdgeCveCertifyVexStatement, EdgeCveCertifyVuln, EdgeCveIsVulnerability, EdgeGhsaCertifyVexStatement, EdgeGhsaCertifyVuln, EdgeGhsaIsVulnerability, EdgeNoVulnCertifyVuln, EdgeOsvCertifyVexStatement, EdgeOsvCertifyVuln, EdgeOsvIsVulnerability, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSbom, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementCve, EdgeCertifyVexStatementGhsa, EdgeCertifyVexStatementOsv, EdgeCertifyVexStatementPackage, EdgeCertifyVulnCve, EdgeCertifyVulnGhsa, EdgeCertifyVulnNoVuln, EdgeCertifyVulnOsv, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomPackage, EdgeHasSbomSource, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeIsVulnerabilityCve, EdgeIsVulnerabilityGhsa, EdgeIsVulnerabilityOsv, EdgePkgEqualPackage:
+	case EdgeArtifactCertifyBad, EdgeArtifactCertifyGood, EdgeArtifactCertifyVexStatement, EdgeArtifactHashEqual, EdgeArtifactHasSbom, EdgeArtifactHasSlsa, EdgeArtifactIsOccurrence, EdgeBuilderHasSlsa, EdgeCveCertifyVexStatement, EdgeCveCertifyVuln, EdgeCveIsVulnerability, EdgeGhsaCertifyVexStatement, EdgeGhsaCertifyVuln, EdgeGhsaIsVulnerability, EdgeNoVulnCertifyVuln, EdgeOsvCertifyVexStatement, EdgeOsvCertifyVuln, EdgeOsvIsVulnerability, EdgePackageCertifyBad, EdgePackageCertifyGood, EdgePackageCertifyVexStatement, EdgePackageCertifyVuln, EdgePackageHasSbom, EdgePackageHasSourceAt, EdgePackageIsDependency, EdgePackageIsOccurrence, EdgePackagePkgEqual, EdgeSourceCertifyBad, EdgeSourceCertifyGood, EdgeSourceCertifyScorecard, EdgeSourceHasSourceAt, EdgeSourceIsOccurrence, EdgeCertifyBadArtifact, EdgeCertifyBadPackage, EdgeCertifyBadSource, EdgeCertifyGoodArtifact, EdgeCertifyGoodPackage, EdgeCertifyGoodSource, EdgeCertifyScorecardSource, EdgeCertifyVexStatementArtifact, EdgeCertifyVexStatementCve, EdgeCertifyVexStatementGhsa, EdgeCertifyVexStatementOsv, EdgeCertifyVexStatementPackage, EdgeCertifyVulnCve, EdgeCertifyVulnGhsa, EdgeCertifyVulnNoVuln, EdgeCertifyVulnOsv, EdgeCertifyVulnPackage, EdgeHashEqualArtifact, EdgeHasSbomArtifact, EdgeHasSbomPackage, EdgeHasSlsaBuiltBy, EdgeHasSlsaMaterials, EdgeHasSlsaSubject, EdgeHasSourceAtPackage, EdgeHasSourceAtSource, EdgeIsDependencyPackage, EdgeIsOccurrenceArtifact, EdgeIsOccurrencePackage, EdgeIsOccurrenceSource, EdgeIsVulnerabilityCve, EdgeIsVulnerabilityGhsa, EdgeIsVulnerabilityOsv, EdgePkgEqualPackage:
 		return true
 	}
 	return false
