@@ -212,15 +212,12 @@ func (c *demoClient) buildArtifactResponse(id uint32, filter *model.ArtifactSpec
 	if err != nil {
 		return nil, fmt.Errorf("ID does not match expected node type for artifact, %w", err)
 	}
-	if filter != nil {
-		algorithm := strings.ToLower(nilToEmpty(filter.Algorithm))
-		digest := strings.ToLower(nilToEmpty(filter.Digest))
-		if algorithm != artNode.algorithm {
-			return nil, nil
-		}
-		if digest != artNode.digest {
-			return nil, nil
-		}
+
+	if filter != nil && noMatch(toLower(filter.Algorithm), artNode.algorithm) {
+		return nil, nil
+	}
+	if filter != nil && noMatch(toLower(filter.Digest), artNode.digest) {
+		return nil, nil
 	}
 	art := &model.Artifact{
 		// IDs are generated as string even though we ask for integers
