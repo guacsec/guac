@@ -230,7 +230,6 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	funcName := "CertifyVuln"
 
 	if filter != nil {
-		// TODO: this panics if filter is missing (cannot retrieve all certifications)
 		if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, true); err != nil {
 			return nil, err
 		}
