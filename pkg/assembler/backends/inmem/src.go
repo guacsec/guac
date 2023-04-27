@@ -17,6 +17,8 @@ package inmem
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -250,6 +252,10 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 		}
 		s, err := c.buildSourceResponse(uint32(id), filter)
 		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
 			return nil, err
 		}
 		return []*model.Source{s}, nil
@@ -349,7 +355,7 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 
 	node, ok := c.index[id]
 	if !ok {
-		return nil, gqlerror.Errorf("ID does not match existing node")
+		return nil, fmt.Errorf("%w : ID does not match existing node", errNotFound)
 	}
 
 	snl := []*model.SourceName{}
@@ -373,7 +379,7 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 		})
 		node, ok = c.index[nameNode.parent]
 		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+			return nil, fmt.Errorf("Internal ID does not match existing node")
 		}
 	}
 
@@ -389,13 +395,13 @@ func (c *demoClient) buildSourceResponse(id uint32, filter *model.SourceSpec) (*
 		})
 		node, ok = c.index[nameStruct.parent]
 		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+			return nil, fmt.Errorf("Internal ID does not match existing node")
 		}
 	}
 
 	namespaceStruct, ok := node.(*srcNamespaceStruct)
 	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type for source namespace")
+		return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
 	}
 	s := model.Source{
 		ID:         nodeID(namespaceStruct.id),

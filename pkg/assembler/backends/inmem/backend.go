@@ -58,6 +58,8 @@ type node interface {
 
 type indexType map[uint32]node
 
+var errNotFound = errors.New("Not found")
+
 // atomic add to ensure ID is not duplicated
 func (c *demoClient) getNextID() uint32 {
 	return atomic.AddUint32(&c.id, 1)
@@ -186,11 +188,11 @@ func byID[E node](id uint32, c *demoClient) (E, error) {
 	var nl E
 	o, ok := c.index[id]
 	if !ok {
-		return nl, errors.New("could not find node")
+		return nl, fmt.Errorf("%w : id not in index", errNotFound)
 	}
 	s, ok := o.(E)
 	if !ok {
-		return nl, fmt.Errorf("not a %T", nl)
+		return nl, fmt.Errorf("%w : node not a %T", errNotFound, nl)
 	}
 	return s, nil
 }
