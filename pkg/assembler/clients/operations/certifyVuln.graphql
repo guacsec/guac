@@ -15,7 +15,7 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest a CertifyVuln or a NoKnownVuln into GUAC
+# Defines the GraphQL operations to ingest a vulnerability certification into GUAC
 
 mutation CertifyOSV($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
   ingestPackage(pkg: $pkg) {

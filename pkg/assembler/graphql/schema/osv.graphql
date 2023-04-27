@@ -15,13 +15,12 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the OSV trie/tree. It contains the OSV ID
-# associated with the vulnerability.
+# Defines a GraphQL schema for a vulnerability in OSV schema
 
 """
 OSV represents an Open Source Vulnerability.
 
-The `osvId` field is mandatory and canonicalized to be lowercase.
+The osvId field is mandatory and canonicalized to be lowercase.
 
 This maps to a vulnerability ID specific to the environment (e.g., GHSA ID or
 CVE ID).
@@ -33,27 +32,23 @@ type OSV {
   osvId: String!
 }
 
-"""
-OSVSpec allows filtering the list of OSV to return.
-"""
+"OSVSpec allows filtering the list of advisories to return in a query."
 input OSVSpec {
   id: ID
   osvId: String
 }
 
-"""
-OSVInputSpec is the same as OSVSpec, but used for mutation ingestion.
-"""
+"OSVInputSpec specifies a OSV vulnerability for mutations."
 input OSVInputSpec {
   osvId: String!
 }
 
 extend type Query {
-  "Returns all OSV"
+  "Returns all OSV vulnerabilities matching a filter."
   osv(osvSpec: OSVSpec): [OSV!]!
 }
 
 extend type Mutation {
-  "Ingest a new OSV. Returns the ingested object"
+  "Ingests a new OSV vulnerability and returns it."
   ingestOSV(osv: OSVInputSpec): OSV!
 }

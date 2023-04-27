@@ -11,8 +11,8 @@ import (
 )
 
 // IngestHashEqual is the resolver for the ingestHashEqual field.
-func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
-	return r.Backend.IngestHashEqual(ctx, artifact, equalArtifact, hashEqual)
+func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+	return r.Backend.IngestHashEqual(ctx, artifact, otherArtifact, hashEqual)
 }
 
 // HashEqual is the resolver for the HashEqual field.

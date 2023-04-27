@@ -32,13 +32,13 @@ type MutationResolver interface {
 	IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error)
 	IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error)
 	IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error)
-	IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error)
+	IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
-	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error)
+	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error)
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error)
 }
 type QueryResolver interface {
@@ -333,14 +333,14 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Cont
 	}
 	args["artifact"] = arg0
 	var arg1 model.ArtifactInputSpec
-	if tmp, ok := rawArgs["equalArtifact"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("equalArtifact"))
+	if tmp, ok := rawArgs["otherArtifact"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherArtifact"))
 		arg1, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["equalArtifact"] = arg1
+	args["otherArtifact"] = arg1
 	var arg2 model.HashEqualInputSpec
 	if tmp, ok := rawArgs["hashEqual"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqual"))
@@ -477,14 +477,14 @@ func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Conte
 	}
 	args["pkg"] = arg0
 	var arg1 model.PkgInputSpec
-	if tmp, ok := rawArgs["depPkg"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
+	if tmp, ok := rawArgs["otherPackage"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherPackage"))
 		arg1, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["depPkg"] = arg1
+	args["otherPackage"] = arg1
 	var arg2 model.PkgEqualInputSpec
 	if tmp, ok := rawArgs["pkgEqual"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqual"))
@@ -2029,7 +2029,7 @@ func (ec *executionContext) _Mutation_ingestHashEqual(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHashEqual(rctx, fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["equalArtifact"].(model.ArtifactInputSpec), fc.Args["hashEqual"].(model.HashEqualInputSpec))
+		return ec.resolvers.Mutation().IngestHashEqual(rctx, fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["otherArtifact"].(model.ArtifactInputSpec), fc.Args["hashEqual"].(model.HashEqualInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2431,7 +2431,7 @@ func (ec *executionContext) _Mutation_ingestPkgEqual(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPkgEqual(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["depPkg"].(model.PkgInputSpec), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
+		return ec.resolvers.Mutation().IngestPkgEqual(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["otherPackage"].(model.PkgInputSpec), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

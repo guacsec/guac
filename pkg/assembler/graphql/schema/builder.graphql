@@ -15,39 +15,35 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the builder. It only contains the uri
+# Defines a GraphQL schema for the builder
 
 """
-Builder represents the builder such as (FRSCA or github actions).
+Builder represents the builder (e.g., FRSCA or GitHub Actions).
 
-Currently builders are identified by the `uri` field, which is mandatory.
+Currently builders are identified by the uri field.
 """
 type Builder {
   id: ID!
   uri: String!
 }
 
-"""
-BuilderSpec allows filtering the list of builders to return.
-"""
+"BuilderSpec allows filtering the list of builders to return in a query."
 input BuilderSpec {
   id: ID
   uri: String
 }
 
-"""
-BuilderInputSpec is the same as Builder, but used for mutation ingestion.
-"""
+"BuilderInputSpec specifies a builder for mutations."
 input BuilderInputSpec {
   uri: String!
 }
 
 extend type Query {
-  "Returns all builders"
+  "Returns all builders matching a filter."
   builders(builderSpec: BuilderSpec): [Builder!]!
 }
 
 extend type Mutation {
-  "Ingest a new builder. Returns the ingested builder"
+  "Ingests a new builder and returns it."
   ingestBuilder(builder: BuilderInputSpec): Builder!
 }

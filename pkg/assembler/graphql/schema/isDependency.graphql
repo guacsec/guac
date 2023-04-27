@@ -15,48 +15,44 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the IsDependency. It contains the package object, dependent package object
-# version range of the dependent package that it applies to, justification, origin and collector.
+# Defines a GraphQL schema for specifying dependencies
 
-"""
-DependencyType determines the type of the IsDependency.
-Direct - direct dependency of the IsDependency Package
-Indirect - transitive dependency of the IsDependency Package
-Unknown - type of the dependency not known
-"""
+"DependencyType determines the type of the dependency."
 enum DependencyType {
+  "direct dependency"
   DIRECT
+  "indirect dependency"
   INDIRECT
+  "type not known/not specified"
   UNKNOWN
 }
 
-"""
-IsDependency is an attestation that represents when a package is dependent on another package
-
-package (subject) - the package object type that represents the package
-dependentPackage (object) - the package object type that represents the packageName (cannot be to the packageVersion)
-versionRange (property) - string value for version range that applies to the dependent package
-dependencyType - enum that represents the dependency as either direct, indirect or unknown
-justification (property) - string value representing why the artifacts are the equal
-origin (property) - where this attestation was generated from (based on which document)
-collector (property) - the GUAC collector that collected the document that generated this attestation
-"""
+"IsDependency is an attestation to record that a package depends on another."
 type IsDependency {
   id: ID!
+  "Package that has the dependency"
   package: Package!
+  "Package for the dependency; MUST BE PackageName, not PackageVersion"
   dependentPackage: Package!
+  "Version range for the dependency link"
   versionRange: String!
+  "Type of dependency"
   dependencyType: DependencyType!
+  "Justification for the attested relationship"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
 }
 
 """
-IsDependencySpec allows filtering the list of IsDependency to return.
+IsDependencySpec allows filtering the list of dependencies to return.
 
-Note: the package object must be defined to return its dependent packages.
-Dependent Packages must represent the packageName (cannot be the packageVersion)
+To obtain the list of dependency packages, caller must fill in the package
+field.
+
+Dependent packages must be defined at PackageName, not PackageVersion.
 """
 input IsDependencySpec {
   id: ID
@@ -70,9 +66,12 @@ input IsDependencySpec {
 }
 
 """
-PkgNameSpec is used for IsDependency to input dependent packages. This is different from PkgSpec
-as the IsDependency attestation should only be allowed to be made to the packageName node and not the
-packageVersion node. Versions will be handled by the version_range in the IsDependency attestation node.
+PkgNameSpec is used to query for dependent packages.
+
+This is different from PkgSpec as the IsDependency attestation should only be
+allowed to be made to the packageName node and not the packageVersion node.
+Versions will be handled by the version_range in the IsDependency attestation
+node.
 """
 input PkgNameSpec {
   id: ID
@@ -81,11 +80,7 @@ input PkgNameSpec {
   name: String
 }
 
-"""
-IsDependencyInputSpec is the same as IsDependency but for mutation input.
-
-All fields are required.
-"""
+"IsDependencyInputSpec is the input to record a new dependency."
 input IsDependencyInputSpec {
   versionRange: String!
   dependencyType: DependencyType!
@@ -95,11 +90,11 @@ input IsDependencyInputSpec {
 }
 
 extend type Query {
-  "Returns all IsDependency"
+  "Returns all package dependencies that match the filter."
   IsDependency(isDependencySpec: IsDependencySpec): [IsDependency!]!
 }
 
 extend type Mutation {
-  "Adds dependency between two packages"
+  "Adds a dependency between two packages"
   ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
 }

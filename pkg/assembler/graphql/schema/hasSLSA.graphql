@@ -15,14 +15,14 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for specifiying SLSA provenance.
+# Defines a GraphQL schema for specifiying SLSA provenance
 
 "HasSLSA records that a subject node has a SLSA attestation."
 type HasSLSA {
   id: ID!
-  "The subject of SLSA attestation: package, source, or artifact."
+  "The subject of SLSA attestation"
   subject: Artifact!
-  "The SLSA attestation."
+  "The SLSA attestation"
   slsa: SLSA!
 }
 
@@ -37,7 +37,7 @@ We also include fields to specify under what conditions the check was performed
 included into GUAC (origin document and the collector for that document).
 """
 type SLSA {
-  "Sources of the build resulting in subject (materials)"
+  "Materials of the build resulting in subject"
   builtFrom: [Artifact!]!
   "Builder performing the build"
   builtBy: Builder!
@@ -83,8 +83,6 @@ value = "https://github.com/octocat/hello-world"
 ```
 
 This node cannot be directly referred by other parts of GUAC.
-
-TODO(mihaimaruseac): Can we define these directly?
 """
 type SLSAPredicate {
   key: String!
@@ -112,11 +110,7 @@ input SLSAPredicateSpec {
   value: String!
 }
 
-"""
-SLSAInputSpec is the same as SLSA but for mutation input.
-
-All fields are required.
-"""
+"SLSAInputSpec is the same as SLSA but for mutation input."
 input SLSAInputSpec {
   buildType: String!
   slsaPredicate: [SLSAPredicateInputSpec!]!
@@ -127,36 +121,21 @@ input SLSAInputSpec {
   collector: String!
 }
 
-"""
-SLSAPredicateInputSpec is the same as SLSAPredicateSpec, but for mutation
-input.
-"""
+"SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec."
 input SLSAPredicateInputSpec {
   key: String!
   value: String!
 }
 
 extend type Query {
-  "Returns all SLSA attestations matching the filter"
+  "Returns all SLSA attestations matching the filter."
   HasSLSA(hasSLSASpec: HasSLSASpec): [HasSLSA!]!
 }
 
 extend type Mutation {
-  """
-  Ingests a SLSA attestation.
-
-  Note that materials and builder are extracted as separate arguments. This is
-  because this ingestion method assumes that the subject and the materials are
-  already ingested and only creates the SLSA node.
-  """
+  "Ingests a SLSA attestation."
   ingestSLSA(subject: ArtifactInputSpec!, builtFrom: [ArtifactInputSpec!]!, builtBy: BuilderInputSpec!, slsa: SLSAInputSpec!): HasSLSA!
 
-  """
-  Ingests a set of packages, sources, and artifacts.
-
-  This is a helper mutation for ingesting SLSA nodes. It should be more
-  efficient to call this method to ingest a set materials instead of ingesting
-  them one by one.
-  """
+  "Helper mutation to ingest multiple artifacts as materials for SLSA."
   ingestMaterials(materials: [ArtifactInputSpec!]!): [Artifact!]!
 }

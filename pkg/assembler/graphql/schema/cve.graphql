@@ -15,15 +15,17 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the CVE trie/tree. It contains the year
-# along with the ID associated with vulnerability (CVE ID).
+# Defines a GraphQL schema for a vulnerability in CVE schema
 
 """
-CVE represents common vulnerabilities and exposures. It contains the year along
-with the CVE ID.
+CVE represents a vulnerability in the Common Vulnerabilities and Exposures
+schema.
 
-The `year` is mandatory.
-The `cveId` field is mandatory and canonicalized to be lowercase.
+The vulnerability identifier contains a year field, so we are extracting that
+to allow matching for vulnerabilities found in a given year.
+
+The vulnerability identifier field is mandatory and canonicalized to be
+lowercase.
 
 This node can be referred to by other parts of GUAC.
 """
@@ -33,29 +35,25 @@ type CVE {
   cveId: String!
 }
 
-"""
-CVESpec allows filtering the list of cves to return.
-"""
+"CVESpec allows filtering the list of advisories to return in a query."
 input CVESpec {
   id: ID
   year: Int
   cveId: String
 }
 
-"""
-CVEInputSpec is the same as CVESpec, but used for mutation ingestion.
-"""
+"CVEInputSpec specifies a CVE vulnerability for mutations."
 input CVEInputSpec {
   year: Int!
   cveId: String!
 }
 
 extend type Query {
-  "Returns all CVEs"
+  "Returns all CVEs matching a filter."
   cve(cveSpec: CVESpec): [CVE!]!
 }
 
 extend type Mutation {
-  "Ingest a new CVE. Returns the ingested object"
+  "Ingests new CVE and returns it."
   ingestCVE(cve: CVEInputSpec): CVE!
 }

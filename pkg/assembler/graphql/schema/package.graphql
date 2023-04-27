@@ -15,25 +15,23 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines a GraphQL schema for the package trie/tree. This tree closely matches
-# the pURL specification (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst)
-# but deviates from it where GUAC rules state otherwise. In principle, we want
-# this to represent a trie for packages, so information that represents a
-# smaller collection of packages is being pushed downwards in the trie.
+# Defines a GraphQL schema for the package trie/tree
 
 """
-Package represents a package.
+Package represents the root of the package trie/tree.
 
-In the pURL representation, each Package matches a `pkg:<type>` partial pURL.
-The `type` field matches the pURL types but we might also use `"guac"` for the
-cases where the pURL representation is not complete or when we have custom
-rules.
+We map package information to a trie, closely matching the pURL specification
+(https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+but deviating from it where GUAC heuristics allow for better representation of
+package information. Each path in the trie fully represents a package; we split
+the trie based on the pURL components.
 
-This node is a singleton: backends guarantee that there is exactly one node
-with the same `type` value.
+This node matches a pkg:<type> partial pURL. The type field matches the
+pURL types but we might also use "guac" for the cases where the pURL
+representation is not complete or when we have custom rules.
 
-Also note that this is named `Package`, not `PackageType`. This is only to make
-queries more readable.
+Since this node is at the root of the package trie, it is named Package, not
+PackageType.
 """
 type Package {
   id: ID!
@@ -45,7 +43,7 @@ type Package {
 PackageNamespace is a namespace for packages.
 
 In the pURL representation, each PackageNamespace matches the
-`pkg:<type>/<namespace>/` partial pURL.
+pkg:<type>/<namespace>/ partial pURL.
 
 Namespaces are optional and type specific. Because they are optional, we use
 empty string to denote missing namespaces.
@@ -60,7 +58,7 @@ type PackageNamespace {
 PackageName is a name for packages.
 
 In the pURL representation, each PackageName matches the
-`pkg:<type>/<namespace>/<name>` pURL.
+pkg:<type>/<namespace>/<name> pURL.
 
 Names are always mandatory.
 
@@ -77,10 +75,12 @@ type PackageName {
 PackageVersion is a package version.
 
 In the pURL representation, each PackageName matches the
-`pkg:<type>/<namespace>/<name>@<version>` pURL.
+pkg:<type>/<namespace>/<name>@<version> pURL.
 
-Versions are optional and each Package type defines own rules for handling them.
-For this level of GUAC, these are just opaque strings.
+Versions are optional and each Package type defines own rules for handling
+them. For this level of GUAC, these are just opaque strings.
+
+NOTE: The handling of versions might change before this schema becomes stable.
 
 This node can be referred to by other parts of GUAC.
 
@@ -88,9 +88,9 @@ Subpath and qualifiers are optional. Lack of qualifiers is represented by an
 empty list and lack of subpath by empty string (to be consistent with
 optionality of namespace and version). Two nodes that have different qualifiers
 and/or subpath but the same version mean two different packages in the trie
-(they are different). Two nodes that have same version but qualifiers of one are
-a subset of the qualifier of the other also mean two different packages in the
-trie.
+(they are different). Two nodes that have same version but qualifiers of one
+are a subset of the qualifier of the other also mean two different packages in
+the trie.
 """
 type PackageVersion {
   id: ID!
@@ -102,8 +102,8 @@ type PackageVersion {
 """
 PackageQualifier is a qualifier for a package, a key-value pair.
 
-In the pURL representation, it is a part of the `<qualifiers>` part of the
-`pkg:<type>/<namespace>/<name>@<version>?<qualifiers>` pURL.
+In the pURL representation, it is a part of the <qualifiers> part of the
+pkg:<type>/<namespace>/<name>@<version>?<qualifiers> pURL.
 
 Qualifiers are optional, each Package type defines own rules for handling them,
 and multiple qualifiers could be attached to the same package.
@@ -116,18 +116,18 @@ type PackageQualifier {
 }
 
 """
-PkgSpec allows filtering the list of packages to return.
+PkgSpec allows filtering the list of sources to return in a query.
 
-Each field matches a qualifier from pURL. Use `null` to match on all values at
+Each field matches a qualifier from pURL. Use null to match on all values at
 that level. For example, to get all packages in GUAC backend, use a PkgSpec
-where every field is `null`.
+where every field is null.
 
 Empty string at a field means matching with the empty string. If passing in
 qualifiers, all of the values in the list must match. Since we want to return
-nodes with any number of qualifiers if no qualifiers are passed in the input, we
-must also return the same set of nodes it the qualifiers list is empty. To match
-on nodes that don't contain any qualifier, set `matchOnlyEmptyQualifiers` to
-true. If this field is true, then the qualifiers argument is ignored.
+nodes with any number of qualifiers if no qualifiers are passed in the input,
+we must also return the same set of nodes it the qualifiers list is empty. To
+match on nodes that don't contain any qualifier, set matchOnlyEmptyQualifiers
+to true. If this field is true, then the qualifiers argument is ignored.
 """
 input PkgSpec {
   id: ID
@@ -141,17 +141,13 @@ input PkgSpec {
 }
 
 """
-PackageQualifierSpec is the same as PackageQualifier, but usable as query
-input.
+PackageQualifierSpec allows filtering package qualifiers in a query.
 
-GraphQL does not allow input types to contain composite types and does not allow
-composite types to contain input types. So, although in this case these two
-types are semantically the same, we have to duplicate the definition.
-
-Keys are mandatory, but values could also be `null` if we want to match all
+Keys are mandatory, but values could also be null if we want to match all
 values for a specific key.
 
-TODO(mihaimaruseac): Formalize empty vs null when the schema is fully done
+NOTE: Before the schema becomes stable, we might change the nulability
+requirements of these fields.
 """
 input PackageQualifierSpec {
   key: String!
@@ -159,10 +155,10 @@ input PackageQualifierSpec {
 }
 
 """
-PkgInputSpec specifies a package for a mutation.
+PkgInputSpec specifies a package for mutations.
 
 This is different than PkgSpec because we want to encode mandatory fields:
-`type` and `name`. All optional fields are given empty default values.
+type and name. All optional fields are given empty default values.
 """
 input PkgInputSpec {
   type: String!
@@ -173,27 +169,18 @@ input PkgInputSpec {
   subpath: String = ""
 }
 
-"""
-PackageQualifierInputSpec is the same as PackageQualifier, but usable as
-mutation input.
-
-GraphQL does not allow input types to contain composite types and does not allow
-composite types to contain input types. So, although in this case these two
-types are semantically the same, we have to duplicate the definition.
-
-Both fields are mandatory.
-"""
+"PackageQualifierInputSpec allows specifying package qualifiers in mutations."
 input PackageQualifierInputSpec {
   key: String!
   value: String!
 }
 
 extend type Query {
-  "Returns all packages"
+  "Returns all packages matching a filter."
   packages(pkgSpec: PkgSpec): [Package!]!
 }
 
 extend type Mutation {
-  "Ingest a new package. Returns the ingested package trie"
+  "Ingests a new package and returns the corresponding package trie path."
   ingestPackage(pkg: PkgInputSpec!): Package!
 }
