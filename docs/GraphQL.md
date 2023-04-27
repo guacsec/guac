@@ -1,5 +1,13 @@
 # GUAC GraphQL definitions
 
+[GraphQL](https://graphql.org/) allows developers to define an API for a
+service using a definition language and then serve this API via a single
+endpoint. GraphQL also represents the runtime for fulfilling these queries. The
+design of GraphQL is that queries can ask exactly for the data they need and
+only receive that data. This empowers clients to be in control and more
+resilient in the face of API changes. To get started, consult [the official
+documentation](https://graphql.org/learn/).
+
 This documents provides some insight into how the GraphQL API matches the [GUAC
 ontology](https://github.com/guacsec/guac/blob/main/docs/ontology.md) and its
 [definition](https://github.com/guacsec/guac/blob/main/docs/ontology-definitions.md).
