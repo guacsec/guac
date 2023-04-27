@@ -595,7 +595,7 @@ type SLSA {
 ```
 
 Finally, the last evidence tree defined in GUAC is attaching SBOM information to
-packages and sources:
+packages and artifacts:
 
 ```gql
 type HasSBOM {

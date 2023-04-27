@@ -23,7 +23,6 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -293,12 +292,9 @@ func (c *demoClient) addHasSBOMIfMatch(out []*model.HasSbom,
 	filter *model.HasSBOMSpec, link *hasSBOMStruct) (
 	[]*model.HasSbom, error) {
 
-	algorithm := strings.ToLower(nilToEmpty(filter.Algorithm))
-	digest := strings.ToLower(nilToEmpty(filter.Digest))
-
 	if noMatch(filter.URI, link.uri) ||
-		noMatch(ptrfrom.String(algorithm), link.algorithm) ||
-		noMatch(ptrfrom.String(digest), link.digest) ||
+		noMatch(toLower(filter.Algorithm), link.algorithm) ||
+		noMatch(toLower(filter.Digest), link.digest) ||
 		noMatch(filter.DownloadLocation, link.downloadLocation) ||
 		noMatchAnnotations(filter.Annotations, link.annotations) ||
 		noMatch(filter.Origin, link.origin) ||
@@ -359,9 +355,6 @@ func getAnnotationsFromInput(annotationInput []*model.AnnotationInputSpec) map[s
 
 func getAnnotationsFromFilter(annotationFilter []*model.AnnotationSpec) map[string]string {
 	annotationMap := map[string]string{}
-	if annotationFilter == nil {
-		return annotationMap
-	}
 	for _, kv := range annotationFilter {
 		annotationMap[kv.Key] = kv.Value
 	}
@@ -369,7 +362,7 @@ func getAnnotationsFromFilter(annotationFilter []*model.AnnotationSpec) map[stri
 }
 
 func noMatchAnnotations(annotationFilter []*model.AnnotationSpec, v map[string]string) bool {
-	if annotationFilter == nil && len(annotationFilter) > 0 {
+	if len(annotationFilter) > 0 {
 		return !reflect.DeepEqual(v, getAnnotationsFromFilter(annotationFilter))
 	}
 	return false
