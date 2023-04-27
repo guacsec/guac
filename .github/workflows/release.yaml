@@ -53,7 +53,14 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          pack build ${IMAGE_URI}:${{ github.ref_name }} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR}
+          VERSION=$(shell git describe --tags --always)
+          COMMIT=$(shell git rev-parse HEAD)
+          BUILD=$(shell date +%FT%T%z)
+          PKG=github.com/${{ github.repository }}/pkg/version
+          pack build ${IMAGE_URI}:${{ github.ref_name }} --builder ${BUILDER} --buildpack ${BUILDPACK} \
+            --publish \
+            --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR} \
+            --env BP_GO_BUILD_LDFLAGS="-X $(PKG).Version=$(VERSION) -X $(PKG).Commit=$(COMMIT) -X $(PKG).Date=$(BUILD)"
           echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})" >> $GITHUB_OUTPUT
         shell: bash
         env:
