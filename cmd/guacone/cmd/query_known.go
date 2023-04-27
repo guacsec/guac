@@ -156,13 +156,21 @@ var queryKnownCmd = &cobra.Command{
 					logger.Fatalf("error querying for package version neighbors: %v", err)
 				}
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSrcAtStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, occurrenceStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, certifyVulnStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSBOMStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSLSAStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, vexLinkStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, pkgEqualStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, badLinkStr))
+				t.AppendSeparator()
 				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, goodLinkStr))
 				path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id,
 					pkgResponse.Packages[0].Namespaces[0].Names[0].Id, pkgResponse.Packages[0].Namespaces[0].Id,
@@ -194,9 +202,13 @@ var queryKnownCmd = &cobra.Command{
 			}
 
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, hasSrcAtStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, occurrenceStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, scorecardStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, badLinkStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, goodLinkStr))
 			path = append([]string{srcResponse.Sources[0].Namespaces[0].Names[0].Id,
 				srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id}, neighborsPath...)
@@ -223,11 +235,17 @@ var queryKnownCmd = &cobra.Command{
 			}
 
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hashEqualStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, occurrenceStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSBOMStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSLSAStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, vexLinkStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, badLinkStr))
+			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, goodLinkStr))
 			path = append([]string{artifactResponse.Artifacts[0].Id}, neighborsPath...)
 		default:
