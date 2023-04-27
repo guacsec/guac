@@ -47,12 +47,6 @@ func (b *builderStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 
 func (n *builderStruct) setHasSLSAs(id uint32) { n.hasSLSAs = append(n.hasSLSAs, id) }
 
-// TODO make these into test cases
-// func registerAllBuilders(client *demoClient) {
-// 	client.registerBuilder("https://github.com/Attestations/GitHubHostedActions@v1")
-// 	client.registerBuilder("https://tekton.dev/chains/v2")
-// }
-
 func (c *demoClient) builderByKey(uri string) (*builderStruct, error) {
 	if b, ok := c.builders[uri]; ok {
 		return b, nil

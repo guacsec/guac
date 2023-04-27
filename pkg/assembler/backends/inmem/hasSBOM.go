@@ -216,9 +216,12 @@ func (c *demoClient) convHasSBOM(in *hasSBOMStruct) (*model.HasSbom, error) {
 
 func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	funcName := "HasSBOM"
-	if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
-		return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+	if filter != nil {
+		if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
 	}
+
 	c.m.RLock()
 	defer c.m.RUnlock()
 

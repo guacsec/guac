@@ -262,11 +262,14 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 	c.m.RLock()
 	defer c.m.RUnlock()
 	funcName := "CertifyVEXStatement"
-	if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
-		return nil, err
-	}
-	if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, false); err != nil {
-		return nil, err
+
+	if filter != nil {
+		if err := helper.ValidatePackageOrArtifactQueryFilter(filter.Subject); err != nil {
+			return nil, err
+		}
+		if err := helper.ValidateVulnerabilityQueryFilter(filter.Vulnerability, false); err != nil {
+			return nil, err
+		}
 	}
 
 	if filter != nil && filter.ID != nil {
