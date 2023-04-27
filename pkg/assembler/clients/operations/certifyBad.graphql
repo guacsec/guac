@@ -37,7 +37,7 @@ mutation CertifyBadSrc($source: SourceInputSpec!, $certifyBad: CertifyBadInputSp
 
 mutation CertifyBadArtifact($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
   ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   ingestCertifyBad(subject: {artifact: $artifact}, certifyBad: $certifyBad) {
     ...allCertifyBad

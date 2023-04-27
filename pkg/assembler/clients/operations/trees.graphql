@@ -56,7 +56,7 @@ fragment AllSourceTree on Source {
   }
 }
 
-fragment allArtifactTree on Artifact {
+fragment AllArtifactTree on Artifact {
   id
   algorithm
   digest
@@ -114,7 +114,7 @@ fragment AllIsOccurrencesTree on IsOccurrence {
     }
   }
   artifact {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   justification
   origin
@@ -137,12 +137,13 @@ fragment allIsDependencyTree on IsDependency {
 }
 
 fragment allSLSATree on HasSLSA {
+  id
   subject {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   slsa {
     builtFrom {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
     builtBy {
       id
@@ -173,7 +174,7 @@ fragment allCertifyBad on CertifyBad {
       ...AllSourceTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
   }
   origin
@@ -192,7 +193,7 @@ fragment allCertifyGood on CertifyGood {
       ...AllSourceTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
   }
   origin
@@ -203,7 +204,7 @@ fragment allHashEqualTree on HashEqual {
   id
   justification
   artifacts {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   origin
   collector
@@ -214,7 +215,7 @@ fragment allHasSBOMTree on HasSBOM {
   subject {
     __typename
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
     ... on Package {
       ...AllPkgTree
@@ -314,7 +315,7 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
       ...AllPkgTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
   }
   vulnerability {
