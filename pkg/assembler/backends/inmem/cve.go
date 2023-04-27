@@ -17,6 +17,8 @@ package inmem
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -138,11 +140,15 @@ func (c *demoClient) Cve(ctx context.Context, filter *model.CVESpec) ([]*model.C
 		if err != nil {
 			return nil, err
 		}
-		osv, err := c.buildCveResponse(uint32(id), filter)
+		cve, err := c.buildCveResponse(uint32(id), filter)
 		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
 			return nil, err
 		}
-		return []*model.Cve{osv}, nil
+		return []*model.Cve{cve}, nil
 	}
 
 	var out []*model.Cve
@@ -206,25 +212,21 @@ func (c *demoClient) buildCveResponse(id uint32, filter *model.CVESpec) (*model.
 		}
 	}
 
-	node, ok := c.index[id]
-	if !ok {
-		return nil, gqlerror.Errorf("ID does not match existing node")
+	cve, err := byID[*cveNode](id, c)
+	if err != nil {
+		return nil, fmt.Errorf("Could not find node to build cve response, %w", err)
+	}
+	if filter != nil &&
+		(noMatch(toLower(filter.CveID), cve.cveID) ||
+			(filter.Year != nil && *filter.Year != cve.year)) {
+		return nil, nil
 	}
 
-	var csv *model.Cve
-	if cveIDNode, ok := node.(*cveNode); ok {
-		if filter != nil && (noMatch(toLower(filter.CveID), cveIDNode.cveID) ||
-			(filter.Year != nil && *filter.Year != cveIDNode.year)) {
-			return nil, nil
-		}
-		csv = &model.Cve{
-			ID:    nodeID(cveIDNode.id),
-			Year:  cveIDNode.year,
-			CveID: cveIDNode.cveID,
-		}
-	}
-
-	return csv, nil
+	return &model.Cve{
+		ID:    nodeID(cve.id),
+		Year:  cve.year,
+		CveID: cve.cveID,
+	}, nil
 }
 
 func getCveIDFromInput(c *demoClient, input model.CVEInputSpec) (uint32, error) {

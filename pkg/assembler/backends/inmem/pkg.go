@@ -17,6 +17,8 @@ package inmem
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 
@@ -385,6 +387,10 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 		}
 		p, err := c.buildPackageResponse(uint32(id), filter)
 		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
 			return nil, err
 		}
 		return []*model.Package{p}, nil
@@ -513,7 +519,7 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 
 	node, ok := c.index[id]
 	if !ok {
-		return nil, gqlerror.Errorf("ID does not match existing node")
+		return nil, fmt.Errorf("%w : ID does not match existing node", errNotFound)
 	}
 
 	pvl := []*model.PackageVersion{}
@@ -535,7 +541,7 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 		})
 		node, ok = c.index[versionNode.parent]
 		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+			return nil, fmt.Errorf("Internal ID does not match existing node")
 		}
 	}
 
@@ -551,7 +557,7 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 		})
 		node, ok = c.index[versionStruct.parent]
 		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+			return nil, fmt.Errorf("Internal ID does not match existing node")
 		}
 	}
 
@@ -567,13 +573,13 @@ func (c *demoClient) buildPackageResponse(id uint32, filter *model.PkgSpec) (*mo
 		})
 		node, ok = c.index[nameStruct.parent]
 		if !ok {
-			return nil, gqlerror.Errorf("ID does not match existing node")
+			return nil, fmt.Errorf("Internal ID does not match existing node")
 		}
 	}
 
 	namespaceStruct, ok := node.(*pkgNamespaceStruct)
 	if !ok {
-		return nil, gqlerror.Errorf("ID does not match expected node type for package namespace")
+		return nil, fmt.Errorf("%w: ID does not match expected node type for package namespace", errNotFound)
 	}
 	p := model.Package{
 		ID:         nodeID(namespaceStruct.id),

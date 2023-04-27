@@ -17,6 +17,7 @@ package inmem
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -135,6 +136,10 @@ func (c *demoClient) Osv(ctx context.Context, filter *model.OSVSpec) ([]*model.O
 		}
 		osv, err := c.buildOsvResponse(uint32(id), filter)
 		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
 			return nil, err
 		}
 		return []*model.Osv{osv}, nil
