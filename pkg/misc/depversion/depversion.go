@@ -41,9 +41,6 @@ func vrange(ss ...string) VersionMatchObject {
 // doing [{semver},{semver}] `[\[\(]{1}` + svR + `,` + svR + `[\]\)]{1}`
 var rangeRegexp = regexp.MustCompile(`[\[\(]{1}(v?(?P<semver1>(?P<major1>0|[1-9]\d*)(\.(?P<minor1>0|[1-9]\d*))?(\.(?P<patch1>0|[1-9]\d*))?(?:-(?P<prerelease1>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata1>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)?),\s*(v?(?P<semver2>(?P<major2>0|[1-9]\d*)(\.(?P<minor2>0|[1-9]\d*))?(\.(?P<patch2>0|[1-9]\d*))?(?:-(?P<prerelease2>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata2>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)?)[\]\)]{1}`)
 
-// var fuzzySemverRegexp = `v?(0|[1-9]\d*)(\.(0|[1-9]\d*))?(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?`
-var svR = regexp.MustCompile(`v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<minor>0|[1-9]\d*))?(\.(?P<patch>0|[1-9]\d*))?(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)`)
-
 // check for exac semvers
 var exactSvR = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<minor>0|[1-9]\d*))?(\.(?P<patch>0|[1-9]\d*))?(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
@@ -81,10 +78,6 @@ func isValidConstraint(s string) bool {
 
 func isAlmostValidConstraint(s string) bool {
 	return almostValidConstraint.Match([]byte(s))
-}
-
-func getWildcardConstraint(s string) bool {
-	return exactSvRWithWildcard.Match([]byte(s))
 }
 
 func isDashRange(s string) bool {
