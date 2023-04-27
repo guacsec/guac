@@ -84,7 +84,6 @@ type srcNameNode struct {
 	srcMapLinks    []uint32
 	scorecardLinks []uint32
 	occurrences    []uint32
-	hasSBOMs       []uint32
 	badLinks       []uint32
 	goodLinks      []uint32
 }
@@ -120,9 +119,6 @@ func (n *srcNameNode) Neighbors(allowedEdges edgeMap) []uint32 {
 	if allowedEdges[model.EdgeSourceIsOccurrence] {
 		out = append(out, n.occurrences...)
 	}
-	if allowedEdges[model.EdgeSourceHasSbom] {
-		out = append(out, n.hasSBOMs...)
-	}
 	if allowedEdges[model.EdgeSourceCertifyBad] {
 		out = append(out, n.badLinks...)
 	}
@@ -145,7 +141,6 @@ func (n *srcNameNode) BuildModelNode(c *demoClient) (model.Node, error) {
 func (p *srcNameNode) setSrcMapLinks(id uint32)      { p.srcMapLinks = append(p.srcMapLinks, id) }
 func (p *srcNameNode) setScorecardLinks(id uint32)   { p.scorecardLinks = append(p.scorecardLinks, id) }
 func (p *srcNameNode) setOccurrenceLinks(id uint32)  { p.occurrences = append(p.occurrences, id) }
-func (p *srcNameNode) setHasSBOM(id uint32)          { p.hasSBOMs = append(p.hasSBOMs, id) }
 func (p *srcNameNode) setCertifyBadLinks(id uint32)  { p.badLinks = append(p.badLinks, id) }
 func (p *srcNameNode) setCertifyGoodLinks(id uint32) { p.goodLinks = append(p.goodLinks, id) }
 

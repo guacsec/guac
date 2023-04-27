@@ -20,7 +20,7 @@
 type HasSBOM {
   id: ID!
   "SBOM subject"
-  subject: PackageOrSource!
+  subject: PackageOrArtifact!
   "Identifier for the SBOM document"
   uri: String!
   "Algorithm by which SBOMs digest was computed"
@@ -49,11 +49,11 @@ type Annotation {
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
-Only the package or source can be added, not both.
+Only the package or artifact can be added, not both.
 """
 input HasSBOMSpec {
   id: ID
-  subject: PackageOrSourceSpec
+  subject: PackageOrArtifactSpec
   uri: String
   algorithm: String
   digest: String
@@ -92,6 +92,6 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Certifies that a package or a source has an SBOM."
-  ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+  "Certifies that a package or artifact has an SBOM."
+  ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
 }

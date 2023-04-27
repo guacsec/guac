@@ -26,11 +26,11 @@ mutation HasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
   }
 }
 
-mutation HasSBOMSrc($source: SourceInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-  ingestSource(source: $source) {
-    ...AllSourceTree
+mutation HasSBOMArtifact($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
+  ingestArtifact(artifact: $artifact) {
+    ...allArtifactTree
   }
-  ingestHasSBOM(subject: {source: $source}, hasSBOM: $hasSBOM) {
+  ingestHasSBOM(subject: {artifact: $artifact}, hasSBOM: $hasSBOM) {
     ...allHasSBOMTree
   }
 }

@@ -181,7 +181,7 @@ type ComplexityRoot struct {
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
-		IngestHasSbom         func(childComplexity int, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) int
+		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
 		IngestHasSourceAt     func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHashEqual       func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
@@ -1033,7 +1033,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrSourceInput), args["hasSBOM"].(model.HasSBOMInputSpec)), true
+		return e.complexity.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["hasSBOM"].(model.HasSBOMInputSpec)), true
 
 	case "Mutation.ingestHasSourceAt":
 		if e.complexity.Mutation.IngestHasSourceAt == nil {
@@ -2860,7 +2860,7 @@ extend type Mutation {
 type HasSBOM {
   id: ID!
   "SBOM subject"
-  subject: PackageOrSource!
+  subject: PackageOrArtifact!
   "Identifier for the SBOM document"
   uri: String!
   "Algorithm by which SBOMs digest was computed"
@@ -2889,11 +2889,11 @@ type Annotation {
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
-Only the package or source can be added, not both.
+Only the package or artifact can be added, not both.
 """
 input HasSBOMSpec {
   id: ID
-  subject: PackageOrSourceSpec
+  subject: PackageOrArtifactSpec
   uri: String
   algorithm: String
   digest: String
@@ -2932,8 +2932,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Certifies that a package or a source has an SBOM."
-  ingestHasSBOM(subject: PackageOrSourceInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
+  "Certifies that a package or artifact has an SBOM."
+  ingestHasSBOM(subject: PackageOrArtifactInput!, hasSBOM: HasSBOMInputSpec!): HasSBOM!
 }
 `, BuiltIn: false},
 	{Name: "../schema/hasSLSA.graphql", Input: `#
@@ -3796,6 +3796,7 @@ enum Edge {
   ARTIFACT_CERTIFY_GOOD
   ARTIFACT_CERTIFY_VEX_STATEMENT
   ARTIFACT_HASH_EQUAL
+  ARTIFACT_HAS_SBOM
   ARTIFACT_HAS_SLSA
   ARTIFACT_IS_OCCURRENCE
   BUILDER_HAS_SLSA
@@ -3821,7 +3822,6 @@ enum Edge {
   SOURCE_CERTIFY_BAD
   SOURCE_CERTIFY_GOOD
   SOURCE_CERTIFY_SCORECARD
-  SOURCE_HAS_SBOM
   SOURCE_HAS_SOURCE_AT
   SOURCE_IS_OCCURRENCE
 
@@ -3843,8 +3843,8 @@ enum Edge {
   CERTIFY_VULN_OSV
   CERTIFY_VULN_PACKAGE
   HASH_EQUAL_ARTIFACT
+  HAS_SBOM_ARTIFACT
   HAS_SBOM_PACKAGE
-  HAS_SBOM_SOURCE
   HAS_SLSA_BUILT_BY
   HAS_SLSA_MATERIALS
   HAS_SLSA_SUBJECT
