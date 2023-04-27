@@ -3939,6 +3939,7 @@ const (
 	EdgeArtifactCertifyGood         Edge = "ARTIFACT_CERTIFY_GOOD"
 	EdgeArtifactCertifyVexStatement Edge = "ARTIFACT_CERTIFY_VEX_STATEMENT"
 	EdgeArtifactHashEqual           Edge = "ARTIFACT_HASH_EQUAL"
+	EdgeArtifactHasSbom             Edge = "ARTIFACT_HAS_SBOM"
 	EdgeArtifactHasSlsa             Edge = "ARTIFACT_HAS_SLSA"
 	EdgeArtifactIsOccurrence        Edge = "ARTIFACT_IS_OCCURRENCE"
 	EdgeBuilderHasSlsa              Edge = "BUILDER_HAS_SLSA"
@@ -3964,7 +3965,6 @@ const (
 	EdgeSourceCertifyBad            Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood           Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyScorecard      Edge = "SOURCE_CERTIFY_SCORECARD"
-	EdgeSourceHasSbom               Edge = "SOURCE_HAS_SBOM"
 	EdgeSourceHasSourceAt           Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence          Edge = "SOURCE_IS_OCCURRENCE"
 	EdgeCertifyBadArtifact          Edge = "CERTIFY_BAD_ARTIFACT"
@@ -3985,8 +3985,8 @@ const (
 	EdgeCertifyVulnOsv              Edge = "CERTIFY_VULN_OSV"
 	EdgeCertifyVulnPackage          Edge = "CERTIFY_VULN_PACKAGE"
 	EdgeHashEqualArtifact           Edge = "HASH_EQUAL_ARTIFACT"
+	EdgeHasSbomArtifact             Edge = "HAS_SBOM_ARTIFACT"
 	EdgeHasSbomPackage              Edge = "HAS_SBOM_PACKAGE"
-	EdgeHasSbomSource               Edge = "HAS_SBOM_SOURCE"
 	EdgeHasSlsaBuiltBy              Edge = "HAS_SLSA_BUILT_BY"
 	EdgeHasSlsaMaterials            Edge = "HAS_SLSA_MATERIALS"
 	EdgeHasSlsaSubject              Edge = "HAS_SLSA_SUBJECT"
@@ -4096,6 +4096,214 @@ type GHSAsResponse struct {
 // GetGhsa returns GHSAsResponse.Ghsa, and is useful for accessing the field via an interface.
 func (v *GHSAsResponse) GetGhsa() []GHSAsGhsaGHSA { return v.Ghsa }
 
+// HasSBOMArtifactIngestArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type HasSBOMArtifactIngestArtifact struct {
+	allArtifactTree `json:"-"`
+}
+
+// GetId returns HasSBOMArtifactIngestArtifact.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestArtifact) GetId() string { return v.allArtifactTree.Id }
+
+// GetAlgorithm returns HasSBOMArtifactIngestArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns HasSBOMArtifactIngestArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *HasSBOMArtifactIngestArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMArtifactIngestArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMArtifactIngestArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMArtifactIngestArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *HasSBOMArtifactIngestArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMArtifactIngestArtifact) __premarshalJSON() (*__premarshalHasSBOMArtifactIngestArtifact, error) {
+	var retval __premarshalHasSBOMArtifactIngestArtifact
+
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
+
+// HasSBOMArtifactIngestHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+type HasSBOMArtifactIngestHasSBOM struct {
+	allHasSBOMTree `json:"-"`
+}
+
+// GetId returns HasSBOMArtifactIngestHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
+
+// GetSubject returns HasSBOMArtifactIngestHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrArtifact {
+	return v.allHasSBOMTree.Subject
+}
+
+// GetUri returns HasSBOMArtifactIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
+
+// GetAlgorithm returns HasSBOMArtifactIngestHasSBOM.Algorithm, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetAlgorithm() string { return v.allHasSBOMTree.Algorithm }
+
+// GetDigest returns HasSBOMArtifactIngestHasSBOM.Digest, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetDigest() string { return v.allHasSBOMTree.Digest }
+
+// GetDownloadLocation returns HasSBOMArtifactIngestHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetDownloadLocation() string {
+	return v.allHasSBOMTree.DownloadLocation
+}
+
+// GetAnnotations returns HasSBOMArtifactIngestHasSBOM.Annotations, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
+	return v.allHasSBOMTree.Annotations
+}
+
+// GetOrigin returns HasSBOMArtifactIngestHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
+
+// GetCollector returns HasSBOMArtifactIngestHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactIngestHasSBOM) GetCollector() string { return v.allHasSBOMTree.Collector }
+
+func (v *HasSBOMArtifactIngestHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMArtifactIngestHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMArtifactIngestHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMArtifactIngestHasSBOM struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Uri string `json:"uri"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+
+	DownloadLocation string `json:"downloadLocation"`
+
+	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSBOMArtifactIngestHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMArtifactIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMArtifactIngestHasSBOM, error) {
+	var retval __premarshalHasSBOMArtifactIngestHasSBOM
+
+	retval.Id = v.allHasSBOMTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.allHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Unable to marshal HasSBOMArtifactIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Uri = v.allHasSBOMTree.Uri
+	retval.Algorithm = v.allHasSBOMTree.Algorithm
+	retval.Digest = v.allHasSBOMTree.Digest
+	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
+	retval.Annotations = v.allHasSBOMTree.Annotations
+	retval.Origin = v.allHasSBOMTree.Origin
+	retval.Collector = v.allHasSBOMTree.Collector
+	return &retval, nil
+}
+
+// HasSBOMArtifactResponse is returned by HasSBOMArtifact on success.
+type HasSBOMArtifactResponse struct {
+	// Ingests a new artifact and returns it.
+	IngestArtifact HasSBOMArtifactIngestArtifact `json:"ingestArtifact"`
+	// Certifies that a package or artifact has an SBOM.
+	IngestHasSBOM HasSBOMArtifactIngestHasSBOM `json:"ingestHasSBOM"`
+}
+
+// GetIngestArtifact returns HasSBOMArtifactResponse.IngestArtifact, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactResponse) GetIngestArtifact() HasSBOMArtifactIngestArtifact {
+	return v.IngestArtifact
+}
+
+// GetIngestHasSBOM returns HasSBOMArtifactResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
+func (v *HasSBOMArtifactResponse) GetIngestHasSBOM() HasSBOMArtifactIngestHasSBOM {
+	return v.IngestHasSBOM
+}
+
 // HasSBOMInputSpec is the same as HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
 	Uri              string                `json:"uri"`
@@ -4137,7 +4345,7 @@ type HasSBOMPkgIngestHasSBOM struct {
 func (v *HasSBOMPkgIngestHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 
 // GetSubject returns HasSBOMPkgIngestHasSBOM.Subject, and is useful for accessing the field via an interface.
-func (v *HasSBOMPkgIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+func (v *HasSBOMPkgIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrArtifact {
 	return v.allHasSBOMTree.Subject
 }
 
@@ -4228,7 +4436,7 @@ func (v *HasSBOMPkgIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMPkgIng
 		dst := &retval.Subject
 		src := v.allHasSBOMTree.Subject
 		var err error
-		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrArtifact(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -4331,7 +4539,7 @@ func (v *HasSBOMPkgIngestPackage) __premarshalJSON() (*__premarshalHasSBOMPkgIng
 type HasSBOMPkgResponse struct {
 	// Ingests a new package and returns the corresponding package trie path.
 	IngestPackage HasSBOMPkgIngestPackage `json:"ingestPackage"`
-	// Certifies that a package or a source has an SBOM.
+	// Certifies that a package or artifact has an SBOM.
 	IngestHasSBOM HasSBOMPkgIngestHasSBOM `json:"ingestHasSBOM"`
 }
 
@@ -4340,216 +4548,6 @@ func (v *HasSBOMPkgResponse) GetIngestPackage() HasSBOMPkgIngestPackage { return
 
 // GetIngestHasSBOM returns HasSBOMPkgResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgResponse) GetIngestHasSBOM() HasSBOMPkgIngestHasSBOM { return v.IngestHasSBOM }
-
-// HasSBOMSrcIngestHasSBOM includes the requested fields of the GraphQL type HasSBOM.
-type HasSBOMSrcIngestHasSBOM struct {
-	allHasSBOMTree `json:"-"`
-}
-
-// GetId returns HasSBOMSrcIngestHasSBOM.Id, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
-
-// GetSubject returns HasSBOMSrcIngestHasSBOM.Subject, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
-	return v.allHasSBOMTree.Subject
-}
-
-// GetUri returns HasSBOMSrcIngestHasSBOM.Uri, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetUri() string { return v.allHasSBOMTree.Uri }
-
-// GetAlgorithm returns HasSBOMSrcIngestHasSBOM.Algorithm, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetAlgorithm() string { return v.allHasSBOMTree.Algorithm }
-
-// GetDigest returns HasSBOMSrcIngestHasSBOM.Digest, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetDigest() string { return v.allHasSBOMTree.Digest }
-
-// GetDownloadLocation returns HasSBOMSrcIngestHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetDownloadLocation() string {
-	return v.allHasSBOMTree.DownloadLocation
-}
-
-// GetAnnotations returns HasSBOMSrcIngestHasSBOM.Annotations, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetAnnotations() []allHasSBOMTreeAnnotationsAnnotation {
-	return v.allHasSBOMTree.Annotations
-}
-
-// GetOrigin returns HasSBOMSrcIngestHasSBOM.Origin, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetOrigin() string { return v.allHasSBOMTree.Origin }
-
-// GetCollector returns HasSBOMSrcIngestHasSBOM.Collector, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestHasSBOM) GetCollector() string { return v.allHasSBOMTree.Collector }
-
-func (v *HasSBOMSrcIngestHasSBOM) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*HasSBOMSrcIngestHasSBOM
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.HasSBOMSrcIngestHasSBOM = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.allHasSBOMTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalHasSBOMSrcIngestHasSBOM struct {
-	Id string `json:"id"`
-
-	Subject json.RawMessage `json:"subject"`
-
-	Uri string `json:"uri"`
-
-	Algorithm string `json:"algorithm"`
-
-	Digest string `json:"digest"`
-
-	DownloadLocation string `json:"downloadLocation"`
-
-	Annotations []allHasSBOMTreeAnnotationsAnnotation `json:"annotations"`
-
-	Origin string `json:"origin"`
-
-	Collector string `json:"collector"`
-}
-
-func (v *HasSBOMSrcIngestHasSBOM) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *HasSBOMSrcIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMSrcIngestHasSBOM, error) {
-	var retval __premarshalHasSBOMSrcIngestHasSBOM
-
-	retval.Id = v.allHasSBOMTree.Id
-	{
-
-		dst := &retval.Subject
-		src := v.allHasSBOMTree.Subject
-		var err error
-		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
-			&src)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"Unable to marshal HasSBOMSrcIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
-		}
-	}
-	retval.Uri = v.allHasSBOMTree.Uri
-	retval.Algorithm = v.allHasSBOMTree.Algorithm
-	retval.Digest = v.allHasSBOMTree.Digest
-	retval.DownloadLocation = v.allHasSBOMTree.DownloadLocation
-	retval.Annotations = v.allHasSBOMTree.Annotations
-	retval.Origin = v.allHasSBOMTree.Origin
-	retval.Collector = v.allHasSBOMTree.Collector
-	return &retval, nil
-}
-
-// HasSBOMSrcIngestSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents the root of the source trie/tree.
-//
-// We map source information to a trie, as a derivative of the pURL specification:
-// each path in the trie represents a type, namespace, name and an optional
-// qualifier that stands for tag/commit information.
-//
-// This node represents the type part of the trie path. It is used to represent
-// the version control system that is being used.
-//
-// Since this node is at the root of the source trie, it is named Source, not
-// SourceType.
-type HasSBOMSrcIngestSource struct {
-	AllSourceTree `json:"-"`
-}
-
-// GetId returns HasSBOMSrcIngestSource.Id, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestSource) GetId() string { return v.AllSourceTree.Id }
-
-// GetType returns HasSBOMSrcIngestSource.Type, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestSource) GetType() string { return v.AllSourceTree.Type }
-
-// GetNamespaces returns HasSBOMSrcIngestSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcIngestSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
-	return v.AllSourceTree.Namespaces
-}
-
-func (v *HasSBOMSrcIngestSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*HasSBOMSrcIngestSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.HasSBOMSrcIngestSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalHasSBOMSrcIngestSource struct {
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *HasSBOMSrcIngestSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *HasSBOMSrcIngestSource) __premarshalJSON() (*__premarshalHasSBOMSrcIngestSource, error) {
-	var retval __premarshalHasSBOMSrcIngestSource
-
-	retval.Id = v.AllSourceTree.Id
-	retval.Type = v.AllSourceTree.Type
-	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
-}
-
-// HasSBOMSrcResponse is returned by HasSBOMSrc on success.
-type HasSBOMSrcResponse struct {
-	// Ingests a new source and returns the corresponding source trie path.
-	IngestSource HasSBOMSrcIngestSource `json:"ingestSource"`
-	// Certifies that a package or a source has an SBOM.
-	IngestHasSBOM HasSBOMSrcIngestHasSBOM `json:"ingestHasSBOM"`
-}
-
-// GetIngestSource returns HasSBOMSrcResponse.IngestSource, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcResponse) GetIngestSource() HasSBOMSrcIngestSource { return v.IngestSource }
-
-// GetIngestHasSBOM returns HasSBOMSrcResponse.IngestHasSBOM, and is useful for accessing the field via an interface.
-func (v *HasSBOMSrcResponse) GetIngestHasSBOM() HasSBOMSrcIngestHasSBOM { return v.IngestHasSBOM }
 
 // HasSourceAtIngestHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
 // The GraphQL type's documentation follows.
@@ -7460,7 +7458,7 @@ func (v *NeighborsNeighborsHasSBOM) GetTypename() *string { return v.Typename }
 func (v *NeighborsNeighborsHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 
 // GetSubject returns NeighborsNeighborsHasSBOM.Subject, and is useful for accessing the field via an interface.
-func (v *NeighborsNeighborsHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+func (v *NeighborsNeighborsHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrArtifact {
 	return v.allHasSBOMTree.Subject
 }
 
@@ -7554,7 +7552,7 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 		dst := &retval.Subject
 		src := v.allHasSBOMTree.Subject
 		var err error
-		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrArtifact(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -10296,7 +10294,7 @@ func (v *NodeNodeHasSBOM) GetTypename() *string { return v.Typename }
 func (v *NodeNodeHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 
 // GetSubject returns NodeNodeHasSBOM.Subject, and is useful for accessing the field via an interface.
-func (v *NodeNodeHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+func (v *NodeNodeHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrArtifact {
 	return v.allHasSBOMTree.Subject
 }
 
@@ -10388,7 +10386,7 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 		dst := &retval.Subject
 		src := v.allHasSBOMTree.Subject
 		var err error
-		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrArtifact(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -12497,7 +12495,7 @@ func (v *PathPathHasSBOM) GetTypename() *string { return v.Typename }
 func (v *PathPathHasSBOM) GetId() string { return v.allHasSBOMTree.Id }
 
 // GetSubject returns PathPathHasSBOM.Subject, and is useful for accessing the field via an interface.
-func (v *PathPathHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrSource {
+func (v *PathPathHasSBOM) GetSubject() allHasSBOMTreeSubjectPackageOrArtifact {
 	return v.allHasSBOMTree.Subject
 }
 
@@ -12589,7 +12587,7 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 		dst := &retval.Subject
 		src := v.allHasSBOMTree.Subject
 		var err error
-		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrArtifact(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -17245,6 +17243,18 @@ type __GHSAsInput struct {
 // GetFilter returns __GHSAsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__GHSAsInput) GetFilter() *GHSASpec { return v.Filter }
 
+// __HasSBOMArtifactInput is used internally by genqlient
+type __HasSBOMArtifactInput struct {
+	Artifact ArtifactInputSpec `json:"artifact"`
+	HasSBOM  HasSBOMInputSpec  `json:"hasSBOM"`
+}
+
+// GetArtifact returns __HasSBOMArtifactInput.Artifact, and is useful for accessing the field via an interface.
+func (v *__HasSBOMArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+
+// GetHasSBOM returns __HasSBOMArtifactInput.HasSBOM, and is useful for accessing the field via an interface.
+func (v *__HasSBOMArtifactInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
+
 // __HasSBOMPkgInput is used internally by genqlient
 type __HasSBOMPkgInput struct {
 	Pkg     PkgInputSpec     `json:"pkg"`
@@ -17256,18 +17266,6 @@ func (v *__HasSBOMPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 
 // GetHasSBOM returns __HasSBOMPkgInput.HasSBOM, and is useful for accessing the field via an interface.
 func (v *__HasSBOMPkgInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
-
-// __HasSBOMSrcInput is used internally by genqlient
-type __HasSBOMSrcInput struct {
-	Source  SourceInputSpec  `json:"source"`
-	HasSBOM HasSBOMInputSpec `json:"hasSBOM"`
-}
-
-// GetSource returns __HasSBOMSrcInput.Source, and is useful for accessing the field via an interface.
-func (v *__HasSBOMSrcInput) GetSource() SourceInputSpec { return v.Source }
-
-// GetHasSBOM returns __HasSBOMSrcInput.HasSBOM, and is useful for accessing the field via an interface.
-func (v *__HasSBOMSrcInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
 
 // __HasSourceAtInput is used internally by genqlient
 type __HasSourceAtInput struct {
@@ -19372,7 +19370,7 @@ func (v *allCertifyVEXStatementVulnerabilityOSV) __premarshalJSON() (*__premarsh
 type allHasSBOMTree struct {
 	Id string `json:"id"`
 	// SBOM subject
-	Subject allHasSBOMTreeSubjectPackageOrSource `json:"-"`
+	Subject allHasSBOMTreeSubjectPackageOrArtifact `json:"-"`
 	// Identifier for the SBOM document
 	Uri string `json:"uri"`
 	// Algorithm by which SBOMs digest was computed
@@ -19393,7 +19391,7 @@ type allHasSBOMTree struct {
 func (v *allHasSBOMTree) GetId() string { return v.Id }
 
 // GetSubject returns allHasSBOMTree.Subject, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTree) GetSubject() allHasSBOMTreeSubjectPackageOrSource { return v.Subject }
+func (v *allHasSBOMTree) GetSubject() allHasSBOMTreeSubjectPackageOrArtifact { return v.Subject }
 
 // GetUri returns allHasSBOMTree.Uri, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTree) GetUri() string { return v.Uri }
@@ -19438,7 +19436,7 @@ func (v *allHasSBOMTree) UnmarshalJSON(b []byte) error {
 		dst := &v.Subject
 		src := firstPass.Subject
 		if len(src) != 0 && string(src) != "null" {
-			err = __unmarshalallHasSBOMTreeSubjectPackageOrSource(
+			err = __unmarshalallHasSBOMTreeSubjectPackageOrArtifact(
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
@@ -19486,7 +19484,7 @@ func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error)
 		dst := &retval.Subject
 		src := v.Subject
 		var err error
-		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrSource(
+		*dst, err = __marshalallHasSBOMTreeSubjectPackageOrArtifact(
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -19518,6 +19516,86 @@ func (v *allHasSBOMTreeAnnotationsAnnotation) GetKey() string { return v.Key }
 
 // GetValue returns allHasSBOMTreeAnnotationsAnnotation.Value, and is useful for accessing the field via an interface.
 func (v *allHasSBOMTreeAnnotationsAnnotation) GetValue() string { return v.Value }
+
+// allHasSBOMTreeSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type allHasSBOMTreeSubjectArtifact struct {
+	Typename        *string `json:"__typename"`
+	allArtifactTree `json:"-"`
+}
+
+// GetTypename returns allHasSBOMTreeSubjectArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns allHasSBOMTreeSubjectArtifact.Id, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectArtifact) GetId() string { return v.allArtifactTree.Id }
+
+// GetAlgorithm returns allHasSBOMTreeSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectArtifact) GetAlgorithm() string { return v.allArtifactTree.Algorithm }
+
+// GetDigest returns allHasSBOMTreeSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *allHasSBOMTreeSubjectArtifact) GetDigest() string { return v.allArtifactTree.Digest }
+
+func (v *allHasSBOMTreeSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*allHasSBOMTreeSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.allHasSBOMTreeSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.allArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalallHasSBOMTreeSubjectArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *allHasSBOMTreeSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *allHasSBOMTreeSubjectArtifact) __premarshalJSON() (*__premarshalallHasSBOMTreeSubjectArtifact, error) {
+	var retval __premarshalallHasSBOMTreeSubjectArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.allArtifactTree.Id
+	retval.Algorithm = v.allArtifactTree.Algorithm
+	retval.Digest = v.allArtifactTree.Digest
+	return &retval, nil
+}
 
 // allHasSBOMTreeSubjectPackage includes the requested fields of the GraphQL type Package.
 // The GraphQL type's documentation follows.
@@ -19608,26 +19686,26 @@ func (v *allHasSBOMTreeSubjectPackage) __premarshalJSON() (*__premarshalallHasSB
 	return &retval, nil
 }
 
-// allHasSBOMTreeSubjectPackageOrSource includes the requested fields of the GraphQL interface PackageOrSource.
+// allHasSBOMTreeSubjectPackageOrArtifact includes the requested fields of the GraphQL interface PackageOrArtifact.
 //
-// allHasSBOMTreeSubjectPackageOrSource is implemented by the following types:
+// allHasSBOMTreeSubjectPackageOrArtifact is implemented by the following types:
 // allHasSBOMTreeSubjectPackage
-// allHasSBOMTreeSubjectSource
+// allHasSBOMTreeSubjectArtifact
 // The GraphQL type's documentation follows.
 //
-// PackageOrSource is a union of Package and Source.
-type allHasSBOMTreeSubjectPackageOrSource interface {
-	implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrSource()
+// PackageOrArtifact is a union of Package and Artifact.
+type allHasSBOMTreeSubjectPackageOrArtifact interface {
+	implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrArtifact()
 	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
 	GetTypename() *string
 }
 
-func (v *allHasSBOMTreeSubjectPackage) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrSource() {
+func (v *allHasSBOMTreeSubjectPackage) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrArtifact() {
 }
-func (v *allHasSBOMTreeSubjectSource) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrSource() {
+func (v *allHasSBOMTreeSubjectArtifact) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrArtifact() {
 }
 
-func __unmarshalallHasSBOMTreeSubjectPackageOrSource(b []byte, v *allHasSBOMTreeSubjectPackageOrSource) error {
+func __unmarshalallHasSBOMTreeSubjectPackageOrArtifact(b []byte, v *allHasSBOMTreeSubjectPackageOrArtifact) error {
 	if string(b) == "null" {
 		return nil
 	}
@@ -19644,19 +19722,19 @@ func __unmarshalallHasSBOMTreeSubjectPackageOrSource(b []byte, v *allHasSBOMTree
 	case "Package":
 		*v = new(allHasSBOMTreeSubjectPackage)
 		return json.Unmarshal(b, *v)
-	case "Source":
-		*v = new(allHasSBOMTreeSubjectSource)
+	case "Artifact":
+		*v = new(allHasSBOMTreeSubjectArtifact)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
-			"response was missing PackageOrSource.__typename")
+			"response was missing PackageOrArtifact.__typename")
 	default:
 		return fmt.Errorf(
-			`unexpected concrete type for allHasSBOMTreeSubjectPackageOrSource: "%v"`, tn.TypeName)
+			`unexpected concrete type for allHasSBOMTreeSubjectPackageOrArtifact: "%v"`, tn.TypeName)
 	}
 }
 
-func __marshalallHasSBOMTreeSubjectPackageOrSource(v *allHasSBOMTreeSubjectPackageOrSource) ([]byte, error) {
+func __marshalallHasSBOMTreeSubjectPackageOrArtifact(v *allHasSBOMTreeSubjectPackageOrArtifact) ([]byte, error) {
 
 	var typename string
 	switch v := (*v).(type) {
@@ -19672,8 +19750,8 @@ func __marshalallHasSBOMTreeSubjectPackageOrSource(v *allHasSBOMTreeSubjectPacka
 			*__premarshalallHasSBOMTreeSubjectPackage
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *allHasSBOMTreeSubjectSource:
-		typename = "Source"
+	case *allHasSBOMTreeSubjectArtifact:
+		typename = "Artifact"
 
 		premarshaled, err := v.__premarshalJSON()
 		if err != nil {
@@ -19681,101 +19759,15 @@ func __marshalallHasSBOMTreeSubjectPackageOrSource(v *allHasSBOMTreeSubjectPacka
 		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*__premarshalallHasSBOMTreeSubjectSource
+			*__premarshalallHasSBOMTreeSubjectArtifact
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
 	default:
 		return nil, fmt.Errorf(
-			`unexpected concrete type for allHasSBOMTreeSubjectPackageOrSource: "%T"`, v)
+			`unexpected concrete type for allHasSBOMTreeSubjectPackageOrArtifact: "%T"`, v)
 	}
-}
-
-// allHasSBOMTreeSubjectSource includes the requested fields of the GraphQL type Source.
-// The GraphQL type's documentation follows.
-//
-// Source represents the root of the source trie/tree.
-//
-// We map source information to a trie, as a derivative of the pURL specification:
-// each path in the trie represents a type, namespace, name and an optional
-// qualifier that stands for tag/commit information.
-//
-// This node represents the type part of the trie path. It is used to represent
-// the version control system that is being used.
-//
-// Since this node is at the root of the source trie, it is named Source, not
-// SourceType.
-type allHasSBOMTreeSubjectSource struct {
-	Typename      *string `json:"__typename"`
-	AllSourceTree `json:"-"`
-}
-
-// GetTypename returns allHasSBOMTreeSubjectSource.Typename, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetTypename() *string { return v.Typename }
-
-// GetId returns allHasSBOMTreeSubjectSource.Id, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetId() string { return v.AllSourceTree.Id }
-
-// GetType returns allHasSBOMTreeSubjectSource.Type, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetType() string { return v.AllSourceTree.Type }
-
-// GetNamespaces returns allHasSBOMTreeSubjectSource.Namespaces, and is useful for accessing the field via an interface.
-func (v *allHasSBOMTreeSubjectSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
-	return v.AllSourceTree.Namespaces
-}
-
-func (v *allHasSBOMTreeSubjectSource) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*allHasSBOMTreeSubjectSource
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.allHasSBOMTreeSubjectSource = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllSourceTree)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalallHasSBOMTreeSubjectSource struct {
-	Typename *string `json:"__typename"`
-
-	Id string `json:"id"`
-
-	Type string `json:"type"`
-
-	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
-}
-
-func (v *allHasSBOMTreeSubjectSource) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *allHasSBOMTreeSubjectSource) __premarshalJSON() (*__premarshalallHasSBOMTreeSubjectSource, error) {
-	var retval __premarshalallHasSBOMTreeSubjectSource
-
-	retval.Typename = v.Typename
-	retval.Id = v.AllSourceTree.Id
-	retval.Type = v.AllSourceTree.Type
-	retval.Namespaces = v.AllSourceTree.Namespaces
-	return &retval, nil
 }
 
 // allHasSourceAt includes the GraphQL fields of HasSourceAt requested by the fragment allHasSourceAt.
@@ -22182,6 +22174,91 @@ fragment AllGHSATree on GHSA {
 	return &data, err
 }
 
+func HasSBOMArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	hasSBOM HasSBOMInputSpec,
+) (*HasSBOMArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSBOMArtifact",
+		Query: `
+mutation HasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
+	ingestArtifact(artifact: $artifact) {
+		... allArtifactTree
+	}
+	ingestHasSBOM(subject: {artifact:$artifact}, hasSBOM: $hasSBOM) {
+		... allHasSBOMTree
+	}
+}
+fragment allArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment allHasSBOMTree on HasSBOM {
+	id
+	subject {
+		__typename
+		... on Artifact {
+			... allArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	uri
+	algorithm
+	digest
+	downloadLocation
+	annotations {
+		key
+		value
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`,
+		Variables: &__HasSBOMArtifactInput{
+			Artifact: artifact,
+			HasSBOM:  hasSBOM,
+		},
+	}
+	var err error
+
+	var data HasSBOMArtifactResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
 func HasSBOMPkg(
 	ctx context.Context,
 	client graphql.Client,
@@ -22224,11 +22301,11 @@ fragment allHasSBOMTree on HasSBOM {
 	id
 	subject {
 		__typename
+		... on Artifact {
+			... allArtifactTree
+		}
 		... on Package {
 			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
 		}
 	}
 	uri
@@ -22242,19 +22319,10 @@ fragment allHasSBOMTree on HasSBOM {
 	origin
 	collector
 }
-fragment AllSourceTree on Source {
+fragment allArtifactTree on Artifact {
 	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
-	}
+	algorithm
+	digest
 }
 `,
 		Variables: &__HasSBOMPkgInput{
@@ -22265,100 +22333,6 @@ fragment AllSourceTree on Source {
 	var err error
 
 	var data HasSBOMPkgResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-func HasSBOMSrc(
-	ctx context.Context,
-	client graphql.Client,
-	source SourceInputSpec,
-	hasSBOM HasSBOMInputSpec,
-) (*HasSBOMSrcResponse, error) {
-	req := &graphql.Request{
-		OpName: "HasSBOMSrc",
-		Query: `
-mutation HasSBOMSrc ($source: SourceInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-	ingestSource(source: $source) {
-		... AllSourceTree
-	}
-	ingestHasSBOM(subject: {source:$source}, hasSBOM: $hasSBOM) {
-		... allHasSBOMTree
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
-	}
-}
-fragment allHasSBOMTree on HasSBOM {
-	id
-	subject {
-		__typename
-		... on Package {
-			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
-		}
-	}
-	uri
-	algorithm
-	digest
-	downloadLocation
-	annotations {
-		key
-		value
-	}
-	origin
-	collector
-}
-fragment AllPkgTree on Package {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			versions {
-				id
-				version
-				qualifiers {
-					key
-					value
-				}
-				subpath
-			}
-		}
-	}
-}
-`,
-		Variables: &__HasSBOMSrcInput{
-			Source:  source,
-			HasSBOM: hasSBOM,
-		},
-	}
-	var err error
-
-	var data HasSBOMSrcResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -23210,11 +23184,11 @@ fragment allHasSBOMTree on HasSBOM {
 	id
 	subject {
 		__typename
+		... on Artifact {
+			... allArtifactTree
+		}
 		... on Package {
 			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
 		}
 	}
 	uri
@@ -23608,11 +23582,11 @@ fragment allHasSBOMTree on HasSBOM {
 	id
 	subject {
 		__typename
+		... on Artifact {
+			... allArtifactTree
+		}
 		... on Package {
 			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
 		}
 	}
 	uri
@@ -24097,11 +24071,11 @@ fragment allHasSBOMTree on HasSBOM {
 	id
 	subject {
 		__typename
+		... on Artifact {
+			... allArtifactTree
+		}
 		... on Package {
 			... AllPkgTree
-		}
-		... on Source {
-			... AllSourceTree
 		}
 	}
 	uri

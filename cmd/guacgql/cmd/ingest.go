@@ -1032,13 +1032,12 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
-	sourceTag := "v0.0.1"
 
 	ingestHasSBOM := []struct {
-		name    string
-		pkg     *model.PkgInputSpec
-		source  *model.SourceInputSpec
-		hasSBOM model.HasSBOMInputSpec
+		name     string
+		pkg      *model.PkgInputSpec
+		artifact *model.ArtifactInputSpec
+		hasSBOM  model.HasSBOMInputSpec
 	}{{
 		name: "uri:location of package SBOM",
 		pkg: &model.PkgInputSpec{
@@ -1063,15 +1062,13 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 			Collector: "Demo ingestion",
 		},
 	}, {
-		name: "uri:location of source SBOM",
-		source: &model.SourceInputSpec{
-			Type:      "git",
-			Namespace: "github",
-			Name:      "github.com/guacsec/guac",
-			Tag:       &sourceTag,
+		name: "uri:location of artifact SBOM",
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
 		},
 		hasSBOM: model.HasSBOMInputSpec{
-			Uri:              "uri:location of source SBOM",
+			Uri:              "uri:location of artifact SBOM",
 			Algorithm:        "sha1",
 			Digest:           "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 			DownloadLocation: "uri: download location of the SBOM",
@@ -1109,14 +1106,12 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 		},
 	}, {
 		name: "uri:location of source SBOM (duplicate)",
-		source: &model.SourceInputSpec{
-			Type:      "git",
-			Namespace: "github",
-			Name:      "github.com/guacsec/guac",
-			Tag:       &sourceTag,
+		artifact: &model.ArtifactInputSpec{
+			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			Algorithm: "sha256",
 		},
 		hasSBOM: model.HasSBOMInputSpec{
-			Uri:              "uri:location of source SBOM",
+			Uri:              "uri:location of artifact SBOM",
 			Algorithm:        "sha1",
 			Digest:           "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 			DownloadLocation: "uri: download location of the SBOM",
@@ -1136,8 +1131,8 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client) {
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}
-		} else if ingest.source != nil {
-			_, err := model.HasSBOMSrc(context.Background(), client, *ingest.source, ingest.hasSBOM)
+		} else if ingest.artifact != nil {
+			_, err := model.HasSBOMArtifact(context.Background(), client, *ingest.artifact, ingest.hasSBOM)
 			if err != nil {
 				logger.Errorf("Error in ingesting: %v\n", err)
 			}

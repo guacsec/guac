@@ -28,7 +28,7 @@ type MutationResolver interface {
 	IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error)
 	IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error)
 	IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error)
-	IngestHasSbom(ctx context.Context, subject model.PackageOrSourceInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error)
+	IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error)
 	IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error)
 	IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error)
 	IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error)
@@ -257,10 +257,10 @@ func (ec *executionContext) field_Mutation_ingestGHSA_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_ingestHasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PackageOrSourceInput
+	var arg0 model.PackageOrArtifactInput
 	if tmp, ok := rawArgs["subject"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNPackageOrSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceInput(ctx, tmp)
+		arg0, err = ec.unmarshalNPackageOrArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1757,7 +1757,7 @@ func (ec *executionContext) _Mutation_ingestHasSBOM(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHasSbom(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["hasSBOM"].(model.HasSBOMInputSpec))
+		return ec.resolvers.Mutation().IngestHasSbom(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["hasSBOM"].(model.HasSBOMInputSpec))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

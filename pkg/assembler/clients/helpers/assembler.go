@@ -270,11 +270,11 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, goodList []as
 
 func ingestHasSBOM(ctx context.Context, client graphql.Client, hasSBOMIngestList []assembler.HasSBOMIngest) error {
 	for _, hb := range hasSBOMIngestList {
-		if hb.Pkg != nil && hb.Src != nil {
+		if hb.Pkg != nil && hb.Artifact != nil {
 			return fmt.Errorf("unable to create hasSBOM with both Pkg and Src subject specified")
 		}
 
-		if hb.Pkg == nil && hb.Src == nil {
+		if hb.Pkg == nil && hb.Artifact == nil {
 			return fmt.Errorf("unable to create hasSBOM without either Pkg and Src ssubject specified")
 		}
 
@@ -284,7 +284,7 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hasSBOMIngestList
 				return err
 			}
 		} else {
-			_, err := model.HasSBOMSrc(ctx, client, *hb.Src, *hb.HasSBOM)
+			_, err := model.HasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM)
 			if err != nil {
 				return err
 			}

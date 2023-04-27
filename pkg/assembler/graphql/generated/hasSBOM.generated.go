@@ -186,9 +186,9 @@ func (ec *executionContext) _HasSBOM_subject(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.PackageOrSource)
+	res := resTmp.(model.PackageOrArtifact)
 	fc.Result = res
-	return ec.marshalNPackageOrSource2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSource(ctx, field.Selections, res)
+	return ec.marshalNPackageOrArtifact2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifact(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HasSBOM_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -198,7 +198,7 @@ func (ec *executionContext) fieldContext_HasSBOM_subject(ctx context.Context, fi
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type PackageOrSource does not have child fields")
+			return nil, errors.New("field of type PackageOrArtifact does not have child fields")
 		},
 	}
 	return fc, nil
@@ -700,7 +700,7 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-			it.Subject, err = ec.unmarshalOPackageOrSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceSpec(ctx, v)
+			it.Subject, err = ec.unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
