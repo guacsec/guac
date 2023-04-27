@@ -84,10 +84,14 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceIn
 		if err != nil {
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		if sourceID == v.sourceID && scorecard.TimeScanned.UTC() == v.timeScanned && scorecard.AggregateScore == v.aggregateScore &&
-			scorecard.ScorecardVersion == v.scorecardVersion && scorecard.ScorecardCommit == v.scorecardCommit && scorecard.Origin == v.origin &&
-			scorecard.Collector == v.collector && reflect.DeepEqual(checksMap, v.checks) {
-
+		if sourceID == v.sourceID &&
+			scorecard.TimeScanned.UTC() == v.timeScanned &&
+			floatEqual(scorecard.AggregateScore, v.aggregateScore) &&
+			scorecard.ScorecardVersion == v.scorecardVersion &&
+			scorecard.ScorecardCommit == v.scorecardCommit &&
+			scorecard.Origin == v.origin &&
+			scorecard.Collector == v.collector &&
+			reflect.DeepEqual(checksMap, v.checks) {
 			collectedScorecardLink = *v
 			duplicate = true
 			break
@@ -159,7 +163,7 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		if exactSource != nil {
-			search = append(search, exactSource.scorecardLinks...)
+			search = exactSource.scorecardLinks
 			foundOne = true
 		}
 	}
@@ -192,10 +196,10 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 func (c *demoClient) addSCIfMatch(out []*model.CertifyScorecard,
 	filter *model.CertifyScorecardSpec, link *scorecardLink) (
 	[]*model.CertifyScorecard, error) {
-	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() == link.timeScanned {
+	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() != link.timeScanned {
 		return out, nil
 	}
-	if filter != nil && filter.AggregateScore != nil && *filter.AggregateScore != link.aggregateScore {
+	if filter != nil && noMatchFloat(filter.AggregateScore, link.aggregateScore) {
 		return out, nil
 	}
 	if filter != nil && noMatchChecks(filter.Checks, link.checks) {

@@ -32,5 +32,8 @@ func Int(v int) *int { return &v }
 // Int64 helps get int64 pointers for test literals
 func Int64(v int64) *int64 { return &v }
 
+// Float64 helps get float64 pofloaters for test literals
+func Float64(v float64) *float64 { return &v }
+
 // String helps get string pointers for test literals
 func String(v string) *string { return &v }
