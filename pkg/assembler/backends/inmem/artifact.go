@@ -82,22 +82,6 @@ func (n *artStruct) setVexLinks(id uint32)         { n.vexLinks = append(n.vexLi
 func (n *artStruct) setCertifyBadLinks(id uint32)  { n.badLinks = append(n.badLinks, id) }
 func (n *artStruct) setCertifyGoodLinks(id uint32) { n.goodLinks = append(n.goodLinks, id) }
 
-// TODO convert to unit tests
-// func registerAllArtifacts(c *demoClient) {
-// 	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
-// 		Algorithm: "sha256",
-// 		Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-// 	})
-// 	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
-// 		Algorithm: "sha1",
-// 		Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
-// 	})
-// 	c.IngestArtifact(context.Background(), &model.ArtifactInputSpec{
-// 		Algorithm: "sha512",
-// 		Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
-// 	})
-// }
-
 // Ingest Artifacts
 
 func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
@@ -229,10 +213,10 @@ func (c *demoClient) buildArtifactResponse(id uint32, filter *model.ArtifactSpec
 		return nil, fmt.Errorf("ID does not match expected node type for artifact, %w", err)
 	}
 
-	if filter != nil && noMatch(filter.Algorithm, artNode.algorithm) {
+	if filter != nil && noMatch(toLower(filter.Algorithm), artNode.algorithm) {
 		return nil, nil
 	}
-	if filter != nil && noMatch(filter.Digest, artNode.digest) {
+	if filter != nil && noMatch(toLower(filter.Digest), artNode.digest) {
 		return nil, nil
 	}
 	art := &model.Artifact{

@@ -238,8 +238,10 @@ func (c *demoClient) artifactMatch(aID uint32, artifactSpec *model.ArtifactSpec)
 
 func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	funcName := "IsOccurrence"
-	if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
-		return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+	if filter != nil {
+		if err := helper.ValidatePackageOrSourceQueryFilter(filter.Subject); err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
 	}
 
 	c.m.RLock()
