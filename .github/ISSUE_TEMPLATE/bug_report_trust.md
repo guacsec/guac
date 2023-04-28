@@ -1,8 +1,8 @@
 ---
-name: Bug report not matching other categories
-about: Create a report to help us improve
-title: "[bug] FILL THIS IN"
-labels: bug
+name: Bug report for issues related to trust information
+about: Create a report related to trust information
+title: "[ingestion bug] FILL THIS IN"
+labels: bug, trust
 assignees: ""
 ---
 
