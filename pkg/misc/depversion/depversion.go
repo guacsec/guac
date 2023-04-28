@@ -48,12 +48,10 @@ func WhichVersionMatches(versions []string, versionRange string) (map[string]boo
 	}
 
 	for _, v := range versions {
-		fmt.Printf("checking version: %v\n", v)
 		vv := ParseVersionValue(v)
 		if vmo.Match(vv) {
 			matchedVersions[v] = true
 		}
-		fmt.Printf("matched: %v\n", matchedVersions[v])
 	}
 
 	return matchedVersions, nil
