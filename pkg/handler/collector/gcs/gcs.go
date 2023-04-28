@@ -29,6 +29,7 @@ import (
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 )
 
 type gcs struct {
@@ -67,7 +68,9 @@ func NewGCSClient(ctx context.Context, poll bool, interval time.Duration) (*gcs,
 	if getCredsPath() == "" {
 		return nil, errors.New("gcs bucket not specified")
 	}
-	client, err := storage.NewClient(ctx, option.WithCredentialsFile(os.Getenv(gcsCredsEnv)))
+	client, err := storage.NewClient(ctx,
+		option.WithCredentialsFile(os.Getenv(gcsCredsEnv)),
+		option.WithUserAgent(version.UserAgent))
 	if err != nil {
 		return nil, err
 	}

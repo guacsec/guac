@@ -29,6 +29,7 @@ import (
 	pb "github.com/guacsec/guac/pkg/handler/collector/deps_dev/internal"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -74,7 +75,9 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 
 	// Connect to the service using TLS.
 	creds := credentials.NewClientTLSFromCert(sysPool, "")
-	conn, err := grpc.Dial("api.deps.dev:443", grpc.WithTransportCredentials(creds))
+	conn, err := grpc.Dial("api.deps.dev:443",
+		grpc.WithTransportCredentials(creds),
+		grpc.WithUserAgent(version.UserAgent))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to api.deps.dev: %w", err)
 	}

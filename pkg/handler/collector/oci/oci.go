@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
 	"github.com/regclient/regclient/types/manifest"
@@ -128,6 +129,7 @@ func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []
 	rcOpts := []regclient.Opt{}
 	rcOpts = append(rcOpts, regclient.WithDockerCreds())
 	rcOpts = append(rcOpts, regclient.WithDockerCerts())
+	rcOpts = append(rcOpts, regclient.WithUserAgent(version.UserAgent))
 
 	if len(tags) > 0 {
 		for _, tag := range tags {

@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/version"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -41,8 +42,9 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "guacingest",
-	Short: "starts the GUAC processor, ingestor and assembler process",
+	Use:     "guacingest",
+	Short:   "starts the GUAC processor, ingestor and assembler process",
+	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		ingest(cmd, args)
 	},

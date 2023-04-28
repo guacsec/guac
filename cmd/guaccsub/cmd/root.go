@@ -26,14 +26,16 @@ import (
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/server"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/version"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "guaccsub",
-	Short: "GUAC collect subscriber service for GUAC collectors",
+	Use:     "guaccsub",
+	Short:   "GUAC collect subscriber service for GUAC collectors",
+	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		port := viper.GetInt("csub-listen-port")
 
