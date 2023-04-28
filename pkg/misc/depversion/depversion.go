@@ -125,16 +125,16 @@ type VersionRange struct {
 	Constraint string
 }
 
-func vrange(ss ...string) VersionMatchObject {
-	var vrSet []VersionRange
-	for _, s := range ss {
-		vrSet = append(vrSet, VersionRange{Constraint: s})
-	}
+// func vrange(ss ...string) VersionMatchObject {
+// 	var vrSet []VersionRange
+// 	for _, s := range ss {
+// 		vrSet = append(vrSet, VersionRange{Constraint: s})
+// 	}
 
-	return VersionMatchObject{
-		VRSet: vrSet,
-	}
-}
+// 	return VersionMatchObject{
+// 		VRSet: vrSet,
+// 	}
+// }
 
 // range regular expression
 // doing [{semver},{semver}] `[\[\(]{1}` + svR + `,` + svR + `[\]\)]{1}`
