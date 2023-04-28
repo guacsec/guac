@@ -22,6 +22,16 @@ type VersionMatchObject struct {
 	Exact *string
 }
 
+// TODO: implement
+func WhichVersionMatches(versions []string, versionRange string) (map[string]bool, error) {
+	return map[string]bool{}, fmt.Errorf("unimplemented")
+}
+
+// TODO: implement for more efficient traversal later
+func DoesRangeInclude(versions []string, versionRange string) (bool, error) {
+	return false, fmt.Errorf("unimplemented")
+}
+
 type VersionRange struct {
 	Constraint string
 }
