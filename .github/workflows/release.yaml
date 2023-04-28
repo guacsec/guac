@@ -56,11 +56,11 @@ jobs:
           VERSION=$(git describe --tags --always)
           COMMIT=$(git rev-parse HEAD)
           BUILD=$(date +%FT%T%z)
-          PKG=github.com/${{ github.repository }}/pkg/version
+          PKG=github.com/guacsec/guac/pkg/version
           pack build ${IMAGE_URI}:${{ github.ref_name }} --builder ${BUILDER} --buildpack ${BUILDPACK} \
             --publish \
             --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR} \
-            --env BP_GO_BUILD_LDFLAGS="-X $(PKG).Version=$(VERSION) -X $(PKG).Commit=$(COMMIT) -X $(PKG).Date=$(BUILD)"
+            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}"
           echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})" >> $GITHUB_OUTPUT
         shell: bash
         env:
