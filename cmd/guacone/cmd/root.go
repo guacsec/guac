@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/version"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -41,8 +42,9 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "guacone",
-	Short: "guacone is an all in one flow cmdline for GUAC",
+	Use:     "guacone",
+	Short:   "guacone is an all in one flow cmdline for GUAC",
+	Version: version.Version,
 }
 
 func Execute() {
