@@ -20,6 +20,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	version "github.com/Masterminds/semver"
 )
 
 var (
@@ -27,19 +29,91 @@ var (
 )
 
 type VersionValue struct {
-	SemVer        *string
-	UnknownString *string
+	SemVer *string
+	Raw    string
 }
 
 type VersionMatchObject struct {
 	VRSet []VersionRange
 	// Exact used in the case where heuristics can't determine semvers
 	Exact *string
+	All   bool
 }
 
-// TODO: implement
 func WhichVersionMatches(versions []string, versionRange string) (map[string]bool, error) {
-	return map[string]bool{}, fmt.Errorf("unimplemented")
+	matchedVersions := map[string]bool{}
+	vmo, err := ParseVersionRange(versionRange)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse ver range: %w", err)
+	}
+
+	for _, v := range versions {
+		vv := ParseVersionValue(v)
+		if vmo.Match(vv) {
+			matchedVersions[v] = true
+		}
+	}
+
+	return matchedVersions, nil
+}
+
+func (vmo *VersionMatchObject) Match(v VersionValue) bool {
+	if vmo.All {
+		return true
+	}
+
+	if vmo.Exact != nil {
+		return v.Raw == *vmo.Exact
+	}
+
+	// else do a semver compare
+	vstr := v.Raw
+	if v.SemVer != nil {
+		vstr = *v.SemVer
+	}
+
+	vcmp, err := version.NewVersion(vstr)
+	if err != nil {
+		// cant match
+		return false
+	}
+
+	for _, vr := range vmo.VRSet {
+		constraints, err := version.NewConstraint(vr.Constraint)
+		if err != nil {
+			continue
+		}
+		if constraints.Check(vcmp) {
+			return true
+		}
+	}
+	return false
+}
+
+func ParseVersionValue(s string) VersionValue {
+
+	vv := VersionValue{Raw: s}
+
+	if isSemver(s) {
+		semver, _, _, _, _, _, err := parseSemver(s)
+		if err != nil {
+			return vv
+		}
+
+		vv.SemVer = &semver
+		return vv
+	} else if almostSemVer(s) {
+		fixedS := fixAlmostSemVer(s)
+		semver, _, _, _, _, _, err := parseSemver(fixedS)
+		if err != nil {
+			return vv
+		}
+
+		vv.SemVer = &semver
+		return vv
+	}
+
+	return vv
 }
 
 // TODO: implement for more efficient traversal later
@@ -73,7 +147,7 @@ var exactSvR = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<min
 var exactSvRWithWildcard = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<minor>x|0|[1-9]\d*))?(\.(?P<patch>0|x|[1-9]\d*))?(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
 // for bad semvers like v1.0.0rc8 that don't include prerelease dashes
-var almostExactSvR = regexp.MustCompile(`^(?P<beforerel>(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*))(?P<afterrel>(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
+var almostExactSvR = regexp.MustCompile(`^v?(?P<beforerel>(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*))(?P<afterrel>(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
 // Regexp that checks for constraints such as ">1.0" and ">=2.3,<3.0"
 var validConstraint = regexp.MustCompile(`^[><~^=]{1,3}v?(?P<semver1>(?P<major1>0|[1-9]\d*)(\.(?P<minor1>0|[1-9]\d*))?(\.(?P<patch1>0|[1-9]\d*))?(?:-(?P<prerelease1>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata1>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)([,\s]?[><~^=]{1,3}v?(?P<semver2>(?P<major2>0|[1-9]\d*)(\.(?P<minor2>0|[1-9]\d*))?(\.(?P<patch2>0|[1-9]\d*))?(?:-(?P<prerelease2>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata2>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?))?$`)
@@ -91,6 +165,10 @@ func almostSemVer(s string) bool {
 func fixAlmostSemVer(s string) string {
 	matches := almostExactSvR.FindStringSubmatch(s)
 	return fmt.Sprintf("%s-%s", matches[almostExactSvR.SubexpIndex("beforerel")], matches[almostExactSvR.SubexpIndex("afterrel")])
+}
+
+func isSemver(s string) bool {
+	return exactSvR.Match([]byte(s))
 }
 
 func isSemVerWildcard(s string) bool {
@@ -111,11 +189,11 @@ func isDashRange(s string) bool {
 
 func ParseVersionRange(s string) (VersionMatchObject, error) {
 	if s == "" {
-		return vrange(">=0.0.0"), nil
+		return VersionMatchObject{All: true}, nil
 	}
 
 	if s == "latest" {
-		return vrange(">=0.0.0"), nil
+		return VersionMatchObject{All: true}, nil
 	}
 
 	// Handle split for "||"s
@@ -219,7 +297,7 @@ func parseSemverHelper(re *regexp.Regexp, s string) (semver, major, minor, patch
 func getConstraint(s string) (string, error) {
 	// TODO Check other unhandled cases like "~=", "^="
 
-	if exactSvR.Match([]byte(s)) {
+	if isSemver(s) {
 		semver, _, _, _, _, _, err := parseSemver(s)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver: %v", err)
