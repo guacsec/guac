@@ -27,7 +27,7 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
       ... AllSourceTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
     ... on Builder {
       ...allBuilderTree
@@ -99,7 +99,7 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
       ... AllSourceTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
     ... on Builder {
       ...allBuilderTree
@@ -171,7 +171,7 @@ query Node($node: ID!) {
       ... AllSourceTree
     }
     ... on Artifact {
-      ...allArtifactTree
+      ...AllArtifactTree
     }
     ... on Builder {
       ...allBuilderTree

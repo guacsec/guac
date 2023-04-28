@@ -94,7 +94,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
-	github.com/jedib0t/go-pretty/v6 v6.4.6 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.16.4 // indirect
 	github.com/letsencrypt/boulder v0.0.0-20221109233200-85aa52084eaf // indirect
@@ -166,6 +165,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v50 v50.2.0
 	github.com/google/osv-scanner v1.3.1
+	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.16

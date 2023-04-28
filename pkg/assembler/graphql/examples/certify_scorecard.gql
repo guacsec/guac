@@ -1,3 +1,18 @@
+fragment allSrcTree on Source {
+  id
+  type
+  namespaces {
+    id
+    namespace
+    names {
+      id
+      name
+      tag
+      commit
+    }
+  }
+}
+
 fragment allCertifyScorecardTree on CertifyScorecard {
   id
   source {

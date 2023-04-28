@@ -19,10 +19,10 @@
 
 mutation HashEqual($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
   artifact: ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   otherArtifact: ingestArtifact(artifact: $otherArtifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual) {
     ...allHashEqualTree

@@ -55,7 +55,7 @@ mutation VexPackageAndOsv($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $vexStatemen
 
 mutation VexArtifactAndCve($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   ingestCVE(cve: $cve) {
     ...AllCveTree
@@ -67,7 +67,7 @@ mutation VexArtifactAndCve($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $
 
 mutation VexArtifactAndGhsa($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   ingestGHSA(ghsa: $ghsa) {
     ...AllGHSATree
@@ -79,7 +79,7 @@ mutation VexArtifactAndGhsa($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!
 
 mutation VexArtifactAndOsv($artifact: ArtifactInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
   ingestArtifact(artifact: $artifact) {
-    ...allArtifactTree
+    ...AllArtifactTree
   }
   ingestOSV(osv: $osv) {
     ...AllOSVTree
