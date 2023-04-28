@@ -79,6 +79,14 @@ func Test_VersionRangeParse(t *testing.T) {
 			},
 		},
 		{
+			input: ">=v1.0.0rc8",
+			expect: VersionMatchObject{
+				VRSet: []VersionRange{
+					{">=1.0.0-rc8"},
+				},
+			},
+		},
+		{
 			input: "[1.5.0,1.7.0]",
 			expect: VersionMatchObject{
 				VRSet: []VersionRange{
@@ -261,6 +269,67 @@ func Test_VersionRangeParse(t *testing.T) {
 				return
 			}
 
+			if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_ParseVersionValue(t *testing.T) {
+	testCases := []struct {
+		input  string
+		expect VersionValue
+	}{
+		{
+			input: "",
+			expect: VersionValue{
+				UnknownString: ptrfrom.String(""),
+			},
+		},
+		{
+			input: "1.2.3",
+			expect: VersionValue{
+				SemVer: ptrfrom.String("1.2.3"),
+			},
+		},
+		{
+			input: "v1.2.3",
+			expect: VersionValue{
+				SemVer: ptrfrom.String("1.2.3"),
+			},
+		},
+		{
+			input: "v1.2",
+			expect: VersionValue{
+				// Should be 1.2.0 to be precise, but good enough for now
+				SemVer: ptrfrom.String("1.2"),
+			},
+		},
+		{
+			input: "v1.2.3-rc8",
+			expect: VersionValue{
+				SemVer: ptrfrom.String("1.2.3-rc8"),
+			},
+		},
+		{
+			input: "v1.2.3rc8",
+			expect: VersionValue{
+				SemVer: ptrfrom.String("1.2.3-rc8"),
+			},
+		},
+		{
+			input: "1.2.3rc8",
+			expect: VersionValue{
+				SemVer: ptrfrom.String("1.2.3-rc8"),
+			},
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("parsing version range %s", tt.input), func(t *testing.T) {
+
+			got := ParseVersionValue(tt.input)
 			if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
 				t.Errorf("(-want +got):\n%s", diff)
 			}

@@ -20,6 +20,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 )
 
 var (
@@ -37,9 +39,37 @@ type VersionMatchObject struct {
 	Exact *string
 }
 
+/*
 // TODO: implement
 func WhichVersionMatches(versions []string, versionRange string) (map[string]bool, error) {
+
+	vmo, err := ParseVersionRange(versionRange)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse ver range: %w", err)
+	}
 	return map[string]bool{}, fmt.Errorf("unimplemented")
+}
+*/
+func ParseVersionValue(s string) VersionValue {
+
+	if isSemver(s) {
+		semver, _, _, _, _, _, err := parseSemver(s)
+		if err != nil {
+			return VersionValue{UnknownString: ptrfrom.String(s)}
+		}
+
+		return VersionValue{SemVer: &semver}
+	} else if almostSemVer(s) {
+		fixedS := fixAlmostSemVer(s)
+		semver, _, _, _, _, _, err := parseSemver(fixedS)
+		if err != nil {
+			return VersionValue{UnknownString: ptrfrom.String(s)}
+		}
+
+		return VersionValue{SemVer: &semver}
+	}
+
+	return VersionValue{UnknownString: ptrfrom.String(s)}
 }
 
 // TODO: implement for more efficient traversal later
@@ -73,7 +103,7 @@ var exactSvR = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<min
 var exactSvRWithWildcard = regexp.MustCompile(`^v?(?P<semver>(?P<major>0|[1-9]\d*)(\.(?P<minor>x|0|[1-9]\d*))?(\.(?P<patch>0|x|[1-9]\d*))?(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
 // for bad semvers like v1.0.0rc8 that don't include prerelease dashes
-var almostExactSvR = regexp.MustCompile(`^(?P<beforerel>(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*))(?P<afterrel>(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
+var almostExactSvR = regexp.MustCompile(`^v?(?P<beforerel>(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*))(?P<afterrel>(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$`)
 
 // Regexp that checks for constraints such as ">1.0" and ">=2.3,<3.0"
 var validConstraint = regexp.MustCompile(`^[><~^=]{1,3}v?(?P<semver1>(?P<major1>0|[1-9]\d*)(\.(?P<minor1>0|[1-9]\d*))?(\.(?P<patch1>0|[1-9]\d*))?(?:-(?P<prerelease1>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata1>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)([,\s]?[><~^=]{1,3}v?(?P<semver2>(?P<major2>0|[1-9]\d*)(\.(?P<minor2>0|[1-9]\d*))?(\.(?P<patch2>0|[1-9]\d*))?(?:-(?P<prerelease2>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata2>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?))?$`)
@@ -91,6 +121,10 @@ func almostSemVer(s string) bool {
 func fixAlmostSemVer(s string) string {
 	matches := almostExactSvR.FindStringSubmatch(s)
 	return fmt.Sprintf("%s-%s", matches[almostExactSvR.SubexpIndex("beforerel")], matches[almostExactSvR.SubexpIndex("afterrel")])
+}
+
+func isSemver(s string) bool {
+	return exactSvR.Match([]byte(s))
 }
 
 func isSemVerWildcard(s string) bool {
@@ -219,7 +253,7 @@ func parseSemverHelper(re *regexp.Regexp, s string) (semver, major, minor, patch
 func getConstraint(s string) (string, error) {
 	// TODO Check other unhandled cases like "~=", "^="
 
-	if exactSvR.Match([]byte(s)) {
+	if isSemver(s) {
 		semver, _, _, _, _, _, err := parseSemver(s)
 		if err != nil {
 			return "", fmt.Errorf("unable to parse semver: %v", err)
