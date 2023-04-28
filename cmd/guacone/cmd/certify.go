@@ -167,7 +167,11 @@ func validateCertifyFlags(graphqlEndpoint, certifyType, justification string, go
 		return opts, fmt.Errorf("expected positional argument for subject")
 	}
 
-	opts.subject = args[0]
+	if len(args) > 0 {
+		opts.subject = args[0]
+	} else {
+		return opts, fmt.Errorf("expected subject input to be purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)")
+	}
 
 	return opts, nil
 }
