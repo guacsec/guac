@@ -34,17 +34,20 @@ import (
 )
 
 const (
-	hashEqualStr   string = "hashEqual"
-	scorecardStr   string = "scorecard"
-	occurrenceStr  string = "occurrence"
-	hasSrcAtStr    string = "hasSrcAt"
-	hasSBOMStr     string = "hasSBOM"
-	hasSLSAStr     string = "hasSLSA"
-	certifyVulnStr string = "certifyVuln"
-	vexLinkStr     string = "vexLink"
-	badLinkStr     string = "badLink"
-	goodLinkStr    string = "goodLink"
-	pkgEqualStr    string = "pkgEqual"
+	hashEqualStr        string = "hashEqual"
+	scorecardStr        string = "scorecard"
+	occurrenceStr       string = "occurrence"
+	hasSrcAtStr         string = "hasSrcAt"
+	hasSBOMStr          string = "hasSBOM"
+	hasSLSAStr          string = "hasSLSA"
+	certifyVulnStr      string = "certifyVuln"
+	vexLinkStr          string = "vexLink"
+	badLinkStr          string = "badLink"
+	goodLinkStr         string = "goodLink"
+	pkgEqualStr         string = "pkgEqual"
+	packageSubjectType  string = "package"
+	sourceSubjectType   string = "source"
+	artifactSubjectType string = "artifact"
 )
 
 type queryKnownOptions struct {
@@ -109,7 +112,7 @@ var queryKnownCmd = &cobra.Command{
 		t.AppendHeader(rowHeader)
 		path := []string{}
 		switch opts.subjectType {
-		case "package":
+		case packageSubjectType:
 			pkgInput, err := helpers.PurlToPkg(opts.subject)
 			if err != nil {
 				logger.Fatalf("failed to parse PURL: %v", err)
@@ -144,9 +147,11 @@ var queryKnownCmd = &cobra.Command{
 				if err != nil {
 					logger.Fatalf("error querying for package name neighbors: %v", err)
 				}
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, hasSrcAtStr))
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, badLinkStr))
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, goodLinkStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, hasSrcAtStr, packageSubjectType))
+				t.AppendSeparator()
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, badLinkStr, packageSubjectType))
+				t.AppendSeparator()
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, goodLinkStr, packageSubjectType))
 				path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Id,
 					pkgResponse.Packages[0].Namespaces[0].Id,
 					pkgResponse.Packages[0].Id}, neighborsPath...)
@@ -155,28 +160,28 @@ var queryKnownCmd = &cobra.Command{
 				if err != nil {
 					logger.Fatalf("error querying for package version neighbors: %v", err)
 				}
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSrcAtStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSrcAtStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, occurrenceStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, occurrenceStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, certifyVulnStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, certifyVulnStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSBOMStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSBOMStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSLSAStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSLSAStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, vexLinkStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, vexLinkStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, pkgEqualStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, pkgEqualStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, badLinkStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, badLinkStr, packageSubjectType))
 				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, goodLinkStr))
+				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, goodLinkStr, packageSubjectType))
 				path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id,
 					pkgResponse.Packages[0].Namespaces[0].Names[0].Id, pkgResponse.Packages[0].Namespaces[0].Id,
 					pkgResponse.Packages[0].Id}, neighborsPath...)
 			}
-		case "source":
+		case sourceSubjectType:
 			srcInput, err := helpers.VcsToSrc(opts.subject)
 			if err != nil {
 				logger.Fatalf("failed to parse source: %v", err)
@@ -201,18 +206,18 @@ var queryKnownCmd = &cobra.Command{
 				logger.Fatalf("error querying for source neighbors: %v", err)
 			}
 
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, hasSrcAtStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, hasSrcAtStr, sourceSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, occurrenceStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, occurrenceStr, sourceSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, scorecardStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, scorecardStr, sourceSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, badLinkStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, badLinkStr, sourceSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, goodLinkStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, goodLinkStr, sourceSubjectType))
 			path = append([]string{srcResponse.Sources[0].Namespaces[0].Names[0].Id,
 				srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id}, neighborsPath...)
-		case "artifact":
+		case artifactSubjectType:
 			split := strings.Split(opts.subject, ":")
 			if len(split) != 2 {
 				logger.Fatalf("failed to parse artifact. Needs to be in algorithm:digest form")
@@ -234,19 +239,19 @@ var queryKnownCmd = &cobra.Command{
 				logger.Fatalf("error querying for artifact neighbors: %v", err)
 			}
 
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hashEqualStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hashEqualStr, artifactSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, occurrenceStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, occurrenceStr, artifactSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSBOMStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSBOMStr, artifactSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSLSAStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hasSLSAStr, artifactSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, vexLinkStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, vexLinkStr, artifactSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, badLinkStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, badLinkStr, artifactSubjectType))
 			t.AppendSeparator()
-			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, goodLinkStr))
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, goodLinkStr, artifactSubjectType))
 			path = append([]string{artifactResponse.Artifacts[0].Id}, neighborsPath...)
 		default:
 			logger.Fatalf("expected type to be either a package, source or artifact")
@@ -305,7 +310,7 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 	return collectedNeighbors, path, nil
 }
 
-func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collectedNeighbors *neighbors, nodeType string) []table.Row {
+func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collectedNeighbors *neighbors, nodeType string, subjectType string) []table.Row {
 	logger := logging.FromContext(ctx)
 	tableRows := []table.Row{}
 	switch nodeType {
@@ -371,13 +376,21 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 		}
 	case hasSrcAtStr:
 		for _, src := range collectedNeighbors.hasSrcAt {
-			namespace := ""
-			if !strings.HasPrefix(src.Source.Namespaces[0].Namespace, "https://") {
-				namespace = "https://" + src.Source.Namespaces[0].Namespace
+			if subjectType == packageSubjectType {
+				namespace := ""
+				if !strings.HasPrefix(src.Source.Namespaces[0].Namespace, "https://") {
+					namespace = "https://" + src.Source.Namespaces[0].Namespace
+				} else {
+					namespace = src.Source.Namespaces[0].Namespace
+				}
+				tableRows = append(tableRows, table.Row{hasSrcAtStr, src.Id, "Source: " + src.Source.Type + "+" + namespace + "/" +
+					src.Source.Namespaces[0].Names[0].Name})
 			} else {
-				namespace = src.Source.Namespaces[0].Namespace
+				purl := helpers.PkgToPurl(src.Package.Type, src.Package.Namespaces[0].Namespace,
+					src.Package.Namespaces[0].Names[0].Name, "", "", []string{})
+
+				tableRows = append(tableRows, table.Row{hasSrcAtStr, src.Id, "Source for Package: " + purl})
 			}
-			tableRows = append(tableRows, table.Row{hasSrcAtStr, src.Id, "Source: " + src.Source.Type + "+" + namespace + "/" + src.Source.Namespaces[0].Names[0].Name})
 		}
 	case hashEqualStr:
 		for _, hash := range collectedNeighbors.hashEquals {
