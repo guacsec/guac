@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	version "github.com/Masterminds/semver"
 )
 
 var (
@@ -29,47 +29,93 @@ var (
 )
 
 type VersionValue struct {
-	SemVer        *string
-	UnknownString *string
+	SemVer *string
+	Raw    string
 }
 
 type VersionMatchObject struct {
 	VRSet []VersionRange
 	// Exact used in the case where heuristics can't determine semvers
 	Exact *string
+	All   bool
 }
 
-/*
-// TODO: implement
 func WhichVersionMatches(versions []string, versionRange string) (map[string]bool, error) {
-
+	matchedVersions := map[string]bool{}
 	vmo, err := ParseVersionRange(versionRange)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse ver range: %w", err)
 	}
-	return map[string]bool{}, fmt.Errorf("unimplemented")
+
+	for _, v := range versions {
+		fmt.Printf("checking version: %v\n", v)
+		vv := ParseVersionValue(v)
+		if vmo.Match(vv) {
+			matchedVersions[v] = true
+		}
+		fmt.Printf("matched: %v\n", matchedVersions[v])
+	}
+
+	return matchedVersions, nil
 }
-*/
+
+func (vmo *VersionMatchObject) Match(v VersionValue) bool {
+	if vmo.All {
+		return true
+	}
+
+	if vmo.Exact != nil {
+		return v.Raw == *vmo.Exact
+	}
+
+	// else do a semver compare
+	vstr := v.Raw
+	if v.SemVer != nil {
+		vstr = *v.SemVer
+	}
+
+	vcmp, err := version.NewVersion(vstr)
+	if err != nil {
+		// cant match
+		return false
+	}
+
+	for _, vr := range vmo.VRSet {
+		constraints, err := version.NewConstraint(vr.Constraint)
+		if err != nil {
+			continue
+		}
+		if constraints.Check(vcmp) {
+			return true
+		}
+	}
+	return false
+}
+
 func ParseVersionValue(s string) VersionValue {
+
+	vv := VersionValue{Raw: s}
 
 	if isSemver(s) {
 		semver, _, _, _, _, _, err := parseSemver(s)
 		if err != nil {
-			return VersionValue{UnknownString: ptrfrom.String(s)}
+			return vv
 		}
 
-		return VersionValue{SemVer: &semver}
+		vv.SemVer = &semver
+		return vv
 	} else if almostSemVer(s) {
 		fixedS := fixAlmostSemVer(s)
 		semver, _, _, _, _, _, err := parseSemver(fixedS)
 		if err != nil {
-			return VersionValue{UnknownString: ptrfrom.String(s)}
+			return vv
 		}
 
-		return VersionValue{SemVer: &semver}
+		vv.SemVer = &semver
+		return vv
 	}
 
-	return VersionValue{UnknownString: ptrfrom.String(s)}
+	return vv
 }
 
 // TODO: implement for more efficient traversal later
@@ -145,11 +191,11 @@ func isDashRange(s string) bool {
 
 func ParseVersionRange(s string) (VersionMatchObject, error) {
 	if s == "" {
-		return vrange(">=0.0.0"), nil
+		return VersionMatchObject{All: true}, nil
 	}
 
 	if s == "latest" {
-		return vrange(">=0.0.0"), nil
+		return VersionMatchObject{All: true}, nil
 	}
 
 	// Handle split for "||"s

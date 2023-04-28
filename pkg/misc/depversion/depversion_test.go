@@ -23,6 +23,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 )
 
+// TODO: add tests for "VersionMatchObject.Match"
 func Test_VersionRangeParse(t *testing.T) {
 	testCases := []struct {
 		input  string
@@ -32,9 +33,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			// deps.dev test set
 			input: "",
 			expect: VersionMatchObject{
-				VRSet: []VersionRange{
-					{">=0.0.0"},
-				},
+				All: true,
 			},
 		},
 		{
@@ -247,9 +246,7 @@ func Test_VersionRangeParse(t *testing.T) {
 			// special case latest set to no constraint
 			input: "latest",
 			expect: VersionMatchObject{
-				VRSet: []VersionRange{
-					{">=0.0.0"},
-				},
+				All: true,
 			},
 		},
 		{
@@ -284,19 +281,21 @@ func Test_ParseVersionValue(t *testing.T) {
 		{
 			input: "",
 			expect: VersionValue{
-				UnknownString: ptrfrom.String(""),
+				Raw: "",
 			},
 		},
 		{
 			input: "1.2.3",
 			expect: VersionValue{
 				SemVer: ptrfrom.String("1.2.3"),
+				Raw:    "1.2.3",
 			},
 		},
 		{
 			input: "v1.2.3",
 			expect: VersionValue{
 				SemVer: ptrfrom.String("1.2.3"),
+				Raw:    "v1.2.3",
 			},
 		},
 		{
@@ -304,32 +303,139 @@ func Test_ParseVersionValue(t *testing.T) {
 			expect: VersionValue{
 				// Should be 1.2.0 to be precise, but good enough for now
 				SemVer: ptrfrom.String("1.2"),
+				Raw:    "v1.2",
 			},
 		},
 		{
 			input: "v1.2.3-rc8",
 			expect: VersionValue{
 				SemVer: ptrfrom.String("1.2.3-rc8"),
+				Raw:    "v1.2.3-rc8",
 			},
 		},
 		{
 			input: "v1.2.3rc8",
 			expect: VersionValue{
 				SemVer: ptrfrom.String("1.2.3-rc8"),
+				Raw:    "v1.2.3rc8",
 			},
 		},
 		{
 			input: "1.2.3rc8",
 			expect: VersionValue{
 				SemVer: ptrfrom.String("1.2.3-rc8"),
+				Raw:    "1.2.3rc8",
 			},
 		},
 	}
 
 	for _, tt := range testCases {
-		t.Run(fmt.Sprintf("parsing version range %s", tt.input), func(t *testing.T) {
+		t.Run(fmt.Sprintf("parsing version value %s", tt.input), func(t *testing.T) {
 
 			got := ParseVersionValue(tt.input)
+			if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_WhichVersionMatches(t *testing.T) {
+	testCases := []struct {
+		versions     []string
+		versionRange string
+		expect       map[string]bool
+	}{
+		{
+			versionRange: "",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.3-rc8", "1.2.3rc8", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"0.0.0":         true,
+				"0.5":           true,
+				"1.0.0":         true,
+				"1.2.3":         true,
+				"1.2.3-rc8":     true,
+				"1.2.3rc8":      true,
+				"1.2":           true,
+				"anythingflies": true,
+			},
+		},
+		{
+			versionRange: "<1.2.4-rc9",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.3-rc8", "1.2.3rc8", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"0.0.0":     true,
+				"0.5":       true,
+				"1.0.0":     true,
+				"1.2.3":     true,
+				"1.2":       true,
+				"1.2.3-rc8": true,
+				"1.2.3rc8":  true,
+			},
+		},
+		{
+			versionRange: "<1.2.3",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.4", "2.0", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"0.0.0": true,
+				"0.5":   true,
+				"1.0.0": true,
+				"1.2":   true,
+			},
+		},
+		{
+			versionRange: ">=0.5,<1.2.4",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.4", "2.0", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"0.5":   true,
+				"1.0.0": true,
+				"1.2":   true,
+				"1.2.3": true,
+			},
+		},
+		{
+			versionRange: "<1.0 || >1.2.3",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.4", "2.0", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"0.0.0": true,
+				"0.5":   true,
+				"1.2.4": true,
+				"2.0":   true,
+			},
+		},
+		{
+			versionRange: "anythingflies",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.3-rc8", "1.2.3rc8", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"anythingflies": true,
+			},
+		},
+		{
+			versionRange: "=1.2.3-rc8",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.3-rc8", "1.2.3rc8", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"1.2.3-rc8": true,
+				"1.2.3rc8":  true,
+			},
+		},
+		{
+			versionRange: "=1.2.3rc8",
+			versions:     []string{"0.0.0", "0.5", "1.0.0", "1.2.3", "1.2.3-rc8", "1.2.3rc8", "1.2", "anythingflies"},
+			expect: map[string]bool{
+				"1.2.3-rc8": true,
+				"1.2.3rc8":  true,
+			},
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("which version matches %s", tt.versionRange), func(t *testing.T) {
+			got, err := WhichVersionMatches(tt.versions, tt.versionRange)
+			if err != nil {
+				t.Errorf("got err from WhichVersionMatches: %v", err)
+				return
+			}
+
 			if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
