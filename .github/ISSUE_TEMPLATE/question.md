@@ -1,6 +1,6 @@
 ---
 name: Question
-about: Ask a question about hindent
+about: Ask a question about GUAC
 title: "[question] FILL THIS IN"
 labels: question
 assignees: ""
