@@ -16,10 +16,10 @@ determine and answer the question of what are the “known, knowns” “what is
 known, unknowns” and finally “unknown, unknowns”. Let's take a look at this in
 more detail.
 
-In the [workflow demo](./workflow/workflow.md), we went through the process
-of ingesting an SBOM and letting GUAC expand our horizons on what we know about
-our environment autonomously! In this demo, based on the documents ingested and
-the information GUAC was able to pull for us, we will determine what we know but
+In the [workflow demo](./workflow/workflow.md), we went through the process of
+ingesting an SBOM and letting GUAC expand our horizons on what we know about our
+environment autonomously! In this demo, based on the documents ingested and the
+information GUAC was able to pull for us, we will determine what we know but
 also as equally important, what we don’t know about the artifacts.
 
 ## Requirements
@@ -65,12 +65,12 @@ make
 
 ## Installing GUAC via Helm Chart/Docker compose
 
-Please refer to the <GUAC Helm Install Guide> or [docker compose deployment](../../docs/Compose.md)  to have a running instance.
+Please refer to the <GUAC Helm Install Guide> or
+[docker compose deployment](../../docs/Compose.md) to have a running instance.
 
 ## Ingesting Vault’s SBOM
 
-As this demo builds off
-[docker compose deployment](../../docs/Compose.md)
+As this demo builds off [docker compose deployment](../../docs/Compose.md)
 please follow the steps of ingesting
 [Vault’s SBOM](https://github.com/guacsec/guac-data/blob/main/top-dh-sboms/vault.json)
 and letting GUAC find additional information about the dependencies.
@@ -78,14 +78,15 @@ and letting GUAC find additional information about the dependencies.
 ## Running the query to find the knowns and unknowns
 
 Now that we have the data ingested from the
-[docker compose deployment](../../docs/Compose.md),
-let's run some queries on the data.
+[docker compose deployment](../../docs/Compose.md), let's run some queries on
+the data.
 
 GAUC (at the time of the beta release) can store various metadata about an
-artifact. In context of the query CLI the evidence nodes have the following meaning:
+artifact. In context of the query CLI the evidence nodes have the following
+meaning:
 
 | Evidence Nodes | Description                                                                  |
-|----------------|------------------------------------------------------------------------------|
+| -------------- | ---------------------------------------------------------------------------- |
 | `hashEquals`   | when two artifacts are equal                                                 |
 | `scorecards`   | the OpenSSF scorecard associated with the source repo                        |
 | `occurrences`  | a package is associated with an artifact (digest)                            |
@@ -99,19 +100,24 @@ artifact. In context of the query CLI the evidence nodes have the following mean
 | `pkgEquals`    | two packages (with different purls) are equal                                |
 
 For more information on these please refer to the
-[grapQL documentation](../docs/GraphQL.md)
-along with the
-[ontology definitions](../docs/ontology-definitions.md)
-Utilizing the CLI and GUAC Visualizer, we quickly determine the location of
-SBOMs, SLSA attestations, and scorecard information but also determine what
-information we are missing.
+[grapQL documentation](../docs/GraphQL.md) along with the
+[ontology definitions](../docs/ontology-definitions.md) Utilizing the CLI and
+GUAC Visualizer, we quickly determine the location of SBOMs, SLSA attestations,
+and scorecard information but also determine what information we are missing.
 
 ## Query Known/Unknown
 
-We will utilize the “query known” CLI:
+We will utilize the “query known” CLI. This CLI has the ability to search a
+package (via [PURL](https://github.com/package-url/purl-spec), source URL
+(following the definition of VCS uri from the
+[SPDX documentation](https://spdx.github.io/spdx-spec/v2.3/package-information/#771-description)
+<vcs_tool>+<transport>://<host_name>[/<path_to_repository>][@<revision_tag_or_branch>][#<sub_path>])
+and a artifact (algorithm:digest).
 
-First, we will look at if a package (vault) has an SBOM associated with and
-where it can be found:
+First, we will look at if a package (vault) to see if it has an SBOM associated
+with and where it can be found:
+
+**Note**: `--type "package"` flag is specified that we are querying a PURL
 
 ```bash
 ./bin/guacone query_known --type "package" "pkg:guac/spdx/docker.io/library/vault-latest"
@@ -120,64 +126,176 @@ where it can be found:
 The output will look similar to this:
 
 ```bash
-{"level":"info","ts":1682866911.5851321,"caller":"cli/init.go:53","msg":"Using config file: /Users/parth/Documents/pxp928/artifact-ff/guac.yaml"}
++------------------------------------------------+
+| Package Name Nodes                             |
++-----------+-----------+------------------------+
+| NODE TYPE | NODE ID # | ADDITIONAL INFORMATION |
++-----------+-----------+------------------------+
++-----------+-----------+------------------------+
+Visualizer url: http://localhost:3000/visualize?path=[4,3,2]
++----------------------------------------------------------------------------------------------+
+| Package Version Nodes                                                                        |
 +-----------+-----------+----------------------------------------------------------------------+
-| NODE TYPE | NODE ID   | ADDITIONAL INFORMATION                                               |
+| NODE TYPE | NODE ID # | ADDITIONAL INFORMATION                                               |
 +-----------+-----------+----------------------------------------------------------------------+
 | hasSBOM   | 6964      | SBOM Download Location: file:///../guac-data/top-dh-sboms/vault.json |
 +-----------+-----------+----------------------------------------------------------------------+
 Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,6964]
+
 ```
+
+This output two separate tables, one for at the “package name level” and the
+other at the “package version level”. Evidence/metadata nodes at the “package
+name level” mean that they apply to all the versions that come below it.
+“Pacakge version level”, on the other hand, mean that it only applies to the
+version specified. By default, if a version is not specified during ingestion,
+it defaults to a empty version string.
+
+The “package name level” does not have any nodes associated with it, but the
+“package version level” does have the “hasSBOM” node associated with it. This
+shows us that this package has an SBOM associated with it and can be downloaded
+at the following location. Future work with GUAC is to have an evidence store
+with GUAC to store SBOM and SLSA attestations for quick access. For now, we can
+quickly location the SBOM and also see that we are missing `hasSLSA`
+attestations…
+
+Nex we will run the query on the prometheus package we were working with in the
+workflow demo:
 
 ```bash
-➜  artifact-ff git:(unknown-known-demo) ✗ ./bin/guacone query_known --type "package" "pkg:guac/spdx/docker.io/library/vault-latest"
-{"level":"info","ts":1682866911.5851321,"caller":"cli/init.go:53","msg":"Using config file: /Users/parth/Documents/pxp928/artifact-ff/guac.yaml"}
-+-----------+-----------+----------------------------------------------------------------------+
-| NODE TYPE | NODE ID   | ADDITIONAL INFORMATION                                               |
-+-----------+-----------+----------------------------------------------------------------------+
-| hasSBOM   | 6964      | SBOM Download Location: file:///../guac-data/top-dh-sboms/vault.json |
-+-----------+-----------+----------------------------------------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,6964]
-```
-
-➜ artifact-ff git:(unknown-known-demo) ✗ ./bin/guacone query_known --type
+./bin/guacone query_known --type
 "package" "pkg:golang/github.com/prometheus/client_golang@v1.11.1"
+```
+
+The Output should be similar to this:
 
 ```bash
-{"level":"info","ts":1682866825.0184278,"caller":"cli/init.go:53","msg":"Using config file: /Users/parth/Documents/pxp928/artifact-ff/guac.yaml"}
++---------------------------------------------------------------------------------+
+| Package Name Nodes                                                              |
++-----------+-----------+---------------------------------------------------------+
+| NODE TYPE | NODE ID # | ADDITIONAL INFORMATION                                  |
++-----------+-----------+---------------------------------------------------------+
+| hasSrcAt  | 7647      | Source: git+https://github.com/prometheus/client_golang |
++-----------+-----------+---------------------------------------------------------+
+Visualizer url: http://localhost:3000/visualize?path=[578,327,6,7647]
++----------------------------------------------------+
+| Package Version Nodes                              |
 +-------------+-----------+--------------------------+
-| NODE TYPE   | NODE ID   | ADDITIONAL INFORMATION   |
+| NODE TYPE   | NODE ID # | ADDITIONAL INFORMATION   |
 +-------------+-----------+--------------------------+
 | certifyVuln | 13469     | vulnerability ID: NoVuln |
 +-------------+-----------+--------------------------+
+Visualizer url: http://localhost:3000/visualize?path=[579,578,327,6,13469]
+
+```
+
+In this example the “package name level” has the “hasSrcAt” node that shows us
+that the “prometheus/client_golang” source repo is located at
+“https://github.com/prometheus/client_golang”
+
+The “Package Version Nodes” shows us that the specific package with the purl
+`pkg:golang/github.com/prometheus/client_golang@v1.11.1` was scanned and did not
+contain any vulnerabilities associated with it.
+
+**NOTE**: this is just the vulnerability associated with this specific package
+(not taking into account dependencies). For a full indepth vulnerability search
+please follow the [Query Vulnerability demo](./query_vuln.md)
+
+We also see that in this case we did not get a `hasSBOM` associated with it.
+Meaning that we do not have any SBOM information related to this package. We
+also see there are no nodes for the SLSA attestations, source information and
+scorecard.
+
+Next we will look at another version of the “prometheus/client_golang” package
+with the purl "pkg:golang/github.com/prometheus/client_golang@v1.4.0". Note the
+version is now v1.4.0.
+
+Using the CLI to query this:
+
+```bash
+./bin/guacone query_known --type "package" "pkg:golang/github.com/prometheus/client_golang@v1.4.0"
 ```
 
 ```bash
-➜  artifact-ff git:(unknown-known-demo) ✗ go run ./cmd/guacone query_known --type "source" "git+https://github.com/googleapis/google-cloud-go"
-{"level":"info","ts":1682866506.0761201,"caller":"cli/init.go:53","msg":"Using config file: /Users/parth/Documents/pxp928/artifact-ff/guac.yaml"}
-+-----------+-----------+---------------------------------------------------------------------+
-| NODE TYPE | NODE ID   | ADDITIONAL INFORMATION                                              |
-+-----------+-----------+---------------------------------------------------------------------+
-| hasSrcAt  | 7074      | Source for Package: pkg:golang/cloud.google.com/go                  |
-| hasSrcAt  | 7075      | Source for Package: pkg:golang/cloud.google.com/go/storage          |
-| hasSrcAt  | 7156      | Source for Package: pkg:golang/cloud.google.com/go/spanner          |
-| hasSrcAt  | 8948      | Source for Package: pkg:golang/cloud.google.com/go/compute/metadata |
-| hasSrcAt  | 8949      | Source for Package: pkg:golang/cloud.google.com/go/logging          |
-| hasSrcAt  | 8950      | Source for Package: pkg:golang/cloud.google.com/go/longrunning      |
-+-----------+-----------+---------------------------------------------------------------------+
-| scorecard | 6968      | Overall Score: 8.300000                                             |
-+-----------+-----------+---------------------------------------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[6967,6966,6965,7074,7075,7156,8948,8949,8950,6968]
-```
-
-```bash
-➜  artifact-ff git:(unknown-known-demo) ✗ ./bin/guacone query_known --type "package" "pkg:golang/github.com/prometheus/client_golang@v1.4.0"
-{"level":"info","ts":1682870962.001216,"caller":"cli/init.go:53","msg":"Using config file: /Users/parth/Documents/pxp928/artifact-ff/guac.yaml"}
++---------------------------------------------------------------------------------+
+| Package Name Nodes                                                              |
++-----------+-----------+---------------------------------------------------------+
+| NODE TYPE | NODE ID # | ADDITIONAL INFORMATION                                  |
++-----------+-----------+---------------------------------------------------------+
+| hasSrcAt  | 7647      | Source: git+https://github.com/prometheus/client_golang |
++-----------+-----------+---------------------------------------------------------+
+Visualizer url: http://localhost:3000/visualize?path=[578,327,6,7647]
++-----------------------------------------------------------------+
+| Package Version Nodes                                           |
 +-------------+-----------+---------------------------------------+
-| NODE TYPE   | NODE ID   | ADDITIONAL INFORMATION                |
+| NODE TYPE   | NODE ID # | ADDITIONAL INFORMATION                |
 +-------------+-----------+---------------------------------------+
 | certifyVuln | 13471     | vulnerability ID: ghsa-cg3q-j54f-5p7p |
 | certifyVuln | 13473     | vulnerability ID: go-2022-0322        |
 +-------------+-----------+---------------------------------------+
 Visualizer url: http://localhost:3000/visualize?path=[7600,578,327,6,13471,13473]
+```
+
+We once again see that at the “package name level” we have the same source repo
+associated with it. But at the “package verion level” (at v1.4.0) there are some
+vulnerabilities that are associated with it! The older version of the same
+“prometheus/client_golang” have different information.
+
+Lets take a closer look at the source repo for the prometheus/client_golang
+package:
+
+We can run the query:
+
+**Note**: `--type "source"` flag is specified that we are querying a source repo
+
+```bash
+./bin/guacone query_known --type "source" git+https://github.com/prometheus/client_golang
+```
+
+```bash
++-----------+-----------+--------------------------------------------------------------------+
+| NODE TYPE | NODE ID # | ADDITIONAL INFORMATION                                             |
++-----------+-----------+--------------------------------------------------------------------+
+| hasSrcAt  | 7647      | Source for Package: pkg:golang/github.com/prometheus/client_golang |
++-----------+-----------+--------------------------------------------------------------------+
+| scorecard | 7583      | Overall Score: 6.600000                                            |
++-----------+-----------+--------------------------------------------------------------------+
+Visualizer url: http://localhost:3000/visualize?path=[7582,7581,6965,7647,7583]
+```
+
+From this output we again see that this source is related to the
+prometheus/client_golang package we queried for above but also we see that there
+is a OpenSSF scorecard asccoicated with it.
+
+Let’s query for another source repo:
+
+```bash
+./bin/guacone query_known --type "source" "git+https://github.com/googleapis/google-cloud-go"
+```
+
+The output should be similar to:
+
++-----------+-----------+---------------------------------------------------------------------+
+| NODE TYPE | NODE ID | ADDITIONAL INFORMATION |
++-----------+-----------+---------------------------------------------------------------------+
+| hasSrcAt | 7074 | Source for Package: pkg:golang/cloud.google.com/go | |
+hasSrcAt | 7075 | Source for Package: pkg:golang/cloud.google.com/go/storage | |
+hasSrcAt | 7156 | Source for Package: pkg:golang/cloud.google.com/go/spanner | |
+hasSrcAt | 8948 | Source for Package:
+pkg:golang/cloud.google.com/go/compute/metadata | | hasSrcAt | 8949 | Source for
+Package: pkg:golang/cloud.google.com/go/logging | | hasSrcAt | 8950 | Source for
+Package: pkg:golang/cloud.google.com/go/longrunning |
++-----------+-----------+---------------------------------------------------------------------+
+| scorecard | 6968 | Overall Score: 8.300000 |
++-----------+-----------+---------------------------------------------------------------------+
+Visualizer url:
+http://localhost:3000/visualize?path=[6967,6966,6965,7074,7075,7156,8948,8949,8950,6968]
+
+```
+
+Here we see that this specific source repo is associated with various different packages (go, storage, spanner…etc) and again we see that it does have a scorecard associated with a score of 8.3
+
+
+
+## Knowing the unknown
 ```
