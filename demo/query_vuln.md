@@ -129,7 +129,7 @@ In this first example, we will query if our image has any vulnerabilities
 We will start off by running the following command:
 
 ```bash
-./bin/guacone queryVuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest"
+./bin/guacone query_vuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest"
 ```
 
 **Note**: if you see the following error:
@@ -148,14 +148,25 @@ five minute interval to keep re-scanning for any new packages in GUAC). To force
 the scan to occur immediately please run:
 
 ```bash
-docker run --rm --network guac_default local-organic-guac:latest /opt/guac/guacone certifier osv -p=false --gql-endpoint http://guac-graphql:8080/query
+./bin/guacone certifier osv -p=false
 ```
 
 Successful output will show the following:
 
 ```bash
-{"level":"info","ts":1682083927.505824,"caller":"cmd/query_vulnerability.go:184","msg":"found path 5,4,3,2,104,103,102,101,6,21059,21060,103,102,101,6,21061,21062,103,102,101,6,21063,21064,103,102,101,6,21065,21066,103,102,101,6,21067,21068,103,102,101,6,21069,21070,103,102,101,6,323,322,321,84,6,21055,21056,322,321,84,6"}
-{"level":"info","ts":1682083927.505867,"caller":"cmd/query_vulnerability.go:185","msg":"Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,104,103,102,101,6,21059,21060,103,102,101,6,21061,21062,103,102,101,6,21063,21064,103,102,101,6,21065,21066,103,102,101,6,21067,21068,103,102,101,6,21069,21070,103,102,101,6,323,322,321,84,6,21055,21056,322,321,84,6]"}
++-------------+-----------+---------------------------------------+
+| NODE TYPE   | NODE ID   | ADDITIONAL INFORMATION                |
++-------------+-----------+---------------------------------------+
+| certifyVuln | 21161     | vulnerability ID: ghsa-7rjr-3q55-vv33 |
+| certifyVuln | 21163     | vulnerability ID: ghsa-8489-44mv-ggj8 |
+| certifyVuln | 21165     | vulnerability ID: ghsa-fxph-q3j8-mv87 |
+| certifyVuln | 21167     | vulnerability ID: ghsa-jfh8-c2jp-5v3q |
+| certifyVuln | 21169     | vulnerability ID: ghsa-p6xc-xr62-6r2g |
+| certifyVuln | 21171     | vulnerability ID: ghsa-vwqq-5vrc-xw9h |
+| certifyVuln | 21148     | vulnerability ID: ghsa-599f-7c49-w659 |
++-------------+-----------+---------------------------------------+
+Found path 5,4,3,2,186,185,184,183,20,21161,21162,185,184,183,20,21163,21164,185,184,183,20,21165,21166,185,184,183,20,21167,21168,185,184,183,20,21169,21170,185,184,183,20,21171,21172,185,184,183,20,339,338,337,202,20,21148,21149,338,337,202,20
+Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,186,185,184,183,20,21161,21162,185,184,183,20,21163,21164,185,184,183,20,21165,21166,185,184,183,20,21167,21168,185,184,183,20,21169,21170,185,184,183,20,21171,21172,185,184,183,20,339,338,337,202,20,21148,21149,338,337,202,20]
 ```
 
 From the output, you can see that there are vulnerabilities associated with the
@@ -178,16 +189,20 @@ In this example, we will query our image to determine if it is affected by a
 particular vulnerability. If it is, return a path to said vulnerability such
 that we can remediate the culprit.
 
+**Note**: This query will return all paths by default. If you want to only
+return a certain number, you can use the `--path` flag to specify the number.
+
 To do this we will run the following:
 
 ```bash
-./bin/guacone queryVuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" --vulnerabilityID "ghsa-7rjr-3q55-vv33"
+./bin/guacone query_vuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" --vulnerabilityID "ghsa-7rjr-3q55-vv33"
 ```
 
-**Note**: if you see the following errors:
+**Note**: if you see the following:
 
 ```bash
-{"level":"fatal","ts":1681824986.1271732,"caller":"cmd/query_vulnerability.go:160","msg":"failed to identify vulnerability as cve or ghsa and no results found for OSV"}
+Failed to identify vulnerability as cve or ghsa and no results found for OSV
+No path to vulnerability ID found!
 ```
 
 This means that the vulnerability node was not found within GUAC.
@@ -202,8 +217,13 @@ successfully to provide accurate results.
 Successful output will show the following:
 
 ```bash
-{"level":"info","ts":1682083996.850477,"caller":"cmd/query_vulnerability.go:158","msg":"found path 21059,21060,103,102,101,6,104,5,4,3,2"}
-{"level":"info","ts":1682083996.850501,"caller":"cmd/query_vulnerability.go:159","msg":"Visualizer url: http://localhost:3000/visualize?path=[21059,21060,103,102,101,6,104,5,4,3,2]"}
++-----------+-----------+---------------------------------------+
+| NODE TYPE | NODE ID # | ADDITIONAL INFORMATION                |
++-----------+-----------+---------------------------------------+
+| osv       | 21161     | vulnerability ID: ghsa-7rjr-3q55-vv33 |
++-----------+-----------+---------------------------------------+
+Found path 21161,21162,185,184,183,20,186,5,4,3,2
+Visualizer url: http://localhost:3000/visualize?path=[21161,21162,185,184,183,20,186,5,4,3,2]
 ```
 
 Based on the output we see that there is a path to the vulnerability, we can use
