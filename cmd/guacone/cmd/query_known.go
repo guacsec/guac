@@ -106,7 +106,6 @@ var queryKnownCmd = &cobra.Command{
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		t := table.NewWriter()
-		// you can also instantiate the object directly
 		tTemp := table.Table{}
 		tTemp.Render()
 		t.AppendHeader(rowHeader)
