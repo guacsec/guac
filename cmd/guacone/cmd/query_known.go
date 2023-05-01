@@ -103,11 +103,11 @@ var queryKnownCmd = &cobra.Command{
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		t := table.NewWriter()
-		// you can also instantiate the object directly
 		tTemp := table.Table{}
 		tTemp.Render()
 		t.AppendHeader(rowHeader)
-		path := []string{}
+
+		var path []string
 		switch opts.subjectType {
 		case packageSubjectType:
 			pkgInput, err := helpers.PurlToPkg(opts.subject)
@@ -280,7 +280,7 @@ var queryKnownCmd = &cobra.Command{
 
 func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQueryID string) (*neighbors, []string, error) {
 	collectedNeighbors := &neighbors{}
-	path := []string{}
+	var path []string
 	neighborResponse, err := model.Neighbors(ctx, gqlclient, subjectQueryID, []model.Edge{})
 	if err != nil {
 		return nil, nil, fmt.Errorf("error querying neighbors: %v", err)
@@ -329,7 +329,7 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 
 func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collectedNeighbors *neighbors, nodeType string, subjectType string) []table.Row {
 	logger := logging.FromContext(ctx)
-	tableRows := []table.Row{}
+	var tableRows []table.Row
 	switch nodeType {
 	case certifyVulnStr:
 		for _, vuln := range collectedNeighbors.certifyVulns {
