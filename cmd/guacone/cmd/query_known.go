@@ -57,8 +57,6 @@ type queryKnownOptions struct {
 	subjectType string
 	// purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)
 	subject string
-	// if type is package, true if at pkgName (for all versions) or false for a specific version
-	pkgName bool
 }
 
 type neighbors struct {
@@ -92,7 +90,6 @@ var queryKnownCmd = &cobra.Command{
 		opts, err := validateQueryKnownFlags(
 			viper.GetString("gql-endpoint"),
 			viper.GetString("type"),
-			viper.GetBool("pkgName"),
 			args,
 		)
 
@@ -109,7 +106,8 @@ var queryKnownCmd = &cobra.Command{
 		tTemp := table.Table{}
 		tTemp.Render()
 		t.AppendHeader(rowHeader)
-		path := []string{}
+
+		var path []string
 		switch opts.subjectType {
 		case packageSubjectType:
 			pkgInput, err := helpers.PurlToPkg(opts.subject)
@@ -141,45 +139,61 @@ var queryKnownCmd = &cobra.Command{
 				logger.Fatalf("failed to located package based on purl")
 			}
 
-			if opts.pkgName {
-				pkgNameNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, pkgResponse.Packages[0].Namespaces[0].Names[0].Id)
-				if err != nil {
-					logger.Fatalf("error querying for package name neighbors: %v", err)
-				}
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, hasSrcAtStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, badLinkStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, goodLinkStr, packageSubjectType))
-				path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Id,
-					pkgResponse.Packages[0].Namespaces[0].Id,
-					pkgResponse.Packages[0].Id}, neighborsPath...)
-			} else {
-				pkgVersionNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id)
-				if err != nil {
-					logger.Fatalf("error querying for package version neighbors: %v", err)
-				}
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSrcAtStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, occurrenceStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, certifyVulnStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSBOMStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSLSAStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, vexLinkStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, pkgEqualStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, badLinkStr, packageSubjectType))
-				t.AppendSeparator()
-				t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, goodLinkStr, packageSubjectType))
-				path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id,
-					pkgResponse.Packages[0].Namespaces[0].Names[0].Id, pkgResponse.Packages[0].Namespaces[0].Id,
-					pkgResponse.Packages[0].Id}, neighborsPath...)
+			pkgNameNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, pkgResponse.Packages[0].Namespaces[0].Names[0].Id)
+			if err != nil {
+				logger.Fatalf("error querying for package name neighbors: %v", err)
 			}
+			t.SetTitle("Package Name Nodes")
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, hasSrcAtStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, badLinkStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgNameNeighbors, goodLinkStr, packageSubjectType))
+			t.AppendSeparator()
+
+			path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Id,
+				pkgResponse.Packages[0].Namespaces[0].Id,
+				pkgResponse.Packages[0].Id}, neighborsPath...)
+
+			fmt.Println(t.Render())
+			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
+
+			pkgVersionNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id)
+			if err != nil {
+				logger.Fatalf("error querying for package version neighbors: %v", err)
+			}
+
+			// instantiate new table for package version nodes
+			t := table.NewWriter()
+			tTemp := table.Table{}
+			tTemp.Render()
+			t.AppendHeader(rowHeader)
+
+			t.SetTitle("Package Version Nodes")
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSrcAtStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, occurrenceStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, certifyVulnStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSBOMStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, hasSLSAStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, vexLinkStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, pkgEqualStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, badLinkStr, packageSubjectType))
+			t.AppendSeparator()
+			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, pkgVersionNeighbors, goodLinkStr, packageSubjectType))
+			path = append([]string{pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id,
+				pkgResponse.Packages[0].Namespaces[0].Names[0].Id, pkgResponse.Packages[0].Namespaces[0].Id,
+				pkgResponse.Packages[0].Id}, neighborsPath...)
+
+			fmt.Println(t.Render())
+			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
+
 		case sourceSubjectType:
 			srcInput, err := helpers.VcsToSrc(opts.subject)
 			if err != nil {
@@ -216,6 +230,9 @@ var queryKnownCmd = &cobra.Command{
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, goodLinkStr, sourceSubjectType))
 			path = append([]string{srcResponse.Sources[0].Namespaces[0].Names[0].Id,
 				srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id}, neighborsPath...)
+
+			fmt.Println(t.Render())
+			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
 		case artifactSubjectType:
 			split := strings.Split(opts.subject, ":")
 			if len(split) != 2 {
@@ -252,17 +269,18 @@ var queryKnownCmd = &cobra.Command{
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, goodLinkStr, artifactSubjectType))
 			path = append([]string{artifactResponse.Artifacts[0].Id}, neighborsPath...)
+
+			fmt.Println(t.Render())
+			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
 		default:
 			logger.Fatalf("expected type to be either a package, source or artifact")
 		}
-		fmt.Println(t.Render())
-		fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
 	},
 }
 
 func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQueryID string) (*neighbors, []string, error) {
 	collectedNeighbors := &neighbors{}
-	path := []string{}
+	var path []string
 	neighborResponse, err := model.Neighbors(ctx, gqlclient, subjectQueryID, []model.Edge{})
 	if err != nil {
 		return nil, nil, fmt.Errorf("error querying neighbors: %v", err)
@@ -311,7 +329,7 @@ func queryKnownNeighbors(ctx context.Context, gqlclient graphql.Client, subjectQ
 
 func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collectedNeighbors *neighbors, nodeType string, subjectType string) []table.Row {
 	logger := logging.FromContext(ctx)
-	tableRows := []table.Row{}
+	var tableRows []table.Row
 	switch nodeType {
 	case certifyVulnStr:
 		for _, vuln := range collectedNeighbors.certifyVulns {
@@ -408,10 +426,9 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	return tableRows
 }
 
-func validateQueryKnownFlags(graphqlEndpoint, queryType string, pkgName bool, args []string) (queryKnownOptions, error) {
+func validateQueryKnownFlags(graphqlEndpoint, queryType string, args []string) (queryKnownOptions, error) {
 	var opts queryKnownOptions
 	opts.graphqlEndpoint = graphqlEndpoint
-	opts.pkgName = pkgName
 	if queryType != "package" && queryType != "source" && queryType != "artifact" {
 		return opts, fmt.Errorf("expected type to be either a package, source or artifact")
 	}
@@ -427,7 +444,7 @@ func validateQueryKnownFlags(graphqlEndpoint, queryType string, pkgName bool, ar
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"type", "pkgName"})
+	set, err := cli.BuildFlags([]string{"type"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
