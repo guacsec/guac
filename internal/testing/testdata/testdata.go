@@ -25,6 +25,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/guacsec/guac/internal/testing/keyutil"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
@@ -119,8 +120,8 @@ var (
 
 	// DSSE/SLSA Testdata
 
-	// Taken from: https://slsa.dev/provenance/v0.1#example
-	ite6SLSA = `
+	// Taken from: https://slsa.dev/provenance/v0.2#example
+	ite6SLSA02 = `
 	{
 		"_type": "https://in-toto.io/Statement/v0.1",
 		"subject": [{"name": "helloworld", "digest": {"sha256": "3a2bd2c5cc4c978e8aefd8bd0ef335fb42ee31d1"}}],
@@ -153,7 +154,77 @@ var (
 		}
 	}`
 
-	b64ITE6SLSA    = base64.StdEncoding.EncodeToString([]byte(ite6SLSA))
+	ite6SLSA1 = `
+{
+    "_type": "https://in-toto.io/Statement/v1",
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "predicate": {
+        "buildDefinition": {
+            "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+            "externalParameters": {
+                "inputs": {
+                    "build_id": 123456768,
+                    "deploy_target": "deployment_sys_1a",
+                    "perform_deploy": "true"
+                },
+                "vars": {
+                    "MASCOT": "Mona"
+                },
+                "workflow": {
+                    "ref": "refs/heads/main",
+                    "repository": "https://github.com/octocat/hello-world",
+                    "path": ".github/workflow/release.yml"
+                }
+            },
+            "internalParameters": {
+                "github": {
+                    "actor_id": "1234567",
+                    "event_name": "workflow_dispatch"
+                }
+            },
+            "resolvedDependencies": [
+                {
+                    "uri": "git+https://github.com/octocat/hello-world@refs/heads/main",
+                    "digest": {
+                        "gitCommit": "c27d339ee6075c1f744c5d4b200f7901aad2c369"
+                    }
+                 },
+                {
+                    "uri": "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"
+                }
+            ]
+        },
+        "runDetails": {
+            "builder": {
+                "id": "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"
+            },
+            "metadata": {
+                "invocationId": "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1",
+                "startedOn": "2023-01-01T12:34:56Z"
+            }
+        }
+    },
+    "subject": [
+        {
+            "name": "_",
+            "digest": {
+                "sha256": "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4"
+            }
+        }
+    ]
+}
+`
+	Ite6SLSA1Doc = processor.Document{
+		Blob:   []byte(ite6SLSA1),
+		Type:   processor.DocumentITE6SLSA,
+		Format: processor.FormatJSON,
+		SourceInformation: processor.SourceInformation{
+			Collector: "TestCollector",
+			Source:    "TestSource",
+		},
+	}
+
+	b64ITE6SLSA    = base64.StdEncoding.EncodeToString([]byte(ite6SLSA02))
 	Ite6Payload, _ = json.Marshal(dsse.Envelope{
 		PayloadType: "https://in-toto.io/Statement/v0.1",
 		Payload:     b64ITE6SLSA,
@@ -172,7 +243,7 @@ var (
 		},
 	}
 	Ite6SLSADoc = processor.Document{
-		Blob:   []byte(ite6SLSA),
+		Blob:   []byte(ite6SLSA02),
 		Type:   processor.DocumentITE6SLSA,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
@@ -260,6 +331,76 @@ var (
 				Artifact:  &art,
 				Builder:   &build,
 				Materials: []model.ArtifactInputSpec{mat1, mat2},
+			},
+		},
+	}
+
+	slsa1time, _ = time.Parse(time.RFC3339, "2023-01-01T12:34:56Z")
+	SlsaPreds1   = assembler.IngestPredicates{
+		IsOccurrence: []assembler.IsOccurrenceIngest{
+			{
+				Src: &model.SourceInputSpec{
+					Type:      "git",
+					Namespace: "github.com/octocat/hello-world@refs/heads",
+					Name:      "main",
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "gitCommit",
+					Digest:    "c27d339ee6075c1f744c5d4b200f7901aad2c369",
+				},
+				IsOccurrence: &slsaIsOccurrence,
+			},
+			{
+				Pkg: &model.PkgInputSpec{
+					Type:      "guac",
+					Namespace: ptrfrom.String("generic"),
+					Name:      "_",
+					Version:   ptrfrom.String(""),
+					Subpath:   ptrfrom.String(""),
+				},
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha256",
+					Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+				},
+				IsOccurrence: &slsaIsOccurrence,
+			},
+		},
+		HasSlsa: []assembler.HasSlsaIngest{
+			{
+				Artifact: &model.ArtifactInputSpec{
+					Algorithm: "sha256",
+					Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+				},
+				Builder: &model.BuilderInputSpec{
+					Uri: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1",
+				},
+				Materials: []model.ArtifactInputSpec{{
+					Algorithm: "gitCommit",
+					Digest:    "c27d339ee6075c1f744c5d4b200f7901aad2c369",
+				}},
+				HasSlsa: &model.SLSAInputSpec{
+					BuildType:   "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+					SlsaVersion: "https://slsa.dev/provenance/v1",
+					StartedOn:   slsa1time,
+					SlsaPredicate: []model.SLSAPredicateInputSpec{
+						{Key: "slsa.buildDefinition.buildType", Value: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e+08"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.deploy_target", Value: "deployment_sys_1a"},
+						{Key: "slsa.buildDefinition.externalParameters.inputs.perform_deploy", Value: "true"},
+						{Key: "slsa.buildDefinition.externalParameters.vars.MASCOT", Value: "Mona"},
+						{Key: "slsa.buildDefinition.externalParameters.workflow.path", Value: ".github/workflow/release.yml"},
+						{Key: "slsa.buildDefinition.externalParameters.workflow.ref", Value: "refs/heads/main"},
+						{Key: "slsa.buildDefinition.externalParameters.workflow.repository", Value: "https://github.com/octocat/hello-world"},
+						{Key: "slsa.buildDefinition.internalParameters.github.actor_id", Value: "1234567"},
+						{Key: "slsa.buildDefinition.internalParameters.github.event_name", Value: "workflow_dispatch"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.digest.gitCommit", Value: "c27d339ee6075c1f744c5d4b200f7901aad2c369"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.0.uri", Value: "git+https://github.com/octocat/hello-world@refs/heads/main"},
+						{Key: "slsa.buildDefinition.resolvedDependencies.1.uri", Value: "https://github.com/actions/virtual-environments/releases/tag/ubuntu20/20220515.1"},
+						{Key: "slsa.runDetails.builder.id", Value: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1"},
+						{Key: "slsa.runDetails.metadata.invocationID", Value: "https://github.com/octocat/hello-world/actions/runs/1536140711/attempts/1"},
+						{Key: "slsa.runDetails.metadata.startedOn", Value: "2023-01-01T12:34:56Z"},
+					},
+				},
 			},
 		},
 	}
