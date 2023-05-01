@@ -47,7 +47,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@main
       - name: Install crane
-        uses: imjasonh/setup-crane@v0.1
+        uses: imjasonh/setup-crane@v0.3
       - name: Build and publish image
         id: build_n_publish_image 
         run: |
