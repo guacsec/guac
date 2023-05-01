@@ -156,7 +156,7 @@ var queryKnownCmd = &cobra.Command{
 				pkgResponse.Packages[0].Id}, neighborsPath...)
 
 			fmt.Println(t.Render())
-			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
+			fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
 
 			pkgVersionNeighbors, neighborsPath, err := queryKnownNeighbors(ctx, gqlclient, pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id)
 			if err != nil {
@@ -192,7 +192,7 @@ var queryKnownCmd = &cobra.Command{
 				pkgResponse.Packages[0].Id}, neighborsPath...)
 
 			fmt.Println(t.Render())
-			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
+			fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
 
 		case sourceSubjectType:
 			srcInput, err := helpers.VcsToSrc(opts.subject)
@@ -218,7 +218,6 @@ var queryKnownCmd = &cobra.Command{
 			if err != nil {
 				logger.Fatalf("error querying for source neighbors: %v", err)
 			}
-
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, hasSrcAtStr, sourceSubjectType))
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, sourceNeighbors, occurrenceStr, sourceSubjectType))
@@ -232,7 +231,7 @@ var queryKnownCmd = &cobra.Command{
 				srcResponse.Sources[0].Namespaces[0].Id, srcResponse.Sources[0].Id}, neighborsPath...)
 
 			fmt.Println(t.Render())
-			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
+			fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
 		case artifactSubjectType:
 			split := strings.Split(opts.subject, ":")
 			if len(split) != 2 {
@@ -254,7 +253,6 @@ var queryKnownCmd = &cobra.Command{
 			if err != nil {
 				logger.Fatalf("error querying for artifact neighbors: %v", err)
 			}
-
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, hashEqualStr, artifactSubjectType))
 			t.AppendSeparator()
 			t.AppendRows(getOutputBasedOnNode(ctx, gqlclient, artifactNeighbors, occurrenceStr, artifactSubjectType))
@@ -271,7 +269,7 @@ var queryKnownCmd = &cobra.Command{
 			path = append([]string{artifactResponse.Artifacts[0].Id}, neighborsPath...)
 
 			fmt.Println(t.Render())
-			fmt.Printf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))
+			fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
 		default:
 			logger.Fatalf("expected type to be either a package, source or artifact")
 		}

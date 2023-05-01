@@ -60,7 +60,7 @@ query Path($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!
       ...allSLSATree
     }
     ... on CertifyBad {
-      ...allCertifyBad
+      ...AllCertifyBad
     }
     ... on CertifyGood {
       ...allCertifyGood
@@ -132,7 +132,7 @@ query Neighbors($node: ID!, $usingOnly: [Edge!]!) {
       ...allSLSATree
     }
     ... on CertifyBad {
-      ...allCertifyBad
+      ...AllCertifyBad
     }
     ... on CertifyGood {
       ...allCertifyGood
@@ -204,7 +204,7 @@ query Node($node: ID!) {
       ...allSLSATree
     }
     ... on CertifyBad {
-      ...allCertifyBad
+      ...AllCertifyBad
     }
     ... on CertifyGood {
       ...allCertifyGood
