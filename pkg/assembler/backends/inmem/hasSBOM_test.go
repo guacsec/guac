@@ -221,7 +221,7 @@ func TestHasSBOM(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Query on Algorighm",
+			Name:  "Query on Algorithm",
 			InPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
 				{
