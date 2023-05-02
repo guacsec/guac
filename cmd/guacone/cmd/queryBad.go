@@ -252,7 +252,7 @@ func init() {
 		os.Exit(1)
 	}
 	queryBadCmd.Flags().AddFlagSet(set)
-	if err := viper.BindPFlags(queryVulnCmd.Flags()); err != nil {
+	if err := viper.BindPFlags(queryBadCmd.Flags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
