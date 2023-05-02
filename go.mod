@@ -164,7 +164,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v50 v50.2.0
-	github.com/google/osv-scanner v1.3.2
+	github.com/google/osv-scanner v1.3.3-0.20230501025221-190aea2b43c8
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/mitchellh/go-homedir v1.1.0
