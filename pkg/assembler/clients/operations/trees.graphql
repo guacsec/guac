@@ -162,7 +162,7 @@ fragment allSLSATree on HasSLSA {
   }
 }
 
-fragment allCertifyBad on CertifyBad {
+fragment AllCertifyBad on CertifyBad {
   id
   justification
   subject {

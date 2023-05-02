@@ -22,7 +22,7 @@ mutation CertifyBadPkg($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyB
     ...AllPkgTree
   }
   ingestCertifyBad(subject: {package: $pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad) {
-    ...allCertifyBad
+    ...AllCertifyBad
   }
 }
 
@@ -31,7 +31,7 @@ mutation CertifyBadSrc($source: SourceInputSpec!, $certifyBad: CertifyBadInputSp
     ...AllSourceTree
   }
   ingestCertifyBad(subject: {source: $source}, certifyBad: $certifyBad) {
-    ...allCertifyBad
+    ...AllCertifyBad
   }
 }
 
@@ -40,6 +40,14 @@ mutation CertifyBadArtifact($artifact: ArtifactInputSpec!, $certifyBad: CertifyB
     ...AllArtifactTree
   }
   ingestCertifyBad(subject: {artifact: $artifact}, certifyBad: $certifyBad) {
-    ...allCertifyBad
+    ...AllCertifyBad
+  }
+}
+
+# Exposes GraphQL queries to retrieve GUAC CertifyBads
+
+query CertifyBads($filter: CertifyBadSpec) {
+  CertifyBad(certifyBadSpec: $filter) {
+    ...AllCertifyBad
   }
 }
