@@ -129,7 +129,7 @@ In this first example, we will query if our image has any vulnerabilities
 We will start off by running the following command:
 
 ```bash
-./bin/guacone query_vuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest"
+./bin/guacone query vuln "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest"
 ```
 
 **Note**: if you see the following error:
@@ -157,16 +157,15 @@ Successful output will show the following:
 +-------------+-----------+---------------------------------------+
 | NODE TYPE   | NODE ID   | ADDITIONAL INFORMATION                |
 +-------------+-----------+---------------------------------------+
-| certifyVuln | 21161     | vulnerability ID: ghsa-7rjr-3q55-vv33 |
-| certifyVuln | 21163     | vulnerability ID: ghsa-8489-44mv-ggj8 |
-| certifyVuln | 21165     | vulnerability ID: ghsa-fxph-q3j8-mv87 |
-| certifyVuln | 21167     | vulnerability ID: ghsa-jfh8-c2jp-5v3q |
-| certifyVuln | 21169     | vulnerability ID: ghsa-p6xc-xr62-6r2g |
-| certifyVuln | 21171     | vulnerability ID: ghsa-vwqq-5vrc-xw9h |
-| certifyVuln | 21148     | vulnerability ID: ghsa-599f-7c49-w659 |
+| certifyVuln | 138477    | vulnerability ID: ghsa-599f-7c49-w659 |
+| certifyVuln | 138449    | vulnerability ID: ghsa-7rjr-3q55-vv33 |
+| certifyVuln | 138451    | vulnerability ID: ghsa-8489-44mv-ggj8 |
+| certifyVuln | 138453    | vulnerability ID: ghsa-fxph-q3j8-mv87 |
+| certifyVuln | 138455    | vulnerability ID: ghsa-jfh8-c2jp-5v3q |
+| certifyVuln | 138457    | vulnerability ID: ghsa-p6xc-xr62-6r2g |
+| certifyVuln | 138459    | vulnerability ID: ghsa-vwqq-5vrc-xw9h |
 +-------------+-----------+---------------------------------------+
-Found path 5,4,3,2,186,185,184,183,20,21161,21162,185,184,183,20,21163,21164,185,184,183,20,21165,21166,185,184,183,20,21167,21168,185,184,183,20,21169,21170,185,184,183,20,21171,21172,185,184,183,20,339,338,337,202,20,21148,21149,338,337,202,20
-Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,186,185,184,183,20,21161,21162,185,184,183,20,21163,21164,185,184,183,20,21165,21166,185,184,183,20,21167,21168,185,184,183,20,21169,21170,185,184,183,20,21171,21172,185,184,183,20,339,338,337,202,20,21148,21149,338,337,202,20]
+Visualizer url: http://localhost:3000/?path=15337,15336,15335,2,15432,15431,15430,15340,2509,138477,138478,15574,15573,15572,15515,138449,138450,138451,138452,138453,138454,138455,138456,138457,138458,138459,138460
 ```
 
 From the output, you can see that there are vulnerabilities associated with the
@@ -218,12 +217,11 @@ Successful output will show the following:
 
 ```bash
 +-----------+-----------+---------------------------------------+
-| NODE TYPE | NODE ID # | ADDITIONAL INFORMATION                |
+| NODE TYPE | NODE ID   | ADDITIONAL INFORMATION                |
 +-----------+-----------+---------------------------------------+
-| osv       | 21161     | vulnerability ID: ghsa-7rjr-3q55-vv33 |
+| osv       | 138449    | vulnerability ID: ghsa-7rjr-3q55-vv33 |
 +-----------+-----------+---------------------------------------+
-Found path 21161,21162,185,184,183,20,186,5,4,3,2
-Visualizer url: http://localhost:3000/visualize?path=[21161,21162,185,184,183,20,186,5,4,3,2]
+Visualizer url: http://localhost:3000/?path=138449,138450,15573,15572,15515,2509,15574,15337,15336,15335,2
 ```
 
 Based on the output we see that there is a path to the vulnerability, we can use
