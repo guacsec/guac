@@ -217,7 +217,7 @@ Successful output will show the following:
 
 ```bash
 +-----------+-----------+---------------------------------------+
-| NODE TYPE | NODE ID   | ADDITIONAL INFORMATION                | 
+| NODE TYPE | NODE ID   | ADDITIONAL INFORMATION                |
 +-----------+-----------+---------------------------------------+
 | osv       | 138449    | vulnerability ID: ghsa-7rjr-3q55-vv33 |
 +-----------+-----------+---------------------------------------+
