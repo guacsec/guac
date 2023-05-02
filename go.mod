@@ -62,6 +62,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0 // indirect
 	github.com/caarlos0/env/v6 v6.10.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/chzyer/readline v1.5.0 // indirect
 	github.com/cloudflare/circl v1.1.0 // indirect
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
@@ -167,6 +168,7 @@ require (
 	github.com/google/osv-scanner v1.3.3-0.20230501025221-190aea2b43c8
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/jeremywohl/flatten v1.0.1
+	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.16
 	github.com/nats-io/nats.go v1.25.0
