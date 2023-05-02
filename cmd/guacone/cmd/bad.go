@@ -142,7 +142,7 @@ var queryBadCmd = &cobra.Command{
 				}
 				if len(pkgPath) > 0 {
 					path = append(path, fullCertifyBadPath...)
-					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
+					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
 				} else {
 					fmt.Printf("No paths to bad package found!\n")
 				}
@@ -187,7 +187,7 @@ var queryBadCmd = &cobra.Command{
 						subject.Namespaces[0].Names[0].Id,
 						subject.Namespaces[0].Id, subject.Id}, path...)
 					path = append(path, fullCertifyBadPath...)
-					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
+					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
 				} else {
 					fmt.Printf("No paths to bad source found!\n")
 				}
@@ -229,7 +229,7 @@ var queryBadCmd = &cobra.Command{
 					fullCertifyBadPath := append([]string{selectedCertifyBad.Id,
 						subject.Id}, path...)
 					path = append(path, fullCertifyBadPath...)
-					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
+					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(removeDuplicateValuesFromPath(path), `,`))
 				} else {
 					fmt.Printf("No paths to bad artifact found!\n")
 				}
