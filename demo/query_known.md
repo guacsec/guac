@@ -121,7 +121,7 @@ with and where it can be found:
 **Note**: `--type "package"` flag is specified that we are querying a PURL
 
 ```bash
-./bin/guacone query_known --type "package" "pkg:guac/spdx/docker.io/library/vault-latest"
+./bin/guacone query known --type "package" "pkg:guac/spdx/docker.io/library/vault-latest"
 ```
 
 The output will look similar to this:
@@ -133,7 +133,7 @@ The output will look similar to this:
 | NODE TYPE | NODE ID   | ADDITIONAL INFORMATION |
 +-----------+-----------+------------------------+
 +-----------+-----------+------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[4,3,2]
+Visualizer url: http://localhost:3000/?path=4,3,2
 +----------------------------------------------------------------------------------------------+
 | Package Version Nodes                                                                        |
 +-----------+-----------+----------------------------------------------------------------------+
@@ -141,7 +141,7 @@ Visualizer url: http://localhost:3000/visualize?path=[4,3,2]
 +-----------+-----------+----------------------------------------------------------------------+
 | hasSBOM   | 6964      | SBOM Download Location: file:///../guac-data/top-dh-sboms/vault.json |
 +-----------+-----------+----------------------------------------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[5,4,3,2,6964]
+Visualizer url: http://localhost:3000/?path=5,4,3,2,6964
 
 ```
 
@@ -178,7 +178,7 @@ The Output should be similar to this:
 +-----------+-----------+---------------------------------------------------------+
 | hasSrcAt  | 7647      | Source: git+https://github.com/prometheus/client_golang |
 +-----------+-----------+---------------------------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[578,327,6,7647]
+Visualizer url: http://localhost:3000/?path=578,327,6,7647
 +----------------------------------------------------+
 | Package Version Nodes                              |
 +-------------+-----------+--------------------------+
@@ -186,7 +186,7 @@ Visualizer url: http://localhost:3000/visualize?path=[578,327,6,7647]
 +-------------+-----------+--------------------------+
 | certifyVuln | 13469     | vulnerability ID: NoVuln |
 +-------------+-----------+--------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[579,578,327,6,13469]
+Visualizer url: http://localhost:3000/?path=579,578,327,6,13469
 
 ```
 
@@ -226,7 +226,7 @@ Using the CLI to query this:
 +-----------+-----------+---------------------------------------------------------+
 | hasSrcAt  | 7647      | Source: git+https://github.com/prometheus/client_golang |
 +-----------+-----------+---------------------------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[578,327,6,7647]
+Visualizer url: http://localhost:3000/?path=578,327,6,7647
 +-----------------------------------------------------------------+
 | Package Version Nodes                                           |
 +-------------+-----------+---------------------------------------+
@@ -235,7 +235,7 @@ Visualizer url: http://localhost:3000/visualize?path=[578,327,6,7647]
 | certifyVuln | 13471     | vulnerability ID: ghsa-cg3q-j54f-5p7p |
 | certifyVuln | 13473     | vulnerability ID: go-2022-0322        |
 +-------------+-----------+---------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[7600,578,327,6,13471,13473]
+Visualizer url: http://localhost:3000/?path=7600,578,327,6,13471,13473
 ```
 
 We once again see that at the “package name level” we have the same source repo
@@ -318,7 +318,7 @@ We can run the query:
 +-----------+-----------+--------------------------------------------------------------------+
 | scorecard | 7583      | Overall Score: 6.600000                                            |
 +-----------+-----------+--------------------------------------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[7582,7581,6965,7647,7583]
+Visualizer url: http://localhost:3000/?path=7582,7581,6965,7647,7583
 ```
 
 From this output, we see the reverse of what we saw when we queried the package.
@@ -347,7 +347,7 @@ The output should be similar to:
 +-----------+-----------+---------------------------------------------------------------------+
 | scorecard | 6968      | Overall Score: 8.300000                                             |
 +-----------+-----------+---------------------------------------------------------------------+
-Visualizer url: http://localhost:3000/visualize?path=[6967,6966,6965,7074,7075,7156,8948,8949,8950,6968]
+Visualizer url: http://localhost:3000/?path=6967,6966,6965,7074,7075,7156,8948,8949,8950,6968
 ```
 
 Here we see that this specific source repo is associated with various different
