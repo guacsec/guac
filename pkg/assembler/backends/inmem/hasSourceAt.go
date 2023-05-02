@@ -261,7 +261,7 @@ func (c *demoClient) addSrcIfMatch(out []*model.HasSourceAt,
 	if filter != nil && noMatch(filter.Collector, link.collector) {
 		return out, nil
 	}
-	if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() == link.knownSince {
+	if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() != link.knownSince {
 		return out, nil
 	}
 	foundHasSourceAt, err := c.buildHasSourceAt(link, filter, false)
