@@ -170,7 +170,11 @@ var queryBadCmd = &cobra.Command{
 				for _, neighbor := range neighborResponse.Neighbors {
 					switch v := neighbor.(type) {
 					case *model.NeighborsNeighborsHasSourceAt:
-						path = append(path, v.Id, v.Package.Namespaces[0].Names[0].Versions[0].Id, v.Package.Namespaces[0].Names[0].Id, v.Package.Namespaces[0].Id, v.Package.Id)
+						if len(v.Package.Namespaces[0].Names[0].Versions) > 0 {
+							path = append(path, v.Id, v.Package.Namespaces[0].Names[0].Versions[0].Id, v.Package.Namespaces[0].Names[0].Id, v.Package.Namespaces[0].Id, v.Package.Id)
+						} else {
+							path = append(path, v.Id, v.Package.Namespaces[0].Names[0].Id, v.Package.Namespaces[0].Id, v.Package.Id)
+						}
 					case *model.NeighborsNeighborsIsOccurrence:
 						path = append(path, v.Id, v.Artifact.Id)
 					default:
