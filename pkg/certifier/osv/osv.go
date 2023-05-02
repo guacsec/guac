@@ -18,16 +18,20 @@ package osv
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	"github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
+
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
-	"github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
+	"github.com/guacsec/guac/pkg/version"
 )
 
 const (
@@ -37,61 +41,48 @@ const (
 	PRODUCER_ID string = "guacsec/guac"
 )
 
-var ErrOSVComponenetTypeMismatch error = fmt.Errorf("rootComponent type is not []*root_package.PackageNode")
+var ErrOSVComponenetTypeMismatch error = errors.New("rootComponent type is not []*root_package.PackageNode")
 
 type osvCertifier struct {
-	packageNodes []*root_package.PackageNode
+	osvHTTPClient *http.Client
 }
 
 // NewOSVCertificationParser initializes the OSVCertifier
 func NewOSVCertificationParser() certifier.Certifier {
-	return &osvCertifier{}
+	return &osvCertifier{
+		osvHTTPClient: &http.Client{
+			Transport: version.UATransport,
+		},
+	}
 }
 
 // CertifyComponent takes in the root component from the gauc database and does a recursive scan
 // to generate vulnerability attestations
 func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
-	if component, ok := rootComponent.([]*root_package.PackageNode); ok {
-		o.packageNodes = component
-	} else {
+	packageNodes, ok := rootComponent.([]*root_package.PackageNode)
+	if !ok {
 		return ErrOSVComponenetTypeMismatch
 	}
 
-	err := o.certifyHelper(ctx, docChannel)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *osvCertifier) certifyHelper(ctx context.Context, docChannel chan<- *processor.Document) error {
 	var query osv_scanner.BatchedQuery
 	packMap := map[string][]*root_package.PackageNode{}
-	for _, node := range o.packageNodes {
+	for _, node := range packageNodes {
 		if _, ok := packMap[node.Purl]; !ok {
 			purlQuery := osv_scanner.MakePURLRequest(node.Purl)
 			query.Queries = append(query.Queries, purlQuery)
 		}
 		packMap[node.Purl] = append(packMap[node.Purl], node)
 	}
-	err := getVulnerabilities(query, packMap, docChannel)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
-func getVulnerabilities(query osv_scanner.BatchedQuery, packMap map[string][]*root_package.PackageNode, docChannel chan<- *processor.Document) error {
-	resp, err := osv_scanner.MakeRequest(query)
+	resp, err := osv_scanner.MakeRequestWithClient(query, o.osvHTTPClient)
 	if err != nil {
-		return fmt.Errorf("scan failed: %v", err)
+		return fmt.Errorf("osv.dev batched request failed: %w", err)
 	}
 	for i, query := range query.Queries {
 		response := resp.Results[i]
 		purl := query.Package.PURL
-		err := generateDocument(packMap[purl], response.Vulns, docChannel)
-		if err != nil {
-			return err
+		if err := generateDocument(packMap[purl], response.Vulns, docChannel); err != nil {
+			return fmt.Errorf("could not generate document from OSV results: %w", err)
 		}
 	}
 	return nil
@@ -101,7 +92,7 @@ func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner
 	for _, node := range packNodes {
 		payload, err := json.Marshal(createAttestation(node, vulns))
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to marshal attestation: %w", err)
 		}
 		doc := &processor.Document{
 			Blob:   payload,
