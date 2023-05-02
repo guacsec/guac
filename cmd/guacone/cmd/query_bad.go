@@ -27,7 +27,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,13 +38,8 @@ type queryBadOptions struct {
 	depth           int
 }
 
-var (
-	colVisualizerURL = "Visualizer URL"
-	rowBadHeader     = table.Row{colTitleNodeType, colTitleNodeID, colVisualizerURL}
-)
-
 var queryBadCmd = &cobra.Command{
-	Use:   "query_bad [flags]",
+	Use:   "bad [flags]",
 	Short: "query to find more information on certifyBad",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
@@ -110,32 +104,48 @@ var queryBadCmd = &cobra.Command{
 			return
 		}
 
-		t := table.NewWriter()
-		tTemp := table.Table{}
-		tTemp.Render()
-		t.AppendHeader(rowBadHeader)
-
 		for _, selectedCertifyBad := range mapCertifyBad[certifyBadSelected] {
-			var tableRows []table.Row
 			switch subject := selectedCertifyBad.Subject.(type) {
 			case *model.AllCertifyBadSubjectPackage:
 				var path []string
-				for _, version := range subject.Namespaces[0].Names[0].Versions {
-					pkgPath, err := searchDependencyPackagesReverse(ctx, gqlclient, "", version.Id, opts.depth)
+
+				var pkgVersions []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion
+				if len(subject.Namespaces[0].Names[0].Versions) == 0 {
+					pkgFilter := &model.PkgSpec{
+						Type:      &subject.Type,
+						Namespace: &subject.Namespaces[0].Namespace,
+						Name:      &subject.Namespaces[0].Names[0].Name,
+					}
+					pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
 					if err != nil {
-						logger.Fatalf("error searching dependency packages match: %v", err)
+						logger.Fatalf("error querying for package: %v", err)
 					}
-					if len(pkgPath) > 0 {
-						fullCertifyBadPath := append([]string{selectedCertifyBad.Id,
-							subject.Namespaces[0].Names[0].Versions[0].Id,
-							subject.Namespaces[0].Names[0].Id, subject.Namespaces[0].Id,
-							subject.Id}, pkgPath...)
-						path = append(path, fullCertifyBadPath...)
+					if len(pkgResponse.Packages) != 1 {
+						logger.Fatalf("failed to located package based on package from certifyBad")
 					}
+					pkgVersions = pkgResponse.Packages[0].Namespaces[0].Names[0].Versions
+				} else {
+					pkgVersions = subject.Namespaces[0].Names[0].Versions
 				}
-				tableRows = append(tableRows, table.Row{badLinkStr, selectedCertifyBad.Id, fmt.Sprintf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))})
-				t.AppendRows(tableRows)
-				fmt.Println(t.Render())
+
+				pkgPath, err := searchDependencyPackagesReverse(ctx, gqlclient, "", pkgVersions[0].Id, opts.depth)
+				if err != nil {
+					logger.Fatalf("error searching dependency packages match: %v", err)
+				}
+
+				var fullCertifyBadPath []string
+				for _, version := range pkgVersions {
+					fullCertifyBadPath = append([]string{selectedCertifyBad.Id,
+						version.Id,
+						subject.Namespaces[0].Names[0].Id, subject.Namespaces[0].Id,
+						subject.Id}, pkgPath...)
+				}
+				if len(pkgPath) > 0 {
+					path = append(path, fullCertifyBadPath...)
+					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
+				} else {
+					fmt.Printf("No paths to bad package found!\n")
+				}
 			case *model.AllCertifyBadSubjectSource:
 				var path []string
 				srcFilter := &model.SourceSpec{
@@ -173,10 +183,11 @@ var queryBadCmd = &cobra.Command{
 						subject.Namespaces[0].Names[0].Id,
 						subject.Namespaces[0].Id, subject.Id}, path...)
 					path = append(path, fullCertifyBadPath...)
+					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
+				} else {
+					fmt.Printf("No paths to bad source found!\n")
 				}
-				tableRows = append(tableRows, table.Row{badLinkStr, selectedCertifyBad.Id, fmt.Sprintf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))})
-				t.AppendRows(tableRows)
-				fmt.Println(t.Render())
+
 			case *model.AllCertifyBadSubjectArtifact:
 				var path []string
 				artifactFilter := &model.ArtifactSpec{
@@ -214,10 +225,10 @@ var queryBadCmd = &cobra.Command{
 					fullCertifyBadPath := append([]string{selectedCertifyBad.Id,
 						subject.Id}, path...)
 					path = append(path, fullCertifyBadPath...)
+					fmt.Printf("Visualizer url: http://localhost:3000/?path=%v\n", strings.Join(path, `,`))
+				} else {
+					fmt.Printf("No paths to bad artifact found!\n")
 				}
-				tableRows = append(tableRows, table.Row{badLinkStr, selectedCertifyBad.Id, fmt.Sprintf("Visualizer url: http://localhost:3000/visualize?path=[%v]\n", strings.Join(path, `,`))})
-				t.AppendRows(tableRows)
-				fmt.Println(t.Render())
 			}
 		}
 	},
@@ -242,5 +253,5 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.AddCommand(queryBadCmd)
+	queryCmd.AddCommand(queryBadCmd)
 }

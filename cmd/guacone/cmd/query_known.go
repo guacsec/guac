@@ -81,7 +81,7 @@ var (
 )
 
 var queryKnownCmd = &cobra.Command{
-	Use:   "query_known [flags] purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)",
+	Use:   "known [flags] purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)",
 	Short: "query for all the available information on a package, source or artifact",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
@@ -453,5 +453,5 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.AddCommand(queryKnownCmd)
+	queryCmd.AddCommand(queryKnownCmd)
 }
