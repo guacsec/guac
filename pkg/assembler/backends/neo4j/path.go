@@ -33,3 +33,7 @@ func (c *neo4jClient) Neighbors(ctx context.Context, node string, usingOnly []mo
 func (c *neo4jClient) Node(ctx context.Context, node string) (model.Node, error) {
 	panic(fmt.Errorf("not implemented: Node - node"))
 }
+
+func (c *neo4jClient) Nodes(ctx context.Context, nodes []string) ([]model.Node, error) {
+	panic(fmt.Errorf("not implemented: Nodes - nodes"))
+}
