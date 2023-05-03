@@ -194,7 +194,7 @@ return a certain number, you can use the `--path` flag to specify the number.
 To do this we will run the following:
 
 ```bash
-./bin/guacone query_vuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" --vulnerabilityID "ghsa-7rjr-3q55-vv33"
+./bin/guacone query vuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" --vulnerabilityID "ghsa-7rjr-3q55-vv33"
 ```
 
 **Note**: if you see the following:

@@ -68,7 +68,11 @@ var queryBadCmd = &cobra.Command{
 		for _, certifyBad := range certifyBadResponse.CertifyBad {
 			switch subject := certifyBad.Subject.(type) {
 			case *model.AllCertifyBadSubjectPackage:
-				purl := helpers.PkgToPurl(subject.Type, subject.Namespaces[0].Namespace, subject.Namespaces[0].Names[0].Name, "", "", []string{})
+				version := ""
+				if len(subject.Namespaces[0].Names[0].Versions) == 1 {
+					version = subject.Namespaces[0].Names[0].Versions[0].Version
+				}
+				purl := helpers.PkgToPurl(subject.Type, subject.Namespaces[0].Namespace, subject.Namespaces[0].Names[0].Name, version, "", []string{})
 				purlAndJustification := purl + " (" + certifyBad.Justification + ")"
 				mapCertifyBad[purlAndJustification] = append(mapCertifyBad[purlAndJustification], certifyBad)
 			case *model.AllCertifyBadSubjectSource:
