@@ -748,11 +748,12 @@ are `HAS_SLSA_SUBJECT`, `HAS_SLSA_BUILT_BY`, and `HAS_SLSA_MATERIALS`. This is
 because `ARTIFACT_HAS_SLSA` is only defined from subject `Artifact` to
 `HasSLSA`.
 
-With these, we can define 3 queries that return `Node`s without looking at their
+With these, we can define 4 queries that return `Node`s without looking at their
 type, but only at their connectivity:
 
 ```gql
 node(node: ID!): Node!
+nodes(nodes: [ID!]!): [Node!]!
 neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
 path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
 }
