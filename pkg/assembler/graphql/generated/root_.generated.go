@@ -261,6 +261,7 @@ type ComplexityRoot struct {
 		IsVulnerability     func(childComplexity int, isVulnerabilitySpec *model.IsVulnerabilitySpec) int
 		Neighbors           func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                func(childComplexity int, node string) int
+		Nodes               func(childComplexity int, nodes []string) int
 		Osv                 func(childComplexity int, osvSpec *model.OSVSpec) int
 		Packages            func(childComplexity int, pkgSpec *model.PkgSpec) int
 		Path                func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
@@ -1543,6 +1544,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Node(childComplexity, args["node"].(string)), true
+
+	case "Query.nodes":
+		if e.complexity.Query.Nodes == nil {
+			break
+		}
+
+		args, err := ec.field_Query_nodes_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Nodes(childComplexity, args["nodes"].([]string)), true
 
 	case "Query.osv":
 		if e.complexity.Query.Osv == nil {
@@ -3888,6 +3901,13 @@ extend type Query {
   The input is only specified by its ID.
   """
   node(node: ID!): Node!
+
+  """
+  nodes returns an array of nodes, regardless of type.
+
+  The input is an array of IDs to retrieve.
+  """
+  nodes(nodes: [ID!]!): [Node!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/pkgEqual.graphql", Input: `#
