@@ -283,7 +283,7 @@ func (c *demoClient) addDepIfMatch(out []*model.IsDependency,
 	if filter != nil && noMatch(filter.VersionRange, link.versionRange) {
 		return out, nil
 	}
-	if filter != nil && filter.DependencyType != nil && *filter.DependencyType == link.dependencyType {
+	if filter != nil && filter.DependencyType != nil && *filter.DependencyType != link.dependencyType {
 		return out, nil
 	}
 
