@@ -77,6 +77,7 @@ type Backend interface {
 	// Topological queries: queries where node connectivity matters more than node type
 	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
 	Node(ctx context.Context, node string) (model.Node, error)
+	Nodes(ctx context.Context, nodes []string) ([]model.Node, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
 }
 

@@ -237,3 +237,74 @@ query GetNode ($nodeId: ID!) {
   }
 }
 
+query GetNodes ($nodeIds: [ID!]!) {
+  nodes(nodes: $nodeIds) {
+    __typename
+    ... on Package{
+      ...allPkgTree
+    }
+    ... on Source {
+        ...allSrcTree
+    }
+    ... on Artifact {
+        ...allArtifactTree
+    }
+    ... on Builder {
+        ...allBuilderTree
+    }
+    ... on OSV {
+        ...allOSVTree
+    }
+    ... on CVE {
+        ...allCveTree
+    }
+    ... on GHSA {
+        ...allGHSATree
+    }
+    ... on NoVuln {
+      id
+    }
+    ... on IsOccurrence {
+        ...allIsOccurrencesTree
+    }
+    ... on IsDependency {
+        ...allIsDependencyTree
+    }
+    ... on IsVulnerability {
+        ...allIsVulnerabilityTree
+    }
+    ... on CertifyVEXStatement {
+        ...allCertifyVEXStatementTree
+    }
+    ... on HashEqual {
+        ...allHashEqualTree
+    }
+    ... on CertifyBad {
+        ...allCertifyBadTree
+    }
+    ... on CertifyGood {
+        ...allCertifyGoodTree
+    }
+    ... on CertifyBad {
+        ...allCertifyBadTree
+    }
+    ... on PkgEqual {
+        ...allPkgEqualTree
+    }
+    ... on CertifyScorecard {
+        ...allCertifyScorecardTree
+    }
+    ... on CertifyVuln {
+        ...allCertifyVulnTree
+    }
+    ... on HasSourceAt {
+        ...allHasSourceAtTree
+    }
+    ... on HasSBOM {
+        ...allHasSBOMTree
+    }
+    ... on HasSLSA {
+        ...allHasSLSATree
+    }
+  }
+}

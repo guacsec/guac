@@ -24,3 +24,8 @@ func (r *queryResolver) Neighbors(ctx context.Context, node string, usingOnly []
 func (r *queryResolver) Node(ctx context.Context, node string) (model.Node, error) {
 	return r.Backend.Node(ctx, node)
 }
+
+// Nodes is the resolver for the nodes field.
+func (r *queryResolver) Nodes(ctx context.Context, nodes []string) ([]model.Node, error) {
+	return r.Backend.Nodes(ctx, nodes)
+}

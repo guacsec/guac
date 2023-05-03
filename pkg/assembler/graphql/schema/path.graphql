@@ -156,4 +156,11 @@ extend type Query {
   The input is only specified by its ID.
   """
   node(node: ID!): Node!
+
+  """
+  nodes returns an array of nodes, regardless of type.
+
+  The input is an array of IDs to retrieve.
+  """
+  nodes(nodes: [ID!]!): [Node!]!
 }

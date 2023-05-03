@@ -194,3 +194,15 @@ func (c *demoClient) Node(ctx context.Context, source string) (model.Node, error
 
 	return out, nil
 }
+
+func (c *demoClient) Nodes(ctx context.Context, ids []string) ([]model.Node, error) {
+	rv := make([]model.Node, 0, len(ids))
+	for _, id := range ids {
+		n, err := c.Node(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		rv = append(rv, n)
+	}
+	return rv, nil
+}
