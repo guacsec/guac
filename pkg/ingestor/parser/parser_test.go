@@ -131,6 +131,7 @@ package parser
 // 	}
 // }
 //
+// TODO: Fix tests to check for logger messages instead of err text (https://github.com/guacsec/guac/issues/765)
 // func Test_ParserSubscribe(t *testing.T) {
 // 	ctx := logging.WithLogger(context.Background())
 // 	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
