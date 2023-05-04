@@ -1,14 +1,21 @@
 # Deploying GUAC with Helm Chart
 
 This tutorial introduces the full GUAC components deployment and how to deploy
-it with [Kusari's GUAC Helm Chart](https://github.com/kusaridev/helm-charts/tree/main/charts/guac).
+it with
+[Kusari's GUAC Helm Chart](https://github.com/kusaridev/helm-charts/tree/main/charts/guac).
 
-In case you run into issues with using the helm chart that this document doesn't address, please refer to documentation at [Kusari's GUAC Helm Chart](https://github.com/kusaridev/helm-charts/tree/main/charts/guac).
+In case you run into issues with using the helm chart that this document doesn't
+address, please refer to documentation at
+[Kusari's GUAC Helm Chart](https://github.com/kusaridev/helm-charts/tree/main/charts/guac).
+
 ## Prerequisites
 
 - Kubernetes
-  - Deploy one of these for local testing if you don't have a Kubernetes cluster ready:
-    - [kind](https://kind.sigs.k8s.io/), [minikube](https://minikube.sigs.k8s.io/docs/start/), [colima](https://github.com/abiosoft/colima)
+  - Deploy one of these for local testing if you don't have a Kubernetes cluster
+    ready:
+    - [kind](https://kind.sigs.k8s.io/),
+      [minikube](https://minikube.sigs.k8s.io/docs/start/),
+      [colima](https://github.com/abiosoft/colima)
 - [Helm](https://helm.sh/docs/intro/install/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - Docker
@@ -16,23 +23,25 @@ In case you run into issues with using the helm chart that this document doesn't
 
 ## Deploy GUAC
 
-Add the [kusaridev/helm-charts](https://github.com/kusaridev/helm-charts) repo and search for the guac helm chart.
+Add the [kusaridev/helm-charts](https://github.com/kusaridev/helm-charts) repo
+and search for the guac helm chart.
 
 ```bash
 helm repo add kusaridev https://kusaridev.github.io/helm-charts
 helm repo update
 
 helm search repo kusaridev
-NAME            CHART VERSION   APP VERSION     DESCRIPTION                                  
+NAME            CHART VERSION   APP VERSION     DESCRIPTION
 kusaridev/guac  0.1.3           v0.0.1          A Helm chart for deploying GUAC to Kubernetes
 ```
 
 Deploy the helm chart
+
 ```
 helm install [RELEASE_NAME] kusaridev/guac
 
 e.g.
-helm install guac kusaridev/guac 
+helm install guac kusaridev/guac
 
 NAME: guac
 LAST DEPLOYED: Fri Apr 21 22:59:39 2023
@@ -42,6 +51,7 @@ REVISION: 1
 ```
 
 Verify the pods and services are running once the chart is deployed.
+
 ```
 kubectl get pod
 NAME                                 READY   STATUS    RESTARTS       AGE
@@ -65,30 +75,37 @@ visualizer       ClusterIP   10.96.219.45   <none>        3000/TCP              
 ```
 
 #### Expose services via kubectl port-forward
-The full GUAC deployment is now running. You may use ```kubectl port-forward``` to gain access to respective services.
+
+The full GUAC deployment is now running. You may use `kubectl port-forward` to
+gain access to respective services.
 
 ```
 kubectl port-forward svc/graphql-server 8080:8080 &
 kubectl port-forward svc/visualizer 3000:3000 &
 ```
 
-The GraphQL server service is listening on port `8080`. You may visit [http://localhost:8080](http://localhost:8080) to see the GraphQL playground. GraphQL queries are served at the `/query` endpoint.
-You may visit [http://localhost:3000](http://localhost:3000) to see the Visualizer.
+The GraphQL server service is listening on port `8080`. You may visit
+[http://localhost:8080](http://localhost:8080) to see the GraphQL playground.
+GraphQL queries are served at the `/query` endpoint. You may visit
+[http://localhost:3000](http://localhost:3000) to see the Visualizer.
 
-If there is a need to access NATS and CollectSub service, e.g. you're running the ```guaccollect``` command, run
+If there is a need to access NATS and CollectSub service, e.g. you're running
+the `guaccollect` command, run
+
 ```
 kubectl port-forward svc/guac-nats 4222:4222 &
 kubectl port-forward svc/collectsub 2782:2782 &
 ```
 
-NATS is listening on port `4222`, this is where the collectors will to connect to push any docs they find. The GUAC `guaccollect` command defaults to `nats://127.0.0.1:4222` for the NATS address, so this will work automatically.
-
+NATS is listening on port `4222`, this is where the collectors will to connect
+to push any docs they find. The GUAC `guaccollect` command defaults to
+`nats://127.0.0.1:4222` for the NATS address, so this will work automatically.
 
 ## Start Ingesting Data
 
 Now you can run the `guacone files` ingestion command to load data into your
-GUAC deployment. For example we can ingest the sample `guacsec/guac-data` data. However,
-you may ingest what you wish to here instead.
+GUAC deployment. For example we can ingest the sample `guacsec/guac-data` data.
+However, you may ingest what you wish to here instead.
 
 #### Clone the sample GUAC data
 
@@ -97,18 +114,25 @@ git clone https://github.com/guacsec/guac-data.git
 
 cd guac-data
 ```
-The rest of the tutorial will assume you are in the ```guac-data``` directory
+
+The rest of the tutorial will assume you are in the `guac-data` directory
 
 #### Pull the GUAC container image
-The ```guacone``` binary is packaged in the guac container image. Let's pull it so we can run the ingestion.
+
+The `guacone` binary is packaged in the guac container image. Let's pull it so
+we can run the ingestion.
 
 ```bash
-docker pull ghcr.io/kusaridev/guac:v0.0.1-beta.5 
+docker pull ghcr.io/kusaridev/guac:v0.0.1-beta.5
 ```
+
 You may pull newer versions of the guac container as they became available.
 
 #### Following the logs
-Optionally, in a separate terminal, you may follow the logs of all the services to see what's going on behind the scene as you ingest the sample data.
+
+Optionally, in a separate terminal, you may follow the logs of all the services
+to see what's going on behind the scene as you ingest the sample data.
+
 ```
 kubectl logs -l app.kubernetes.io/part-of=guac -f --max-log-requests 8
 ...
@@ -131,15 +155,26 @@ warn  - Experimental features are not covered by semver, and may cause unexpecte
 ```
 
 #### Ingesting sample data
+
 We are ingesting the sboms in guac-data/docs dir in this example.
+
 ```bash
 docker run --rm -v $PWD:/data --entrypoint /cnb/process/guacone  ghcr.io/kusaridev/guac:v0.0.1-beta.5 files /data/docs --gql-endpoint http://host.docker.internal:8080/query
 ```
-This command uses the `/cnb/process/guacone` GUAC binary from the `guac` container - specified via the ```--entrypoint``` flag. The parameters are toward the end of the command after the image name (following docker run's syntax).
 
-Because containers don't have access to the host's localhost by default, we use the `host.docker.internal` hostname to access the port-forward exposed at localhost. The command uses a volume mount to mout `guac-data` into the container for collecting (`-v $PWD:/data`). 
+This command uses the `/cnb/process/guacone` GUAC binary from the `guac`
+container - specified via the `--entrypoint` flag. The parameters are toward the
+end of the command after the image name (following docker run's syntax).
 
-Switch back to the logs terminal and you will soon see that the OSV certifier recognized the new packages and is looking up vulnerability information for them.
+Because containers don't have access to the host's localhost by default, we use
+the `host.docker.internal` hostname to access the port-forward exposed at
+localhost. The command uses a volume mount to mout `guac-data` into the
+container for collecting (`-v $PWD:/data`).
+
+Switch back to the logs terminal and you will soon see that the OSV certifier
+recognized the new packages and is looking up vulnerability information for
+them.
+
 ```
 ...
 {"level":"info","ts":1682343662.38526,"caller":"cmd/osv.go:111","msg":"[4.73ms] completed doc {Collector:guac Source:guac}"}
@@ -157,8 +192,10 @@ Switch back to the logs terminal and you will soon see that the OSV certifier re
 ...
 ```
 
-**Note** - in case you run into errors, double check that you've run the [port-forward commands](#expose-services-via-kubectl-port-forward) previously to expose other services at localhost and that you're running the ingestion command at in the ```guac-data``` dir.
-
+**Note** - in case you run into errors, double check that you've run the
+[port-forward commands](#expose-services-via-kubectl-port-forward) previously to
+expose other services at localhost and that you're running the ingestion command
+at in the `guac-data` dir.
 
 ## Query GraphQL Endpoint
 
@@ -188,7 +225,8 @@ Congratulations, you are now running a full GUAC deployment!
 
 ## What is running?
 
-The output of `kubectl get pod` shows the different running services. Here is a brief descriptions of what they are:
+The output of `kubectl get pod` shows the different running services. Here is a
+brief descriptions of what they are:
 
 - **GraphQL Server**: Serving GUAC GraphQL queries and storing the data. As the
   in-memory backend is used, no separate backend is needed behind the server.
@@ -213,6 +251,11 @@ The output of `kubectl get pod` shows the different running services. Here is a 
 
 ## Next steps
 
-The GUAC Helm Chart deployment is suitable to leave running in an environment that is accessible to you for further GUAC ingestion, discovery, analysis, and evaluation. Keep in mind that the in-memory backend is not persistent.
+The GUAC Helm Chart deployment is suitable to leave running in an environment
+that is accessible to you for further GUAC ingestion, discovery, analysis, and
+evaluation. Keep in mind that the in-memory backend is not persistent.
 
-Explore the types of collectors available in the `guaccollect` binary and see what will work for your build, ingestion, and SBOM workflow. These collectors can be run as another service that watches a location for new documents to ingest.
+Explore the types of collectors available in the `guaccollect` binary and see
+what will work for your build, ingestion, and SBOM workflow. These collectors
+can be run as another service that watches a location for new documents to
+ingest.
