@@ -33,12 +33,20 @@ func Test_slsaParser(t *testing.T) {
 		doc            *processor.Document
 		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
-	}{{
-		name:           "testing",
-		doc:            &testdata.Ite6SLSADoc,
-		wantPredicates: &testdata.SlsaPreds,
-		wantErr:        false,
-	}}
+	}{
+		{
+			name:           "testing v0.2",
+			doc:            &testdata.Ite6SLSADoc,
+			wantPredicates: &testdata.SlsaPreds,
+			wantErr:        false,
+		},
+		{
+			name:           "testing v0.1",
+			doc:            &testdata.Ite6SLSA1Doc,
+			wantPredicates: &testdata.SlsaPreds1,
+			wantErr:        false,
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSLSAParser()
@@ -52,6 +60,7 @@ func Test_slsaParser(t *testing.T) {
 			}
 
 			preds := s.GetPredicates(ctx)
+			//fmt.Println(preds.HasSlsa[0].HasSlsa.SlsaPredicate)
 			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
 				t.Errorf("slsa.GetPredicate mismatch values (+got, -expected): %s", d)
 			}

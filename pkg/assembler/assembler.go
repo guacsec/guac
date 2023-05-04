@@ -240,7 +240,7 @@ type CertifyGoodIngest struct {
 }
 
 type HasSBOMIngest struct {
-	// hasSBOM describes either pkg or src
+	// hasSBOM describes either pkg or artifact
 	Pkg      *generated.PkgInputSpec
 	Artifact *generated.ArtifactInputSpec
 
