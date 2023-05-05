@@ -26,7 +26,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
@@ -81,15 +80,17 @@ var (
 )
 
 var queryKnownCmd = &cobra.Command{
-	Use:   "known [flags] purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)",
-	Short: "query for all the available information on a package, source or artifact",
+	Use:   "known [flags] <type> <subject>",
+	Short: "Query for all the available information on a package, source, or artifact.",
+	Long: `Query for all the available information on a package, source, or artifact.
+  <type> must be either "package", "source", or "artifact".
+  <subject> is in the form of "<purl>" for package, "<vcs_tool>+<transport>" for source, or "<algorithm>:<digest>" for artiact.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateQueryKnownFlags(
-			viper.GetString("gql-endpoint"),
-			viper.GetString("type"),
+			viper.GetString("gql-addr"),
 			args,
 		)
 
@@ -424,34 +425,22 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	return tableRows
 }
 
-func validateQueryKnownFlags(graphqlEndpoint, queryType string, args []string) (queryKnownOptions, error) {
+func validateQueryKnownFlags(graphqlEndpoint string, args []string) (queryKnownOptions, error) {
 	var opts queryKnownOptions
 	opts.graphqlEndpoint = graphqlEndpoint
-	if queryType != "package" && queryType != "source" && queryType != "artifact" {
+
+	if len(args) != 2 {
+		return opts, fmt.Errorf("expected positional arguments for <type> <subject>")
+	}
+	opts.subjectType = args[0]
+	if opts.subjectType != "package" && opts.subjectType != "source" && opts.subjectType != "artifact" {
 		return opts, fmt.Errorf("expected type to be either a package, source or artifact")
 	}
-	opts.subjectType = queryType
-
-	if len(args) > 0 {
-		opts.subject = args[0]
-	} else {
-		return opts, fmt.Errorf("expected subject input to be purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)")
-	}
+	opts.subject = args[1]
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"type"})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
-		os.Exit(1)
-	}
-	queryKnownCmd.Flags().AddFlagSet(set)
-	if err := viper.BindPFlags(queryKnownCmd.Flags()); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
-		os.Exit(1)
-	}
-
 	queryCmd.AddCommand(queryKnownCmd)
 }

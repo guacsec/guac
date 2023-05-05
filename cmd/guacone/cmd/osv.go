@@ -52,7 +52,7 @@ var osvCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateOSVFlags(
-			viper.GetString("gql-endpoint"),
+			viper.GetString("gql-addr"),
 			viper.GetBool("poll"),
 			viper.GetString("interval"),
 			viper.GetString("csub-addr"),

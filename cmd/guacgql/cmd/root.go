@@ -45,14 +45,14 @@ var rootCmd = &cobra.Command{
 	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		flags.backend = viper.GetString("gql-backend")
-		flags.port = viper.GetInt("gql-port")
+		flags.port = viper.GetInt("gql-listen-port")
 		flags.debug = viper.GetBool("gql-debug")
-		flags.testData = viper.GetBool("gql-testdata")
+		flags.testData = viper.GetBool("gql-test-data")
 
-		flags.nUser = viper.GetString("gdbuser")
-		flags.nPass = viper.GetString("gdbpass")
-		flags.nAddr = viper.GetString("gdbaddr")
-		flags.nRealm = viper.GetString("realm")
+		flags.nUser = viper.GetString("neo4j-user")
+		flags.nPass = viper.GetString("neo4j-pass")
+		flags.nAddr = viper.GetString("neo4j-addr")
+		flags.nRealm = viper.GetString("neo4j-realm")
 
 		startServer(cmd)
 	},
@@ -62,8 +62,8 @@ func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
 	set, err := cli.BuildFlags([]string{
-		"gdbaddr", "gdbuser", "gdbpass", "realm", "gql-testdata",
-		"gql-port", "gql-debug", "gql-backend"})
+		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm", "gql-test-data",
+		"gql-listen-port", "gql-debug", "gql-backend"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
