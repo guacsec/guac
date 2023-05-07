@@ -126,19 +126,52 @@ var p2out = &model.Package{
 		}},
 	}},
 }
+var p2outName = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name:     "tensorflow",
+			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}
 
-// var p3 = &model.PkgInputSpec{
-// 	Type:    "pypi",
-// 	Name:    "tensorflow",
-// 	Version: ptrfrom.String("2.11.1"),
-// 	Subpath: ptrfrom.String("saved_model_cli.py"),
-// }
-// var p4 = &model.PkgInputSpec{
-// 	Type:      "conan",
-// 	Namespace: ptrfrom.String("openssl.org"),
-// 	Name:      "openssl",
-// 	Version:   ptrfrom.String("3.0.3"),
-// }
+var p3 = &model.PkgInputSpec{
+	Type:    "pypi",
+	Name:    "tensorflow",
+	Version: ptrfrom.String("2.11.1"),
+	Subpath: ptrfrom.String("saved_model_cli.py"),
+}
+var p3out = &model.Package{
+	Type: "pypi",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name: "tensorflow",
+			Versions: []*model.PackageVersion{{
+				Version:    "2.11.1",
+				Subpath:    "saved_model_cli.py",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
+}
+
+var p4 = &model.PkgInputSpec{
+	Type:      "conan",
+	Namespace: ptrfrom.String("openssl.org"),
+	Name:      "openssl",
+	Version:   ptrfrom.String("3.0.3"),
+}
+var p4outName = &model.Package{
+	Type: "conan",
+	Namespaces: []*model.PackageNamespace{{
+		Namespace: "openssl.org",
+		Names: []*model.PackageName{{
+			Name:     "openssl",
+			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}
 
 var s1 = &model.SourceInputSpec{
 	Type:      "git",
