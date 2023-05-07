@@ -756,7 +756,6 @@ node(node: ID!): Node!
 nodes(nodes: [ID!]!): [Node!]!
 neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
 path(subject: ID!, target: ID!, maxPathLength: Int!, usingOnly: [Edge!]!): [Node!]!
-}
 ```
 
 In a path query, all connecting evidence nodes along with their intermediate
