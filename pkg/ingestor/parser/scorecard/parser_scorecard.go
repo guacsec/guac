@@ -32,14 +32,12 @@ import (
 type scorecardParser struct {
 	scorecardPredicates []*model.ScorecardInputSpec
 	srcPredicates       []*model.SourceInputSpec
+	vcsStrings          []string
 }
 
 // NewSLSAParser initializes the slsaParser
 func NewScorecardParser() common.DocumentParser {
-	return &scorecardParser{
-		scorecardPredicates: []*model.ScorecardInputSpec{},
-		srcPredicates:       []*model.SourceInputSpec{},
-	}
+	return &scorecardParser{}
 }
 
 // Parse breaks out the document into the graph components
@@ -48,22 +46,18 @@ func (p *scorecardParser) Parse(ctx context.Context, doc *processor.Document) er
 	if doc.Type != processor.DocumentScorecard {
 		return fmt.Errorf("expected document type: %v, actual document type: %v", processor.DocumentScorecard, doc.Type)
 	}
-
-	switch doc.Format {
-	case processor.FormatJSON:
-		var scorecard sc.JSONScorecardResultV2
-		if err := json.Unmarshal(doc.Blob, &scorecard); err != nil {
-			return err
-		}
-		scPred, srcPred, err := getPredicates(&scorecard)
-		if err != nil {
-			return fmt.Errorf("error parsing scorecard document: %w", err)
-		}
-		p.scorecardPredicates = append(p.scorecardPredicates, scPred)
-		p.srcPredicates = append(p.srcPredicates, srcPred)
-		return nil
+	if doc.Format != processor.FormatJSON {
+		return fmt.Errorf("unable to support parsing of Scorecard document format: %v", doc.Format)
 	}
-	return fmt.Errorf("unable to support parsing of Scorecard document format: %v", doc.Format)
+
+	scorecard := &sc.JSONScorecardResultV2{}
+	if err := json.Unmarshal(doc.Blob, scorecard); err != nil {
+		return fmt.Errorf("error unmarshaling scorecard json: %w", err)
+	}
+	if err := p.getPredicates(scorecard); err != nil {
+		return fmt.Errorf("error parsing scorecard document: %w", err)
+	}
+	return nil
 }
 
 func (p *scorecardParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
@@ -85,10 +79,12 @@ func (p *scorecardParser) GetIdentities(ctx context.Context) []common.TrustInfor
 }
 
 func (p *scorecardParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStrings, error) {
-	return nil, fmt.Errorf("not yet implemented")
+	return &common.IdentifierStrings{
+		VcsStrings: p.vcsStrings,
+	}, nil
 }
 
-func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *model.SourceInputSpec, error) {
+func (p *scorecardParser) getPredicates(s *sc.JSONScorecardResultV2) error {
 	var ns, name string
 	idx := strings.LastIndex(s.Repo.Name, "/")
 	if idx < 0 {
@@ -96,14 +92,6 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 	} else {
 		ns = s.Repo.Name[:idx]
 		name = s.Repo.Name[idx+1:]
-	}
-
-	srcInput := model.SourceInputSpec{
-		// assuming scorecards is only git
-		Type:      "git",
-		Namespace: ns,
-		Name:      name,
-		Commit:    &s.Repo.Commit,
 	}
 
 	var checks []model.ScorecardCheckInputSpec
@@ -114,11 +102,7 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 		})
 	}
 
-	var (
-		timeScanned time.Time
-		err         error
-	)
-	timeScanned, err = time.Parse(time.RFC3339, s.Date)
+	timeScanned, err := time.Parse(time.RFC3339, s.Date)
 	if err != nil {
 		// at the moment, scorecard doesn't use RFC3339 and a custom format
 		// heuristic to check this and convert to RFC3339.
@@ -126,16 +110,24 @@ func getPredicates(s *sc.JSONScorecardResultV2) (*model.ScorecardInputSpec, *mod
 		// https://github.com/ossf/scorecard/issues/2711
 		timeScanned, err = time.Parse("2006-01-02", s.Date)
 		if err != nil {
-			return nil, nil, err
+			return err
 		}
 	}
 
-	scInput := model.ScorecardInputSpec{
+	p.vcsStrings = append(p.vcsStrings, s.Repo.Name)
+	p.srcPredicates = append(p.srcPredicates, &model.SourceInputSpec{
+		// assuming scorecards is only git
+		Type:      "git",
+		Namespace: ns,
+		Name:      name,
+		Commit:    &s.Repo.Commit,
+	})
+	p.scorecardPredicates = append(p.scorecardPredicates, &model.ScorecardInputSpec{
 		TimeScanned:      timeScanned,
 		AggregateScore:   (float64)(s.AggregateScore),
 		Checks:           checks,
 		ScorecardVersion: s.Scorecard.Version,
 		ScorecardCommit:  s.Scorecard.Commit,
-	}
-	return &scInput, &srcInput, nil
+	})
+	return nil
 }

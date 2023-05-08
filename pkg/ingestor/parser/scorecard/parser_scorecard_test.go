@@ -25,16 +25,18 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 )
 
 func Test_scorecardParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
-		name           string
-		doc            *processor.Document
-		wantPredicates *assembler.IngestPredicates
-		wantErr        bool
+		name            string
+		doc             *processor.Document
+		wantPredicates  *assembler.IngestPredicates
+		wantIdentifiers *common.IdentifierStrings
+		wantErr         bool
 	}{{
 		name: "testing",
 		doc: &processor.Document{
@@ -72,6 +74,9 @@ func Test_scorecardParser(t *testing.T) {
 				},
 			},
 		},
+		wantIdentifiers: &common.IdentifierStrings{
+			VcsStrings: []string{"github.com/kubernetes/kubernetes"},
+		},
 		wantErr: false,
 	}}
 	for _, tt := range tests {
@@ -83,6 +88,13 @@ func Test_scorecardParser(t *testing.T) {
 			preds := s.GetPredicates(ctx)
 			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
 				t.Errorf("scorecard.GetPredicate mismatch values (+got, -expected): %s", d)
+			}
+			gotIDs, err := s.GetIdentifiers(ctx)
+			if err != nil {
+				t.Fatalf("scorecard.GetIdentifiers() failed: %v", err)
+			}
+			if d := cmp.Diff(tt.wantIdentifiers, gotIDs); len(d) != 0 {
+				t.Errorf("scorecard.GetIdentifiers mismatch values (+got, -expected): %s", d)
 			}
 		})
 	}
