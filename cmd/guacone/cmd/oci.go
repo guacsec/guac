@@ -48,7 +48,7 @@ var ociCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateOCIFlags(
-			viper.GetString("gql-endpoint"),
+			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
 			args)
 		if err != nil {

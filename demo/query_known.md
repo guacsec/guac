@@ -118,10 +118,8 @@ and a artifact (algorithm:digest).
 First, we will look at if a package (vault) to see if it has an SBOM associated
 with and where it can be found:
 
-**Note**: `--type "package"` flag is specified that we are querying a PURL
-
 ```bash
-./bin/guacone query known --type "package" "pkg:guac/spdx/docker.io/library/vault-latest"
+./bin/guacone query known package "pkg:guac/spdx/docker.io/library/vault-latest"
 ```
 
 The output will look similar to this:
@@ -164,7 +162,7 @@ Next, we will run the query on the Prometheus package we were working on within
 the workflow demo:
 
 ```bash
-./bin/guacone query known --type "package" "pkg:golang/github.com/prometheus/client_golang@v1.11.1"
+./bin/guacone query known package "pkg:golang/github.com/prometheus/client_golang@v1.11.1"
 ```
 
 The Output should be similar to this:
@@ -214,7 +212,7 @@ v1.4.0.
 Using the CLI to query this:
 
 ```bash
-./bin/guacone query known --type "package" "pkg:golang/github.com/prometheus/client_golang@v1.4.0"
+./bin/guacone query known package "pkg:golang/github.com/prometheus/client_golang@v1.4.0"
 ```
 
 ```bash
@@ -303,10 +301,10 @@ prometheus/client_golang package:
 
 We can run the query:
 
-**Note**: `--type "source"` flag is specified that we are querying a source repo
+**Note**: `source` is specified to indicate we are querying a source repo
 
 ```bash
-./bin/guacone query known --type "source" git+https://github.com/prometheus/client_golang
+./bin/guacone query known source "git+https://github.com/prometheus/client_golang"
 ```
 
 ```bash
@@ -328,7 +326,7 @@ associated.
 Finally, let’s query for another source repo:
 
 ```bash
-./bin/guacone query known --type "source" "git+https://github.com/googleapis/google-cloud-go"
+./bin/guacone query known source "git+https://github.com/googleapis/google-cloud-go"
 ```
 
 The output should be similar to:

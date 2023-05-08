@@ -48,8 +48,8 @@ var filesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		opts, err := validateFilesFlags(
-			viper.GetString("natsaddr"),
-			viper.GetBool("poll"),
+			viper.GetString("nats-addr"),
+			viper.GetBool("service-poll"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)

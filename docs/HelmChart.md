@@ -159,7 +159,7 @@ warn  - Experimental features are not covered by semver, and may cause unexpecte
 We are ingesting the sboms in guac-data/docs dir in this example.
 
 ```bash
-docker run --rm -v $PWD:/data --entrypoint /cnb/process/guacone  ghcr.io/kusaridev/guac:v0.0.1-beta.5 files /data/docs --gql-endpoint http://host.docker.internal:8080/query
+docker run --rm -v $PWD:/data --entrypoint /cnb/process/guacone  ghcr.io/kusaridev/guac:v0.0.1-beta.5 files /data/docs --gql-addr http://host.docker.internal:8080/query
 ```
 
 This command uses the `/cnb/process/guacone` GUAC binary from the `guac`

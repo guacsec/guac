@@ -29,7 +29,7 @@ import (
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
-	set, err := cli.BuildFlags([]string{"natsaddr", "csub-addr", "gql-endpoint"})
+	set, err := cli.BuildFlags([]string{"nats-addr", "csub-addr", "gql-addr"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

@@ -43,19 +43,21 @@ type certifyOptions struct {
 }
 
 var certifyCmd = &cobra.Command{
-	Use:              "certify [flags] purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)",
-	Short:            "certify can either certify a package, source or artifact to be good or bad based on a justification",
+	Use:   "certify [flags] <type> <justification> <subject>",
+	Short: "Certify can either certify a package, source or artifact to be good or bad based on a justification.",
+	Long: `Certify can either certify a package, source or artifact to be good or bad based on a justification
+  <type> must be either "package", "source", or "artifact".
+  <justification> is a string to save with the certification in GUAC.
+  <subject> is in the form of "<purl>" for package, "<vcs_tool>+<transport>" for source, or "<algorithm>:<digest>" for artifact.`,
 	TraverseChildren: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateCertifyFlags(
-			viper.GetString("gql-endpoint"),
-			viper.GetString("type"),
-			viper.GetString("justification"),
-			viper.GetBool("good"),
-			viper.GetBool("pkgName"),
+			viper.GetString("gql-addr"),
+			viper.GetBool("cert-good"),
+			viper.GetBool("package-name"),
 			args,
 		)
 
@@ -150,34 +152,29 @@ var certifyCmd = &cobra.Command{
 	},
 }
 
-func validateCertifyFlags(graphqlEndpoint, certifyType, justification string, good, pkgName bool, args []string) (certifyOptions, error) {
+func validateCertifyFlags(graphqlEndpoint string, good, pkgName bool, args []string) (certifyOptions, error) {
 	var opts certifyOptions
 	opts.graphqlEndpoint = graphqlEndpoint
 	opts.good = good
 	opts.pkgName = pkgName
-	if certifyType != "package" && certifyType != "source" && certifyType != "artifact" {
-		return opts, fmt.Errorf("expected type to be either a package, source or artifact")
+	if len(args) != 3 {
+		return opts, fmt.Errorf("expected positional arguments for <type> <justification> <subject>")
 	}
-	opts.certifyType = certifyType
-	if justification == "" {
-		return opts, fmt.Errorf("missing justification")
+	opts.certifyType = args[0]
+	if opts.certifyType != "package" && opts.certifyType != "source" && opts.certifyType != "artifact" {
+		return opts, fmt.Errorf("expected type to be either \"package\", \"source\", or \"artifact\"")
 	}
-	opts.justification = justification
-	if len(args) != 1 {
-		return opts, fmt.Errorf("expected positional argument for subject")
+	opts.justification = args[1]
+	if opts.justification == "" {
+		return opts, fmt.Errorf("justification cannot be an empty string")
 	}
-
-	if len(args) > 0 {
-		opts.subject = args[0]
-	} else {
-		return opts, fmt.Errorf("expected subject input to be purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)")
-	}
+	opts.subject = args[2]
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"good", "type", "justification", "pkgName"})
+	set, err := cli.BuildFlags([]string{"cert-good", "package-name"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

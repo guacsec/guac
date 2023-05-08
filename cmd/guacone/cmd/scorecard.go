@@ -54,7 +54,7 @@ var scorecardCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateScorecardFlags(
-			viper.GetString("gql-endpoint"),
+			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("poll"),
 			viper.GetString("interval"),

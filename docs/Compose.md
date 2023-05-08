@@ -185,7 +185,7 @@ However, you may ingest what you wish to here instead.
 
 ```bash
 pushd ../guac-data/docs
-docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone collect files /data --gql-endpoint http://guac-graphql:8080/query
+docker run --rm -v $PWD:/data --network guac_default local-organic-guac:latest /opt/guac/guacone collect files /data --gql-addr http://guac-graphql:8080/query
 popd
 ```
 

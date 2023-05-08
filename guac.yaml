@@ -1,7 +1,23 @@
-gdbuser: neo4j
-gdbpass: s3cr3t
-gdbaddr: neo4j://localhost:7687
-realm: neo4j
-natsaddr: nats://localhost:4222
+# Neo4j details
+neo4j-user: neo4j
+neo4j-pass: s3cr3t
+neo4j-addr: neo4j://localhost:7687
+neo4j-realm: neo4j
+
+# Nats setup
+nats-addr: nats://localhost:4222
+
+# CSub setup
 csub-addr: localhost:2782
 csub-listen-port: 2782
+
+# GQL setup
+gql-backend: inmem
+gql-listen-port: 8080
+gql-debug: true
+gql-test-data: false
+gql-addr: http://localhost:8080/query
+
+# Collector behavior
+service-poll: true
+use-csub: true

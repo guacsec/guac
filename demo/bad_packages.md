@@ -87,13 +87,12 @@ know that a particular package is affected, more specifically the package
 vulnerability (yikes!).
 
 The first step we can take is to mark this package as bad. We can do this by
-using the `guacone certify` command with the `-good=false` flag which asserts
-that it is a negative certification (instead of a positive one), as well as a
-`justification` flag to indicate why it is bad. In this case, it is a critical
-vulnerability.
+using the `guacone certify` command which defaults to assert a negative
+certification (instead of a positive one), as well as a `justification` to
+indicate why it is bad. In this case, it is a critical vulnerability.
 
 ```bash
-bin/guacone certify --good=false --justification="never use this version of log4j" --type package "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+bin/guacone certify package "never use this version of log4j" "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
 ```
 
 an output will contain the following meaning that we have successfully added
@@ -186,7 +185,7 @@ figure out where they could be used. For example, let's take the
 running:
 
 ```bash
-bin/guacone certify --good=false --justification="github repo compromised" --type source "git+https://github.com/googleapis/google-cloud-go"
+bin/guacone certify source "github repo compromised" "git+https://github.com/googleapis/google-cloud-go"
 ```
 
 Once again, you will see an output similar to the above confirming that it has
