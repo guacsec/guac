@@ -50,10 +50,10 @@ var depsDevCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateDepsDevFlags(
-			viper.GetString("natsaddr"),
+			viper.GetString("nats-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("use-csub"),
-			viper.GetBool("poll"),
+			viper.GetBool("service-poll"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)

@@ -31,39 +31,38 @@ func init() {
 
 	// Set of all flags used across GUAC clis and subcommands. Use consistant
 	// names for config file.
-	set.String("natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
+	set.String("nats-addr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	set.String("csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	set.Bool("use-csub", true, "use collectsub server for datasource")
 
 	set.Int("csub-listen-port", 2782, "port to listen to on collect-sub service")
 
 	set.String("gql-backend", "inmem", "backend used for graphql api server: [neo4j | inmem]")
-	set.Int("gql-port", 8080, "port used for graphql api server")
+	set.Int("gql-listen-port", 8080, "port used for graphql api server")
 	set.Bool("gql-debug", false, "debug flag which enables the graphQL playground")
-	set.Bool("gql-testdata", false, "Populate backend with test data")
+	set.Bool("gql-test-data", false, "Populate backend with test data")
 
-	set.String("gdbaddr", "neo4j://localhost:7687", "address to neo4j db")
-	set.String("gdbuser", "", "neo4j user credential to connect to graph db")
-	set.String("gdbpass", "", "neo4j password credential to connect to graph db")
-	set.String("realm", "neo4j", "realm to connect to graph db")
+	set.String("neo4j-addr", "neo4j://localhost:7687", "address to neo4j db")
+	set.String("neo4j-user", "", "neo4j user credential to connect to graph db")
+	set.String("neo4j-pass", "", "neo4j password credential to connect to graph db")
+	set.String("neo4j-realm", "neo4j", "realm to connect to graph db")
 
-	set.String("gql-endpoint", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
+	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
-	set.String("verifier-keyPath", "", "path to pem file to verify dsse")
-	set.String("verifier-keyID", "", "ID of the key to be stored")
+	set.String("verifier-key-path", "", "path to pem file to verify dsse")
+	set.String("verifier-key-id", "", "ID of the key to be stored")
 
-	set.BoolP("poll", "p", true, "sets the collector or certifier to polling mode")
+	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")
+	set.BoolP("poll", "p", false, "sets the collector or certifier to polling mode")
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
 
-	set.BoolP("good", "g", true, "set true if certifyGood or false for certifyBad")
-	set.StringP("type", "t", "", "package, source or artifact that is being certified")
-	set.StringP("justification", "j", "", "justification for the certification (either good or bad)")
-	set.BoolP("pkgName", "n", false, "if type is package, true if attestation is at pkgName (for all versions) or false for a specific version")
+	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
+	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")
 
-	set.String("purl", "", "package purl to check")
-	set.String("vulnerabilityID", "", "CVE, GHSA or OSV ID to check")
-	set.Int("depth", 0, "depth to check, 0 has no limit")
-	set.Int("path", 0, "number of paths to return, 0 means all paths")
+	set.IntP("search-depth", "d", 0, "depth to search, 0 has no limit")
+
+	set.StringP("vuln-id", "v", "", "CVE, GHSA or OSV ID to check")
+	set.Int("num-path", 0, "number of paths to return, 0 means all paths")
 
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f

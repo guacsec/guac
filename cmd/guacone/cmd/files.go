@@ -66,9 +66,9 @@ var filesCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateFilesFlags(
-			viper.GetString("verifier-keyPath"),
-			viper.GetString("verifier-keyID"),
-			viper.GetString("gql-endpoint"),
+			viper.GetString("verifier-key-path"),
+			viper.GetString("verifier-key-id"),
+			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
 			args)
 		if err != nil {
@@ -256,7 +256,7 @@ func printErrors(filesWithErrors []string) string {
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"verifier-keyPath", "verifier-keyID"})
+	set, err := cli.BuildFlags([]string{"verifier-key-path", "verifier-key-id"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

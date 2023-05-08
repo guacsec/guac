@@ -40,7 +40,7 @@ echo @@@@ Ingesting guac-data into server
 go run "${GUAC_DIR}/cmd/guacone" collect files "${GUAC_DIR}/guac-data/docs/"
 
 echo @@@@ Running osv certifier
-go run "${GUAC_DIR}/cmd/guacone" certifier osv -p=false
+go run "${GUAC_DIR}/cmd/guacone" certifier osv
 
 queries="${GUAC_DIR}/demo/queries.gql"
 

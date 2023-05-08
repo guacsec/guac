@@ -99,7 +99,7 @@ them.
 wait for the OSV certifier to re-scan or force it to run manually via:
 
 ```bash
-./bin/guacone certifier osv -p=false
+./bin/guacone certifier osv
 ```
 
 Once the OSV certifier has completed running and you will see the following
@@ -148,7 +148,7 @@ five minute interval to keep re-scanning for any new packages in GUAC). To force
 the scan to occur immediately please run:
 
 ```bash
-./bin/guacone certifier osv -p=false
+./bin/guacone certifier osv
 ```
 
 Successful output will show the following:
@@ -189,12 +189,13 @@ particular vulnerability. If it is, return a path to said vulnerability such
 that we can remediate the culprit.
 
 **Note**: This query will return all paths by default. If you want to only
-return a certain number, you can use the `--path` flag to specify the number.
+return a certain number, you can use the `--num-path` flag to specify the
+number.
 
 To do this we will run the following:
 
 ```bash
-./bin/guacone query vuln --purl "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" --vulnerabilityID "ghsa-7rjr-3q55-vv33"
+./bin/guacone query vuln "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" --vuln-id "ghsa-7rjr-3q55-vv33"
 ```
 
 **Note**: if you see the following:

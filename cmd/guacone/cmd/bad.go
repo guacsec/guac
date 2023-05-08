@@ -40,14 +40,14 @@ type queryBadOptions struct {
 
 var queryBadCmd = &cobra.Command{
 	Use:   "bad [flags]",
-	Short: "query to find more information on certifyBad",
+	Short: "Query to find more information on certifyBad.",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateQueryBadFlags(
-			viper.GetString("gql-endpoint"),
-			viper.GetInt("depth"),
+			viper.GetString("gql-addr"),
+			viper.GetInt("search-depth"),
 		)
 
 		if err != nil {
@@ -250,7 +250,7 @@ func validateQueryBadFlags(graphqlEndpoint string, depth int) (queryBadOptions, 
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"depth"})
+	set, err := cli.BuildFlags([]string{"search-depth"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

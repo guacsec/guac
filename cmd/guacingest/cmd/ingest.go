@@ -49,9 +49,9 @@ type options struct {
 func ingest(cmd *cobra.Command, args []string) {
 
 	opts, err := validateFlags(
-		viper.GetString("natsaddr"),
+		viper.GetString("nats-addr"),
 		viper.GetString("csub-addr"),
-		viper.GetString("gql-endpoint"),
+		viper.GetString("gql-addr"),
 		args)
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
