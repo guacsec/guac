@@ -15,24 +15,28 @@
 name: release-guac-image
 
 on:
+  workflow_dispatch: # testing only, trigger manually to test it works
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
 permissions:
+  actions: read   # for detecting the Github Actions environment.
   packages: write # To publish container images to GHCR
   id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
-  build-image-on-release:
+  build:
     name: Build and publish image
     runs-on: ubuntu-latest
     env:
       IMAGE_URI: ghcr.io/${{ github.repository }}
-      BUILDER: paketobuildpacks/builder:base
-      BUILDPACK: paketo-buildpacks/go
-      BUILDPACK_SBOM_OUTPUT_DIR: sbom-output-dir
-      BUILDPACK_SPDX_SBOM: "launch/paketo-buildpacks_go-build/targets/sbom.spdx.json"
+      IMAGE_URI_TAG: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+    outputs:
+      image: ${{ env.IMAGE_URI }}
+      digest: ${{ steps.image_digest.outputs.IMAGE_DIGEST }}
     steps:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
@@ -44,12 +48,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup pack 
         uses: buildpacks/github-actions/setup-pack@2c2fe0dad1a532cdcde622787d752df8fc3172f0 # v5.1.0
-      - name: Install cosign
-        uses: sigstore/cosign-installer@main
-      - name: Install crane
-        uses: imjasonh/setup-crane@v0.3
       - name: Build and publish image
-        id: build_n_publish_image 
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -57,27 +56,98 @@ jobs:
           COMMIT=$(git rev-parse HEAD)
           BUILD=$(date +%FT%T%z)
           PKG=github.com/guacsec/guac/pkg/version
-          pack build ${IMAGE_URI}:${{ github.ref_name }} \
+          pack build ${IMAGE_URI_TAG} \
             --builder ${BUILDER} \
             --buildpack ${BUILDPACK} \
-            --publish \
-            --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR} \
             --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
             --env BP_GO_TARGETS=${BP_GO_TARGETS}
-          echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI}:${{ github.ref_name }})" >> $GITHUB_OUTPUT
         shell: bash
         env:
           BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
-      - name: Sign and verify image
+          BUILDER: paketobuildpacks/builder:base
+          BUILDPACK: paketo-buildpacks/go
+      - name: Push image
+        if: startsWith(github.ref, 'refs/tags/')
+        run: docker push ${IMAGE_URI}:${{ github.ref_name }}
+      - name: Install crane
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: imjasonh/setup-crane@00c9e93efa4e1138c9a7a5c594acd6c75a2fbf0c # v0.3
+      - name: Output image digest
+        if: startsWith(github.ref, 'refs/tags/')
+        id: image_digest
+        run: echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
+
+  sign:
+    name: Sign image and generate sbom
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Trivy in fs mode to generate SBOM
+        uses: aquasecurity/trivy-action@e5f43133f6e8736992c9f3c1b3296e24b37e17f2 # master
+        with:
+          scan-type: 'fs'
+          format: 'spdx-json'
+          output: 'spdx.sbom.json'
+      - name: Install cosign
+        uses: sigstore/cosign-installer@204a51a57a74d190b284a0ce69b44bc37201f343 # main
+      - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
           cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST} --yes
-          cosign attach sbom --sbom ${BUILDPACK_SBOM_OUTPUT_DIR}/${BUILDPACK_SPDX_SBOM} ${IMAGE_URI_DIGEST}
+          cosign attach sbom --sbom spdx.sbom.json ${IMAGE_URI_DIGEST}
           cosign sign -a git_sha=$GITHUB_SHA --attachment sbom ${IMAGE_URI_DIGEST} --yes
-          cosign verify ${IMAGE_URI_DIGEST} --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
         shell: bash
         env:
-          IMAGE_URI_DIGEST: ${{ env.IMAGE_URI }}@${{ steps.build_n_publish_image.outputs.IMAGE_DIGEST }}
+          IMAGE_URI_DIGEST: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
+
+  provenance:
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/')
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.5.0
+    with:
+      image: ${{ needs.build.outputs.image }}
+      digest: ${{ needs.build.outputs.digest }}
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  verify:
+    name: Verify image and provenance
+    runs-on: ubuntu-latest
+    needs: [build, sign, provenance]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install cosign
+        uses: sigstore/cosign-installer@204a51a57a74d190b284a0ce69b44bc37201f343 # main
+      - name: Install slsa-verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@623cf20a23f3360549eafac6efe1a158960f15f9 # v2.2.0 
+      - name: Verify image and provenance
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          cosign verify ${IMAGE_URI_DIGEST} \
+            --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} \
+            --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
+          slsa-verifier verify-image \
+            --source-uri github.com/${{ github.repository }} ${IMAGE_URI_DIGEST}
+        shell: bash
+        env:
+          IMAGE_URI_DIGEST: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
           GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
           COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/release.yaml@${{ github.ref }}
