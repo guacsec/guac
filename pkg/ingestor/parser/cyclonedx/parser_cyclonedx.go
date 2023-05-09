@@ -98,6 +98,8 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")
 				purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
+			} else {
+				purl = "pkg:guac/cdx/" + cdxBom.Metadata.Component.Name
 			}
 		}
 
