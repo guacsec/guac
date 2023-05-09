@@ -544,12 +544,12 @@ func TestGuacPkgPurl(t *testing.T) {
 		{
 			pkgName:    "hello",
 			pkgVersion: strP("1.2"),
-			expected:   "pkg:guac/hello@1.2",
+			expected:   "pkg:guac/pkg/hello@1.2",
 		},
 		{
 			pkgName:    "hello",
 			pkgVersion: nil,
-			expected:   "pkg:guac/hello",
+			expected:   "pkg:guac/pkg/hello",
 		},
 	}
 

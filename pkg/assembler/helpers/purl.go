@@ -158,9 +158,9 @@ func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]st
 
 func GuacPkgPurl(pkgName string, pkgVersion *string) string {
 	if pkgVersion == nil {
-		return fmt.Sprintf("pkg:guac/%s", pkgName)
+		return fmt.Sprintf("pkg:guac/pkg/%s", pkgName)
 	}
-	return fmt.Sprintf("pkg:guac/%s@%s", pkgName, *pkgVersion)
+	return fmt.Sprintf("pkg:guac/pkg/%s@%s", pkgName, *pkgVersion)
 }
 
 func GuacFilePurl(alg string, digest string, filename *string) string {
