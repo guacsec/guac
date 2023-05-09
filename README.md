@@ -4,14 +4,8 @@
   <img src="https://user-images.githubusercontent.com/3060102/204297133-9bf702c6-b4e2-46df-a029-42b5060b19a4.png">
 </p>
 
-> :warning: **GUAC is being re-architected to support GraphQL**: the main branch
-> has breaking changes. Please use
-> [release v0.0.1](https://github.com/guacsec/guac/releases/tag/v0.0.1) until
-> work is complete!
-
 **Note:** GUAC is under active development - if you are interested in
-contributing, please look at [contributor guide](CONTRIBUTING.md) and the
-["express interest" issue](https://github.com/guacsec/guac/issues/1)
+contributing, please look at [contributor guide](CONTRIBUTING.md).
 
 Graph for Understanding Artifact Composition (GUAC) aggregates software security
 metadata into a high fidelity graph database—normalizing entity identities and
@@ -30,14 +24,18 @@ A few examples of questions answered by GUAC include:
 
 ## Quickstart
 
-Refer to the [Setup + Demo](./SETUP.md) document to learn how to prepare your
-environment and try GUAC out!
+We have a couple [demos quickstarts](demo/) that you can take a look.
+
+Starting the GUAC services with our [docker compose quickstart](docs/Compose.md).
 
 ## Architecture
 
 Here is an overview of the architecture of GUAC:
 
-![image](https://user-images.githubusercontent.com/3060102/182689908-477f4770-1142-4c18-8fa9-16d93dcf84b4.png)
+![image](https://user-images.githubusercontent.com/3060102/235186368-995784eb-7ef2-43e6-b560-17d6014553ca.png)
+
+For an in-depth view and explanation of components of the GUAC Beta, please refer to [the BETA setup guide](docs/Compose.md).
+
 
 ## Supported input formats
 

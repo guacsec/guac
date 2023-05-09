@@ -3,11 +3,9 @@
 We'd love to accept your patches and contributions to this project. There are
 just a few small guidelines you need to follow.
 
-Refer to the [Developer Setup](./SETUP.md) document to learn how to prepare your
-environment. You can also consult a [GraphQL Guide](./demo/GraphQL.md) which
-replaces the deprecated Neo4j components of `SETUP.md` (which is scheduled for
-deletion). Optionally, you can also consult
-[docker compose documentation](./docs/Compose.md).
+Refer to the [GraphQL Guide](./demo/GraphQL.md) to go through a setup.
+Optionally, you can also consult [docker compose
+documentation](./docs/Compose.md).
 
 ## Contributor License Agreement
 
