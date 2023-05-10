@@ -1,8 +1,8 @@
 ---
-name: Bug report for ingestion issues
-about: Create a report related to ingestion issues
-title: "[ingestion bug] FILL THIS IN"
-labels: bug, data-sources
+name: Report for data quality issues and ingestion bugs
+about: Create a report related to data quality and ingestion issues
+title: "[ingestion/data-quality issue] FILL THIS IN"
+labels: bug, data-sources, data-quality
 assignees: ""
 ---
 
@@ -26,6 +26,10 @@ If applicable, add screenshots to help explain your problem.
 **GUAC version**
 Are you using a released version of GUAC or one build from a commit in the
 repository?
+
+**Ingested document(s)**
+
+Can you share the documents that are used to reproduce the ingestion errors or showcase the data quality issues.
 
 **Additional context**
 Add any other context about the problem here.
