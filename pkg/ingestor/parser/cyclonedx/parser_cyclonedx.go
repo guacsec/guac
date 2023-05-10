@@ -137,7 +137,15 @@ func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 			// the required purl for package node. Currently there is no use-case
 			// to capture OS for GUAC.
 			if comp.Type != cdx.ComponentTypeOS {
-				pkg, err := asmhelpers.PurlToPkg(comp.PackageURL)
+				purl := comp.PackageURL
+				if purl == "" {
+					if comp.Type == cdx.ComponentTypeFile {
+						purl = "pkg:guac/file/" + comp.Name + "&checksum=" + comp.Version
+					} else {
+						purl = asmhelpers.GuacPkgPurl(comp.Name, &comp.Version)
+					}
+				}
+				pkg, err := asmhelpers.PurlToPkg(purl)
 				if err != nil {
 					return err
 				}
