@@ -27,6 +27,9 @@ on:
       - synchronize
       - reopened
 
+permissions:
+  contents: read
+
 jobs:
   test-integration:
     runs-on: ubuntu-latest
