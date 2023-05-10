@@ -211,9 +211,21 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantPurl: "pkg:guac/cdx/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
+		wantPurl: "pkg:guac/cdx/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 	}, {
-		name: "name split length too long, tag not specified",
+		name: "name contains local registry, tag specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "foo.registry.com:4443/myapp/debian:latest",
+					Type:    cdx.ComponentTypeContainer,
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantPurl: "pkg:guac/cdx/foo.registry.com:4443/myapp/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest",
+	}, {
+		name: "ComponentTypeLibrary",
 		cdxBom: &cdx.BOM{
 			Metadata: &cdx.Metadata{
 				Component: &cdx.Component{
@@ -223,7 +235,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantPurl: "pkg:guac/cdx/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
+		wantPurl: "pkg:guac/cdx/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 	}, {
 		name: "file type - purl nor provided, version provided",
 		cdxBom: &cdx.BOM{
