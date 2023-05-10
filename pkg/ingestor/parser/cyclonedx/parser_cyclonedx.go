@@ -86,6 +86,8 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 					repositoryURL = splitImage[0] + "/" + splitImage[1] + "/" + splitTag[0]
 				case 2:
 					repositoryURL = splitImage[0] + "/" + splitTag[0]
+				case 1:
+					repositoryURL = splitImage[0]
 				default:
 					repositoryURL = ""
 				}
@@ -93,13 +95,16 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 				if len(splitTag) == 2 {
 					tag = splitTag[1]
 				}
-
-				purl = "pkg:guac/cdx/" + repositoryURL + "@" + cdxBom.Metadata.Component.Version + "?tag=" + tag
+				if repositoryURL != "" {
+					purl = "pkg:guac/cdx/" + repositoryURL + "@" + cdxBom.Metadata.Component.Version + "?tag=" + tag
+				} else {
+					purl = "pkg:guac/cdx/" + cdxBom.Metadata.Component.Name + "@" + cdxBom.Metadata.Component.Version
+				}
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")
 				purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
 			} else {
-				purl = "pkg:guac/cdx/" + cdxBom.Metadata.Component.Name
+				purl = "pkg:guac/cdx/" + cdxBom.Metadata.Component.Name + "@" + cdxBom.Metadata.Component.Version
 			}
 		}
 

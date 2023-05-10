@@ -115,7 +115,6 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 	tests := []struct {
 		name     string
 		cdxBom   *cdx.BOM
-		wantTag  string
 		wantPurl string
 	}{{
 		name: "purl provided",
@@ -129,7 +128,6 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "container",
 		wantPurl: "pkg:oci/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?repository_url=gcr.io/distroless/static&tag=nonroot",
 	}, {
 		name: "gcr.io/distroless/static:nonroot - purl not provided",
@@ -142,7 +140,6 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "container",
 		wantPurl: "pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=nonroot",
 	}, {
 		name: "gcr.io/distroless/static - purl not provided, tag not specified",
@@ -155,7 +152,6 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "container",
 		wantPurl: "pkg:guac/cdx/gcr.io/distroless/static@sha256:6ad5b696af3ca05a048bd29bf0f623040462638cb0b29c8d702cbb2805687388?tag=",
 	}, {
 		name: "gcr.io/distroless/static - purl not provided, tag not specified, version not specified",
@@ -167,7 +163,6 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "container",
 		wantPurl: "pkg:guac/cdx/gcr.io/distroless/static@?tag=",
 	}, {
 		name: "library/debian:latest - purl not provided, assume docker.io",
@@ -180,10 +175,9 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "container",
 		wantPurl: "pkg:guac/cdx/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=latest",
 	}, {
-		name: "library/debian - purl not provided, assume docker.io, tag not specified",
+		name: "library/debian - purl not provided, tag not specified",
 		cdxBom: &cdx.BOM{
 			Metadata: &cdx.Metadata{
 				Component: &cdx.Component{
@@ -193,8 +187,43 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "container",
 		wantPurl: "pkg:guac/cdx/library/debian@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
+	}, {
+		name: "library - purl not provided, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "library",
+					Type:    cdx.ComponentTypeContainer,
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantPurl: "pkg:guac/cdx/library@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
+	}, {
+		name: "name split length too long, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "ghcr.io/guacsec/guac/guacsec",
+					Type:    cdx.ComponentTypeContainer,
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantPurl: "pkg:guac/cdx/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
+	}, {
+		name: "name split length too long, tag not specified",
+		cdxBom: &cdx.BOM{
+			Metadata: &cdx.Metadata{
+				Component: &cdx.Component{
+					Name:    "ghcr.io/guacsec/guac/guacsec",
+					Type:    cdx.ComponentTypeLibrary,
+					Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
+				},
+			},
+		},
+		wantPurl: "pkg:guac/cdx/ghcr.io/guacsec/guac/guacsec@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?tag=",
 	}, {
 		name: "file type - purl nor provided, version provided",
 		cdxBom: &cdx.BOM{
@@ -206,7 +235,6 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "file",
 		wantPurl: "pkg:guac/file//home/work/test/build/webserver/&checksum=sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 	}, {
 		name: "file type - purl nor provided, version not provided",
@@ -218,7 +246,6 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantTag:  "file",
 		wantPurl: "pkg:guac/file//home/work/test/build/webserver/&checksum=",
 	}}
 	for _, tt := range tests {
