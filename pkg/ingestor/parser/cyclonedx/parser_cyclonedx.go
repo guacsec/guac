@@ -96,15 +96,15 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 					tag = splitTag[1]
 				}
 				if repositoryURL != "" {
-					purl = "pkg:guac/cdx/" + repositoryURL + "@" + cdxBom.Metadata.Component.Version + "?tag=" + tag
+					purl = guacCDXPkgPurl(repositoryURL, cdxBom.Metadata.Component.Version, tag)
 				} else {
-					purl = "pkg:guac/cdx/" + cdxBom.Metadata.Component.Name + "@" + cdxBom.Metadata.Component.Version
+					purl = guacCDXPkgPurl(cdxBom.Metadata.Component.Name, cdxBom.Metadata.Component.Version, tag)
 				}
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")
-				purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
+				purl = guacCDXFilePurl(cdxBom.Metadata.Component.Name, cdxBom.Metadata.Component.Version)
 			} else {
-				purl = "pkg:guac/cdx/" + cdxBom.Metadata.Component.Name + "@" + cdxBom.Metadata.Component.Version
+				purl = guacCDXPkgPurl(cdxBom.Metadata.Component.Name, cdxBom.Metadata.Component.Version, "")
 			}
 		}
 
@@ -140,7 +140,7 @@ func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 				purl := comp.PackageURL
 				if purl == "" {
 					if comp.Type == cdx.ComponentTypeFile {
-						purl = "pkg:guac/file/" + comp.Name + "&checksum=" + comp.Version
+						purl = guacCDXFilePurl(comp.Name, comp.Version)
 					} else {
 						purl = asmhelpers.GuacPkgPurl(comp.Name, &comp.Version)
 					}
@@ -255,4 +255,27 @@ func (s *cyclonedxParser) getPackageElement(elementID string) []*model.PkgInputS
 		return packNode
 	}
 	return nil
+}
+
+func guacCDXFilePurl(fileName string, version string) string {
+	if version != "" {
+		splitVersion := strings.Split(version, ":")
+		return asmhelpers.GuacFilePurl(splitVersion[0], splitVersion[1], &fileName)
+	} else {
+		return asmhelpers.PurlFilesGuac + fileName
+	}
+}
+
+func guacCDXPkgPurl(componentName string, version string, tag string) string {
+	purl := ""
+	if version != "" && tag != "" {
+		purl = "pkg:guac/cdx/" + componentName + "@" + version + "?tag=" + tag
+	} else if version != "" {
+		purl = "pkg:guac/cdx/" + componentName + "@" + version
+	} else if tag != "" {
+		purl = "pkg:guac/cdx/" + componentName + "?tag=" + tag
+	} else {
+		purl = "pkg:guac/cdx/" + componentName
+	}
+	return purl
 }
