@@ -79,7 +79,20 @@ func (s *spdxParser) getTopLevelPackage() error {
 
 	// Currently create TopLevel package as well in some cases where we guess that the SPDX document
 	// may not encode it
-	var purl string = "pkg:guac/spdx/" + s.spdxDoc.DocumentName
+	var purl string = ""
+	var documentSpdxId string = ""
+	// could also be DESCRIBED BY , RefB is SPDXRef-...
+	// https://github.com/spdx/tools-golang/blob/main/spdx/v2/common/external.go#L30-L31
+	// fall back to original code
+	for _, r := range s.spdxDoc.Relationships {
+		if r.RefA.DocumentRefID == "SPDXRef-DOCUMENT" && r.Relationship == "DESCRIBES" {
+			documentSpdxId = r.RefB.DocumentRefID
+		}
+	}
+
+	if documentSpdxId != "" {
+		purl = "pkg:guac/spdx/" + documentSpdxId
+	}
 
 	if purl != "" {
 		topPackage, err := asmhelpers.PurlToPkg(purl)

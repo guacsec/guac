@@ -46,7 +46,21 @@ func Test_spdxParser(t *testing.T) {
 		},
 		wantPredicates: &testdata.SpdxIngestionPredicates,
 		wantErr:        false,
-	}}
+	},
+		{
+			name: "SPDX document with DESCRIBES relationship populates pUrl",
+			doc: &processor.Document{
+				Blob:   testdata.OCIGoSPDXMulti1,
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &testdata.SpdxIngestionPredicates,
+			wantErr:        false,
+		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSpdxParser()
