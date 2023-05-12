@@ -363,29 +363,32 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 			tableRows = append(tableRows, table.Row{hasSBOMStr, sbom.Id, "SBOM Download Location: " + sbom.DownloadLocation})
 		}
 	case hasSLSAStr:
-		for _, slsa := range collectedNeighbors.hasSLSAs {
-			tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Id, "SLSA Attestation Location: " + slsa.Slsa.Origin})
-		}
-		// if there is an isOccurrence, check to see if there are slsa attestation associated with it
-		for _, occurrence := range collectedNeighbors.occurrences {
-			artifactFilter := &model.ArtifactSpec{
-				Algorithm: &occurrence.Artifact.Algorithm,
-				Digest:    &occurrence.Artifact.Digest,
+		if len(collectedNeighbors.hasSLSAs) > 0 {
+			for _, slsa := range collectedNeighbors.hasSLSAs {
+				tableRows = append(tableRows, table.Row{hasSLSAStr, slsa.Id, "SLSA Attestation Location: " + slsa.Slsa.Origin})
 			}
-			artifactResponse, err := model.Artifacts(ctx, gqlclient, artifactFilter)
-			if err != nil {
-				logger.Debugf("error querying for artifacts: %v", err)
-			}
-			if len(artifactResponse.Artifacts) != 1 {
-				logger.Debugf("failed to located artifacts based on (algorithm:digest)")
-			}
-			neighborResponseHasSLSA, err := model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{model.EdgeArtifactHasSlsa})
-			if err != nil {
-				logger.Debugf("error querying neighbors: %v", err)
-			} else {
-				for _, neighborHasSLSA := range neighborResponseHasSLSA.Neighbors {
-					if hasSLSA, ok := neighborHasSLSA.(*model.NeighborsNeighborsHasSLSA); ok {
-						tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "SLSA Attestation Location: " + hasSLSA.Slsa.Origin})
+		} else {
+			// if there is an isOccurrence, check to see if there are slsa attestation associated with it
+			for _, occurrence := range collectedNeighbors.occurrences {
+				artifactFilter := &model.ArtifactSpec{
+					Algorithm: &occurrence.Artifact.Algorithm,
+					Digest:    &occurrence.Artifact.Digest,
+				}
+				artifactResponse, err := model.Artifacts(ctx, gqlclient, artifactFilter)
+				if err != nil {
+					logger.Debugf("error querying for artifacts: %v", err)
+				}
+				if len(artifactResponse.Artifacts) != 1 {
+					logger.Debugf("failed to located artifacts based on (algorithm:digest)")
+				}
+				neighborResponseHasSLSA, err := model.Neighbors(ctx, gqlclient, artifactResponse.Artifacts[0].Id, []model.Edge{model.EdgeArtifactHasSlsa})
+				if err != nil {
+					logger.Debugf("error querying neighbors: %v", err)
+				} else {
+					for _, neighborHasSLSA := range neighborResponseHasSLSA.Neighbors {
+						if hasSLSA, ok := neighborHasSLSA.(*model.NeighborsNeighborsHasSLSA); ok {
+							tableRows = append(tableRows, table.Row{hasSLSAStr, hasSLSA.Id, "SLSA Attestation Location: " + hasSLSA.Slsa.Origin})
+						}
 					}
 				}
 			}
@@ -414,7 +417,26 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 		}
 	case occurrenceStr:
 		for _, occurrence := range collectedNeighbors.occurrences {
-			tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, ""})
+			if subjectType == artifactSubjectType {
+				switch v := occurrence.Subject.(type) {
+				case *model.AllIsOccurrencesTreeSubjectPackage:
+					purl := helpers.PkgToPurl(v.Type, v.Namespaces[0].Namespace,
+						v.Namespaces[0].Names[0].Name, v.Namespaces[0].Names[0].Versions[0].Version, "", []string{})
+
+					tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Package: " + purl})
+				case *model.AllIsOccurrencesTreeSubjectSource:
+					namespace := ""
+					if !strings.HasPrefix(v.Namespaces[0].Namespace, "https://") {
+						namespace = "https://" + v.Namespaces[0].Namespace
+					} else {
+						namespace = v.Namespaces[0].Namespace
+					}
+					tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Package: " + v.Type + "+" + namespace + "/" +
+						v.Namespaces[0].Names[0].Name})
+				}
+			} else {
+				tableRows = append(tableRows, table.Row{occurrenceStr, occurrence.Id, "Occurrence for Artifact: " + occurrence.Artifact.Algorithm + ":" + occurrence.Artifact.Digest})
+			}
 		}
 	case pkgEqualStr:
 		for _, equal := range collectedNeighbors.pkgEquals {
