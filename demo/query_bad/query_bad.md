@@ -82,9 +82,10 @@ To start up the GUAC visualizer, follow
 ## New security incident
 
 A new security incident has occurred and listening on various communities, we
-know that a particular package is affected, more specifically the package
-"maven/org.apache.logging.log4j/log4j-core" has been found to have a
-vulnerability (yikes!).
+know that a particular package is affected, more specifically the debian package
+"tzdata" has been found to have a critical vulnerability (yikes!). We know the
+package and the specific version that is vulnerable. Can we be proactive with
+this information and quickly find where this package is being used?
 
 The first step we can take is to mark this package as bad. We can do this by
 using the `guacone certify` command which defaults to assert a negative
@@ -92,7 +93,7 @@ certification (instead of a positive one), as well as a `justification` to
 indicate why it is bad. In this case, it is a critical vulnerability.
 
 ```bash
-bin/guacone certify package "never use this version of log4j" "pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1"
+./bin/guacone certify package "compromised version of tzdata" "pkg:deb/debian/tzdata@2021a-1+deb11u5?arch=all&distro=debian-11"
 ```
 
 an output will contain the following meaning that we have successfully added
@@ -148,18 +149,15 @@ we created earlier:
 ```bash
 Use the arrow keys to navigate: ↓ ↑ → ←
 ? Select CertifyBad to Query:
-↑   pkg:golang/github.com/kr/pretty (pretty bad undisclosed vuln)
-    git+https://github.com/googleapis/google-cloud-go (github repo compromised)
-    pkg:golang/github.com/pmezard/go-difflib (github repo compromised)
-  ▸ pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1 (never use this version of log4j)
-    pkg:golang/github.com/prometheus/client_golang@v1.11.1 (undisclosed vuln)
+    pkg:golang/k8s.io/release/images/build/go-runner@%28devel%29 (compromised go-runner)
+  ▸ pkg:deb/debian/tzdata@2021a-1+deb11u5 (compromised version of tzdata)
 ```
 
 Doing so will produce a output similar to this:
 
 ```bash
-✔ pkg:maven/org.apache.logging.log4j/log4j-core (never use this version of log4j)
-Visualizer url: http://localhost:3000/?path=142367,15573,15572,15515,2509,15574,15337,15336,15335,2
+✔ pkg:deb/debian/tzdata@2021a-1+deb11u5 (compromised version of tzdata)
+Visualizer url: http://localhost:3000/?path=142605,44614,1372,1305,1304,127547,127527,127526,36248,2,125455,125358,125357,123291,123287,123286,121220,121216,121215,119149,119145,119144,117075,117074,117073,115010,115006,115005,112939,112935,112934,110299,110283,110282,107515,107453,107452,68077,67990,67989,65923,65745,65744,63678,63674,63673,61607,61603,61602,59536,59532,59531,57463,57461,57460,55393,55390,55389,53320,53319,53318,51236,51113,51112,49048,48779,48778,46714,46713,46712,44615,44610,44609,42533,42528,42527,40466,40462,40461,38397,38393,38392,36252,36250,36249,15392,15337,15336,15335,4155,4125,4124,3,3182,2865,2864,2667,2633,2632,2501,2419,2418,2413,2312,2311,2190,2150,2149,2092,2048,2047,1374,1303,1302
 ```
 
 Navigating to the URL to visualize the output. This will show us an expanded
@@ -169,18 +167,22 @@ GUAC's external sources (such as Deps.dev). Therefore, if you are seeing less
 than what is shown here, you may want to check back again by re-running the CLI
 in a few minutes!
 
-<img width="1267" alt="6" src="https://user-images.githubusercontent.com/88045217/236021098-184e5bd7-a90d-4509-842c-b6e6988c320d.png">
+<img width="1267" alt="6" src="https://github.com/guacsec/guac/assets/88045217/bd73a5fe-ea6c-46c1-8c56-c52de6c8a567">
 
-From here, we can tell from this small example (arranging the graph a little)
-the bad package is being used by a test image under the guacsec org! We need to
-remediate that right away!
+From here, we can tell from this example (arranging the graph a little) the bad
+debian package (used for timezone information) is commonly used throughout a
+bunch of dependant container images! All are a cause for concern as they are
+notable images for kubernetes, redis, nginx and python. We need to remediate
+these right away! This always us to quickly figure out what needs to be updated,
+so we are not scrambling to first scan and determine where `tzdata` might be
+used.
 
-## Bigger example
+## Exploring bad source repos and their packages
 
-The above example is a fairly simple one. This time, we know of a git repo that
-is producing a bunch of bad packages. We want to mark that repo as compromised
-and learn what the packages are that are linked to this particular repo and
-figure out where they could be used. For example, let's take the
+In the above example, we look at a specific package. This time, we know of a git
+repo that is producing a bunch of bad packages. We want to mark that repo as
+compromised and learn what the packages are that are linked to this particular
+repo and figure out where they could be used. For example, let's take the
 `googleapis/google-cloud-go` git repo. We will begin by certifying it bad by
 running:
 

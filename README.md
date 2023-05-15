@@ -26,7 +26,8 @@ A few examples of questions answered by GUAC include:
 
 We have a couple [demos quickstarts](demo/) that you can take a look.
 
-Starting the GUAC services with our [docker compose quickstart](docs/Compose.md).
+Starting the GUAC services with our
+[docker compose quickstart](docs/Compose.md).
 
 ## Architecture
 
@@ -34,8 +35,8 @@ Here is an overview of the architecture of GUAC:
 
 ![image](https://user-images.githubusercontent.com/3060102/235186368-995784eb-7ef2-43e6-b560-17d6014553ca.png)
 
-For an in-depth view and explanation of components of the GUAC Beta, please refer to [the BETA setup guide](docs/Compose.md).
-
+For an in-depth view and explanation of components of the GUAC Beta, please
+refer to [the BETA setup guide](docs/Compose.md).
 
 ## Supported input formats
 
