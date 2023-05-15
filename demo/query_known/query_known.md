@@ -158,6 +158,154 @@ with GUAC to store SBOM and SLSA attestations for quick access. For now, we can
 quickly locate the SBOM but we also learn that we are missing `hasSLSA`
 attestations for this package.
 
+Along the same lines, we have the hash of an executable binary that was
+generated. We can ask the question, "Is there an SLSA attestation associated?"
+with it. If so, where is it located and is there a package associated with this
+particular hash?
+
+This time, we will change query for known `artifact` rather than package:
+
+```bash
+./bin/guacone query known artifact "sha256:625fe537a4c1657bd613be44f7882a8883c13c3b72919cfdbd02d2eb4dbf677b"
+```
+
+The output should look similar to the following:
+
+```bash
++------------+-----------+-----------------------------------------------------------------------------------------------------------------+
+| NODE TYPE  | NODE ID   | ADDITIONAL INFORMATION                                                                                          |
++------------+-----------+-----------------------------------------------------------------------------------------------------------------+
+| occurrence | 5477      | Occurrence for Package: pkg:guac/generic/gs%3A/kubernetes-release/release/v1.24.1/bin/windows/arm64/kubectl.exe |
++------------+-----------+-----------------------------------------------------------------------------------------------------------------+
+| hasSLSA    | 6364      | SLSA Attestation Location: file:///../guac-data/docs/slsa/kube-slsa-v1.24.1.json                                |
++------------+-----------+-----------------------------------------------------------------------------------------------------------------+
+Visualizer url: http://localhost:3000/?path=5476,5477,6364
+```
+
+From the output, we know that there is a SLSA attestation associated with this
+particular artifact and it's location. We also see from the output, that the
+digest is associated with the windows arm64 version of the kubectl!
+
+**Note**: Currently, the package "purl" is guessed based on heuristics. This
+will improve as future versions of SLSA adopt
+[ResourceDescriptor field type](https://github.com/in-toto/attestation/blob/main/spec/v1/resource_descriptor.md).
+
+For more information on the SLSA attestation, we can look up the SLSA
+attestation via the Node ID in the [graphQL playground](../graphql/GraphQL.md)
+that is shown in the output.
+
+```graphql
+query SLSAQ3 {
+  HasSLSA(hasSLSASpec: { id: "6364" }) {
+    ...allHasSLSATree
+  }
+}
+```
+
+To view the output:
+
+```graphql
+{
+  "data": {
+    "HasSLSA": [
+      {
+        "id": "6364",
+        "subject": {
+          "id": "5476",
+          "algorithm": "sha256",
+          "digest": "625fe537a4c1657bd613be44f7882a8883c13c3b72919cfdbd02d2eb4dbf677b"
+        },
+        "slsa": {
+          "builtFrom": [
+            {
+              "id": "6354",
+              "algorithm": "sha1",
+              "digest": "aaf024b5e8dc5e08e4414583203968ca0a5ec043"
+            }
+          ],
+          "builtBy": {
+            "id": "6356",
+            "uri": "https://git.k8s.io/release/docs/krel"
+          },
+          "buildType": "https://cloudbuild.googleapis.com/CloudBuildYaml@v1",
+          "slsaPredicate": [
+            {
+              "key": "slsa.buildType",
+              "value": "https://cloudbuild.googleapis.com/CloudBuildYaml@v1"
+            },
+            {
+              "key": "slsa.builder.id",
+              "value": "https://git.k8s.io/release/docs/krel"
+            },
+            {
+              "key": "slsa.invocation.configSource.entryPoint",
+              "value": "https://git.k8s.io/release/gcb/stage/cloudbuild.yaml"
+            },
+            {
+              "key": "slsa.invocation.parameters.branch",
+              "value": "release-1.24"
+            },
+            {
+              "key": "slsa.invocation.parameters.build-version",
+              "value": "v1.24.1-rc.0.29+1868a3a2eb9945"
+            },
+            {
+              "key": "slsa.invocation.parameters.nomock",
+              "value": "true"
+            },
+            {
+              "key": "slsa.invocation.parameters.type",
+              "value": "official"
+            },
+            {
+              "key": "slsa.materials.0.digest.sha1",
+              "value": "'aaf024b5e8dc5e08e4414583203968ca0a5ec043'"
+            },
+            {
+              "key": "slsa.materials.0.uri",
+              "value": "git+https://github.com/kubernetes/kubernetes"
+            },
+            {
+              "key": "slsa.metadata.buildFinishedOn",
+              "value": "2022-05-24T13:27:46.145159431Z"
+            },
+            {
+              "key": "slsa.metadata.buildInvocationID",
+              "value": "b6186090-c8ff-4f91-97cf-7a3b47699e57"
+            },
+            {
+              "key": "slsa.metadata.buildStartedOn",
+              "value": "2022-05-24T12:13:35.054695403Z"
+            },
+            {
+              "key": "slsa.metadata.completeness.environment",
+              "value": "false"
+            },
+            {
+              "key": "slsa.metadata.completeness.materials",
+              "value": "true"
+            },
+            {
+              "key": "slsa.metadata.completeness.parameters",
+              "value": "true"
+            },
+            {
+              "key": "slsa.metadata.reproducible",
+              "value": "false"
+            }
+          ],
+          "slsaVersion": "https://slsa.dev/provenance/v0.2",
+          "startedOn": "2022-05-24T12:13:35.054695403Z",
+          "finishedOn": "2022-05-24T12:13:35.054695403Z",
+          "origin": "file:///../guac-data/docs/slsa/kube-slsa-v1.24.1.json",
+          "collector": "FileCollector"
+        }
+      }
+    ]
+  }
+}
+```
+
 Next, we will run the query on the Prometheus package we were working on within
 the workflow demo:
 
