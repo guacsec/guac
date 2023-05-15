@@ -278,26 +278,29 @@ func (ec *executionContext) unmarshalInputHashEqualInputSpec(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Justification = data
 		case "origin":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
-			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Origin = data
 		case "collector":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
-			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Collector = data
 		}
 	}
 
@@ -322,42 +325,47 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ID = data
 		case "artifacts":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-			it.Artifacts, err = ec.unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
+			data, err := ec.unmarshalOArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Artifacts = data
 		case "justification":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
-			it.Justification, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Justification = data
 		case "origin":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
-			it.Origin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Origin = data
 		case "collector":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
-			it.Collector, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Collector = data
 		}
 	}
 

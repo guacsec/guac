@@ -99,7 +99,7 @@ func (v *AllCertifyBad) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal AllCertifyBad.Subject: %w", err)
+					"unable to unmarshal AllCertifyBad.Subject: %w", err)
 			}
 		}
 	}
@@ -140,7 +140,7 @@ func (v *AllCertifyBad) __premarshalJSON() (*__premarshalAllCertifyBad, error) {
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal AllCertifyBad.Subject: %w", err)
+				"unable to marshal AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.Origin
@@ -320,9 +320,9 @@ func (v *AllCertifyBadSubjectPackage) __premarshalJSON() (*__premarshalAllCertif
 // AllCertifyBadSubjectPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
 //
 // AllCertifyBadSubjectPackageSourceOrArtifact is implemented by the following types:
+// AllCertifyBadSubjectArtifact
 // AllCertifyBadSubjectPackage
 // AllCertifyBadSubjectSource
-// AllCertifyBadSubjectArtifact
 // The GraphQL type's documentation follows.
 //
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
@@ -332,11 +332,11 @@ type AllCertifyBadSubjectPackageSourceOrArtifact interface {
 	GetTypename() *string
 }
 
+func (v *AllCertifyBadSubjectArtifact) implementsGraphQLInterfaceAllCertifyBadSubjectPackageSourceOrArtifact() {
+}
 func (v *AllCertifyBadSubjectPackage) implementsGraphQLInterfaceAllCertifyBadSubjectPackageSourceOrArtifact() {
 }
 func (v *AllCertifyBadSubjectSource) implementsGraphQLInterfaceAllCertifyBadSubjectPackageSourceOrArtifact() {
-}
-func (v *AllCertifyBadSubjectArtifact) implementsGraphQLInterfaceAllCertifyBadSubjectPackageSourceOrArtifact() {
 }
 
 func __unmarshalAllCertifyBadSubjectPackageSourceOrArtifact(b []byte, v *AllCertifyBadSubjectPackageSourceOrArtifact) error {
@@ -353,14 +353,14 @@ func __unmarshalAllCertifyBadSubjectPackageSourceOrArtifact(b []byte, v *AllCert
 	}
 
 	switch tn.TypeName {
+	case "Artifact":
+		*v = new(AllCertifyBadSubjectArtifact)
+		return json.Unmarshal(b, *v)
 	case "Package":
 		*v = new(AllCertifyBadSubjectPackage)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(AllCertifyBadSubjectSource)
-		return json.Unmarshal(b, *v)
-	case "Artifact":
-		*v = new(AllCertifyBadSubjectArtifact)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -375,6 +375,18 @@ func __marshalAllCertifyBadSubjectPackageSourceOrArtifact(v *AllCertifyBadSubjec
 
 	var typename string
 	switch v := (*v).(type) {
+	case *AllCertifyBadSubjectArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllCertifyBadSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
 	case *AllCertifyBadSubjectPackage:
 		typename = "Package"
 
@@ -397,18 +409,6 @@ func __marshalAllCertifyBadSubjectPackageSourceOrArtifact(v *AllCertifyBadSubjec
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalAllCertifyBadSubjectSource
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *AllCertifyBadSubjectArtifact:
-		typename = "Artifact"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalAllCertifyBadSubjectArtifact
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -737,7 +737,7 @@ func (v *AllCertifyVuln) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal AllCertifyVuln.Vulnerability: %w", err)
+					"unable to unmarshal AllCertifyVuln.Vulnerability: %w", err)
 			}
 		}
 	}
@@ -776,7 +776,7 @@ func (v *AllCertifyVuln) __premarshalJSON() (*__premarshalAllCertifyVuln, error)
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.Metadata
@@ -916,10 +916,10 @@ func (v *AllCertifyVulnPackage) __premarshalJSON() (*__premarshalAllCertifyVulnP
 // AllCertifyVulnVulnerability includes the requested fields of the GraphQL interface Vulnerability.
 //
 // AllCertifyVulnVulnerability is implemented by the following types:
-// AllCertifyVulnVulnerabilityOSV
 // AllCertifyVulnVulnerabilityCVE
 // AllCertifyVulnVulnerabilityGHSA
 // AllCertifyVulnVulnerabilityNoVuln
+// AllCertifyVulnVulnerabilityOSV
 // The GraphQL type's documentation follows.
 //
 // Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node.
@@ -929,10 +929,10 @@ type AllCertifyVulnVulnerability interface {
 	GetTypename() *string
 }
 
-func (v *AllCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceAllCertifyVulnVulnerability()    {}
 func (v *AllCertifyVulnVulnerabilityCVE) implementsGraphQLInterfaceAllCertifyVulnVulnerability()    {}
 func (v *AllCertifyVulnVulnerabilityGHSA) implementsGraphQLInterfaceAllCertifyVulnVulnerability()   {}
 func (v *AllCertifyVulnVulnerabilityNoVuln) implementsGraphQLInterfaceAllCertifyVulnVulnerability() {}
+func (v *AllCertifyVulnVulnerabilityOSV) implementsGraphQLInterfaceAllCertifyVulnVulnerability()    {}
 
 func __unmarshalAllCertifyVulnVulnerability(b []byte, v *AllCertifyVulnVulnerability) error {
 	if string(b) == "null" {
@@ -948,9 +948,6 @@ func __unmarshalAllCertifyVulnVulnerability(b []byte, v *AllCertifyVulnVulnerabi
 	}
 
 	switch tn.TypeName {
-	case "OSV":
-		*v = new(AllCertifyVulnVulnerabilityOSV)
-		return json.Unmarshal(b, *v)
 	case "CVE":
 		*v = new(AllCertifyVulnVulnerabilityCVE)
 		return json.Unmarshal(b, *v)
@@ -959,6 +956,9 @@ func __unmarshalAllCertifyVulnVulnerability(b []byte, v *AllCertifyVulnVulnerabi
 		return json.Unmarshal(b, *v)
 	case "NoVuln":
 		*v = new(AllCertifyVulnVulnerabilityNoVuln)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(AllCertifyVulnVulnerabilityOSV)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -973,18 +973,6 @@ func __marshalAllCertifyVulnVulnerability(v *AllCertifyVulnVulnerability) ([]byt
 
 	var typename string
 	switch v := (*v).(type) {
-	case *AllCertifyVulnVulnerabilityOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalAllCertifyVulnVulnerabilityOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *AllCertifyVulnVulnerabilityCVE:
 		typename = "CVE"
 
@@ -1016,6 +1004,18 @@ func __marshalAllCertifyVulnVulnerability(v *AllCertifyVulnVulnerability) ([]byt
 			TypeName string `json:"__typename"`
 			*AllCertifyVulnVulnerabilityNoVuln
 		}{typename, v}
+		return json.Marshal(result)
+	case *AllCertifyVulnVulnerabilityOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllCertifyVulnVulnerabilityOSV
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -1386,7 +1386,7 @@ func (v *AllIsOccurrencesTree) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal AllIsOccurrencesTree.Subject: %w", err)
+					"unable to unmarshal AllIsOccurrencesTree.Subject: %w", err)
 			}
 		}
 	}
@@ -1428,7 +1428,7 @@ func (v *AllIsOccurrencesTree) __premarshalJSON() (*__premarshalAllIsOccurrences
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal AllIsOccurrencesTree.Subject: %w", err)
+				"unable to marshal AllIsOccurrencesTree.Subject: %w", err)
 		}
 	}
 	retval.Artifact = v.Artifact
@@ -2454,7 +2454,7 @@ func (v *CertifyBadArtifactIngestCertifyBad) __premarshalJSON() (*__premarshalCe
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyBadArtifactIngestCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal CertifyBadArtifactIngestCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -2593,7 +2593,7 @@ func (v *CertifyBadPkgIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyBadPkgIngestCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal CertifyBadPkgIngestCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -2827,7 +2827,7 @@ func (v *CertifyBadSrcIngestCertifyBad) __premarshalJSON() (*__premarshalCertify
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyBadSrcIngestCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal CertifyBadSrcIngestCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -3024,7 +3024,7 @@ func (v *CertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadsCert
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyBadsCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal CertifyBadsCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -3285,7 +3285,7 @@ func (v *CertifyCVEIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyCVEIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal CertifyCVEIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -3546,7 +3546,7 @@ func (v *CertifyGHSAIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__prema
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyGHSAIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal CertifyGHSAIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -3745,7 +3745,7 @@ func (v *CertifyGoodArtifactIngestCertifyGood) __premarshalJSON() (*__premarshal
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyGoodArtifactIngestCertifyGood.allCertifyGood.Subject: %w", err)
+				"unable to marshal CertifyGoodArtifactIngestCertifyGood.allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.allCertifyGood.Origin
@@ -3883,7 +3883,7 @@ func (v *CertifyGoodPkgIngestCertifyGood) __premarshalJSON() (*__premarshalCerti
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyGoodPkgIngestCertifyGood.allCertifyGood.Subject: %w", err)
+				"unable to marshal CertifyGoodPkgIngestCertifyGood.allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.allCertifyGood.Origin
@@ -4087,7 +4087,7 @@ func (v *CertifyGoodSrcIngestCertifyGood) __premarshalJSON() (*__premarshalCerti
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyGoodSrcIngestCertifyGood.allCertifyGood.Subject: %w", err)
+				"unable to marshal CertifyGoodSrcIngestCertifyGood.allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.allCertifyGood.Origin
@@ -4358,7 +4358,7 @@ func (v *CertifyNoKnownVulnIngestVulnerabilityCertifyVuln) __premarshalJSON() (*
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyNoKnownVulnIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal CertifyNoKnownVulnIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -4619,7 +4619,7 @@ func (v *CertifyOSVIngestVulnerabilityCertifyVuln) __premarshalJSON() (*__premar
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal CertifyOSVIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal CertifyOSVIngestVulnerabilityCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -5010,7 +5010,7 @@ func (v *HasSBOMArtifactIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMA
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal HasSBOMArtifactIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
+				"unable to marshal HasSBOMArtifactIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
 		}
 	}
 	retval.Uri = v.allHasSBOMTree.Uri
@@ -5177,7 +5177,7 @@ func (v *HasSBOMPkgIngestHasSBOM) __premarshalJSON() (*__premarshalHasSBOMPkgIng
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal HasSBOMPkgIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
+				"unable to marshal HasSBOMPkgIngestHasSBOM.allHasSBOMTree.Subject: %w", err)
 		}
 	}
 	retval.Uri = v.allHasSBOMTree.Uri
@@ -6358,7 +6358,7 @@ func (v *IsOccurrencePkgIngestOccurrenceIsOccurrence) __premarshalJSON() (*__pre
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal IsOccurrencePkgIngestOccurrenceIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+				"unable to marshal IsOccurrencePkgIngestOccurrenceIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
 		}
 	}
 	retval.Artifact = v.AllIsOccurrencesTree.Artifact
@@ -6648,7 +6648,7 @@ func (v *IsOccurrenceSrcIngestOccurrenceIsOccurrence) __premarshalJSON() (*__pre
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal IsOccurrenceSrcIngestOccurrenceIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+				"unable to marshal IsOccurrenceSrcIngestOccurrenceIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
 		}
 	}
 	retval.Artifact = v.AllIsOccurrencesTree.Artifact
@@ -6935,7 +6935,7 @@ func (v *IsVulnerabilityCVEIngestIsVulnerability) __premarshalJSON() (*__premars
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal IsVulnerabilityCVEIngestIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+				"unable to marshal IsVulnerabilityCVEIngestIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
 		}
 	}
 	retval.Justification = v.allIsVulnerability.Justification
@@ -7195,7 +7195,7 @@ func (v *IsVulnerabilityGHSAIngestIsVulnerability) __premarshalJSON() (*__premar
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal IsVulnerabilityGHSAIngestIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+				"unable to marshal IsVulnerabilityGHSAIngestIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
 		}
 	}
 	retval.Justification = v.allIsVulnerability.Justification
@@ -7655,7 +7655,7 @@ func (v *NeighborsNeighborsCertifyBad) __premarshalJSON() (*__premarshalNeighbor
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal NeighborsNeighborsCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -7766,7 +7766,7 @@ func (v *NeighborsNeighborsCertifyGood) __premarshalJSON() (*__premarshalNeighbo
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsCertifyGood.allCertifyGood.Subject: %w", err)
+				"unable to marshal NeighborsNeighborsCertifyGood.allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.allCertifyGood.Origin
@@ -7985,7 +7985,7 @@ func (v *NeighborsNeighborsCertifyVEXStatement) __premarshalJSON() (*__premarsha
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal NeighborsNeighborsCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -7997,7 +7997,7 @@ func (v *NeighborsNeighborsCertifyVEXStatement) __premarshalJSON() (*__premarsha
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal NeighborsNeighborsCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -8103,7 +8103,7 @@ func (v *NeighborsNeighborsCertifyVuln) __premarshalJSON() (*__premarshalNeighbo
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal NeighborsNeighborsCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -8293,7 +8293,7 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsHasSBOM.allHasSBOMTree.Subject: %w", err)
+				"unable to marshal NeighborsNeighborsHasSBOM.allHasSBOMTree.Subject: %w", err)
 		}
 	}
 	retval.Uri = v.allHasSBOMTree.Uri
@@ -8795,7 +8795,7 @@ func (v *NeighborsNeighborsIsOccurrence) __premarshalJSON() (*__premarshalNeighb
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+				"unable to marshal NeighborsNeighborsIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
 		}
 	}
 	retval.Artifact = v.AllIsOccurrencesTree.Artifact
@@ -8907,7 +8907,7 @@ func (v *NeighborsNeighborsIsVulnerability) __premarshalJSON() (*__premarshalNei
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NeighborsNeighborsIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+				"unable to marshal NeighborsNeighborsIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
 		}
 	}
 	retval.Justification = v.allIsVulnerability.Justification
@@ -8937,27 +8937,27 @@ func (v *NeighborsNeighborsNoVuln) GetId() string { return v.Id }
 // NeighborsNeighborsNode includes the requested fields of the GraphQL interface Node.
 //
 // NeighborsNeighborsNode is implemented by the following types:
-// NeighborsNeighborsPackage
-// NeighborsNeighborsSource
 // NeighborsNeighborsArtifact
 // NeighborsNeighborsBuilder
-// NeighborsNeighborsOSV
 // NeighborsNeighborsCVE
-// NeighborsNeighborsGHSA
-// NeighborsNeighborsNoVuln
-// NeighborsNeighborsIsOccurrence
-// NeighborsNeighborsIsDependency
-// NeighborsNeighborsIsVulnerability
-// NeighborsNeighborsCertifyVEXStatement
-// NeighborsNeighborsHashEqual
 // NeighborsNeighborsCertifyBad
 // NeighborsNeighborsCertifyGood
-// NeighborsNeighborsPkgEqual
 // NeighborsNeighborsCertifyScorecard
+// NeighborsNeighborsCertifyVEXStatement
 // NeighborsNeighborsCertifyVuln
-// NeighborsNeighborsHasSourceAt
+// NeighborsNeighborsGHSA
 // NeighborsNeighborsHasSBOM
 // NeighborsNeighborsHasSLSA
+// NeighborsNeighborsHasSourceAt
+// NeighborsNeighborsHashEqual
+// NeighborsNeighborsIsDependency
+// NeighborsNeighborsIsOccurrence
+// NeighborsNeighborsIsVulnerability
+// NeighborsNeighborsNoVuln
+// NeighborsNeighborsOSV
+// NeighborsNeighborsPackage
+// NeighborsNeighborsPkgEqual
+// NeighborsNeighborsSource
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -8971,27 +8971,27 @@ type NeighborsNeighborsNode interface {
 	GetTypename() *string
 }
 
-func (v *NeighborsNeighborsPackage) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
-func (v *NeighborsNeighborsSource) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
 func (v *NeighborsNeighborsArtifact) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
 func (v *NeighborsNeighborsBuilder) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
-func (v *NeighborsNeighborsOSV) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
 func (v *NeighborsNeighborsCVE) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
-func (v *NeighborsNeighborsGHSA) implementsGraphQLInterfaceNeighborsNeighborsNode()                {}
-func (v *NeighborsNeighborsNoVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
-func (v *NeighborsNeighborsIsOccurrence) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
-func (v *NeighborsNeighborsIsDependency) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
-func (v *NeighborsNeighborsIsVulnerability) implementsGraphQLInterfaceNeighborsNeighborsNode()     {}
-func (v *NeighborsNeighborsCertifyVEXStatement) implementsGraphQLInterfaceNeighborsNeighborsNode() {}
-func (v *NeighborsNeighborsHashEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()           {}
 func (v *NeighborsNeighborsCertifyBad) implementsGraphQLInterfaceNeighborsNeighborsNode()          {}
 func (v *NeighborsNeighborsCertifyGood) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
-func (v *NeighborsNeighborsPkgEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
 func (v *NeighborsNeighborsCertifyScorecard) implementsGraphQLInterfaceNeighborsNeighborsNode()    {}
+func (v *NeighborsNeighborsCertifyVEXStatement) implementsGraphQLInterfaceNeighborsNeighborsNode() {}
 func (v *NeighborsNeighborsCertifyVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
-func (v *NeighborsNeighborsHasSourceAt) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
+func (v *NeighborsNeighborsGHSA) implementsGraphQLInterfaceNeighborsNeighborsNode()                {}
 func (v *NeighborsNeighborsHasSBOM) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
 func (v *NeighborsNeighborsHasSLSA) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
+func (v *NeighborsNeighborsHasSourceAt) implementsGraphQLInterfaceNeighborsNeighborsNode()         {}
+func (v *NeighborsNeighborsHashEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()           {}
+func (v *NeighborsNeighborsIsDependency) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
+func (v *NeighborsNeighborsIsOccurrence) implementsGraphQLInterfaceNeighborsNeighborsNode()        {}
+func (v *NeighborsNeighborsIsVulnerability) implementsGraphQLInterfaceNeighborsNeighborsNode()     {}
+func (v *NeighborsNeighborsNoVuln) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
+func (v *NeighborsNeighborsOSV) implementsGraphQLInterfaceNeighborsNeighborsNode()                 {}
+func (v *NeighborsNeighborsPackage) implementsGraphQLInterfaceNeighborsNeighborsNode()             {}
+func (v *NeighborsNeighborsPkgEqual) implementsGraphQLInterfaceNeighborsNeighborsNode()            {}
+func (v *NeighborsNeighborsSource) implementsGraphQLInterfaceNeighborsNeighborsNode()              {}
 
 func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) error {
 	if string(b) == "null" {
@@ -9007,44 +9007,14 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 	}
 
 	switch tn.TypeName {
-	case "Package":
-		*v = new(NeighborsNeighborsPackage)
-		return json.Unmarshal(b, *v)
-	case "Source":
-		*v = new(NeighborsNeighborsSource)
-		return json.Unmarshal(b, *v)
 	case "Artifact":
 		*v = new(NeighborsNeighborsArtifact)
 		return json.Unmarshal(b, *v)
 	case "Builder":
 		*v = new(NeighborsNeighborsBuilder)
 		return json.Unmarshal(b, *v)
-	case "OSV":
-		*v = new(NeighborsNeighborsOSV)
-		return json.Unmarshal(b, *v)
 	case "CVE":
 		*v = new(NeighborsNeighborsCVE)
-		return json.Unmarshal(b, *v)
-	case "GHSA":
-		*v = new(NeighborsNeighborsGHSA)
-		return json.Unmarshal(b, *v)
-	case "NoVuln":
-		*v = new(NeighborsNeighborsNoVuln)
-		return json.Unmarshal(b, *v)
-	case "IsOccurrence":
-		*v = new(NeighborsNeighborsIsOccurrence)
-		return json.Unmarshal(b, *v)
-	case "IsDependency":
-		*v = new(NeighborsNeighborsIsDependency)
-		return json.Unmarshal(b, *v)
-	case "IsVulnerability":
-		*v = new(NeighborsNeighborsIsVulnerability)
-		return json.Unmarshal(b, *v)
-	case "CertifyVEXStatement":
-		*v = new(NeighborsNeighborsCertifyVEXStatement)
-		return json.Unmarshal(b, *v)
-	case "HashEqual":
-		*v = new(NeighborsNeighborsHashEqual)
 		return json.Unmarshal(b, *v)
 	case "CertifyBad":
 		*v = new(NeighborsNeighborsCertifyBad)
@@ -9052,23 +9022,53 @@ func __unmarshalNeighborsNeighborsNode(b []byte, v *NeighborsNeighborsNode) erro
 	case "CertifyGood":
 		*v = new(NeighborsNeighborsCertifyGood)
 		return json.Unmarshal(b, *v)
-	case "PkgEqual":
-		*v = new(NeighborsNeighborsPkgEqual)
-		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(NeighborsNeighborsCertifyScorecard)
+		return json.Unmarshal(b, *v)
+	case "CertifyVEXStatement":
+		*v = new(NeighborsNeighborsCertifyVEXStatement)
 		return json.Unmarshal(b, *v)
 	case "CertifyVuln":
 		*v = new(NeighborsNeighborsCertifyVuln)
 		return json.Unmarshal(b, *v)
-	case "HasSourceAt":
-		*v = new(NeighborsNeighborsHasSourceAt)
+	case "GHSA":
+		*v = new(NeighborsNeighborsGHSA)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NeighborsNeighborsHasSBOM)
 		return json.Unmarshal(b, *v)
 	case "HasSLSA":
 		*v = new(NeighborsNeighborsHasSLSA)
+		return json.Unmarshal(b, *v)
+	case "HasSourceAt":
+		*v = new(NeighborsNeighborsHasSourceAt)
+		return json.Unmarshal(b, *v)
+	case "HashEqual":
+		*v = new(NeighborsNeighborsHashEqual)
+		return json.Unmarshal(b, *v)
+	case "IsDependency":
+		*v = new(NeighborsNeighborsIsDependency)
+		return json.Unmarshal(b, *v)
+	case "IsOccurrence":
+		*v = new(NeighborsNeighborsIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "IsVulnerability":
+		*v = new(NeighborsNeighborsIsVulnerability)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(NeighborsNeighborsNoVuln)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(NeighborsNeighborsOSV)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(NeighborsNeighborsPackage)
+		return json.Unmarshal(b, *v)
+	case "PkgEqual":
+		*v = new(NeighborsNeighborsPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(NeighborsNeighborsSource)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -9083,30 +9083,6 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 
 	var typename string
 	switch v := (*v).(type) {
-	case *NeighborsNeighborsPackage:
-		typename = "Package"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsPackage
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsSource:
-		typename = "Source"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsSource
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NeighborsNeighborsArtifact:
 		typename = "Artifact"
 
@@ -9131,18 +9107,6 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			*__premarshalNeighborsNeighborsBuilder
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NeighborsNeighborsOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NeighborsNeighborsCVE:
 		typename = "CVE"
 
@@ -9153,86 +9117,6 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsCVE
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsGHSA:
-		typename = "GHSA"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsGHSA
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsNoVuln:
-		typename = "NoVuln"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*NeighborsNeighborsNoVuln
-		}{typename, v}
-		return json.Marshal(result)
-	case *NeighborsNeighborsIsOccurrence:
-		typename = "IsOccurrence"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsIsOccurrence
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsIsDependency:
-		typename = "IsDependency"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsIsDependency
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsIsVulnerability:
-		typename = "IsVulnerability"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsIsVulnerability
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsCertifyVEXStatement:
-		typename = "CertifyVEXStatement"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsCertifyVEXStatement
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NeighborsNeighborsHashEqual:
-		typename = "HashEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsHashEqual
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NeighborsNeighborsCertifyBad:
@@ -9259,18 +9143,6 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			*__premarshalNeighborsNeighborsCertifyGood
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NeighborsNeighborsPkgEqual:
-		typename = "PkgEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsPkgEqual
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NeighborsNeighborsCertifyScorecard:
 		typename = "CertifyScorecard"
 
@@ -9281,6 +9153,18 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsCertifyScorecard
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsCertifyVEXStatement:
+		typename = "CertifyVEXStatement"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsCertifyVEXStatement
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NeighborsNeighborsCertifyVuln:
@@ -9295,8 +9179,8 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 			*__premarshalNeighborsNeighborsCertifyVuln
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NeighborsNeighborsHasSourceAt:
-		typename = "HasSourceAt"
+	case *NeighborsNeighborsGHSA:
+		typename = "GHSA"
 
 		premarshaled, err := v.__premarshalJSON()
 		if err != nil {
@@ -9304,7 +9188,7 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*__premarshalNeighborsNeighborsHasSourceAt
+			*__premarshalNeighborsNeighborsGHSA
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NeighborsNeighborsHasSBOM:
@@ -9329,6 +9213,122 @@ func __marshalNeighborsNeighborsNode(v *NeighborsNeighborsNode) ([]byte, error) 
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNeighborsNeighborsHasSLSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHasSourceAt:
+		typename = "HasSourceAt"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsHasSourceAt
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsHashEqual:
+		typename = "HashEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsHashEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsIsDependency:
+		typename = "IsDependency"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsIsDependency
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsIsOccurrence:
+		typename = "IsOccurrence"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsIsOccurrence
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsIsVulnerability:
+		typename = "IsVulnerability"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsIsVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NeighborsNeighborsNoVuln
+		}{typename, v}
+		return json.Marshal(result)
+	case *NeighborsNeighborsOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsPkgEqual:
+		typename = "PkgEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsPkgEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NeighborsNeighborsSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNeighborsNeighborsSource
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -9722,7 +9722,7 @@ func (v *NeighborsResponse) UnmarshalJSON(b []byte) error {
 					src, dst)
 				if err != nil {
 					return fmt.Errorf(
-						"Unable to unmarshal NeighborsResponse.Neighbors: %w", err)
+						"unable to unmarshal NeighborsResponse.Neighbors: %w", err)
 				}
 			}
 		}
@@ -9759,7 +9759,7 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 				&src)
 			if err != nil {
 				return nil, fmt.Errorf(
-					"Unable to marshal NeighborsResponse.Neighbors: %w", err)
+					"unable to marshal NeighborsResponse.Neighbors: %w", err)
 			}
 		}
 	}
@@ -9769,27 +9769,27 @@ func (v *NeighborsResponse) __premarshalJSON() (*__premarshalNeighborsResponse, 
 // NodeNode includes the requested fields of the GraphQL interface Node.
 //
 // NodeNode is implemented by the following types:
-// NodeNodePackage
-// NodeNodeSource
 // NodeNodeArtifact
 // NodeNodeBuilder
-// NodeNodeOSV
 // NodeNodeCVE
-// NodeNodeGHSA
-// NodeNodeNoVuln
-// NodeNodeIsOccurrence
-// NodeNodeIsDependency
-// NodeNodeIsVulnerability
-// NodeNodeCertifyVEXStatement
-// NodeNodeHashEqual
 // NodeNodeCertifyBad
 // NodeNodeCertifyGood
-// NodeNodePkgEqual
 // NodeNodeCertifyScorecard
+// NodeNodeCertifyVEXStatement
 // NodeNodeCertifyVuln
-// NodeNodeHasSourceAt
+// NodeNodeGHSA
 // NodeNodeHasSBOM
 // NodeNodeHasSLSA
+// NodeNodeHasSourceAt
+// NodeNodeHashEqual
+// NodeNodeIsDependency
+// NodeNodeIsOccurrence
+// NodeNodeIsVulnerability
+// NodeNodeNoVuln
+// NodeNodeOSV
+// NodeNodePackage
+// NodeNodePkgEqual
+// NodeNodeSource
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -9803,27 +9803,27 @@ type NodeNode interface {
 	GetTypename() *string
 }
 
-func (v *NodeNodePackage) implementsGraphQLInterfaceNodeNode()             {}
-func (v *NodeNodeSource) implementsGraphQLInterfaceNodeNode()              {}
 func (v *NodeNodeArtifact) implementsGraphQLInterfaceNodeNode()            {}
 func (v *NodeNodeBuilder) implementsGraphQLInterfaceNodeNode()             {}
-func (v *NodeNodeOSV) implementsGraphQLInterfaceNodeNode()                 {}
 func (v *NodeNodeCVE) implementsGraphQLInterfaceNodeNode()                 {}
-func (v *NodeNodeGHSA) implementsGraphQLInterfaceNodeNode()                {}
-func (v *NodeNodeNoVuln) implementsGraphQLInterfaceNodeNode()              {}
-func (v *NodeNodeIsOccurrence) implementsGraphQLInterfaceNodeNode()        {}
-func (v *NodeNodeIsDependency) implementsGraphQLInterfaceNodeNode()        {}
-func (v *NodeNodeIsVulnerability) implementsGraphQLInterfaceNodeNode()     {}
-func (v *NodeNodeCertifyVEXStatement) implementsGraphQLInterfaceNodeNode() {}
-func (v *NodeNodeHashEqual) implementsGraphQLInterfaceNodeNode()           {}
 func (v *NodeNodeCertifyBad) implementsGraphQLInterfaceNodeNode()          {}
 func (v *NodeNodeCertifyGood) implementsGraphQLInterfaceNodeNode()         {}
-func (v *NodeNodePkgEqual) implementsGraphQLInterfaceNodeNode()            {}
 func (v *NodeNodeCertifyScorecard) implementsGraphQLInterfaceNodeNode()    {}
+func (v *NodeNodeCertifyVEXStatement) implementsGraphQLInterfaceNodeNode() {}
 func (v *NodeNodeCertifyVuln) implementsGraphQLInterfaceNodeNode()         {}
-func (v *NodeNodeHasSourceAt) implementsGraphQLInterfaceNodeNode()         {}
+func (v *NodeNodeGHSA) implementsGraphQLInterfaceNodeNode()                {}
 func (v *NodeNodeHasSBOM) implementsGraphQLInterfaceNodeNode()             {}
 func (v *NodeNodeHasSLSA) implementsGraphQLInterfaceNodeNode()             {}
+func (v *NodeNodeHasSourceAt) implementsGraphQLInterfaceNodeNode()         {}
+func (v *NodeNodeHashEqual) implementsGraphQLInterfaceNodeNode()           {}
+func (v *NodeNodeIsDependency) implementsGraphQLInterfaceNodeNode()        {}
+func (v *NodeNodeIsOccurrence) implementsGraphQLInterfaceNodeNode()        {}
+func (v *NodeNodeIsVulnerability) implementsGraphQLInterfaceNodeNode()     {}
+func (v *NodeNodeNoVuln) implementsGraphQLInterfaceNodeNode()              {}
+func (v *NodeNodeOSV) implementsGraphQLInterfaceNodeNode()                 {}
+func (v *NodeNodePackage) implementsGraphQLInterfaceNodeNode()             {}
+func (v *NodeNodePkgEqual) implementsGraphQLInterfaceNodeNode()            {}
+func (v *NodeNodeSource) implementsGraphQLInterfaceNodeNode()              {}
 
 func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 	if string(b) == "null" {
@@ -9839,44 +9839,14 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 	}
 
 	switch tn.TypeName {
-	case "Package":
-		*v = new(NodeNodePackage)
-		return json.Unmarshal(b, *v)
-	case "Source":
-		*v = new(NodeNodeSource)
-		return json.Unmarshal(b, *v)
 	case "Artifact":
 		*v = new(NodeNodeArtifact)
 		return json.Unmarshal(b, *v)
 	case "Builder":
 		*v = new(NodeNodeBuilder)
 		return json.Unmarshal(b, *v)
-	case "OSV":
-		*v = new(NodeNodeOSV)
-		return json.Unmarshal(b, *v)
 	case "CVE":
 		*v = new(NodeNodeCVE)
-		return json.Unmarshal(b, *v)
-	case "GHSA":
-		*v = new(NodeNodeGHSA)
-		return json.Unmarshal(b, *v)
-	case "NoVuln":
-		*v = new(NodeNodeNoVuln)
-		return json.Unmarshal(b, *v)
-	case "IsOccurrence":
-		*v = new(NodeNodeIsOccurrence)
-		return json.Unmarshal(b, *v)
-	case "IsDependency":
-		*v = new(NodeNodeIsDependency)
-		return json.Unmarshal(b, *v)
-	case "IsVulnerability":
-		*v = new(NodeNodeIsVulnerability)
-		return json.Unmarshal(b, *v)
-	case "CertifyVEXStatement":
-		*v = new(NodeNodeCertifyVEXStatement)
-		return json.Unmarshal(b, *v)
-	case "HashEqual":
-		*v = new(NodeNodeHashEqual)
 		return json.Unmarshal(b, *v)
 	case "CertifyBad":
 		*v = new(NodeNodeCertifyBad)
@@ -9884,23 +9854,53 @@ func __unmarshalNodeNode(b []byte, v *NodeNode) error {
 	case "CertifyGood":
 		*v = new(NodeNodeCertifyGood)
 		return json.Unmarshal(b, *v)
-	case "PkgEqual":
-		*v = new(NodeNodePkgEqual)
-		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(NodeNodeCertifyScorecard)
+		return json.Unmarshal(b, *v)
+	case "CertifyVEXStatement":
+		*v = new(NodeNodeCertifyVEXStatement)
 		return json.Unmarshal(b, *v)
 	case "CertifyVuln":
 		*v = new(NodeNodeCertifyVuln)
 		return json.Unmarshal(b, *v)
-	case "HasSourceAt":
-		*v = new(NodeNodeHasSourceAt)
+	case "GHSA":
+		*v = new(NodeNodeGHSA)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NodeNodeHasSBOM)
 		return json.Unmarshal(b, *v)
 	case "HasSLSA":
 		*v = new(NodeNodeHasSLSA)
+		return json.Unmarshal(b, *v)
+	case "HasSourceAt":
+		*v = new(NodeNodeHasSourceAt)
+		return json.Unmarshal(b, *v)
+	case "HashEqual":
+		*v = new(NodeNodeHashEqual)
+		return json.Unmarshal(b, *v)
+	case "IsDependency":
+		*v = new(NodeNodeIsDependency)
+		return json.Unmarshal(b, *v)
+	case "IsOccurrence":
+		*v = new(NodeNodeIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "IsVulnerability":
+		*v = new(NodeNodeIsVulnerability)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(NodeNodeNoVuln)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(NodeNodeOSV)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(NodeNodePackage)
+		return json.Unmarshal(b, *v)
+	case "PkgEqual":
+		*v = new(NodeNodePkgEqual)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(NodeNodeSource)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -9915,30 +9915,6 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 
 	var typename string
 	switch v := (*v).(type) {
-	case *NodeNodePackage:
-		typename = "Package"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodePackage
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodeNodeSource:
-		typename = "Source"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeSource
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NodeNodeArtifact:
 		typename = "Artifact"
 
@@ -9963,18 +9939,6 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			*__premarshalNodeNodeBuilder
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NodeNodeOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NodeNodeCVE:
 		typename = "CVE"
 
@@ -9985,86 +9949,6 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeCVE
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodeNodeGHSA:
-		typename = "GHSA"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeGHSA
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodeNodeNoVuln:
-		typename = "NoVuln"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*NodeNodeNoVuln
-		}{typename, v}
-		return json.Marshal(result)
-	case *NodeNodeIsOccurrence:
-		typename = "IsOccurrence"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeIsOccurrence
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodeNodeIsDependency:
-		typename = "IsDependency"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeIsDependency
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodeNodeIsVulnerability:
-		typename = "IsVulnerability"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeIsVulnerability
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodeNodeCertifyVEXStatement:
-		typename = "CertifyVEXStatement"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeCertifyVEXStatement
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodeNodeHashEqual:
-		typename = "HashEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeHashEqual
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodeNodeCertifyBad:
@@ -10091,18 +9975,6 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			*__premarshalNodeNodeCertifyGood
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NodeNodePkgEqual:
-		typename = "PkgEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodeNodePkgEqual
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NodeNodeCertifyScorecard:
 		typename = "CertifyScorecard"
 
@@ -10113,6 +9985,18 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeCertifyScorecard
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeCertifyVEXStatement:
+		typename = "CertifyVEXStatement"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeCertifyVEXStatement
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodeNodeCertifyVuln:
@@ -10127,8 +10011,8 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 			*__premarshalNodeNodeCertifyVuln
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NodeNodeHasSourceAt:
-		typename = "HasSourceAt"
+	case *NodeNodeGHSA:
+		typename = "GHSA"
 
 		premarshaled, err := v.__premarshalJSON()
 		if err != nil {
@@ -10136,7 +10020,7 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*__premarshalNodeNodeHasSourceAt
+			*__premarshalNodeNodeGHSA
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodeNodeHasSBOM:
@@ -10161,6 +10045,122 @@ func __marshalNodeNode(v *NodeNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodeNodeHasSLSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeHasSourceAt:
+		typename = "HasSourceAt"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeHasSourceAt
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeHashEqual:
+		typename = "HashEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeHashEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeIsDependency:
+		typename = "IsDependency"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeIsDependency
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeIsOccurrence:
+		typename = "IsOccurrence"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeIsOccurrence
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeIsVulnerability:
+		typename = "IsVulnerability"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeIsVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodeNodeNoVuln
+		}{typename, v}
+		return json.Marshal(result)
+	case *NodeNodeOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodePackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodePackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodePkgEqual:
+		typename = "PkgEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodePkgEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodeNodeSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodeNodeSource
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -10505,7 +10505,7 @@ func (v *NodeNodeCertifyBad) __premarshalJSON() (*__premarshalNodeNodeCertifyBad
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal NodeNodeCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -10614,7 +10614,7 @@ func (v *NodeNodeCertifyGood) __premarshalJSON() (*__premarshalNodeNodeCertifyGo
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeCertifyGood.allCertifyGood.Subject: %w", err)
+				"unable to marshal NodeNodeCertifyGood.allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.allCertifyGood.Origin
@@ -10829,7 +10829,7 @@ func (v *NodeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalNodeNodeC
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal NodeNodeCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -10841,7 +10841,7 @@ func (v *NodeNodeCertifyVEXStatement) __premarshalJSON() (*__premarshalNodeNodeC
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal NodeNodeCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -10945,7 +10945,7 @@ func (v *NodeNodeCertifyVuln) __premarshalJSON() (*__premarshalNodeNodeCertifyVu
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal NodeNodeCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -11133,7 +11133,7 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeHasSBOM.allHasSBOMTree.Subject: %w", err)
+				"unable to marshal NodeNodeHasSBOM.allHasSBOMTree.Subject: %w", err)
 		}
 	}
 	retval.Uri = v.allHasSBOMTree.Uri
@@ -11615,7 +11615,7 @@ func (v *NodeNodeIsOccurrence) __premarshalJSON() (*__premarshalNodeNodeIsOccurr
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+				"unable to marshal NodeNodeIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
 		}
 	}
 	retval.Artifact = v.AllIsOccurrencesTree.Artifact
@@ -11723,7 +11723,7 @@ func (v *NodeNodeIsVulnerability) __premarshalJSON() (*__premarshalNodeNodeIsVul
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeNodeIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+				"unable to marshal NodeNodeIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
 		}
 	}
 	retval.Justification = v.allIsVulnerability.Justification
@@ -12123,7 +12123,7 @@ func (v *NodeResponse) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal NodeResponse.Node: %w", err)
+					"unable to unmarshal NodeResponse.Node: %w", err)
 			}
 		}
 	}
@@ -12154,7 +12154,7 @@ func (v *NodeResponse) __premarshalJSON() (*__premarshalNodeResponse, error) {
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodeResponse.Node: %w", err)
+				"unable to marshal NodeResponse.Node: %w", err)
 		}
 	}
 	return &retval, nil
@@ -12494,7 +12494,7 @@ func (v *NodesNodesCertifyBad) __premarshalJSON() (*__premarshalNodesNodesCertif
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal NodesNodesCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -12603,7 +12603,7 @@ func (v *NodesNodesCertifyGood) __premarshalJSON() (*__premarshalNodesNodesCerti
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesCertifyGood.allCertifyGood.Subject: %w", err)
+				"unable to marshal NodesNodesCertifyGood.allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.allCertifyGood.Origin
@@ -12818,7 +12818,7 @@ func (v *NodesNodesCertifyVEXStatement) __premarshalJSON() (*__premarshalNodesNo
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal NodesNodesCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -12830,7 +12830,7 @@ func (v *NodesNodesCertifyVEXStatement) __premarshalJSON() (*__premarshalNodesNo
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal NodesNodesCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -12934,7 +12934,7 @@ func (v *NodesNodesCertifyVuln) __premarshalJSON() (*__premarshalNodesNodesCerti
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal NodesNodesCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -13122,7 +13122,7 @@ func (v *NodesNodesHasSBOM) __premarshalJSON() (*__premarshalNodesNodesHasSBOM, 
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesHasSBOM.allHasSBOMTree.Subject: %w", err)
+				"unable to marshal NodesNodesHasSBOM.allHasSBOMTree.Subject: %w", err)
 		}
 	}
 	retval.Uri = v.allHasSBOMTree.Uri
@@ -13608,7 +13608,7 @@ func (v *NodesNodesIsOccurrence) __premarshalJSON() (*__premarshalNodesNodesIsOc
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+				"unable to marshal NodesNodesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
 		}
 	}
 	retval.Artifact = v.AllIsOccurrencesTree.Artifact
@@ -13718,7 +13718,7 @@ func (v *NodesNodesIsVulnerability) __premarshalJSON() (*__premarshalNodesNodesI
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal NodesNodesIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+				"unable to marshal NodesNodesIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
 		}
 	}
 	retval.Justification = v.allIsVulnerability.Justification
@@ -13748,27 +13748,27 @@ func (v *NodesNodesNoVuln) GetId() string { return v.Id }
 // NodesNodesNode includes the requested fields of the GraphQL interface Node.
 //
 // NodesNodesNode is implemented by the following types:
-// NodesNodesPackage
-// NodesNodesSource
 // NodesNodesArtifact
 // NodesNodesBuilder
-// NodesNodesOSV
 // NodesNodesCVE
-// NodesNodesGHSA
-// NodesNodesNoVuln
-// NodesNodesIsOccurrence
-// NodesNodesIsDependency
-// NodesNodesIsVulnerability
-// NodesNodesCertifyVEXStatement
-// NodesNodesHashEqual
 // NodesNodesCertifyBad
 // NodesNodesCertifyGood
-// NodesNodesPkgEqual
 // NodesNodesCertifyScorecard
+// NodesNodesCertifyVEXStatement
 // NodesNodesCertifyVuln
-// NodesNodesHasSourceAt
+// NodesNodesGHSA
 // NodesNodesHasSBOM
 // NodesNodesHasSLSA
+// NodesNodesHasSourceAt
+// NodesNodesHashEqual
+// NodesNodesIsDependency
+// NodesNodesIsOccurrence
+// NodesNodesIsVulnerability
+// NodesNodesNoVuln
+// NodesNodesOSV
+// NodesNodesPackage
+// NodesNodesPkgEqual
+// NodesNodesSource
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -13782,27 +13782,27 @@ type NodesNodesNode interface {
 	GetTypename() *string
 }
 
-func (v *NodesNodesPackage) implementsGraphQLInterfaceNodesNodesNode()             {}
-func (v *NodesNodesSource) implementsGraphQLInterfaceNodesNodesNode()              {}
 func (v *NodesNodesArtifact) implementsGraphQLInterfaceNodesNodesNode()            {}
 func (v *NodesNodesBuilder) implementsGraphQLInterfaceNodesNodesNode()             {}
-func (v *NodesNodesOSV) implementsGraphQLInterfaceNodesNodesNode()                 {}
 func (v *NodesNodesCVE) implementsGraphQLInterfaceNodesNodesNode()                 {}
-func (v *NodesNodesGHSA) implementsGraphQLInterfaceNodesNodesNode()                {}
-func (v *NodesNodesNoVuln) implementsGraphQLInterfaceNodesNodesNode()              {}
-func (v *NodesNodesIsOccurrence) implementsGraphQLInterfaceNodesNodesNode()        {}
-func (v *NodesNodesIsDependency) implementsGraphQLInterfaceNodesNodesNode()        {}
-func (v *NodesNodesIsVulnerability) implementsGraphQLInterfaceNodesNodesNode()     {}
-func (v *NodesNodesCertifyVEXStatement) implementsGraphQLInterfaceNodesNodesNode() {}
-func (v *NodesNodesHashEqual) implementsGraphQLInterfaceNodesNodesNode()           {}
 func (v *NodesNodesCertifyBad) implementsGraphQLInterfaceNodesNodesNode()          {}
 func (v *NodesNodesCertifyGood) implementsGraphQLInterfaceNodesNodesNode()         {}
-func (v *NodesNodesPkgEqual) implementsGraphQLInterfaceNodesNodesNode()            {}
 func (v *NodesNodesCertifyScorecard) implementsGraphQLInterfaceNodesNodesNode()    {}
+func (v *NodesNodesCertifyVEXStatement) implementsGraphQLInterfaceNodesNodesNode() {}
 func (v *NodesNodesCertifyVuln) implementsGraphQLInterfaceNodesNodesNode()         {}
-func (v *NodesNodesHasSourceAt) implementsGraphQLInterfaceNodesNodesNode()         {}
+func (v *NodesNodesGHSA) implementsGraphQLInterfaceNodesNodesNode()                {}
 func (v *NodesNodesHasSBOM) implementsGraphQLInterfaceNodesNodesNode()             {}
 func (v *NodesNodesHasSLSA) implementsGraphQLInterfaceNodesNodesNode()             {}
+func (v *NodesNodesHasSourceAt) implementsGraphQLInterfaceNodesNodesNode()         {}
+func (v *NodesNodesHashEqual) implementsGraphQLInterfaceNodesNodesNode()           {}
+func (v *NodesNodesIsDependency) implementsGraphQLInterfaceNodesNodesNode()        {}
+func (v *NodesNodesIsOccurrence) implementsGraphQLInterfaceNodesNodesNode()        {}
+func (v *NodesNodesIsVulnerability) implementsGraphQLInterfaceNodesNodesNode()     {}
+func (v *NodesNodesNoVuln) implementsGraphQLInterfaceNodesNodesNode()              {}
+func (v *NodesNodesOSV) implementsGraphQLInterfaceNodesNodesNode()                 {}
+func (v *NodesNodesPackage) implementsGraphQLInterfaceNodesNodesNode()             {}
+func (v *NodesNodesPkgEqual) implementsGraphQLInterfaceNodesNodesNode()            {}
+func (v *NodesNodesSource) implementsGraphQLInterfaceNodesNodesNode()              {}
 
 func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 	if string(b) == "null" {
@@ -13818,44 +13818,14 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 	}
 
 	switch tn.TypeName {
-	case "Package":
-		*v = new(NodesNodesPackage)
-		return json.Unmarshal(b, *v)
-	case "Source":
-		*v = new(NodesNodesSource)
-		return json.Unmarshal(b, *v)
 	case "Artifact":
 		*v = new(NodesNodesArtifact)
 		return json.Unmarshal(b, *v)
 	case "Builder":
 		*v = new(NodesNodesBuilder)
 		return json.Unmarshal(b, *v)
-	case "OSV":
-		*v = new(NodesNodesOSV)
-		return json.Unmarshal(b, *v)
 	case "CVE":
 		*v = new(NodesNodesCVE)
-		return json.Unmarshal(b, *v)
-	case "GHSA":
-		*v = new(NodesNodesGHSA)
-		return json.Unmarshal(b, *v)
-	case "NoVuln":
-		*v = new(NodesNodesNoVuln)
-		return json.Unmarshal(b, *v)
-	case "IsOccurrence":
-		*v = new(NodesNodesIsOccurrence)
-		return json.Unmarshal(b, *v)
-	case "IsDependency":
-		*v = new(NodesNodesIsDependency)
-		return json.Unmarshal(b, *v)
-	case "IsVulnerability":
-		*v = new(NodesNodesIsVulnerability)
-		return json.Unmarshal(b, *v)
-	case "CertifyVEXStatement":
-		*v = new(NodesNodesCertifyVEXStatement)
-		return json.Unmarshal(b, *v)
-	case "HashEqual":
-		*v = new(NodesNodesHashEqual)
 		return json.Unmarshal(b, *v)
 	case "CertifyBad":
 		*v = new(NodesNodesCertifyBad)
@@ -13863,23 +13833,53 @@ func __unmarshalNodesNodesNode(b []byte, v *NodesNodesNode) error {
 	case "CertifyGood":
 		*v = new(NodesNodesCertifyGood)
 		return json.Unmarshal(b, *v)
-	case "PkgEqual":
-		*v = new(NodesNodesPkgEqual)
-		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(NodesNodesCertifyScorecard)
+		return json.Unmarshal(b, *v)
+	case "CertifyVEXStatement":
+		*v = new(NodesNodesCertifyVEXStatement)
 		return json.Unmarshal(b, *v)
 	case "CertifyVuln":
 		*v = new(NodesNodesCertifyVuln)
 		return json.Unmarshal(b, *v)
-	case "HasSourceAt":
-		*v = new(NodesNodesHasSourceAt)
+	case "GHSA":
+		*v = new(NodesNodesGHSA)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(NodesNodesHasSBOM)
 		return json.Unmarshal(b, *v)
 	case "HasSLSA":
 		*v = new(NodesNodesHasSLSA)
+		return json.Unmarshal(b, *v)
+	case "HasSourceAt":
+		*v = new(NodesNodesHasSourceAt)
+		return json.Unmarshal(b, *v)
+	case "HashEqual":
+		*v = new(NodesNodesHashEqual)
+		return json.Unmarshal(b, *v)
+	case "IsDependency":
+		*v = new(NodesNodesIsDependency)
+		return json.Unmarshal(b, *v)
+	case "IsOccurrence":
+		*v = new(NodesNodesIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "IsVulnerability":
+		*v = new(NodesNodesIsVulnerability)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(NodesNodesNoVuln)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(NodesNodesOSV)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(NodesNodesPackage)
+		return json.Unmarshal(b, *v)
+	case "PkgEqual":
+		*v = new(NodesNodesPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(NodesNodesSource)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -13894,30 +13894,6 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 
 	var typename string
 	switch v := (*v).(type) {
-	case *NodesNodesPackage:
-		typename = "Package"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesPackage
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodesNodesSource:
-		typename = "Source"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesSource
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NodesNodesArtifact:
 		typename = "Artifact"
 
@@ -13942,18 +13918,6 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			*__premarshalNodesNodesBuilder
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NodesNodesOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NodesNodesCVE:
 		typename = "CVE"
 
@@ -13964,86 +13928,6 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesCVE
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodesNodesGHSA:
-		typename = "GHSA"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesGHSA
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodesNodesNoVuln:
-		typename = "NoVuln"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*NodesNodesNoVuln
-		}{typename, v}
-		return json.Marshal(result)
-	case *NodesNodesIsOccurrence:
-		typename = "IsOccurrence"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesIsOccurrence
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodesNodesIsDependency:
-		typename = "IsDependency"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesIsDependency
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodesNodesIsVulnerability:
-		typename = "IsVulnerability"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesIsVulnerability
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodesNodesCertifyVEXStatement:
-		typename = "CertifyVEXStatement"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesCertifyVEXStatement
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *NodesNodesHashEqual:
-		typename = "HashEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesHashEqual
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodesNodesCertifyBad:
@@ -14070,18 +13954,6 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			*__premarshalNodesNodesCertifyGood
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NodesNodesPkgEqual:
-		typename = "PkgEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesPkgEqual
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *NodesNodesCertifyScorecard:
 		typename = "CertifyScorecard"
 
@@ -14092,6 +13964,18 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesCertifyScorecard
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesCertifyVEXStatement:
+		typename = "CertifyVEXStatement"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesCertifyVEXStatement
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodesNodesCertifyVuln:
@@ -14106,8 +13990,8 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 			*__premarshalNodesNodesCertifyVuln
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *NodesNodesHasSourceAt:
-		typename = "HasSourceAt"
+	case *NodesNodesGHSA:
+		typename = "GHSA"
 
 		premarshaled, err := v.__premarshalJSON()
 		if err != nil {
@@ -14115,7 +13999,7 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*__premarshalNodesNodesHasSourceAt
+			*__premarshalNodesNodesGHSA
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *NodesNodesHasSBOM:
@@ -14140,6 +14024,122 @@ func __marshalNodesNodesNode(v *NodesNodesNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalNodesNodesHasSLSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesHasSourceAt:
+		typename = "HasSourceAt"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesHasSourceAt
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesHashEqual:
+		typename = "HashEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesHashEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesIsDependency:
+		typename = "IsDependency"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesIsDependency
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesIsOccurrence:
+		typename = "IsOccurrence"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesIsOccurrence
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesIsVulnerability:
+		typename = "IsVulnerability"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesIsVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*NodesNodesNoVuln
+		}{typename, v}
+		return json.Marshal(result)
+	case *NodesNodesOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesPkgEqual:
+		typename = "PkgEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesPkgEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *NodesNodesSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalNodesNodesSource
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -14530,7 +14530,7 @@ func (v *NodesResponse) UnmarshalJSON(b []byte) error {
 					src, dst)
 				if err != nil {
 					return fmt.Errorf(
-						"Unable to unmarshal NodesResponse.Nodes: %w", err)
+						"unable to unmarshal NodesResponse.Nodes: %w", err)
 				}
 			}
 		}
@@ -14567,7 +14567,7 @@ func (v *NodesResponse) __premarshalJSON() (*__premarshalNodesResponse, error) {
 				&src)
 			if err != nil {
 				return nil, fmt.Errorf(
-					"Unable to marshal NodesResponse.Nodes: %w", err)
+					"unable to marshal NodesResponse.Nodes: %w", err)
 			}
 		}
 	}
@@ -15145,7 +15145,7 @@ func (v *PathPathCertifyBad) __premarshalJSON() (*__premarshalPathPathCertifyBad
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathCertifyBad.AllCertifyBad.Subject: %w", err)
+				"unable to marshal PathPathCertifyBad.AllCertifyBad.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.AllCertifyBad.Origin
@@ -15254,7 +15254,7 @@ func (v *PathPathCertifyGood) __premarshalJSON() (*__premarshalPathPathCertifyGo
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathCertifyGood.allCertifyGood.Subject: %w", err)
+				"unable to marshal PathPathCertifyGood.allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.allCertifyGood.Origin
@@ -15469,7 +15469,7 @@ func (v *PathPathCertifyVEXStatement) __premarshalJSON() (*__premarshalPathPathC
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal PathPathCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -15481,7 +15481,7 @@ func (v *PathPathCertifyVEXStatement) __premarshalJSON() (*__premarshalPathPathC
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal PathPathCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -15585,7 +15585,7 @@ func (v *PathPathCertifyVuln) __premarshalJSON() (*__premarshalPathPathCertifyVu
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
+				"unable to marshal PathPathCertifyVuln.AllCertifyVuln.Vulnerability: %w", err)
 		}
 	}
 	retval.Metadata = v.AllCertifyVuln.Metadata
@@ -15773,7 +15773,7 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathHasSBOM.allHasSBOMTree.Subject: %w", err)
+				"unable to marshal PathPathHasSBOM.allHasSBOMTree.Subject: %w", err)
 		}
 	}
 	retval.Uri = v.allHasSBOMTree.Uri
@@ -16255,7 +16255,7 @@ func (v *PathPathIsOccurrence) __premarshalJSON() (*__premarshalPathPathIsOccurr
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+				"unable to marshal PathPathIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
 		}
 	}
 	retval.Artifact = v.AllIsOccurrencesTree.Artifact
@@ -16363,7 +16363,7 @@ func (v *PathPathIsVulnerability) __premarshalJSON() (*__premarshalPathPathIsVul
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal PathPathIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
+				"unable to marshal PathPathIsVulnerability.allIsVulnerability.Vulnerability: %w", err)
 		}
 	}
 	retval.Justification = v.allIsVulnerability.Justification
@@ -16393,27 +16393,27 @@ func (v *PathPathNoVuln) GetId() string { return v.Id }
 // PathPathNode includes the requested fields of the GraphQL interface Node.
 //
 // PathPathNode is implemented by the following types:
-// PathPathPackage
-// PathPathSource
 // PathPathArtifact
 // PathPathBuilder
-// PathPathOSV
 // PathPathCVE
-// PathPathGHSA
-// PathPathNoVuln
-// PathPathIsOccurrence
-// PathPathIsDependency
-// PathPathIsVulnerability
-// PathPathCertifyVEXStatement
-// PathPathHashEqual
 // PathPathCertifyBad
 // PathPathCertifyGood
-// PathPathPkgEqual
 // PathPathCertifyScorecard
+// PathPathCertifyVEXStatement
 // PathPathCertifyVuln
-// PathPathHasSourceAt
+// PathPathGHSA
 // PathPathHasSBOM
 // PathPathHasSLSA
+// PathPathHasSourceAt
+// PathPathHashEqual
+// PathPathIsDependency
+// PathPathIsOccurrence
+// PathPathIsVulnerability
+// PathPathNoVuln
+// PathPathOSV
+// PathPathPackage
+// PathPathPkgEqual
+// PathPathSource
 // The GraphQL type's documentation follows.
 //
 // Node is a union type of all the possible nodes.
@@ -16427,27 +16427,27 @@ type PathPathNode interface {
 	GetTypename() *string
 }
 
-func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()             {}
-func (v *PathPathSource) implementsGraphQLInterfacePathPathNode()              {}
 func (v *PathPathArtifact) implementsGraphQLInterfacePathPathNode()            {}
 func (v *PathPathBuilder) implementsGraphQLInterfacePathPathNode()             {}
-func (v *PathPathOSV) implementsGraphQLInterfacePathPathNode()                 {}
 func (v *PathPathCVE) implementsGraphQLInterfacePathPathNode()                 {}
-func (v *PathPathGHSA) implementsGraphQLInterfacePathPathNode()                {}
-func (v *PathPathNoVuln) implementsGraphQLInterfacePathPathNode()              {}
-func (v *PathPathIsOccurrence) implementsGraphQLInterfacePathPathNode()        {}
-func (v *PathPathIsDependency) implementsGraphQLInterfacePathPathNode()        {}
-func (v *PathPathIsVulnerability) implementsGraphQLInterfacePathPathNode()     {}
-func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode() {}
-func (v *PathPathHashEqual) implementsGraphQLInterfacePathPathNode()           {}
 func (v *PathPathCertifyBad) implementsGraphQLInterfacePathPathNode()          {}
 func (v *PathPathCertifyGood) implementsGraphQLInterfacePathPathNode()         {}
-func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()            {}
 func (v *PathPathCertifyScorecard) implementsGraphQLInterfacePathPathNode()    {}
+func (v *PathPathCertifyVEXStatement) implementsGraphQLInterfacePathPathNode() {}
 func (v *PathPathCertifyVuln) implementsGraphQLInterfacePathPathNode()         {}
-func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()         {}
+func (v *PathPathGHSA) implementsGraphQLInterfacePathPathNode()                {}
 func (v *PathPathHasSBOM) implementsGraphQLInterfacePathPathNode()             {}
 func (v *PathPathHasSLSA) implementsGraphQLInterfacePathPathNode()             {}
+func (v *PathPathHasSourceAt) implementsGraphQLInterfacePathPathNode()         {}
+func (v *PathPathHashEqual) implementsGraphQLInterfacePathPathNode()           {}
+func (v *PathPathIsDependency) implementsGraphQLInterfacePathPathNode()        {}
+func (v *PathPathIsOccurrence) implementsGraphQLInterfacePathPathNode()        {}
+func (v *PathPathIsVulnerability) implementsGraphQLInterfacePathPathNode()     {}
+func (v *PathPathNoVuln) implementsGraphQLInterfacePathPathNode()              {}
+func (v *PathPathOSV) implementsGraphQLInterfacePathPathNode()                 {}
+func (v *PathPathPackage) implementsGraphQLInterfacePathPathNode()             {}
+func (v *PathPathPkgEqual) implementsGraphQLInterfacePathPathNode()            {}
+func (v *PathPathSource) implementsGraphQLInterfacePathPathNode()              {}
 
 func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 	if string(b) == "null" {
@@ -16463,44 +16463,14 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 	}
 
 	switch tn.TypeName {
-	case "Package":
-		*v = new(PathPathPackage)
-		return json.Unmarshal(b, *v)
-	case "Source":
-		*v = new(PathPathSource)
-		return json.Unmarshal(b, *v)
 	case "Artifact":
 		*v = new(PathPathArtifact)
 		return json.Unmarshal(b, *v)
 	case "Builder":
 		*v = new(PathPathBuilder)
 		return json.Unmarshal(b, *v)
-	case "OSV":
-		*v = new(PathPathOSV)
-		return json.Unmarshal(b, *v)
 	case "CVE":
 		*v = new(PathPathCVE)
-		return json.Unmarshal(b, *v)
-	case "GHSA":
-		*v = new(PathPathGHSA)
-		return json.Unmarshal(b, *v)
-	case "NoVuln":
-		*v = new(PathPathNoVuln)
-		return json.Unmarshal(b, *v)
-	case "IsOccurrence":
-		*v = new(PathPathIsOccurrence)
-		return json.Unmarshal(b, *v)
-	case "IsDependency":
-		*v = new(PathPathIsDependency)
-		return json.Unmarshal(b, *v)
-	case "IsVulnerability":
-		*v = new(PathPathIsVulnerability)
-		return json.Unmarshal(b, *v)
-	case "CertifyVEXStatement":
-		*v = new(PathPathCertifyVEXStatement)
-		return json.Unmarshal(b, *v)
-	case "HashEqual":
-		*v = new(PathPathHashEqual)
 		return json.Unmarshal(b, *v)
 	case "CertifyBad":
 		*v = new(PathPathCertifyBad)
@@ -16508,23 +16478,53 @@ func __unmarshalPathPathNode(b []byte, v *PathPathNode) error {
 	case "CertifyGood":
 		*v = new(PathPathCertifyGood)
 		return json.Unmarshal(b, *v)
-	case "PkgEqual":
-		*v = new(PathPathPkgEqual)
-		return json.Unmarshal(b, *v)
 	case "CertifyScorecard":
 		*v = new(PathPathCertifyScorecard)
+		return json.Unmarshal(b, *v)
+	case "CertifyVEXStatement":
+		*v = new(PathPathCertifyVEXStatement)
 		return json.Unmarshal(b, *v)
 	case "CertifyVuln":
 		*v = new(PathPathCertifyVuln)
 		return json.Unmarshal(b, *v)
-	case "HasSourceAt":
-		*v = new(PathPathHasSourceAt)
+	case "GHSA":
+		*v = new(PathPathGHSA)
 		return json.Unmarshal(b, *v)
 	case "HasSBOM":
 		*v = new(PathPathHasSBOM)
 		return json.Unmarshal(b, *v)
 	case "HasSLSA":
 		*v = new(PathPathHasSLSA)
+		return json.Unmarshal(b, *v)
+	case "HasSourceAt":
+		*v = new(PathPathHasSourceAt)
+		return json.Unmarshal(b, *v)
+	case "HashEqual":
+		*v = new(PathPathHashEqual)
+		return json.Unmarshal(b, *v)
+	case "IsDependency":
+		*v = new(PathPathIsDependency)
+		return json.Unmarshal(b, *v)
+	case "IsOccurrence":
+		*v = new(PathPathIsOccurrence)
+		return json.Unmarshal(b, *v)
+	case "IsVulnerability":
+		*v = new(PathPathIsVulnerability)
+		return json.Unmarshal(b, *v)
+	case "NoVuln":
+		*v = new(PathPathNoVuln)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(PathPathOSV)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(PathPathPackage)
+		return json.Unmarshal(b, *v)
+	case "PkgEqual":
+		*v = new(PathPathPkgEqual)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(PathPathSource)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -16539,30 +16539,6 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 
 	var typename string
 	switch v := (*v).(type) {
-	case *PathPathPackage:
-		typename = "Package"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathPackage
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathSource:
-		typename = "Source"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathSource
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *PathPathArtifact:
 		typename = "Artifact"
 
@@ -16587,18 +16563,6 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			*__premarshalPathPathBuilder
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *PathPathOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *PathPathCVE:
 		typename = "CVE"
 
@@ -16609,86 +16573,6 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathCVE
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathGHSA:
-		typename = "GHSA"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathGHSA
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathNoVuln:
-		typename = "NoVuln"
-
-		result := struct {
-			TypeName string `json:"__typename"`
-			*PathPathNoVuln
-		}{typename, v}
-		return json.Marshal(result)
-	case *PathPathIsOccurrence:
-		typename = "IsOccurrence"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathIsOccurrence
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathIsDependency:
-		typename = "IsDependency"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathIsDependency
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathIsVulnerability:
-		typename = "IsVulnerability"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathIsVulnerability
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathCertifyVEXStatement:
-		typename = "CertifyVEXStatement"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathCertifyVEXStatement
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *PathPathHashEqual:
-		typename = "HashEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathHashEqual
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *PathPathCertifyBad:
@@ -16715,18 +16599,6 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			*__premarshalPathPathCertifyGood
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *PathPathPkgEqual:
-		typename = "PkgEqual"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalPathPathPkgEqual
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *PathPathCertifyScorecard:
 		typename = "CertifyScorecard"
 
@@ -16737,6 +16609,18 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathCertifyScorecard
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathCertifyVEXStatement:
+		typename = "CertifyVEXStatement"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathCertifyVEXStatement
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *PathPathCertifyVuln:
@@ -16751,8 +16635,8 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 			*__premarshalPathPathCertifyVuln
 		}{typename, premarshaled}
 		return json.Marshal(result)
-	case *PathPathHasSourceAt:
-		typename = "HasSourceAt"
+	case *PathPathGHSA:
+		typename = "GHSA"
 
 		premarshaled, err := v.__premarshalJSON()
 		if err != nil {
@@ -16760,7 +16644,7 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 		}
 		result := struct {
 			TypeName string `json:"__typename"`
-			*__premarshalPathPathHasSourceAt
+			*__premarshalPathPathGHSA
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case *PathPathHasSBOM:
@@ -16785,6 +16669,122 @@ func __marshalPathPathNode(v *PathPathNode) ([]byte, error) {
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalPathPathHasSLSA
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHasSourceAt:
+		typename = "HasSourceAt"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathHasSourceAt
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathHashEqual:
+		typename = "HashEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathHashEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathIsDependency:
+		typename = "IsDependency"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathIsDependency
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathIsOccurrence:
+		typename = "IsOccurrence"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathIsOccurrence
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathIsVulnerability:
+		typename = "IsVulnerability"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathIsVulnerability
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathNoVuln:
+		typename = "NoVuln"
+
+		result := struct {
+			TypeName string `json:"__typename"`
+			*PathPathNoVuln
+		}{typename, v}
+		return json.Marshal(result)
+	case *PathPathOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathOSV
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathPackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathPkgEqual:
+		typename = "PkgEqual"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathPkgEqual
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *PathPathSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalPathPathSource
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -17177,7 +17177,7 @@ func (v *PathResponse) UnmarshalJSON(b []byte) error {
 					src, dst)
 				if err != nil {
 					return fmt.Errorf(
-						"Unable to unmarshal PathResponse.Path: %w", err)
+						"unable to unmarshal PathResponse.Path: %w", err)
 				}
 			}
 		}
@@ -17214,7 +17214,7 @@ func (v *PathResponse) __premarshalJSON() (*__premarshalPathResponse, error) {
 				&src)
 			if err != nil {
 				return nil, fmt.Errorf(
-					"Unable to marshal PathResponse.Path: %w", err)
+					"unable to marshal PathResponse.Path: %w", err)
 			}
 		}
 	}
@@ -18533,7 +18533,7 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -18545,7 +18545,7 @@ func (v *VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal VEXPackageAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -18857,7 +18857,7 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -18869,7 +18869,7 @@ func (v *VexArtifactAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal VexArtifactAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -19170,7 +19170,7 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJS
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -19182,7 +19182,7 @@ func (v *VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement) __premarshalJS
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal VexArtifactAndGhsaIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -19488,7 +19488,7 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -19500,7 +19500,7 @@ func (v *VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSO
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal VexArtifactAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -19833,7 +19833,7 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexPackageAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal VexPackageAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -19845,7 +19845,7 @@ func (v *VexPackageAndCveIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexPackageAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal VexPackageAndCveIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -20158,7 +20158,7 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -20170,7 +20170,7 @@ func (v *VexPackageAndOsvIngestVEXStatementCertifyVEXStatement) __premarshalJSON
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal VexPackageAndOsvIngestVEXStatementCertifyVEXStatement.allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.allCertifyVEXStatement.Status
@@ -20893,7 +20893,7 @@ func (v *allCertifyGood) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal allCertifyGood.Subject: %w", err)
+					"unable to unmarshal allCertifyGood.Subject: %w", err)
 			}
 		}
 	}
@@ -20934,7 +20934,7 @@ func (v *allCertifyGood) __premarshalJSON() (*__premarshalallCertifyGood, error)
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal allCertifyGood.Subject: %w", err)
+				"unable to marshal allCertifyGood.Subject: %w", err)
 		}
 	}
 	retval.Origin = v.Origin
@@ -21114,9 +21114,9 @@ func (v *allCertifyGoodSubjectPackage) __premarshalJSON() (*__premarshalallCerti
 // allCertifyGoodSubjectPackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
 //
 // allCertifyGoodSubjectPackageSourceOrArtifact is implemented by the following types:
+// allCertifyGoodSubjectArtifact
 // allCertifyGoodSubjectPackage
 // allCertifyGoodSubjectSource
-// allCertifyGoodSubjectArtifact
 // The GraphQL type's documentation follows.
 //
 // PackageSourceOrArtifact is a union of Package, Source, and Artifact.
@@ -21126,11 +21126,11 @@ type allCertifyGoodSubjectPackageSourceOrArtifact interface {
 	GetTypename() *string
 }
 
+func (v *allCertifyGoodSubjectArtifact) implementsGraphQLInterfaceallCertifyGoodSubjectPackageSourceOrArtifact() {
+}
 func (v *allCertifyGoodSubjectPackage) implementsGraphQLInterfaceallCertifyGoodSubjectPackageSourceOrArtifact() {
 }
 func (v *allCertifyGoodSubjectSource) implementsGraphQLInterfaceallCertifyGoodSubjectPackageSourceOrArtifact() {
-}
-func (v *allCertifyGoodSubjectArtifact) implementsGraphQLInterfaceallCertifyGoodSubjectPackageSourceOrArtifact() {
 }
 
 func __unmarshalallCertifyGoodSubjectPackageSourceOrArtifact(b []byte, v *allCertifyGoodSubjectPackageSourceOrArtifact) error {
@@ -21147,14 +21147,14 @@ func __unmarshalallCertifyGoodSubjectPackageSourceOrArtifact(b []byte, v *allCer
 	}
 
 	switch tn.TypeName {
+	case "Artifact":
+		*v = new(allCertifyGoodSubjectArtifact)
+		return json.Unmarshal(b, *v)
 	case "Package":
 		*v = new(allCertifyGoodSubjectPackage)
 		return json.Unmarshal(b, *v)
 	case "Source":
 		*v = new(allCertifyGoodSubjectSource)
-		return json.Unmarshal(b, *v)
-	case "Artifact":
-		*v = new(allCertifyGoodSubjectArtifact)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -21169,6 +21169,18 @@ func __marshalallCertifyGoodSubjectPackageSourceOrArtifact(v *allCertifyGoodSubj
 
 	var typename string
 	switch v := (*v).(type) {
+	case *allCertifyGoodSubjectArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyGoodSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
 	case *allCertifyGoodSubjectPackage:
 		typename = "Package"
 
@@ -21191,18 +21203,6 @@ func __marshalallCertifyGoodSubjectPackageSourceOrArtifact(v *allCertifyGoodSubj
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalallCertifyGoodSubjectSource
-		}{typename, premarshaled}
-		return json.Marshal(result)
-	case *allCertifyGoodSubjectArtifact:
-		typename = "Artifact"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalallCertifyGoodSubjectArtifact
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -21387,7 +21387,7 @@ func (v *allCertifyVEXStatement) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal allCertifyVEXStatement.Subject: %w", err)
+					"unable to unmarshal allCertifyVEXStatement.Subject: %w", err)
 			}
 		}
 	}
@@ -21400,7 +21400,7 @@ func (v *allCertifyVEXStatement) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal allCertifyVEXStatement.Vulnerability: %w", err)
+					"unable to unmarshal allCertifyVEXStatement.Vulnerability: %w", err)
 			}
 		}
 	}
@@ -21450,7 +21450,7 @@ func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXS
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal allCertifyVEXStatement.Subject: %w", err)
+				"unable to marshal allCertifyVEXStatement.Subject: %w", err)
 		}
 	}
 	{
@@ -21462,7 +21462,7 @@ func (v *allCertifyVEXStatement) __premarshalJSON() (*__premarshalallCertifyVEXS
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal allCertifyVEXStatement.Vulnerability: %w", err)
+				"unable to marshal allCertifyVEXStatement.Vulnerability: %w", err)
 		}
 	}
 	retval.Status = v.Status
@@ -21649,8 +21649,8 @@ func (v *allCertifyVEXStatementSubjectPackage) __premarshalJSON() (*__premarshal
 // allCertifyVEXStatementSubjectPackageOrArtifact includes the requested fields of the GraphQL interface PackageOrArtifact.
 //
 // allCertifyVEXStatementSubjectPackageOrArtifact is implemented by the following types:
-// allCertifyVEXStatementSubjectPackage
 // allCertifyVEXStatementSubjectArtifact
+// allCertifyVEXStatementSubjectPackage
 // The GraphQL type's documentation follows.
 //
 // PackageOrArtifact is a union of Package and Artifact.
@@ -21660,9 +21660,9 @@ type allCertifyVEXStatementSubjectPackageOrArtifact interface {
 	GetTypename() *string
 }
 
-func (v *allCertifyVEXStatementSubjectPackage) implementsGraphQLInterfaceallCertifyVEXStatementSubjectPackageOrArtifact() {
-}
 func (v *allCertifyVEXStatementSubjectArtifact) implementsGraphQLInterfaceallCertifyVEXStatementSubjectPackageOrArtifact() {
+}
+func (v *allCertifyVEXStatementSubjectPackage) implementsGraphQLInterfaceallCertifyVEXStatementSubjectPackageOrArtifact() {
 }
 
 func __unmarshalallCertifyVEXStatementSubjectPackageOrArtifact(b []byte, v *allCertifyVEXStatementSubjectPackageOrArtifact) error {
@@ -21679,11 +21679,11 @@ func __unmarshalallCertifyVEXStatementSubjectPackageOrArtifact(b []byte, v *allC
 	}
 
 	switch tn.TypeName {
-	case "Package":
-		*v = new(allCertifyVEXStatementSubjectPackage)
-		return json.Unmarshal(b, *v)
 	case "Artifact":
 		*v = new(allCertifyVEXStatementSubjectArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(allCertifyVEXStatementSubjectPackage)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -21698,18 +21698,6 @@ func __marshalallCertifyVEXStatementSubjectPackageOrArtifact(v *allCertifyVEXSta
 
 	var typename string
 	switch v := (*v).(type) {
-	case *allCertifyVEXStatementSubjectPackage:
-		typename = "Package"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalallCertifyVEXStatementSubjectPackage
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *allCertifyVEXStatementSubjectArtifact:
 		typename = "Artifact"
 
@@ -21720,6 +21708,18 @@ func __marshalallCertifyVEXStatementSubjectPackageOrArtifact(v *allCertifyVEXSta
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalallCertifyVEXStatementSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allCertifyVEXStatementSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementSubjectPackage
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -21733,10 +21733,10 @@ func __marshalallCertifyVEXStatementSubjectPackageOrArtifact(v *allCertifyVEXSta
 // allCertifyVEXStatementVulnerability includes the requested fields of the GraphQL interface Vulnerability.
 //
 // allCertifyVEXStatementVulnerability is implemented by the following types:
-// allCertifyVEXStatementVulnerabilityOSV
 // allCertifyVEXStatementVulnerabilityCVE
 // allCertifyVEXStatementVulnerabilityGHSA
 // allCertifyVEXStatementVulnerabilityNoVuln
+// allCertifyVEXStatementVulnerabilityOSV
 // The GraphQL type's documentation follows.
 //
 // Vulnerability is a union of OSV, CVE, GHSA or the NoVuln node.
@@ -21746,13 +21746,13 @@ type allCertifyVEXStatementVulnerability interface {
 	GetTypename() *string
 }
 
-func (v *allCertifyVEXStatementVulnerabilityOSV) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
-}
 func (v *allCertifyVEXStatementVulnerabilityCVE) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
 }
 func (v *allCertifyVEXStatementVulnerabilityGHSA) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
 }
 func (v *allCertifyVEXStatementVulnerabilityNoVuln) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
+}
+func (v *allCertifyVEXStatementVulnerabilityOSV) implementsGraphQLInterfaceallCertifyVEXStatementVulnerability() {
 }
 
 func __unmarshalallCertifyVEXStatementVulnerability(b []byte, v *allCertifyVEXStatementVulnerability) error {
@@ -21769,9 +21769,6 @@ func __unmarshalallCertifyVEXStatementVulnerability(b []byte, v *allCertifyVEXSt
 	}
 
 	switch tn.TypeName {
-	case "OSV":
-		*v = new(allCertifyVEXStatementVulnerabilityOSV)
-		return json.Unmarshal(b, *v)
 	case "CVE":
 		*v = new(allCertifyVEXStatementVulnerabilityCVE)
 		return json.Unmarshal(b, *v)
@@ -21780,6 +21777,9 @@ func __unmarshalallCertifyVEXStatementVulnerability(b []byte, v *allCertifyVEXSt
 		return json.Unmarshal(b, *v)
 	case "NoVuln":
 		*v = new(allCertifyVEXStatementVulnerabilityNoVuln)
+		return json.Unmarshal(b, *v)
+	case "OSV":
+		*v = new(allCertifyVEXStatementVulnerabilityOSV)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -21794,18 +21794,6 @@ func __marshalallCertifyVEXStatementVulnerability(v *allCertifyVEXStatementVulne
 
 	var typename string
 	switch v := (*v).(type) {
-	case *allCertifyVEXStatementVulnerabilityOSV:
-		typename = "OSV"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalallCertifyVEXStatementVulnerabilityOSV
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *allCertifyVEXStatementVulnerabilityCVE:
 		typename = "CVE"
 
@@ -21837,6 +21825,18 @@ func __marshalallCertifyVEXStatementVulnerability(v *allCertifyVEXStatementVulne
 			TypeName string `json:"__typename"`
 			*allCertifyVEXStatementVulnerabilityNoVuln
 		}{typename, v}
+		return json.Marshal(result)
+	case *allCertifyVEXStatementVulnerabilityOSV:
+		typename = "OSV"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallCertifyVEXStatementVulnerabilityOSV
+		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
 		return []byte("null"), nil
@@ -22164,7 +22164,7 @@ func (v *allHasSBOMTree) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal allHasSBOMTree.Subject: %w", err)
+					"unable to unmarshal allHasSBOMTree.Subject: %w", err)
 			}
 		}
 	}
@@ -22212,7 +22212,7 @@ func (v *allHasSBOMTree) __premarshalJSON() (*__premarshalallHasSBOMTree, error)
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal allHasSBOMTree.Subject: %w", err)
+				"unable to marshal allHasSBOMTree.Subject: %w", err)
 		}
 	}
 	retval.Uri = v.Uri
@@ -22413,8 +22413,8 @@ func (v *allHasSBOMTreeSubjectPackage) __premarshalJSON() (*__premarshalallHasSB
 // allHasSBOMTreeSubjectPackageOrArtifact includes the requested fields of the GraphQL interface PackageOrArtifact.
 //
 // allHasSBOMTreeSubjectPackageOrArtifact is implemented by the following types:
-// allHasSBOMTreeSubjectPackage
 // allHasSBOMTreeSubjectArtifact
+// allHasSBOMTreeSubjectPackage
 // The GraphQL type's documentation follows.
 //
 // PackageOrArtifact is a union of Package and Artifact.
@@ -22424,9 +22424,9 @@ type allHasSBOMTreeSubjectPackageOrArtifact interface {
 	GetTypename() *string
 }
 
-func (v *allHasSBOMTreeSubjectPackage) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrArtifact() {
-}
 func (v *allHasSBOMTreeSubjectArtifact) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrArtifact() {
+}
+func (v *allHasSBOMTreeSubjectPackage) implementsGraphQLInterfaceallHasSBOMTreeSubjectPackageOrArtifact() {
 }
 
 func __unmarshalallHasSBOMTreeSubjectPackageOrArtifact(b []byte, v *allHasSBOMTreeSubjectPackageOrArtifact) error {
@@ -22443,11 +22443,11 @@ func __unmarshalallHasSBOMTreeSubjectPackageOrArtifact(b []byte, v *allHasSBOMTr
 	}
 
 	switch tn.TypeName {
-	case "Package":
-		*v = new(allHasSBOMTreeSubjectPackage)
-		return json.Unmarshal(b, *v)
 	case "Artifact":
 		*v = new(allHasSBOMTreeSubjectArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(allHasSBOMTreeSubjectPackage)
 		return json.Unmarshal(b, *v)
 	case "":
 		return fmt.Errorf(
@@ -22462,18 +22462,6 @@ func __marshalallHasSBOMTreeSubjectPackageOrArtifact(v *allHasSBOMTreeSubjectPac
 
 	var typename string
 	switch v := (*v).(type) {
-	case *allHasSBOMTreeSubjectPackage:
-		typename = "Package"
-
-		premarshaled, err := v.__premarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		result := struct {
-			TypeName string `json:"__typename"`
-			*__premarshalallHasSBOMTreeSubjectPackage
-		}{typename, premarshaled}
-		return json.Marshal(result)
 	case *allHasSBOMTreeSubjectArtifact:
 		typename = "Artifact"
 
@@ -22484,6 +22472,18 @@ func __marshalallHasSBOMTreeSubjectPackageOrArtifact(v *allHasSBOMTreeSubjectPac
 		result := struct {
 			TypeName string `json:"__typename"`
 			*__premarshalallHasSBOMTreeSubjectArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *allHasSBOMTreeSubjectPackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalallHasSBOMTreeSubjectPackage
 		}{typename, premarshaled}
 		return json.Marshal(result)
 	case nil:
@@ -23076,7 +23076,7 @@ func (v *allIsVulnerability) UnmarshalJSON(b []byte) error {
 				src, dst)
 			if err != nil {
 				return fmt.Errorf(
-					"Unable to unmarshal allIsVulnerability.Vulnerability: %w", err)
+					"unable to unmarshal allIsVulnerability.Vulnerability: %w", err)
 			}
 		}
 	}
@@ -23119,7 +23119,7 @@ func (v *allIsVulnerability) __premarshalJSON() (*__premarshalallIsVulnerability
 			&src)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"Unable to marshal allIsVulnerability.Vulnerability: %w", err)
+				"unable to marshal allIsVulnerability.Vulnerability: %w", err)
 		}
 	}
 	retval.Justification = v.Justification
@@ -23836,14 +23836,8 @@ func (v *allSLSATreeSubjectArtifact) __premarshalJSON() (*__premarshalallSLSATre
 	return &retval, nil
 }
 
-func Artifacts(
-	ctx context.Context,
-	client graphql.Client,
-	filter *ArtifactSpec,
-) (*ArtifactsResponse, error) {
-	req := &graphql.Request{
-		OpName: "Artifacts",
-		Query: `
+// The query or mutation executed by Artifacts.
+const Artifacts_Operation = `
 query Artifacts ($filter: ArtifactSpec) {
 	artifacts(artifactSpec: $filter) {
 		... AllArtifactTree
@@ -23854,7 +23848,16 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-`,
+`
+
+func Artifacts(
+	ctx context.Context,
+	client graphql.Client,
+	filter *ArtifactSpec,
+) (*ArtifactsResponse, error) {
+	req := &graphql.Request{
+		OpName: "Artifacts",
+		Query:  Artifacts_Operation,
 		Variables: &__ArtifactsInput{
 			Filter: filter,
 		},
@@ -23873,14 +23876,8 @@ fragment AllArtifactTree on Artifact {
 	return &data, err
 }
 
-func CVEs(
-	ctx context.Context,
-	client graphql.Client,
-	filter *CVESpec,
-) (*CVEsResponse, error) {
-	req := &graphql.Request{
-		OpName: "CVEs",
-		Query: `
+// The query or mutation executed by CVEs.
+const CVEs_Operation = `
 query CVEs ($filter: CVESpec) {
 	cve(cveSpec: $filter) {
 		... AllCveTree
@@ -23891,7 +23888,16 @@ fragment AllCveTree on CVE {
 	year
 	cveId
 }
-`,
+`
+
+func CVEs(
+	ctx context.Context,
+	client graphql.Client,
+	filter *CVESpec,
+) (*CVEsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CVEs",
+		Query:  CVEs_Operation,
 		Variables: &__CVEsInput{
 			Filter: filter,
 		},
@@ -23910,15 +23916,8 @@ fragment AllCveTree on CVE {
 	return &data, err
 }
 
-func CertifyBadArtifact(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	certifyBad CertifyBadInputSpec,
-) (*CertifyBadArtifactResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyBadArtifact",
-		Query: `
+// The query or mutation executed by CertifyBadArtifact.
+const CertifyBadArtifact_Operation = `
 mutation CertifyBadArtifact ($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -23985,7 +23984,17 @@ fragment AllSourceTree on Source {
 		}
 	}
 }
-`,
+`
+
+func CertifyBadArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	certifyBad CertifyBadInputSpec,
+) (*CertifyBadArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyBadArtifact",
+		Query:  CertifyBadArtifact_Operation,
 		Variables: &__CertifyBadArtifactInput{
 			Artifact:   artifact,
 			CertifyBad: certifyBad,
@@ -24005,16 +24014,8 @@ fragment AllSourceTree on Source {
 	return &data, err
 }
 
-func CertifyBadPkg(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
-	certifyBad CertifyBadInputSpec,
-) (*CertifyBadPkgResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyBadPkg",
-		Query: `
+// The query or mutation executed by CertifyBadPkg.
+const CertifyBadPkg_Operation = `
 mutation CertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyBad: CertifyBadInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -24081,7 +24082,18 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-`,
+`
+
+func CertifyBadPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType *MatchFlags,
+	certifyBad CertifyBadInputSpec,
+) (*CertifyBadPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyBadPkg",
+		Query:  CertifyBadPkg_Operation,
 		Variables: &__CertifyBadPkgInput{
 			Pkg:          pkg,
 			PkgMatchType: pkgMatchType,
@@ -24102,15 +24114,8 @@ fragment AllArtifactTree on Artifact {
 	return &data, err
 }
 
-func CertifyBadSrc(
-	ctx context.Context,
-	client graphql.Client,
-	source SourceInputSpec,
-	certifyBad CertifyBadInputSpec,
-) (*CertifyBadSrcResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyBadSrc",
-		Query: `
+// The query or mutation executed by CertifyBadSrc.
+const CertifyBadSrc_Operation = `
 mutation CertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
 	ingestSource(source: $source) {
 		... AllSourceTree
@@ -24177,7 +24182,17 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-`,
+`
+
+func CertifyBadSrc(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	certifyBad CertifyBadInputSpec,
+) (*CertifyBadSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyBadSrc",
+		Query:  CertifyBadSrc_Operation,
 		Variables: &__CertifyBadSrcInput{
 			Source:     source,
 			CertifyBad: certifyBad,
@@ -24197,14 +24212,8 @@ fragment AllArtifactTree on Artifact {
 	return &data, err
 }
 
-func CertifyBads(
-	ctx context.Context,
-	client graphql.Client,
-	filter *CertifyBadSpec,
-) (*CertifyBadsResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyBads",
-		Query: `
+// The query or mutation executed by CertifyBads.
+const CertifyBads_Operation = `
 query CertifyBads ($filter: CertifyBadSpec) {
 	CertifyBad(certifyBadSpec: $filter) {
 		... AllCertifyBad
@@ -24268,7 +24277,16 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-`,
+`
+
+func CertifyBads(
+	ctx context.Context,
+	client graphql.Client,
+	filter *CertifyBadSpec,
+) (*CertifyBadsResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyBads",
+		Query:  CertifyBads_Operation,
 		Variables: &__CertifyBadsInput{
 			Filter: filter,
 		},
@@ -24287,16 +24305,8 @@ fragment AllArtifactTree on Artifact {
 	return &data, err
 }
 
-func CertifyCVE(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	cve CVEInputSpec,
-	certifyVuln VulnerabilityMetaDataInput,
-) (*CertifyCVEResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyCVE",
-		Query: `
+// The query or mutation executed by CertifyCVE.
+const CertifyCVE_Operation = `
 mutation CertifyCVE ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -24372,7 +24382,18 @@ fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-`,
+`
+
+func CertifyCVE(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	cve CVEInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
+) (*CertifyCVEResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyCVE",
+		Query:  CertifyCVE_Operation,
 		Variables: &__CertifyCVEInput{
 			Pkg:         pkg,
 			Cve:         cve,
@@ -24393,16 +24414,8 @@ fragment AllGHSATree on GHSA {
 	return &data, err
 }
 
-func CertifyGHSA(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	ghsa GHSAInputSpec,
-	certifyVuln VulnerabilityMetaDataInput,
-) (*CertifyGHSAResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyGHSA",
-		Query: `
+// The query or mutation executed by CertifyGHSA.
+const CertifyGHSA_Operation = `
 mutation CertifyGHSA ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -24478,7 +24491,18 @@ fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-`,
+`
+
+func CertifyGHSA(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	ghsa GHSAInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
+) (*CertifyGHSAResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyGHSA",
+		Query:  CertifyGHSA_Operation,
 		Variables: &__CertifyGHSAInput{
 			Pkg:         pkg,
 			Ghsa:        ghsa,
@@ -24499,15 +24523,8 @@ fragment AllOSVTree on OSV {
 	return &data, err
 }
 
-func CertifyGoodArtifact(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	certifyGood CertifyGoodInputSpec,
-) (*CertifyGoodArtifactResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyGoodArtifact",
-		Query: `
+// The query or mutation executed by CertifyGoodArtifact.
+const CertifyGoodArtifact_Operation = `
 mutation CertifyGoodArtifact ($artifact: ArtifactInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -24574,7 +24591,17 @@ fragment AllSourceTree on Source {
 		}
 	}
 }
-`,
+`
+
+func CertifyGoodArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	certifyGood CertifyGoodInputSpec,
+) (*CertifyGoodArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyGoodArtifact",
+		Query:  CertifyGoodArtifact_Operation,
 		Variables: &__CertifyGoodArtifactInput{
 			Artifact:    artifact,
 			CertifyGood: certifyGood,
@@ -24594,16 +24621,8 @@ fragment AllSourceTree on Source {
 	return &data, err
 }
 
-func CertifyGoodPkg(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	pkgMatchType *MatchFlags,
-	certifyGood CertifyGoodInputSpec,
-) (*CertifyGoodPkgResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyGoodPkg",
-		Query: `
+// The query or mutation executed by CertifyGoodPkg.
+const CertifyGoodPkg_Operation = `
 mutation CertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags, $certifyGood: CertifyGoodInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -24670,7 +24689,18 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-`,
+`
+
+func CertifyGoodPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType *MatchFlags,
+	certifyGood CertifyGoodInputSpec,
+) (*CertifyGoodPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyGoodPkg",
+		Query:  CertifyGoodPkg_Operation,
 		Variables: &__CertifyGoodPkgInput{
 			Pkg:          pkg,
 			PkgMatchType: pkgMatchType,
@@ -24691,15 +24721,8 @@ fragment AllArtifactTree on Artifact {
 	return &data, err
 }
 
-func CertifyGoodSrc(
-	ctx context.Context,
-	client graphql.Client,
-	source SourceInputSpec,
-	certifyGood CertifyGoodInputSpec,
-) (*CertifyGoodSrcResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyGoodSrc",
-		Query: `
+// The query or mutation executed by CertifyGoodSrc.
+const CertifyGoodSrc_Operation = `
 mutation CertifyGoodSrc ($source: SourceInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
 	ingestSource(source: $source) {
 		... AllSourceTree
@@ -24766,7 +24789,17 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-`,
+`
+
+func CertifyGoodSrc(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	certifyGood CertifyGoodInputSpec,
+) (*CertifyGoodSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyGoodSrc",
+		Query:  CertifyGoodSrc_Operation,
 		Variables: &__CertifyGoodSrcInput{
 			Source:      source,
 			CertifyGood: certifyGood,
@@ -24786,15 +24819,8 @@ fragment AllArtifactTree on Artifact {
 	return &data, err
 }
 
-func CertifyNoKnownVuln(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	certifyVuln VulnerabilityMetaDataInput,
-) (*CertifyNoKnownVulnResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyNoKnownVuln",
-		Query: `
+// The query or mutation executed by CertifyNoKnownVuln.
+const CertifyNoKnownVuln_Operation = `
 mutation CertifyNoKnownVuln ($pkg: PkgInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -24867,7 +24893,17 @@ fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-`,
+`
+
+func CertifyNoKnownVuln(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
+) (*CertifyNoKnownVulnResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyNoKnownVuln",
+		Query:  CertifyNoKnownVuln_Operation,
 		Variables: &__CertifyNoKnownVulnInput{
 			Pkg:         pkg,
 			CertifyVuln: certifyVuln,
@@ -24887,16 +24923,8 @@ fragment AllGHSATree on GHSA {
 	return &data, err
 }
 
-func CertifyOSV(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	osv OSVInputSpec,
-	certifyVuln VulnerabilityMetaDataInput,
-) (*CertifyOSVResponse, error) {
-	req := &graphql.Request{
-		OpName: "CertifyOSV",
-		Query: `
+// The query or mutation executed by CertifyOSV.
+const CertifyOSV_Operation = `
 mutation CertifyOSV ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $certifyVuln: VulnerabilityMetaDataInput!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -24972,7 +25000,18 @@ fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-`,
+`
+
+func CertifyOSV(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	osv OSVInputSpec,
+	certifyVuln VulnerabilityMetaDataInput,
+) (*CertifyOSVResponse, error) {
+	req := &graphql.Request{
+		OpName: "CertifyOSV",
+		Query:  CertifyOSV_Operation,
 		Variables: &__CertifyOSVInput{
 			Pkg:         pkg,
 			Osv:         osv,
@@ -24993,14 +25032,8 @@ fragment AllGHSATree on GHSA {
 	return &data, err
 }
 
-func GHSAs(
-	ctx context.Context,
-	client graphql.Client,
-	filter *GHSASpec,
-) (*GHSAsResponse, error) {
-	req := &graphql.Request{
-		OpName: "GHSAs",
-		Query: `
+// The query or mutation executed by GHSAs.
+const GHSAs_Operation = `
 query GHSAs ($filter: GHSASpec) {
 	ghsa(ghsaSpec: $filter) {
 		... AllGHSATree
@@ -25010,7 +25043,16 @@ fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-`,
+`
+
+func GHSAs(
+	ctx context.Context,
+	client graphql.Client,
+	filter *GHSASpec,
+) (*GHSAsResponse, error) {
+	req := &graphql.Request{
+		OpName: "GHSAs",
+		Query:  GHSAs_Operation,
 		Variables: &__GHSAsInput{
 			Filter: filter,
 		},
@@ -25029,15 +25071,8 @@ fragment AllGHSATree on GHSA {
 	return &data, err
 }
 
-func HasSBOMArtifact(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	hasSBOM HasSBOMInputSpec,
-) (*HasSBOMArtifactResponse, error) {
-	req := &graphql.Request{
-		OpName: "HasSBOMArtifact",
-		Query: `
+// The query or mutation executed by HasSBOMArtifact.
+const HasSBOMArtifact_Operation = `
 mutation HasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -25094,7 +25129,17 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-`,
+`
+
+func HasSBOMArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	hasSBOM HasSBOMInputSpec,
+) (*HasSBOMArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSBOMArtifact",
+		Query:  HasSBOMArtifact_Operation,
 		Variables: &__HasSBOMArtifactInput{
 			Artifact: artifact,
 			HasSBOM:  hasSBOM,
@@ -25114,15 +25159,8 @@ fragment AllPkgTree on Package {
 	return &data, err
 }
 
-func HasSBOMPkg(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	hasSBOM HasSBOMInputSpec,
-) (*HasSBOMPkgResponse, error) {
-	req := &graphql.Request{
-		OpName: "HasSBOMPkg",
-		Query: `
+// The query or mutation executed by HasSBOMPkg.
+const HasSBOMPkg_Operation = `
 mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -25179,7 +25217,17 @@ fragment AllArtifactTree on Artifact {
 	algorithm
 	digest
 }
-`,
+`
+
+func HasSBOMPkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	hasSBOM HasSBOMInputSpec,
+) (*HasSBOMPkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSBOMPkg",
+		Query:  HasSBOMPkg_Operation,
 		Variables: &__HasSBOMPkgInput{
 			Pkg:     pkg,
 			HasSBOM: hasSBOM,
@@ -25199,17 +25247,8 @@ fragment AllArtifactTree on Artifact {
 	return &data, err
 }
 
-func HasSourceAt(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	pkgMatchType MatchFlags,
-	source SourceInputSpec,
-	hasSourceAt HasSourceAtInputSpec,
-) (*HasSourceAtResponse, error) {
-	req := &graphql.Request{
-		OpName: "HasSourceAt",
-		Query: `
+// The query or mutation executed by HasSourceAt.
+const HasSourceAt_Operation = `
 mutation HasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -25269,7 +25308,19 @@ fragment allHasSourceAt on HasSourceAt {
 	origin
 	collector
 }
-`,
+`
+
+func HasSourceAt(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	pkgMatchType MatchFlags,
+	source SourceInputSpec,
+	hasSourceAt HasSourceAtInputSpec,
+) (*HasSourceAtResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSourceAt",
+		Query:  HasSourceAt_Operation,
 		Variables: &__HasSourceAtInput{
 			Pkg:          pkg,
 			PkgMatchType: pkgMatchType,
@@ -25291,16 +25342,8 @@ fragment allHasSourceAt on HasSourceAt {
 	return &data, err
 }
 
-func HashEqual(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	otherArtifact ArtifactInputSpec,
-	hashEqual HashEqualInputSpec,
-) (*HashEqualResponse, error) {
-	req := &graphql.Request{
-		OpName: "HashEqual",
-		Query: `
+// The query or mutation executed by HashEqual.
+const HashEqual_Operation = `
 mutation HashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
 	artifact: ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -25326,7 +25369,18 @@ fragment allHashEqualTree on HashEqual {
 	origin
 	collector
 }
-`,
+`
+
+func HashEqual(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	otherArtifact ArtifactInputSpec,
+	hashEqual HashEqualInputSpec,
+) (*HashEqualResponse, error) {
+	req := &graphql.Request{
+		OpName: "HashEqual",
+		Query:  HashEqual_Operation,
 		Variables: &__HashEqualInput{
 			Artifact:      artifact,
 			OtherArtifact: otherArtifact,
@@ -25347,16 +25401,8 @@ fragment allHashEqualTree on HashEqual {
 	return &data, err
 }
 
-func IsDependency(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	depPkg PkgInputSpec,
-	dependency IsDependencyInputSpec,
-) (*IsDependencyResponse, error) {
-	req := &graphql.Request{
-		OpName: "IsDependency",
-		Query: `
+// The query or mutation executed by IsDependency.
+const IsDependency_Operation = `
 mutation IsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
 	pkg: ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -25403,7 +25449,18 @@ fragment allIsDependencyTree on IsDependency {
 	origin
 	collector
 }
-`,
+`
+
+func IsDependency(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	depPkg PkgInputSpec,
+	dependency IsDependencyInputSpec,
+) (*IsDependencyResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsDependency",
+		Query:  IsDependency_Operation,
 		Variables: &__IsDependencyInput{
 			Pkg:        pkg,
 			DepPkg:     depPkg,
@@ -25424,16 +25481,8 @@ fragment allIsDependencyTree on IsDependency {
 	return &data, err
 }
 
-func IsOccurrencePkg(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	artifact ArtifactInputSpec,
-	occurrence IsOccurrenceInputSpec,
-) (*IsOccurrencePkgResponse, error) {
-	req := &graphql.Request{
-		OpName: "IsOccurrencePkg",
-		Query: `
+// The query or mutation executed by IsOccurrencePkg.
+const IsOccurrencePkg_Operation = `
 mutation IsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -25503,7 +25552,18 @@ fragment AllSourceTree on Source {
 		}
 	}
 }
-`,
+`
+
+func IsOccurrencePkg(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	artifact ArtifactInputSpec,
+	occurrence IsOccurrenceInputSpec,
+) (*IsOccurrencePkgResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsOccurrencePkg",
+		Query:  IsOccurrencePkg_Operation,
 		Variables: &__IsOccurrencePkgInput{
 			Pkg:        pkg,
 			Artifact:   artifact,
@@ -25524,16 +25584,8 @@ fragment AllSourceTree on Source {
 	return &data, err
 }
 
-func IsOccurrenceSrc(
-	ctx context.Context,
-	client graphql.Client,
-	source SourceInputSpec,
-	artifact ArtifactInputSpec,
-	occurrence IsOccurrenceInputSpec,
-) (*IsOccurrenceSrcResponse, error) {
-	req := &graphql.Request{
-		OpName: "IsOccurrenceSrc",
-		Query: `
+// The query or mutation executed by IsOccurrenceSrc.
+const IsOccurrenceSrc_Operation = `
 mutation IsOccurrenceSrc ($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
 	ingestSource(source: $source) {
 		... AllSourceTree
@@ -25603,7 +25655,18 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-`,
+`
+
+func IsOccurrenceSrc(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	artifact ArtifactInputSpec,
+	occurrence IsOccurrenceInputSpec,
+) (*IsOccurrenceSrcResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsOccurrenceSrc",
+		Query:  IsOccurrenceSrc_Operation,
 		Variables: &__IsOccurrenceSrcInput{
 			Source:     source,
 			Artifact:   artifact,
@@ -25624,16 +25687,8 @@ fragment AllPkgTree on Package {
 	return &data, err
 }
 
-func IsVulnerabilityCVE(
-	ctx context.Context,
-	client graphql.Client,
-	osv OSVInputSpec,
-	cve CVEInputSpec,
-	isVulnerability IsVulnerabilityInputSpec,
-) (*IsVulnerabilityCVEResponse, error) {
-	req := &graphql.Request{
-		OpName: "IsVulnerabilityCVE",
-		Query: `
+// The query or mutation executed by IsVulnerabilityCVE.
+const IsVulnerabilityCVE_Operation = `
 mutation IsVulnerabilityCVE ($osv: OSVInputSpec!, $cve: CVEInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
 	ingestOSV(osv: $osv) {
 		... AllOSVTree
@@ -25676,7 +25731,18 @@ fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-`,
+`
+
+func IsVulnerabilityCVE(
+	ctx context.Context,
+	client graphql.Client,
+	osv OSVInputSpec,
+	cve CVEInputSpec,
+	isVulnerability IsVulnerabilityInputSpec,
+) (*IsVulnerabilityCVEResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsVulnerabilityCVE",
+		Query:  IsVulnerabilityCVE_Operation,
 		Variables: &__IsVulnerabilityCVEInput{
 			Osv:             osv,
 			Cve:             cve,
@@ -25697,16 +25763,8 @@ fragment AllGHSATree on GHSA {
 	return &data, err
 }
 
-func IsVulnerabilityGHSA(
-	ctx context.Context,
-	client graphql.Client,
-	osv OSVInputSpec,
-	ghsa GHSAInputSpec,
-	isVulnerability IsVulnerabilityInputSpec,
-) (*IsVulnerabilityGHSAResponse, error) {
-	req := &graphql.Request{
-		OpName: "IsVulnerabilityGHSA",
-		Query: `
+// The query or mutation executed by IsVulnerabilityGHSA.
+const IsVulnerabilityGHSA_Operation = `
 mutation IsVulnerabilityGHSA ($osv: OSVInputSpec!, $ghsa: GHSAInputSpec!, $isVulnerability: IsVulnerabilityInputSpec!) {
 	ingestOSV(osv: $osv) {
 		... AllOSVTree
@@ -25749,7 +25807,18 @@ fragment AllCveTree on CVE {
 	year
 	cveId
 }
-`,
+`
+
+func IsVulnerabilityGHSA(
+	ctx context.Context,
+	client graphql.Client,
+	osv OSVInputSpec,
+	ghsa GHSAInputSpec,
+	isVulnerability IsVulnerabilityInputSpec,
+) (*IsVulnerabilityGHSAResponse, error) {
+	req := &graphql.Request{
+		OpName: "IsVulnerabilityGHSA",
+		Query:  IsVulnerabilityGHSA_Operation,
 		Variables: &__IsVulnerabilityGHSAInput{
 			Osv:             osv,
 			Ghsa:            ghsa,
@@ -25770,15 +25839,8 @@ fragment AllCveTree on CVE {
 	return &data, err
 }
 
-func Neighbors(
-	ctx context.Context,
-	client graphql.Client,
-	node string,
-	usingOnly []Edge,
-) (*NeighborsResponse, error) {
-	req := &graphql.Request{
-		OpName: "Neighbors",
-		Query: `
+// The query or mutation executed by Neighbors.
+const Neighbors_Operation = `
 query Neighbors ($node: ID!, $usingOnly: [Edge!]!) {
 	neighbors(node: $node, usingOnly: $usingOnly) {
 		__typename
@@ -26150,7 +26212,17 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-`,
+`
+
+func Neighbors(
+	ctx context.Context,
+	client graphql.Client,
+	node string,
+	usingOnly []Edge,
+) (*NeighborsResponse, error) {
+	req := &graphql.Request{
+		OpName: "Neighbors",
+		Query:  Neighbors_Operation,
 		Variables: &__NeighborsInput{
 			Node:      node,
 			UsingOnly: usingOnly,
@@ -26170,14 +26242,8 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	return &data, err
 }
 
-func Node(
-	ctx context.Context,
-	client graphql.Client,
-	node string,
-) (*NodeResponse, error) {
-	req := &graphql.Request{
-		OpName: "Node",
-		Query: `
+// The query or mutation executed by Node.
+const Node_Operation = `
 query Node ($node: ID!) {
 	node(node: $node) {
 		__typename
@@ -26549,7 +26615,16 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-`,
+`
+
+func Node(
+	ctx context.Context,
+	client graphql.Client,
+	node string,
+) (*NodeResponse, error) {
+	req := &graphql.Request{
+		OpName: "Node",
+		Query:  Node_Operation,
 		Variables: &__NodeInput{
 			Node: node,
 		},
@@ -26568,14 +26643,8 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	return &data, err
 }
 
-func Nodes(
-	ctx context.Context,
-	client graphql.Client,
-	nodes []string,
-) (*NodesResponse, error) {
-	req := &graphql.Request{
-		OpName: "Nodes",
-		Query: `
+// The query or mutation executed by Nodes.
+const Nodes_Operation = `
 query Nodes ($nodes: [ID!]!) {
 	nodes(nodes: $nodes) {
 		__typename
@@ -26947,7 +27016,16 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-`,
+`
+
+func Nodes(
+	ctx context.Context,
+	client graphql.Client,
+	nodes []string,
+) (*NodesResponse, error) {
+	req := &graphql.Request{
+		OpName: "Nodes",
+		Query:  Nodes_Operation,
 		Variables: &__NodesInput{
 			Nodes: nodes,
 		},
@@ -26966,14 +27044,8 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	return &data, err
 }
 
-func OSVs(
-	ctx context.Context,
-	client graphql.Client,
-	filter *OSVSpec,
-) (*OSVsResponse, error) {
-	req := &graphql.Request{
-		OpName: "OSVs",
-		Query: `
+// The query or mutation executed by OSVs.
+const OSVs_Operation = `
 query OSVs ($filter: OSVSpec) {
 	osv(osvSpec: $filter) {
 		... AllOSVTree
@@ -26983,7 +27055,16 @@ fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-`,
+`
+
+func OSVs(
+	ctx context.Context,
+	client graphql.Client,
+	filter *OSVSpec,
+) (*OSVsResponse, error) {
+	req := &graphql.Request{
+		OpName: "OSVs",
+		Query:  OSVs_Operation,
 		Variables: &__OSVsInput{
 			Filter: filter,
 		},
@@ -27002,14 +27083,8 @@ fragment AllOSVTree on OSV {
 	return &data, err
 }
 
-func Packages(
-	ctx context.Context,
-	client graphql.Client,
-	filter *PkgSpec,
-) (*PackagesResponse, error) {
-	req := &graphql.Request{
-		OpName: "Packages",
-		Query: `
+// The query or mutation executed by Packages.
+const Packages_Operation = `
 query Packages ($filter: PkgSpec) {
 	packages(pkgSpec: $filter) {
 		... AllPkgTree
@@ -27036,7 +27111,16 @@ fragment AllPkgTree on Package {
 		}
 	}
 }
-`,
+`
+
+func Packages(
+	ctx context.Context,
+	client graphql.Client,
+	filter *PkgSpec,
+) (*PackagesResponse, error) {
+	req := &graphql.Request{
+		OpName: "Packages",
+		Query:  Packages_Operation,
 		Variables: &__PackagesInput{
 			Filter: filter,
 		},
@@ -27055,17 +27139,8 @@ fragment AllPkgTree on Package {
 	return &data, err
 }
 
-func Path(
-	ctx context.Context,
-	client graphql.Client,
-	subject string,
-	target string,
-	maxPathLength int,
-	usingOnly []Edge,
-) (*PathResponse, error) {
-	req := &graphql.Request{
-		OpName: "Path",
-		Query: `
+// The query or mutation executed by Path.
+const Path_Operation = `
 query Path ($subject: ID!, $target: ID!, $maxPathLength: Int!, $usingOnly: [Edge!]!) {
 	path(subject: $subject, target: $target, maxPathLength: $maxPathLength, usingOnly: $usingOnly) {
 		__typename
@@ -27437,7 +27512,19 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	origin
 	collector
 }
-`,
+`
+
+func Path(
+	ctx context.Context,
+	client graphql.Client,
+	subject string,
+	target string,
+	maxPathLength int,
+	usingOnly []Edge,
+) (*PathResponse, error) {
+	req := &graphql.Request{
+		OpName: "Path",
+		Query:  Path_Operation,
 		Variables: &__PathInput{
 			Subject:       subject,
 			Target:        target,
@@ -27459,16 +27546,8 @@ fragment allCertifyVEXStatement on CertifyVEXStatement {
 	return &data, err
 }
 
-func PkgEqual(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	otherPackage PkgInputSpec,
-	pkgEqual PkgEqualInputSpec,
-) (*PkgEqualResponse, error) {
-	req := &graphql.Request{
-		OpName: "PkgEqual",
-		Query: `
+// The query or mutation executed by PkgEqual.
+const PkgEqual_Operation = `
 mutation PkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
 	pkg: ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -27510,7 +27589,18 @@ fragment allPkgEqual on PkgEqual {
 	origin
 	collector
 }
-`,
+`
+
+func PkgEqual(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	otherPackage PkgInputSpec,
+	pkgEqual PkgEqualInputSpec,
+) (*PkgEqualResponse, error) {
+	req := &graphql.Request{
+		OpName: "PkgEqual",
+		Query:  PkgEqual_Operation,
 		Variables: &__PkgEqualInput{
 			Pkg:          pkg,
 			OtherPackage: otherPackage,
@@ -27531,17 +27621,8 @@ fragment allPkgEqual on PkgEqual {
 	return &data, err
 }
 
-func SLSAForArtifact(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	materials []ArtifactInputSpec,
-	builder BuilderInputSpec,
-	slsa SLSAInputSpec,
-) (*SLSAForArtifactResponse, error) {
-	req := &graphql.Request{
-		OpName: "SLSAForArtifact",
-		Query: `
+// The query or mutation executed by SLSAForArtifact.
+const SLSAForArtifact_Operation = `
 mutation SLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -27586,7 +27667,19 @@ fragment allSLSATree on HasSLSA {
 		collector
 	}
 }
-`,
+`
+
+func SLSAForArtifact(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	materials []ArtifactInputSpec,
+	builder BuilderInputSpec,
+	slsa SLSAInputSpec,
+) (*SLSAForArtifactResponse, error) {
+	req := &graphql.Request{
+		OpName: "SLSAForArtifact",
+		Query:  SLSAForArtifact_Operation,
 		Variables: &__SLSAForArtifactInput{
 			Artifact:  artifact,
 			Materials: materials,
@@ -27608,15 +27701,8 @@ fragment allSLSATree on HasSLSA {
 	return &data, err
 }
 
-func Scorecard(
-	ctx context.Context,
-	client graphql.Client,
-	source SourceInputSpec,
-	scorecard ScorecardInputSpec,
-) (*ScorecardResponse, error) {
-	req := &graphql.Request{
-		OpName: "Scorecard",
-		Query: `
+// The query or mutation executed by Scorecard.
+const Scorecard_Operation = `
 mutation Scorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
 	ingestSource(source: $source) {
 		... AllSourceTree
@@ -27657,7 +27743,17 @@ fragment AllCertifyScorecard on CertifyScorecard {
 		collector
 	}
 }
-`,
+`
+
+func Scorecard(
+	ctx context.Context,
+	client graphql.Client,
+	source SourceInputSpec,
+	scorecard ScorecardInputSpec,
+) (*ScorecardResponse, error) {
+	req := &graphql.Request{
+		OpName: "Scorecard",
+		Query:  Scorecard_Operation,
 		Variables: &__ScorecardInput{
 			Source:    source,
 			Scorecard: scorecard,
@@ -27677,14 +27773,8 @@ fragment AllCertifyScorecard on CertifyScorecard {
 	return &data, err
 }
 
-func Sources(
-	ctx context.Context,
-	client graphql.Client,
-	filter *SourceSpec,
-) (*SourcesResponse, error) {
-	req := &graphql.Request{
-		OpName: "Sources",
-		Query: `
+// The query or mutation executed by Sources.
+const Sources_Operation = `
 query Sources ($filter: SourceSpec) {
 	sources(sourceSpec: $filter) {
 		... AllSourceTree
@@ -27704,7 +27794,16 @@ fragment AllSourceTree on Source {
 		}
 	}
 }
-`,
+`
+
+func Sources(
+	ctx context.Context,
+	client graphql.Client,
+	filter *SourceSpec,
+) (*SourcesResponse, error) {
+	req := &graphql.Request{
+		OpName: "Sources",
+		Query:  Sources_Operation,
 		Variables: &__SourcesInput{
 			Filter: filter,
 		},
@@ -27723,16 +27822,8 @@ fragment AllSourceTree on Source {
 	return &data, err
 }
 
-func VEXPackageAndGhsa(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	ghsa GHSAInputSpec,
-	vexStatement VexStatementInputSpec,
-) (*VEXPackageAndGhsaResponse, error) {
-	req := &graphql.Request{
-		OpName: "VEXPackageAndGhsa",
-		Query: `
+// The query or mutation executed by VEXPackageAndGhsa.
+const VEXPackageAndGhsa_Operation = `
 mutation VEXPackageAndGhsa ($pkg: PkgInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -27814,7 +27905,18 @@ fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-`,
+`
+
+func VEXPackageAndGhsa(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	ghsa GHSAInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VEXPackageAndGhsaResponse, error) {
+	req := &graphql.Request{
+		OpName: "VEXPackageAndGhsa",
+		Query:  VEXPackageAndGhsa_Operation,
 		Variables: &__VEXPackageAndGhsaInput{
 			Pkg:          pkg,
 			Ghsa:         ghsa,
@@ -27835,16 +27937,8 @@ fragment AllOSVTree on OSV {
 	return &data, err
 }
 
-func VexArtifactAndCve(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	cve CVEInputSpec,
-	vexStatement VexStatementInputSpec,
-) (*VexArtifactAndCveResponse, error) {
-	req := &graphql.Request{
-		OpName: "VexArtifactAndCve",
-		Query: `
+// The query or mutation executed by VexArtifactAndCve.
+const VexArtifactAndCve_Operation = `
 mutation VexArtifactAndCve ($artifact: ArtifactInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -27926,7 +28020,18 @@ fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-`,
+`
+
+func VexArtifactAndCve(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	cve CVEInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexArtifactAndCveResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexArtifactAndCve",
+		Query:  VexArtifactAndCve_Operation,
 		Variables: &__VexArtifactAndCveInput{
 			Artifact:     artifact,
 			Cve:          cve,
@@ -27947,16 +28052,8 @@ fragment AllOSVTree on OSV {
 	return &data, err
 }
 
-func VexArtifactAndGhsa(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	ghsa GHSAInputSpec,
-	vexStatement VexStatementInputSpec,
-) (*VexArtifactAndGhsaResponse, error) {
-	req := &graphql.Request{
-		OpName: "VexArtifactAndGhsa",
-		Query: `
+// The query or mutation executed by VexArtifactAndGhsa.
+const VexArtifactAndGhsa_Operation = `
 mutation VexArtifactAndGhsa ($artifact: ArtifactInputSpec!, $ghsa: GHSAInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -28038,7 +28135,18 @@ fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-`,
+`
+
+func VexArtifactAndGhsa(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	ghsa GHSAInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexArtifactAndGhsaResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexArtifactAndGhsa",
+		Query:  VexArtifactAndGhsa_Operation,
 		Variables: &__VexArtifactAndGhsaInput{
 			Artifact:     artifact,
 			Ghsa:         ghsa,
@@ -28059,16 +28167,8 @@ fragment AllOSVTree on OSV {
 	return &data, err
 }
 
-func VexArtifactAndOsv(
-	ctx context.Context,
-	client graphql.Client,
-	artifact ArtifactInputSpec,
-	osv OSVInputSpec,
-	vexStatement VexStatementInputSpec,
-) (*VexArtifactAndOsvResponse, error) {
-	req := &graphql.Request{
-		OpName: "VexArtifactAndOsv",
-		Query: `
+// The query or mutation executed by VexArtifactAndOsv.
+const VexArtifactAndOsv_Operation = `
 mutation VexArtifactAndOsv ($artifact: ArtifactInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestArtifact(artifact: $artifact) {
 		... AllArtifactTree
@@ -28150,7 +28250,18 @@ fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-`,
+`
+
+func VexArtifactAndOsv(
+	ctx context.Context,
+	client graphql.Client,
+	artifact ArtifactInputSpec,
+	osv OSVInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexArtifactAndOsvResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexArtifactAndOsv",
+		Query:  VexArtifactAndOsv_Operation,
 		Variables: &__VexArtifactAndOsvInput{
 			Artifact:     artifact,
 			Osv:          osv,
@@ -28171,16 +28282,8 @@ fragment AllGHSATree on GHSA {
 	return &data, err
 }
 
-func VexPackageAndCve(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	cve CVEInputSpec,
-	vexStatement VexStatementInputSpec,
-) (*VexPackageAndCveResponse, error) {
-	req := &graphql.Request{
-		OpName: "VexPackageAndCve",
-		Query: `
+// The query or mutation executed by VexPackageAndCve.
+const VexPackageAndCve_Operation = `
 mutation VexPackageAndCve ($pkg: PkgInputSpec!, $cve: CVEInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -28262,7 +28365,18 @@ fragment AllOSVTree on OSV {
 	id
 	osvId
 }
-`,
+`
+
+func VexPackageAndCve(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	cve CVEInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexPackageAndCveResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexPackageAndCve",
+		Query:  VexPackageAndCve_Operation,
 		Variables: &__VexPackageAndCveInput{
 			Pkg:          pkg,
 			Cve:          cve,
@@ -28283,16 +28397,8 @@ fragment AllOSVTree on OSV {
 	return &data, err
 }
 
-func VexPackageAndOsv(
-	ctx context.Context,
-	client graphql.Client,
-	pkg PkgInputSpec,
-	osv OSVInputSpec,
-	vexStatement VexStatementInputSpec,
-) (*VexPackageAndOsvResponse, error) {
-	req := &graphql.Request{
-		OpName: "VexPackageAndOsv",
-		Query: `
+// The query or mutation executed by VexPackageAndOsv.
+const VexPackageAndOsv_Operation = `
 mutation VexPackageAndOsv ($pkg: PkgInputSpec!, $osv: OSVInputSpec!, $vexStatement: VexStatementInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		... AllPkgTree
@@ -28374,7 +28480,18 @@ fragment AllGHSATree on GHSA {
 	id
 	ghsaId
 }
-`,
+`
+
+func VexPackageAndOsv(
+	ctx context.Context,
+	client graphql.Client,
+	pkg PkgInputSpec,
+	osv OSVInputSpec,
+	vexStatement VexStatementInputSpec,
+) (*VexPackageAndOsvResponse, error) {
+	req := &graphql.Request{
+		OpName: "VexPackageAndOsv",
+		Query:  VexPackageAndOsv_Operation,
 		Variables: &__VexPackageAndOsvInput{
 			Pkg:          pkg,
 			Osv:          osv,
