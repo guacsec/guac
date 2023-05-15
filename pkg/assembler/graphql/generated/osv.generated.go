@@ -137,10 +137,11 @@ func (ec *executionContext) unmarshalInputOSVInputSpec(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osvId"))
-			it.OsvID, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.OsvID = data
 		}
 	}
 
@@ -165,18 +166,20 @@ func (ec *executionContext) unmarshalInputOSVSpec(ctx context.Context, obj inter
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ID = data
 		case "osvId":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osvId"))
-			it.OsvID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.OsvID = data
 		}
 	}
 

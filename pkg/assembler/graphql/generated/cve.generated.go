@@ -181,18 +181,20 @@ func (ec *executionContext) unmarshalInputCVEInputSpec(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
-			it.Year, err = ec.unmarshalNInt2int(ctx, v)
+			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Year = data
 		case "cveId":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cveId"))
-			it.CveID, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.CveID = data
 		}
 	}
 
@@ -217,26 +219,29 @@ func (ec *executionContext) unmarshalInputCVESpec(ctx context.Context, obj inter
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ID = data
 		case "year":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("year"))
-			it.Year, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Year = data
 		case "cveId":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cveId"))
-			it.CveID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.CveID = data
 		}
 	}
 

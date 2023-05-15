@@ -603,82 +603,92 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ID = data
 		case "package":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-			it.Package, err = ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
+			data, err := ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Package = data
 		case "vulnerability":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-			it.Vulnerability, err = ec.unmarshalOVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, v)
+			data, err := ec.unmarshalOVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Vulnerability = data
 		case "timeScanned":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
-			it.TimeScanned, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.TimeScanned = data
 		case "dbUri":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbUri"))
-			it.DbURI, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.DbURI = data
 		case "dbVersion":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbVersion"))
-			it.DbVersion, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.DbVersion = data
 		case "scannerUri":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerUri"))
-			it.ScannerURI, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ScannerURI = data
 		case "scannerVersion":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerVersion"))
-			it.ScannerVersion, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ScannerVersion = data
 		case "origin":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
-			it.Origin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Origin = data
 		case "collector":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
-			it.Collector, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Collector = data
 		}
 	}
 
@@ -703,34 +713,38 @@ func (ec *executionContext) unmarshalInputVulnerabilityInput(ctx context.Context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-			it.Osv, err = ec.unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx, v)
+			data, err := ec.unmarshalOOSVInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVInputSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Osv = data
 		case "cve":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-			it.Cve, err = ec.unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpec(ctx, v)
+			data, err := ec.unmarshalOCVEInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVEInputSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Cve = data
 		case "ghsa":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-			it.Ghsa, err = ec.unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpec(ctx, v)
+			data, err := ec.unmarshalOGHSAInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSAInputSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Ghsa = data
 		case "noVuln":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noVuln"))
-			it.NoVuln, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.NoVuln = data
 		}
 	}
 
@@ -755,58 +769,65 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetaDataInput(ctx context
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
-			it.TimeScanned, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.TimeScanned = data
 		case "dbUri":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbUri"))
-			it.DbURI, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.DbURI = data
 		case "dbVersion":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dbVersion"))
-			it.DbVersion, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.DbVersion = data
 		case "scannerUri":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerUri"))
-			it.ScannerURI, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ScannerURI = data
 		case "scannerVersion":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scannerVersion"))
-			it.ScannerVersion, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ScannerVersion = data
 		case "origin":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
-			it.Origin, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Origin = data
 		case "collector":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
-			it.Collector, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Collector = data
 		}
 	}
 
@@ -831,34 +852,38 @@ func (ec *executionContext) unmarshalInputVulnerabilitySpec(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("osv"))
-			it.Osv, err = ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, v)
+			data, err := ec.unmarshalOOSVSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐOSVSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Osv = data
 		case "cve":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cve"))
-			it.Cve, err = ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
+			data, err := ec.unmarshalOCVESpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCVESpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Cve = data
 		case "ghsa":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsa"))
-			it.Ghsa, err = ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
+			data, err := ec.unmarshalOGHSASpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐGHSASpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Ghsa = data
 		case "noVuln":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("noVuln"))
-			it.NoVuln, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.NoVuln = data
 		}
 	}
 
