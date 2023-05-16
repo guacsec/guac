@@ -3,7 +3,7 @@
 We'd love to accept your patches and contributions to this project. There are
 just a few small guidelines you need to follow.
 
-Refer to the [GraphQL Guide](./demo/GraphQL.md) to go through a setup.
+Refer to the [GraphQL Guide](./demo/graphql/GraphQL.md) to go through a setup.
 Optionally, you can also consult [docker compose
 documentation](./docs/Compose.md).
 
