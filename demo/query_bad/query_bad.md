@@ -130,11 +130,8 @@ following:
 ```bash
 Use the arrow keys to navigate: ↓ ↑ → ←
 ? Select CertifyBad to Query:
-  ▸ pkg:golang/github.com/kr/pretty (pretty bad undisclosed vuln)
-    git+https://github.com/googleapis/google-cloud-go (github repo compromised)
-    pkg:golang/github.com/pmezard/go-difflib (github repo compromised)
-    pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1 (never use this version of log4j)
-↓   pkg:golang/github.com/prometheus/client_golang@v1.11.1 (undisclosed vuln)
+    pkg:golang/k8s.io/release/images/build/go-runner@%28devel%29 (compromised go-runner)
+  ▸ pkg:deb/debian/tzdata@2021a-1+deb11u5 (compromised version of tzdata)
 ```
 
 Select the package, source, or artifact from the list and a visualizer URL will
@@ -143,15 +140,7 @@ that use it). Further iterations of the same CLI tool (or another) could be used
 to give a step-by-step guide to remediation!
 
 From the list, select
-`pkg:maven/org.apache.logging.log4j/log4j-core (never use this version of log4j)`
-we created earlier:
-
-```bash
-Use the arrow keys to navigate: ↓ ↑ → ←
-? Select CertifyBad to Query:
-    pkg:golang/k8s.io/release/images/build/go-runner@%28devel%29 (compromised go-runner)
-  ▸ pkg:deb/debian/tzdata@2021a-1+deb11u5 (compromised version of tzdata)
-```
+`pkg:deb/debian/tzdata@2021a-1+deb11u5 (compromised version of tzdata)`
 
 Doing so will produce a output similar to this:
 
@@ -161,11 +150,7 @@ Visualizer url: http://localhost:3000/?path=142605,44614,1372,1305,1304,127547,1
 ```
 
 Navigating to the URL to visualize the output. This will show us an expanded
-graph of dependencies. Note that if you don't see dependencies expanded here, it
-is possible that additional open-source insights are still being ingested from
-GUAC's external sources (such as Deps.dev). Therefore, if you are seeing less
-than what is shown here, you may want to check back again by re-running the CLI
-in a few minutes!
+graph of dependencies.
 
 <img width="1267" alt="6" src="https://github.com/guacsec/guac/assets/88045217/bd73a5fe-ea6c-46c1-8c56-c52de6c8a567">
 
