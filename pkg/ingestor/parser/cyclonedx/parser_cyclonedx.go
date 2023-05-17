@@ -86,6 +86,8 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 					repositoryURL = splitImage[0] + "/" + splitImage[1] + "/" + splitTag[0]
 				case 2:
 					repositoryURL = splitImage[0] + "/" + splitTag[0]
+				case 1:
+					repositoryURL = splitImage[0]
 				default:
 					repositoryURL = ""
 				}
@@ -93,13 +95,16 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 				if len(splitTag) == 2 {
 					tag = splitTag[1]
 				}
-
-				purl = "pkg:guac/cdx/" + repositoryURL + "@" + cdxBom.Metadata.Component.Version + "?tag=" + tag
+				if repositoryURL != "" {
+					purl = guacCDXPkgPurl(repositoryURL, cdxBom.Metadata.Component.Version, tag)
+				} else {
+					purl = guacCDXPkgPurl(cdxBom.Metadata.Component.Name, cdxBom.Metadata.Component.Version, tag)
+				}
 			} else if cdxBom.Metadata.Component.Type == cdx.ComponentTypeFile {
 				// example: file type ("/home/work/test/build/webserver/")
-				purl = "pkg:guac/file/" + cdxBom.Metadata.Component.Name + "&checksum=" + cdxBom.Metadata.Component.Version
+				purl = guacCDXFilePurl(cdxBom.Metadata.Component.Name, cdxBom.Metadata.Component.Version)
 			} else {
-				purl = "pkg:guac/cdx/" + cdxBom.Metadata.Component.Name
+				purl = guacCDXPkgPurl(cdxBom.Metadata.Component.Name, cdxBom.Metadata.Component.Version, "")
 			}
 		}
 
@@ -132,7 +137,15 @@ func (c *cyclonedxParser) getPackages(cdxBom *cdx.BOM) error {
 			// the required purl for package node. Currently there is no use-case
 			// to capture OS for GUAC.
 			if comp.Type != cdx.ComponentTypeOS {
-				pkg, err := asmhelpers.PurlToPkg(comp.PackageURL)
+				purl := comp.PackageURL
+				if purl == "" {
+					if comp.Type == cdx.ComponentTypeFile {
+						purl = guacCDXFilePurl(comp.Name, comp.Version)
+					} else {
+						purl = asmhelpers.GuacPkgPurl(comp.Name, &comp.Version)
+					}
+				}
+				pkg, err := asmhelpers.PurlToPkg(purl)
 				if err != nil {
 					return err
 				}
@@ -242,4 +255,27 @@ func (s *cyclonedxParser) getPackageElement(elementID string) []*model.PkgInputS
 		return packNode
 	}
 	return nil
+}
+
+func guacCDXFilePurl(fileName string, version string) string {
+	if version != "" {
+		splitVersion := strings.Split(version, ":")
+		return asmhelpers.GuacFilePurl(splitVersion[0], splitVersion[1], &fileName)
+	} else {
+		return asmhelpers.PurlFilesGuac + fileName
+	}
+}
+
+func guacCDXPkgPurl(componentName string, version string, tag string) string {
+	purl := ""
+	if version != "" && tag != "" {
+		purl = "pkg:guac/cdx/" + componentName + "@" + version + "?tag=" + tag
+	} else if version != "" {
+		purl = "pkg:guac/cdx/" + componentName + "@" + version
+	} else if tag != "" {
+		purl = "pkg:guac/cdx/" + componentName + "?tag=" + tag
+	} else {
+		purl = "pkg:guac/cdx/" + componentName
+	}
+	return purl
 }
