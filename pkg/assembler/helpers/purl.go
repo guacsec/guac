@@ -24,7 +24,10 @@ import (
 	purl "github.com/package-url/packageurl-go"
 )
 
-const PurlTypeGuac = "guac"
+const (
+	PurlTypeGuac  = "guac"
+	PurlFilesGuac = "pkg:guac/files/"
+)
 
 // PurlToPkg converts a purl URI string into a graphql package node
 func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
@@ -164,7 +167,7 @@ func GuacPkgPurl(pkgName string, pkgVersion *string) string {
 }
 
 func GuacFilePurl(alg string, digest string, filename *string) string {
-	s := fmt.Sprintf("pkg:guac/files/%s:%s", strings.ToLower(alg), digest)
+	s := fmt.Sprintf(PurlFilesGuac+"%s:%s", strings.ToLower(alg), digest)
 	if filename != nil {
 		s += fmt.Sprintf("#%s", *filename)
 	}
