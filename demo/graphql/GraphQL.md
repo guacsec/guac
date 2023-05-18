@@ -83,7 +83,7 @@ GraphQL Playground instead, use these steps:
 1. Open the GraphQL Playground by visiting `http://localhost:8080/` in your web
    browser.
 
-1. Open `demo/queries.gql` in a text editor and copy the full contents.
+1. Open `demo/graphql/queries.gql` in a text editor and copy the full contents.
 
 1. Paste the contents in the left pane of the Playground
 
