@@ -16,10 +16,6 @@
 package neo4j
 
 import (
-	"sort"
-	"strings"
-
-	"github.com/guacsec/guac/pkg/assembler"
 )
 
 func registerAllArtifacts(client *neo4jClient) error {
