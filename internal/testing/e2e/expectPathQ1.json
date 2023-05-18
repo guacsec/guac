@@ -5,10 +5,10 @@
       "type": "golang",
       "namespaces": [
         {
-          "namespace": "go.etcd.io/etcd/client",
+          "namespace": "github.com/hashicorp/consul",
           "names": [
             {
-              "name": "v2",
+              "name": "sdk",
               "versions": []
             }
           ]
@@ -20,22 +20,7 @@
       "type": "golang",
       "namespaces": [
         {
-          "namespace": "go.etcd.io/etcd/client",
-          "names": []
-        }
-      ]
-    },
-    {
-      "__typename": "Package",
-      "type": "golang",
-      "namespaces": []
-    },
-    {
-      "__typename": "Package",
-      "type": "golang",
-      "namespaces": [
-        {
-          "namespace": "go.etcd.io/etcd/api",
+          "namespace": "github.com/hashicorp/consul",
           "names": []
         }
       ]
@@ -45,10 +30,10 @@
       "type": "golang",
       "namespaces": [
         {
-          "namespace": "go.etcd.io/etcd/api",
+          "namespace": "github.com/hashicorp/consul",
           "names": [
             {
-              "name": "v3",
+              "name": "api",
               "versions": []
             }
           ]

@@ -85,7 +85,7 @@ query IsDependencyQ2 {
 }
 
 query PkgQ5 {
-  packages(pkgSpec: { type: "golang", namespace: "go.etcd.io/etcd/client", name: "v2" }) {
+  packages(pkgSpec: { type: "golang", namespace: "github.com/hashicorp/consul", name: "sdk" }) {
     type
     namespaces {
       namespace
@@ -98,7 +98,7 @@ query PkgQ5 {
 }
 
 query PkgQ6 {
-  packages(pkgSpec: { type: "golang", namespace: "go.etcd.io/etcd/api", name: "v3" }) {
+  packages(pkgSpec: { type: "golang", namespace: "github.com/hashicorp/consul", name: "api" }) {
     type
     namespaces {
       namespace
