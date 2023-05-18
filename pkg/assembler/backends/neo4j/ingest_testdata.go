@@ -15,9 +15,6 @@
 
 package neo4j
 
-import (
-)
-
 func registerAllArtifacts(client *neo4jClient) error {
 	// strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
 	err := client.registerArtifact("sha256", "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf")
