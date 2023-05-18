@@ -15,13 +15,6 @@
 
 package neo4j
 
-import (
-	"sort"
-	"strings"
-
-	"github.com/guacsec/guac/pkg/assembler"
-)
-
 func registerAllArtifacts(client *neo4jClient) error {
 	// strings.ToLower(string(checksum.Algorithm)) + ":" + checksum.Value
 	err := client.registerArtifact("sha256", "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf")
@@ -266,148 +259,29 @@ func registerAllSources(client *neo4jClient) error {
 }
 
 func (c *neo4jClient) registerArtifact(algorithm, digest string) error {
-	// enforce lowercase for both the algorithm and digest when ingesting
-	collectedArtifact := &artifactNode{
-		algorithm: strings.ToLower(algorithm),
-		digest:    strings.ToLower(digest),
-	}
-	assemblerinput := assembler.Graph{
-		Nodes: []assembler.GuacNode{collectedArtifact},
-	}
-	err := assembler.StoreGraph(assemblerinput, c.driver)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (c *neo4jClient) registerBuilder(uri string) error {
-	collectedBuilder := &builderNode{
-		uri: uri,
-	}
-	assemblerinput := assembler.Graph{
-		Nodes: []assembler.GuacNode{collectedBuilder},
-	}
-	err := assembler.StoreGraph(assemblerinput, c.driver)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (c *neo4jClient) registerCVE(year, id string) error {
-	collectedCve := &cveNode{}
-	collectedYear := &cveYear{year: year}
-	collecteCveId := &cveID{id: strings.ToLower(id)}
-
-	cveToYearEdge := &cveToYear{collectedCve, collectedYear}
-	cveYearToIDEdge := &cveYearToCveID{collectedYear, collecteCveId}
-	assemblerinput := assembler.Graph{
-		Nodes: []assembler.GuacNode{collectedCve, collectedYear, collecteCveId},
-		Edges: []assembler.GuacEdge{cveToYearEdge, cveYearToIDEdge},
-	}
-	err := assembler.StoreGraph(assemblerinput, c.driver)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (c *neo4jClient) registerGhsa(id string) error {
-	collectedGhsa := &ghsaNode{}
-	collecteGhsaId := &ghsaID{id: strings.ToLower(id)}
-
-	ghsaToIDEdge := &ghsaToID{collectedGhsa, collecteGhsaId}
-	assemblerinput := assembler.Graph{
-		Nodes: []assembler.GuacNode{collectedGhsa, collecteGhsaId},
-		Edges: []assembler.GuacEdge{ghsaToIDEdge},
-	}
-	err := assembler.StoreGraph(assemblerinput, c.driver)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (c *neo4jClient) registerOSV(id string) error {
-	collectedOsv := &osvNode{}
-	collecteOsvId := &osvID{id: strings.ToLower(id)}
-
-	osvToIDEdge := &osvToID{collectedOsv, collecteOsvId}
-	assemblerinput := assembler.Graph{
-		Nodes: []assembler.GuacNode{collectedOsv, collecteOsvId},
-		Edges: []assembler.GuacEdge{osvToIDEdge},
-	}
-	err := assembler.StoreGraph(assemblerinput, c.driver)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (c *neo4jClient) registerPackage(packageType, namespace, name, version, subpath string, qualifiers ...string) error {
-	collectedPkg := &pkgNode{}
-	collectedType := &pkgType{pkgType: packageType}
-	collectedNamespace := &pkgNamespace{namespace: namespace}
-	collectedName := &pkgName{name: name}
-	collectedVersion := &pkgVersion{version: version, subpath: subpath}
-	if len(qualifiers) > 0 {
-		qualifiersMap := map[string]string{}
-		keys := []string{}
-		for _, kv := range qualifiers {
-			pair := strings.Split(kv, "=")
-			qualifiersMap[pair[0]] = pair[1]
-			keys = append(keys, pair[0])
-		}
-		sort.Strings(keys)
-		qualifiers := []string{}
-		for _, k := range keys {
-			qualifiers = append(qualifiers, k, qualifiersMap[k])
-		}
-
-		collectedVersion.qualifier_list = qualifiers
-	}
-
-	pkgToTypeEdge := &pkgToType{collectedPkg, collectedType}
-	typeToNamespaceEdge := &typeToNamespace{collectedType, collectedNamespace}
-	namespaceToNameEdge := &namespaceToName{collectedNamespace, collectedName}
-	nameToVersionEdge := &nameToVersion{collectedName, collectedVersion}
-	assemblerinput := assembler.Graph{
-		Nodes: []assembler.GuacNode{collectedPkg, collectedType, collectedNamespace, collectedName, collectedVersion},
-		Edges: []assembler.GuacEdge{pkgToTypeEdge, typeToNamespaceEdge, namespaceToNameEdge, nameToVersionEdge},
-	}
-
-	err := assembler.StoreGraph(assemblerinput, c.driver)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (c *neo4jClient) registerSource(sourceType, namespace, name, qualifier string) error {
-	collectedSrc := &srcNode{}
-	collectedType := &srcType{srcType: sourceType}
-	collectedNamespace := &srcNamespace{namespace: namespace}
-	collectedName := &srcName{name: name}
-	if qualifier != "" {
-		pair := strings.Split(qualifier, "=")
-		if pair[0] == "tag" {
-			collectedName.tag = pair[1]
-		} else {
-			collectedName.commit = pair[1]
-		}
-	}
-
-	srcToTypeEdge := &srcToType{collectedSrc, collectedType}
-	typetoNamespaceEdge := &srcTypeToNamespace{collectedType, collectedNamespace}
-	namespaceToNameEdge := &srcNamespaceToName{collectedNamespace, collectedName}
-	assemblerinput := assembler.Graph{
-		Nodes: []assembler.GuacNode{collectedSrc, collectedType, collectedNamespace, collectedName},
-		Edges: []assembler.GuacEdge{srcToTypeEdge, typetoNamespaceEdge, namespaceToNameEdge},
-	}
-	err := assembler.StoreGraph(assemblerinput, c.driver)
-	if err != nil {
-		return err
-	}
 	return nil
 }
