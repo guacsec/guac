@@ -73,7 +73,7 @@ This can take a minute or two. This dataset consists of a set of document types:
 
 ## Running Queries
 
-The queries for this demo are stored in the `demo/queries.gql` file. Running the
+The queries for this demo are stored in the `demo/graphql/queries.gql` file. Running the
 demo queries can be done graphically by opening the GraphQL Playground in a web
 browser, or using the command line.
 
