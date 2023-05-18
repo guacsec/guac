@@ -20,16 +20,25 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
+
+func pUrlToPkgDiscardError(pUrl string) *generated.PkgInputSpec {
+	pkg, _ := asmhelpers.PurlToPkg(pUrl)
+	return pkg
+}
 
 func Test_spdxParser(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
 		name           string
+		additionalOpts []cmp.Option
 		doc            *processor.Document
 		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
@@ -48,9 +57,24 @@ func Test_spdxParser(t *testing.T) {
 		wantErr:        false,
 	},
 		{
-			name: "SPDX document with DESCRIBES relationship populates pUrl",
+			name: "SPDX with DESCRIBES relationship populates pUrl from described element",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
 			doc: &processor.Document{
-				Blob:   testdata.OCIGoSPDXMulti1,
+				Blob: []byte(`
+			{
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"relationships":[
+				{
+					"spdxElementId":"SPDXRef-DOCUMENT",
+					"relationshipType":"DESCRIBES",
+					"relatedSpdxElement":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10"
+				}
+			]
+			}
+		`),
 				Format: processor.FormatJSON,
 				Type:   processor.DocumentSPDX,
 				SourceInformation: processor.SourceInformation{
@@ -58,9 +82,47 @@ func Test_spdxParser(t *testing.T) {
 					Source:    "TestSource",
 				},
 			},
-			wantPredicates: &testdata.SpdxIngestionPredicates,
-			wantErr:        false,
-		}}
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:guac/spdx/Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10")},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX with DESCRIBED_BY relationship populates pUrl from described element",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(assembler.HasSBOMIngest{},
+					"HasSBOM")},
+			doc: &processor.Document{
+				Blob: []byte(`
+			{
+			"SPDXID":"SPDXRef-DOCUMENT",
+			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+			"relationships":[
+				{
+					"spdxElementId":"SPDXRef-Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
+					"relationshipType":"DESCRIBED_BY",
+					"relatedSpdxElement":"SPDXRef-DOCUMENT"
+				}
+			]
+			}
+		`),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{Pkg: pUrlToPkgDiscardError("pkg:guac/spdx/Package-sha256-a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10")},
+				},
+			},
+			wantErr: false,
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSpdxParser()
@@ -74,7 +136,8 @@ func Test_spdxParser(t *testing.T) {
 			}
 
 			preds := s.GetPredicates(ctx)
-			if d := cmp.Diff(tt.wantPredicates, preds, testdata.IngestPredicatesCmpOpts...); len(d) != 0 {
+			opts := append(testdata.IngestPredicatesCmpOpts, tt.additionalOpts...)
+			if d := cmp.Diff(tt.wantPredicates, preds, opts...); len(d) != 0 {
 				t.Errorf("spdx.GetPredicate mismatch values (+got, -expected): %s", d)
 			}
 		})
