@@ -230,58 +230,8 @@ func getIngestor(ctx context.Context, transportFunc func([]assembler.IngestPredi
 
 func getAssembler(opts options) (func([]assembler.IngestPredicates) error, error) {
 	// TODO(bulldozer): return assembler func to talk to graphQL ingestion
-	// authToken := graphdb.CreateAuthTokenWithUsernameAndPassword(
-	// 	opts.user,
-	// 	opts.pass,
-	// 	opts.realm,
-	// )
-
-	// client, err := graphdb.NewGraphClient(opts.dbAddr, authToken)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// err = createIndices(client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// return func(gs []assembler.Graph) error {
-	// 	combined := assembler.Graph{
-	// 		Nodes: []assembler.GuacNode{},
-	// 		Edges: []assembler.GuacEdge{},
-	// 	}
-	// 	for _, g := range gs {
-	// 		combined.AppendGraph(g)
-	// 	}
-	// 	if err := assembler.StoreGraph(combined, client); err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }, nil
 	return func(_ []assembler.IngestPredicates) error { return nil }, nil
 }
-
-// func createIndices(client graphdb.Client) error {
-// 	indices := map[string][]string{
-// 		"Artifact":      {"digest", "name"},
-// 		"Package":       {"purl", "name"},
-// 		"Metadata":      {"id"},
-// 		"Attestation":   {"digest"},
-// 		"Vulnerability": {"id"},
-// 	}
-
-// 	for label, attributes := range indices {
-// 		for _, attribute := range attributes {
-// 			err := assembler.CreateIndexOn(client, label, attribute)
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 func init() {
 	rootCmd.AddCommand(filesCmd)
