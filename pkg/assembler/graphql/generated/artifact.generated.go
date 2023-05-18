@@ -4262,18 +4262,20 @@ func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
-			it.Algorithm, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Algorithm = data
 		case "digest":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
-			it.Digest, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Digest = data
 		}
 	}
 
@@ -4298,26 +4300,29 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ID = data
 		case "algorithm":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
-			it.Algorithm, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Algorithm = data
 		case "digest":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
-			it.Digest, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.Digest = data
 		}
 	}
 

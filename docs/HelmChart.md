@@ -123,7 +123,7 @@ The `guacone` binary is packaged in the guac container image. Let's pull it so
 we can run the ingestion.
 
 ```bash
-docker pull ghcr.io/kusaridev/guac:v0.0.1-beta.5
+docker pull ghcr.io/guacsec/guac:v0.0.1-alpha.0
 ```
 
 You may pull newer versions of the guac container as they became available.
@@ -159,7 +159,7 @@ warn  - Experimental features are not covered by semver, and may cause unexpecte
 We are ingesting the sboms in guac-data/docs dir in this example.
 
 ```bash
-docker run --rm -v $PWD:/data --entrypoint /cnb/process/guacone  ghcr.io/kusaridev/guac:v0.0.1-beta.5 files /data/docs --gql-addr http://host.docker.internal:8080/query
+docker run --rm -v $PWD:/data --entrypoint /cnb/process/guacone  ghcr.io/guacsec/guac:v0.0.1-alpha.0 collect files /data/docs --gql-addr http://host.docker.internal:8080/query
 ```
 
 This command uses the `/cnb/process/guacone` GUAC binary from the `guac`

@@ -137,10 +137,11 @@ func (ec *executionContext) unmarshalInputGHSAInputSpec(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsaId"))
-			it.GhsaID, err = ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.GhsaID = data
 		}
 	}
 
@@ -165,18 +166,20 @@ func (ec *executionContext) unmarshalInputGHSASpec(ctx context.Context, obj inte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.ID = data
 		case "ghsaId":
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ghsaId"))
-			it.GhsaID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+			it.GhsaID = data
 		}
 	}
 

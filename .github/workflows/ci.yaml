@@ -45,7 +45,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: setup-go
-        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
+        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # tag=v3.2.1
         with:
           go-version: '1.19'
       - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
@@ -67,7 +67,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: setup-go
-        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
+        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # tag=v3.2.1
         with:
           go-version: '1.19'
       - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
@@ -86,7 +86,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: setup-go
-        uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # tag=v3.2.1
+        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # tag=v3.2.1
         with:
           go-version: '1.19'
       - name: Install formatter
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
-    - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9
+    - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753
       with:
         go-version: '~1.19'
     - uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b
