@@ -266,43 +266,45 @@ func (s *cyclonedxParser) getPackageElement(elementID string) []*model.PkgInputS
 }
 
 func guacCDXFilePurl(fileName string, version string, topLevel bool) string {
+	escapedName := asmhelpers.SanitizeString(fileName)
 	if topLevel {
 		if version != "" {
 			splitVersion := strings.Split(version, ":")
 			if len(splitVersion) == 2 {
 				s := fmt.Sprintf(topCdxPurlGuac+"%s:%s", strings.ToLower(splitVersion[0]), splitVersion[1])
-				s += fmt.Sprintf("#%s", fileName)
+				s += fmt.Sprintf("#%s", escapedName)
 				return s
 			}
 		}
-		return topCdxPurlGuac + fileName
+		return topCdxPurlGuac + escapedName
 	} else {
 		if version != "" {
 			splitVersion := strings.Split(version, ":")
 			if len(splitVersion) == 2 {
-				return asmhelpers.GuacFilePurl(splitVersion[0], splitVersion[1], &fileName)
+				return asmhelpers.GuacFilePurl(splitVersion[0], splitVersion[1], &escapedName)
 			}
 		}
-		return asmhelpers.PurlFilesGuac + fileName
+		return asmhelpers.PurlFilesGuac + escapedName
 	}
 }
 
 func guacCDXPkgPurl(componentName string, version string, tag string, topLevel bool) string {
 	purl := ""
 	typeNamespaceString := ""
+	escapedName := asmhelpers.SanitizeString(componentName)
 	if topLevel {
 		typeNamespaceString = topCdxPurlGuac
 	} else {
 		typeNamespaceString = asmhelpers.PurlPkgGuac
 	}
 	if version != "" && tag != "" {
-		purl = typeNamespaceString + componentName + "@" + version + "?tag=" + tag
+		purl = typeNamespaceString + escapedName + "@" + version + "?tag=" + tag
 	} else if version != "" {
-		purl = typeNamespaceString + componentName + "@" + version
+		purl = typeNamespaceString + escapedName + "@" + version
 	} else if tag != "" {
-		purl = typeNamespaceString + componentName + "?tag=" + tag
+		purl = typeNamespaceString + escapedName + "?tag=" + tag
 	} else {
-		purl = typeNamespaceString + componentName
+		purl = typeNamespaceString + escapedName
 	}
 	return purl
 }
