@@ -182,11 +182,14 @@ func nilToEmpty(input *string) string {
 	return *input
 }
 
-func nilToZeroValue(inputTime *time.Time) time.Time {
-	if inputTime == nil {
-		return time.Time{}
+func timePtrEqual(a, b *time.Time) bool {
+	if a == nil && b == nil {
+		return true
 	}
-	return *inputTime
+	if a != nil && b != nil {
+		return a.Equal(*b)
+	}
+	return false
 }
 
 func toLower(filter *string) *string {
