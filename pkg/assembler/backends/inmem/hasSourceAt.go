@@ -100,7 +100,7 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.Pkg
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		if packageID == v.packageID && sourceID == v.sourceID && hasSourceAt.Justification == v.justification &&
-			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.UTC() == v.knownSince {
+			hasSourceAt.Origin == v.origin && hasSourceAt.Collector == v.collector && hasSourceAt.KnownSince.Equal(v.knownSince) {
 			collectedSrcMapLink = *v
 			duplicate = true
 			break

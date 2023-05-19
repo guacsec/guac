@@ -197,7 +197,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		if artifactID != 0 && artifactID == v.artifactID {
 			subjectMatch = true
 		}
-		if vulnMatch && subjectMatch && vexStatement.KnownSince.UTC() == v.knownSince && vexStatement.VexJustification == v.justification &&
+		if vulnMatch && subjectMatch && vexStatement.KnownSince.Equal(v.knownSince) && vexStatement.VexJustification == v.justification &&
 			vexStatement.Status == v.status && vexStatement.Statement == v.statement && vexStatement.StatusNotes == v.statusNotes &&
 			vexStatement.Origin == v.origin && vexStatement.Collector == v.collector {
 
