@@ -34,10 +34,6 @@ const guacType string = "guac"
 type PackageNode struct {
 	// Purl is the package url of the package
 	Purl string
-	// Algorithm is the hash algorithm used
-	Algorithm string
-	// Digest represents the hash of the package occurrence
-	Digest string
 }
 
 type packageQuery struct {
@@ -137,18 +133,15 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, response *generated.
 		for _, namespace := range pkgType.Namespaces {
 			for _, name := range namespace.Names {
 				for _, version := range name.Versions {
-					response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{generated.EdgePackageCertifyVuln, generated.EdgePackageIsOccurrence})
+					response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{generated.EdgePackageCertifyVuln})
 					if err != nil {
 						return fmt.Errorf("failed neighbors query: %w", err)
 					}
 					vulnList := []*generated.NeighborsNeighborsCertifyVuln{}
-					occurrenceList := []*generated.NeighborsNeighborsIsOccurrence{}
 					certifyVulnFound := false
 					for _, neighbor := range response.Neighbors {
 						if certifyVuln, ok := neighbor.(*generated.NeighborsNeighborsCertifyVuln); ok {
 							vulnList = append(vulnList, certifyVuln)
-						} else if occurrence, ok := neighbor.(*generated.NeighborsNeighborsIsOccurrence); ok {
-							occurrenceList = append(occurrenceList, occurrence)
 						}
 					}
 					// collect all certifyVulnerability and then check timestamp else if not checking timestamp,
@@ -178,23 +171,10 @@ func (p *packageQuery) getPackageNodes(ctx context.Context, response *generated.
 							qualifiers = append(qualifiers, k, qualifiersMap[k])
 						}
 						purl := helpers.PkgToPurl(pkgType.Type, namespace.Namespace, name.Name, version.Version, version.Subpath, qualifiers)
-						if len(occurrenceList) == 0 {
-							packNode := PackageNode{
-								Purl:      purl,
-								Algorithm: "",
-								Digest:    "",
-							}
-							nodeChan <- &packNode
-						} else {
-							for _, occurrence := range occurrenceList {
-								packNode := PackageNode{
-									Purl:      purl,
-									Algorithm: occurrence.Artifact.Algorithm,
-									Digest:    occurrence.Artifact.Digest,
-								}
-								nodeChan <- &packNode
-							}
+						packNode := PackageNode{
+							Purl: purl,
 						}
+						nodeChan <- &packNode
 					}
 				}
 			}

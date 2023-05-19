@@ -40,7 +40,6 @@ func TestParser(t *testing.T) {
 		doc     *processor.Document
 		wantCVs []assembler.CertifyVulnIngest
 		wantIVs []assembler.IsVulnIngest
-		wantIOs []assembler.IsOccurrenceIngest
 		wantErr bool
 	}{{
 		name: "valid vulnerability certifier document",
@@ -232,7 +231,6 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
-		wantIOs: []assembler.IsOccurrenceIngest{},
 		wantErr: false,
 	}, {
 		name: "no vulnerability certifier document with package digest",
@@ -260,24 +258,6 @@ func TestParser(t *testing.T) {
 			},
 		}},
 		wantIVs: []assembler.IsVulnIngest{},
-		wantIOs: []assembler.IsOccurrenceIngest{
-			{
-				Pkg: &generated.PkgInputSpec{
-					Type:      "maven",
-					Namespace: ptrfrom.String("org.apache.logging.log4j"),
-					Name:      "log4j-core",
-					Version:   ptrfrom.String("2.8.1"),
-					Subpath:   ptrfrom.String(""),
-				},
-				Artifact: &generated.ArtifactInputSpec{
-					Algorithm: "sha256",
-					Digest:    "3a2bd2c5cc4c978e8aefd8bd0ef335fb42ee31d1",
-				},
-				IsOccurrence: &generated.IsOccurrenceInputSpec{
-					Justification: "Package digest reported to vulnerability certifier",
-				},
-			},
-		},
 		wantErr: false,
 	}}
 	ivSortOpt := cmp.Transformer("Sort", func(in []assembler.IsVulnIngest) []assembler.IsVulnIngest {
@@ -291,13 +271,6 @@ func TestParser(t *testing.T) {
 		out := append([]assembler.CertifyVulnIngest(nil), in...)
 		sort.Slice(out, func(i, j int) bool {
 			return strings.Compare(out[i].OSV.OsvId, out[j].OSV.OsvId) > 0
-		})
-		return out
-	})
-	ioSortOpt := cmp.Transformer("Sort", func(in []assembler.IsOccurrenceIngest) []assembler.IsOccurrenceIngest {
-		out := append([]assembler.IsOccurrenceIngest(nil), in...)
-		sort.Slice(out, func(i, j int) bool {
-			return strings.Compare(out[i].Artifact.Digest, out[j].Artifact.Digest) > 0
 		})
 		return out
 	})
@@ -316,9 +289,6 @@ func TestParser(t *testing.T) {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 			if diff := cmp.Diff(tt.wantIVs, ip.IsVuln, ivSortOpt); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-			}
-			if diff := cmp.Diff(tt.wantIOs, ip.IsOccurrence, ioSortOpt); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
