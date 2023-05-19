@@ -22,9 +22,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	"github.com/guacsec/guac/pkg/ingestor/verifier"
-	"github.com/guacsec/guac/pkg/logging"
-	"github.com/sigstore/sigstore/pkg/cryptoutils"
 )
 
 type dsseParser struct {
@@ -50,7 +47,9 @@ func (d *dsseParser) Parse(ctx context.Context, doc *processor.Document) error {
 }
 
 func (d *dsseParser) getIdentity(ctx context.Context) error {
-	identities, err := verifier.VerifyIdentity(ctx, d.doc)
+	// TODO (pxp928): enable dsse verification once the identity and key management is finalized
+	// See issue: https://github.com/guacsec/guac/issues/75 and https://github.com/guacsec/guac/issues/443
+	/* identities, err := verifier.VerifyIdentity(ctx, d.doc)
 	if err != nil {
 		return fmt.Errorf("failed to verify identity: %w", err)
 	}
@@ -69,7 +68,7 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 			logger := logging.FromContext(ctx)
 			logger.Errorf("failed to verify DSSE with provided key: %w", i.ID)
 		}
-	}
+	} */
 	return nil
 }
 
