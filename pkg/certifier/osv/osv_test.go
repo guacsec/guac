@@ -28,7 +28,6 @@ import (
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
-	"github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
@@ -207,80 +206,40 @@ func Test_createAttestation(t *testing.T) {
 		name string
 		args args
 		want *attestation_vuln.VulnerabilityStatement
-	}{
-		{
-			name: "default",
-			args: args{
-				packageNode: root_package.PackageNode{
-					Purl:      "",
-					Algorithm: "",
-					Digest:    "",
-				},
-				vulns: []osv_scanner.MinimalVulnerability{
-					{
-						ID: "testId",
-					},
-				},
+	}{{
+		name: "default",
+		args: args{
+			packageNode: root_package.PackageNode{
+				Purl: "",
 			},
-			want: &attestation_vuln.VulnerabilityStatement{
-				StatementHeader: intoto.StatementHeader{
-					Type:          intoto.StatementInTotoV01,
-					PredicateType: attestation_vuln.PredicateVuln,
-					Subject:       []intoto.Subject{{Name: ""}},
-				},
-				Predicate: attestation_vuln.VulnerabilityPredicate{
-					Invocation: attestation_vuln.Invocation{
-						Uri:        INVOC_URI,
-						ProducerID: PRODUCER_ID,
-					},
-					Scanner: attestation_vuln.Scanner{
-						Uri:     URI,
-						Version: VERSION,
-						Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
-					},
-					Metadata: attestation_vuln.Metadata{
-						ScannedOn: &currentTime,
-					},
+			vulns: []osv_scanner.MinimalVulnerability{
+				{
+					ID: "testId",
 				},
 			},
 		},
-		{
-			name: "has digests",
-			args: args{
-				packageNode: root_package.PackageNode{
-					Purl:      "",
-					Algorithm: "test",
-					Digest:    "Digest",
-				}},
-			want: &attestation_vuln.VulnerabilityStatement{
-				StatementHeader: intoto.StatementHeader{
-					Type:          intoto.StatementInTotoV01,
-					PredicateType: attestation_vuln.PredicateVuln,
-					Subject: []intoto.Subject{
-						{
-							Name: "",
-							Digest: common.DigestSet{
-								"test": "Digest",
-							},
-						},
-					},
+		want: &attestation_vuln.VulnerabilityStatement{
+			StatementHeader: intoto.StatementHeader{
+				Type:          intoto.StatementInTotoV01,
+				PredicateType: attestation_vuln.PredicateVuln,
+				Subject:       []intoto.Subject{{Name: ""}},
+			},
+			Predicate: attestation_vuln.VulnerabilityPredicate{
+				Invocation: attestation_vuln.Invocation{
+					Uri:        INVOC_URI,
+					ProducerID: PRODUCER_ID,
 				},
-				Predicate: attestation_vuln.VulnerabilityPredicate{
-					Invocation: attestation_vuln.Invocation{
-						Uri:        INVOC_URI,
-						ProducerID: PRODUCER_ID,
-					},
-					Scanner: attestation_vuln.Scanner{
-						Uri:     URI,
-						Version: VERSION,
-					},
-					Metadata: attestation_vuln.Metadata{
-						ScannedOn: &currentTime,
-					},
+				Scanner: attestation_vuln.Scanner{
+					Uri:     URI,
+					Version: VERSION,
+					Result:  []attestation_vuln.Result{{VulnerabilityId: "testId"}},
+				},
+				Metadata: attestation_vuln.Metadata{
+					ScannedOn: &currentTime,
 				},
 			},
 		},
-	}
+	}}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			currentTime := time.Now()

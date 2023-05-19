@@ -25,7 +25,6 @@ import (
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
 	intoto "github.com/in-toto/in-toto-golang/in_toto"
-	"github.com/in-toto/in-toto-golang/in_toto/slsa_provenance/common"
 
 	"github.com/guacsec/guac/pkg/certifier"
 	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
@@ -132,12 +131,6 @@ func createAttestation(packageNode *root_package.PackageNode, vulns []osv_scanne
 	}
 
 	subject := intoto.Subject{Name: packageNode.Purl}
-
-	if packageNode.Algorithm != "" && packageNode.Digest != "" {
-		subject.Digest = common.DigestSet{
-			packageNode.Algorithm: packageNode.Digest,
-		}
-	}
 
 	attestation.StatementHeader.Subject = []intoto.Subject{subject}
 
