@@ -283,7 +283,8 @@ func Test_createAttestation(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := createAttestation(&test.args.packageNode, test.args.vulns)
+			currentTime := time.Now()
+			got := createAttestation(&test.args.packageNode, test.args.vulns, currentTime)
 			if !deepEqualIgnoreTimestamp(got, test.want) {
 				t.Errorf("createAttestation() = %v, want %v", got, test.want)
 			}

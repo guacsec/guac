@@ -120,7 +120,6 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 // generateDocuments runs CertifyVulns as a goroutine to scan and generates attestations that
 // are emitted as processor documents to be ingested
 func generateDocuments(ctx context.Context, collectedComponent interface{}, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
-
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
