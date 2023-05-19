@@ -38,8 +38,8 @@ type hasSLSAStruct struct {
 	buildType  string
 	predicates []*model.SLSAPredicate
 	version    string
-	start      time.Time
-	finish     time.Time
+	start      *time.Time
+	finish     *time.Time
 	origin     string
 	collector  string
 }
@@ -227,8 +227,8 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 			sl.buildType == slsa.BuildType &&
 			cmp.Equal(sl.predicates, preds) &&
 			sl.version == slsa.SlsaVersion &&
-			sl.start == slsa.StartedOn &&
-			sl.finish == slsa.FinishedOn &&
+			timePtrEqual(sl.start, slsa.StartedOn) &&
+			timePtrEqual(sl.finish, slsa.FinishedOn) &&
 			sl.origin == slsa.Origin &&
 			sl.collector == slsa.Collector {
 			return c.convSLSA(sl)
@@ -324,8 +324,8 @@ func (c *demoClient) addSLSAIfMatch(out []*model.HasSlsa,
 		noMatch(filter.SlsaVersion, link.version) ||
 		noMatch(filter.Origin, link.origin) ||
 		noMatch(filter.Collector, link.collector) ||
-		(filter.StartedOn != nil && !filter.StartedOn.Equal(link.start)) ||
-		(filter.FinishedOn != nil && !filter.FinishedOn.Equal(link.finish)) ||
+		(filter.StartedOn != nil && (link.start == nil || !filter.StartedOn.Equal(*link.start))) ||
+		(filter.FinishedOn != nil && (link.finish == nil || !filter.FinishedOn.Equal(*link.finish))) ||
 		(filter.BuiltBy != nil && filter.BuiltBy.ID != nil && *filter.BuiltBy.ID != nodeID(bb.id)) ||
 		(filter.BuiltBy != nil && filter.BuiltBy.URI != nil && *filter.BuiltBy.URI != bb.uri) ||
 		!matchSLSAPreds(link.predicates, filter.Predicate) ||
