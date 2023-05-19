@@ -165,7 +165,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 		if noKnownVulnID != 0 && noKnownVulnID == v.noKnownVulnID {
 			vulnMatch = true
 		}
-		if vulnMatch && packageID == v.packageID && certifyVuln.TimeScanned.UTC() == v.timeScanned && certifyVuln.DbURI == v.dbURI &&
+		if vulnMatch && packageID == v.packageID && certifyVuln.TimeScanned.Equal(v.timeScanned) && certifyVuln.DbURI == v.dbURI &&
 			certifyVuln.DbVersion == v.dbVersion && certifyVuln.ScannerURI == v.scannerURI && certifyVuln.ScannerVersion == v.scannerVersion &&
 			certifyVuln.Origin == v.origin && certifyVuln.Collector == v.collector {
 
@@ -174,6 +174,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 			break
 		}
 	}
+
 	if !duplicate {
 		if readOnly {
 			c.m.RUnlock()
@@ -189,7 +190,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 			cveID:          cveID,
 			ghsaID:         ghsaID,
 			noKnownVulnID:  noKnownVulnID,
-			timeScanned:    certifyVuln.TimeScanned.UTC(),
+			timeScanned:    certifyVuln.TimeScanned,
 			dbURI:          certifyVuln.DbURI,
 			dbVersion:      certifyVuln.DbVersion,
 			scannerURI:     certifyVuln.ScannerURI,
