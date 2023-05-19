@@ -89,8 +89,9 @@ func (o *osvCertifier) CertifyComponent(ctx context.Context, rootComponent inter
 }
 
 func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability, docChannel chan<- *processor.Document) error {
+	currentTime := time.Now()
 	for _, node := range packNodes {
-		payload, err := json.Marshal(createAttestation(node, vulns))
+		payload, err := json.Marshal(createAttestation(node, vulns, currentTime))
 		if err != nil {
 			return fmt.Errorf("unable to marshal attestation: %w", err)
 		}
@@ -108,8 +109,7 @@ func generateDocument(packNodes []*root_package.PackageNode, vulns []osv_scanner
 	return nil
 }
 
-func createAttestation(packageNode *root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability) *attestation_vuln.VulnerabilityStatement {
-	currentTime := time.Now()
+func createAttestation(packageNode *root_package.PackageNode, vulns []osv_scanner.MinimalVulnerability, currentTime time.Time) *attestation_vuln.VulnerabilityStatement {
 
 	attestation := &attestation_vuln.VulnerabilityStatement{
 		StatementHeader: intoto.StatementHeader{
