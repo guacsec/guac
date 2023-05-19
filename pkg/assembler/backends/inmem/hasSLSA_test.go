@@ -79,9 +79,11 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
-						BuildType: "test type",
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						BuildType:  "test type",
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
@@ -115,9 +117,11 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
-						BuildType: "test type",
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						BuildType:  "test type",
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
@@ -151,9 +155,11 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
-						BuildType: "test type one",
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						BuildType:  "test type one",
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
@@ -190,6 +196,8 @@ func TestHasSLSA(t *testing.T) {
 						BuiltBy:     b1out,
 						BuiltFrom:   []*model.Artifact{a2out},
 						SlsaVersion: "test type two",
+						StartedOn:   &time.Time{},
+						FinishedOn:  &time.Time{},
 					},
 				},
 			},
@@ -223,9 +231,10 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
-						StartedOn: &testTime,
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						StartedOn:  &testTime,
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
@@ -257,8 +266,10 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
@@ -296,15 +307,19 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out, a3out},
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out, a3out},
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
@@ -336,8 +351,10 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
@@ -367,8 +384,10 @@ func TestHasSLSA(t *testing.T) {
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
-						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltBy:    b1out,
+						BuiltFrom:  []*model.Artifact{a2out},
+						StartedOn:  &time.Time{},
+						FinishedOn: &time.Time{},
 					},
 				},
 			},
