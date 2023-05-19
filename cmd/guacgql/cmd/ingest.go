@@ -91,7 +91,8 @@ func ingestScorecards(ctx context.Context, client graphql.Client) {
 
 func ingestSLSA(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
-
+	startTime := time.Now()
+	finishTime := time.Now().Add(10 * time.Second)
 	predicate := []model.SLSAPredicateInputSpec{
 		{
 			Key:   "buildDefinition.externalParameters.repository",
@@ -124,8 +125,8 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		BuildType:     "Test:SLSA",
 		SlsaPredicate: predicate,
 		SlsaVersion:   "v1",
-		StartedOn:     time.Now(),
-		FinishedOn:    time.Now().Add(10 * time.Second),
+		StartedOn:     &startTime,
+		FinishedOn:    &finishTime,
 		Origin:        "Demo ingestion",
 		Collector:     "Demo ingestion",
 	}
@@ -155,8 +156,6 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		BuildType:     "Test:SLSA2",
 		SlsaPredicate: predicate,
 		SlsaVersion:   "v1",
-		StartedOn:     time.Now(),
-		FinishedOn:    time.Now().Add(10 * time.Second),
 		Origin:        "Demo ingestion",
 		Collector:     "Demo ingestion",
 	}

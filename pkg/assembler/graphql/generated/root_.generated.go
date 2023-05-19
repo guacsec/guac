@@ -2999,9 +2999,9 @@ type SLSA {
   "Version of the SLSA predicate"
   slsaVersion: String!
   "Timestamp (RFC3339Nano format) of build start time"
-  startedOn: Time!
+  startedOn: Time
   "Timestamp (RFC3339Nano format) of build end time"
-  finishedOn: Time!
+  finishedOn: Time
   "Document from which this attestation is generated from"
   origin: String!
   "GUAC collector for the document"
@@ -3066,8 +3066,8 @@ input SLSAInputSpec {
   buildType: String!
   slsaPredicate: [SLSAPredicateInputSpec!]!
   slsaVersion: String!
-  startedOn: Time!
-  finishedOn: Time!
+  startedOn: Time
+  finishedOn: Time
   origin: String!
   collector: String!
 }

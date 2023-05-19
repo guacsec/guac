@@ -41,6 +41,7 @@ var b2 = &model.BuilderInputSpec{
 
 func TestHasSLSA(t *testing.T) {
 	testTime := time.Unix(1e9+5, 0)
+	testTime2 := time.Unix(1e9, 0)
 	type call struct {
 		Sub  *model.ArtifactInputSpec
 		BF   []*model.ArtifactInputSpec
@@ -203,7 +204,7 @@ func TestHasSLSA(t *testing.T) {
 					BF:  []*model.ArtifactInputSpec{a2},
 					BB:  b1,
 					SLSA: &model.SLSAInputSpec{
-						StartedOn: time.Unix(1e9, 0),
+						StartedOn: &testTime2,
 					},
 				},
 				{
@@ -211,7 +212,7 @@ func TestHasSLSA(t *testing.T) {
 					BF:  []*model.ArtifactInputSpec{a2},
 					BB:  b1,
 					SLSA: &model.SLSAInputSpec{
-						StartedOn: testTime,
+						StartedOn: &testTime,
 					},
 				},
 			},
@@ -224,7 +225,7 @@ func TestHasSLSA(t *testing.T) {
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
 						BuiltFrom: []*model.Artifact{a2out},
-						StartedOn: testTime,
+						StartedOn: &testTime,
 					},
 				},
 			},

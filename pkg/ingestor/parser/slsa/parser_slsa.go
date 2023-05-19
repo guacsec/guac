@@ -197,30 +197,30 @@ func getSlsaEntity(name string, digests scommon.DigestSet) (*slsaEntity, error) 
 func fillSLSA01(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA01) {
 	inp.BuildType = stmt.Predicate.Recipe.Type
 	if stmt.Predicate.Metadata.BuildStartedOn != nil {
-		inp.StartedOn = *stmt.Predicate.Metadata.BuildStartedOn
+		inp.StartedOn = stmt.Predicate.Metadata.BuildStartedOn
 	}
 	if stmt.Predicate.Metadata.BuildFinishedOn != nil {
-		inp.FinishedOn = *stmt.Predicate.Metadata.BuildStartedOn
+		inp.FinishedOn = stmt.Predicate.Metadata.BuildStartedOn
 	}
 }
 
 func fillSLSA02(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA02) {
 	inp.BuildType = stmt.Predicate.BuildType
 	if stmt.Predicate.Metadata.BuildStartedOn != nil {
-		inp.StartedOn = *stmt.Predicate.Metadata.BuildStartedOn
+		inp.StartedOn = stmt.Predicate.Metadata.BuildStartedOn
 	}
 	if stmt.Predicate.Metadata.BuildFinishedOn != nil {
-		inp.FinishedOn = *stmt.Predicate.Metadata.BuildStartedOn
+		inp.FinishedOn = stmt.Predicate.Metadata.BuildStartedOn
 	}
 }
 
 func fillSLSA1(inp *model.SLSAInputSpec, stmt *in_toto.ProvenanceStatementSLSA1) {
 	inp.BuildType = stmt.Predicate.BuildDefinition.BuildType
 	if stmt.Predicate.RunDetails.BuildMetadata.StartedOn != nil {
-		inp.StartedOn = *stmt.Predicate.RunDetails.BuildMetadata.StartedOn
+		inp.StartedOn = stmt.Predicate.RunDetails.BuildMetadata.StartedOn
 	}
 	if stmt.Predicate.RunDetails.BuildMetadata.FinishedOn != nil {
-		inp.FinishedOn = *stmt.Predicate.RunDetails.BuildMetadata.FinishedOn
+		inp.FinishedOn = stmt.Predicate.RunDetails.BuildMetadata.FinishedOn
 	}
 }
 

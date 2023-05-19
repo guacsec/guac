@@ -17855,8 +17855,8 @@ type SLSAInputSpec struct {
 	BuildType     string                   `json:"buildType"`
 	SlsaPredicate []SLSAPredicateInputSpec `json:"slsaPredicate"`
 	SlsaVersion   string                   `json:"slsaVersion"`
-	StartedOn     time.Time                `json:"startedOn"`
-	FinishedOn    time.Time                `json:"finishedOn"`
+	StartedOn     *time.Time               `json:"startedOn"`
+	FinishedOn    *time.Time               `json:"finishedOn"`
 	Origin        string                   `json:"origin"`
 	Collector     string                   `json:"collector"`
 }
@@ -17871,10 +17871,10 @@ func (v *SLSAInputSpec) GetSlsaPredicate() []SLSAPredicateInputSpec { return v.S
 func (v *SLSAInputSpec) GetSlsaVersion() string { return v.SlsaVersion }
 
 // GetStartedOn returns SLSAInputSpec.StartedOn, and is useful for accessing the field via an interface.
-func (v *SLSAInputSpec) GetStartedOn() time.Time { return v.StartedOn }
+func (v *SLSAInputSpec) GetStartedOn() *time.Time { return v.StartedOn }
 
 // GetFinishedOn returns SLSAInputSpec.FinishedOn, and is useful for accessing the field via an interface.
-func (v *SLSAInputSpec) GetFinishedOn() time.Time { return v.FinishedOn }
+func (v *SLSAInputSpec) GetFinishedOn() *time.Time { return v.FinishedOn }
 
 // GetOrigin returns SLSAInputSpec.Origin, and is useful for accessing the field via an interface.
 func (v *SLSAInputSpec) GetOrigin() string { return v.Origin }
@@ -23592,9 +23592,9 @@ type allSLSATreeSlsaSLSA struct {
 	// Version of the SLSA predicate
 	SlsaVersion string `json:"slsaVersion"`
 	// Timestamp (RFC3339Nano format) of build start time
-	StartedOn time.Time `json:"startedOn"`
+	StartedOn *time.Time `json:"startedOn"`
 	// Timestamp (RFC3339Nano format) of build end time
-	FinishedOn time.Time `json:"finishedOn"`
+	FinishedOn *time.Time `json:"finishedOn"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
 	// GUAC collector for the document
@@ -23621,10 +23621,10 @@ func (v *allSLSATreeSlsaSLSA) GetSlsaPredicate() []allSLSATreeSlsaSLSASlsaPredic
 func (v *allSLSATreeSlsaSLSA) GetSlsaVersion() string { return v.SlsaVersion }
 
 // GetStartedOn returns allSLSATreeSlsaSLSA.StartedOn, and is useful for accessing the field via an interface.
-func (v *allSLSATreeSlsaSLSA) GetStartedOn() time.Time { return v.StartedOn }
+func (v *allSLSATreeSlsaSLSA) GetStartedOn() *time.Time { return v.StartedOn }
 
 // GetFinishedOn returns allSLSATreeSlsaSLSA.FinishedOn, and is useful for accessing the field via an interface.
-func (v *allSLSATreeSlsaSLSA) GetFinishedOn() time.Time { return v.FinishedOn }
+func (v *allSLSATreeSlsaSLSA) GetFinishedOn() *time.Time { return v.FinishedOn }
 
 // GetOrigin returns allSLSATreeSlsaSLSA.Origin, and is useful for accessing the field via an interface.
 func (v *allSLSATreeSlsaSLSA) GetOrigin() string { return v.Origin }
