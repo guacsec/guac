@@ -3066,7 +3066,7 @@ input SLSAInputSpec {
   buildType: String!
   slsaPredicate: [SLSAPredicateInputSpec!]!
   slsaVersion: String!
-  startedOn: Time 
+  startedOn: Time
   finishedOn: Time
   origin: String!
   collector: String!

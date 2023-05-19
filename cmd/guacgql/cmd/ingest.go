@@ -156,8 +156,6 @@ func ingestSLSA(ctx context.Context, client graphql.Client) {
 		BuildType:     "Test:SLSA2",
 		SlsaPredicate: predicate,
 		SlsaVersion:   "v1",
-		StartedOn:     &startTime,
-		FinishedOn:    &finishTime,
 		Origin:        "Demo ingestion",
 		Collector:     "Demo ingestion",
 	}
