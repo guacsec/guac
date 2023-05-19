@@ -79,7 +79,7 @@ func (s *spdxParser) getTopLevelPackage() error {
 
 	// Currently create TopLevel package as well in some cases where we guess that the SPDX document
 	// may not encode it
-	var purl string = "pkg:guac/spdx/" + s.spdxDoc.DocumentName
+	var purl string = "pkg:guac/spdx/" + asmhelpers.SanitizeString(s.spdxDoc.DocumentName)
 
 	if purl != "" {
 		topPackage, err := asmhelpers.PurlToPkg(purl)

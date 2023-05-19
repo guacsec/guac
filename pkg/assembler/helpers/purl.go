@@ -17,6 +17,7 @@ package helpers
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -27,6 +28,7 @@ import (
 const (
 	PurlTypeGuac  = "guac"
 	PurlFilesGuac = "pkg:guac/files/"
+	PurlPkgGuac   = "pkg:guac/pkg/"
 )
 
 // PurlToPkg converts a purl URI string into a graphql package node
@@ -159,21 +161,36 @@ func pkg(typ, namespace, name, version, subpath string, qualifiers map[string]st
 	return p
 }
 
-func GuacPkgPurl(pkgName string, pkgVersion *string) string {
-	if pkgVersion == nil {
-		return fmt.Sprintf("pkg:guac/pkg/%s", pkgName)
+func SanitizeString(s string) string {
+	escapedName := ""
+	if strings.Contains(s, "/") {
+		var ns []string
+		for _, item := range strings.Split(s, "/") {
+			ns = append(ns, url.QueryEscape(item))
+		}
+		escapedName = strings.Join(ns, "/")
+	} else {
+		escapedName = url.QueryEscape(s)
 	}
-	return fmt.Sprintf("pkg:guac/pkg/%s@%s", pkgName, *pkgVersion)
+	return escapedName
+}
+
+func GuacPkgPurl(pkgName string, pkgVersion *string) string {
+	escapedName := SanitizeString(pkgName)
+	if pkgVersion == nil {
+		return fmt.Sprintf(PurlPkgGuac+"%s", escapedName)
+	}
+	return fmt.Sprintf(PurlPkgGuac+"%s@%s", escapedName, *pkgVersion)
 }
 
 func GuacFilePurl(alg string, digest string, filename *string) string {
 	s := fmt.Sprintf(PurlFilesGuac+"%s:%s", strings.ToLower(alg), digest)
 	if filename != nil {
-		s += fmt.Sprintf("#%s", *filename)
+		s += fmt.Sprintf("#%s", SanitizeString(*filename))
 	}
 	return s
 }
 
 func GuacGenericPurl(s string) string {
-	return fmt.Sprintf("pkg:guac/generic/%s", s)
+	return fmt.Sprintf("pkg:guac/generic/%s", SanitizeString(s))
 }
