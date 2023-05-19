@@ -227,8 +227,8 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 			sl.buildType == slsa.BuildType &&
 			cmp.Equal(sl.predicates, preds) &&
 			sl.version == slsa.SlsaVersion &&
-			sl.start == slsa.StartedOn &&
-			sl.finish == slsa.FinishedOn &&
+			sl.start.Equal(nilToZeroValue(slsa.StartedOn)) &&
+			sl.finish.Equal(nilToZeroValue(slsa.FinishedOn)) &&
 			sl.origin == slsa.Origin &&
 			sl.collector == slsa.Collector {
 			return c.convSLSA(sl)
@@ -250,8 +250,8 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 		buildType:  slsa.BuildType,
 		predicates: preds,
 		version:    slsa.SlsaVersion,
-		start:      slsa.StartedOn,
-		finish:     slsa.FinishedOn,
+		start:      nilToZeroValue(slsa.StartedOn),
+		finish:     nilToZeroValue(slsa.FinishedOn),
 		origin:     slsa.Origin,
 		collector:  slsa.Collector,
 	}
@@ -305,8 +305,8 @@ func (c *demoClient) convSLSA(in *hasSLSAStruct) (*model.HasSlsa, error) {
 			BuildType:     in.buildType,
 			SlsaPredicate: in.predicates,
 			SlsaVersion:   in.version,
-			StartedOn:     in.start,
-			FinishedOn:    in.finish,
+			StartedOn:     &in.start,
+			FinishedOn:    &in.finish,
 			Origin:        in.origin,
 			Collector:     in.collector,
 		},

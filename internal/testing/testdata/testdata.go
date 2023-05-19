@@ -310,7 +310,7 @@ var (
 				HasSlsa: &model.SLSAInputSpec{
 					BuildType:   "https://github.com/Attestations/GitHubActionsWorkflow@v1",
 					SlsaVersion: "https://slsa.dev/provenance/v0.2",
-					StartedOn:   slsaStartTime,
+					StartedOn:   &slsaStartTime,
 					SlsaPredicate: []model.SLSAPredicateInputSpec{
 						{Key: "slsa.metadata.completeness.environment", Value: "true"},
 						{Key: "slsa.metadata.buildStartedOn", Value: "2020-08-19T08:38:00Z"},
@@ -381,7 +381,7 @@ var (
 				HasSlsa: &model.SLSAInputSpec{
 					BuildType:   "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
 					SlsaVersion: "https://slsa.dev/provenance/v1",
-					StartedOn:   slsa1time,
+					StartedOn:   &slsa1time,
 					SlsaPredicate: []model.SLSAPredicateInputSpec{
 						{Key: "slsa.buildDefinition.buildType", Value: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1"},
 						{Key: "slsa.buildDefinition.externalParameters.inputs.build_id", Value: "1.23456768e+08"},

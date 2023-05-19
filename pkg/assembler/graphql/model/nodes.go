@@ -979,9 +979,9 @@ type Slsa struct {
 	// Version of the SLSA predicate
 	SlsaVersion string `json:"slsaVersion"`
 	// Timestamp (RFC3339Nano format) of build start time
-	StartedOn time.Time `json:"startedOn"`
+	StartedOn *time.Time `json:"startedOn,omitempty"`
 	// Timestamp (RFC3339Nano format) of build end time
-	FinishedOn time.Time `json:"finishedOn"`
+	FinishedOn *time.Time `json:"finishedOn,omitempty"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
 	// GUAC collector for the document
@@ -993,8 +993,8 @@ type SLSAInputSpec struct {
 	BuildType     string                    `json:"buildType"`
 	SlsaPredicate []*SLSAPredicateInputSpec `json:"slsaPredicate"`
 	SlsaVersion   string                    `json:"slsaVersion"`
-	StartedOn     time.Time                 `json:"startedOn"`
-	FinishedOn    time.Time                 `json:"finishedOn"`
+	StartedOn     *time.Time                `json:"startedOn,omitempty"`
+	FinishedOn    *time.Time                `json:"finishedOn,omitempty"`
 	Origin        string                    `json:"origin"`
 	Collector     string                    `json:"collector"`
 }

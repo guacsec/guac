@@ -22,6 +22,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -179,6 +180,13 @@ func nilToEmpty(input *string) string {
 		return ""
 	}
 	return *input
+}
+
+func nilToZeroValue(inputTime *time.Time) time.Time {
+	if inputTime == nil {
+		return time.Time{}
+	}
+	return *inputTime
 }
 
 func toLower(filter *string) *string {
