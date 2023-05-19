@@ -1,0 +1,17 @@
+name: test verify oci image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-verify:
+    # uses: guacsec/guac/.github/workflows/reusable-verify-image.yaml@{ref}
+    uses: ./.github/workflows/reusable-verify-image.yaml
+    with:
+      # github.event is defined in event.json
+      image: ${{ github.event.inputs.image }}
+      digest: ${{ github.event.inputs.digest }}
+      registry-username: ${{ github.actor }}
+      image-signing-workflow-repo: ${{ github.event.inputs.image-signing-workflow-repo }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
