@@ -85,7 +85,7 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceIn
 			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		if sourceID == v.sourceID &&
-			scorecard.TimeScanned.UTC() == v.timeScanned &&
+			scorecard.TimeScanned.Equal(v.timeScanned) &&
 			floatEqual(scorecard.AggregateScore, v.aggregateScore) &&
 			scorecard.ScorecardVersion == v.scorecardVersion &&
 			scorecard.ScorecardCommit == v.scorecardCommit &&
