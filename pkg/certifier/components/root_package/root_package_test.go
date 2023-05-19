@@ -106,10 +106,6 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 		TimeScanned: time.Now().UTC(),
 	}
 
-	neighborIsOccurrence := generated.NeighborsNeighborsIsOccurrence{}
-	neighborIsOccurrence.Artifact.Algorithm = "sha256"
-	neighborIsOccurrence.Artifact.Digest = "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf"
-
 	tests := []struct {
 		name              string
 		daysSinceLastScan int
@@ -133,9 +129,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			},
 			wantPackNode: []*PackageNode{
 				{
-					Purl:      "pkg:pypi/django@1.11.1",
-					Algorithm: "",
-					Digest:    "",
+					Purl: "pkg:pypi/django@1.11.1",
 				},
 			},
 			wantErr: false,
@@ -168,9 +162,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 				}, nil
 			},
 			wantPackNode: []*PackageNode{{
-				Purl:      "pkg:pypi/django@1.11.1",
-				Algorithm: "",
-				Digest:    "",
+				Purl: "pkg:pypi/django@1.11.1",
 			}},
 			wantErr: false,
 		}, {
@@ -198,7 +190,7 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp, &neighborIsOccurrence},
+					Neighbors: []generated.NeighborsNeighborsNode{&neighborCertifyVulnTimeStamp},
 				}, nil
 			},
 			wantPackNode: []*PackageNode{},
@@ -213,13 +205,11 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 			},
 			getNeighbors: func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error) {
 				return &generated.NeighborsResponse{
-					Neighbors: []generated.NeighborsNeighborsNode{&neighborIsOccurrence},
+					Neighbors: []generated.NeighborsNeighborsNode{},
 				}, nil
 			},
 			wantPackNode: []*PackageNode{{
-				Purl:      "pkg:pypi/django@1.11.1",
-				Algorithm: "sha256",
-				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+				Purl: "pkg:pypi/django@1.11.1",
 			}},
 			wantErr: false,
 		}, {
@@ -236,13 +226,9 @@ func Test_packageQuery_GetComponents(t *testing.T) {
 				}, nil
 			},
 			wantPackNode: []*PackageNode{{
-				Purl:      "pkg:pypi/django@1.11.1",
-				Algorithm: "",
-				Digest:    "",
+				Purl: "pkg:pypi/django@1.11.1",
 			}, {
-				Purl:      "pkg:conan/openssl.org/openssl@3.0.3",
-				Algorithm: "",
-				Digest:    "",
+				Purl: "pkg:conan/openssl.org/openssl@3.0.3",
 			}},
 			wantErr: false,
 		}}

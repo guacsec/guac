@@ -854,7 +854,7 @@ var (
 		"subject":[
 		   {
 			  "name":"pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
-			  "digest":{"sha256":"fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1"}
+			  "digest":null
 		   }
 		],
 		"predicate":{
@@ -947,9 +947,7 @@ var (
 	}
 
 	SecondLevelPackage = root_package.PackageNode{
-		Purl:      "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
-		Algorithm: "sha256",
-		Digest:    "fe608dbc4894fc0b9c82908ece9ddddb63bb79083e5b25f2c02f87773bde1aa1",
+		Purl: "pkg:oci/vul-secondLevel-latest?repository_url=grc.io",
 	}
 
 	Log4JPackage = root_package.PackageNode{

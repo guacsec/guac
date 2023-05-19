@@ -49,7 +49,6 @@ type parser struct {
 	vulnData *generated.VulnerabilityMetaDataInput
 	vulns    []*generated.OSVInputSpec
 	isVulns  []assembler.IsVulnIngest
-	isOccs   []assembler.IsOccurrenceIngest
 }
 
 // NewVulnCertificationParser initializes the parser
@@ -63,12 +62,11 @@ func (c *parser) Parse(ctx context.Context, doc *processor.Document) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse slsa predicate: %w", err)
 	}
-	ps, ios, err := parseSubject(statement)
+	ps, err := parseSubject(statement)
 	if err != nil {
 		return fmt.Errorf("unable to parse subject of statement: %w", err)
 	}
 	c.packages = ps
-	c.isOccs = ios
 	c.vulnData = parseMetadata(statement)
 	vs, ivs, err := parseVulns(ctx, statement)
 	if err != nil {
@@ -88,31 +86,16 @@ func parseVulnCertifyPredicate(p []byte) (*attestation_vuln.VulnerabilityStateme
 	return &predicate, nil
 }
 
-func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgInputSpec,
-	[]assembler.IsOccurrenceIngest, error) {
+func parseSubject(s *attestation_vuln.VulnerabilityStatement) ([]*generated.PkgInputSpec, error) {
 	var ps []*generated.PkgInputSpec
-	var ios []assembler.IsOccurrenceIngest
 	for _, sub := range s.StatementHeader.Subject {
 		p, err := helpers.PurlToPkg(sub.Name)
 		if err != nil {
-			return nil, nil, fmt.Errorf("bad purl in statement header: %w", err)
+			return nil, fmt.Errorf("bad purl in statement header: %w", err)
 		}
 		ps = append(ps, p)
-		for a, d := range sub.Digest {
-			io := assembler.IsOccurrenceIngest{
-				Pkg: p,
-				Artifact: &generated.ArtifactInputSpec{
-					Algorithm: a,
-					Digest:    d,
-				},
-				IsOccurrence: &generated.IsOccurrenceInputSpec{
-					Justification: "Package digest reported to vulnerability certifier",
-				},
-			}
-			ios = append(ios, io)
-		}
 	}
-	return ps, ios, nil
+	return ps, nil
 }
 
 func parseMetadata(s *attestation_vuln.VulnerabilityStatement) *generated.VulnerabilityMetaDataInput {
@@ -155,8 +138,7 @@ func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement)
 
 func (c *parser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	rv := &assembler.IngestPredicates{
-		IsVuln:       c.isVulns,
-		IsOccurrence: c.isOccs,
+		IsVuln: c.isVulns,
 	}
 	for _, p := range c.packages {
 		if len(c.vulns) > 0 {
