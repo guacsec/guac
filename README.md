@@ -60,15 +60,8 @@ the [metadata quality issue](https://github.com/guacsec/guac/issues/169).
 
 ## Communication
 
-We encourage discussions to be done on github issues. We also have a
-[public slack channel](https://openssf.slack.com/archives/C03U677QD46) on the
-OpenSSF slack.
-
-For future updates, announcements, and community meetings, join our
-[GUAC community google group](https://groups.google.com/forum/#!forum/guac-community/join).
-
-We host monthly community calls available for all to join
-([Calendar Invite](https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=NTRsazR2cWUxaHVkYXVlOGt1dDNwZDBhNGdfMjAyMzAyMTZUMTgwMDAwWiBjXzg0ZjFmY2FhZGVhMmM0NTZlYTBkNWQ2OTljMzIwZWU5ZDc1NzY0ODQ0NzRlYmVmY2U1N2M0N2QxZWFlYjAyZDZAZw&tmsrc=c_84f1fcaadea2c456ea0d5d699c320ee9d7576484474ebefce57c47d1eaeb02d6%40group.calendar.google.com&scp=ALL)).
+For more information on how to get involved in the community, mailing lists and
+metings, please refer to our [community page](https://guac.sh/community/)
 
 For security issues or code of conduct concerns, an e-mail should be sent to
 guac-maintainers@googlegroups.com.
