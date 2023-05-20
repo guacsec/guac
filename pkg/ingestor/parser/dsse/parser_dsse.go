@@ -22,6 +22,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type dsseParser struct {
@@ -69,6 +70,8 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 			logger.Errorf("failed to verify DSSE with provided key: %w", i.ID)
 		}
 	} */
+	logger := logging.FromContext(ctx)
+	logger.Warn("DSSE verification currently not implemented in this release. Continuing without DSSE verification")
 	return nil
 }
 
