@@ -118,7 +118,23 @@ func ParseVersionValue(s string) VersionValue {
 
 // TODO: implement for more efficient traversal later
 func DoesRangeInclude(versions []string, versionRange string) (bool, error) {
-	return false, fmt.Errorf("unimplemented")
+
+	versionMap, err := WhichVersionMatches(versions, versionRange)
+	for k, v := range versionMap {
+		fmt.Println(k, "value is", v)
+	}
+
+	if err != nil {
+		return false, fmt.Errorf("error for DoesRangeInclude %v", err)
+	}
+
+	for _, isInRange := range versionMap {
+		if isInRange {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 type VersionRange struct {

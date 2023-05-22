@@ -442,3 +442,41 @@ func Test_WhichVersionMatches(t *testing.T) {
 		})
 	}
 }
+
+func Test_DoesRangeInclude(t *testing.T) {
+	testCases := []struct {
+		versions     []string
+		versionRange string
+		expect       bool
+	}{
+		{
+			versionRange: ">=1.0,<=2.0",
+			versions:     []string{"1.5"},
+			expect:       true,
+		},
+		{
+			versionRange: ">=1.0,<=2.0",
+			versions:     []string{"1.0", "2.0", "3.0"},
+			expect:       true,
+		},
+		{
+			versionRange: ">=1.0,<=2.0",
+			versions:     []string{"3.0", "2.1"},
+			expect:       false,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("does range include %s", tt.versionRange), func(t *testing.T) {
+			got, err := DoesRangeInclude(tt.versions, tt.versionRange)
+			if err != nil {
+				t.Errorf("got err from DoesRangeInclude: %v", err)
+				return
+			}
+
+			if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
