@@ -32,6 +32,12 @@ can take a look.
 Starting the GUAC services with our
 [docker compose quickstart](https://docs.guac.sh/setup/).
 
+## Docs
+
+All documentation for GUAC lives on [docs.guac.sh](https://docs.guac.sh),
+backed by the following [docs github
+repository](https://github.com/guacsec/guac-docs).
+
 ## Architecture
 
 Here is an overview of the architecture of GUAC:
