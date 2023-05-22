@@ -54,8 +54,8 @@ Note that GUAC uses software identifiers standards to help link metadata
 together. However, these identifiers are not always available and heuristics
 need to be used to link them. Therefore, there may be unhandled edge cases and
 errors occurring when ingesting data. We appreciate it if you could create a
-[data quality issue](https://github.com/guacsec/guac/issues) if you encounter
-any errors or bugs with ingestion.
+[data quality issue](https://github.com/guacsec/guac/issues/new?assignees=&labels=bug%2C+data-sources%2C+data-quality&projects=&template=bug_report_ingestion.md&title=%5Bingestion%2Fdata-quality+issue%5D+FILL+THIS+IN)
+if you encounter any errors or bugs with ingestion.
 
 ## Additional References
 
