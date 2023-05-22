@@ -10,8 +10,8 @@ components. For example, the [GUAC GraphQL demo](graphql-demo.md) showcases the
 graphQL server in isolation.
 
 However, that's just one component of GUAC! In order to get the most value out
-of GUAC (for example, augmenting documents with additional data), we need to take
-advantage of the additional components of GUAC!
+of GUAC (for example, augmenting documents with additional data), we need to
+take advantage of the additional components of GUAC!
 
 The full GUAC component deployment is a set of asynchronous services that
 combine to form a robust and scalable pipeline. This is represented by the area
