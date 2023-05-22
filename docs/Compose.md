@@ -10,12 +10,12 @@ components. For example, the [GUAC GraphQL demo](graphql-demo.md) showcases the
 graphQL server in isolation.
 
 However, that's just one component of GUAC! In order to get the most value out
-of GUAC (for example, augmenting documents with aditional data), we need to take
-advantage of the additional components of GUAC!
+of GUAC (for example, augmenting documents with additional data), we need to
+take advantage of the additional components of GUAC!
 
 The full GUAC component deployment is a set of asynchronous services that
-combine to form a robust and scaleable pipeline. This is represented by the area
-in green in the diagrom below. In some of our [demos](demos/), you may have seen
+combine to form a robust and scalable pipeline. This is represented by the area
+in green in the diagram below. In some of our [demos](demos/), you may have seen
 these components work in concert! This document explains a little more of what
 goes on behind the hood!
 
@@ -91,7 +91,7 @@ of the GraphQL server, but logically part of ingestion).
 
 #### CollectSub
 
-The collect subcriber service provides a way to express a want for a datasource
+The collect subscriber service provides a way to express a want for a datasource
 to be used, or indication that more data about a software identifier is desired.
 For example, in parsing an SBOM, if it sees the use of a package with a PURL,
 the ingestor creates and entry to the CollectSub service to indicate more
@@ -161,7 +161,7 @@ automatically.
 Once it is up, you should be able to verify that its running
 
 ```bash
-docker compose ls --filter "name=guac"
+docker-compose ls --filter "name=guac"
 ```
 
 with expected output:
@@ -174,7 +174,7 @@ guac                running(7)          /Users/lumb/go/src/github.com/guacsec/gu
 ### Note
 
 If you are running into trouble getting the server started up, you can try
-runnning `docker-compose down` first. Because docker compose caches the
+running `docker-compose down` first. Because docker compose caches the
 containers used, the unclean state can cause issues.
 
 ## Start Ingesting Data

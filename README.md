@@ -7,11 +7,11 @@
 **Note:** GUAC is under active development - if you are interested in
 contributing, please look at [contributor guide](CONTRIBUTING.md).
 
-[Graph for Understanding Artifact Composition (GUAC)](https://guac.sh/) aggregates software security
-metadata into a high fidelity graph database—normalizing entity identities and
-mapping standard relationships between them. Querying this graph can drive
-higher-level organizational outcomes such as audit, policy, risk management, and
-even developer assistance.
+[Graph for Understanding Artifact Composition (GUAC)](https://guac.sh/)
+aggregates software security metadata into a high fidelity graph
+database—normalizing entity identities and mapping standard relationships
+between them. Querying this graph can drive higher-level organizational outcomes
+such as audit, policy, risk management, and even developer assistance.
 
 Conceptually, GUAC occupies the “aggregation and synthesis” layer of the
 software supply chain transparency logical model:
@@ -26,9 +26,11 @@ A few examples of questions answered by GUAC include:
 
 Our [documentation](https://docs.guac.sh/) is a good place to get started.
 
-We have various [demos use cases](https://docs.guac.sh/guac-use-cases/) that you can take a look.
+We have various [demos use cases](https://docs.guac.sh/guac-use-cases/) that you
+can take a look.
 
-Starting the GUAC services with our [docker compose quickstart](https://docs.guac.sh/setup/).
+Starting the GUAC services with our
+[docker compose quickstart](https://docs.guac.sh/setup/).
 
 ## Architecture
 
@@ -36,7 +38,8 @@ Here is an overview of the architecture of GUAC:
 
 ![image](https://user-images.githubusercontent.com/3060102/235186368-995784eb-7ef2-43e6-b560-17d6014553ca.png)
 
-For an in-depth view and explanation of components of the GUAC Beta, please refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
+For an in-depth view and explanation of components of the GUAC Beta, please
+refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
 
 ## Supported input formats
 
@@ -50,7 +53,9 @@ For an in-depth view and explanation of components of the GUAC Beta, please refe
 Note that GUAC uses software identifiers standards to help link metadata
 together. However, these identifiers are not always available and heuristics
 need to be used to link them. Therefore, there may be unhandled edge cases and
-errors occurring when ingesting data. We appreciate if you can create an [issue](https://github.com/guacsec/guac/issues) via the "Report for data quality issues and ingestion bugs" issue template.
+errors occurring when ingesting data. We appreciate it if you could create a
+[data quality issue](https://github.com/guacsec/guac/issues) if you encounter
+any errors or bugs with ingestion.
 
 ## Additional References
 
@@ -61,7 +66,7 @@ errors occurring when ingesting data. We appreciate if you can create an [issue]
 ## Communication
 
 For more information on how to get involved in the community, mailing lists and
-metings, please refer to our [community page](https://guac.sh/community/)
+meetings, please refer to our [community page](https://guac.sh/community/)
 
 For security issues or code of conduct concerns, an e-mail should be sent to
 guac-maintainers@googlegroups.com.
