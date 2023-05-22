@@ -50,7 +50,8 @@ For an in-depth view and explanation of components of the GUAC Beta, please refe
 Note that GUAC uses software identifiers standards to help link metadata
 together. However, these identifiers are not always available and heuristics
 need to be used to link them. Therefore, there may be unhandled edge cases and
-errors occurring when ingesting data. We appreciate if you can create an [issue](https://github.com/guacsec/guac/issues) via the "Report for data quality issues and ingestion bugs" issue template.
+errors occurring when ingesting data. We appreciate it if you could create a [data quality issue](https://github.com/guacsec/guac/issues)
+if you encounter any errors or bugs with ingestion.
 
 ## Additional References
 
@@ -61,7 +62,7 @@ errors occurring when ingesting data. We appreciate if you can create an [issue]
 ## Communication
 
 For more information on how to get involved in the community, mailing lists and
-metings, please refer to our [community page](https://guac.sh/community/)
+meetings, please refer to our [community page](https://guac.sh/community/)
 
 For security issues or code of conduct concerns, an e-mail should be sent to
 guac-maintainers@googlegroups.com.
