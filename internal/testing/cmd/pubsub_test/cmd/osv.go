@@ -62,7 +62,7 @@ var osvCmd = &cobra.Command{
 		}
 
 		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
-			logger.Fatalf("unable to register certifier: %w", err)
+			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
 		// TODO: Fix this with the graphQL endpoint

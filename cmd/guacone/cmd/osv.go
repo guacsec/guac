@@ -65,13 +65,13 @@ var osvCmd = &cobra.Command{
 		}
 
 		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
-			logger.Fatalf("unable to register certifier: %w", err)
+			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
 		// initialize collectsub client
 		csubClient, err := csub_client.NewClient(opts.csubAddr)
 		if err != nil {
-			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %w", err)
+			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
 			defer csubClient.Close()

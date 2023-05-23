@@ -279,9 +279,9 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %w", uuidString, err)
-			logger.Error(fmtErr)
-			return fmtErr
+			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes", uuidString)
+			logger.Errorf(fmtErrString+": %v", err)
+			return fmt.Errorf(fmtErrString+": %w", err)
 		}
 
 		docNode := &processor.DocumentNode{
@@ -292,9 +292,9 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		docTree := processor.DocumentTree(docNode)
 		err = transportFunc(docTree)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %w", uuidString, err)
-			logger.Error(fmtErr)
-			return fmtErr
+			fmtErrString := fmt.Sprintf("[processor: %s] failed transportFunc", uuidString)
+			logger.Errorf(fmtErrString+": %v", err)
+			return fmt.Errorf(fmtErrString+": %w", err)
 		}
 		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
 		return nil
