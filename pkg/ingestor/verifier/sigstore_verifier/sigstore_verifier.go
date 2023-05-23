@@ -65,7 +65,7 @@ func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]v
 		if err != nil {
 			// logging here as we don't want to fail but record that the signature check failed
 			logger := logging.FromContext(ctx)
-			logger.Errorf("failed to verify signature with provided key: %w", key.Hash)
+			logger.Errorf("failed to verify signature with provided key: %v", key.Hash)
 		}
 		// if err (meaning that the keyID or the signature verification failed), verified is set to false
 		foundIdentity.Verified = (err == nil)

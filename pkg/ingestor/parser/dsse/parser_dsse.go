@@ -67,7 +67,7 @@ func (d *dsseParser) getIdentity(ctx context.Context) error {
 			_ = pemBytes
 		} else {
 			logger := logging.FromContext(ctx)
-			logger.Errorf("failed to verify DSSE with provided key: %w", i.ID)
+			logger.Errorf("failed to verify DSSE with provided key: %v", i.ID)
 		}
 	} */
 	logger := logging.FromContext(ctx)

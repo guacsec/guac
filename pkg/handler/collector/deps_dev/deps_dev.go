@@ -158,14 +158,14 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 
 	err = d.collectAdditionalMetadata(ctx, packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version, component)
 	if err != nil {
-		logger.Debugf("failed to get additional metadata for package: %s, err: %w", purl, err)
+		logger.Debugf("failed to get additional metadata for package: %s, err: %v", purl, err)
 	}
 
 	// Make an RPC Request. The returned result is a stream of
 	// DependenciesResponse structs.
 	versionKey, err := getVersionKey(packageInput.Type, packageInput.Namespace, packageInput.Name, packageInput.Version)
 	if err != nil {
-		logger.Infof("failed to getVersionKey with the following error: %w", err)
+		logger.Infof("failed to getVersionKey with the following error: %v", err)
 		return nil
 	}
 
@@ -217,7 +217,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		depComponent.CurrentPackage = depPackageInput
 		err = d.collectAdditionalMetadata(ctx, depPackageInput.Type, depPackageInput.Namespace, depPackageInput.Name, depPackageInput.Version, depComponent)
 		if err != nil {
-			logger.Debugf("failed to get additional metadata for package: %s, err: %w", depPurl, err)
+			logger.Debugf("failed to get additional metadata for package: %s, err: %v", depPurl, err)
 		}
 		dependencyNodes = append(dependencyNodes, depComponent)
 		d.checkedPurls[depPurl] = depComponent

@@ -67,7 +67,7 @@ var ociCmd = &cobra.Command{
 		// initialize collectsub client
 		csubClient, err := csub_client.NewClient(opts.csubAddr)
 		if err != nil {
-			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %w", err)
+			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
 			defer csubClient.Close()
