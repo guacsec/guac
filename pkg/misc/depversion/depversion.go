@@ -116,7 +116,6 @@ func ParseVersionValue(s string) VersionValue {
 	return vv
 }
 
-// TODO: implement for more efficient traversal later
 func DoesRangeInclude(versions []string, versionRange string) (bool, error) {
 	versionMap, err := WhichVersionMatches(versions, versionRange)
 	for k, v := range versionMap {
