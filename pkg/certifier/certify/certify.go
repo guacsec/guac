@@ -86,7 +86,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		for len(compChan) > 0 {
 			d := <-compChan
 			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
-				logger.Errorf("generate certifier documents error: %w", err)
+				logger.Errorf("generate certifier documents error: %v", err)
 			}
 		}
 		return nil
@@ -140,7 +140,7 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 		select {
 		case d := <-docChan:
 			if err := emitter(d); err != nil {
-				logger.Errorf("emit error: %w", err)
+				logger.Errorf("emit error: %v", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -154,7 +154,7 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 	for len(docChan) > 0 {
 		d := <-docChan
 		if err := emitter(d); err != nil {
-			logger.Errorf("emit error: %w", err)
+			logger.Errorf("emit error: %v", err)
 		}
 	}
 	return nil

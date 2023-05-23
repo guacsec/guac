@@ -77,7 +77,7 @@ var scorecardCmd = &cobra.Command{
 		// initialize collectsub client
 		csubClient, err := csub_client.NewClient(opts.csubAddr)
 		if err != nil {
-			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %w", err)
+			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
 			csubClient = nil
 		} else {
 			defer csubClient.Close()
@@ -109,7 +109,7 @@ var scorecardCmd = &cobra.Command{
 		scCertifier := func() certifier.Certifier { return scorecardCertifier }
 
 		if err := certify.RegisterCertifier(scCertifier, certifier.CertifierScorecard); err != nil {
-			logger.Fatalf("unable to register certifier: %w", err)
+			logger.Fatalf("unable to register certifier: %v", err)
 		}
 		processorFunc := getProcessor(ctx)
 		collectSubEmitFunc := getCollectSubEmit(ctx, csubClient)

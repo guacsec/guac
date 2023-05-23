@@ -67,7 +67,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
 	ctx, err = jetStream.JetStreamInit(ctx)
 	if err != nil {
-		logger.Errorf("jetStream initialization failed with error: %w", err)
+		logger.Errorf("jetStream initialization failed with error: %v", err)
 		os.Exit(1)
 	}
 	defer jetStream.Close()
@@ -75,7 +75,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	// initialize collectsub client
 	csubClient, err := csub_client.NewClient(opts.csubAddr)
 	if err != nil {
-		logger.Errorf("collectsub client initialization failed with error: %w", err)
+		logger.Errorf("collectsub client initialization failed with error: %v", err)
 		os.Exit(1)
 	}
 	defer csubClient.Close()
@@ -116,13 +116,13 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	processorFunc, err := getProcessor(ctx, processorTransportFunc)
 	if err != nil {
-		logger.Errorf("error: %w", err)
+		logger.Errorf("error: %v", err)
 		os.Exit(1)
 	}
 
 	ingestorFunc, err := getIngestor(ctx, ingestorTransportFunc)
 	if err != nil {
-		logger.Errorf("error: %w", err)
+		logger.Errorf("error: %v", err)
 		os.Exit(1)
 	}
 

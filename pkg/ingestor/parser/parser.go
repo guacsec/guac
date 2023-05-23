@@ -90,20 +90,20 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredica
 		docNode := processor.DocumentNode{}
 		err := json.Unmarshal(d, &docNode)
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %w", uuidString, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed unmarshal the document tree bytes: %v", uuidString, err)
 			logger.Error(fmtErr)
 			return nil
 		}
 		assemblerInputs, idStrings, err := ParseDocumentTree(ctx, processor.DocumentTree(&docNode))
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %w", uuidString, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed parse document: %v", uuidString, err)
 			logger.Error(fmtErr)
 			return nil
 		}
 
 		err = transportFunc(assemblerInputs, idStrings)
 		if err != nil {
-			fmtErr := fmt.Errorf("[ingestor: %s] failed transportFunc: %w", uuidString, err)
+			fmtErr := fmt.Errorf("[ingestor: %s] failed transportFunc: %v", uuidString, err)
 			logger.Error(fmtErr)
 			return nil
 		}
