@@ -207,9 +207,9 @@ func createSubscriber(ctx context.Context, id string, subj string, durable strin
 			if len(msgs) > 0 {
 				err := msgs[0].Ack()
 				if err != nil {
-					fmtErr := fmt.Errorf("[%s: %v] unable to Ack: %v", durable, id, err)
-					logger.Error(fmtErr)
-					errChan <- fmtErr
+					fmtErrString := fmt.Sprintf("[%s: %v] unable to Ack", durable, id)
+					logger.Errorf(fmtErrString+": %v", err)
+					errChan <- fmt.Errorf(fmtErrString+": %w", err)
 					return
 				}
 				dataChan <- msgs[0].Data

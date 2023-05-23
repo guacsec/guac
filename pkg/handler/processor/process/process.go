@@ -77,21 +77,18 @@ func Subscribe(ctx context.Context, transportFunc func(processor.DocumentTree) e
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			logger.Error(fmtErr)
+			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			return nil
 		}
 		docTree, err := Process(ctx, &doc)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed process document: %v", uuidString, err)
-			logger.Error(fmtErr)
+			logger.Error("[processor: %s] failed process document: %v", uuidString, err)
 			return nil
 		}
 
 		err = transportFunc(docTree)
 		if err != nil {
-			fmtErr := fmt.Errorf("[processor: %s] failed transportFunc: %v", uuidString, err)
-			logger.Error(fmtErr)
+			logger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
 			return nil
 		}
 
