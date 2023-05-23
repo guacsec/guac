@@ -229,7 +229,7 @@ func getIngestor(ctx context.Context) func(processor.DocumentTree) ([]assembler.
 func getAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.IngestPredicates) error {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
-	f := helpers.GetAssembler(ctx, gqlclient)
+	f := helpers.GetParallelAssembler(ctx, gqlclient)
 	return f
 }
 
