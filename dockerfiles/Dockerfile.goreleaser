@@ -1,0 +1,11 @@
+FROM scratch
+# FROM alpine:3.15.0
+
+WORKDIR /guac
+COPY guaccollect*  /opt/guac/
+COPY guaccsub*  /opt/guac/
+COPY guacgql*  /opt/guac/
+COPY guacingest*  /opt/guac/
+COPY guacone*  /opt/guac/
+
+# ENTRYPOINT ["/opt/gauc"]

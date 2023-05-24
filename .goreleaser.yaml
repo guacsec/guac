@@ -5,6 +5,38 @@ env:
   - CGO_ENABLED=0
   - PKG=github.com/guacsec/guac/pkg/version
 
+# dockers:
+#   - goos: linux
+#     goarch: amd64
+#     image_templates:
+#       - "guacsec/guac:latest"
+#       - "guacsec/guac:{{ .Tag }}"
+#     skip_push: true
+#     dockerfile: dockerfiles/Dockerfile.goreleaser
+dockers:
+  # https://goreleaser.com/customization/docker/
+  # - use: buildx
+  - goos: linux
+    goarch: amd64
+    image_templates:
+      # - "guacsec/guac:latest"
+      # - "guacsec/guac:{{ .Tag }}"
+      - "{{ .Env.GITHUB_REPOSITORY }}:{{ .Version }}"
+      - "{{ .Env.GITHUB_REPOSITORY }}:latest"
+    dockerfile: dockerfiles/Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  # - goos: linux
+  #   goarch: arm64
+  #   image_templates:
+  #     # - "guacsec/guac:latest"
+  #     # - "guacsec/guac:{{ .Tag }}"
+  #     - "guacsec/{{ .ProjectName }}:{{ .Version }}-arm64"
+  #     - "guacsec/{{ .ProjectName }}:latest-arm64"
+  #   dockerfile: dockerfiles/Dockerfile.goreleaser
+  #   build_flag_templates:
+  #     - "--platform=linux/arm64"
+
 before:
   hooks:
     - go mod tidy
@@ -13,7 +45,8 @@ before:
 builds:
   - main: ./cmd/guaccollect
     id: guaccollect
-    binary: guaccollect-{{ .Os }}-{{ .Arch }}
+    # binary: guaccollect-{{ .Os }}-{{ .Arch }}
+    binary: guaccollect
     ldflags:
       # See https://goreleaser.com/customization/templates/#common-fields for field definitions
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
@@ -23,46 +56,54 @@ builds:
     # goarch:  [ '386', 'amd64', 'arm64' ] - default
   - main: ./cmd/guaccsub
     id: guaccsub
-    binary: guaccsub-{{ .Os }}-{{ .Arch }}
+    # binary: guaccsub-{{ .Os }}-{{ .Arch }}
+    binary: guaccsub
+
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
   - main: ./cmd/guacgql
     id: guacgql
-    binary: guacgql-{{ .Os }}-{{ .Arch }}
+    # binary: guacgql-{{ .Os }}-{{ .Arch }}
+    binary: guacgql
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
   - main: ./cmd/guacingest
     id: guacingest
-    binary: guacingest-{{ .Os }}-{{ .Arch }}
+    # binary: guacingest-{{ .Os }}-{{ .Arch }}
+    binary: guacingest
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
   - main: ./cmd/guacone
     id: guacone
-    binary: guacone-{{ .Os }}-{{ .Arch }}
+    # binary: guacone-{{ .Os }}-{{ .Arch }}
+    binary: guacone
+
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
 
 sboms:
-  - artifacts: binary
+  # - artifacts: binary
+  - artifacts: archive
     documents:
       - "${artifact}.spdx.sbom.json"
 
-signs:
-  - id: guac-cosign-keyless
-    signature: "${artifact}-keyless.sig"
-    certificate: "${artifact}-keyless.pem"
-    cmd: cosign
-    args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
-    artifacts: all
-    output: true
+# signs:
+#   - id: guac-cosign-keyless
+#     signature: "${artifact}-keyless.sig"
+#     certificate: "${artifact}-keyless.pem"
+#     cmd: cosign
+#     args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
+#     artifacts: all
+#     output: true
+
 
 archives:
   - format: binary
