@@ -91,6 +91,9 @@ var (
 	//go:embed exampledata/no-dependent-components-cyclonedx.json
 	CycloneDXExampleNoDependentComponents []byte
 
+	//go:embed exampledata/cyclonedx-bom-example.json
+	CycloneDXExampleCycloneDXpyNoBOMRef []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
@@ -796,6 +799,30 @@ var (
 	CdxNpmIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: CdxNpmDeps,
 		HasSBOM:      CdxNpmHasSBOM,
+	}
+
+	cdxPyRuamelPackage, _ = asmhelpers.PurlToPkg("pkg:pypi/ruamel.yaml@0.17.21")
+
+	CdxPipenvDeps = []assembler.IsDependencyIngest{
+		{
+			Pkg: cdxPyRuamelPackage,
+		},
+	}
+
+	CdxPipenvHasSBOM = []assembler.HasSBOMIngest{
+		{
+			Pkg: cdxPyRuamelPackage,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Uri:              "TestSource",
+				Algorithm:        "sha256",
+				Digest:           "35363f03c80f26a88db6f2400771bdcc6624bb7b61b96da8503be0f757605fde",
+				DownloadLocation: "TestSource",
+			},
+		},
+	}
+
+	CdxPipenvIngestionPredicates = assembler.IngestPredicates{
+		//without a root node, the parser will return empty predicates. Not sure what the "correct" behavior here should be
 	}
 
 	quarkusParentPackage, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-parent@999-SNAPSHOT?type=pom")

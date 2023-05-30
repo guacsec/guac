@@ -202,7 +202,13 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 
 	preds := &assembler.IngestPredicates{}
 
-	toplevel := c.getPackageElement(string(c.cdxBom.Metadata.Component.BOMRef))
+	var toplevel []*model.PkgInputSpec = nil
+
+	if c.cdxBom.Metadata.Component != nil && c.cdxBom.Metadata.Component.BOMRef != "" {
+		// BOMRef is not a required element
+		toplevel = c.getPackageElement(string(c.cdxBom.Metadata.Component.BOMRef))
+	}
+
 	// adding top level package edge manually for all depends on package
 	// TODO: This is not based on the relationship so that can be inaccurate (can capture both direct and in-direct)...Remove this and be done below by the *c.cdxBom.Dependencies?
 	// see https://github.com/CycloneDX/specification/issues/33

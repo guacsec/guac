@@ -1,0 +1,95 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:588bb01b-577e-4e1b-a055-b51b8f5f2ed1",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2023-04-18T21:47:45.707189+00:00",
+    "tools": [
+      {
+        "vendor": "CycloneDX",
+        "name": "cyclonedx-bom",
+        "version": "3.11.0"
+      },
+      {
+        "vendor": "CycloneDX",
+        "name": "cyclonedx-python-lib",
+        "version": "3.1.5",
+        "externalReferences": [
+          {
+            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/actions",
+            "type": "build-system"
+          },
+          {
+            "url": "https://pypi.org/project/cyclonedx-python-lib/",
+            "type": "distribution"
+          },
+          {
+            "url": "https://cyclonedx.github.io/cyclonedx-python-lib/",
+            "type": "documentation"
+          },
+          {
+            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/issues",
+            "type": "issue-tracker"
+          },
+          {
+            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/blob/main/LICENSE",
+            "type": "license"
+          },
+          {
+            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/blob/main/CHANGELOG.md",
+            "type": "release-notes"
+          },
+          {
+            "url": "https://github.com/CycloneDX/cyclonedx-python-lib",
+            "type": "vcs"
+          },
+          {
+            "url": "https://cyclonedx.org",
+            "type": "website"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "13ca86b0-38a2-47aa-9a39-b2b042da8bc4",
+      "name": "ruamel.yaml",
+      "version": "0.17.21",
+      "purl": "pkg:pypi/ruamel.yaml@0.17.21",
+      "externalReferences": [
+        {
+          "url": "https://pypi.org/project/ruamel.yaml/0.17.21",
+          "comment": "Distribution available from pypi.org",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "742b35d3d665023981bd6d16b3d24248ce5df75fdb4e2924e93a05c1f8b61ca7"
+            }
+          ]
+        },
+        {
+          "url": "https://pypi.org/project/ruamel.yaml/0.17.21",
+          "comment": "Distribution available from pypi.org",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8b7ce697a2f212752a35c1ac414471dc16c424c9573be4926b56ff3f5d23b7af"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "13ca86b0-38a2-47aa-9a39-b2b042da8bc4",
+      "dependsOn": []
+    }
+  ]
+}
