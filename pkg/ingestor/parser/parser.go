@@ -71,7 +71,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // Subscribe is used by NATS JetStream to stream the documents received from the processor
-// and parse them them via ParseDocumentTree
+// and parse them via ParseDocumentTree
 func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*common.IdentifierStrings) error) error {
 	logger := logging.FromContext(ctx)
 
@@ -124,7 +124,7 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 	docTreeBuilder := newDocTreeBuilder()
 
 	logger.Infof("parsing document tree with root type: %v", docTree.Document.Type)
-	err := docTreeBuilder.parse(ctx, docTree)
+	err := docTreeBuilder.parse(ctx, docTree, map[visitedKey]bool{})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -143,22 +143,33 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 	return assemblerInputs, identifierStrings, nil
 }
 
-func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree) error {
+// visitedKey is used to keep track of the document nodes that have already been visited to avoid infinite loops.
+// The key is a combination of the document type, format, and source information. This is used instead of
+// processor.Document because maps cannot use slices as keys.
+type visitedKey struct {
+	Type              processor.DocumentType
+	Format            processor.FormatType
+	SourceInformation processor.SourceInformation
+}
+
+// The visited map is used to keep track of the document nodes that have already been visited to avoid infinite loops.
+func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree, visited map[visitedKey]bool) error {
 	builder, err := parseHelper(ctx, root.Document)
 	if err != nil {
 		return err
 	}
 
+	key := visitedKey{root.Document.Type, root.Document.Format, root.Document.SourceInformation}
+	if visited[key] {
+		return nil
+	}
+	visited[key] = true
+
 	t.graphBuilders = append(t.graphBuilders, builder)
 	t.identities = append(t.identities, builder.GetIdentities()...)
 
-	if len(root.Children) == 0 {
-		return nil
-	}
-
 	for _, c := range root.Children {
-		err := t.parse(ctx, c)
-		if err != nil {
+		if err := t.parse(ctx, c, visited); err != nil {
 			return err
 		}
 	}
