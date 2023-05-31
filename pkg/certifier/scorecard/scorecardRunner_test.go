@@ -24,6 +24,9 @@ import (
 )
 
 func Test_scorecardRunner_GetScore(t *testing.T) {
+	if os.Getenv("GITHUB_EVENT_NAME") != "check_suite" || os.Getenv("GITHUB_EVENT_ACTION") != "completed" {
+		t.Skip("Skipping test: Not running on post-merge")
+	}
 	newsc, _ := NewScorecardRunner(context.Background())
 	tests := []struct {
 		name     string
