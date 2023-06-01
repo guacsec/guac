@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -158,14 +157,30 @@ func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.Artif
 	}
 
 	values := map[string]any{}
+	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
+	values["art_digest"] = strings.ToLower(artifact.Digest)
+	values["equal_algorithm"] = strings.ToLower(equalArtifact.Algorithm)
+	values["equal_digest"] = strings.ToLower(equalArtifact.Digest)
 	values["justification"] = strings.ToLower(hashEqual.Justification)
 	values["collector"] = strings.ToLower(hashEqual.Collector)
 	values["origin"] = strings.ToLower(hashEqual.Origin)
 
 	query := `
-UPSERT { justification:@justification, collector:@collector, origin:@origin } 
-INSERT { algorithm:@algorithm, digest:@digest } 
-UPDATE {} IN artifacts`
+LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
+LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @equal_algorithm FILTER art.digest == @equal_digest RETURN art)
+LET hasEqual = FIRST(
+	UPSERT { justification:@justification, collector:@collector, origin:@origin } 
+		INSERT { justification:@justification, collector:@collector, origin:@origin } 
+		UPDATE {} IN hasEquals
+		RETURN NEW
+)
+FOR edgeData IN [
+    {from: hasEqual._id, to: equalArtifact._id}, 
+    {from: artifact._id, to: hasEqual._id}]
+
+  UPSERT { _from: edgeData.from, _to: edgeData.to }
+    INSERT { _from: edgeData.from, _to: edgeData.to }
+    UPDATE {} IN myEdgeCollection`
 
 	cursor, err := hasEqualCollection.Database().Query(ctx, query, values)
 	if err != nil {
@@ -173,24 +188,14 @@ UPDATE {} IN artifacts`
 	}
 	defer cursor.Close()
 
-	for {
-		var doc *model.Artifact
-		_, err := cursor.ReadDocument(ctx, &doc)
-		if driver.IsNoMoreDocuments(err) {
-			return doc, nil
-		} else if err != nil {
-			return nil, fmt.Errorf("failed to ingest artifact: %w", err)
-		}
-	}
-
-	// add edge
-	edgeCollection, _, err := graph.EdgeCollection(nil, "myEdgeCollection")
-	if err != nil {
-		return nil, fmt.Errorf("Failed to select edge collection: %w", err)
-	}
-
-	edge := MyEdgeObject{From: "myCollection1/Homer", To: "myCollection1/Marge"}
-	_, err = edgeCollection.CreateDocument(nil, edge)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create edge document: %w", err)
+	// for {
+	// 	var doc *model.HashEqual
+	// 	_, err := cursor.(ctx, &doc)
+	// 	if driver.IsNoMoreDocuments(err) {
+	// 		return doc, nil
+	// 	} else if err != nil {
+	// 		return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+	// 	}
+	// }
+	return nil, nil
 }
