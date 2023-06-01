@@ -35,7 +35,7 @@ services:
   # it doesn't have utilities within it to perform the check from the container
   # itself.
   service-health-1:
-    image: "local-healthcheck"
+    image: $GUAC_HEALTH_IMAGE
     stdin_open: true
     tty: true
     command:
@@ -50,7 +50,7 @@ services:
         # echo "neo4j-up";
 
   guac-collectsub:
-    image: "local-organic-guac"
+    image: $GUAC_IMAGE
     command: "/opt/guac/guaccsub"
     working_dir: /guac
     restart: on-failure
@@ -63,7 +63,7 @@ services:
       - ./container_files/guac:/guac
 
   guac-graphql:
-    image: "local-organic-guac"
+    image: $GUAC_IMAGE
     command: "/opt/guac/guacgql"
     working_dir: /guac
     restart: on-failure
@@ -71,13 +71,13 @@ services:
       service-health-1:
         condition: service_completed_successfully
     ports:
-      - "8080:8080"
+      - "$GUAC_API_PORT:8080"
     volumes:
       - ./container_files/guac:/guac
 
   # GUAC ingestor and oci collector are dependent on the collectsub service to be up
   service-health-2:
-    image: "local-healthcheck"
+    image: $GUAC_HEALTH_IMAGE
     stdin_open: true
     tty: true
     command:
@@ -96,7 +96,7 @@ services:
 
 
   guac-ingestor:
-    image: "local-organic-guac"
+    image: $GUAC_IMAGE
     command: "/opt/guac/guacingest"
     working_dir: /guac
     restart: on-failure
@@ -108,7 +108,7 @@ services:
 
 
   oci-collector:
-    image: "local-organic-guac"
+    image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect image"
     working_dir: /guac
     restart: on-failure
@@ -118,7 +118,7 @@ services:
     volumes:
       - ./container_files/guac:/guac
   depsdev-collector:
-    image: "local-organic-guac"
+    image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect deps_dev"
     working_dir: /guac
     restart: on-failure
@@ -130,7 +130,7 @@ services:
     volumes:
       - ./container_files/guac:/guac
   osv-certifier:
-    image: "local-organic-guac"
+    image: $GUAC_IMAGE
     command: "/opt/guac/guacone certifier osv"
     working_dir: /guac
     restart: on-failure
