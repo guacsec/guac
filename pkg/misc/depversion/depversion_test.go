@@ -442,3 +442,59 @@ func Test_WhichVersionMatches(t *testing.T) {
 		})
 	}
 }
+
+func Test_DoesRangeInclude(t *testing.T) {
+	testCases := []struct {
+		versions     []string
+		versionRange string
+		expect       bool
+	}{
+		{
+			versionRange: ">=1.0,<=2.0",
+			versions:     []string{"1.5"},
+			expect:       true,
+		},
+		{
+			versionRange: ">=1.0,<=2.0",
+			versions:     []string{"1.0", "2.0", "3.0"},
+			expect:       true,
+		},
+		{
+			versionRange: ">=1.0,<=2.0",
+			versions:     []string{"3.0", "2.1"},
+			expect:       false,
+		},
+		{
+			versionRange: ">1.0,<2.0",
+			versions:     []string{"3.0", "1.0", "2.0"},
+			expect:       false,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("does range include %s", tt.versionRange), func(t *testing.T) {
+			got, err := DoesRangeInclude(tt.versions, tt.versionRange)
+			if err != nil {
+				t.Errorf("got err from DoesRangeInclude: %v", err)
+				return
+			}
+
+			if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_DoesRangeInclude_Errors(t *testing.T) {
+	res1, err1 := DoesRangeInclude([]string{"3.0", "1.0", "2.0"}, ">1.0 , <2.0")
+	res2, err2 := DoesRangeInclude([]string{"anythinggoes", "1.0", "2.0"}, "bad range")
+
+	if err1 != nil || err2 != nil {
+		t.Errorf("expected error for DoesRangeInclude and did not receive an error")
+	}
+
+	if res1 != false || res2 != false {
+		t.Errorf("expected error for DoesRangeInclude and did not receive false result as expected")
+	}
+}

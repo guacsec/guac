@@ -20,279 +20,211 @@ import (
 	"fmt"
 
 	"github.com/Khan/genqlient/graphql"
+
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assembler.AssemblerInput) error {
-
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
-			if err := ingestCertifyScorecards(ctx, gqlclient, p.CertifyScorecard); err != nil {
-				return err
+			for _, v := range p.CertifyScorecard {
+				if err := ingestCertifyScorecards(ctx, gqlclient, v); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
-			if err := ingestIsDependency(ctx, gqlclient, p.IsDependency); err != nil {
-				return err
+			for _, v := range p.IsDependency {
+				if err := ingestIsDependency(ctx, gqlclient, v); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurrence))
-			if err := ingestIsOccurrence(ctx, gqlclient, p.IsOccurrence); err != nil {
-				return err
+			for _, v := range p.IsOccurrence {
+				if err := ingestIsOccurrence(ctx, gqlclient, v); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
-			if err := ingestHasSlsa(ctx, gqlclient, p.HasSlsa); err != nil {
-				return err
+			for _, v := range p.HasSlsa {
+				if err := ingestHasSlsa(ctx, gqlclient, v); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
-			if err := ingestCertifyVuln(ctx, gqlclient, p.CertifyVuln); err != nil {
-				return err
+			for _, cv := range p.CertifyVuln {
+				if err := ingestCertifyVuln(ctx, gqlclient, cv); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling IsVuln: %v", len(p.IsVuln))
-			if err := ingestIsVuln(ctx, gqlclient, p.IsVuln); err != nil {
-				return err
+			for _, iv := range p.IsVuln {
+				if err := ingestIsVuln(ctx, gqlclient, iv); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
-			if err := hasSourceAt(ctx, gqlclient, p.HasSourceAt); err != nil {
-				return err
+			for _, hsa := range p.HasSourceAt {
+				if err := hasSourceAt(ctx, gqlclient, hsa); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling CertifyBad: %v", len(p.CertifyBad))
-			if err := ingestCertifyBad(ctx, gqlclient, p.CertifyBad); err != nil {
-				return err
+			for _, bad := range p.CertifyBad {
+				if err := ingestCertifyBad(ctx, gqlclient, bad); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling CertifyGood: %v", len(p.CertifyGood))
-			if err := ingestCertifyGood(ctx, gqlclient, p.CertifyGood); err != nil {
-				return err
+			for _, good := range p.CertifyGood {
+				if err := ingestCertifyGood(ctx, gqlclient, good); err != nil {
+					return err
+				}
 			}
 
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
-			if err := ingestHasSBOM(ctx, gqlclient, p.HasSBOM); err != nil {
-				return err
+			for _, hb := range p.HasSBOM {
+				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
 	}
 }
 
-func ingestCertifyScorecards(ctx context.Context, client graphql.Client, vs []assembler.CertifyScorecardIngest) error {
-	for _, v := range vs {
-		_, err := model.Scorecard(ctx, client, *v.Source, *v.Scorecard)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v assembler.CertifyScorecardIngest) error {
+	_, err := model.Scorecard(ctx, client, *v.Source, *v.Scorecard)
+	return err
 }
 
-func ingestIsDependency(ctx context.Context, client graphql.Client, vs []assembler.IsDependencyIngest) error {
-	for _, v := range vs {
-		_, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, *v.IsDependency)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func ingestIsDependency(ctx context.Context, client graphql.Client, v assembler.IsDependencyIngest) error {
+	_, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, *v.IsDependency)
+	return err
 }
 
-func ingestIsOccurrence(ctx context.Context, client graphql.Client, vs []assembler.IsOccurrenceIngest) error {
-	for _, v := range vs {
-		if v.Pkg != nil && v.Src != nil {
-			return fmt.Errorf("unable to create IsOccurrence with both Src and Pkg subject specified")
-		}
-
-		if v.Pkg == nil && v.Src == nil {
-			return fmt.Errorf("unable to create IsOccurrence without either Src and Pkg subject specified")
-		}
-
-		if v.Src != nil {
-			_, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurrence)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurrence)
-			if err != nil {
-				return err
-			}
-
-		}
-
+func ingestIsOccurrence(ctx context.Context, client graphql.Client, v assembler.IsOccurrenceIngest) error {
+	if v.Pkg != nil && v.Src != nil {
+		return fmt.Errorf("unable to create IsOccurrence with both Src and Pkg subject specified")
 	}
-	return nil
+	if v.Pkg == nil && v.Src == nil {
+		return fmt.Errorf("unable to create IsOccurrence without either Src and Pkg subject specified")
+	}
+
+	if v.Src != nil {
+		_, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurrence)
+		return err
+	}
+	_, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurrence)
+	return err
 }
 
-func ingestHasSlsa(ctx context.Context, client graphql.Client, vs []assembler.HasSlsaIngest) error {
-	for _, v := range vs {
-		_, err := model.SLSAForArtifact(ctx, client, *v.Artifact, v.Materials, *v.Builder, *v.HasSlsa)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func ingestHasSlsa(ctx context.Context, client graphql.Client, v assembler.HasSlsaIngest) error {
+	_, err := model.SLSAForArtifact(ctx, client, *v.Artifact, v.Materials, *v.Builder, *v.HasSlsa)
+	return err
 }
 
-func ingestCertifyVuln(ctx context.Context, client graphql.Client, cvs []assembler.CertifyVulnIngest) error {
-	for _, cv := range cvs {
-
-		err := ValidateVulnerabilityInput(cv.OSV, cv.CVE, cv.GHSA, "certifyVulnerability")
-		if err != nil {
-			return fmt.Errorf("input validation failed for certifyVulnerability: %w", err)
-		}
-
-		if cv.OSV != nil {
-			_, err := model.CertifyOSV(ctx, client, *cv.Pkg, *cv.OSV, *cv.VulnData)
-			if err != nil {
-				return err
-			}
-		} else if cv.CVE != nil {
-			_, err := model.CertifyCVE(ctx, client, *cv.Pkg, *cv.CVE, *cv.VulnData)
-			if err != nil {
-				return err
-			}
-		} else if cv.GHSA != nil {
-			_, err := model.CertifyGHSA(ctx, client, *cv.Pkg, *cv.GHSA, *cv.VulnData)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := model.CertifyNoKnownVuln(ctx, client, *cv.Pkg, *cv.VulnData)
-			if err != nil {
-				return err
-			}
-		}
+func ingestCertifyVuln(ctx context.Context, client graphql.Client, cv assembler.CertifyVulnIngest) error {
+	if err := ValidateVulnerabilityInput(cv.OSV, cv.CVE, cv.GHSA, "certifyVulnerability"); err != nil {
+		return fmt.Errorf("input validation failed for certifyVulnerability: %w", err)
 	}
-	return nil
+
+	if cv.OSV != nil {
+		_, err := model.CertifyOSV(ctx, client, *cv.Pkg, *cv.OSV, *cv.VulnData)
+		return err
+	}
+	if cv.CVE != nil {
+		_, err := model.CertifyCVE(ctx, client, *cv.Pkg, *cv.CVE, *cv.VulnData)
+		return err
+	}
+	if cv.GHSA != nil {
+		_, err := model.CertifyGHSA(ctx, client, *cv.Pkg, *cv.GHSA, *cv.VulnData)
+		return err
+	}
+	_, err := model.CertifyNoKnownVuln(ctx, client, *cv.Pkg, *cv.VulnData)
+	return err
 }
 
-func ingestIsVuln(ctx context.Context, client graphql.Client, ivs []assembler.IsVulnIngest) error {
-	for _, iv := range ivs {
-		if iv.CVE != nil && iv.GHSA != nil {
-			return fmt.Errorf("unable to create IsVuln with both CVE and GHSA specified")
-		}
-
-		if iv.CVE == nil && iv.GHSA == nil {
-			return fmt.Errorf("unable to create IsVuln without either CVE or GHSA specified")
-		}
-
-		if iv.CVE != nil {
-			_, err := model.IsVulnerabilityCVE(ctx, client, *iv.OSV, *iv.CVE, *iv.IsVuln)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := model.IsVulnerabilityGHSA(ctx, client, *iv.OSV, *iv.GHSA, *iv.IsVuln)
-			if err != nil {
-				return err
-			}
-
-		}
-
+func ingestIsVuln(ctx context.Context, client graphql.Client, iv assembler.IsVulnIngest) error {
+	if iv.CVE != nil && iv.GHSA != nil {
+		return fmt.Errorf("unable to create IsVuln with both CVE and GHSA specified")
 	}
-	return nil
+	if iv.CVE == nil && iv.GHSA == nil {
+		return fmt.Errorf("unable to create IsVuln without either CVE or GHSA specified")
+	}
+
+	if iv.CVE != nil {
+		_, err := model.IsVulnerabilityCVE(ctx, client, *iv.OSV, *iv.CVE, *iv.IsVuln)
+		return err
+	}
+	_, err := model.IsVulnerabilityGHSA(ctx, client, *iv.OSV, *iv.GHSA, *iv.IsVuln)
+	return err
 }
 
-func hasSourceAt(ctx context.Context, client graphql.Client, hsaList []assembler.HasSourceAtIngest) error {
-	for _, hsa := range hsaList {
-		_, err := model.HasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func hasSourceAt(ctx context.Context, client graphql.Client, hsa assembler.HasSourceAtIngest) error {
+	_, err := model.HasSourceAt(ctx, client, *hsa.Pkg, hsa.PkgMatchFlag, *hsa.Src, *hsa.HasSourceAt)
+	return err
 }
 
-func ingestCertifyBad(ctx context.Context, client graphql.Client, badList []assembler.CertifyBadIngest) error {
-	for _, bad := range badList {
-
-		err := validatePackageSourceOrArtifactInput(bad.Pkg, bad.Src, bad.Artifact, "certifyBad")
-		if err != nil {
-			return fmt.Errorf("input validation failed for certifyBad: %w", err)
-		}
-
-		if bad.Pkg != nil {
-			_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, &bad.PkgMatchFlag, *bad.CertifyBad)
-			if err != nil {
-				return err
-			}
-		} else if bad.Src != nil {
-			_, err := model.CertifyBadSrc(ctx, client, *bad.Src, *bad.CertifyBad)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := model.CertifyBadArtifact(ctx, client, *bad.Artifact, *bad.CertifyBad)
-			if err != nil {
-				return err
-			}
-		}
+func ingestCertifyBad(ctx context.Context, client graphql.Client, bad assembler.CertifyBadIngest) error {
+	if err := validatePackageSourceOrArtifactInput(bad.Pkg, bad.Src, bad.Artifact, "certifyBad"); err != nil {
+		return fmt.Errorf("input validation failed for certifyBad: %w", err)
 	}
-	return nil
+
+	if bad.Pkg != nil {
+		_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, &bad.PkgMatchFlag, *bad.CertifyBad)
+		return err
+	}
+	if bad.Src != nil {
+		_, err := model.CertifyBadSrc(ctx, client, *bad.Src, *bad.CertifyBad)
+		return err
+	}
+	_, err := model.CertifyBadArtifact(ctx, client, *bad.Artifact, *bad.CertifyBad)
+	return err
 }
 
-func ingestCertifyGood(ctx context.Context, client graphql.Client, goodList []assembler.CertifyGoodIngest) error {
-	for _, good := range goodList {
-
-		err := validatePackageSourceOrArtifactInput(good.Pkg, good.Src, good.Artifact, "certifyGood")
-		if err != nil {
-			return fmt.Errorf("input validation failed for certifyBad: %w", err)
-		}
-
-		if good.Pkg != nil {
-			_, err := model.CertifyGoodPkg(ctx, client, *good.Pkg, &good.PkgMatchFlag, *good.CertifyGood)
-			if err != nil {
-				return err
-			}
-		} else if good.Src != nil {
-			_, err := model.CertifyGoodSrc(ctx, client, *good.Src, *good.CertifyGood)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := model.CertifyGoodArtifact(ctx, client, *good.Artifact, *good.CertifyGood)
-			if err != nil {
-				return err
-			}
-		}
+func ingestCertifyGood(ctx context.Context, client graphql.Client, good assembler.CertifyGoodIngest) error {
+	if err := validatePackageSourceOrArtifactInput(good.Pkg, good.Src, good.Artifact, "certifyGood"); err != nil {
+		return fmt.Errorf("input validation failed for certifyBad: %w", err)
 	}
-	return nil
+
+	if good.Pkg != nil {
+		_, err := model.CertifyGoodPkg(ctx, client, *good.Pkg, &good.PkgMatchFlag, *good.CertifyGood)
+		return err
+	}
+	if good.Src != nil {
+		_, err := model.CertifyGoodSrc(ctx, client, *good.Src, *good.CertifyGood)
+		return err
+	}
+	_, err := model.CertifyGoodArtifact(ctx, client, *good.Artifact, *good.CertifyGood)
+	return err
 }
 
-func ingestHasSBOM(ctx context.Context, client graphql.Client, hasSBOMIngestList []assembler.HasSBOMIngest) error {
-	for _, hb := range hasSBOMIngestList {
-		if hb.Pkg != nil && hb.Artifact != nil {
-			return fmt.Errorf("unable to create hasSBOM with both Pkg and Src subject specified")
-		}
-
-		if hb.Pkg == nil && hb.Artifact == nil {
-			return fmt.Errorf("unable to create hasSBOM without either Pkg and Src ssubject specified")
-		}
-
-		if hb.Pkg != nil {
-			_, err := model.HasSBOMPkg(ctx, client, *hb.Pkg, *hb.HasSBOM)
-			if err != nil {
-				return err
-			}
-		} else {
-			_, err := model.HasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM)
-			if err != nil {
-				return err
-			}
-
-		}
-
+func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasSBOMIngest) error {
+	if hb.Pkg != nil && hb.Artifact != nil {
+		return fmt.Errorf("unable to create hasSBOM with both Pkg and Src subject specified")
 	}
-	return nil
+	if hb.Pkg == nil && hb.Artifact == nil {
+		return fmt.Errorf("unable to create hasSBOM without either Pkg and Src ssubject specified")
+	}
+
+	if hb.Pkg != nil {
+		_, err := model.HasSBOMPkg(ctx, client, *hb.Pkg, *hb.HasSBOM)
+		return err
+	}
+	_, err := model.HasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM)
+	return err
 }
 
 func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.SourceInputSpec, artifact *model.ArtifactInputSpec, path string) error {
@@ -307,7 +239,7 @@ func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.So
 		valuesDefined = valuesDefined + 1
 	}
 	if valuesDefined != 1 {
-		return gqlerror.Errorf("Must specify at most one package, source, or artifact for %v", path)
+		return fmt.Errorf("Must specify at most one package, source, or artifact for %v", path)
 	}
 
 	return nil
@@ -325,7 +257,7 @@ func ValidateVulnerabilityInput(osv *model.OSVInputSpec, cve *model.CVEInputSpec
 		vulnDefined = vulnDefined + 1
 	}
 	if vulnDefined > 2 {
-		return gqlerror.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
+		return fmt.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
 	}
 	return nil
 }
