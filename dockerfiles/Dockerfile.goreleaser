@@ -1,0 +1,8 @@
+FROM scratch
+
+WORKDIR /guac
+COPY guaccollect*  /opt/guac/guaccollect
+COPY guaccsub*  /opt/guac/guaccsub
+COPY guacgql*  /opt/guac/guacgql
+COPY guacingest*  /opt/guac/guacingest
+COPY guacone*  /opt/guac/guacone

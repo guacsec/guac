@@ -1,0 +1,167 @@
+---
+project_name: guac
+
+env:
+  - CGO_ENABLED=0
+  - PKG=github.com/guacsec/guac/pkg/version
+
+dockers:
+  # see details at https://goreleaser.com/customization/docker/
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Version }}-amd64"
+    dockerfile: dockerfiles/Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--builder=desktop-linux"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Version }}-arm64"
+    dockerfile: dockerfiles/Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--builder=desktop-linux"
+
+docker_manifests:
+- name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Version }}"
+  image_templates:
+    - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Version }}-amd64"
+    - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Version }}-arm64"
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - main: ./cmd/guaccollect
+    id: guaccollect
+    binary: guaccollect-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      # See https://goreleaser.com/customization/templates/#common-fields for field definitions
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    # goos: [ 'darwin', 'linux', 'windows' ] - default
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guaccsub
+    id: guaccsub
+    binary: guaccsub-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guacgql
+    id: guacgql
+    binary: guacgql-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guacingest
+    id: guacingest
+    binary: guacingest-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+  - main: ./cmd/guacone
+    id: guacone
+    binary: guacone-{{ .Os }}-{{ .Arch }}
+    ldflags:
+      - -X {{.Env.PKG}}.Commit={{.FullCommit}}
+      - -X {{.Env.PKG}}.Date={{.Date}}
+      - -X {{.Env.PKG}}.Version={{.Summary}}
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+
+universal_binaries:
+- replace: true
+
+sboms:
+  - artifacts: binary
+    documents:
+      - "${artifact}.spdx.sbom.json"
+
+signs:
+ - id: guac-cosign-keyless
+   signature: "${artifact}-keyless.sig"
+   certificate: "${artifact}-keyless.pem"
+   cmd: cosign
+   args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
+   artifacts: all
+   output: true
+
+archives:
+  - format: binary
+    name_template: "{{ .Binary }}"
+    allow_different_binary_count: true
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+
+snapshot:
+  name_template: SNAPSHOT-{{ .ShortCommit }}
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+release:
+  prerelease: auto
+  draft: true
+  replace_existing_draft: true
+
+# The lines beneath this are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
