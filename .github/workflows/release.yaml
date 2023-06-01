@@ -40,15 +40,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Login to GitHub Container Registry
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup pack 
-        uses: buildpacks/github-actions/setup-pack@723a8f4cfec2278c3caddaf5ee1e131c2c447dcd # v5.2.0
-      - name: Build and publish image
+      
+      - name: Cross build
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -56,19 +57,15 @@ jobs:
           COMMIT=$(git rev-parse HEAD)
           BUILD=$(date +%FT%T%z)
           PKG=github.com/guacsec/guac/pkg/version
-          pack build ${IMAGE_URI_TAG} \
-            --builder ${BUILDER} \
-            --buildpack ${BUILDPACK} \
-            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
-            --env BP_GO_TARGETS=${BP_GO_TARGETS}
-        shell: bash
-        env:
-          BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
-          BUILDER: paketobuildpacks/builder:base
-          BUILDPACK: paketo-buildpacks/go
-      - name: Push image
-        if: startsWith(github.ref, 'refs/tags/')
-        run: docker push ${IMAGE_URI}:${{ github.ref_name }}
+          GO_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}"
+
+          docker buildx bake \
+            -f ./dockerfiles/docker-bake.hcl \
+            --set build.args.GO_LDFLAGS="$GO_LDFLAGS" \
+            --set build.args.IMAGE_TAG="${{ github.ref_name }}" \
+            --push \
+            cross
+
       - name: Install crane
         if: startsWith(github.ref, 'refs/tags/')
         uses: imjasonh/setup-crane@00c9e93efa4e1138c9a7a5c594acd6c75a2fbf0c # v0.3
