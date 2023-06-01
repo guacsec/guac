@@ -1,0 +1,65 @@
+name: SLSA go releaser
+on:
+  workflow_dispatch:
+  # push:
+  #   tags:
+  #     - "v*"
+
+permissions: read-all
+
+jobs:
+  # Generate ldflags dynamically.
+  # Optional: only needed for ldflags.
+  args:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ldflags.outputs.version }}
+      build-date: ${{ steps.ldflags.outputs.build-date }}
+      commit: ${{ steps.ldflags.outputs.commit }}
+      commit-date: ${{ steps.ldflags.outputs.commit-date }}
+      tree-state: ${{ steps.ldflags.outputs.tree-state }}
+    steps:
+      - id: checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
+        with:
+          fetch-depth: 0
+      - id: ldflags
+        run: |
+          echo "version=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
+          echo "build-date=$(date +%s)" >> "$GITHUB_OUTPUT"
+          echo "commit=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+          echo "commit-date=$(git log --date=iso8601-strict -1 --pretty=%ct)" >> "$GITHUB_OUTPUT"
+          echo "tree-state=$(if git diff --quiet; then echo "clean"; else echo "dirty"; fi)" >> "$GITHUB_OUTPUT"
+
+  # Trusted builder.
+  build:
+    permissions:
+      id-token: write # To sign the provenance.
+      contents: write # To upload assets to release.
+      actions: read # To read the workflow path.
+    strategy:
+      matrix:
+        guac_component:
+          - guaccollect
+        #   - guaccsub
+        #   - guacgql
+        #   - guacingest
+        #   - guacone
+        os:
+          - linux
+        #   - windows
+          # - darwin
+        arch:
+          - amd64
+          # - arm64
+    needs: args
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.6.0
+    with:
+      go-version: "1.20"
+      config-file: .slsa-goreleaser/${{matrix.guac_component}}-${{matrix.os}}-${{matrix.arch}}.yml
+      # Optional: only needed if using ldflags.
+      # evaluated-envs: "VERSION:${{needs.args.outputs.version}},COMMIT:${{needs.args.outputs.commit}}"
+      # evaluated-envs: "BUILD_DATE:${{needs.args.outputs.build-date}},COMMIT_DATE:${{needs.args.outputs.commit-date}},COMMIT:${{needs.args.outputs.commit}},VERSION:${{needs.args.outputs.version}},TREE_STATE:${{needs.args.outputs.tree-state}}"
+      evaluated-envs: "COMMIT_DATE:${{needs.args.outputs.commit-date}},COMMIT:${{needs.args.outputs.commit}},VERSION:${{needs.args.outputs.version}},TREE_STATE:${{needs.args.outputs.tree-state}},BUILD_DATE:2023-05-17T160606-0400"
+      upload-assets: true
+      prerelease: true
