@@ -15,7 +15,7 @@ dockers:
     dockerfile: dockerfiles/Dockerfile.goreleaser
     build_flag_templates:
       - "--platform=linux/amd64"
-      - "--builder=desktop-linux"
+      # - "--builder=desktop-linux"
   - use: buildx
     goos: linux
     goarch: arm64
@@ -24,7 +24,6 @@ dockers:
     dockerfile: dockerfiles/Dockerfile.goreleaser
     build_flag_templates:
       - "--platform=linux/arm64"
-      - "--builder=desktop-linux"
 
 docker_manifests:
 - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Version }}"
