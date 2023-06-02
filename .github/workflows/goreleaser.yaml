@@ -62,6 +62,7 @@ jobs:
           args: release --clean --snapshot --skip-sign
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: snapshot-tag
       - name: Run GoReleaser Release
         if: startsWith(github.ref, 'refs/tags/')
         id: run-goreleaser-release
