@@ -32,6 +32,16 @@ docker_manifests:
     - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
     - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
 
+docker_signs:
+  - cmd: cosign
+    artifacts: all
+    output: true
+    args:
+    - "sign"
+    - "-a git_sha=$GITHUB_SHA"
+    - "${artifact}"
+    - "--yes"
+
 before:
   hooks:
     - go mod tidy
@@ -131,11 +141,11 @@ sboms:
 
 signs:
  - id: guac-cosign-keyless
+   artifacts: checksum
    signature: "${artifact}-keyless.sig"
    certificate: "${artifact}-keyless.pem"
    cmd: cosign
    args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
-   artifacts: all
    output: true
 
 archives:
@@ -162,6 +172,5 @@ release:
   replace_existing_draft: true
 
 # The lines beneath this are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
