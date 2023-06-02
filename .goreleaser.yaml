@@ -15,6 +15,11 @@ dockers:
     dockerfile: dockerfiles/Dockerfile.goreleaser
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
       # - "--builder=desktop-linux"
   - use: buildx
     goos: linux
@@ -24,12 +29,12 @@ dockers:
     dockerfile: dockerfiles/Dockerfile.goreleaser
     build_flag_templates:
       - "--platform=linux/arm64"
-      # - "--builder=desktop-linux"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.name={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.source={{.GitURL}}"
+      # - "--builder=desktop-linux"
 
 docker_manifests:
 - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}"
@@ -45,7 +50,7 @@ docker_signs:
     - "sign"
     - "--a"
     - "git_sha={{.FullCommit}}"
-    - "${artifact}@${digest}"
+    - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}@${digest}"
     - "--yes"
 
 before:
