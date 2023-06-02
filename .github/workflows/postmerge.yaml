@@ -1,0 +1,80 @@
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Post Merge Actions
+
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+
+jobs:
+  test-integration:
+    runs-on: ubuntu-latest
+    name: CI for integration tests
+    services:
+      neo4j:
+        image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
+        env:
+          NEO4J_AUTH: none
+        ports:
+          - 7687:7687
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
+      - name: setup-go
+        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # tag=v3.2.1
+        with:
+          go-version: '1.19'
+      - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Setup the project
+        run: go mod download
+      - name: Run integration tests
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make integration-test
+  integration-merge-test:
+    needs: test-integration
+    # if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
+    runs-on: ubuntu-latest
+    name: CI for Integration Merge Test
+    services:
+      neo4j:
+        image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
+        env:
+          NEO4J_AUTH: none
+        ports:
+          - 7687:7687
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: setup-go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.19'
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Setup the project
+        run: go mod download
+      - name: Run integration merge test
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make integration-merge-test
