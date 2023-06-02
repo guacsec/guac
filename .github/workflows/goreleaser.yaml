@@ -89,10 +89,27 @@ jobs:
           fi
           echo "hashes=$hashes" >> $GITHUB_OUTPUT
 
-  provenance:
+  provenance-bins:
     if: startsWith(github.ref, 'refs/tags/')
     needs: [goreleaser]
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.6.0 # must use semver here
     with:
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
       upload-assets: true # upload to a new release
+
+  # This step calls the container workflow to generate provenance and push it to
+  # the container registry.
+  # provenance-docker:
+  #   needs: [goreleaser]
+  #   permissions:
+  #     actions: read # for detecting the Github Actions environment.
+  #     id-token: write # for creating OIDC tokens for signing.
+  #     packages: write # for uploading attestations.
+  #   if: startsWith(github.ref, 'refs/tags/')
+  #   uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.6.0
+  #   with:
+  #     image: ${{ needs.build.outputs.image }}
+  #     digest: ${{ needs.build.outputs.digest }}
+  #     registry-username: ${{ github.actor }}
+  #   secrets:
+  #     registry-password: ${{ secrets.GITHUB_TOKEN }}
