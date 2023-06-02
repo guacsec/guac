@@ -578,6 +578,15 @@ var (
 				Justification:  isDepJustifyContainedByJustification,
 			},
 		},
+		{
+			Pkg:    keysPack,
+			DepPkg: rsaPubFilePack,
+			IsDependency: &model.IsDependencyInputSpec{
+				DependencyType: model.DependencyTypeUnknown,
+				VersionRange:   "",
+				Justification:  isDepJustifyContainsJustification,
+			},
+		},
 	}
 
 	SpdxOccurences = []assembler.IsOccurrenceIngest{
