@@ -118,12 +118,12 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	} else {
 		// define the edgeCollection to store the edges
 		var edgeDefinition driver.EdgeDefinition
-		edgeDefinition.Collection = "myEdgeCollection"
+		edgeDefinition.Collection = "hashEqualsEdges"
 		// define a set of collections where an edge is going out...
-		edgeDefinition.From = []string{"artifacts", "hasEquals"}
+		edgeDefinition.From = []string{"artifacts", "hashEquals"}
 
 		// repeat this for the collections where an edge is going into
-		edgeDefinition.To = []string{"artifacts", "hasEquals"}
+		edgeDefinition.To = []string{"artifacts", "hashEquals"}
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
@@ -186,15 +186,10 @@ func (aqb *arangoQueryBuilder) search() *arangoQuerySearch {
 	return newArangoQuerySearch(aqb)
 }
 
-func (aqb *arangoQueryBuilder) filter(fieldName string, condition string, value interface{}) *arangoQueryFilter {
+func (aqb *arangoQueryBuilder) filter(fieldName string, condition string, value string) *arangoQueryFilter {
 	aqb.query.WriteString(" ")
 
-	switch value.(type) {
-	case string:
-		aqb.query.WriteString(fmt.Sprintf("FILTER %s.%s %s %q", aqb.counterName, fieldName, condition, value))
-	default:
-		aqb.query.WriteString(fmt.Sprintf("FILTER %s.%s %s %v", aqb.counterName, fieldName, condition, value))
-	}
+	aqb.query.WriteString(fmt.Sprintf("FILTER %s.%s %s %s", aqb.counterName, fieldName, condition, value))
 
 	return newArangoQueryFilter(aqb)
 }

@@ -32,46 +32,46 @@ func registerAllArtifacts(ctx context.Context, client *arangoClient) {
 }
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	artifactCollection, err := c.graph.VertexCollection(ctx, "artifacts")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vertex collection: %w", err)
+	}
 
-	// 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
-	// 	defer session.Close()
+	values := map[string]any{}
+	arangoQueryBuilder := newForQuery("artifacts", "art")
+	if artifactSpec.Algorithm != nil {
+		arangoQueryBuilder.filter("algorithm", "==", "@algorithm")
+		values["algorithm"] = strings.ToLower(*artifactSpec.Algorithm)
+	}
+	if artifactSpec.Digest != nil {
+		arangoQueryBuilder.filter("digest", "==", "@digest")
+		values["digest"] = strings.ToLower(*artifactSpec.Digest)
+	}
+	arangoQueryBuilder.returnStatement()
 
-	// 	var sb strings.Builder
-	// 	var firstMatch bool = true
-	// 	queryValues := map[string]any{}
+	fmt.Println(arangoQueryBuilder.string())
+	cursor, err := artifactCollection.Database().Query(ctx, arangoQueryBuilder.string(), values)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+	}
+	defer cursor.Close()
 
-	// 	sb.WriteString("MATCH (a:Artifact)")
+	var collectedArtifacts []*model.Artifact
+	for {
+		var doc *model.Artifact
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+			}
+		} else {
+			collectedArtifacts = append(collectedArtifacts, doc)
+		}
+	}
 
-	// 	setArtifactMatchValues(&sb, artifactSpec, false, &firstMatch, queryValues)
-
-	// 	sb.WriteString(" RETURN a.algorithm, a.digest")
-
-	// 	result, err := session.ReadTransaction(
-	// 		func(tx neo4j.Transaction) (interface{}, error) {
-	// 			result, err := tx.Run(sb.String(), queryValues)
-	// 			if err != nil {
-	// 				return nil, err
-	// 			}
-
-	// 			artifacts := []*model.Artifact{}
-	// 			for result.Next() {
-	// 				algorithm := result.Record().Values[0].(string)
-	// 				digest := result.Record().Values[1].(string)
-	// 				artifact := generateModelArtifact(algorithm, digest)
-	// 				artifacts = append(artifacts, artifact)
-	// 			}
-	// 			if err = result.Err(); err != nil {
-	// 				return nil, err
-	// 			}
-
-	// 			return artifacts, nil
-	// 		})
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// return result.([]*model.Artifact), nil
+	return collectedArtifacts, nil
 }
 
 func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
@@ -87,7 +87,8 @@ func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.Artif
 	query := `
 UPSERT { algorithm:@algorithm, digest:@digest } 
 INSERT { algorithm:@algorithm, digest:@digest } 
-UPDATE {} IN artifacts`
+UPDATE {} IN artifacts
+RETURN NEW`
 
 	cursor, err := artifactCollection.Database().Query(ctx, query, values)
 	if err != nil {
@@ -95,14 +96,24 @@ UPDATE {} IN artifacts`
 	}
 	defer cursor.Close()
 
+	var createdArtifacts []*model.Artifact
 	for {
 		var doc *model.Artifact
 		_, err := cursor.ReadDocument(ctx, &doc)
-		if driver.IsNoMoreDocuments(err) {
-			return doc, nil
-		} else if err != nil {
-			return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+			}
+		} else {
+			createdArtifacts = append(createdArtifacts, doc)
 		}
+	}
+	if len(createdArtifacts) == 1 {
+		return createdArtifacts[0], nil
+	} else {
+		return nil, fmt.Errorf("number of artifacts ingested is too great")
 	}
 }
 
@@ -132,10 +143,10 @@ UPDATE {} IN artifacts`
 // 	}
 // }
 
-// func generateModelArtifact(algorithm, digest string) *model.Artifact {
-// 	artifact := model.Artifact{
-// 		Algorithm: algorithm,
-// 		Digest:    digest,
-// 	}
-// 	return &artifact
-// }
+func generateModelArtifact(algorithm, digest string) *model.Artifact {
+	artifact := model.Artifact{
+		Algorithm: algorithm,
+		Digest:    digest,
+	}
+	return &artifact
+}
