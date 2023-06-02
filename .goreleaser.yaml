@@ -158,8 +158,7 @@ changelog:
 
 release:
   prerelease: auto
-  draft: true
-
+  draft: false
   replace_existing_draft: true
 
 # The lines beneath this are called `modelines`. See `:help modeline`
