@@ -25,6 +25,11 @@ dockers:
     build_flag_templates:
       - "--platform=linux/arm64"
       # - "--builder=desktop-linux"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
 
 docker_manifests:
 - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}"
@@ -38,7 +43,8 @@ docker_signs:
     output: true
     args:
     - "sign"
-    - "-a git_sha=$GITHUB_SHA"
+    - "--a"
+    - "git_sha={{.FullCommit}}"
     - "${artifact}"
     - "--yes"
 
@@ -145,7 +151,14 @@ signs:
    signature: "${artifact}-keyless.sig"
    certificate: "${artifact}-keyless.pem"
    cmd: cosign
-   args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
+   args: 
+   - "sign-blob"
+   - "--yes"
+   - "--output-signature"
+   - "${artifact}-keyless.sig"
+   - "--output-certificate"
+   - "${artifact}-keyless.pem"
+   - "${artifact}"
    output: true
 
 archives:
