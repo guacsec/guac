@@ -60,11 +60,14 @@ func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
-
-	art, err := b.client.Artifact.Create().
-		SetAlgorithm(artifact.Algorithm).
-		SetDigest(artifact.Digest).
-		Save(ctx)
+	art, err := WithinTX(ctx, b.client, func(ctx context.Context) (*Artifact, error) {
+		client := FromContext(ctx)
+		// TODO: Use upsert here
+		return client.Artifact.Create().
+			SetAlgorithm(artifact.Algorithm).
+			SetDigest(artifact.Digest).
+			Save(ctx)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +99,9 @@ func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 
 func (b *EntBackend) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*BuilderNode, error) {
-		return b.client.BuilderNode.Create().
+		client := FromContext(ctx)
+		// TODO: Use upsert here
+		return client.BuilderNode.Create().
 			SetURI(builder.URI).
 			Save(ctx)
 	})

@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -20,5 +22,7 @@ func (Artifact) Fields() []ent.Field {
 
 // Edges of the Artifact.
 func (Artifact) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("dependency", Artifact.Type).Annotations(entsql.OnDelete(entsql.Cascade)).From("dependents"),
+	}
 }
