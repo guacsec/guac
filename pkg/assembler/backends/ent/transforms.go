@@ -1,10 +1,14 @@
 package ent
 
-import "github.com/guacsec/guac/pkg/assembler/graphql/model"
+import (
+	"fmt"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+)
 
 func toArtifact(a *Artifact) *model.Artifact {
 	return &model.Artifact{
-		ID:        a.ID,
+		ID:        fmt.Sprintf("%d", a.ID),
 		Algorithm: a.Algorithm,
 		Digest:    a.Digest,
 	}
