@@ -10,7 +10,7 @@ import (
 var (
 	// ArtifactsColumns holds the columns for the "artifacts" table.
 	ArtifactsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "algorithm", Type: field.TypeString},
 		{Name: "digest", Type: field.TypeString},
 	}

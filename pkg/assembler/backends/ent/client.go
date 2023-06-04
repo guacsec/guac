@@ -233,7 +233,7 @@ func (c *ArtifactClient) UpdateOne(a *Artifact) *ArtifactUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ArtifactClient) UpdateOneID(id string) *ArtifactUpdateOne {
+func (c *ArtifactClient) UpdateOneID(id int) *ArtifactUpdateOne {
 	mutation := newArtifactMutation(c.config, OpUpdateOne, withArtifactID(id))
 	return &ArtifactUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -250,7 +250,7 @@ func (c *ArtifactClient) DeleteOne(a *Artifact) *ArtifactDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ArtifactClient) DeleteOneID(id string) *ArtifactDeleteOne {
+func (c *ArtifactClient) DeleteOneID(id int) *ArtifactDeleteOne {
 	builder := c.Delete().Where(artifact.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -267,12 +267,12 @@ func (c *ArtifactClient) Query() *ArtifactQuery {
 }
 
 // Get returns a Artifact entity by its id.
-func (c *ArtifactClient) Get(ctx context.Context, id string) (*Artifact, error) {
+func (c *ArtifactClient) Get(ctx context.Context, id int) (*Artifact, error) {
 	return c.Query().Where(artifact.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ArtifactClient) GetX(ctx context.Context, id string) *Artifact {
+func (c *ArtifactClient) GetX(ctx context.Context, id int) *Artifact {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

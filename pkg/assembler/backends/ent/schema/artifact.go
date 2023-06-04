@@ -13,7 +13,6 @@ type Artifact struct {
 // Fields of the Artifact.
 func (Artifact) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").Immutable().Unique(),
 		field.String("algorithm"),
 		field.String("digest"),
 	}

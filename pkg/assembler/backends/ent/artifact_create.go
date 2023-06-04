@@ -31,12 +31,6 @@ func (ac *ArtifactCreate) SetDigest(s string) *ArtifactCreate {
 	return ac
 }
 
-// SetID sets the "id" field.
-func (ac *ArtifactCreate) SetID(s string) *ArtifactCreate {
-	ac.mutation.SetID(s)
-	return ac
-}
-
 // Mutation returns the ArtifactMutation object of the builder.
 func (ac *ArtifactCreate) Mutation() *ArtifactMutation {
 	return ac.mutation
@@ -91,13 +85,8 @@ func (ac *ArtifactCreate) sqlSave(ctx context.Context) (*Artifact, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Artifact.ID type: %T", _spec.ID.Value)
-		}
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	ac.mutation.id = &_node.ID
 	ac.mutation.done = true
 	return _node, nil
@@ -106,12 +95,8 @@ func (ac *ArtifactCreate) sqlSave(ctx context.Context) (*Artifact, error) {
 func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Artifact{config: ac.config}
-		_spec = sqlgraph.NewCreateSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
 	)
-	if id, ok := ac.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
 	if value, ok := ac.mutation.Algorithm(); ok {
 		_spec.SetField(artifact.FieldAlgorithm, field.TypeString, value)
 		_node.Algorithm = value
@@ -163,6 +148,10 @@ func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})

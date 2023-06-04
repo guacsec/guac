@@ -8,58 +8,48 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Artifact {
+func ID(id int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Artifact {
+func IDEQ(id int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Artifact {
+func IDNEQ(id int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Artifact {
+func IDIn(ids ...int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Artifact {
+func IDNotIn(ids ...int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Artifact {
+func IDGT(id int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Artifact {
+func IDGTE(id int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Artifact {
+func IDLT(id int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Artifact {
+func IDLTE(id int) predicate.Artifact {
 	return predicate.Artifact(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Artifact {
-	return predicate.Artifact(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Artifact {
-	return predicate.Artifact(sql.FieldContainsFold(FieldID, id))
 }
 
 // Algorithm applies equality check predicate on the "algorithm" field. It's identical to AlgorithmEQ.

@@ -81,8 +81,8 @@ func (aq *ArtifactQuery) FirstX(ctx context.Context) *Artifact {
 
 // FirstID returns the first Artifact ID from the query.
 // Returns a *NotFoundError when no Artifact ID was found.
-func (aq *ArtifactQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (aq *ArtifactQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -94,7 +94,7 @@ func (aq *ArtifactQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *ArtifactQuery) FirstIDX(ctx context.Context) string {
+func (aq *ArtifactQuery) FirstIDX(ctx context.Context) int {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -132,8 +132,8 @@ func (aq *ArtifactQuery) OnlyX(ctx context.Context) *Artifact {
 // OnlyID is like Only, but returns the only Artifact ID in the query.
 // Returns a *NotSingularError when more than one Artifact ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -149,7 +149,7 @@ func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) string {
+func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) int {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -177,7 +177,7 @@ func (aq *ArtifactQuery) AllX(ctx context.Context) []*Artifact {
 }
 
 // IDs executes the query and returns a list of Artifact IDs.
-func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if aq.ctx.Unique == nil && aq.path != nil {
 		aq.Unique(true)
 	}
@@ -189,7 +189,7 @@ func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []string, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *ArtifactQuery) IDsX(ctx context.Context) []string {
+func (aq *ArtifactQuery) IDsX(ctx context.Context) []int {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -364,7 +364,7 @@ func (aq *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *ArtifactQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
 	_spec.From = aq.sql
 	if unique := aq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

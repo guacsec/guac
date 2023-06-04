@@ -15,7 +15,7 @@ import (
 type Artifact struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Algorithm holds the value of the "algorithm" field.
 	Algorithm string `json:"algorithm,omitempty"`
 	// Digest holds the value of the "digest" field.
@@ -28,7 +28,9 @@ func (*Artifact) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case artifact.FieldID, artifact.FieldAlgorithm, artifact.FieldDigest:
+		case artifact.FieldID:
+			values[i] = new(sql.NullInt64)
+		case artifact.FieldAlgorithm, artifact.FieldDigest:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -46,11 +48,11 @@ func (a *Artifact) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case artifact.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				a.ID = value.String
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
 			}
+			a.ID = int(value.Int64)
 		case artifact.FieldAlgorithm:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field algorithm", values[i])
