@@ -2,6 +2,7 @@ package ent
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
@@ -13,10 +14,23 @@ type EntBackend struct {
 	client *Client
 }
 
-func GetBackend(entClient *Client) backends.Backend {
-	return &EntBackend{
-		client: entClient,
+type Args struct {
+	entClient *Client
+}
+
+func WithEntClient(client *Client) backends.BackendArgs {
+	return Args{entClient: client}
+}
+
+func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
+	be := &EntBackend{}
+	if args, ok := args.(Args); ok {
+		be.client = args.entClient
+	} else {
+		return nil, fmt.Errorf("invalid args type")
 	}
+
+	return be, nil
 }
 
 func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
