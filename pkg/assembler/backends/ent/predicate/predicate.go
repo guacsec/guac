@@ -8,3 +8,6 @@ import (
 
 // Artifact is the predicate function for artifact builders.
 type Artifact func(*sql.Selector)
+
+// BuilderNode is the predicate function for buildernode builders.
+type BuilderNode func(*sql.Selector)

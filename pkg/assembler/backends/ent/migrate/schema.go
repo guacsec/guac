@@ -20,9 +20,21 @@ var (
 		Columns:    ArtifactsColumns,
 		PrimaryKey: []*schema.Column{ArtifactsColumns[0]},
 	}
+	// BuilderNodesColumns holds the columns for the "builder_nodes" table.
+	BuilderNodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uri", Type: field.TypeString, Unique: true},
+	}
+	// BuilderNodesTable holds the schema information for the "builder_nodes" table.
+	BuilderNodesTable = &schema.Table{
+		Name:       "builder_nodes",
+		Columns:    BuilderNodesColumns,
+		PrimaryKey: []*schema.Column{BuilderNodesColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
+		BuilderNodesTable,
 	}
 )
 

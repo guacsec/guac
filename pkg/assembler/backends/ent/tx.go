@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Artifact is the client for interacting with the Artifact builders.
 	Artifact *ArtifactClient
+	// BuilderNode is the client for interacting with the BuilderNode builders.
+	BuilderNode *BuilderNodeClient
 
 	// lazily loaded.
 	client     *Client
@@ -146,6 +148,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Artifact = NewArtifactClient(tx.config)
+	tx.BuilderNode = NewBuilderNodeClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

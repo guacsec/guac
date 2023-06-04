@@ -21,6 +21,18 @@ func (f ArtifactFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ArtifactMutation", m)
 }
 
+// The BuilderNodeFunc type is an adapter to allow the use of ordinary
+// function as BuilderNode mutator.
+type BuilderNodeFunc func(context.Context, *ent.BuilderNodeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BuilderNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BuilderNodeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BuilderNodeMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 
