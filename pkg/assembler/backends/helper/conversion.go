@@ -22,7 +22,7 @@ import (
 )
 
 // TODO: maybe use generics for PkgInputSpec and PkgSpec?
-func ConvertPkgInputSpecToPkgSpec(pkgInput *model.PkgInputSpec) *model.PkgSpec {
+func ConvertPkgInputSpecToPkgSpec[T model.PkgSpec](pkgInput *model.PkgInputSpec) *T {
 	qualifiers := convertQualifierInputToQualifierSpec(pkgInput.Qualifiers)
 	matchEmpty := false
 	if len(qualifiers) == 0 {
@@ -36,7 +36,7 @@ func ConvertPkgInputSpecToPkgSpec(pkgInput *model.PkgInputSpec) *model.PkgSpec {
 	if pkgInput.Subpath != nil {
 		subpath = *pkgInput.Subpath
 	}
-	pkgSpec := model.PkgSpec{
+	pkgSpec := T{
 		Type:                     &pkgInput.Type,
 		Namespace:                pkgInput.Namespace,
 		Name:                     &pkgInput.Name,
@@ -61,7 +61,7 @@ func convertQualifierInputToQualifierSpec(qualifiers []*model.PackageQualifierIn
 }
 
 // TODO: maybe use generics for SourceInputSpec and SourceSpec?
-func ConvertSrcInputSpecToSrcSpec(srcInput *model.SourceInputSpec) *model.SourceSpec {
+func ConvertSrcInputSpecToSrcSpec[T model.SourceSpec](srcInput *model.SourceInputSpec) *T {
 	var tag string = ""
 	if srcInput.Tag != nil {
 		tag = *srcInput.Tag
@@ -70,7 +70,7 @@ func ConvertSrcInputSpecToSrcSpec(srcInput *model.SourceInputSpec) *model.Source
 	if srcInput.Commit != nil {
 		commit = *srcInput.Commit
 	}
-	srcSpec := model.SourceSpec{
+	srcSpec := T{
 		Type:      &srcInput.Type,
 		Namespace: &srcInput.Namespace,
 		Name:      &srcInput.Name,
@@ -81,45 +81,50 @@ func ConvertSrcInputSpecToSrcSpec(srcInput *model.SourceInputSpec) *model.Source
 }
 
 // TODO: maybe use generics for OSVInputSpec and OSVSpec?
-func ConvertOsvInputSpecToOsvSpec(osvInput *model.OSVInputSpec) *model.OSVSpec {
+func ConvertOsvInputSpecToOsvSpec[T model.OSVSpec](osvInput *model.OSVInputSpec) *T {
 	osvID := strings.ToLower(osvInput.OsvID)
-	osvSpec := model.OSVSpec{
+	osvSpec := T{
 		OsvID: &osvID,
 	}
 	return &osvSpec
 }
 
 // TODO: maybe use generics for GHSAInputSpec and GHSASpec?
-func ConvertGhsaInputSpecToGhsaSpec(ghsaInput *model.GHSAInputSpec) *model.GHSASpec {
+func ConvertGhsaInputSpecToGhsaSpec[T model.GHSASpec](ghsaInput *model.GHSAInputSpec) *T {
 	ghsaID := strings.ToLower(ghsaInput.GhsaID)
-	ghsaSpec := model.GHSASpec{
+	ghsaSpec := T{
 		GhsaID: &ghsaID,
 	}
 	return &ghsaSpec
 }
 
 // TODO: maybe use generics for CVEInputSpec and CVESpec?
-func ConvertCveInputSpecToCveSpec(cveInput *model.CVEInputSpec) *model.CVESpec {
+func ConvertCveInputSpecToCveSpec[T model.CVESpec](cveInput *model.CVEInputSpec) *T {
 	cveID := strings.ToLower(cveInput.CveID)
-	cveSpec := model.CVESpec{
+	cveSpec := T{
 		Year:  &cveInput.Year,
 		CveID: &cveID,
 	}
 	return &cveSpec
 }
 
+type ArtifactOrSourceSpec interface {
+	model.ArtifactSpec
+	model.SourceSpec
+}
+
 // TODO: maybe use generics for ArtifactInputSpec and ArtifactSpec?
-func ConvertArtInputSpecToArtSpec(artInput *model.ArtifactInputSpec) *model.ArtifactSpec {
-	artSpec := model.ArtifactSpec{
+func ConvertArtInputSpecToArtSpec[T model.ArtifactSpec](artInput *model.ArtifactInputSpec) *T {
+	artSpec := T{
 		Algorithm: &artInput.Algorithm,
 		Digest:    &artInput.Digest,
 	}
 	return &artSpec
 }
 
-func ConvertBuilderInputSpecToBuilderSpec(input *model.BuilderInputSpec) *model.BuilderSpec {
+func ConvertBuilderInputSpecToBuilderSpec[T model.BuilderSpec](input *model.BuilderInputSpec) *T {
 	uri := input.URI
-	output := model.BuilderSpec{
+	output := T{
 		URI: &uri,
 	}
 	return &output
