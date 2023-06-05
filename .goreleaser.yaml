@@ -146,10 +146,12 @@ universal_binaries:
 - replace: true
 
 sboms:
-  - artifacts: binary
+  - id: bins 
+    artifacts: binary
     documents:
       - "${artifact}.spdx.sbom.json"
-  - artifacts: source
+  - id: container
+    artifacts: source
     # generate sbom for container as goreleaser can't - https://goreleaser.com/customization/sbom/#limitations
     cmd: syft
     args: [packages, "dir:./", "--output", "spdx-json"]
