@@ -99,8 +99,12 @@ func Test_docTreeBuilder_parse(t *testing.T) {
 		fields          fields
 		root            processor.DocumentTree
 		registerDocType processor.DocumentType
-		makeOverflow    bool
-		wantErr         bool
+		// The registerDocType is used to register the document parser, it is different from the roots own
+		// processor.DocumentType so that we can test the error case
+		makeOverflow bool
+		// makeOverflow is used to know whether we should try to make the stack overflow.
+		// The makeOverflow flag makes the roots child point back to the root so that it will overflow
+		wantErr bool
 	}{
 		{
 			name: "default",

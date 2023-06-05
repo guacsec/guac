@@ -95,6 +95,7 @@ fmt-md:
 .PHONY: generate
 generate:
 	go generate ./...
+	mockgen -source=pkg/ingestor/parser/common/types.go -destination=pkg/ingestor/parser/internal/mock/types.go -package=mocks -copyright_file=pkg/ingestor/parser/internal/mock/license.txt
 
 .PHONY: container
 container: check-docker-tool-check

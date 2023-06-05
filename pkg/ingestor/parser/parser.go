@@ -147,9 +147,9 @@ func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]a
 // The key is a combination of the document type, format, and source information. This is used instead of
 // processor.Document because maps cannot use slices as keys.
 type visitedKey struct {
-	Type              processor.DocumentType
-	Format            processor.FormatType
-	SourceInformation processor.SourceInformation
+	docType           processor.DocumentType
+	format            processor.FormatType
+	sourceInformation processor.SourceInformation
 }
 
 // The visited map is used to keep track of the document nodes that have already been visited to avoid infinite loops.
