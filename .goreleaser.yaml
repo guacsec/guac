@@ -146,9 +146,12 @@ universal_binaries:
 - replace: true
 
 sboms:
-  - artifacts: binary
+  - artifacts: all
     documents:
       - "${artifact}.spdx.sbom.json"
+  # - artifacts: binary
+  #   documents:
+  #     - "${artifact}.spdx.sbom.json"
 
 signs:
  - id: guac-cosign-keyless
