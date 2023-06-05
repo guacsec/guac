@@ -66,9 +66,9 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	}
 	values["qualifier"] = qualifiers
 
-	values["secondPkgType"] = pkg.Type
-	values["secondNamespace"] = pkg.Namespace
-	values["secondName"] = pkg.Name
+	values["secondPkgType"] = depPkg.Type
+	values["secondNamespace"] = depPkg.Namespace
+	values["secondName"] = depPkg.Name
 	values[versionRange] = dependency.VersionRange
 	values[dependencyType] = dependency.DependencyType.String()
 	values[justification] = dependency.Justification
