@@ -148,13 +148,6 @@ sboms:
     artifacts: binary
     documents:
       - "${artifact}.spdx.sbom.json"
-  - id: container
-    artifacts: source
-    # generate sbom for container as goreleaser can't - https://goreleaser.com/customization/sbom/#limitations
-    cmd: syft
-    args: [packages, "dir:./", "--output", "spdx-json"]
-    documents:
-      - "guac.spdx.sbom.json"
 
 signs:
  - id: guac-cosign-keyless
