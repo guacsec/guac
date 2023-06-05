@@ -18,16 +18,24 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"testing"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 
-	server2 "github.com/guacsec/guac/pkg/cli"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
+	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+)
+
+const (
+	inmems = "inmem"
 )
 
 func ingestDependencies(ctx context.Context, client graphql.Client) {
@@ -354,7 +362,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}
 }
 
-func Test_FindPathsFromVuln(t *testing.T) {
+func Test_SearchSubgraphFromVuln(t *testing.T) {
 	// testCases := []struct {
 	// 	vulnID      string
 	// 	retNodeList []string
@@ -366,32 +374,81 @@ func Test_FindPathsFromVuln(t *testing.T) {
 	// 		retNodeMap:  nil,
 	// 	},
 	// }
-
-	var cmd = &cobra.Command{
-		Use:   "query",
-		Short: "Runs the query command against GraphQL",
-	}
-
-	server2.StartServer(cmd)
+	startTestServer()
 
 	ctx := logging.WithLogger(context.Background())
 
-	opts, err := server2.ValidateFlags(
-		viper.GetString("gql-addr"),
-		viper.GetString("vuln-id"),
-		viper.GetInt("search-depth"),
-		viper.GetInt("num-path"),
-	)
 	httpClient := http.Client{}
-	gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
+	gqlclient := graphql.NewClient("inmem", &httpClient)
 
 	ingestVulnerabilities(ctx, gqlclient)
 	ingestDependencies(ctx, gqlclient)
 	//for _, tt := range testCases {
-	_, _, err = searchSubgraphFromVuln(ctx, gqlclient, "CVE-2019-13110", "", 0)
 
-	if err != nil {
-		fmt.Printf("err")
-	}
+	t.Run("test1", func(t *testing.T) {
+		got, _, err := searchSubgraphFromVuln(ctx, gqlclient, "CVE-2019-13110", "", 0)
+		if err != nil {
+			t.Errorf("got err from DoesRangeInclude: %v", err)
+			return
+		} else {
+			fmt.Printf(got[0])
+		}
+
+		// if diff := cmp.Diff(tt.expect, got); len(diff) > 0 {
+		// 	t.Errorf("(-want +got):\n%s", diff)
+		// }
+	})
 	//}
+}
+
+func startTestServer() {
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
+
+	srv, err := getGraphqlTestServer()
+	if err != nil {
+		logger.Errorf("unable to initialize graphql server: %v", err)
+		os.Exit(1)
+	}
+	http.Handle("/query", srv)
+
+	server := &http.Server{Addr: fmt.Sprintf(":%d", 9090)}
+	logger.Info("starting server")
+	go func() {
+		logger.Infof("server finished: %s", server.ListenAndServe())
+	}()
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	s := <-sigs
+	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+	done := make(chan bool, 1)
+	ctx, cf := context.WithCancel(ctx)
+	go func() {
+		_ = server.Shutdown(ctx)
+		done <- true
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		logger.Warnf("forcibly shutting down gql http server")
+		cf()
+		server.Close()
+	}
+	cf()
+}
+
+func getGraphqlTestServer() (*handler.Server, error) {
+	var topResolver resolvers.Resolver
+	args := inmem.DemoCredentials{}
+	backend, err := inmem.GetBackend(&args)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating inmem backend: %w", err)
+	}
+
+	topResolver = resolvers.Resolver{Backend: backend}
+
+	config := generated.Config{Resolvers: &topResolver}
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
+
+	return srv, nil
 }

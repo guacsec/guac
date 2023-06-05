@@ -24,7 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/misc/depversion"
 )
 
-type dfsNode struct {
+type DfsNode struct {
 	expanded     bool // true once all node neighbors are added to queue
 	parent       string
 	isDependency *model.NeighborsNeighborsIsDependency
@@ -32,7 +32,7 @@ type dfsNode struct {
 }
 
 // TODO: make more robust usuing predicates
-func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnID string, stopID string, maxDepth int) ([]string, map[string]dfsNode, error) {
+func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnID string, stopID string, maxDepth int) ([]string, map[string]DfsNode, error) {
 	vulnNode, err := model.Node(ctx, gqlclient, vulnID)
 
 	if err != nil {
@@ -49,8 +49,8 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 	queue := make([]string, 0) // the queue of nodes in bfs
 
 	collectedIDs = append(collectedIDs, vulnID)
-	nodeMap := map[string]dfsNode{}
-	nodeMap[vulnID] = dfsNode{
+	nodeMap := map[string]DfsNode{}
+	nodeMap[vulnID] = DfsNode{
 		expanded: false,
 		depth:    0,
 	}
@@ -96,7 +96,7 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 							found = true
 						}
 						if !seen {
-							dfsN = dfsNode{
+							dfsN = DfsNode{
 								parent:       now,
 								isDependency: isDependency,
 								depth:        nowNode.depth + 1,
