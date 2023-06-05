@@ -59,7 +59,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make integration-test
-
+        
   test-unit:
     runs-on: ubuntu-latest
     name: CI for unit tests
