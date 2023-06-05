@@ -21,9 +21,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // TODO: move this into a unit test for this file

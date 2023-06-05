@@ -20,9 +20,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Internal data: link between sources and packages (HasSourceAt)

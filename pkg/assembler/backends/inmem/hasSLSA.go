@@ -23,9 +23,9 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"golang.org/x/exp/slices"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
