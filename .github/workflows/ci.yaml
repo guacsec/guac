@@ -102,7 +102,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5 # tag=v3.2.0
+        uses: golangci/golangci-lint-action@5f1fec7010f6ae3b84ea4f7b2129beb8639b564f # tag=v3.2.0
         with:
           only-new-issues: true
       - name: Check markdown format
