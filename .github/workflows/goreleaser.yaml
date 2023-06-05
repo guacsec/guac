@@ -91,9 +91,9 @@ jobs:
           fi
           echo "hashes=$hashes" >> $GITHUB_OUTPUT
 
-          image=$(echo $ARTIFACTS | jq --raw-output '.[] | select( .type =="Docker Manifest" ).name | split(":")[0]'
+          image=$(echo $ARTIFACTS | jq --raw-output '.[] | select( .type =="Docker Manifest" ).name | split(":")[0]')
           echo "image=$image" >> $GITHUB_OUTPUT
-          digest=$(echo $ARTIFACTS | jq --raw-output '.[] | select( .type =="Docker Manifest" ).extra.Digest' 
+          digest=$(echo $ARTIFACTS | jq --raw-output '.[] | select( .type =="Docker Manifest" ).extra.Digest')
           echo "digest=$digest" >> $GITHUB_OUTPUT
 
 
