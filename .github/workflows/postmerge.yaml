@@ -20,16 +20,10 @@ permissions:
   contents: read
 
 jobs:
-  test-integration:
+  integration-merge-test:
+    # if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
     runs-on: ubuntu-latest
-    name: CI for integration tests
-    services:
-      neo4j:
-        image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
-        env:
-          NEO4J_AUTH: none
-        ports:
-          - 7687:7687
+    name: CI for Integration Merge Test
     steps:
       - name: Checkout code
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
@@ -38,36 +32,6 @@ jobs:
         with:
           go-version: '1.19'
       - uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      - name: Setup the project
-        run: go mod download
-      - name: Run integration tests
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: make integration-test
-  integration-merge-test:
-    needs: test-integration
-    # if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged
-    runs-on: ubuntu-latest
-    name: CI for Integration Merge Test
-    services:
-      neo4j:
-        image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
-        env:
-          NEO4J_AUTH: none
-        ports:
-          - 7687:7687
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: setup-go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.19'
-      - uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
