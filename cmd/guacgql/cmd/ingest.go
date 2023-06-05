@@ -46,7 +46,7 @@ func ingestData(port int) {
 	logger.Infof("Ingesting test data into backend server")
 	//ingestScorecards(ctx, gqlclient)
 	//ingestSLSA(ctx, gqlclient)
-	//ingestDependency(ctx, gqlclient)
+	ingestDependency(ctx, gqlclient)
 	//ingestOccurrence(ctx, gqlclient)
 	//ingestVulnerability(ctx, gqlclient)
 	//ingestPkgEqual(ctx, gqlclient)

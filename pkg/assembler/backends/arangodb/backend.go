@@ -117,17 +117,57 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 	} else {
 		// define the edgeCollection to store the edges
-		var edgeDefinition driver.EdgeDefinition
-		edgeDefinition.Collection = "hashEqualsEdges"
+		var hashEqualsEdges driver.EdgeDefinition
+		hashEqualsEdges.Collection = "hashEqualsEdges"
 		// define a set of collections where an edge is going out...
-		edgeDefinition.From = []string{"artifacts", "hashEquals"}
+		hashEqualsEdges.From = []string{"artifacts", "hashEquals"}
 
 		// repeat this for the collections where an edge is going into
-		edgeDefinition.To = []string{"artifacts", "hashEquals"}
+		hashEqualsEdges.To = []string{"artifacts", "hashEquals"}
+
+		var pkgHasType driver.EdgeDefinition
+		pkgHasType.Collection = "PkgHasType"
+		// define a set of collections where an edge is going out...
+		pkgHasType.From = []string{"Pkg"}
+
+		// repeat this for the collections where an edge is going into
+		pkgHasType.To = []string{"PkgType"}
+
+		var pkgHasNamespace driver.EdgeDefinition
+		pkgHasNamespace.Collection = "PkgHasNamespace"
+		// define a set of collections where an edge is going out...
+		pkgHasNamespace.From = []string{"PkgType"}
+
+		// repeat this for the collections where an edge is going into
+		pkgHasNamespace.To = []string{"PkgNamespace"}
+
+		var pkgHasName driver.EdgeDefinition
+		pkgHasName.Collection = "PkgHasName"
+		// define a set of collections where an edge is going out...
+		pkgHasName.From = []string{"PkgNamespace"}
+
+		// repeat this for the collections where an edge is going into
+		pkgHasName.To = []string{"PkgName"}
+
+		var pkgHasVersion driver.EdgeDefinition
+		pkgHasVersion.Collection = "PkgHasVersion"
+		// define a set of collections where an edge is going out...
+		pkgHasVersion.From = []string{"PkgName"}
+
+		// repeat this for the collections where an edge is going into
+		pkgHasVersion.To = []string{"PkgVersion"}
+
+		var isDependencyEdges driver.EdgeDefinition
+		isDependencyEdges.Collection = "isDependencyEdges"
+		// define a set of collections where an edge is going out...
+		isDependencyEdges.From = []string{"isDependencies", "PkgVersion"}
+
+		// repeat this for the collections where an edge is going into
+		isDependencyEdges.To = []string{"isDependencies", "PkgName"}
 
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
-		options.EdgeDefinitions = []driver.EdgeDefinition{edgeDefinition}
+		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName, pkgHasVersion, isDependencyEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -138,6 +178,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 	arangoClient := &arangoClient{arangodbClient, db, graph}
 	registerAllArtifacts(ctx, arangoClient)
+	registerAllPackages(ctx, arangoClient)
 	if err != nil {
 		return nil, err
 	}
@@ -453,9 +494,6 @@ func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.A
 func (c *arangoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
-func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
-}
 func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
@@ -468,9 +506,6 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
 func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
-}
-func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
 func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {

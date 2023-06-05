@@ -51,9 +51,8 @@ LET a = (
 	  FOR hashEqual IN INBOUND objArt hashEqualsEdges
 		FOR art IN INBOUND hashEqual hashEqualsEdges
 		FILTER art.algorithm == "sha512" && art.digest == "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7"
-
 		  RETURN {
-			 "algorithmA" : objArt.algorithm,
+			"algorithmA" : objArt.algorithm,
 			"digestA" : objArt.digest,
 			"hashEqual" : hashEqual,
 			"algorithmB" : art.algorithm,
@@ -155,36 +154,36 @@ LET a = (
 	return nil, nil
 }
 
-func setHashEqualValues(sb *strings.Builder, hashEqualSpec *model.HashEqualSpec, firstMatch *bool, queryValues map[string]any) {
-	if hashEqualSpec.Justification != nil {
-		matchProperties(sb, *firstMatch, "hashEqual", "justification", "$justification")
-		*firstMatch = false
-		queryValues["justification"] = hashEqualSpec.Justification
-	}
-	if hashEqualSpec.Origin != nil {
-		matchProperties(sb, *firstMatch, "hashEqual", "origin", "$origin")
-		*firstMatch = false
-		queryValues["origin"] = hashEqualSpec.Origin
-	}
-	if hashEqualSpec.Collector != nil {
-		matchProperties(sb, *firstMatch, "hashEqual", "collector", "$collector")
-		*firstMatch = false
-		queryValues["collector"] = hashEqualSpec.Collector
-	}
-}
+// func setHashEqualValues(sb *strings.Builder, hashEqualSpec *model.HashEqualSpec, firstMatch *bool, queryValues map[string]any) {
+// 	if hashEqualSpec.Justification != nil {
+// 		matchProperties(sb, *firstMatch, "hashEqual", "justification", "$justification")
+// 		*firstMatch = false
+// 		queryValues["justification"] = hashEqualSpec.Justification
+// 	}
+// 	if hashEqualSpec.Origin != nil {
+// 		matchProperties(sb, *firstMatch, "hashEqual", "origin", "$origin")
+// 		*firstMatch = false
+// 		queryValues["origin"] = hashEqualSpec.Origin
+// 	}
+// 	if hashEqualSpec.Collector != nil {
+// 		matchProperties(sb, *firstMatch, "hashEqual", "collector", "$collector")
+// 		*firstMatch = false
+// 		queryValues["collector"] = hashEqualSpec.Collector
+// 	}
+// }
 
-func matchProperties(sb *strings.Builder, firstMatch bool, label, property string, resolver string) {
-	if firstMatch {
-		sb.WriteString(" WHERE ")
-	} else {
-		sb.WriteString(" AND ")
-	}
-	sb.WriteString(label)
-	sb.WriteString(".")
-	sb.WriteString(property)
-	sb.WriteString(" = ")
-	sb.WriteString(resolver)
-}
+// func matchProperties(sb *strings.Builder, firstMatch bool, label, property string, resolver string) {
+// 	if firstMatch {
+// 		sb.WriteString(" WHERE ")
+// 	} else {
+// 		sb.WriteString(" AND ")
+// 	}
+// 	sb.WriteString(label)
+// 	sb.WriteString(".")
+// 	sb.WriteString(property)
+// 	sb.WriteString(" = ")
+// 	sb.WriteString(resolver)
+// }
 
 func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
 	hasEqualCollection, err := c.graph.VertexCollection(ctx, "hashEquals")
