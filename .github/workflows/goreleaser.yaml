@@ -109,7 +109,6 @@ jobs:
   # the container registry.
   provenance-docker:
     needs: [goreleaser]
-    permissions:
     if: startsWith(github.ref, 'refs/tags/')
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.6.0 # must use semver here
     with:
