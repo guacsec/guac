@@ -1,4 +1,3 @@
-//
 // Copyright 2023 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +22,9 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
-	server "github.com/guacsec/guac/cmd/guacgql/cmd"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+
+	server2 "github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -355,26 +355,28 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 }
 
 func Test_FindPathsFromVuln(t *testing.T) {
-	testCases := []struct {
-		vulnID      string
-		retNodeList []string
-		retNodeMap  map[string]dfsNode
-	}{
-		{
-			vulnID:      "CVE-2019-13110",
-			retNodeList: nil,
-			retNodeMap:  nil,
-		},
-	}
+	// testCases := []struct {
+	// 	vulnID      string
+	// 	retNodeList []string
+	// 	retNodeMap  map[string]dfsNode
+	// }{
+	// 	{
+	// 		vulnID:      "CVE-2019-13110",
+	// 		retNodeList: nil,
+	// 		retNodeMap:  nil,
+	// 	},
+	// }
 
 	var cmd = &cobra.Command{
 		Use:   "query",
 		Short: "Runs the query command against GraphQL",
 	}
-	server.StartServer(cmd)
+
+	server2.StartServer(cmd)
+
 	ctx := logging.WithLogger(context.Background())
 
-	opts, err := validateFlags(
+	opts, err := server2.ValidateFlags(
 		viper.GetString("gql-addr"),
 		viper.GetString("vuln-id"),
 		viper.GetInt("search-depth"),
@@ -385,11 +387,11 @@ func Test_FindPathsFromVuln(t *testing.T) {
 
 	ingestVulnerabilities(ctx, gqlclient)
 	ingestDependencies(ctx, gqlclient)
-	for _, tt := range testCases {
-		_, _, err := searchSubgraphFromVuln(ctxx, gqlclient, "CVE-2019-13110", "", 0)
+	//for _, tt := range testCases {
+	_, _, err = searchSubgraphFromVuln(ctx, gqlclient, "CVE-2019-13110", "", 0)
 
-		if err != nil {
-			fmt.Printf("err")
-		}
+	if err != nil {
+		fmt.Printf("err")
 	}
+	//}
 }
