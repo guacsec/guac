@@ -47,7 +47,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 
 	// TODO(pxp928): currently only supporting package for testing. Will add in source once testing is completed
 	if subject.Package == nil {
-		return nil, fmt.Errorf("source as a subject is currently unimplemented for the arr")
+		return nil, fmt.Errorf("source as a subject is currently unimplemented for the IngestOccurrence")
 	}
 
 	values["pkgType"] = subject.Package.Type
@@ -142,7 +142,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		  "origin": isOccurrence.origin
 	  }`
 
-	cursor, err := c.db.Query(ctx, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
