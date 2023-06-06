@@ -153,8 +153,12 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 
 	record, err := b.client.PackageNode.Query().Where(packagenode.ID(*recordID)).
 		WithNamespaces(func(q *PackageNamespaceQuery) {
+			q.Order(Asc(packagenamespace.FieldNamespace))
 			q.WithNames(func(q *PackageNameQuery) {
-				q.WithVersions()
+				q.Order(Asc(packagename.FieldName))
+				q.WithVersions(func(q *PackageVersionQuery) {
+					q.Order(Asc(packageversion.FieldVersion))
+				})
 			})
 		}).
 		Only(ctx)
