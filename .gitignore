@@ -13,3 +13,5 @@ go.work
 *pkg/.DS_Store
 *.swp
 *.swo
+
+dist/
