@@ -168,27 +168,3 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 
 	return toModelPackage(record), nil
 }
-
-func (b *EntBackend) registerPackage(ctx context.Context, packageType, namespace, name, version, subpath string, qualifiers ...string) error {
-	pkg, err := b.client.PackageNode.Create().SetType(packageType).Save(ctx)
-	if err != nil {
-		return err
-	}
-
-	ns, err := b.client.PackageNamespace.Create().SetPackage(pkg).SetNamespace(namespace).Save(ctx)
-	if err != nil {
-		return err
-	}
-
-	nameNode, err := b.client.PackageName.Create().SetNamespace(ns).SetName(name).Save(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = b.client.PackageVersion.Create().SetName(nameNode).SetVersion(version).Exec(ctx)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

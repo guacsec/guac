@@ -72,8 +72,8 @@ func (s *Suite) TestCreateSoftwareTree() {
 			s.Equal("apk", pkg.Namespaces[0].Names[0].Name)
 
 			if s.Len(pkg.Namespaces[0].Names[0].Versions, 2) {
-				s.Equal("2.12.9-r3", pkg.Namespaces[0].Names[0].Versions[0].Version)
-				s.Equal("2.12.10", pkg.Namespaces[0].Names[0].Versions[1].Version)
+				s.Equal("2.12.10", pkg.Namespaces[0].Names[0].Versions[0].Version)
+				s.Equal("2.12.9-r3", pkg.Namespaces[0].Names[0].Versions[1].Version)
 			}
 		}
 	}
