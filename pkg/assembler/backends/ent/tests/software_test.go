@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/testutils"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/stretchr/testify/suite"
@@ -64,16 +63,20 @@ func (s *Suite) TestCreateSoftwareTree() {
 	})
 	// Ensure that we don't get a duplicate row error
 	s.NoError(err)
+	s.NotNil(pkg)
 
-	pkgTree := s.Client.PackageNode.Query().Where(packagenode.Type("apk")).
-		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.WithNames(func(q *ent.PackageNameQuery) {
-				q.WithVersions()
-			})
-		}).
-		FirstX(s.Ctx)
+	if s.Len(pkg.Namespaces, 1) {
+		s.Equal("alpine", pkg.Namespaces[0].Namespace)
 
-	s.NotNil(pkgTree)
+		if s.Len(pkg.Namespaces[0].Names, 1) {
+			s.Equal("apk", pkg.Namespaces[0].Names[0].Name)
+
+			if s.Len(pkg.Namespaces[0].Names[0].Versions, 2) {
+				s.Equal("2.12.9-r3", pkg.Namespaces[0].Names[0].Versions[0].Version)
+				s.Equal("2.12.10", pkg.Namespaces[0].Names[0].Versions[1].Version)
+			}
+		}
+	}
 }
 
 func ptr[T any](s T) *T {
