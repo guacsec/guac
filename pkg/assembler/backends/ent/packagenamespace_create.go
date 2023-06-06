@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -19,6 +20,7 @@ type PackageNamespaceCreate struct {
 	config
 	mutation *PackageNamespaceMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetPackageID sets the "package_id" field.
@@ -127,6 +129,7 @@ func (pnc *PackageNamespaceCreate) createSpec() (*PackageNamespace, *sqlgraph.Cr
 		_node = &PackageNamespace{config: pnc.config}
 		_spec = sqlgraph.NewCreateSpec(packagenamespace.Table, sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = pnc.conflict
 	if value, ok := pnc.mutation.Namespace(); ok {
 		_spec.SetField(packagenamespace.FieldNamespace, field.TypeString, value)
 		_node.Namespace = value
@@ -167,10 +170,185 @@ func (pnc *PackageNamespaceCreate) createSpec() (*PackageNamespace, *sqlgraph.Cr
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.PackageNamespace.Create().
+//		SetPackageID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.PackageNamespaceUpsert) {
+//			SetPackageID(v+v).
+//		}).
+//		Exec(ctx)
+func (pnc *PackageNamespaceCreate) OnConflict(opts ...sql.ConflictOption) *PackageNamespaceUpsertOne {
+	pnc.conflict = opts
+	return &PackageNamespaceUpsertOne{
+		create: pnc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.PackageNamespace.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (pnc *PackageNamespaceCreate) OnConflictColumns(columns ...string) *PackageNamespaceUpsertOne {
+	pnc.conflict = append(pnc.conflict, sql.ConflictColumns(columns...))
+	return &PackageNamespaceUpsertOne{
+		create: pnc,
+	}
+}
+
+type (
+	// PackageNamespaceUpsertOne is the builder for "upsert"-ing
+	//  one PackageNamespace node.
+	PackageNamespaceUpsertOne struct {
+		create *PackageNamespaceCreate
+	}
+
+	// PackageNamespaceUpsert is the "OnConflict" setter.
+	PackageNamespaceUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetPackageID sets the "package_id" field.
+func (u *PackageNamespaceUpsert) SetPackageID(v int) *PackageNamespaceUpsert {
+	u.Set(packagenamespace.FieldPackageID, v)
+	return u
+}
+
+// UpdatePackageID sets the "package_id" field to the value that was provided on create.
+func (u *PackageNamespaceUpsert) UpdatePackageID() *PackageNamespaceUpsert {
+	u.SetExcluded(packagenamespace.FieldPackageID)
+	return u
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *PackageNamespaceUpsert) SetNamespace(v string) *PackageNamespaceUpsert {
+	u.Set(packagenamespace.FieldNamespace, v)
+	return u
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *PackageNamespaceUpsert) UpdateNamespace() *PackageNamespaceUpsert {
+	u.SetExcluded(packagenamespace.FieldNamespace)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.PackageNamespace.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *PackageNamespaceUpsertOne) UpdateNewValues() *PackageNamespaceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.PackageNamespace.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *PackageNamespaceUpsertOne) Ignore() *PackageNamespaceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *PackageNamespaceUpsertOne) DoNothing() *PackageNamespaceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the PackageNamespaceCreate.OnConflict
+// documentation for more info.
+func (u *PackageNamespaceUpsertOne) Update(set func(*PackageNamespaceUpsert)) *PackageNamespaceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&PackageNamespaceUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetPackageID sets the "package_id" field.
+func (u *PackageNamespaceUpsertOne) SetPackageID(v int) *PackageNamespaceUpsertOne {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.SetPackageID(v)
+	})
+}
+
+// UpdatePackageID sets the "package_id" field to the value that was provided on create.
+func (u *PackageNamespaceUpsertOne) UpdatePackageID() *PackageNamespaceUpsertOne {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.UpdatePackageID()
+	})
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *PackageNamespaceUpsertOne) SetNamespace(v string) *PackageNamespaceUpsertOne {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.SetNamespace(v)
+	})
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *PackageNamespaceUpsertOne) UpdateNamespace() *PackageNamespaceUpsertOne {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.UpdateNamespace()
+	})
+}
+
+// Exec executes the query.
+func (u *PackageNamespaceUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for PackageNamespaceCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *PackageNamespaceUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *PackageNamespaceUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *PackageNamespaceUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // PackageNamespaceCreateBulk is the builder for creating many PackageNamespace entities in bulk.
 type PackageNamespaceCreateBulk struct {
 	config
 	builders []*PackageNamespaceCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the PackageNamespace entities in the database.
@@ -196,6 +374,7 @@ func (pncb *PackageNamespaceCreateBulk) Save(ctx context.Context) ([]*PackageNam
 					_, err = mutators[i+1].Mutate(root, pncb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = pncb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, pncb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -246,6 +425,135 @@ func (pncb *PackageNamespaceCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (pncb *PackageNamespaceCreateBulk) ExecX(ctx context.Context) {
 	if err := pncb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.PackageNamespace.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.PackageNamespaceUpsert) {
+//			SetPackageID(v+v).
+//		}).
+//		Exec(ctx)
+func (pncb *PackageNamespaceCreateBulk) OnConflict(opts ...sql.ConflictOption) *PackageNamespaceUpsertBulk {
+	pncb.conflict = opts
+	return &PackageNamespaceUpsertBulk{
+		create: pncb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.PackageNamespace.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (pncb *PackageNamespaceCreateBulk) OnConflictColumns(columns ...string) *PackageNamespaceUpsertBulk {
+	pncb.conflict = append(pncb.conflict, sql.ConflictColumns(columns...))
+	return &PackageNamespaceUpsertBulk{
+		create: pncb,
+	}
+}
+
+// PackageNamespaceUpsertBulk is the builder for "upsert"-ing
+// a bulk of PackageNamespace nodes.
+type PackageNamespaceUpsertBulk struct {
+	create *PackageNamespaceCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.PackageNamespace.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *PackageNamespaceUpsertBulk) UpdateNewValues() *PackageNamespaceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.PackageNamespace.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *PackageNamespaceUpsertBulk) Ignore() *PackageNamespaceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *PackageNamespaceUpsertBulk) DoNothing() *PackageNamespaceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the PackageNamespaceCreateBulk.OnConflict
+// documentation for more info.
+func (u *PackageNamespaceUpsertBulk) Update(set func(*PackageNamespaceUpsert)) *PackageNamespaceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&PackageNamespaceUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetPackageID sets the "package_id" field.
+func (u *PackageNamespaceUpsertBulk) SetPackageID(v int) *PackageNamespaceUpsertBulk {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.SetPackageID(v)
+	})
+}
+
+// UpdatePackageID sets the "package_id" field to the value that was provided on create.
+func (u *PackageNamespaceUpsertBulk) UpdatePackageID() *PackageNamespaceUpsertBulk {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.UpdatePackageID()
+	})
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *PackageNamespaceUpsertBulk) SetNamespace(v string) *PackageNamespaceUpsertBulk {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.SetNamespace(v)
+	})
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *PackageNamespaceUpsertBulk) UpdateNamespace() *PackageNamespaceUpsertBulk {
+	return u.Update(func(s *PackageNamespaceUpsert) {
+		s.UpdateNamespace()
+	})
+}
+
+// Exec executes the query.
+func (u *PackageNamespaceUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PackageNamespaceCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for PackageNamespaceCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *PackageNamespaceUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

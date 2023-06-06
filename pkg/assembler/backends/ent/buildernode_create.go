@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
@@ -17,6 +18,7 @@ type BuilderNodeCreate struct {
 	config
 	mutation *BuilderNodeMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetURI sets the "uri" field.
@@ -88,6 +90,7 @@ func (bnc *BuilderNodeCreate) createSpec() (*BuilderNode, *sqlgraph.CreateSpec) 
 		_node = &BuilderNode{config: bnc.config}
 		_spec = sqlgraph.NewCreateSpec(buildernode.Table, sqlgraph.NewFieldSpec(buildernode.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = bnc.conflict
 	if value, ok := bnc.mutation.URI(); ok {
 		_spec.SetField(buildernode.FieldURI, field.TypeString, value)
 		_node.URI = value
@@ -95,10 +98,138 @@ func (bnc *BuilderNodeCreate) createSpec() (*BuilderNode, *sqlgraph.CreateSpec) 
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.BuilderNode.Create().
+//		SetURI(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BuilderNodeUpsert) {
+//			SetURI(v+v).
+//		}).
+//		Exec(ctx)
+func (bnc *BuilderNodeCreate) OnConflict(opts ...sql.ConflictOption) *BuilderNodeUpsertOne {
+	bnc.conflict = opts
+	return &BuilderNodeUpsertOne{
+		create: bnc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.BuilderNode.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bnc *BuilderNodeCreate) OnConflictColumns(columns ...string) *BuilderNodeUpsertOne {
+	bnc.conflict = append(bnc.conflict, sql.ConflictColumns(columns...))
+	return &BuilderNodeUpsertOne{
+		create: bnc,
+	}
+}
+
+type (
+	// BuilderNodeUpsertOne is the builder for "upsert"-ing
+	//  one BuilderNode node.
+	BuilderNodeUpsertOne struct {
+		create *BuilderNodeCreate
+	}
+
+	// BuilderNodeUpsert is the "OnConflict" setter.
+	BuilderNodeUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.BuilderNode.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *BuilderNodeUpsertOne) UpdateNewValues() *BuilderNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.URI(); exists {
+			s.SetIgnore(buildernode.FieldURI)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.BuilderNode.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *BuilderNodeUpsertOne) Ignore() *BuilderNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BuilderNodeUpsertOne) DoNothing() *BuilderNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BuilderNodeCreate.OnConflict
+// documentation for more info.
+func (u *BuilderNodeUpsertOne) Update(set func(*BuilderNodeUpsert)) *BuilderNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BuilderNodeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// Exec executes the query.
+func (u *BuilderNodeUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BuilderNodeCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BuilderNodeUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *BuilderNodeUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *BuilderNodeUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // BuilderNodeCreateBulk is the builder for creating many BuilderNode entities in bulk.
 type BuilderNodeCreateBulk struct {
 	config
 	builders []*BuilderNodeCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the BuilderNode entities in the database.
@@ -124,6 +255,7 @@ func (bncb *BuilderNodeCreateBulk) Save(ctx context.Context) ([]*BuilderNode, er
 					_, err = mutators[i+1].Mutate(root, bncb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = bncb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, bncb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -174,6 +306,114 @@ func (bncb *BuilderNodeCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (bncb *BuilderNodeCreateBulk) ExecX(ctx context.Context) {
 	if err := bncb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.BuilderNode.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BuilderNodeUpsert) {
+//			SetURI(v+v).
+//		}).
+//		Exec(ctx)
+func (bncb *BuilderNodeCreateBulk) OnConflict(opts ...sql.ConflictOption) *BuilderNodeUpsertBulk {
+	bncb.conflict = opts
+	return &BuilderNodeUpsertBulk{
+		create: bncb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.BuilderNode.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bncb *BuilderNodeCreateBulk) OnConflictColumns(columns ...string) *BuilderNodeUpsertBulk {
+	bncb.conflict = append(bncb.conflict, sql.ConflictColumns(columns...))
+	return &BuilderNodeUpsertBulk{
+		create: bncb,
+	}
+}
+
+// BuilderNodeUpsertBulk is the builder for "upsert"-ing
+// a bulk of BuilderNode nodes.
+type BuilderNodeUpsertBulk struct {
+	create *BuilderNodeCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.BuilderNode.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *BuilderNodeUpsertBulk) UpdateNewValues() *BuilderNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.URI(); exists {
+				s.SetIgnore(buildernode.FieldURI)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.BuilderNode.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *BuilderNodeUpsertBulk) Ignore() *BuilderNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BuilderNodeUpsertBulk) DoNothing() *BuilderNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BuilderNodeCreateBulk.OnConflict
+// documentation for more info.
+func (u *BuilderNodeUpsertBulk) Update(set func(*BuilderNodeUpsert)) *BuilderNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BuilderNodeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// Exec executes the query.
+func (u *BuilderNodeUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BuilderNodeCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BuilderNodeCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BuilderNodeUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

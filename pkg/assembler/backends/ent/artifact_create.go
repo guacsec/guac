@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
@@ -17,6 +18,7 @@ type ArtifactCreate struct {
 	config
 	mutation *ArtifactMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetAlgorithm sets the "algorithm" field.
@@ -97,6 +99,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		_node = &Artifact{config: ac.config}
 		_spec = sqlgraph.NewCreateSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = ac.conflict
 	if value, ok := ac.mutation.Algorithm(); ok {
 		_spec.SetField(artifact.FieldAlgorithm, field.TypeString, value)
 		_node.Algorithm = value
@@ -108,10 +111,185 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Artifact.Create().
+//		SetAlgorithm(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ArtifactUpsert) {
+//			SetAlgorithm(v+v).
+//		}).
+//		Exec(ctx)
+func (ac *ArtifactCreate) OnConflict(opts ...sql.ConflictOption) *ArtifactUpsertOne {
+	ac.conflict = opts
+	return &ArtifactUpsertOne{
+		create: ac,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Artifact.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (ac *ArtifactCreate) OnConflictColumns(columns ...string) *ArtifactUpsertOne {
+	ac.conflict = append(ac.conflict, sql.ConflictColumns(columns...))
+	return &ArtifactUpsertOne{
+		create: ac,
+	}
+}
+
+type (
+	// ArtifactUpsertOne is the builder for "upsert"-ing
+	//  one Artifact node.
+	ArtifactUpsertOne struct {
+		create *ArtifactCreate
+	}
+
+	// ArtifactUpsert is the "OnConflict" setter.
+	ArtifactUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetAlgorithm sets the "algorithm" field.
+func (u *ArtifactUpsert) SetAlgorithm(v string) *ArtifactUpsert {
+	u.Set(artifact.FieldAlgorithm, v)
+	return u
+}
+
+// UpdateAlgorithm sets the "algorithm" field to the value that was provided on create.
+func (u *ArtifactUpsert) UpdateAlgorithm() *ArtifactUpsert {
+	u.SetExcluded(artifact.FieldAlgorithm)
+	return u
+}
+
+// SetDigest sets the "digest" field.
+func (u *ArtifactUpsert) SetDigest(v string) *ArtifactUpsert {
+	u.Set(artifact.FieldDigest, v)
+	return u
+}
+
+// UpdateDigest sets the "digest" field to the value that was provided on create.
+func (u *ArtifactUpsert) UpdateDigest() *ArtifactUpsert {
+	u.SetExcluded(artifact.FieldDigest)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.Artifact.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *ArtifactUpsertOne) UpdateNewValues() *ArtifactUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Artifact.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *ArtifactUpsertOne) Ignore() *ArtifactUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ArtifactUpsertOne) DoNothing() *ArtifactUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ArtifactCreate.OnConflict
+// documentation for more info.
+func (u *ArtifactUpsertOne) Update(set func(*ArtifactUpsert)) *ArtifactUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ArtifactUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAlgorithm sets the "algorithm" field.
+func (u *ArtifactUpsertOne) SetAlgorithm(v string) *ArtifactUpsertOne {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.SetAlgorithm(v)
+	})
+}
+
+// UpdateAlgorithm sets the "algorithm" field to the value that was provided on create.
+func (u *ArtifactUpsertOne) UpdateAlgorithm() *ArtifactUpsertOne {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.UpdateAlgorithm()
+	})
+}
+
+// SetDigest sets the "digest" field.
+func (u *ArtifactUpsertOne) SetDigest(v string) *ArtifactUpsertOne {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.SetDigest(v)
+	})
+}
+
+// UpdateDigest sets the "digest" field to the value that was provided on create.
+func (u *ArtifactUpsertOne) UpdateDigest() *ArtifactUpsertOne {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.UpdateDigest()
+	})
+}
+
+// Exec executes the query.
+func (u *ArtifactUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ArtifactCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ArtifactUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *ArtifactUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *ArtifactUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // ArtifactCreateBulk is the builder for creating many Artifact entities in bulk.
 type ArtifactCreateBulk struct {
 	config
 	builders []*ArtifactCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Artifact entities in the database.
@@ -137,6 +315,7 @@ func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
 					_, err = mutators[i+1].Mutate(root, acb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = acb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, acb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -187,6 +366,135 @@ func (acb *ArtifactCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (acb *ArtifactCreateBulk) ExecX(ctx context.Context) {
 	if err := acb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Artifact.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ArtifactUpsert) {
+//			SetAlgorithm(v+v).
+//		}).
+//		Exec(ctx)
+func (acb *ArtifactCreateBulk) OnConflict(opts ...sql.ConflictOption) *ArtifactUpsertBulk {
+	acb.conflict = opts
+	return &ArtifactUpsertBulk{
+		create: acb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Artifact.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (acb *ArtifactCreateBulk) OnConflictColumns(columns ...string) *ArtifactUpsertBulk {
+	acb.conflict = append(acb.conflict, sql.ConflictColumns(columns...))
+	return &ArtifactUpsertBulk{
+		create: acb,
+	}
+}
+
+// ArtifactUpsertBulk is the builder for "upsert"-ing
+// a bulk of Artifact nodes.
+type ArtifactUpsertBulk struct {
+	create *ArtifactCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Artifact.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *ArtifactUpsertBulk) UpdateNewValues() *ArtifactUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Artifact.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *ArtifactUpsertBulk) Ignore() *ArtifactUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ArtifactUpsertBulk) DoNothing() *ArtifactUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ArtifactCreateBulk.OnConflict
+// documentation for more info.
+func (u *ArtifactUpsertBulk) Update(set func(*ArtifactUpsert)) *ArtifactUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ArtifactUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAlgorithm sets the "algorithm" field.
+func (u *ArtifactUpsertBulk) SetAlgorithm(v string) *ArtifactUpsertBulk {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.SetAlgorithm(v)
+	})
+}
+
+// UpdateAlgorithm sets the "algorithm" field to the value that was provided on create.
+func (u *ArtifactUpsertBulk) UpdateAlgorithm() *ArtifactUpsertBulk {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.UpdateAlgorithm()
+	})
+}
+
+// SetDigest sets the "digest" field.
+func (u *ArtifactUpsertBulk) SetDigest(v string) *ArtifactUpsertBulk {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.SetDigest(v)
+	})
+}
+
+// UpdateDigest sets the "digest" field to the value that was provided on create.
+func (u *ArtifactUpsertBulk) UpdateDigest() *ArtifactUpsertBulk {
+	return u.Update(func(s *ArtifactUpsert) {
+		s.UpdateDigest()
+	})
+}
+
+// Exec executes the query.
+func (u *ArtifactUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ArtifactCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ArtifactCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ArtifactUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

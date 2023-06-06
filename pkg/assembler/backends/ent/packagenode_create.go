@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -18,6 +19,7 @@ type PackageNodeCreate struct {
 	config
 	mutation *PackageNodeMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetType sets the "type" field.
@@ -109,6 +111,7 @@ func (pnc *PackageNodeCreate) createSpec() (*PackageNode, *sqlgraph.CreateSpec) 
 		_node = &PackageNode{config: pnc.config}
 		_spec = sqlgraph.NewCreateSpec(packagenode.Table, sqlgraph.NewFieldSpec(packagenode.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = pnc.conflict
 	if value, ok := pnc.mutation.GetType(); ok {
 		_spec.SetField(packagenode.FieldType, field.TypeString, value)
 		_node.Type = value
@@ -132,10 +135,159 @@ func (pnc *PackageNodeCreate) createSpec() (*PackageNode, *sqlgraph.CreateSpec) 
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.PackageNode.Create().
+//		SetType(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.PackageNodeUpsert) {
+//			SetType(v+v).
+//		}).
+//		Exec(ctx)
+func (pnc *PackageNodeCreate) OnConflict(opts ...sql.ConflictOption) *PackageNodeUpsertOne {
+	pnc.conflict = opts
+	return &PackageNodeUpsertOne{
+		create: pnc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.PackageNode.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (pnc *PackageNodeCreate) OnConflictColumns(columns ...string) *PackageNodeUpsertOne {
+	pnc.conflict = append(pnc.conflict, sql.ConflictColumns(columns...))
+	return &PackageNodeUpsertOne{
+		create: pnc,
+	}
+}
+
+type (
+	// PackageNodeUpsertOne is the builder for "upsert"-ing
+	//  one PackageNode node.
+	PackageNodeUpsertOne struct {
+		create *PackageNodeCreate
+	}
+
+	// PackageNodeUpsert is the "OnConflict" setter.
+	PackageNodeUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetType sets the "type" field.
+func (u *PackageNodeUpsert) SetType(v string) *PackageNodeUpsert {
+	u.Set(packagenode.FieldType, v)
+	return u
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *PackageNodeUpsert) UpdateType() *PackageNodeUpsert {
+	u.SetExcluded(packagenode.FieldType)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.PackageNode.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *PackageNodeUpsertOne) UpdateNewValues() *PackageNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.PackageNode.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *PackageNodeUpsertOne) Ignore() *PackageNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *PackageNodeUpsertOne) DoNothing() *PackageNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the PackageNodeCreate.OnConflict
+// documentation for more info.
+func (u *PackageNodeUpsertOne) Update(set func(*PackageNodeUpsert)) *PackageNodeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&PackageNodeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetType sets the "type" field.
+func (u *PackageNodeUpsertOne) SetType(v string) *PackageNodeUpsertOne {
+	return u.Update(func(s *PackageNodeUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *PackageNodeUpsertOne) UpdateType() *PackageNodeUpsertOne {
+	return u.Update(func(s *PackageNodeUpsert) {
+		s.UpdateType()
+	})
+}
+
+// Exec executes the query.
+func (u *PackageNodeUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for PackageNodeCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *PackageNodeUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *PackageNodeUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *PackageNodeUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // PackageNodeCreateBulk is the builder for creating many PackageNode entities in bulk.
 type PackageNodeCreateBulk struct {
 	config
 	builders []*PackageNodeCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the PackageNode entities in the database.
@@ -161,6 +313,7 @@ func (pncb *PackageNodeCreateBulk) Save(ctx context.Context) ([]*PackageNode, er
 					_, err = mutators[i+1].Mutate(root, pncb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = pncb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, pncb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -211,6 +364,121 @@ func (pncb *PackageNodeCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (pncb *PackageNodeCreateBulk) ExecX(ctx context.Context) {
 	if err := pncb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.PackageNode.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.PackageNodeUpsert) {
+//			SetType(v+v).
+//		}).
+//		Exec(ctx)
+func (pncb *PackageNodeCreateBulk) OnConflict(opts ...sql.ConflictOption) *PackageNodeUpsertBulk {
+	pncb.conflict = opts
+	return &PackageNodeUpsertBulk{
+		create: pncb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.PackageNode.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (pncb *PackageNodeCreateBulk) OnConflictColumns(columns ...string) *PackageNodeUpsertBulk {
+	pncb.conflict = append(pncb.conflict, sql.ConflictColumns(columns...))
+	return &PackageNodeUpsertBulk{
+		create: pncb,
+	}
+}
+
+// PackageNodeUpsertBulk is the builder for "upsert"-ing
+// a bulk of PackageNode nodes.
+type PackageNodeUpsertBulk struct {
+	create *PackageNodeCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.PackageNode.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *PackageNodeUpsertBulk) UpdateNewValues() *PackageNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.PackageNode.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *PackageNodeUpsertBulk) Ignore() *PackageNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *PackageNodeUpsertBulk) DoNothing() *PackageNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the PackageNodeCreateBulk.OnConflict
+// documentation for more info.
+func (u *PackageNodeUpsertBulk) Update(set func(*PackageNodeUpsert)) *PackageNodeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&PackageNodeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetType sets the "type" field.
+func (u *PackageNodeUpsertBulk) SetType(v string) *PackageNodeUpsertBulk {
+	return u.Update(func(s *PackageNodeUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *PackageNodeUpsertBulk) UpdateType() *PackageNodeUpsertBulk {
+	return u.Update(func(s *PackageNodeUpsert) {
+		s.UpdateType()
+	})
+}
+
+// Exec executes the query.
+func (u *PackageNodeUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PackageNodeCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for PackageNodeCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *PackageNodeUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

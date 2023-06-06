@@ -4,11 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 )
 
 type EntBackend struct {
@@ -113,35 +118,40 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 }
 
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*PackageNode, error) {
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := FromContext(ctx)
-		pkgRecord, err := client.PackageNode.Create().SetType(pkg.Type).Save(ctx)
+
+		pkgID, err := client.PackageNode.Create().SetType(pkg.Type).
+			OnConflict(sql.ConflictColumns(packagenode.FieldType)).UpdateNewValues().ID(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "upsert package node")
 		}
 
-		nsRecord, err := client.PackageNamespace.Create().SetPackage(pkgRecord).SetNamespace(*pkg.Namespace).Save(ctx)
+		nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(*pkg.Namespace).
+			OnConflict(sql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).UpdateNewValues().ID(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "upsert package namespace")
 		}
 
-		nameNode, err := client.PackageName.Create().SetNamespace(nsRecord).SetName(pkg.Name).Save(ctx)
+		nameID, err := client.PackageName.Create().SetNamespaceID(nsID).SetName(pkg.Name).
+			OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespaceID)).UpdateNewValues().ID(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "upsert package name")
 		}
 
-		err = client.PackageVersion.Create().SetName(nameNode).SetVersion(*pkg.Version).Exec(ctx)
+		_, err = client.PackageVersion.Create().SetNameID(nameID).SetVersion(*pkg.Version).
+			OnConflict(sql.ConflictColumns(packageversion.FieldVersion, packageversion.FieldNameID)).UpdateNewValues().ID(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "upsert package version")
 		}
 
-		return pkgRecord, nil
+		return &pkgID, nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	record, err = b.client.PackageNode.Query().Where(packagenode.ID(record.ID)).
+	record, err := b.client.PackageNode.Query().Where(packagenode.ID(*recordID)).
 		WithNamespaces(func(q *PackageNamespaceQuery) {
 			q.WithNames(func(q *PackageNameQuery) {
 				q.WithVersions()
