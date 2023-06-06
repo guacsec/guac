@@ -165,9 +165,17 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		isDependencyEdges.To = []string{"isDependencies", "PkgName"}
 
+		var isOccurrencesEdges driver.EdgeDefinition
+		isOccurrencesEdges.Collection = "isOccurrencesEdges"
+		// define a set of collections where an edge is going out...
+		isOccurrencesEdges.From = []string{"isOccurrences", "PkgVersion"}
+
+		// repeat this for the collections where an edge is going into
+		isOccurrencesEdges.To = []string{"isOccurrences", "artifacts"}
+
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
-		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName, pkgHasVersion, isDependencyEdges}
+		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName, pkgHasVersion, isDependencyEdges, isOccurrencesEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -465,9 +473,6 @@ func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.H
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
-func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
-}
 func (c *arangoClient) IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error) {
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
@@ -515,9 +520,6 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInput
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
 func (c *arangoClient) IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
-}
-func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {

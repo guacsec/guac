@@ -47,7 +47,7 @@ func ingestData(port int) {
 	//ingestScorecards(ctx, gqlclient)
 	//ingestSLSA(ctx, gqlclient)
 	ingestDependency(ctx, gqlclient)
-	//ingestOccurrence(ctx, gqlclient)
+	ingestOccurrence(ctx, gqlclient)
 	//ingestVulnerability(ctx, gqlclient)
 	//ingestPkgEqual(ctx, gqlclient)
 	//ingestCertifyBad(ctx, gqlclient)
@@ -262,7 +262,7 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 	opensslNs := "openssl.org"
 	opensslVersion := "3.0.3"
 	smartentryNs := "smartentry"
-	sourceTag := "v0.0.1"
+	//sourceTag := "v0.0.1"
 
 	ingestOccurrences := []struct {
 		name       string
@@ -309,25 +309,27 @@ func ingestOccurrence(ctx context.Context, client graphql.Client) {
 			Origin:        "Demo ingestion",
 			Collector:     "Demo ingestion",
 		},
-	}, {
-		name: "this artifact is an occurrence of this source",
-		pkg:  nil,
-		src: &model.SourceInputSpec{
-			Type:      "git",
-			Namespace: "github",
-			Name:      "github.com/guacsec/guac",
-			Tag:       &sourceTag,
-		},
-		art: model.ArtifactInputSpec{
-			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-			Algorithm: "sha256",
-		},
-		occurrence: model.IsOccurrenceInputSpec{
-			Justification: "this artifact is an occurrence of this source",
-			Origin:        "Demo ingestion",
-			Collector:     "Demo ingestion",
-		},
-	}}
+	},
+	// {
+	// 	name: "this artifact is an occurrence of this source",
+	// 	pkg:  nil,
+	// 	src: &model.SourceInputSpec{
+	// 		Type:      "git",
+	// 		Namespace: "github",
+	// 		Name:      "github.com/guacsec/guac",
+	// 		Tag:       &sourceTag,
+	// 	},
+	// 	art: model.ArtifactInputSpec{
+	// 		Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+	// 		Algorithm: "sha256",
+	// 	},
+	// 	occurrence: model.IsOccurrenceInputSpec{
+	// 		Justification: "this artifact is an occurrence of this source",
+	// 		Origin:        "Demo ingestion",
+	// 		Collector:     "Demo ingestion",
+	// 	},
+	// }
+	}
 	for _, ingest := range ingestOccurrences {
 		if ingest.pkg != nil {
 			_, err := model.IsOccurrencePkg(context.Background(), client, *ingest.pkg, ingest.art, ingest.occurrence)
