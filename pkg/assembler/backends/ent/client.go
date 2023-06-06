@@ -13,8 +13,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
 
 // Client is the client that holds all ent builders.
@@ -26,6 +31,14 @@ type Client struct {
 	Artifact *ArtifactClient
 	// BuilderNode is the client for interacting with the BuilderNode builders.
 	BuilderNode *BuilderNodeClient
+	// PackageName is the client for interacting with the PackageName builders.
+	PackageName *PackageNameClient
+	// PackageNamespace is the client for interacting with the PackageNamespace builders.
+	PackageNamespace *PackageNamespaceClient
+	// PackageNode is the client for interacting with the PackageNode builders.
+	PackageNode *PackageNodeClient
+	// PackageVersion is the client for interacting with the PackageVersion builders.
+	PackageVersion *PackageVersionClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -41,6 +54,10 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Artifact = NewArtifactClient(c.config)
 	c.BuilderNode = NewBuilderNodeClient(c.config)
+	c.PackageName = NewPackageNameClient(c.config)
+	c.PackageNamespace = NewPackageNamespaceClient(c.config)
+	c.PackageNode = NewPackageNodeClient(c.config)
+	c.PackageVersion = NewPackageVersionClient(c.config)
 }
 
 type (
@@ -121,10 +138,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Artifact:    NewArtifactClient(cfg),
-		BuilderNode: NewBuilderNodeClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Artifact:         NewArtifactClient(cfg),
+		BuilderNode:      NewBuilderNodeClient(cfg),
+		PackageName:      NewPackageNameClient(cfg),
+		PackageNamespace: NewPackageNamespaceClient(cfg),
+		PackageNode:      NewPackageNodeClient(cfg),
+		PackageVersion:   NewPackageVersionClient(cfg),
 	}, nil
 }
 
@@ -142,10 +163,14 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Artifact:    NewArtifactClient(cfg),
-		BuilderNode: NewBuilderNodeClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Artifact:         NewArtifactClient(cfg),
+		BuilderNode:      NewBuilderNodeClient(cfg),
+		PackageName:      NewPackageNameClient(cfg),
+		PackageNamespace: NewPackageNamespaceClient(cfg),
+		PackageNode:      NewPackageNodeClient(cfg),
+		PackageVersion:   NewPackageVersionClient(cfg),
 	}, nil
 }
 
@@ -174,15 +199,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Artifact.Use(hooks...)
-	c.BuilderNode.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Artifact, c.BuilderNode, c.PackageName, c.PackageNamespace, c.PackageNode,
+		c.PackageVersion,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Artifact.Intercept(interceptors...)
-	c.BuilderNode.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Artifact, c.BuilderNode, c.PackageName, c.PackageNamespace, c.PackageNode,
+		c.PackageVersion,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -192,6 +225,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Artifact.mutate(ctx, m)
 	case *BuilderNodeMutation:
 		return c.BuilderNode.mutate(ctx, m)
+	case *PackageNameMutation:
+		return c.PackageName.mutate(ctx, m)
+	case *PackageNamespaceMutation:
+		return c.PackageNamespace.mutate(ctx, m)
+	case *PackageNodeMutation:
+		return c.PackageNode.mutate(ctx, m)
+	case *PackageVersionMutation:
+		return c.PackageVersion.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -433,12 +474,582 @@ func (c *BuilderNodeClient) mutate(ctx context.Context, m *BuilderNodeMutation) 
 	}
 }
 
+// PackageNameClient is a client for the PackageName schema.
+type PackageNameClient struct {
+	config
+}
+
+// NewPackageNameClient returns a client for the PackageName from the given config.
+func NewPackageNameClient(c config) *PackageNameClient {
+	return &PackageNameClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `packagename.Hooks(f(g(h())))`.
+func (c *PackageNameClient) Use(hooks ...Hook) {
+	c.hooks.PackageName = append(c.hooks.PackageName, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `packagename.Intercept(f(g(h())))`.
+func (c *PackageNameClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PackageName = append(c.inters.PackageName, interceptors...)
+}
+
+// Create returns a builder for creating a PackageName entity.
+func (c *PackageNameClient) Create() *PackageNameCreate {
+	mutation := newPackageNameMutation(c.config, OpCreate)
+	return &PackageNameCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PackageName entities.
+func (c *PackageNameClient) CreateBulk(builders ...*PackageNameCreate) *PackageNameCreateBulk {
+	return &PackageNameCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PackageName.
+func (c *PackageNameClient) Update() *PackageNameUpdate {
+	mutation := newPackageNameMutation(c.config, OpUpdate)
+	return &PackageNameUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PackageNameClient) UpdateOne(pn *PackageName) *PackageNameUpdateOne {
+	mutation := newPackageNameMutation(c.config, OpUpdateOne, withPackageName(pn))
+	return &PackageNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PackageNameClient) UpdateOneID(id int) *PackageNameUpdateOne {
+	mutation := newPackageNameMutation(c.config, OpUpdateOne, withPackageNameID(id))
+	return &PackageNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PackageName.
+func (c *PackageNameClient) Delete() *PackageNameDelete {
+	mutation := newPackageNameMutation(c.config, OpDelete)
+	return &PackageNameDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PackageNameClient) DeleteOne(pn *PackageName) *PackageNameDeleteOne {
+	return c.DeleteOneID(pn.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PackageNameClient) DeleteOneID(id int) *PackageNameDeleteOne {
+	builder := c.Delete().Where(packagename.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PackageNameDeleteOne{builder}
+}
+
+// Query returns a query builder for PackageName.
+func (c *PackageNameClient) Query() *PackageNameQuery {
+	return &PackageNameQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePackageName},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PackageName entity by its id.
+func (c *PackageNameClient) Get(ctx context.Context, id int) (*PackageName, error) {
+	return c.Query().Where(packagename.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PackageNameClient) GetX(ctx context.Context, id int) *PackageName {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryNamespace queries the namespace edge of a PackageName.
+func (c *PackageNameClient) QueryNamespace(pn *PackageName) *PackageNamespaceQuery {
+	query := (&PackageNamespaceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, id),
+			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, packagename.NamespaceTable, packagename.NamespaceColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVersions queries the versions edge of a PackageName.
+func (c *PackageNameClient) QueryVersions(pn *PackageName) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, packagename.VersionsTable, packagename.VersionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PackageNameClient) Hooks() []Hook {
+	return c.hooks.PackageName
+}
+
+// Interceptors returns the client interceptors.
+func (c *PackageNameClient) Interceptors() []Interceptor {
+	return c.inters.PackageName
+}
+
+func (c *PackageNameClient) mutate(ctx context.Context, m *PackageNameMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PackageNameCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PackageNameUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PackageNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PackageNameDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PackageName mutation op: %q", m.Op())
+	}
+}
+
+// PackageNamespaceClient is a client for the PackageNamespace schema.
+type PackageNamespaceClient struct {
+	config
+}
+
+// NewPackageNamespaceClient returns a client for the PackageNamespace from the given config.
+func NewPackageNamespaceClient(c config) *PackageNamespaceClient {
+	return &PackageNamespaceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `packagenamespace.Hooks(f(g(h())))`.
+func (c *PackageNamespaceClient) Use(hooks ...Hook) {
+	c.hooks.PackageNamespace = append(c.hooks.PackageNamespace, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `packagenamespace.Intercept(f(g(h())))`.
+func (c *PackageNamespaceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PackageNamespace = append(c.inters.PackageNamespace, interceptors...)
+}
+
+// Create returns a builder for creating a PackageNamespace entity.
+func (c *PackageNamespaceClient) Create() *PackageNamespaceCreate {
+	mutation := newPackageNamespaceMutation(c.config, OpCreate)
+	return &PackageNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PackageNamespace entities.
+func (c *PackageNamespaceClient) CreateBulk(builders ...*PackageNamespaceCreate) *PackageNamespaceCreateBulk {
+	return &PackageNamespaceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PackageNamespace.
+func (c *PackageNamespaceClient) Update() *PackageNamespaceUpdate {
+	mutation := newPackageNamespaceMutation(c.config, OpUpdate)
+	return &PackageNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PackageNamespaceClient) UpdateOne(pn *PackageNamespace) *PackageNamespaceUpdateOne {
+	mutation := newPackageNamespaceMutation(c.config, OpUpdateOne, withPackageNamespace(pn))
+	return &PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PackageNamespaceClient) UpdateOneID(id int) *PackageNamespaceUpdateOne {
+	mutation := newPackageNamespaceMutation(c.config, OpUpdateOne, withPackageNamespaceID(id))
+	return &PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PackageNamespace.
+func (c *PackageNamespaceClient) Delete() *PackageNamespaceDelete {
+	mutation := newPackageNamespaceMutation(c.config, OpDelete)
+	return &PackageNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PackageNamespaceClient) DeleteOne(pn *PackageNamespace) *PackageNamespaceDeleteOne {
+	return c.DeleteOneID(pn.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PackageNamespaceClient) DeleteOneID(id int) *PackageNamespaceDeleteOne {
+	builder := c.Delete().Where(packagenamespace.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PackageNamespaceDeleteOne{builder}
+}
+
+// Query returns a query builder for PackageNamespace.
+func (c *PackageNamespaceClient) Query() *PackageNamespaceQuery {
+	return &PackageNamespaceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePackageNamespace},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PackageNamespace entity by its id.
+func (c *PackageNamespaceClient) Get(ctx context.Context, id int) (*PackageNamespace, error) {
+	return c.Query().Where(packagenamespace.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PackageNamespaceClient) GetX(ctx context.Context, id int) *PackageNamespace {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackage queries the package edge of a PackageNamespace.
+func (c *PackageNamespaceClient) QueryPackage(pn *PackageNamespace) *PackageNodeQuery {
+	query := (&PackageNodeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, id),
+			sqlgraph.To(packagenode.Table, packagenode.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, packagenamespace.PackageTable, packagenamespace.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNames queries the names edge of a PackageNamespace.
+func (c *PackageNamespaceClient) QueryNames(pn *PackageNamespace) *PackageNameQuery {
+	query := (&PackageNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, id),
+			sqlgraph.To(packagename.Table, packagename.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, packagenamespace.NamesTable, packagenamespace.NamesColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PackageNamespaceClient) Hooks() []Hook {
+	return c.hooks.PackageNamespace
+}
+
+// Interceptors returns the client interceptors.
+func (c *PackageNamespaceClient) Interceptors() []Interceptor {
+	return c.inters.PackageNamespace
+}
+
+func (c *PackageNamespaceClient) mutate(ctx context.Context, m *PackageNamespaceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PackageNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PackageNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PackageNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PackageNamespace mutation op: %q", m.Op())
+	}
+}
+
+// PackageNodeClient is a client for the PackageNode schema.
+type PackageNodeClient struct {
+	config
+}
+
+// NewPackageNodeClient returns a client for the PackageNode from the given config.
+func NewPackageNodeClient(c config) *PackageNodeClient {
+	return &PackageNodeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `packagenode.Hooks(f(g(h())))`.
+func (c *PackageNodeClient) Use(hooks ...Hook) {
+	c.hooks.PackageNode = append(c.hooks.PackageNode, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `packagenode.Intercept(f(g(h())))`.
+func (c *PackageNodeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PackageNode = append(c.inters.PackageNode, interceptors...)
+}
+
+// Create returns a builder for creating a PackageNode entity.
+func (c *PackageNodeClient) Create() *PackageNodeCreate {
+	mutation := newPackageNodeMutation(c.config, OpCreate)
+	return &PackageNodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PackageNode entities.
+func (c *PackageNodeClient) CreateBulk(builders ...*PackageNodeCreate) *PackageNodeCreateBulk {
+	return &PackageNodeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PackageNode.
+func (c *PackageNodeClient) Update() *PackageNodeUpdate {
+	mutation := newPackageNodeMutation(c.config, OpUpdate)
+	return &PackageNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PackageNodeClient) UpdateOne(pn *PackageNode) *PackageNodeUpdateOne {
+	mutation := newPackageNodeMutation(c.config, OpUpdateOne, withPackageNode(pn))
+	return &PackageNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PackageNodeClient) UpdateOneID(id int) *PackageNodeUpdateOne {
+	mutation := newPackageNodeMutation(c.config, OpUpdateOne, withPackageNodeID(id))
+	return &PackageNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PackageNode.
+func (c *PackageNodeClient) Delete() *PackageNodeDelete {
+	mutation := newPackageNodeMutation(c.config, OpDelete)
+	return &PackageNodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PackageNodeClient) DeleteOne(pn *PackageNode) *PackageNodeDeleteOne {
+	return c.DeleteOneID(pn.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PackageNodeClient) DeleteOneID(id int) *PackageNodeDeleteOne {
+	builder := c.Delete().Where(packagenode.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PackageNodeDeleteOne{builder}
+}
+
+// Query returns a query builder for PackageNode.
+func (c *PackageNodeClient) Query() *PackageNodeQuery {
+	return &PackageNodeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePackageNode},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PackageNode entity by its id.
+func (c *PackageNodeClient) Get(ctx context.Context, id int) (*PackageNode, error) {
+	return c.Query().Where(packagenode.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PackageNodeClient) GetX(ctx context.Context, id int) *PackageNode {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryNamespaces queries the namespaces edge of a PackageNode.
+func (c *PackageNodeClient) QueryNamespaces(pn *PackageNode) *PackageNamespaceQuery {
+	query := (&PackageNamespaceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagenode.Table, packagenode.FieldID, id),
+			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, packagenode.NamespacesTable, packagenode.NamespacesColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PackageNodeClient) Hooks() []Hook {
+	return c.hooks.PackageNode
+}
+
+// Interceptors returns the client interceptors.
+func (c *PackageNodeClient) Interceptors() []Interceptor {
+	return c.inters.PackageNode
+}
+
+func (c *PackageNodeClient) mutate(ctx context.Context, m *PackageNodeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PackageNodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PackageNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PackageNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PackageNodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PackageNode mutation op: %q", m.Op())
+	}
+}
+
+// PackageVersionClient is a client for the PackageVersion schema.
+type PackageVersionClient struct {
+	config
+}
+
+// NewPackageVersionClient returns a client for the PackageVersion from the given config.
+func NewPackageVersionClient(c config) *PackageVersionClient {
+	return &PackageVersionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `packageversion.Hooks(f(g(h())))`.
+func (c *PackageVersionClient) Use(hooks ...Hook) {
+	c.hooks.PackageVersion = append(c.hooks.PackageVersion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `packageversion.Intercept(f(g(h())))`.
+func (c *PackageVersionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PackageVersion = append(c.inters.PackageVersion, interceptors...)
+}
+
+// Create returns a builder for creating a PackageVersion entity.
+func (c *PackageVersionClient) Create() *PackageVersionCreate {
+	mutation := newPackageVersionMutation(c.config, OpCreate)
+	return &PackageVersionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PackageVersion entities.
+func (c *PackageVersionClient) CreateBulk(builders ...*PackageVersionCreate) *PackageVersionCreateBulk {
+	return &PackageVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PackageVersion.
+func (c *PackageVersionClient) Update() *PackageVersionUpdate {
+	mutation := newPackageVersionMutation(c.config, OpUpdate)
+	return &PackageVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PackageVersionClient) UpdateOne(pv *PackageVersion) *PackageVersionUpdateOne {
+	mutation := newPackageVersionMutation(c.config, OpUpdateOne, withPackageVersion(pv))
+	return &PackageVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PackageVersionClient) UpdateOneID(id int) *PackageVersionUpdateOne {
+	mutation := newPackageVersionMutation(c.config, OpUpdateOne, withPackageVersionID(id))
+	return &PackageVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PackageVersion.
+func (c *PackageVersionClient) Delete() *PackageVersionDelete {
+	mutation := newPackageVersionMutation(c.config, OpDelete)
+	return &PackageVersionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PackageVersionClient) DeleteOne(pv *PackageVersion) *PackageVersionDeleteOne {
+	return c.DeleteOneID(pv.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PackageVersionClient) DeleteOneID(id int) *PackageVersionDeleteOne {
+	builder := c.Delete().Where(packageversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PackageVersionDeleteOne{builder}
+}
+
+// Query returns a query builder for PackageVersion.
+func (c *PackageVersionClient) Query() *PackageVersionQuery {
+	return &PackageVersionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePackageVersion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PackageVersion entity by its id.
+func (c *PackageVersionClient) Get(ctx context.Context, id int) (*PackageVersion, error) {
+	return c.Query().Where(packageversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PackageVersionClient) GetX(ctx context.Context, id int) *PackageVersion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryName queries the name edge of a PackageVersion.
+func (c *PackageVersionClient) QueryName(pv *PackageVersion) *PackageNameQuery {
+	query := (&PackageNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(packagename.Table, packagename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, packageversion.NameTable, packageversion.NameColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PackageVersionClient) Hooks() []Hook {
+	return c.hooks.PackageVersion
+}
+
+// Interceptors returns the client interceptors.
+func (c *PackageVersionClient) Interceptors() []Interceptor {
+	return c.inters.PackageVersion
+}
+
+func (c *PackageVersionClient) mutate(ctx context.Context, m *PackageVersionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PackageVersionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PackageVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PackageVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PackageVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PackageVersion mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BuilderNode []ent.Hook
+		Artifact, BuilderNode, PackageName, PackageNamespace, PackageNode,
+		PackageVersion []ent.Hook
 	}
 	inters struct {
-		Artifact, BuilderNode []ent.Interceptor
+		Artifact, BuilderNode, PackageName, PackageNamespace, PackageNode,
+		PackageVersion []ent.Interceptor
 	}
 )

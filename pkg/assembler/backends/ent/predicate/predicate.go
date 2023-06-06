@@ -11,3 +11,15 @@ type Artifact func(*sql.Selector)
 
 // BuilderNode is the predicate function for buildernode builders.
 type BuilderNode func(*sql.Selector)
+
+// PackageName is the predicate function for packagename builders.
+type PackageName func(*sql.Selector)
+
+// PackageNamespace is the predicate function for packagenamespace builders.
+type PackageNamespace func(*sql.Selector)
+
+// PackageNode is the predicate function for packagenode builders.
+type PackageNode func(*sql.Selector)
+
+// PackageVersion is the predicate function for packageversion builders.
+type PackageVersion func(*sql.Selector)

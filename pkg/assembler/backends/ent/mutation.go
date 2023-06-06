@@ -12,6 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -24,8 +28,12 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeArtifact    = "Artifact"
-	TypeBuilderNode = "BuilderNode"
+	TypeArtifact         = "Artifact"
+	TypeBuilderNode      = "BuilderNode"
+	TypePackageName      = "PackageName"
+	TypePackageNamespace = "PackageNamespace"
+	TypePackageNode      = "PackageNode"
+	TypePackageVersion   = "PackageVersion"
 )
 
 // ArtifactMutation represents an operation that mutates the Artifact nodes in the graph.
@@ -732,4 +740,1901 @@ func (m *BuilderNodeMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *BuilderNodeMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown BuilderNode edge %s", name)
+}
+
+// PackageNameMutation represents an operation that mutates the PackageName nodes in the graph.
+type PackageNameMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	name             *string
+	clearedFields    map[string]struct{}
+	namespace        *int
+	clearednamespace bool
+	versions         map[int]struct{}
+	removedversions  map[int]struct{}
+	clearedversions  bool
+	done             bool
+	oldValue         func(context.Context) (*PackageName, error)
+	predicates       []predicate.PackageName
+}
+
+var _ ent.Mutation = (*PackageNameMutation)(nil)
+
+// packagenameOption allows management of the mutation configuration using functional options.
+type packagenameOption func(*PackageNameMutation)
+
+// newPackageNameMutation creates new mutation for the PackageName entity.
+func newPackageNameMutation(c config, op Op, opts ...packagenameOption) *PackageNameMutation {
+	m := &PackageNameMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePackageName,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPackageNameID sets the ID field of the mutation.
+func withPackageNameID(id int) packagenameOption {
+	return func(m *PackageNameMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PackageName
+		)
+		m.oldValue = func(ctx context.Context) (*PackageName, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PackageName.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPackageName sets the old PackageName of the mutation.
+func withPackageName(node *PackageName) packagenameOption {
+	return func(m *PackageNameMutation) {
+		m.oldValue = func(context.Context) (*PackageName, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PackageNameMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PackageNameMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PackageNameMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PackageNameMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PackageName.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetNamespaceID sets the "namespace_id" field.
+func (m *PackageNameMutation) SetNamespaceID(i int) {
+	m.namespace = &i
+}
+
+// NamespaceID returns the value of the "namespace_id" field in the mutation.
+func (m *PackageNameMutation) NamespaceID() (r int, exists bool) {
+	v := m.namespace
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNamespaceID returns the old "namespace_id" field's value of the PackageName entity.
+// If the PackageName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageNameMutation) OldNamespaceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNamespaceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNamespaceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNamespaceID: %w", err)
+	}
+	return oldValue.NamespaceID, nil
+}
+
+// ResetNamespaceID resets all changes to the "namespace_id" field.
+func (m *PackageNameMutation) ResetNamespaceID() {
+	m.namespace = nil
+}
+
+// SetName sets the "name" field.
+func (m *PackageNameMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *PackageNameMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the PackageName entity.
+// If the PackageName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageNameMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *PackageNameMutation) ResetName() {
+	m.name = nil
+}
+
+// ClearNamespace clears the "namespace" edge to the PackageNamespace entity.
+func (m *PackageNameMutation) ClearNamespace() {
+	m.clearednamespace = true
+}
+
+// NamespaceCleared reports if the "namespace" edge to the PackageNamespace entity was cleared.
+func (m *PackageNameMutation) NamespaceCleared() bool {
+	return m.clearednamespace
+}
+
+// NamespaceIDs returns the "namespace" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// NamespaceID instead. It exists only for internal usage by the builders.
+func (m *PackageNameMutation) NamespaceIDs() (ids []int) {
+	if id := m.namespace; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetNamespace resets all changes to the "namespace" edge.
+func (m *PackageNameMutation) ResetNamespace() {
+	m.namespace = nil
+	m.clearednamespace = false
+}
+
+// AddVersionIDs adds the "versions" edge to the PackageVersion entity by ids.
+func (m *PackageNameMutation) AddVersionIDs(ids ...int) {
+	if m.versions == nil {
+		m.versions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.versions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVersions clears the "versions" edge to the PackageVersion entity.
+func (m *PackageNameMutation) ClearVersions() {
+	m.clearedversions = true
+}
+
+// VersionsCleared reports if the "versions" edge to the PackageVersion entity was cleared.
+func (m *PackageNameMutation) VersionsCleared() bool {
+	return m.clearedversions
+}
+
+// RemoveVersionIDs removes the "versions" edge to the PackageVersion entity by IDs.
+func (m *PackageNameMutation) RemoveVersionIDs(ids ...int) {
+	if m.removedversions == nil {
+		m.removedversions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.versions, ids[i])
+		m.removedversions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVersions returns the removed IDs of the "versions" edge to the PackageVersion entity.
+func (m *PackageNameMutation) RemovedVersionsIDs() (ids []int) {
+	for id := range m.removedversions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VersionsIDs returns the "versions" edge IDs in the mutation.
+func (m *PackageNameMutation) VersionsIDs() (ids []int) {
+	for id := range m.versions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVersions resets all changes to the "versions" edge.
+func (m *PackageNameMutation) ResetVersions() {
+	m.versions = nil
+	m.clearedversions = false
+	m.removedversions = nil
+}
+
+// Where appends a list predicates to the PackageNameMutation builder.
+func (m *PackageNameMutation) Where(ps ...predicate.PackageName) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PackageNameMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PackageNameMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PackageName, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PackageNameMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PackageNameMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PackageName).
+func (m *PackageNameMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PackageNameMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.namespace != nil {
+		fields = append(fields, packagename.FieldNamespaceID)
+	}
+	if m.name != nil {
+		fields = append(fields, packagename.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PackageNameMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case packagename.FieldNamespaceID:
+		return m.NamespaceID()
+	case packagename.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PackageNameMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case packagename.FieldNamespaceID:
+		return m.OldNamespaceID(ctx)
+	case packagename.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown PackageName field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageNameMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case packagename.FieldNamespaceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNamespaceID(v)
+		return nil
+	case packagename.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PackageName field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PackageNameMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PackageNameMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageNameMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PackageName numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PackageNameMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PackageNameMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PackageNameMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PackageName nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PackageNameMutation) ResetField(name string) error {
+	switch name {
+	case packagename.FieldNamespaceID:
+		m.ResetNamespaceID()
+		return nil
+	case packagename.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageName field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PackageNameMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.namespace != nil {
+		edges = append(edges, packagename.EdgeNamespace)
+	}
+	if m.versions != nil {
+		edges = append(edges, packagename.EdgeVersions)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PackageNameMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case packagename.EdgeNamespace:
+		if id := m.namespace; id != nil {
+			return []ent.Value{*id}
+		}
+	case packagename.EdgeVersions:
+		ids := make([]ent.Value, 0, len(m.versions))
+		for id := range m.versions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PackageNameMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedversions != nil {
+		edges = append(edges, packagename.EdgeVersions)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PackageNameMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case packagename.EdgeVersions:
+		ids := make([]ent.Value, 0, len(m.removedversions))
+		for id := range m.removedversions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PackageNameMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearednamespace {
+		edges = append(edges, packagename.EdgeNamespace)
+	}
+	if m.clearedversions {
+		edges = append(edges, packagename.EdgeVersions)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PackageNameMutation) EdgeCleared(name string) bool {
+	switch name {
+	case packagename.EdgeNamespace:
+		return m.clearednamespace
+	case packagename.EdgeVersions:
+		return m.clearedversions
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PackageNameMutation) ClearEdge(name string) error {
+	switch name {
+	case packagename.EdgeNamespace:
+		m.ClearNamespace()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageName unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PackageNameMutation) ResetEdge(name string) error {
+	switch name {
+	case packagename.EdgeNamespace:
+		m.ResetNamespace()
+		return nil
+	case packagename.EdgeVersions:
+		m.ResetVersions()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageName edge %s", name)
+}
+
+// PackageNamespaceMutation represents an operation that mutates the PackageNamespace nodes in the graph.
+type PackageNamespaceMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	namespace       *string
+	clearedFields   map[string]struct{}
+	_package        *int
+	cleared_package bool
+	names           map[int]struct{}
+	removednames    map[int]struct{}
+	clearednames    bool
+	done            bool
+	oldValue        func(context.Context) (*PackageNamespace, error)
+	predicates      []predicate.PackageNamespace
+}
+
+var _ ent.Mutation = (*PackageNamespaceMutation)(nil)
+
+// packagenamespaceOption allows management of the mutation configuration using functional options.
+type packagenamespaceOption func(*PackageNamespaceMutation)
+
+// newPackageNamespaceMutation creates new mutation for the PackageNamespace entity.
+func newPackageNamespaceMutation(c config, op Op, opts ...packagenamespaceOption) *PackageNamespaceMutation {
+	m := &PackageNamespaceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePackageNamespace,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPackageNamespaceID sets the ID field of the mutation.
+func withPackageNamespaceID(id int) packagenamespaceOption {
+	return func(m *PackageNamespaceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PackageNamespace
+		)
+		m.oldValue = func(ctx context.Context) (*PackageNamespace, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PackageNamespace.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPackageNamespace sets the old PackageNamespace of the mutation.
+func withPackageNamespace(node *PackageNamespace) packagenamespaceOption {
+	return func(m *PackageNamespaceMutation) {
+		m.oldValue = func(context.Context) (*PackageNamespace, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PackageNamespaceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PackageNamespaceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PackageNamespaceMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PackageNamespaceMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PackageNamespace.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPackageID sets the "package_id" field.
+func (m *PackageNamespaceMutation) SetPackageID(i int) {
+	m._package = &i
+}
+
+// PackageID returns the value of the "package_id" field in the mutation.
+func (m *PackageNamespaceMutation) PackageID() (r int, exists bool) {
+	v := m._package
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageID returns the old "package_id" field's value of the PackageNamespace entity.
+// If the PackageNamespace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageNamespaceMutation) OldPackageID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageID: %w", err)
+	}
+	return oldValue.PackageID, nil
+}
+
+// ResetPackageID resets all changes to the "package_id" field.
+func (m *PackageNamespaceMutation) ResetPackageID() {
+	m._package = nil
+}
+
+// SetNamespace sets the "namespace" field.
+func (m *PackageNamespaceMutation) SetNamespace(s string) {
+	m.namespace = &s
+}
+
+// Namespace returns the value of the "namespace" field in the mutation.
+func (m *PackageNamespaceMutation) Namespace() (r string, exists bool) {
+	v := m.namespace
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNamespace returns the old "namespace" field's value of the PackageNamespace entity.
+// If the PackageNamespace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageNamespaceMutation) OldNamespace(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNamespace is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNamespace requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNamespace: %w", err)
+	}
+	return oldValue.Namespace, nil
+}
+
+// ResetNamespace resets all changes to the "namespace" field.
+func (m *PackageNamespaceMutation) ResetNamespace() {
+	m.namespace = nil
+}
+
+// ClearPackage clears the "package" edge to the PackageNode entity.
+func (m *PackageNamespaceMutation) ClearPackage() {
+	m.cleared_package = true
+}
+
+// PackageCleared reports if the "package" edge to the PackageNode entity was cleared.
+func (m *PackageNamespaceMutation) PackageCleared() bool {
+	return m.cleared_package
+}
+
+// PackageIDs returns the "package" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageID instead. It exists only for internal usage by the builders.
+func (m *PackageNamespaceMutation) PackageIDs() (ids []int) {
+	if id := m._package; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackage resets all changes to the "package" edge.
+func (m *PackageNamespaceMutation) ResetPackage() {
+	m._package = nil
+	m.cleared_package = false
+}
+
+// AddNameIDs adds the "names" edge to the PackageName entity by ids.
+func (m *PackageNamespaceMutation) AddNameIDs(ids ...int) {
+	if m.names == nil {
+		m.names = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.names[ids[i]] = struct{}{}
+	}
+}
+
+// ClearNames clears the "names" edge to the PackageName entity.
+func (m *PackageNamespaceMutation) ClearNames() {
+	m.clearednames = true
+}
+
+// NamesCleared reports if the "names" edge to the PackageName entity was cleared.
+func (m *PackageNamespaceMutation) NamesCleared() bool {
+	return m.clearednames
+}
+
+// RemoveNameIDs removes the "names" edge to the PackageName entity by IDs.
+func (m *PackageNamespaceMutation) RemoveNameIDs(ids ...int) {
+	if m.removednames == nil {
+		m.removednames = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.names, ids[i])
+		m.removednames[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedNames returns the removed IDs of the "names" edge to the PackageName entity.
+func (m *PackageNamespaceMutation) RemovedNamesIDs() (ids []int) {
+	for id := range m.removednames {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// NamesIDs returns the "names" edge IDs in the mutation.
+func (m *PackageNamespaceMutation) NamesIDs() (ids []int) {
+	for id := range m.names {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetNames resets all changes to the "names" edge.
+func (m *PackageNamespaceMutation) ResetNames() {
+	m.names = nil
+	m.clearednames = false
+	m.removednames = nil
+}
+
+// Where appends a list predicates to the PackageNamespaceMutation builder.
+func (m *PackageNamespaceMutation) Where(ps ...predicate.PackageNamespace) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PackageNamespaceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PackageNamespaceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PackageNamespace, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PackageNamespaceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PackageNamespaceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PackageNamespace).
+func (m *PackageNamespaceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PackageNamespaceMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m._package != nil {
+		fields = append(fields, packagenamespace.FieldPackageID)
+	}
+	if m.namespace != nil {
+		fields = append(fields, packagenamespace.FieldNamespace)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PackageNamespaceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case packagenamespace.FieldPackageID:
+		return m.PackageID()
+	case packagenamespace.FieldNamespace:
+		return m.Namespace()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PackageNamespaceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case packagenamespace.FieldPackageID:
+		return m.OldPackageID(ctx)
+	case packagenamespace.FieldNamespace:
+		return m.OldNamespace(ctx)
+	}
+	return nil, fmt.Errorf("unknown PackageNamespace field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageNamespaceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case packagenamespace.FieldPackageID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageID(v)
+		return nil
+	case packagenamespace.FieldNamespace:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNamespace(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PackageNamespace field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PackageNamespaceMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PackageNamespaceMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageNamespaceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PackageNamespace numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PackageNamespaceMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PackageNamespaceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PackageNamespaceMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PackageNamespace nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PackageNamespaceMutation) ResetField(name string) error {
+	switch name {
+	case packagenamespace.FieldPackageID:
+		m.ResetPackageID()
+		return nil
+	case packagenamespace.FieldNamespace:
+		m.ResetNamespace()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageNamespace field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PackageNamespaceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m._package != nil {
+		edges = append(edges, packagenamespace.EdgePackage)
+	}
+	if m.names != nil {
+		edges = append(edges, packagenamespace.EdgeNames)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PackageNamespaceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case packagenamespace.EdgePackage:
+		if id := m._package; id != nil {
+			return []ent.Value{*id}
+		}
+	case packagenamespace.EdgeNames:
+		ids := make([]ent.Value, 0, len(m.names))
+		for id := range m.names {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PackageNamespaceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removednames != nil {
+		edges = append(edges, packagenamespace.EdgeNames)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PackageNamespaceMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case packagenamespace.EdgeNames:
+		ids := make([]ent.Value, 0, len(m.removednames))
+		for id := range m.removednames {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PackageNamespaceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleared_package {
+		edges = append(edges, packagenamespace.EdgePackage)
+	}
+	if m.clearednames {
+		edges = append(edges, packagenamespace.EdgeNames)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PackageNamespaceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case packagenamespace.EdgePackage:
+		return m.cleared_package
+	case packagenamespace.EdgeNames:
+		return m.clearednames
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PackageNamespaceMutation) ClearEdge(name string) error {
+	switch name {
+	case packagenamespace.EdgePackage:
+		m.ClearPackage()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageNamespace unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PackageNamespaceMutation) ResetEdge(name string) error {
+	switch name {
+	case packagenamespace.EdgePackage:
+		m.ResetPackage()
+		return nil
+	case packagenamespace.EdgeNames:
+		m.ResetNames()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageNamespace edge %s", name)
+}
+
+// PackageNodeMutation represents an operation that mutates the PackageNode nodes in the graph.
+type PackageNodeMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	_type             *string
+	clearedFields     map[string]struct{}
+	namespaces        map[int]struct{}
+	removednamespaces map[int]struct{}
+	clearednamespaces bool
+	done              bool
+	oldValue          func(context.Context) (*PackageNode, error)
+	predicates        []predicate.PackageNode
+}
+
+var _ ent.Mutation = (*PackageNodeMutation)(nil)
+
+// packagenodeOption allows management of the mutation configuration using functional options.
+type packagenodeOption func(*PackageNodeMutation)
+
+// newPackageNodeMutation creates new mutation for the PackageNode entity.
+func newPackageNodeMutation(c config, op Op, opts ...packagenodeOption) *PackageNodeMutation {
+	m := &PackageNodeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePackageNode,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPackageNodeID sets the ID field of the mutation.
+func withPackageNodeID(id int) packagenodeOption {
+	return func(m *PackageNodeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PackageNode
+		)
+		m.oldValue = func(ctx context.Context) (*PackageNode, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PackageNode.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPackageNode sets the old PackageNode of the mutation.
+func withPackageNode(node *PackageNode) packagenodeOption {
+	return func(m *PackageNodeMutation) {
+		m.oldValue = func(context.Context) (*PackageNode, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PackageNodeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PackageNodeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PackageNodeMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PackageNodeMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PackageNode.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetType sets the "type" field.
+func (m *PackageNodeMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *PackageNodeMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the PackageNode entity.
+// If the PackageNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageNodeMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *PackageNodeMutation) ResetType() {
+	m._type = nil
+}
+
+// AddNamespaceIDs adds the "namespaces" edge to the PackageNamespace entity by ids.
+func (m *PackageNodeMutation) AddNamespaceIDs(ids ...int) {
+	if m.namespaces == nil {
+		m.namespaces = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.namespaces[ids[i]] = struct{}{}
+	}
+}
+
+// ClearNamespaces clears the "namespaces" edge to the PackageNamespace entity.
+func (m *PackageNodeMutation) ClearNamespaces() {
+	m.clearednamespaces = true
+}
+
+// NamespacesCleared reports if the "namespaces" edge to the PackageNamespace entity was cleared.
+func (m *PackageNodeMutation) NamespacesCleared() bool {
+	return m.clearednamespaces
+}
+
+// RemoveNamespaceIDs removes the "namespaces" edge to the PackageNamespace entity by IDs.
+func (m *PackageNodeMutation) RemoveNamespaceIDs(ids ...int) {
+	if m.removednamespaces == nil {
+		m.removednamespaces = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.namespaces, ids[i])
+		m.removednamespaces[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedNamespaces returns the removed IDs of the "namespaces" edge to the PackageNamespace entity.
+func (m *PackageNodeMutation) RemovedNamespacesIDs() (ids []int) {
+	for id := range m.removednamespaces {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// NamespacesIDs returns the "namespaces" edge IDs in the mutation.
+func (m *PackageNodeMutation) NamespacesIDs() (ids []int) {
+	for id := range m.namespaces {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetNamespaces resets all changes to the "namespaces" edge.
+func (m *PackageNodeMutation) ResetNamespaces() {
+	m.namespaces = nil
+	m.clearednamespaces = false
+	m.removednamespaces = nil
+}
+
+// Where appends a list predicates to the PackageNodeMutation builder.
+func (m *PackageNodeMutation) Where(ps ...predicate.PackageNode) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PackageNodeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PackageNodeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PackageNode, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PackageNodeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PackageNodeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PackageNode).
+func (m *PackageNodeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PackageNodeMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m._type != nil {
+		fields = append(fields, packagenode.FieldType)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PackageNodeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case packagenode.FieldType:
+		return m.GetType()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PackageNodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case packagenode.FieldType:
+		return m.OldType(ctx)
+	}
+	return nil, fmt.Errorf("unknown PackageNode field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageNodeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case packagenode.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PackageNode field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PackageNodeMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PackageNodeMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageNodeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PackageNode numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PackageNodeMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PackageNodeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PackageNodeMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PackageNode nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PackageNodeMutation) ResetField(name string) error {
+	switch name {
+	case packagenode.FieldType:
+		m.ResetType()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageNode field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PackageNodeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.namespaces != nil {
+		edges = append(edges, packagenode.EdgeNamespaces)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PackageNodeMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case packagenode.EdgeNamespaces:
+		ids := make([]ent.Value, 0, len(m.namespaces))
+		for id := range m.namespaces {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PackageNodeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removednamespaces != nil {
+		edges = append(edges, packagenode.EdgeNamespaces)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PackageNodeMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case packagenode.EdgeNamespaces:
+		ids := make([]ent.Value, 0, len(m.removednamespaces))
+		for id := range m.removednamespaces {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PackageNodeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearednamespaces {
+		edges = append(edges, packagenode.EdgeNamespaces)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PackageNodeMutation) EdgeCleared(name string) bool {
+	switch name {
+	case packagenode.EdgeNamespaces:
+		return m.clearednamespaces
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PackageNodeMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PackageNode unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PackageNodeMutation) ResetEdge(name string) error {
+	switch name {
+	case packagenode.EdgeNamespaces:
+		m.ResetNamespaces()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageNode edge %s", name)
+}
+
+// PackageVersionMutation represents an operation that mutates the PackageVersion nodes in the graph.
+type PackageVersionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	version       *string
+	clearedFields map[string]struct{}
+	name          *int
+	clearedname   bool
+	done          bool
+	oldValue      func(context.Context) (*PackageVersion, error)
+	predicates    []predicate.PackageVersion
+}
+
+var _ ent.Mutation = (*PackageVersionMutation)(nil)
+
+// packageversionOption allows management of the mutation configuration using functional options.
+type packageversionOption func(*PackageVersionMutation)
+
+// newPackageVersionMutation creates new mutation for the PackageVersion entity.
+func newPackageVersionMutation(c config, op Op, opts ...packageversionOption) *PackageVersionMutation {
+	m := &PackageVersionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePackageVersion,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPackageVersionID sets the ID field of the mutation.
+func withPackageVersionID(id int) packageversionOption {
+	return func(m *PackageVersionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PackageVersion
+		)
+		m.oldValue = func(ctx context.Context) (*PackageVersion, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PackageVersion.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPackageVersion sets the old PackageVersion of the mutation.
+func withPackageVersion(node *PackageVersion) packageversionOption {
+	return func(m *PackageVersionMutation) {
+		m.oldValue = func(context.Context) (*PackageVersion, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PackageVersionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PackageVersionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PackageVersionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PackageVersionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PackageVersion.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetNameID sets the "name_id" field.
+func (m *PackageVersionMutation) SetNameID(i int) {
+	m.name = &i
+}
+
+// NameID returns the value of the "name_id" field in the mutation.
+func (m *PackageVersionMutation) NameID() (r int, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameID returns the old "name_id" field's value of the PackageVersion entity.
+// If the PackageVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageVersionMutation) OldNameID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameID: %w", err)
+	}
+	return oldValue.NameID, nil
+}
+
+// ResetNameID resets all changes to the "name_id" field.
+func (m *PackageVersionMutation) ResetNameID() {
+	m.name = nil
+}
+
+// SetVersion sets the "version" field.
+func (m *PackageVersionMutation) SetVersion(s string) {
+	m.version = &s
+}
+
+// Version returns the value of the "version" field in the mutation.
+func (m *PackageVersionMutation) Version() (r string, exists bool) {
+	v := m.version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVersion returns the old "version" field's value of the PackageVersion entity.
+// If the PackageVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageVersionMutation) OldVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVersion: %w", err)
+	}
+	return oldValue.Version, nil
+}
+
+// ResetVersion resets all changes to the "version" field.
+func (m *PackageVersionMutation) ResetVersion() {
+	m.version = nil
+}
+
+// ClearName clears the "name" edge to the PackageName entity.
+func (m *PackageVersionMutation) ClearName() {
+	m.clearedname = true
+}
+
+// NameCleared reports if the "name" edge to the PackageName entity was cleared.
+func (m *PackageVersionMutation) NameCleared() bool {
+	return m.clearedname
+}
+
+// NameIDs returns the "name" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// NameID instead. It exists only for internal usage by the builders.
+func (m *PackageVersionMutation) NameIDs() (ids []int) {
+	if id := m.name; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetName resets all changes to the "name" edge.
+func (m *PackageVersionMutation) ResetName() {
+	m.name = nil
+	m.clearedname = false
+}
+
+// Where appends a list predicates to the PackageVersionMutation builder.
+func (m *PackageVersionMutation) Where(ps ...predicate.PackageVersion) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PackageVersionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PackageVersionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PackageVersion, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PackageVersionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PackageVersionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PackageVersion).
+func (m *PackageVersionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PackageVersionMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.name != nil {
+		fields = append(fields, packageversion.FieldNameID)
+	}
+	if m.version != nil {
+		fields = append(fields, packageversion.FieldVersion)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PackageVersionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case packageversion.FieldNameID:
+		return m.NameID()
+	case packageversion.FieldVersion:
+		return m.Version()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PackageVersionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case packageversion.FieldNameID:
+		return m.OldNameID(ctx)
+	case packageversion.FieldVersion:
+		return m.OldVersion(ctx)
+	}
+	return nil, fmt.Errorf("unknown PackageVersion field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageVersionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case packageversion.FieldNameID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameID(v)
+		return nil
+	case packageversion.FieldVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVersion(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PackageVersion field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PackageVersionMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PackageVersionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageVersionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PackageVersion numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PackageVersionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PackageVersionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PackageVersionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PackageVersion nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PackageVersionMutation) ResetField(name string) error {
+	switch name {
+	case packageversion.FieldNameID:
+		m.ResetNameID()
+		return nil
+	case packageversion.FieldVersion:
+		m.ResetVersion()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageVersion field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PackageVersionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.name != nil {
+		edges = append(edges, packageversion.EdgeName)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case packageversion.EdgeName:
+		if id := m.name; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PackageVersionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PackageVersionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedname {
+		edges = append(edges, packageversion.EdgeName)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PackageVersionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case packageversion.EdgeName:
+		return m.clearedname
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PackageVersionMutation) ClearEdge(name string) error {
+	switch name {
+	case packageversion.EdgeName:
+		m.ClearName()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageVersion unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PackageVersionMutation) ResetEdge(name string) error {
+	switch name {
+	case packageversion.EdgeName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageVersion edge %s", name)
 }

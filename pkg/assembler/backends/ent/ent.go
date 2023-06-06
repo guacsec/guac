@@ -14,6 +14,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -74,8 +78,12 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			artifact.Table:    artifact.ValidColumn,
-			buildernode.Table: buildernode.ValidColumn,
+			artifact.Table:         artifact.ValidColumn,
+			buildernode.Table:      buildernode.ValidColumn,
+			packagename.Table:      packagename.ValidColumn,
+			packagenamespace.Table: packagenamespace.ValidColumn,
+			packagenode.Table:      packagenode.ValidColumn,
+			packageversion.Table:   packageversion.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

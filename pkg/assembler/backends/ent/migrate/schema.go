@@ -31,12 +31,111 @@ var (
 		Columns:    BuilderNodesColumns,
 		PrimaryKey: []*schema.Column{BuilderNodesColumns[0]},
 	}
+	// PackageNamesColumns holds the columns for the "package_names" table.
+	PackageNamesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "namespace_id", Type: field.TypeInt},
+	}
+	// PackageNamesTable holds the schema information for the "package_names" table.
+	PackageNamesTable = &schema.Table{
+		Name:       "package_names",
+		Columns:    PackageNamesColumns,
+		PrimaryKey: []*schema.Column{PackageNamesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "package_names_package_namespaces_names",
+				Columns:    []*schema.Column{PackageNamesColumns[2]},
+				RefColumns: []*schema.Column{PackageNamespacesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "packagename_name_namespace_id",
+				Unique:  true,
+				Columns: []*schema.Column{PackageNamesColumns[1], PackageNamesColumns[2]},
+			},
+		},
+	}
+	// PackageNamespacesColumns holds the columns for the "package_namespaces" table.
+	PackageNamespacesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "namespace", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeInt},
+	}
+	// PackageNamespacesTable holds the schema information for the "package_namespaces" table.
+	PackageNamespacesTable = &schema.Table{
+		Name:       "package_namespaces",
+		Columns:    PackageNamespacesColumns,
+		PrimaryKey: []*schema.Column{PackageNamespacesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "package_namespaces_package_nodes_namespaces",
+				Columns:    []*schema.Column{PackageNamespacesColumns[2]},
+				RefColumns: []*schema.Column{PackageNodesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "packagenamespace_namespace_package_id",
+				Unique:  true,
+				Columns: []*schema.Column{PackageNamespacesColumns[1], PackageNamespacesColumns[2]},
+			},
+		},
+	}
+	// PackageNodesColumns holds the columns for the "package_nodes" table.
+	PackageNodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeString, Unique: true},
+	}
+	// PackageNodesTable holds the schema information for the "package_nodes" table.
+	PackageNodesTable = &schema.Table{
+		Name:       "package_nodes",
+		Columns:    PackageNodesColumns,
+		PrimaryKey: []*schema.Column{PackageNodesColumns[0]},
+	}
+	// PackageVersionsColumns holds the columns for the "package_versions" table.
+	PackageVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "version", Type: field.TypeString},
+		{Name: "name_id", Type: field.TypeInt},
+	}
+	// PackageVersionsTable holds the schema information for the "package_versions" table.
+	PackageVersionsTable = &schema.Table{
+		Name:       "package_versions",
+		Columns:    PackageVersionsColumns,
+		PrimaryKey: []*schema.Column{PackageVersionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "package_versions_package_names_versions",
+				Columns:    []*schema.Column{PackageVersionsColumns[2]},
+				RefColumns: []*schema.Column{PackageNamesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "packageversion_version_name_id",
+				Unique:  true,
+				Columns: []*schema.Column{PackageVersionsColumns[1], PackageVersionsColumns[2]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
 		BuilderNodesTable,
+		PackageNamesTable,
+		PackageNamespacesTable,
+		PackageNodesTable,
+		PackageVersionsTable,
 	}
 )
 
 func init() {
+	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
+	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageNodesTable
+	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
 }

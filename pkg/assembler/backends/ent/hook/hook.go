@@ -33,6 +33,54 @@ func (f BuilderNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BuilderNodeMutation", m)
 }
 
+// The PackageNameFunc type is an adapter to allow the use of ordinary
+// function as PackageName mutator.
+type PackageNameFunc func(context.Context, *ent.PackageNameMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PackageNameFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PackageNameMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageNameMutation", m)
+}
+
+// The PackageNamespaceFunc type is an adapter to allow the use of ordinary
+// function as PackageNamespace mutator.
+type PackageNamespaceFunc func(context.Context, *ent.PackageNamespaceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PackageNamespaceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PackageNamespaceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageNamespaceMutation", m)
+}
+
+// The PackageNodeFunc type is an adapter to allow the use of ordinary
+// function as PackageNode mutator.
+type PackageNodeFunc func(context.Context, *ent.PackageNodeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PackageNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PackageNodeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageNodeMutation", m)
+}
+
+// The PackageVersionFunc type is an adapter to allow the use of ordinary
+// function as PackageVersion mutator.
+type PackageVersionFunc func(context.Context, *ent.PackageVersionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PackageVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PackageVersionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageVersionMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

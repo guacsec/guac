@@ -16,6 +16,14 @@ type Tx struct {
 	Artifact *ArtifactClient
 	// BuilderNode is the client for interacting with the BuilderNode builders.
 	BuilderNode *BuilderNodeClient
+	// PackageName is the client for interacting with the PackageName builders.
+	PackageName *PackageNameClient
+	// PackageNamespace is the client for interacting with the PackageNamespace builders.
+	PackageNamespace *PackageNamespaceClient
+	// PackageNode is the client for interacting with the PackageNode builders.
+	PackageNode *PackageNodeClient
+	// PackageVersion is the client for interacting with the PackageVersion builders.
+	PackageVersion *PackageVersionClient
 
 	// lazily loaded.
 	client     *Client
@@ -149,6 +157,10 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Artifact = NewArtifactClient(tx.config)
 	tx.BuilderNode = NewBuilderNodeClient(tx.config)
+	tx.PackageName = NewPackageNameClient(tx.config)
+	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
+	tx.PackageNode = NewPackageNodeClient(tx.config)
+	tx.PackageVersion = NewPackageVersionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
