@@ -17,13 +17,13 @@ package guesser
 
 import (
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/spdx/tools-golang/spdx/v2/v2_2"
+	"github.com/spdx/tools-golang/spdx"
 )
 
 type spdxTypeGuesser struct{}
 
 func (_ *spdxTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
-	spdxDoc := &v2_2.Document{}
+	spdxDoc := &spdx.Document{}
 	switch format {
 	case processor.FormatJSON:
 		if err := spdxDoc.UnmarshalJSON(blob); err == nil {

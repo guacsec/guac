@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/spdx/tools-golang/spdx/v2/v2_2"
+	"github.com/spdx/tools-golang/spdx"
 )
 
 // SPDXProcessor processes SPDX documents.
@@ -34,7 +34,7 @@ func (p *SPDXProcessor) ValidateSchema(d *processor.Document) error {
 
 	switch d.Format {
 	case processor.FormatJSON:
-		doc := &v2_2.Document{}
+		doc := &spdx.Document{}
 		return doc.UnmarshalJSON(d.Blob)
 	}
 
