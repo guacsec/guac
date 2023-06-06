@@ -7,6 +7,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -109,4 +110,71 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 		return nil, err
 	}
 	return toModelBuilder(record), nil
+}
+
+func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
+	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*PackageNode, error) {
+		client := FromContext(ctx)
+		pkgRecord, err := client.PackageNode.Create().SetType(pkg.Type).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		nsRecord, err := client.PackageNamespace.Create().SetPackage(pkgRecord).SetNamespace(*pkg.Namespace).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		nameNode, err := client.PackageName.Create().SetNamespace(nsRecord).SetName(pkg.Name).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		err = client.PackageVersion.Create().SetName(nameNode).SetVersion(*pkg.Version).Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return pkgRecord, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	record, err = b.client.PackageNode.Query().Where(packagenode.ID(record.ID)).
+		WithNamespaces(func(q *PackageNamespaceQuery) {
+			q.WithNames(func(q *PackageNameQuery) {
+				q.WithVersions()
+			})
+		}).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return toModelPackage(record), nil
+}
+
+func (b *EntBackend) registerPackage(ctx context.Context, packageType, namespace, name, version, subpath string, qualifiers ...string) error {
+	pkg, err := b.client.PackageNode.Create().SetType(packageType).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	ns, err := b.client.PackageNamespace.Create().SetPackage(pkg).SetNamespace(namespace).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	nameNode, err := b.client.PackageName.Create().SetNamespace(ns).SetName(name).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = b.client.PackageVersion.Create().SetName(nameNode).SetVersion(version).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

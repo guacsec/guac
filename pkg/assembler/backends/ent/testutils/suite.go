@@ -18,7 +18,7 @@ import (
 )
 
 func init() {
-	txdb.Register("txdb", "postgres", "guac_test")
+	txdb.Register("txdb", "postgres", "postgresql://localhost/guac_test?sslmode=disable")
 }
 
 type Suite struct {
@@ -62,7 +62,6 @@ func (s *Suite) BeforeTest(suiteName, testName string) {
 	entSqlDriver := dsql.OpenDB("postgres", db)
 	// enttest automatically runs migrations to create the schema in the test database.
 	client := enttest.NewClient(s.T(), enttest.WithOptions(ent.Driver(entSqlDriver)))
-	log.Println("BeforeTest hook", suiteName, testName)
 	s.Client = client
 
 	// Populate context with ent client so that transactions work
