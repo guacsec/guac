@@ -139,8 +139,20 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 			return nil, errors.Wrap(err, "upsert package name")
 		}
 
-		_, err = client.PackageVersion.Create().SetNameID(nameID).SetVersion(*pkg.Version).
-			OnConflict(sql.ConflictColumns(packageversion.FieldVersion, packageversion.FieldNameID)).UpdateNewValues().ID(ctx)
+		_, err = client.PackageVersion.Create().
+			SetNameID(nameID).
+			SetVersion(*pkg.Version).
+			SetSubpath(valueOrDefault(pkg.Subpath, "")).
+			SetQualifiers(qualifiersToString(pkg.Qualifiers)).
+			OnConflict(
+				sql.ConflictColumns(
+					packageversion.FieldVersion,
+					packageversion.FieldSubpath,
+					packageversion.FieldQualifiers,
+					packageversion.FieldNameID,
+				),
+			).
+			UpdateNewValues().ID(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "upsert package version")
 		}
@@ -151,6 +163,7 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 		return nil, err
 	}
 
+	// TODO: Figure out if we need to preload the edges from the graphql query
 	record, err := b.client.PackageNode.Query().Where(packagenode.ID(*recordID)).
 		WithNamespaces(func(q *PackageNamespaceQuery) {
 			q.Order(Asc(packagenamespace.FieldNamespace))

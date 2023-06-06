@@ -17,6 +17,8 @@ func (PackageVersion) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("name_id"),
 		field.String("version").NotEmpty(),
+		field.String("subpath"),
+		field.String("qualifiers"),
 	}
 }
 
@@ -30,6 +32,6 @@ func (PackageVersion) Edges() []ent.Edge {
 // Indexes of the PackageVersion.
 func (PackageVersion) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("version").Edges("name").Unique(),
+		index.Fields("version", "subpath", "qualifiers").Edges("name").Unique(),
 	}
 }

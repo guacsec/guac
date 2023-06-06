@@ -2210,6 +2210,8 @@ type PackageVersionMutation struct {
 	typ           string
 	id            *int
 	version       *string
+	subpath       *string
+	qualifiers    *string
 	clearedFields map[string]struct{}
 	name          *int
 	clearedname   bool
@@ -2388,6 +2390,78 @@ func (m *PackageVersionMutation) ResetVersion() {
 	m.version = nil
 }
 
+// SetSubpath sets the "subpath" field.
+func (m *PackageVersionMutation) SetSubpath(s string) {
+	m.subpath = &s
+}
+
+// Subpath returns the value of the "subpath" field in the mutation.
+func (m *PackageVersionMutation) Subpath() (r string, exists bool) {
+	v := m.subpath
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubpath returns the old "subpath" field's value of the PackageVersion entity.
+// If the PackageVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageVersionMutation) OldSubpath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubpath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubpath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubpath: %w", err)
+	}
+	return oldValue.Subpath, nil
+}
+
+// ResetSubpath resets all changes to the "subpath" field.
+func (m *PackageVersionMutation) ResetSubpath() {
+	m.subpath = nil
+}
+
+// SetQualifiers sets the "qualifiers" field.
+func (m *PackageVersionMutation) SetQualifiers(s string) {
+	m.qualifiers = &s
+}
+
+// Qualifiers returns the value of the "qualifiers" field in the mutation.
+func (m *PackageVersionMutation) Qualifiers() (r string, exists bool) {
+	v := m.qualifiers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQualifiers returns the old "qualifiers" field's value of the PackageVersion entity.
+// If the PackageVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageVersionMutation) OldQualifiers(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQualifiers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQualifiers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQualifiers: %w", err)
+	}
+	return oldValue.Qualifiers, nil
+}
+
+// ResetQualifiers resets all changes to the "qualifiers" field.
+func (m *PackageVersionMutation) ResetQualifiers() {
+	m.qualifiers = nil
+}
+
 // ClearName clears the "name" edge to the PackageName entity.
 func (m *PackageVersionMutation) ClearName() {
 	m.clearedname = true
@@ -2448,12 +2522,18 @@ func (m *PackageVersionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PackageVersionMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 4)
 	if m.name != nil {
 		fields = append(fields, packageversion.FieldNameID)
 	}
 	if m.version != nil {
 		fields = append(fields, packageversion.FieldVersion)
+	}
+	if m.subpath != nil {
+		fields = append(fields, packageversion.FieldSubpath)
+	}
+	if m.qualifiers != nil {
+		fields = append(fields, packageversion.FieldQualifiers)
 	}
 	return fields
 }
@@ -2467,6 +2547,10 @@ func (m *PackageVersionMutation) Field(name string) (ent.Value, bool) {
 		return m.NameID()
 	case packageversion.FieldVersion:
 		return m.Version()
+	case packageversion.FieldSubpath:
+		return m.Subpath()
+	case packageversion.FieldQualifiers:
+		return m.Qualifiers()
 	}
 	return nil, false
 }
@@ -2480,6 +2564,10 @@ func (m *PackageVersionMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldNameID(ctx)
 	case packageversion.FieldVersion:
 		return m.OldVersion(ctx)
+	case packageversion.FieldSubpath:
+		return m.OldSubpath(ctx)
+	case packageversion.FieldQualifiers:
+		return m.OldQualifiers(ctx)
 	}
 	return nil, fmt.Errorf("unknown PackageVersion field %s", name)
 }
@@ -2502,6 +2590,20 @@ func (m *PackageVersionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVersion(v)
+		return nil
+	case packageversion.FieldSubpath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubpath(v)
+		return nil
+	case packageversion.FieldQualifiers:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQualifiers(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion field %s", name)
@@ -2560,6 +2662,12 @@ func (m *PackageVersionMutation) ResetField(name string) error {
 		return nil
 	case packageversion.FieldVersion:
 		m.ResetVersion()
+		return nil
+	case packageversion.FieldSubpath:
+		m.ResetSubpath()
+		return nil
+	case packageversion.FieldQualifiers:
+		m.ResetQualifiers()
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion field %s", name)

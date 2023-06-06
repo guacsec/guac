@@ -2,6 +2,7 @@ package ent
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -46,11 +47,23 @@ func toModelPackageName(n *PackageName) *model.PackageName {
 }
 
 func toModelPackageVersion(v *PackageVersion) *model.PackageVersion {
+	qualifiers := []*model.PackageQualifier{}
+
+	vals, err := url.ParseQuery(v.Qualifiers)
+	if err == nil {
+		for k, v := range vals {
+			qualifiers = append(qualifiers, &model.PackageQualifier{
+				Key:   k,
+				Value: v[0],
+			})
+		}
+	}
+
 	return &model.PackageVersion{
-		ID:      nodeid(v.ID),
-		Version: v.Version,
-		// Qualifiers: []*model.PackageQualifier{},
-		// Subpath:    v.Subpath,
+		ID:         nodeid(v.ID),
+		Version:    v.Version,
+		Qualifiers: qualifiers,
+		Subpath:    v.Subpath,
 	}
 }
 
@@ -70,4 +83,24 @@ func collect[T any, R any](items []T, transformer func(T) R) []R {
 
 func nodeid(id int) string {
 	return fmt.Sprintf("%d", id)
+}
+
+func valueOrDefault[T any](v *T, def T) T {
+	if v == nil {
+		return def
+	}
+	return *v
+}
+
+func qualifiersToString(qualifiers []*model.PackageQualifierInputSpec) string {
+	if qualifiers == nil {
+		return ""
+	}
+
+	qs := url.Values{}
+	for _, q := range qualifiers {
+		qs.Add(q.Key, q.Value)
+	}
+
+	return qs.Encode()
 }

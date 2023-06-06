@@ -40,6 +40,18 @@ func (pvu *PackageVersionUpdate) SetVersion(s string) *PackageVersionUpdate {
 	return pvu
 }
 
+// SetSubpath sets the "subpath" field.
+func (pvu *PackageVersionUpdate) SetSubpath(s string) *PackageVersionUpdate {
+	pvu.mutation.SetSubpath(s)
+	return pvu
+}
+
+// SetQualifiers sets the "qualifiers" field.
+func (pvu *PackageVersionUpdate) SetQualifiers(s string) *PackageVersionUpdate {
+	pvu.mutation.SetQualifiers(s)
+	return pvu
+}
+
 // SetName sets the "name" edge to the PackageName entity.
 func (pvu *PackageVersionUpdate) SetName(p *PackageName) *PackageVersionUpdate {
 	return pvu.SetNameID(p.ID)
@@ -111,6 +123,12 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if value, ok := pvu.mutation.Version(); ok {
 		_spec.SetField(packageversion.FieldVersion, field.TypeString, value)
 	}
+	if value, ok := pvu.mutation.Subpath(); ok {
+		_spec.SetField(packageversion.FieldSubpath, field.TypeString, value)
+	}
+	if value, ok := pvu.mutation.Qualifiers(); ok {
+		_spec.SetField(packageversion.FieldQualifiers, field.TypeString, value)
+	}
 	if pvu.mutation.NameCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -169,6 +187,18 @@ func (pvuo *PackageVersionUpdateOne) SetNameID(i int) *PackageVersionUpdateOne {
 // SetVersion sets the "version" field.
 func (pvuo *PackageVersionUpdateOne) SetVersion(s string) *PackageVersionUpdateOne {
 	pvuo.mutation.SetVersion(s)
+	return pvuo
+}
+
+// SetSubpath sets the "subpath" field.
+func (pvuo *PackageVersionUpdateOne) SetSubpath(s string) *PackageVersionUpdateOne {
+	pvuo.mutation.SetSubpath(s)
+	return pvuo
+}
+
+// SetQualifiers sets the "qualifiers" field.
+func (pvuo *PackageVersionUpdateOne) SetQualifiers(s string) *PackageVersionUpdateOne {
+	pvuo.mutation.SetQualifiers(s)
 	return pvuo
 }
 
@@ -272,6 +302,12 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 	}
 	if value, ok := pvuo.mutation.Version(); ok {
 		_spec.SetField(packageversion.FieldVersion, field.TypeString, value)
+	}
+	if value, ok := pvuo.mutation.Subpath(); ok {
+		_spec.SetField(packageversion.FieldSubpath, field.TypeString, value)
+	}
+	if value, ok := pvuo.mutation.Qualifiers(); ok {
+		_spec.SetField(packageversion.FieldQualifiers, field.TypeString, value)
 	}
 	if pvuo.mutation.NameCleared() {
 		edge := &sqlgraph.EdgeSpec{

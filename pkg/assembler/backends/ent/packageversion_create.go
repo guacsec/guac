@@ -34,6 +34,18 @@ func (pvc *PackageVersionCreate) SetVersion(s string) *PackageVersionCreate {
 	return pvc
 }
 
+// SetSubpath sets the "subpath" field.
+func (pvc *PackageVersionCreate) SetSubpath(s string) *PackageVersionCreate {
+	pvc.mutation.SetSubpath(s)
+	return pvc
+}
+
+// SetQualifiers sets the "qualifiers" field.
+func (pvc *PackageVersionCreate) SetQualifiers(s string) *PackageVersionCreate {
+	pvc.mutation.SetQualifiers(s)
+	return pvc
+}
+
 // SetName sets the "name" edge to the PackageName entity.
 func (pvc *PackageVersionCreate) SetName(p *PackageName) *PackageVersionCreate {
 	return pvc.SetNameID(p.ID)
@@ -84,6 +96,12 @@ func (pvc *PackageVersionCreate) check() error {
 			return &ValidationError{Name: "version", err: fmt.Errorf(`ent: validator failed for field "PackageVersion.version": %w`, err)}
 		}
 	}
+	if _, ok := pvc.mutation.Subpath(); !ok {
+		return &ValidationError{Name: "subpath", err: errors.New(`ent: missing required field "PackageVersion.subpath"`)}
+	}
+	if _, ok := pvc.mutation.Qualifiers(); !ok {
+		return &ValidationError{Name: "qualifiers", err: errors.New(`ent: missing required field "PackageVersion.qualifiers"`)}
+	}
 	if _, ok := pvc.mutation.NameID(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required edge "PackageVersion.name"`)}
 	}
@@ -117,6 +135,14 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 	if value, ok := pvc.mutation.Version(); ok {
 		_spec.SetField(packageversion.FieldVersion, field.TypeString, value)
 		_node.Version = value
+	}
+	if value, ok := pvc.mutation.Subpath(); ok {
+		_spec.SetField(packageversion.FieldSubpath, field.TypeString, value)
+		_node.Subpath = value
+	}
+	if value, ok := pvc.mutation.Qualifiers(); ok {
+		_spec.SetField(packageversion.FieldQualifiers, field.TypeString, value)
+		_node.Qualifiers = value
 	}
 	if nodes := pvc.mutation.NameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -211,6 +237,30 @@ func (u *PackageVersionUpsert) UpdateVersion() *PackageVersionUpsert {
 	return u
 }
 
+// SetSubpath sets the "subpath" field.
+func (u *PackageVersionUpsert) SetSubpath(v string) *PackageVersionUpsert {
+	u.Set(packageversion.FieldSubpath, v)
+	return u
+}
+
+// UpdateSubpath sets the "subpath" field to the value that was provided on create.
+func (u *PackageVersionUpsert) UpdateSubpath() *PackageVersionUpsert {
+	u.SetExcluded(packageversion.FieldSubpath)
+	return u
+}
+
+// SetQualifiers sets the "qualifiers" field.
+func (u *PackageVersionUpsert) SetQualifiers(v string) *PackageVersionUpsert {
+	u.Set(packageversion.FieldQualifiers, v)
+	return u
+}
+
+// UpdateQualifiers sets the "qualifiers" field to the value that was provided on create.
+func (u *PackageVersionUpsert) UpdateQualifiers() *PackageVersionUpsert {
+	u.SetExcluded(packageversion.FieldQualifiers)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -276,6 +326,34 @@ func (u *PackageVersionUpsertOne) SetVersion(v string) *PackageVersionUpsertOne 
 func (u *PackageVersionUpsertOne) UpdateVersion() *PackageVersionUpsertOne {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.UpdateVersion()
+	})
+}
+
+// SetSubpath sets the "subpath" field.
+func (u *PackageVersionUpsertOne) SetSubpath(v string) *PackageVersionUpsertOne {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.SetSubpath(v)
+	})
+}
+
+// UpdateSubpath sets the "subpath" field to the value that was provided on create.
+func (u *PackageVersionUpsertOne) UpdateSubpath() *PackageVersionUpsertOne {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.UpdateSubpath()
+	})
+}
+
+// SetQualifiers sets the "qualifiers" field.
+func (u *PackageVersionUpsertOne) SetQualifiers(v string) *PackageVersionUpsertOne {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.SetQualifiers(v)
+	})
+}
+
+// UpdateQualifiers sets the "qualifiers" field to the value that was provided on create.
+func (u *PackageVersionUpsertOne) UpdateQualifiers() *PackageVersionUpsertOne {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.UpdateQualifiers()
 	})
 }
 
@@ -503,6 +581,34 @@ func (u *PackageVersionUpsertBulk) SetVersion(v string) *PackageVersionUpsertBul
 func (u *PackageVersionUpsertBulk) UpdateVersion() *PackageVersionUpsertBulk {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.UpdateVersion()
+	})
+}
+
+// SetSubpath sets the "subpath" field.
+func (u *PackageVersionUpsertBulk) SetSubpath(v string) *PackageVersionUpsertBulk {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.SetSubpath(v)
+	})
+}
+
+// UpdateSubpath sets the "subpath" field to the value that was provided on create.
+func (u *PackageVersionUpsertBulk) UpdateSubpath() *PackageVersionUpsertBulk {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.UpdateSubpath()
+	})
+}
+
+// SetQualifiers sets the "qualifiers" field.
+func (u *PackageVersionUpsertBulk) SetQualifiers(v string) *PackageVersionUpsertBulk {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.SetQualifiers(v)
+	})
+}
+
+// UpdateQualifiers sets the "qualifiers" field to the value that was provided on create.
+func (u *PackageVersionUpsertBulk) UpdateQualifiers() *PackageVersionUpsertBulk {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.UpdateQualifiers()
 	})
 }
 

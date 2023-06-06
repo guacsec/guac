@@ -21,6 +21,10 @@ type PackageVersion struct {
 	NameID int `json:"name_id,omitempty"`
 	// Version holds the value of the "version" field.
 	Version string `json:"version,omitempty"`
+	// Subpath holds the value of the "subpath" field.
+	Subpath string `json:"subpath,omitempty"`
+	// Qualifiers holds the value of the "qualifiers" field.
+	Qualifiers string `json:"qualifiers,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PackageVersionQuery when eager-loading is set.
 	Edges        PackageVersionEdges `json:"edges"`
@@ -56,7 +60,7 @@ func (*PackageVersion) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case packageversion.FieldID, packageversion.FieldNameID:
 			values[i] = new(sql.NullInt64)
-		case packageversion.FieldVersion:
+		case packageversion.FieldVersion, packageversion.FieldSubpath, packageversion.FieldQualifiers:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -90,6 +94,18 @@ func (pv *PackageVersion) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field version", values[i])
 			} else if value.Valid {
 				pv.Version = value.String
+			}
+		case packageversion.FieldSubpath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field subpath", values[i])
+			} else if value.Valid {
+				pv.Subpath = value.String
+			}
+		case packageversion.FieldQualifiers:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field qualifiers", values[i])
+			} else if value.Valid {
+				pv.Qualifiers = value.String
 			}
 		default:
 			pv.selectValues.Set(columns[i], values[i])
@@ -137,6 +153,12 @@ func (pv *PackageVersion) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("version=")
 	builder.WriteString(pv.Version)
+	builder.WriteString(", ")
+	builder.WriteString("subpath=")
+	builder.WriteString(pv.Subpath)
+	builder.WriteString(", ")
+	builder.WriteString("qualifiers=")
+	builder.WriteString(pv.Qualifiers)
 	builder.WriteByte(')')
 	return builder.String()
 }

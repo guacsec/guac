@@ -16,6 +16,10 @@ const (
 	FieldNameID = "name_id"
 	// FieldVersion holds the string denoting the version field in the database.
 	FieldVersion = "version"
+	// FieldSubpath holds the string denoting the subpath field in the database.
+	FieldSubpath = "subpath"
+	// FieldQualifiers holds the string denoting the qualifiers field in the database.
+	FieldQualifiers = "qualifiers"
 	// EdgeName holds the string denoting the name edge name in mutations.
 	EdgeName = "name"
 	// Table holds the table name of the packageversion in the database.
@@ -34,6 +38,8 @@ var Columns = []string{
 	FieldID,
 	FieldNameID,
 	FieldVersion,
+	FieldSubpath,
+	FieldQualifiers,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -67,6 +73,16 @@ func ByNameID(opts ...sql.OrderTermOption) OrderOption {
 // ByVersion orders the results by the version field.
 func ByVersion(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVersion, opts...).ToFunc()
+}
+
+// BySubpath orders the results by the subpath field.
+func BySubpath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSubpath, opts...).ToFunc()
+}
+
+// ByQualifiers orders the results by the qualifiers field.
+func ByQualifiers(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualifiers, opts...).ToFunc()
 }
 
 // ByNameField orders the results by name field.
