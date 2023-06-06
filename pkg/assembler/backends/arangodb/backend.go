@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
@@ -173,9 +174,17 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// repeat this for the collections where an edge is going into
 		isOccurrencesEdges.To = []string{"isOccurrences", "artifacts"}
 
+		var hasSBOMEdges driver.EdgeDefinition
+		hasSBOMEdges.Collection = "hasSBOMEdges"
+		// define a set of collections where an edge is going out...
+		hasSBOMEdges.From = []string{"PkgVersion", "artifacts"}
+
+		// repeat this for the collections where an edge is going into
+		hasSBOMEdges.To = []string{"hasSBOMs"}
+
 		// A graph can contain additional vertex collections, defined in the set of orphan collections
 		var options driver.CreateGraphOptions
-		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName, pkgHasVersion, isDependencyEdges, isOccurrencesEdges}
+		options.EdgeDefinitions = []driver.EdgeDefinition{hashEqualsEdges, pkgHasType, pkgHasNamespace, pkgHasName, pkgHasVersion, isDependencyEdges, isOccurrencesEdges, hasSBOMEdges}
 
 		// create a graph
 		graph, err = db.CreateGraphV2(ctx, "guac", &options)
@@ -218,6 +227,38 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 
 	return arangoClient, nil
 }
+
+func executeQueryWithRetry(ctx context.Context, db driver.Database, query string, values map[string]any) (driver.Cursor, error) {
+	var cursor driver.Cursor
+	var err error
+
+	for retry := 0; retry < 10; retry++ {
+		cursor, err = db.Query(ctx, query, values)
+		if err == nil {
+			return cursor, nil
+		}
+
+		// Check if the error is due to a lock timeout or a temporary issue
+		//if isRetryableError(err) {
+		fmt.Printf("Retrying query (attempt %d), %v, ...\n", retry+1, err)
+		time.Sleep(time.Second)
+		continue
+		//}
+
+		// Return the error if it's not retryable
+		//return nil, err
+	}
+
+	return nil, fmt.Errorf("query execution failed after %d retries", 10)
+}
+
+// func isRetryableError(err error) bool {
+// 	// Check the error type or message to determine if it's a retryable error
+// 	// For example, you can check for specific error codes or strings
+// 	// from the ArangoDB driver and return true if it's a retryable error.
+// 	// Customize this function based on your specific use case.
+// 	return false
+// }
 
 func newForQuery(repositoryName string, counterName string) *arangoQueryBuilder {
 	aqb := &arangoQueryBuilder{
@@ -430,121 +471,117 @@ func getPreloadString(prefix, name string) string {
 }
 
 func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Builders - Builders"))
 }
 func (c *arangoClient) Cve(ctx context.Context, cveSpec *model.CVESpec) ([]*model.Cve, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Cve - Cve"))
 }
 func (c *arangoClient) Ghsa(ctx context.Context, ghsaSpec *model.GHSASpec) ([]*model.Ghsa, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Ghsa - Ghsa"))
 }
 func (c *arangoClient) Osv(ctx context.Context, osvSpec *model.OSVSpec) ([]*model.Osv, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Osv - Osv"))
 }
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Packages - Packages"))
 }
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Sources - Sources"))
 }
 
 // Retrieval read-only queries for evidence trees
 func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: CertifyBad - CertifyBad"))
 }
 func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: CertifyGood - CertifyGood"))
 }
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: CertifyVEXStatement - CertifyVEXStatement"))
 }
 func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: CertifyVuln - CertifyVuln"))
 }
-func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
-}
+
 func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: HasSlsa - HasSlsa"))
 }
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: HasSourceAt - HasSourceAt"))
 }
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IsDependency - IsDependency"))
 }
 func (c *arangoClient) IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IsVulnerability - IsVulnerability"))
 }
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: PkgEqual - PkgEqual"))
 }
 func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Scorecards - Scorecards"))
 }
 
 // Mutations for software trees (read-write queries)
 func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestBuilder - IngestBuilder"))
 }
 func (c *arangoClient) IngestCve(ctx context.Context, cve *model.CVEInputSpec) (*model.Cve, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestCve - IngestCve"))
 }
 func (c *arangoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec) (*model.Ghsa, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestGhsa - IngestGhsa"))
 }
 func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestMaterials - IngestMaterials"))
 }
 func (c *arangoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestOsv - IngestOsv"))
 }
 func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestSource - IngestSource"))
 }
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 func (c *arangoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: CertifyScorecard - CertifyScorecard"))
 }
 func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))
 }
 func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
 }
-func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
-}
+
 func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestHasSourceAt - IngestHasSourceAt"))
 }
 func (c *arangoClient) IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestIsVulnerability - IngestIsVulnerability"))
 }
 func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestPkgEqual - IngestPkgEqual"))
 }
 func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestSLSA - IngestSLSA"))
 }
 func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInput, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
 }
 func (c *arangoClient) IngestVulnerability(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInput, certifyVuln model.VulnerabilityMetaDataInput) (*model.CertifyVuln, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: IngestVulnerability - IngestVulnerability"))
 }
 
 // Topological queries: queries where node connectivity matters more than node type
 func (c *arangoClient) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Neighbors - Neighbors"))
 }
 func (c *arangoClient) Node(ctx context.Context, node string) (model.Node, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Node - Node"))
 }
 func (c *arangoClient) Nodes(ctx context.Context, nodes []string) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Nodes - Nodes"))
 }
 func (c *arangoClient) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
-	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
+	panic(fmt.Errorf("not implemented: Path - Path"))
 }

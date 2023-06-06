@@ -32,10 +32,6 @@ func registerAllArtifacts(ctx context.Context, client *arangoClient) {
 }
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	artifactCollection, err := c.graph.VertexCollection(ctx, "artifacts")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get vertex collection: %w", err)
-	}
 
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery("artifacts", "art")
@@ -50,7 +46,7 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	arangoQueryBuilder.returnStatement()
 
 	fmt.Println(arangoQueryBuilder.string())
-	cursor, err := artifactCollection.Database().Query(ctx, arangoQueryBuilder.string(), values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
@@ -75,11 +71,6 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 }
 
 func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
-	artifactCollection, err := c.graph.VertexCollection(ctx, "artifacts")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get vertex collection: %w", err)
-	}
-
 	values := map[string]any{}
 	values["algorithm"] = strings.ToLower(artifact.Algorithm)
 	values["digest"] = strings.ToLower(artifact.Digest)
@@ -90,7 +81,7 @@ INSERT { algorithm:@algorithm, digest:@digest }
 UPDATE {} IN artifacts
 RETURN NEW`
 
-	cursor, err := artifactCollection.Database().Query(ctx, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}

@@ -50,7 +50,7 @@ func ingestData(port int) {
 	//ingestCertifyBad(ctx, gqlclient)
 	//ingestCertifyGood(ctx, gqlclient)
 	ingestHashEqual(ctx, gqlclient)
-	//ingestHasSBOM(ctx, gqlclient)
+	ingestHasSBOM(ctx, gqlclient)
 	//ingestHasSourceAt(ctx, gqlclient)
 	//ingestIsVulnerability(ctx, gqlclient)
 	//ingestVEXStatement(ctx, gqlclient)

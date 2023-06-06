@@ -186,11 +186,6 @@ LET a = (
 // }
 
 func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
-	hasEqualCollection, err := c.graph.VertexCollection(ctx, "hashEquals")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get vertex collection: %w", err)
-	}
-
 	values := map[string]any{}
 	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 	values["art_digest"] = strings.ToLower(artifact.Digest)
@@ -227,7 +222,7 @@ RETURN {
 	"hashEqualCollector": hashEqual.collector
 }`
 
-	cursor, err := hasEqualCollection.Database().Query(ctx, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}

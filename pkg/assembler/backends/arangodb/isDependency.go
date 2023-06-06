@@ -147,7 +147,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 		  "origin": isDependency.origin
 	  }`
 
-	cursor, err := c.db.Query(ctx, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
@@ -178,7 +178,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				return nil, fmt.Errorf("failed to ingest artifact: %w, values: %v", err, values)
 			}
 		} else {
 			createdValues = append(createdValues, doc)
