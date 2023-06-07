@@ -102,32 +102,32 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	  )
 	  
 	  LET type = FIRST(
-		UPSERT { type: @pkgType }
-		INSERT { type: @pkgType }
+		UPSERT { type: @pkgType, _parent: root._id }
+		INSERT { type: @pkgType, _parent: root._id }
 		UPDATE {}
 		IN PkgType
 		RETURN NEW
 	  )
 	  
 	  LET ns = FIRST(
-		UPSERT { namespace: @namespace }
-		INSERT { namespace: @namespace }
+		UPSERT { namespace: @namespace, _parent: type._id }
+		INSERT { namespace: @namespace, _parent: type._id }
 		UPDATE {}
 		IN PkgNamespace
 		RETURN NEW
 	  )
 	  
 	  LET name = FIRST(
-		UPSERT { name: @name }
-		INSERT { name: @name }
+		UPSERT { name: @name, _parent: ns._id }
+		INSERT { name: @name, _parent: ns._id }
 		UPDATE {}
 		IN PkgName
 		RETURN NEW
 	  )
 	  
 	  LET pkgVersionObj = FIRST(
-		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier }
-		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier }
+		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
+		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
 		UPDATE {}
 		IN PkgVersion
 		RETURN NEW
