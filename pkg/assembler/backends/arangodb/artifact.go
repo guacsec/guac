@@ -42,7 +42,12 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 		arangoQueryBuilder.filter("digest", "art", "==", "@digest")
 		values["digest"] = strings.ToLower(*artifactSpec.Digest)
 	}
-	arangoQueryBuilder.returnStatement("art")
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"id": art._id,
+		"algorithm": art.algorithm,
+		"digest": art.digest
+	  }`)
 
 	fmt.Println(arangoQueryBuilder.string())
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
