@@ -28,6 +28,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/spf13/cobra"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
@@ -38,6 +39,7 @@ import (
 const (
 	neo4js = "neo4j"
 	inmems = "inmem"
+	ents   = "ent"
 )
 
 func startServer(cmd *cobra.Command) {
@@ -50,7 +52,7 @@ func startServer(cmd *cobra.Command) {
 		os.Exit(1)
 	}
 
-	srv, err := getGraphqlServer()
+	srv, err := getGraphqlServer(ctx)
 	if err != nil {
 		logger.Errorf("unable to initialize graphql server: %v", err)
 		os.Exit(1)
@@ -93,16 +95,33 @@ func startServer(cmd *cobra.Command) {
 
 func validateFlags() error {
 	if flags.backend != neo4js &&
-		flags.backend != inmems {
-		return fmt.Errorf("invalid graphql backend specified: %v", flags.backend)
+		flags.backend != inmems &&
+		flags.backend != ents {
+		return fmt.Errorf("invalid graphql backend specified: %q", flags.backend)
 	}
 	return nil
 }
 
-func getGraphqlServer() (*handler.Server, error) {
+func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	var topResolver resolvers.Resolver
 
 	switch flags.backend {
+	case ents:
+		client, err := ent.SetupBackend(ctx, ent.BackendOptions{
+			DriverName:  flags.dbDriver,
+			Address:     flags.dbAddress,
+			Debug:       flags.dbDebug,
+			AutoMigrate: flags.dbMigrate,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		backend, err := ent.GetBackend(client)
+		if err != nil {
+			return nil, fmt.Errorf("Error creating ent backend: %w", err)
+		}
+		topResolver = resolvers.Resolver{Backend: backend}
 
 	case neo4js:
 		args := neo4j.Neo4jConfig{
@@ -127,7 +146,7 @@ func getGraphqlServer() (*handler.Server, error) {
 
 		topResolver = resolvers.Resolver{Backend: backend}
 	default:
-		return nil, fmt.Errorf("invalid backend specified: %v", flags.backend)
+		return nil, fmt.Errorf("invalid backend specified: %q", flags.backend)
 	}
 
 	config := generated.Config{Resolvers: &topResolver}

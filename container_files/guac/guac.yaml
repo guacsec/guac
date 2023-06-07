@@ -12,7 +12,7 @@ csub-addr: guac-collectsub:2782
 csub-listen-port: 2782
 
 # graphql
-gql-backend: inmem
+gql-backend: ent # ent|neo4j|inmem
 gql-listen-port: 8080
 gql-debug: true
 gql-test-data: false
@@ -25,3 +25,8 @@ use-csub: true
 # certifier polling
 poll: true
 interval: 5m
+
+# Ent config
+db-driver: postgres
+db-address: postgres://guac:guac@postgres:5432/guac?sslmode=disable
+db-migrate: true

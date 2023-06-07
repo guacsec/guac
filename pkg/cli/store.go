@@ -47,6 +47,11 @@ func init() {
 	set.String("neo4j-pass", "", "neo4j password credential to connect to graph db")
 	set.String("neo4j-realm", "neo4j", "realm to connect to graph db")
 
+	set.String("db-address", "postgres://localhost/guac_dev", "Full URL of database to connect to")
+	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
+	set.Bool("db-debug", false, "enable debug logging for database queries")
+	set.Bool("db-migrate", true, "automatically run database migrations on start")
+
 	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
 	set.String("verifier-key-path", "", "path to pem file to verify dsse")

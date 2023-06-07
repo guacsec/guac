@@ -2,18 +2,25 @@ package ent
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/migrate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/pkg/errors"
+
+	// Import regular postgres driver
+	_ "github.com/lib/pq"
 )
 
 type EntBackend struct {
@@ -21,18 +28,55 @@ type EntBackend struct {
 	client *Client
 }
 
-type Args struct {
-	entClient *Client
+type BackendOptions struct {
+	DriverName  string
+	Address     string
+	Debug       bool
+	AutoMigrate bool
 }
 
-func WithEntClient(client *Client) backends.BackendArgs {
-	return Args{entClient: client}
+// SetupBackend sets up the ent backend, preparing the database and returning a client
+func SetupBackend(ctx context.Context, options BackendOptions) (*Client, error) {
+	logger := logging.FromContext(ctx)
+
+	driver := dialect.Postgres
+	if options.DriverName != "" {
+		driver = options.DriverName
+	}
+	db, err := sql.Open(driver, options.Address)
+	if err != nil {
+		return nil, fmt.Errorf("Error opening db: %w", err)
+	}
+
+	client := NewClient(Driver(entsql.OpenDB(driver, db)))
+
+	if options.AutoMigrate {
+		// Run db migrations
+		err = client.Schema.Create(
+			ctx,
+			migrate.WithDropIndex(true),
+			migrate.WithDropColumn(true),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("Error creating ent schema: %w", err)
+		}
+
+		logger.Infof("ent migrations complete")
+	} else {
+		logger.Infof("skipping ent migrations")
+	}
+
+	return client, nil
 }
 
 func GetBackend(args backends.BackendArgs) (backends.Backend, error) {
 	be := &EntBackend{}
-	if args, ok := args.(Args); ok {
-		be.client = args.entClient
+	if args == nil {
+		return nil, fmt.Errorf("invalid args: WithClient is required, got nil")
+	}
+
+	if client, ok := args.(*Client); ok {
+		be.client = client
 	} else {
 		return nil, fmt.Errorf("invalid args type")
 	}
@@ -122,19 +166,19 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 		client := FromContext(ctx)
 
 		pkgID, err := client.PackageNode.Create().SetType(pkg.Type).
-			OnConflict(sql.ConflictColumns(packagenode.FieldType)).UpdateNewValues().ID(ctx)
+			OnConflict(entsql.ConflictColumns(packagenode.FieldType)).UpdateNewValues().ID(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "upsert package node")
 		}
 
 		nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(*pkg.Namespace).
-			OnConflict(sql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).UpdateNewValues().ID(ctx)
+			OnConflict(entsql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).UpdateNewValues().ID(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "upsert package namespace")
 		}
 
 		nameID, err := client.PackageName.Create().SetNamespaceID(nsID).SetName(pkg.Name).
-			OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespaceID)).UpdateNewValues().ID(ctx)
+			OnConflict(entsql.ConflictColumns(packagename.FieldName, packagename.FieldNamespaceID)).UpdateNewValues().ID(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "upsert package name")
 		}
@@ -145,7 +189,7 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 			SetSubpath(valueOrDefault(pkg.Subpath, "")).
 			SetQualifiers(qualifiersToString(pkg.Qualifiers)).
 			OnConflict(
-				sql.ConflictColumns(
+				entsql.ConflictColumns(
 					packageversion.FieldVersion,
 					packageversion.FieldSubpath,
 					packageversion.FieldQualifiers,

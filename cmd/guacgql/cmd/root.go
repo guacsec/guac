@@ -37,6 +37,12 @@ var flags = struct {
 	nUser  string
 	nPass  string
 	nRealm string
+
+	// Needed only if using ent backend
+	dbAddress string
+	dbDriver  string
+	dbDebug   bool
+	dbMigrate bool
 }{}
 
 var rootCmd = &cobra.Command{
@@ -54,6 +60,12 @@ var rootCmd = &cobra.Command{
 		flags.nAddr = viper.GetString("neo4j-addr")
 		flags.nRealm = viper.GetString("neo4j-realm")
 
+		// Needed only if using ent backend
+		flags.dbAddress = viper.GetString("db-address")
+		flags.dbDriver = viper.GetString("db-driver")
+		flags.dbDebug = viper.GetBool("db-debug")
+		flags.dbMigrate = viper.GetBool("db-migrate")
+
 		startServer(cmd)
 	},
 }
@@ -62,8 +74,10 @@ func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
 	set, err := cli.BuildFlags([]string{
-		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm", "gql-test-data",
-		"gql-listen-port", "gql-debug", "gql-backend"})
+		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm",
+		"gql-test-data", "gql-listen-port", "gql-debug", "gql-backend",
+		"db-address", "db-driver", "db-debug", "db-migrate",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

@@ -21,7 +21,7 @@ func TestSoftwareTreeSuite(t *testing.T) {
 }
 
 func (s *Suite) TestCreateSoftwareTree() {
-	be, err := ent.GetBackend(ent.WithEntClient(s.Client))
+	be, err := ent.GetBackend(s.Client)
 	s.NoError(err)
 
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
@@ -81,7 +81,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 }
 
 func (s *Suite) TestVersionUpsertsWithQualifiers() {
-	be, err := ent.GetBackend(ent.WithEntClient(s.Client))
+	be, err := ent.GetBackend(s.Client)
 	s.NoError(err)
 
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
