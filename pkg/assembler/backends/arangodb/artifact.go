@@ -32,7 +32,6 @@ func registerAllArtifacts(ctx context.Context, client *arangoClient) {
 }
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-
 	values := map[string]any{}
 	arangoQueryBuilder := newForQuery("artifacts", "art")
 	if artifactSpec.Algorithm != nil {
