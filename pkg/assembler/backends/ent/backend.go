@@ -161,6 +161,49 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 	return toModelBuilder(record), nil
 }
 
+func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	query := b.client.PackageNode.Query().Order(Asc(packagenode.FieldType))
+
+	if pkgSpec != nil {
+		if pkgSpec.Type != nil {
+			query.Where(packagenode.Type(*pkgSpec.Type))
+		}
+
+		if pkgSpec.Namespace != nil {
+			query.Where(packagenode.HasNamespacesWith(packagenamespace.Namespace(*pkgSpec.Namespace)))
+			query.WithNamespaces(func(q *PackageNamespaceQuery) {
+				q.Where(packagenamespace.Namespace(*pkgSpec.Namespace))
+
+				if pkgSpec.Name != nil {
+					q.WithNames(func(q *PackageNameQuery) {
+						q.Where(packagename.Name(*pkgSpec.Name))
+
+						// FIXME(ivanvanderbyl): This is incomplete, needs subpath and quals.
+						if pkgSpec.Version != nil {
+							q.WithVersions(func(q *PackageVersionQuery) {
+								q.Where(packageversion.Version(*pkgSpec.Version))
+							})
+						}
+					})
+				}
+			})
+		}
+
+		if pkgSpec.ID != nil {
+			query.Where(IDEQ(pkgSpec.ID))
+		}
+	} else {
+		query.Limit(100)
+	}
+
+	pkgs, err := query.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return collect(pkgs, toModelPackage), nil
+}
+
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := FromContext(ctx)
