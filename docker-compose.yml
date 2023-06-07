@@ -15,6 +15,16 @@ services:
   #     - "7687:7687"
   #   restart: on-failure
 
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: guac
+      POSTGRES_PASSWORD: guac
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./container_files/pg:/var/lib/postgresql/data
+
   nats:
     image: "nats:2.9.14"
     command: "--config /config/nats/js.conf -m 8222"
@@ -94,7 +104,6 @@ services:
       service-health-1:
         condition: service_completed_successfully
 
-
   guac-ingestor:
     image: "local-organic-guac"
     command: "/opt/guac/guacingest"
@@ -105,7 +114,6 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./container_files/guac:/guac
-
 
   oci-collector:
     image: "local-organic-guac"
