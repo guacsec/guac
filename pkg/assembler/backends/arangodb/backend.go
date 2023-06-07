@@ -29,16 +29,18 @@ import (
 )
 
 const (
-	namespaces    string = "namespaces"
-	names         string = namespaces + ".names"
-	versions      string = names + ".versions"
-	cvdID         string = "cveId"
-	origin        string = "origin"
-	collector     string = "collector"
-	justification string = "justification"
-	status        string = "status"
-	statement     string = "statement"
-	statusNotes   string = "statusNotes"
+	namespaces    string        = "namespaces"
+	names         string        = namespaces + ".names"
+	versions      string        = names + ".versions"
+	cvdID         string        = "cveId"
+	origin        string        = "origin"
+	collector     string        = "collector"
+	justification string        = "justification"
+	status        string        = "status"
+	statement     string        = "statement"
+	statusNotes   string        = "statusNotes"
+	maxRetires    int           = 20
+	retryTImer    time.Duration = time.Second
 )
 
 type ArangoConfig struct {
@@ -231,7 +233,7 @@ func executeQueryWithRetry(ctx context.Context, db driver.Database, query string
 	var cursor driver.Cursor
 	var err error
 
-	for retry := 0; retry < 10; retry++ {
+	for retry := 0; retry < maxRetires; retry++ {
 		cursor, err = db.Query(ctx, query, values)
 		if err == nil {
 			return cursor, nil
@@ -240,7 +242,7 @@ func executeQueryWithRetry(ctx context.Context, db driver.Database, query string
 		// Check if the error is due to a lock timeout or a temporary issue
 		//if isRetryableError(err) {
 		fmt.Printf("Retrying query (attempt %d), %v, ...\n", retry+1, err)
-		time.Sleep(time.Second)
+		time.Sleep(retryTImer)
 		continue
 		//}
 
@@ -248,7 +250,7 @@ func executeQueryWithRetry(ctx context.Context, db driver.Database, query string
 		//return nil, err
 	}
 
-	return nil, fmt.Errorf("query execution failed after %d retries", 10)
+	return nil, fmt.Errorf("query execution failed after %d retries", maxRetires)
 }
 
 // func isRetryableError(err error) bool {
