@@ -332,7 +332,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 func (c *demoClient) addCVIfMatch(out []*model.CertifyVuln,
 	filter *model.CertifyVulnSpec,
 	link *vulnerabilityLink) ([]*model.CertifyVuln, error) {
-	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.Equal(link.timeScanned) {
+	if filter != nil && filter.TimeScanned != nil && !filter.TimeScanned.Equal(link.timeScanned) {
 		return out, nil
 	}
 	if filter != nil && noMatch(filter.DbURI, link.dbURI) {
