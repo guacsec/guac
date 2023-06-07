@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -18,10 +19,13 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/pkg/errors"
+	"golang.org/x/exp/slices"
 
 	// Import regular postgres driver
 	_ "github.com/lib/pq"
 )
+
+var PathContains = slices.Contains[string]
 
 type EntBackend struct {
 	backends.Backend
@@ -164,31 +168,36 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, builder *model.BuilderIn
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	query := b.client.PackageNode.Query().Order(Asc(packagenode.FieldType))
 
+	paths := getPreloads(ctx)
+	if len(paths) > 0 {
+		log.Println("Preloading Packages", "paths", paths)
+	}
+
+	query.Where(optionalPredicate(pkgSpec.Type, packagenode.TypeEQ))
+
+	if PathContains(paths, "namespaces") {
+		query.WithNamespaces(func(q *PackageNamespaceQuery) {
+			q.Order(Asc(packagenamespace.FieldNamespace))
+			q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
+
+			if PathContains(paths, "namespaces.names") {
+				q.WithNames(func(q *PackageNameQuery) {
+					q.Order(Asc(packagename.FieldName))
+					q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
+
+					if PathContains(paths, "namespaces.names.versions") {
+						q.WithVersions(func(q *PackageVersionQuery) {
+							q.Order(Asc(packageversion.FieldVersion))
+							q.Where(optionalPredicate(pkgSpec.Version, packageversion.VersionEQ))
+						})
+					}
+				})
+			}
+		})
+	}
+
+	// FIXME: (ivanvanderbyl) This could be much more compact and use a single query as above.
 	if pkgSpec != nil {
-		if pkgSpec.Type != nil {
-			query.Where(packagenode.Type(*pkgSpec.Type))
-		}
-
-		if pkgSpec.Namespace != nil {
-			query.Where(packagenode.HasNamespacesWith(packagenamespace.Namespace(*pkgSpec.Namespace)))
-			query.WithNamespaces(func(q *PackageNamespaceQuery) {
-				q.Where(packagenamespace.Namespace(*pkgSpec.Namespace))
-
-				if pkgSpec.Name != nil {
-					q.WithNames(func(q *PackageNameQuery) {
-						q.Where(packagename.Name(*pkgSpec.Name))
-
-						// FIXME(ivanvanderbyl): This is incomplete, needs subpath and quals.
-						if pkgSpec.Version != nil {
-							q.WithVersions(func(q *PackageVersionQuery) {
-								q.Where(packageversion.Version(*pkgSpec.Version))
-							})
-						}
-					})
-				}
-			})
-		}
-
 		if pkgSpec.ID != nil {
 			query.Where(IDEQ(pkgSpec.ID))
 		}
@@ -267,4 +276,16 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 	}
 
 	return toModelPackage(record), nil
+}
+
+type Predicate interface {
+	~func(*entsql.Selector)
+}
+
+func optionalPredicate[P Predicate](value *string, fn func(s string) P) P {
+	if value == nil {
+		return func(*entsql.Selector) {}
+	}
+
+	return fn(*value)
 }
