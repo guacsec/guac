@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -248,4 +249,391 @@ func generateModelPackage(pkgType, namespaceStr, nameStr string, versionValue, s
 		Namespaces: []*model.PackageNamespace{namespace},
 	}
 	return &pkg
+}
+
+func getQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string {
+	qualifiersMap := map[string]string{}
+	keys := []string{}
+	for _, kv := range qualifiersSpec {
+		key := removeInvalidCharFromProperty(kv.Key)
+		qualifiersMap[key] = *kv.Value
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	qualifiers := []string{}
+	for _, k := range keys {
+		qualifiers = append(qualifiers, k, qualifiersMap[k])
+	}
+	return qualifiers
+}
+
+func removeInvalidCharFromProperty(key string) string {
+	// neo4j does not accept "." in its properties. If the qualifier contains a "." that must
+	// be replaced by an "-"
+	return strings.ReplaceAll(key, ".", "_")
+}
+
+func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
+	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
+	// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
+	fields := getPreloads(ctx)
+
+	nameRequired := false
+	namespaceRequired := false
+	versionRequired := false
+	for _, f := range fields {
+		if f == namespaces {
+			namespaceRequired = true
+		}
+		if f == names {
+			nameRequired = true
+		}
+		if f == versions {
+			versionRequired = true
+		}
+	}
+
+	if !namespaceRequired && !nameRequired && !versionRequired {
+		return c.packagesType(ctx, pkgSpec)
+	} else if namespaceRequired && !nameRequired && !versionRequired {
+		return c.packagesNamespace(ctx, pkgSpec)
+	} else if nameRequired && !versionRequired {
+		return c.packagesName(ctx, pkgSpec)
+	}
+
+	values := map[string]any{}
+
+	arangoQueryBuilder := newForQuery("Pkg", "pkg")
+	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
+	if pkgSpec.Type != nil {
+		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+		values["pkgType"] = *pkgSpec.Type
+	}
+	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pkgHasNamespace", "pkgHasType")
+	if pkgSpec.Namespace != nil {
+		arangoQueryBuilder.filter("namespace", "pkgHasNamespace", "==", "@namespace")
+		values["namespace"] = *pkgSpec.Namespace
+	}
+	arangoQueryBuilder.ForOutBound("PkgHasName", "pkgHasName", "pkgHasNamespace")
+	if pkgSpec.Name != nil {
+		arangoQueryBuilder.filter("name", "pkgHasName", "==", "@name")
+		values["name"] = *pkgSpec.Name
+	}
+	arangoQueryBuilder.ForOutBound("PkgHasVersion", "pkgHasVersion", "pkgHasName")
+	if pkgSpec.Version != nil {
+		arangoQueryBuilder.filter("version", "pkgHasVersion", "==", "@version")
+		values["version"] = *pkgSpec.Version
+	}
+	if pkgSpec.Subpath != nil {
+		arangoQueryBuilder.filter("subpath", "pkgHasVersion", "==", "@subpath")
+		values["subpath"] = *pkgSpec.Subpath
+	}
+	if pkgSpec.Qualifiers != nil {
+		arangoQueryBuilder.filter("qualifier_list", "pkgHasVersion", "==", "@qualifier")
+		values["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type": pkgHasType.type,
+		"namespace": pkgHasNamespace.namespace,
+		"name": pkgHasName.name,
+		"version": pkgHasVersion.version,
+		"subpath": pkgHasVersion.subpath,
+		"qualifier_list": pkgHasVersion.qualifier_list
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type collectedData struct {
+		PkgType       string        `json:"type"`
+		Namespace     string        `json:"namespace"`
+		Name          string        `json:"name"`
+		Version       string        `json:"version"`
+		Subpath       string        `json:"subpath"`
+		QualifierList []interface{} `json:"qualifier_list"`
+	}
+
+	pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+			}
+		} else {
+			var pkgQualifiers []*model.PackageQualifier
+			if doc.QualifierList != nil {
+				pkgQualifiers = getCollectedPackageQualifiers(doc.QualifierList)
+			}
+
+			subPathString := doc.Subpath
+			versionString := doc.Version
+			nameString := doc.Name
+			namespaceString := doc.Namespace
+			typeString := doc.PkgType
+
+			pkgVersion := &model.PackageVersion{
+				Version:    versionString,
+				Subpath:    subPathString,
+				Qualifiers: pkgQualifiers,
+			}
+
+			if pkgNamespaces, ok := pkgTypes[typeString]; ok {
+				if pkgNames, ok := pkgNamespaces[namespaceString]; ok {
+					pkgNames[nameString] = append(pkgNames[nameString], pkgVersion)
+				} else {
+					pkgNames := map[string][]*model.PackageVersion{}
+					pkgNames[nameString] = append(pkgNames[nameString], pkgVersion)
+					pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
+					pkgNamespaces[namespaceString] = pkgNames
+					pkgTypes[typeString] = pkgNamespaces
+				}
+			} else {
+				pkgNames := map[string][]*model.PackageVersion{}
+				pkgNames[nameString] = append(pkgNames[nameString], pkgVersion)
+				pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
+				pkgNamespaces[namespaceString] = pkgNames
+				pkgTypes[typeString] = pkgNamespaces
+			}
+		}
+	}
+	var packages []*model.Package
+	for pkgType, pkgNamespaces := range pkgTypes {
+		collectedPkgNamespaces := []*model.PackageNamespace{}
+		for namespace, pkgNames := range pkgNamespaces {
+			collectedPkgNames := []*model.PackageName{}
+			for name, versions := range pkgNames {
+				pkgName := &model.PackageName{
+					Name:     name,
+					Versions: versions,
+				}
+				collectedPkgNames = append(collectedPkgNames, pkgName)
+			}
+			pkgNamespace := &model.PackageNamespace{
+				Namespace: namespace,
+				Names:     collectedPkgNames,
+			}
+			collectedPkgNamespaces = append(collectedPkgNamespaces, pkgNamespace)
+		}
+		collectedPackage := &model.Package{
+			Type:       pkgType,
+			Namespaces: collectedPkgNamespaces,
+		}
+		packages = append(packages, collectedPackage)
+	}
+	return packages, nil
+}
+
+func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+
+	values := map[string]any{}
+
+	arangoQueryBuilder := newForQuery("Pkg", "pkg")
+	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
+	if pkgSpec.Type != nil {
+		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+		values["pkgType"] = *pkgSpec.Type
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type": pkgHasType.type
+	}`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type collectedData struct {
+		PkgType string `json:"type"`
+	}
+
+	var packages []*model.Package
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+			}
+		} else {
+			collectedPackage := &model.Package{
+				Type:       doc.PkgType,
+				Namespaces: []*model.PackageNamespace{},
+			}
+			packages = append(packages, collectedPackage)
+		}
+	}
+
+	return packages, nil
+}
+
+func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	values := map[string]any{}
+
+	arangoQueryBuilder := newForQuery("Pkg", "pkg")
+	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
+	if pkgSpec.Type != nil {
+		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+		values["pkgType"] = *pkgSpec.Type
+	}
+	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pkgHasNamespace", "pkgHasType")
+	if pkgSpec.Namespace != nil {
+		arangoQueryBuilder.filter("namespace", "pkgHasNamespace", "==", "@namespace")
+		values["namespace"] = *pkgSpec.Namespace
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type": pkgHasType.type,
+		"namespace": pkgHasNamespace.namespace
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type collectedData struct {
+		PkgType   string `json:"type"`
+		Namespace string `json:"namespace"`
+	}
+
+	pkgTypes := map[string][]*model.PackageNamespace{}
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+			}
+		} else {
+			namespaceString := doc.Namespace
+			typeString := doc.PkgType
+
+			pkgNamespace := &model.PackageNamespace{
+				Namespace: namespaceString,
+				Names:     []*model.PackageName{},
+			}
+			pkgTypes[typeString] = append(pkgTypes[typeString], pkgNamespace)
+		}
+	}
+	packages := []*model.Package{}
+	for pkgType, namespaces := range pkgTypes {
+		collectedPackage := &model.Package{
+			Type:       pkgType,
+			Namespaces: namespaces,
+		}
+		packages = append(packages, collectedPackage)
+	}
+
+	return packages, nil
+}
+
+func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
+	values := map[string]any{}
+
+	arangoQueryBuilder := newForQuery("Pkg", "pkg")
+	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
+	if pkgSpec.Type != nil {
+		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+		values["pkgType"] = *pkgSpec.Type
+	}
+	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pkgHasNamespace", "pkgHasType")
+	if pkgSpec.Namespace != nil {
+		arangoQueryBuilder.filter("namespace", "pkgHasNamespace", "==", "@namespace")
+		values["namespace"] = *pkgSpec.Namespace
+	}
+	arangoQueryBuilder.ForOutBound("PkgHasName", "pkgHasName", "pkgHasNamespace")
+	if pkgSpec.Name != nil {
+		arangoQueryBuilder.filter("name", "pkgHasName", "==", "@name")
+		values["name"] = *pkgSpec.Name
+	}
+	arangoQueryBuilder.query.WriteString("\n")
+	arangoQueryBuilder.query.WriteString(`RETURN {
+		"type": pkgHasType.type,
+		"namespace": pkgHasNamespace.namespace,
+		"name": pkgHasName.name
+	  }`)
+
+	fmt.Println(arangoQueryBuilder.string())
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+	}
+	defer cursor.Close()
+
+	type collectedData struct {
+		PkgType   string `json:"type"`
+		Namespace string `json:"namespace"`
+		Name      string `json:"name"`
+	}
+
+	pkgTypes := map[string]map[string][]*model.PackageName{}
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+			}
+		} else {
+			nameString := doc.Name
+			namespaceString := doc.Namespace
+			typeString := doc.PkgType
+
+			pkgName := &model.PackageName{
+				Name:     nameString,
+				Versions: []*model.PackageVersion{},
+			}
+
+			if pkgNamespace, ok := pkgTypes[typeString]; ok {
+				pkgNamespace[namespaceString] = append(pkgNamespace[namespaceString], pkgName)
+			} else {
+				pkgNamespaces := map[string][]*model.PackageName{}
+				pkgNamespaces[namespaceString] = append(pkgNamespaces[namespaceString], pkgName)
+				pkgTypes[typeString] = pkgNamespaces
+			}
+		}
+	}
+	packages := []*model.Package{}
+	for pkgType, pkgNamespaces := range pkgTypes {
+		collectedPkgNamespaces := []*model.PackageNamespace{}
+		for namespace, pkgNames := range pkgNamespaces {
+			pkgNamespace := &model.PackageNamespace{
+				Namespace: namespace,
+				Names:     pkgNames,
+			}
+			collectedPkgNamespaces = append(collectedPkgNamespaces, pkgNamespace)
+		}
+		collectedPackage := &model.Package{
+			Type:       pkgType,
+			Namespaces: collectedPkgNamespaces,
+		}
+		packages = append(packages, collectedPackage)
+	}
+
+	return packages, nil
 }
