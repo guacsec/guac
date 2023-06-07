@@ -196,7 +196,7 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 func (c *demoClient) addSCIfMatch(out []*model.CertifyScorecard,
 	filter *model.CertifyScorecardSpec, link *scorecardLink) (
 	[]*model.CertifyScorecard, error) {
-	if filter != nil && filter.TimeScanned != nil && filter.TimeScanned.UTC() != link.timeScanned {
+	if filter != nil && filter.TimeScanned != nil && !filter.TimeScanned.Equal(link.timeScanned) {
 		return out, nil
 	}
 	if filter != nil && noMatchFloat(filter.AggregateScore, link.aggregateScore) {
