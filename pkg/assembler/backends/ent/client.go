@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
@@ -31,6 +32,8 @@ type Client struct {
 	Artifact *ArtifactClient
 	// BuilderNode is the client for interacting with the BuilderNode builders.
 	BuilderNode *BuilderNodeClient
+	// IsOccurrence is the client for interacting with the IsOccurrence builders.
+	IsOccurrence *IsOccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
 	PackageName *PackageNameClient
 	// PackageNamespace is the client for interacting with the PackageNamespace builders.
@@ -54,6 +57,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Artifact = NewArtifactClient(c.config)
 	c.BuilderNode = NewBuilderNodeClient(c.config)
+	c.IsOccurrence = NewIsOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
 	c.PackageNode = NewPackageNodeClient(c.config)
@@ -142,6 +146,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
+		IsOccurrence:     NewIsOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageNode:      NewPackageNodeClient(cfg),
@@ -167,6 +172,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
+		IsOccurrence:     NewIsOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageNode:      NewPackageNodeClient(cfg),
@@ -200,8 +206,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BuilderNode, c.PackageName, c.PackageNamespace, c.PackageNode,
-		c.PackageVersion,
+		c.Artifact, c.BuilderNode, c.IsOccurrence, c.PackageName, c.PackageNamespace,
+		c.PackageNode, c.PackageVersion,
 	} {
 		n.Use(hooks...)
 	}
@@ -211,8 +217,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BuilderNode, c.PackageName, c.PackageNamespace, c.PackageNode,
-		c.PackageVersion,
+		c.Artifact, c.BuilderNode, c.IsOccurrence, c.PackageName, c.PackageNamespace,
+		c.PackageNode, c.PackageVersion,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -225,6 +231,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Artifact.mutate(ctx, m)
 	case *BuilderNodeMutation:
 		return c.BuilderNode.mutate(ctx, m)
+	case *IsOccurrenceMutation:
+		return c.IsOccurrence.mutate(ctx, m)
 	case *PackageNameMutation:
 		return c.PackageName.mutate(ctx, m)
 	case *PackageNamespaceMutation:
@@ -471,6 +479,156 @@ func (c *BuilderNodeClient) mutate(ctx context.Context, m *BuilderNodeMutation) 
 		return (&BuilderNodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown BuilderNode mutation op: %q", m.Op())
+	}
+}
+
+// IsOccurrenceClient is a client for the IsOccurrence schema.
+type IsOccurrenceClient struct {
+	config
+}
+
+// NewIsOccurrenceClient returns a client for the IsOccurrence from the given config.
+func NewIsOccurrenceClient(c config) *IsOccurrenceClient {
+	return &IsOccurrenceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `isoccurrence.Hooks(f(g(h())))`.
+func (c *IsOccurrenceClient) Use(hooks ...Hook) {
+	c.hooks.IsOccurrence = append(c.hooks.IsOccurrence, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `isoccurrence.Intercept(f(g(h())))`.
+func (c *IsOccurrenceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.IsOccurrence = append(c.inters.IsOccurrence, interceptors...)
+}
+
+// Create returns a builder for creating a IsOccurrence entity.
+func (c *IsOccurrenceClient) Create() *IsOccurrenceCreate {
+	mutation := newIsOccurrenceMutation(c.config, OpCreate)
+	return &IsOccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of IsOccurrence entities.
+func (c *IsOccurrenceClient) CreateBulk(builders ...*IsOccurrenceCreate) *IsOccurrenceCreateBulk {
+	return &IsOccurrenceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for IsOccurrence.
+func (c *IsOccurrenceClient) Update() *IsOccurrenceUpdate {
+	mutation := newIsOccurrenceMutation(c.config, OpUpdate)
+	return &IsOccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *IsOccurrenceClient) UpdateOne(io *IsOccurrence) *IsOccurrenceUpdateOne {
+	mutation := newIsOccurrenceMutation(c.config, OpUpdateOne, withIsOccurrence(io))
+	return &IsOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *IsOccurrenceClient) UpdateOneID(id int) *IsOccurrenceUpdateOne {
+	mutation := newIsOccurrenceMutation(c.config, OpUpdateOne, withIsOccurrenceID(id))
+	return &IsOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for IsOccurrence.
+func (c *IsOccurrenceClient) Delete() *IsOccurrenceDelete {
+	mutation := newIsOccurrenceMutation(c.config, OpDelete)
+	return &IsOccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *IsOccurrenceClient) DeleteOne(io *IsOccurrence) *IsOccurrenceDeleteOne {
+	return c.DeleteOneID(io.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *IsOccurrenceClient) DeleteOneID(id int) *IsOccurrenceDeleteOne {
+	builder := c.Delete().Where(isoccurrence.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &IsOccurrenceDeleteOne{builder}
+}
+
+// Query returns a query builder for IsOccurrence.
+func (c *IsOccurrenceClient) Query() *IsOccurrenceQuery {
+	return &IsOccurrenceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeIsOccurrence},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a IsOccurrence entity by its id.
+func (c *IsOccurrenceClient) Get(ctx context.Context, id int) (*IsOccurrence, error) {
+	return c.Query().Where(isoccurrence.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *IsOccurrenceClient) GetX(ctx context.Context, id int) *IsOccurrence {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPackage queries the package edge of a IsOccurrence.
+func (c *IsOccurrenceClient) QueryPackage(io *IsOccurrence) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := io.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(isoccurrence.Table, isoccurrence.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.PackageTable, isoccurrence.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(io.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArtifact queries the artifact edge of a IsOccurrence.
+func (c *IsOccurrenceClient) QueryArtifact(io *IsOccurrence) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := io.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(isoccurrence.Table, isoccurrence.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.ArtifactTable, isoccurrence.ArtifactColumn),
+		)
+		fromV = sqlgraph.Neighbors(io.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *IsOccurrenceClient) Hooks() []Hook {
+	return c.hooks.IsOccurrence
+}
+
+// Interceptors returns the client interceptors.
+func (c *IsOccurrenceClient) Interceptors() []Interceptor {
+	return c.inters.IsOccurrence
+}
+
+func (c *IsOccurrenceClient) mutate(ctx context.Context, m *IsOccurrenceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&IsOccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&IsOccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&IsOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&IsOccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown IsOccurrence mutation op: %q", m.Op())
 	}
 }
 
@@ -1045,11 +1203,11 @@ func (c *PackageVersionClient) mutate(ctx context.Context, m *PackageVersionMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BuilderNode, PackageName, PackageNamespace, PackageNode,
+		Artifact, BuilderNode, IsOccurrence, PackageName, PackageNamespace, PackageNode,
 		PackageVersion []ent.Hook
 	}
 	inters struct {
-		Artifact, BuilderNode, PackageName, PackageNamespace, PackageNode,
+		Artifact, BuilderNode, IsOccurrence, PackageName, PackageNamespace, PackageNode,
 		PackageVersion []ent.Interceptor
 	}
 )

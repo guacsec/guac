@@ -12,6 +12,9 @@ type Artifact func(*sql.Selector)
 // BuilderNode is the predicate function for buildernode builders.
 type BuilderNode func(*sql.Selector)
 
+// IsOccurrence is the predicate function for isoccurrence builders.
+type IsOccurrence func(*sql.Selector)
+
 // PackageName is the predicate function for packagename builders.
 type PackageName func(*sql.Selector)
 

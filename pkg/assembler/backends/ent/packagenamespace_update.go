@@ -122,11 +122,6 @@ func (pnu *PackageNamespaceUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pnu *PackageNamespaceUpdate) check() error {
-	if v, ok := pnu.mutation.Namespace(); ok {
-		if err := packagenamespace.NamespaceValidator(v); err != nil {
-			return &ValidationError{Name: "namespace", err: fmt.Errorf(`ent: validator failed for field "PackageNamespace.namespace": %w`, err)}
-		}
-	}
 	if _, ok := pnu.mutation.PackageID(); pnu.mutation.PackageCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "PackageNamespace.package"`)
 	}
@@ -348,11 +343,6 @@ func (pnuo *PackageNamespaceUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pnuo *PackageNamespaceUpdateOne) check() error {
-	if v, ok := pnuo.mutation.Namespace(); ok {
-		if err := packagenamespace.NamespaceValidator(v); err != nil {
-			return &ValidationError{Name: "namespace", err: fmt.Errorf(`ent: validator failed for field "PackageNamespace.namespace": %w`, err)}
-		}
-	}
 	if _, ok := pnuo.mutation.PackageID(); pnuo.mutation.PackageCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "PackageNamespace.package"`)
 	}

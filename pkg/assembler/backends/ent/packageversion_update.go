@@ -97,11 +97,6 @@ func (pvu *PackageVersionUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pvu *PackageVersionUpdate) check() error {
-	if v, ok := pvu.mutation.Version(); ok {
-		if err := packageversion.VersionValidator(v); err != nil {
-			return &ValidationError{Name: "version", err: fmt.Errorf(`ent: validator failed for field "PackageVersion.version": %w`, err)}
-		}
-	}
 	if _, ok := pvu.mutation.NameID(); pvu.mutation.NameCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "PackageVersion.name"`)
 	}
@@ -260,11 +255,6 @@ func (pvuo *PackageVersionUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pvuo *PackageVersionUpdateOne) check() error {
-	if v, ok := pvuo.mutation.Version(); ok {
-		if err := packageversion.VersionValidator(v); err != nil {
-			return &ValidationError{Name: "version", err: fmt.Errorf(`ent: validator failed for field "PackageVersion.version": %w`, err)}
-		}
-	}
 	if _, ok := pvuo.mutation.NameID(); pvuo.mutation.NameCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "PackageVersion.name"`)
 	}

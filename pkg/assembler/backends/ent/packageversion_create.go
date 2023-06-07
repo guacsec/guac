@@ -91,11 +91,6 @@ func (pvc *PackageVersionCreate) check() error {
 	if _, ok := pvc.mutation.Version(); !ok {
 		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "PackageVersion.version"`)}
 	}
-	if v, ok := pvc.mutation.Version(); ok {
-		if err := packageversion.VersionValidator(v); err != nil {
-			return &ValidationError{Name: "version", err: fmt.Errorf(`ent: validator failed for field "PackageVersion.version": %w`, err)}
-		}
-	}
 	if _, ok := pvc.mutation.Subpath(); !ok {
 		return &ValidationError{Name: "subpath", err: errors.New(`ent: missing required field "PackageVersion.subpath"`)}
 	}

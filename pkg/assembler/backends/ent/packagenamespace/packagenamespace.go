@@ -55,11 +55,6 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-var (
-	// NamespaceValidator is a validator for the "namespace" field. It is called by the builders before save.
-	NamespaceValidator func(string) error
-)
-
 // OrderOption defines the ordering options for the PackageNamespace queries.
 type OrderOption func(*sql.Selector)
 

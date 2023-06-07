@@ -16,7 +16,7 @@ type PackageVersion struct {
 func (PackageVersion) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("name_id"),
-		field.String("version").NotEmpty(),
+		field.String("version"),
 		field.String("subpath"),
 		field.String("qualifiers"),
 	}

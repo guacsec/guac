@@ -19,6 +19,13 @@ var (
 		Name:       "artifacts",
 		Columns:    ArtifactsColumns,
 		PrimaryKey: []*schema.Column{ArtifactsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "artifact_algorithm_digest",
+				Unique:  true,
+				Columns: []*schema.Column{ArtifactsColumns[1], ArtifactsColumns[2]},
+			},
+		},
 	}
 	// BuilderNodesColumns holds the columns for the "builder_nodes" table.
 	BuilderNodesColumns = []*schema.Column{
@@ -30,6 +37,50 @@ var (
 		Name:       "builder_nodes",
 		Columns:    BuilderNodesColumns,
 		PrimaryKey: []*schema.Column{BuilderNodesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "buildernode_uri",
+				Unique:  true,
+				Columns: []*schema.Column{BuilderNodesColumns[1]},
+			},
+		},
+	}
+	// IsOccurrencesColumns holds the columns for the "is_occurrences" table.
+	IsOccurrencesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "source_id", Type: field.TypeInt, Nullable: true},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeInt, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeInt},
+	}
+	// IsOccurrencesTable holds the schema information for the "is_occurrences" table.
+	IsOccurrencesTable = &schema.Table{
+		Name:       "is_occurrences",
+		Columns:    IsOccurrencesColumns,
+		PrimaryKey: []*schema.Column{IsOccurrencesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "is_occurrences_package_versions_package",
+				Columns:    []*schema.Column{IsOccurrencesColumns[5]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "is_occurrences_artifacts_artifact",
+				Columns:    []*schema.Column{IsOccurrencesColumns[6]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "isoccurrence_justification_origin_collector_package_id_artifact_id",
+				Unique:  true,
+				Columns: []*schema.Column{IsOccurrencesColumns[2], IsOccurrencesColumns[3], IsOccurrencesColumns[4], IsOccurrencesColumns[5], IsOccurrencesColumns[6]},
+			},
+		},
 	}
 	// PackageNamesColumns holds the columns for the "package_names" table.
 	PackageNamesColumns = []*schema.Column{
@@ -129,6 +180,7 @@ var (
 	Tables = []*schema.Table{
 		ArtifactsTable,
 		BuilderNodesTable,
+		IsOccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
 		PackageNodesTable,
@@ -137,6 +189,8 @@ var (
 )
 
 func init() {
+	IsOccurrencesTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	IsOccurrencesTable.ForeignKeys[1].RefTable = ArtifactsTable
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageNodesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable

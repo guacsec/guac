@@ -52,11 +52,6 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-var (
-	// VersionValidator is a validator for the "version" field. It is called by the builders before save.
-	VersionValidator func(string) error
-)
-
 // OrderOption defines the ordering options for the PackageVersion queries.
 type OrderOption func(*sql.Selector)
 

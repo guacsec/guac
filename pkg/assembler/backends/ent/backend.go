@@ -19,6 +19,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"golang.org/x/exp/slices"
 
 	// Import regular postgres driver
@@ -113,19 +114,35 @@ func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 	return collect(artifacts, toModelArtifact), nil
 }
 
-func (b *EntBackend) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
-	art, err := WithinTX(ctx, b.client, func(ctx context.Context) (*Artifact, error) {
+func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInputSpec) (*model.Artifact, error) {
+	funcName := "IngestArtifact"
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := FromContext(ctx)
-		// TODO: Use upsert here
-		return client.Artifact.Create().
-			SetAlgorithm(artifact.Algorithm).
-			SetDigest(artifact.Digest).
-			Save(ctx)
+		id, err := client.Artifact.Create().
+			SetAlgorithm(art.Algorithm).
+			SetDigest(art.Digest).
+			OnConflict(
+				entsql.ConflictColumns(
+					artifact.FieldAlgorithm,
+					artifact.FieldDigest,
+				),
+			).
+			UpdateNewValues().ID(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return &id, nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return toModelArtifact(art), nil
+	record, err := b.client.Artifact.Query().
+		Where(artifact.ID(*recordID)).
+		Only(ctx)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	return toModelArtifact(record), nil
 }
 
 func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
@@ -151,16 +168,32 @@ func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 	return collect(builders, toModelBuilder), nil
 }
 
-func (b *EntBackend) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*BuilderNode, error) {
+func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.BuilderInputSpec) (*model.Builder, error) {
+	funcName := "IngestBuilder"
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := FromContext(ctx)
-		// TODO: Use upsert here
-		return client.BuilderNode.Create().
-			SetURI(builder.URI).
-			Save(ctx)
+
+		id, err := client.BuilderNode.Create().
+			SetURI(build.URI).
+			OnConflict(
+				entsql.ConflictColumns(
+					buildernode.FieldURI,
+				),
+			).
+			UpdateNewValues().ID(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return &id, nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	record, err := b.client.BuilderNode.Query().
+		Where(buildernode.ID(*recordID)).
+		Only(ctx)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 	return toModelBuilder(record), nil
 }
@@ -235,6 +268,10 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 			return nil, errors.Wrap(err, "upsert package name")
 		}
 
+		if pkg.Version == nil {
+			empty := ""
+			pkg.Version = &empty
+		}
 		_, err = client.PackageVersion.Create().
 			SetNameID(nameID).
 			SetVersion(*pkg.Version).

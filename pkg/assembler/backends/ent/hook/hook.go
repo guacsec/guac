@@ -33,6 +33,18 @@ func (f BuilderNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BuilderNodeMutation", m)
 }
 
+// The IsOccurrenceFunc type is an adapter to allow the use of ordinary
+// function as IsOccurrence mutator.
+type IsOccurrenceFunc func(context.Context, *ent.IsOccurrenceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IsOccurrenceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.IsOccurrenceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IsOccurrenceMutation", m)
+}
+
 // The PackageNameFunc type is an adapter to allow the use of ordinary
 // function as PackageName mutator.
 type PackageNameFunc func(context.Context, *ent.PackageNameMutation) (ent.Value, error)
