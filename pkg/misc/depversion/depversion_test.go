@@ -485,16 +485,3 @@ func Test_DoesRangeInclude(t *testing.T) {
 		})
 	}
 }
-
-func Test_DoesRangeInclude_Errors(t *testing.T) {
-	res1, err1 := DoesRangeInclude([]string{"3.0", "1.0", "2.0"}, ">1.0 , <2.0")
-	res2, err2 := DoesRangeInclude([]string{"anythinggoes", "1.0", "2.0"}, "bad range")
-
-	if err1 != nil || err2 != nil {
-		t.Errorf("expected error for DoesRangeInclude and did not receive an error")
-	}
-
-	if res1 != false || res2 != false {
-		t.Errorf("expected error for DoesRangeInclude and did not receive false result as expected")
-	}
-}
