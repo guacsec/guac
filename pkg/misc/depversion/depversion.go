@@ -116,7 +116,7 @@ func ParseVersionValue(s string) VersionValue {
 	return vv
 }
 
-// formatting issues are handled in WhichVersionMatched, error not expected to be thrown
+// formatting issues are handled in WhichVersionMatches, error not expected to be thrown
 func DoesRangeInclude(versions []string, versionRange string) (bool, error) {
 	versionMap, err := WhichVersionMatches(versions, versionRange)
 
