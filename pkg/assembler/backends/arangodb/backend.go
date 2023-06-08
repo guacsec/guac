@@ -201,7 +201,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hashEquals", []string{"origin"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "hashEquals", []string{"artifactID", "equalArtifactID"}, true); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
 		}
 
@@ -252,7 +252,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for PkgHasVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"versionRange"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID"}, true); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
@@ -260,7 +260,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for isDependencyEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"origin"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID"}, true); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
@@ -642,7 +642,7 @@ func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInpu
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 func (c *arangoClient) CertifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
-	panic(fmt.Errorf("not implemented: CertifyScorecard - CertifyScorecard"))
+	return &model.CertifyScorecard{}, nil
 }
 func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyBad - IngestCertifyBad"))

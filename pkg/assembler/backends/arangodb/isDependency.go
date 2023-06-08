@@ -115,8 +115,8 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	  )
 	  
 	  LET isDependency = FIRST(
-		  UPSERT { versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
-			  INSERT { versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
+			  INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:@versionRange, dependencyType:@dependencyType, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isDependencies
 			  RETURN NEW
 	  )

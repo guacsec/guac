@@ -113,8 +113,8 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 	  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 	  
 	  LET isOccurrence = FIRST(
-		  UPSERT { justification:@justification, collector:@collector, origin:@origin } 
-			  INSERT { justification:@justification, collector:@collector, origin:@origin } 
+		  UPSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+			  INSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isOccurrences
 			  RETURN NEW
 	  )
