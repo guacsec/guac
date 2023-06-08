@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 
 services:
   # Neo4j is turned down for now since we are currently only using the in memory backend
@@ -20,12 +20,15 @@ services:
     environment:
       POSTGRES_USER: guac
       POSTGRES_PASSWORD: guac
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks: [frontend]
     ports:
       - "5432:5432"
     volumes:
       - ./container_files/pg:/var/lib/postgresql/data
 
   nats:
+    networks: [frontend]
     image: "nats:2.9.14"
     command: "--config /config/nats/js.conf -m 8222"
     ports:
@@ -45,6 +48,7 @@ services:
   # it doesn't have utilities within it to perform the check from the container
   # itself.
   service-health-1:
+    networks: [frontend]
     image: "local-healthcheck"
     stdin_open: true
     tty: true
@@ -60,6 +64,7 @@ services:
         # echo "neo4j-up";
 
   guac-collectsub:
+    networks: [frontend]
     image: "local-organic-guac"
     command: "/opt/guac/guaccsub"
     working_dir: /guac
@@ -73,6 +78,7 @@ services:
       - ./container_files/guac:/guac
 
   guac-graphql:
+    networks: [frontend]
     image: "local-organic-guac"
     command: "/opt/guac/guacgql"
     working_dir: /guac
@@ -87,6 +93,7 @@ services:
 
   # GUAC ingestor and oci collector are dependent on the collectsub service to be up
   service-health-2:
+    networks: [frontend]
     image: "local-healthcheck"
     stdin_open: true
     tty: true
@@ -105,6 +112,7 @@ services:
         condition: service_completed_successfully
 
   guac-ingestor:
+    networks: [frontend]
     image: "local-organic-guac"
     command: "/opt/guac/guacingest"
     working_dir: /guac
@@ -116,6 +124,7 @@ services:
       - ./container_files/guac:/guac
 
   oci-collector:
+    networks: [frontend]
     image: "local-organic-guac"
     command: "/opt/guac/guaccollect image"
     working_dir: /guac
@@ -126,6 +135,7 @@ services:
     volumes:
       - ./container_files/guac:/guac
   depsdev-collector:
+    networks: [frontend]
     image: "local-organic-guac"
     command: "/opt/guac/guaccollect deps_dev"
     working_dir: /guac
@@ -138,6 +148,7 @@ services:
     volumes:
       - ./container_files/guac:/guac
   osv-certifier:
+    networks: [frontend]
     image: "local-organic-guac"
     command: "/opt/guac/guacone certifier osv"
     working_dir: /guac
@@ -147,3 +158,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./container_files/guac:/guac
+
+networks:
+  frontend:
+    driver: bridge
