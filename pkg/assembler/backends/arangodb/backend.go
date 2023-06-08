@@ -192,6 +192,89 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		if err != nil {
 			return nil, fmt.Errorf("failed to create graph: %w", err)
 		}
+
+		// add indexes to artifact and edge collections
+		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"digest"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
+		}
+		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"algorithm", "digest"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "hashEquals", []string{"origin"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "hashEqualsEdges", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgType", []string{"type"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgType: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgHasType", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgHasType: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"namespace"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgNamespace: %w", err)
+		}
+		if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgHasName", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgHasName: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"subpath"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"qualifier_list[*]"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version", "subpath", "qualifier_list[*]"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgHasVersion", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgHasVersion: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"versionRange"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "isDependencyEdges", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isDependencyEdges: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"origin"}, false); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "isOccurrencesEdges", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isOccurrencesEdges: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "hasSBOMs", []string{"digest"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hasSBOMs: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "hasSBOMEdges", []string{"_from", "_to"}, true); err != nil {
+			return nil, fmt.Errorf("failed to generate index for hasSBOMEdges: %w", err)
+		}
 	}
 
 	arangoClient := &arangoClient{arangodbClient, db, graph}
@@ -227,6 +310,19 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	// }
 
 	return arangoClient, nil
+}
+
+func createIndexPerCollection(ctx context.Context, db driver.Database, collection string, fields []string, unique bool) error {
+	databaseCollection, err := db.Collection(ctx, collection)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = databaseCollection.EnsurePersistentIndex(ctx, fields, &driver.EnsurePersistentIndexOptions{Unique: unique, CacheEnabled: true})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func executeQueryWithRetry(ctx context.Context, db driver.Database, query string, values map[string]any) (driver.Cursor, error) {
