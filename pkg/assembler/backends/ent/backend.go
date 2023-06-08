@@ -47,6 +47,12 @@ func SetupBackend(ctx context.Context, options BackendOptions) (*Client, error) 
 	if options.DriverName != "" {
 		driver = options.DriverName
 	}
+
+	if driver != dialect.Postgres {
+		// TODO: Passively omport preferred driver packages for MySQL and Sqlite
+		return nil, fmt.Errorf("only postgres is supported at this time")
+	}
+
 	db, err := sql.Open(driver, options.Address)
 	if err != nil {
 		return nil, fmt.Errorf("Error opening db: %w", err)
@@ -58,6 +64,7 @@ func SetupBackend(ctx context.Context, options BackendOptions) (*Client, error) 
 		// Run db migrations
 		err = client.Schema.Create(
 			ctx,
+			migrate.WithGlobalUniqueID(true),
 			migrate.WithDropIndex(true),
 			migrate.WithDropColumn(true),
 		)
