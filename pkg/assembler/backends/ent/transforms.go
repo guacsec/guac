@@ -104,3 +104,31 @@ func qualifiersToString(qualifiers []*model.PackageQualifierInputSpec) string {
 
 	return qs.Encode()
 }
+
+func toModelIsOccurrence(o *IsOccurrence) *model.IsOccurrence {
+	var sub model.PackageOrSource
+	if o.Edges.Package != nil { // ?? how do we do this?
+
+		// pkg, err := o.Edges.Package.QueryName().QueryNamespace().QueryPackage().Only(ctx)
+
+		// if pkg, err := o.Edges.PackageOrErr(); err == nil {
+		// 	if name, err := pkg.Edges.NameOrErr(); err == nil {
+		// 		if versions, err := name.Edges.VersionsOrErr(); err == nil && len(versions) == 1 {
+		// 			sub = toModelPackage(versions[0])
+		// 		}
+		// 	}
+		// }
+
+	}
+	// if o.SourceID != 0 { // ?? how do we do this?
+	// 	sub = toModelSource(o.Edges.Source)
+	// }
+	return &model.IsOccurrence{
+		ID:            nodeid(o.ID),
+		Subject:       sub,
+		Artifact:      toModelArtifact(o.Edges.Artifact),
+		Justification: o.Justification,
+		Origin:        o.Origin,
+		Collector:     o.Collector,
+	}
+}
