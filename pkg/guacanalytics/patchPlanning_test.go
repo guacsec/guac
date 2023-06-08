@@ -378,12 +378,13 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	// 		retNodeMap:  nil,
 	// 	},
 	// }
+	fmt.Printf("before start server\n")
 	startTestServer()
-
+	fmt.Printf("after start server\n")
 	ctx := logging.WithLogger(context.Background())
 
 	httpClient := http.Client{}
-	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
+	gqlclient := graphql.NewClient("http://localhost:9090", &httpClient)
 	ingestVulnerabilities(ctx, gqlclient)
 	ingestDependencies(ctx, gqlclient)
 	// startTestServer()
@@ -419,7 +420,7 @@ func startTestServer() {
 		logger.Infof("server finished: %s", server.ListenAndServe())
 	}()
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM) // don't need for testing
 	s := <-sigs
 	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
 	done := make(chan bool, 1)
