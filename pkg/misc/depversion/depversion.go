@@ -116,9 +116,19 @@ func ParseVersionValue(s string) VersionValue {
 	return vv
 }
 
-// TODO: implement for more efficient traversal later
+// formatting issue will enter false case, not throw an error
 func DoesRangeInclude(versions []string, versionRange string) (bool, error) {
-	return false, fmt.Errorf("unimplemented")
+	versionMap, err := WhichVersionMatches(versions, versionRange)
+
+	if err != nil {
+		return false, fmt.Errorf("error for DoesRangeInclude %v", err)
+	}
+
+	for len(versionMap) > 0 {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 type VersionRange struct {

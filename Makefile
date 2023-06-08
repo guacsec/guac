@@ -22,6 +22,10 @@ test: generate
 integration-test: generate check-env
 	go test -tags=integration ./...
 
+.PHONY: integration-merge-test
+integration-merge-test: generate check-env
+	go test -tags=integrationMerge ./...
+
 .PHONY: check-env
 ifndef GITHUB_AUTH_TOKEN
 	$(error GITHUB_AUTH_TOKEN is not set)

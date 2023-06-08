@@ -159,7 +159,7 @@ func (g *githubCollector) populateRepoToReleaseTags(ctx context.Context) error {
 	for _, grds := range ds.GithubReleaseDataSources {
 		r, t, err := ParseGithubReleaseDataSource(grds)
 		if err != nil {
-			logger.Warnf("unable to parse github datasource: %w", err)
+			logger.Warnf("unable to parse github datasource: %v", err)
 			continue
 		}
 		g.repoToReleaseTags[*r] = append(g.repoToReleaseTags[*r], t)
@@ -168,7 +168,7 @@ func (g *githubCollector) populateRepoToReleaseTags(ctx context.Context) error {
 	for _, gds := range ds.GitDataSources {
 		r, t, err := ParseGitDataSource(gds)
 		if err != nil {
-			logger.Warnf("unable to parse git datasource: %w", err)
+			logger.Warnf("unable to parse git datasource: %v", err)
 		}
 		g.repoToReleaseTags[*r] = append(g.repoToReleaseTags[*r], t)
 	}
@@ -189,7 +189,7 @@ func (g *githubCollector) fetchAssets(ctx context.Context, owner string, repo st
 			release, err = g.client.GetReleaseByTag(ctx, owner, repo, gitTag)
 		}
 		if err != nil {
-			logger.Warnf("unable to fetch release: %w", err)
+			logger.Warnf("unable to fetch release: %v", err)
 			continue
 		}
 		releases = append(releases, *release)
@@ -209,7 +209,7 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 		if checkSuffixes(asset.URL, g.assetSuffixes) {
 			content, err := g.client.GetReleaseAsset(asset)
 			if err != nil {
-				logger.Warnf("unable to download asset: %w", err)
+				logger.Warnf("unable to download asset: %v", err)
 				continue
 			}
 			doc := &processor.Document{

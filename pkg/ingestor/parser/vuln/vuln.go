@@ -120,7 +120,7 @@ func parseVulns(ctx context.Context, s *attestation_vuln.VulnerabilityStatement)
 		vs = append(vs, v)
 		cve, ghsa, err := helpers.OSVToGHSACVE(id.VulnerabilityId)
 		if err != nil {
-			logger.Debugf("osvID is not a CVE or GHSA: %w", err)
+			logger.Debugf("osvID is not a CVE or GHSA: %v", err)
 			continue
 		}
 		iv := assembler.IsVulnIngest{
