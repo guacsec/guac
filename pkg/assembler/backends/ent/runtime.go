@@ -4,9 +4,7 @@ package ent
 
 import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/schema"
 )
 
@@ -20,22 +18,10 @@ func init() {
 	packagenameDescName := packagenameFields[1].Descriptor()
 	// packagename.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	packagename.NameValidator = packagenameDescName.Validators[0].(func(string) error)
-	packagenamespaceFields := schema.PackageNamespace{}.Fields()
-	_ = packagenamespaceFields
-	// packagenamespaceDescNamespace is the schema descriptor for namespace field.
-	packagenamespaceDescNamespace := packagenamespaceFields[1].Descriptor()
-	// packagenamespace.NamespaceValidator is a validator for the "namespace" field. It is called by the builders before save.
-	packagenamespace.NamespaceValidator = packagenamespaceDescNamespace.Validators[0].(func(string) error)
 	packagenodeFields := schema.PackageNode{}.Fields()
 	_ = packagenodeFields
 	// packagenodeDescType is the schema descriptor for type field.
 	packagenodeDescType := packagenodeFields[0].Descriptor()
 	// packagenode.TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	packagenode.TypeValidator = packagenodeDescType.Validators[0].(func(string) error)
-	packageversionFields := schema.PackageVersion{}.Fields()
-	_ = packageversionFields
-	// packageversionDescVersion is the schema descriptor for version field.
-	packageversionDescVersion := packageversionFields[1].Descriptor()
-	// packageversion.VersionValidator is a validator for the "version" field. It is called by the builders before save.
-	packageversion.VersionValidator = packageversionDescVersion.Validators[0].(func(string) error)
 }

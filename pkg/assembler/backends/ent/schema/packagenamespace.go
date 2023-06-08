@@ -17,7 +17,7 @@ type PackageNamespace struct {
 func (PackageNamespace) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("package_id"),
-		field.String("namespace").NotEmpty().Comment("In the pURL representation, each PackageNamespace matches the pkg:<type>/<namespace>/ partial pURL"),
+		field.String("namespace").Comment("In the pURL representation, each PackageNamespace matches the pkg:<type>/<namespace>/ partial pURL"),
 	}
 }
 

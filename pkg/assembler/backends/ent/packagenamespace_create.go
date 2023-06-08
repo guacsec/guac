@@ -95,11 +95,6 @@ func (pnc *PackageNamespaceCreate) check() error {
 	if _, ok := pnc.mutation.Namespace(); !ok {
 		return &ValidationError{Name: "namespace", err: errors.New(`ent: missing required field "PackageNamespace.namespace"`)}
 	}
-	if v, ok := pnc.mutation.Namespace(); ok {
-		if err := packagenamespace.NamespaceValidator(v); err != nil {
-			return &ValidationError{Name: "namespace", err: fmt.Errorf(`ent: validator failed for field "PackageNamespace.namespace": %w`, err)}
-		}
-	}
 	if _, ok := pnc.mutation.PackageID(); !ok {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "PackageNamespace.package"`)}
 	}

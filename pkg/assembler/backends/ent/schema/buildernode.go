@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Builder holds the schema definition for the Builder entity.
@@ -20,4 +21,11 @@ func (BuilderNode) Fields() []ent.Field {
 // Edges of the Builder.
 func (BuilderNode) Edges() []ent.Edge {
 	return nil
+}
+
+// Indexes of the BuilderNode.
+func (BuilderNode) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("uri").Unique(),
+	}
 }
