@@ -16,7 +16,6 @@
 package spdx
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -27,9 +26,8 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
-	spdx_json "github.com/spdx/tools-golang/json"
-	spdx_common "github.com/spdx/tools-golang/spdx/common"
-	"github.com/spdx/tools-golang/spdx/v2_2"
+	spdx "github.com/spdx/tools-golang/spdx"
+	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
 )
 
 type spdxParser struct {
@@ -40,7 +38,7 @@ type spdxParser struct {
 	filePackages      map[string][]*model.PkgInputSpec
 	fileArtifacts     map[string][]*model.ArtifactInputSpec
 	identifierStrings *common.IdentifierStrings
-	spdxDoc           *v2_2.Document
+	spdxDoc           *spdx.Document
 }
 
 func NewSpdxParser() common.DocumentParser {
@@ -153,13 +151,12 @@ func (s *spdxParser) getFiles() error {
 	return nil
 }
 
-func parseSpdxBlob(p []byte) (*v2_2.Document, error) {
-	reader := bytes.NewReader(p)
-	spdx, err := spdx_json.Load2_2(reader)
-	if err != nil {
+func parseSpdxBlob(p []byte) (*spdx.Document, error) {
+	doc := &spdx.Document{}
+	if err := doc.UnmarshalJSON(p); err != nil {
 		return nil, err
 	}
-	return spdx, nil
+	return doc, nil
 }
 
 func (s *spdxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
@@ -284,7 +281,7 @@ func (s *spdxParser) GetIdentifiers(ctx context.Context) (*common.IdentifierStri
 	return s.identifierStrings, nil
 }
 
-func getJustification(r *v2_2.Relationship) string {
+func getJustification(r *spdx.Relationship) string {
 	s := fmt.Sprintf("Derived from SPDX %s relationship", r.Relationship)
 	if len(r.RelationshipComment) > 0 {
 		s += fmt.Sprintf("with comment: %s", r.RelationshipComment)

@@ -373,7 +373,7 @@ func (c *demoClient) addVexIfMatch(out []*model.CertifyVEXStatement,
 	filter *model.CertifyVEXStatementSpec, link *vexLink) (
 	[]*model.CertifyVEXStatement, error) {
 
-	if filter != nil && filter.KnownSince != nil && filter.KnownSince.UTC() != link.knownSince {
+	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.knownSince) {
 		return out, nil
 	}
 	if filter != nil && filter.VexJustification != nil && *filter.VexJustification != link.justification {

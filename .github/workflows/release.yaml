@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: release-guac-image
+name: release
 
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
@@ -24,63 +24,82 @@ on:
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
+  contents: write # To upload assets to release.
   packages: write # To publish container images to GHCR
   id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
-  build:
-    name: Build and publish image
+  goreleaser:
     runs-on: ubuntu-latest
-    env:
-      IMAGE_URI: ghcr.io/${{ github.repository }}
-      IMAGE_URI_TAG: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
     outputs:
-      image: ${{ env.IMAGE_URI }}
-      digest: ${{ steps.image_digest.outputs.IMAGE_DIGEST }}
+      hashes: ${{ steps.hash.outputs.hashes }}
+      image: ${{ steps.hash.outputs.image }}
+      digest: ${{ steps.hash.outputs.digest }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # tag=v3
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+        with:
+          fetch-depth: 0
       - name: Login to GitHub Container Registry
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup pack 
-        uses: buildpacks/github-actions/setup-pack@723a8f4cfec2278c3caddaf5ee1e131c2c447dcd # v5.2.0
-      - name: Build and publish image
-        run: |
-          #!/usr/bin/env bash
-          set -euo pipefail
-          VERSION=$(git describe --tags --always)
-          COMMIT=$(git rev-parse HEAD)
-          BUILD=$(date +%FT%T%z)
-          PKG=github.com/guacsec/guac/pkg/version
-          pack build ${IMAGE_URI_TAG} \
-            --builder ${BUILDER} \
-            --buildpack ${BUILDPACK} \
-            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
-            --env BP_GO_TARGETS=${BP_GO_TARGETS}
-        shell: bash
-        env:
-          BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
-          BUILDER: paketobuildpacks/builder:base
-          BUILDPACK: paketo-buildpacks/go
-      - name: Push image
-        if: startsWith(github.ref, 'refs/tags/')
-        run: docker push ${IMAGE_URI}:${{ github.ref_name }}
-      - name: Install crane
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: imjasonh/setup-crane@00c9e93efa4e1138c9a7a5c594acd6c75a2fbf0c # v0.3
-      - name: Output image digest
-        if: startsWith(github.ref, 'refs/tags/')
-        id: image_digest
-        run: echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
+      - name: Set up Go
+        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+      - name: Install cosign
+        uses:  sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # main
+      - name: Install syft
+        uses: anchore/sbom-action/download-syft@ce4a7cf05d7b684693d7b6bba97bfbee56806edb # v0.7.0
 
-  sign:
-    name: Sign image and generate sbom
+      - name: Run GoReleaser Snapshot
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        id: run-goreleaser-snapshot
+        uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b # v4.2.0
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --snapshot --skip-sign
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: v0.0.0-snapshot-tag
+      - name: Run GoReleaser Release
+        if: startsWith(github.ref, 'refs/tags/')
+        id: run-goreleaser-release
+        uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b # v4.2.0
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate hashes and extract image digest
+        id: hash
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          ARTIFACTS: "${{ steps.run-goreleaser-release.outputs.artifacts }}"
+        run: |
+          set -euo pipefail
+  
+          hashes=$(echo $ARTIFACTS | jq --raw-output '.[] | {name, "digest": (.extra.Digest // .extra.Checksum)} | select(.digest) | {digest} + {name} | join("  ") | sub("^sha256:";"")' | base64 -w0)
+          if test "$hashes" = ""; then # goreleaser < v1.13.0
+            checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
+            hashes=$(cat $checksum_file | base64 -w0)
+          fi
+          echo "hashes=$hashes" >> $GITHUB_OUTPUT
+
+          image=$(echo $ARTIFACTS | jq --raw-output '.[] | select( .type =="Docker Manifest" ).name | split(":")[0]')
+          echo "image=$image" >> $GITHUB_OUTPUT
+          digest=$(echo $ARTIFACTS | jq --raw-output '.[] | select( .type =="Docker Manifest" ).extra.Digest')
+          echo "digest=$digest" >> $GITHUB_OUTPUT
+
+  sbom-container:
+    # generate sbom for container as goreleaser can't - https://goreleaser.com/customization/sbom/#limitations
+    name: generate sbom for container
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout code
@@ -103,51 +122,29 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          cosign sign -a git_sha=$GITHUB_SHA ${IMAGE_URI_DIGEST} --yes
           cosign attach sbom --sbom spdx.sbom.json ${IMAGE_URI_DIGEST}
           cosign sign -a git_sha=$GITHUB_SHA --attachment sbom ${IMAGE_URI_DIGEST} --yes
         shell: bash
         env:
-          IMAGE_URI_DIGEST: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
+          IMAGE_URI_DIGEST: ${{ needs.goreleaser.outputs.image }}@${{ needs.goreleaser.outputs.digest }}
 
-  provenance:
-    needs: [build]
+  provenance-bins:
+    name: generate provenance for binaries
+    needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.6.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.6.0 # must use semver here
     with:
-      image: ${{ needs.build.outputs.image }}
-      digest: ${{ needs.build.outputs.digest }}
+      base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
+      upload-assets: true
+
+  provenance-container:
+    name: generate provenance for container
+    needs: [goreleaser]
+    if: startsWith(github.ref, 'refs/tags/')
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.6.0 # must use semver here
+    with:
+      image: ${{ needs.goreleaser.outputs.image }}
+      digest: ${{ needs.goreleaser.outputs.digest }}
       registry-username: ${{ github.actor }}
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
-
-  verify:
-    name: Verify image and provenance
-    runs-on: ubuntu-latest
-    needs: [build, sign, provenance]
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install cosign
-        uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # main
-      - name: Install slsa-verifier
-        uses: slsa-framework/slsa-verifier/actions/installer@c9abffe4d2ab2ffa0b2ea9b2582b84164f390adc # v2.3.0
-      - name: Verify image and provenance
-        run: |
-          #!/usr/bin/env bash
-          set -euo pipefail
-          cosign verify ${IMAGE_URI_DIGEST} \
-            --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} \
-            --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
-          slsa-verifier verify-image \
-            --source-uri github.com/${{ github.repository }} ${IMAGE_URI_DIGEST}
-        shell: bash
-        env:
-          IMAGE_URI_DIGEST: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
-          GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
-          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/release.yaml@${{ github.ref }}

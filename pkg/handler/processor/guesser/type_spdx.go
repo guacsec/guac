@@ -16,20 +16,17 @@
 package guesser
 
 import (
-	"bytes"
-
 	"github.com/guacsec/guac/pkg/handler/processor"
-	spdx_json "github.com/spdx/tools-golang/json"
+	"github.com/spdx/tools-golang/spdx"
 )
 
 type spdxTypeGuesser struct{}
 
 func (_ *spdxTypeGuesser) GuessDocumentType(blob []byte, format processor.FormatType) processor.DocumentType {
-	reader := bytes.NewReader(blob)
+	spdxDoc := &spdx.Document{}
 	switch format {
 	case processor.FormatJSON:
-		spdxDoc, err := spdx_json.Load2_2(reader)
-		if err == nil {
+		if err := spdxDoc.UnmarshalJSON(blob); err == nil {
 			// This is set to check for DocumentNamespace since there seem to
 			// be some SBOMs in the wild that don't use certain fields like
 			// document name.

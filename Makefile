@@ -22,6 +22,10 @@ test: generate
 integration-test: generate check-env
 	go test -tags=integration ./...
 
+.PHONY: integration-merge-test
+integration-merge-test: generate check-env
+	go test -tags=integrationMerge ./...
+
 .PHONY: check-env
 ifndef GITHUB_AUTH_TOKEN
 	$(error GITHUB_AUTH_TOKEN is not set)
@@ -115,7 +119,7 @@ stop-service:
 
 .PHONY: check-docker-tool-check
 check-docker-tool-check:
-	@if ! command -v $(CONTAINER) &> /dev/null; then \
+	@if ! command -v $(CONTAINER) >/dev/null 2>&1; then \
 		echo "'$(CONTAINER)' is not installed. Please install '$(CONTAINER)' and try again. Or set the CONTAINER variable to a different container runtime engine."; \
 		exit 1; \
 	fi
@@ -123,7 +127,7 @@ check-docker-tool-check:
 # Check that protoc is installed.
 .PHONY: check-protoc-tool-check
 check-protoc-tool-check:
-	@if ! command -v protoc &> /dev/null; then \
+	@if ! command -v protoc >/dev/null 2>&1; then \
 		echo "Protoc is not installed. Please install Protoc and try again."; \
 		exit 1; \
 	fi
@@ -131,7 +135,7 @@ check-protoc-tool-check:
 # Check that golangci-lint is installed.
 .PHONY: check-golangci-lint-tool-check
 check-golangci-lint-tool-check:
-	@if ! command -v golangci-lint &> /dev/null; then \
+	@if ! command -v golangci-lint >/dev/null 2>&1; then \
 		echo "Golangci-lint is not installed. Please install Golangci-lint and try again."; \
 		exit 1; \
 	fi
@@ -139,7 +143,7 @@ check-golangci-lint-tool-check:
 # Check that mockgen is installed.
 .PHONY: check-mockgen-tool-check
 check-mockgen-tool-check:
-	@if ! command -v mockgen &> /dev/null; then \
+	@if ! command -v mockgen >/dev/null 2>&1; then \
 		echo "mockgen is not installed. Please install mockgen and try again."; \
 		exit 1; \
 	fi

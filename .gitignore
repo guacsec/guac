@@ -14,3 +14,7 @@ go.work
 *.swp
 *.swo
 container_files/pg/
+
+dist/
+
+dist/
