@@ -222,7 +222,7 @@ RETURN {
 	"hashEqualCollector": hashEqual.collector
 }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestHashEqual")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}

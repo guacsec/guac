@@ -194,85 +194,85 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 
 		// add indexes to artifact and edge collections
-		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"digest"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"digest"}, true, "byDigest"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
 		}
-		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"algorithm", "digest"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "artifacts", []string{"algorithm", "digest"}, true, "byArtAndDigest"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hashEquals", []string{"artifactID", "equalArtifactID"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "hashEquals", []string{"artifactID", "equalArtifactID"}, true, "byArtIDEqualArtID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hashEqualsEdges", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "hashEqualsEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgType", []string{"type"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgType", []string{"type"}, true, "byType"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgType: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgHasType", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasType: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"namespace"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"namespace"}, false, "byNamespace"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgNamespace: %w", err)
 		}
-		if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false, "byName"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgHasName", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasName: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version"}, false, "byVersion"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"subpath"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"subpath"}, false, "bySubpath"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"qualifier_list[*]"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"qualifier_list[*]"}, false, "byQualifierList"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version", "subpath", "qualifier_list[*]"}, false); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version", "subpath", "qualifier_list[*]"}, false, "byAllVersion"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgHasVersion", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgHasVersion", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID"}, true, "byPkgIDDepPkgID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isDependencyEdges", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isDependencyEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencyEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID"}, true, "byPkgIDArtID"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isOccurrencesEdges", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isOccurrencesEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrencesEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hasSBOMs", []string{"digest"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "hasSBOMs", []string{"digest"}, true, "byDigest"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hasSBOMs: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "hasSBOMEdges", []string{"_from", "_to"}, true); err != nil {
+		if err := createIndexPerCollection(ctx, db, "hasSBOMEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hasSBOMEdges: %w", err)
 		}
 	}
@@ -312,20 +312,20 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	return arangoClient, nil
 }
 
-func createIndexPerCollection(ctx context.Context, db driver.Database, collection string, fields []string, unique bool) error {
+func createIndexPerCollection(ctx context.Context, db driver.Database, collection string, fields []string, unique bool, indexName string) error {
 	databaseCollection, err := db.Collection(ctx, collection)
 	if err != nil {
 		return err
 	}
 
-	_, _, err = databaseCollection.EnsurePersistentIndex(ctx, fields, &driver.EnsurePersistentIndexOptions{Unique: unique, CacheEnabled: true})
+	_, _, err = databaseCollection.EnsurePersistentIndex(ctx, fields, &driver.EnsurePersistentIndexOptions{Unique: unique, CacheEnabled: true, Name: indexName})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func executeQueryWithRetry(ctx context.Context, db driver.Database, query string, values map[string]any) (driver.Cursor, error) {
+func executeQueryWithRetry(ctx context.Context, db driver.Database, query string, values map[string]any, executedFrom string) (driver.Cursor, error) {
 	var cursor driver.Cursor
 	var err error
 
@@ -337,7 +337,7 @@ func executeQueryWithRetry(ctx context.Context, db driver.Database, query string
 
 		// Check if the error is due to a lock timeout or a temporary issue
 		//if isRetryableError(err) {
-		fmt.Printf("Retrying query (attempt %d), %v, ...\n", retry+1, err)
+		fmt.Printf("Retrying query (attempt %d), executed from: %s, %v, ...\n", retry+1, executedFrom, err)
 		time.Sleep(retryTImer)
 		continue
 		//}

@@ -50,7 +50,7 @@ func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifa
 	  }`)
 
 	fmt.Println(arangoQueryBuilder.string())
-	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Artifacts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
@@ -85,7 +85,7 @@ INSERT { algorithm:@algorithm, digest:@digest }
 UPDATE {} IN artifacts
 RETURN NEW`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestArtifact")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
