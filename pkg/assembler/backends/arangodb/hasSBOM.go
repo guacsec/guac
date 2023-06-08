@@ -62,7 +62,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
+			  UPSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
 				  INSERT { uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, annotations:@annotations, collector:@collector, origin:@origin } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW

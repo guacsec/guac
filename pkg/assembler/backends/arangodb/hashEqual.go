@@ -199,8 +199,8 @@ func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.Artif
 LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @equal_algorithm FILTER art.digest == @equal_digest RETURN art)
 LET hashEqual = FIRST(
-	UPSERT { justification:@justification, collector:@collector, origin:@origin } 
-		INSERT { justification:@justification, collector:@collector, origin:@origin } 
+	UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:@justification, collector:@collector, origin:@origin } 
+		INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:@justification, collector:@collector, origin:@origin } 
 		UPDATE {} IN hashEquals
 		RETURN NEW
 )
