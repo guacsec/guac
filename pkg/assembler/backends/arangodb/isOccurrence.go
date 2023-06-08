@@ -142,7 +142,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		  "origin": isOccurrence.origin
 	  }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestOccurrence")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}

@@ -89,7 +89,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			  
 		  }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestHasSbom - Artifact")
 		if err != nil {
 			return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 		}
@@ -250,7 +250,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			  "origin": hasSBOM.origin  
 		  }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestHasSbom - Package")
 		if err != nil {
 			return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 		}

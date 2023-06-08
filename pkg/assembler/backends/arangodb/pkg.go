@@ -106,7 +106,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { type: @pkgType, _parent: root._id }
 		INSERT { type: @pkgType, _parent: root._id }
 		UPDATE {}
-		IN PkgType
+		IN PkgType OPTIONS { indexHint: "byType" }
 		RETURN NEW
 	  )
 	  
@@ -114,7 +114,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { namespace: @namespace, _parent: type._id }
 		INSERT { namespace: @namespace, _parent: type._id }
 		UPDATE {}
-		IN PkgNamespace
+		IN PkgNamespace OPTIONS { indexHint: "byNamespace" }
 		RETURN NEW
 	  )
 	  
@@ -122,7 +122,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { name: @name, _parent: ns._id }
 		INSERT { name: @name, _parent: ns._id }
 		UPDATE {}
-		IN PkgName
+		IN PkgName OPTIONS { indexHint: "byName" }
 		RETURN NEW
 	  )
 	  
@@ -130,35 +130,35 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
 		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
 		UPDATE {}
-		IN PkgVersion
+		IN PkgVersion OPTIONS { indexHint: "byAllVersion" }
 		RETURN NEW
 	  )
+	
+	  LET pkgHasTypeCollection = (
+		UPSERT { _from: root._id, _to: type._id, label : "PkgHasType" }
+		  INSERT { _from: root._id, _to: type._id, label : "PkgHasType" }
+		  UPDATE {} IN PkgHasType
+		)
+	   
+		LET pkgHasNamespaceCollection = (
+		UPSERT { _from: type._id, _to: ns._id, label : "PkgHasNamespace" }
+		  INSERT { _from: type._id, _to: ns._id, label : "PkgHasNamespace" }
+		  UPDATE {} IN PkgHasNamespace
+		)
 	  
-	LET pkgHasTypeCollection = (
-    UPSERT { _from: root._id, _to: type._id, label : "PkgHasType" }
-      INSERT { _from: root._id, _to: type._id, label : "PkgHasType" }
-      UPDATE {} IN PkgHasType
-    )
-   
-    LET pkgHasNamespaceCollection = (
-    UPSERT { _from: type._id, _to: ns._id, label : "PkgHasNamespace" }
-      INSERT { _from: type._id, _to: ns._id, label : "PkgHasNamespace" }
-      UPDATE {} IN PkgHasNamespace
-    )
-  
-    LET pkgHasNameCollection = (
-    UPSERT { _from: ns._id, _to: name._id, label : "PkgHasName" }
-      INSERT { _from: ns._id, _to: name._id, label : "PkgHasName" }
-      UPDATE {} IN PkgHasName
-    )
-  
-    LET pkgHasVersionCollection = (
-    UPSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
-      INSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
-      UPDATE {} IN PkgHasVersion
-    )
-      
-  RETURN {
+		LET pkgHasNameCollection = (
+		UPSERT { _from: ns._id, _to: name._id, label : "PkgHasName" }
+		  INSERT { _from: ns._id, _to: name._id, label : "PkgHasName" }
+		  UPDATE {} IN PkgHasName
+		)
+	  
+		LET pkgHasVersionCollection = (
+		UPSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
+		  INSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
+		  UPDATE {} IN PkgHasVersion
+		)
+		
+	RETURN {
     "type": type.type,
     "namespace": ns.namespace,
     "name": name.name,
@@ -167,11 +167,10 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
     "qualifier_list": pkgVersionObj.qualifier_list
   }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestPackage")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
 	}
-	defer cursor.Close()
 
 	type collectedData struct {
 		PkgType       string      `json:"type"`
@@ -188,6 +187,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
+				cursor.Close()
 				break
 			} else {
 				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
@@ -349,7 +349,7 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 
 	fmt.Println(arangoQueryBuilder.string())
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Packages")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
 	}
@@ -466,7 +466,7 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 
 	fmt.Println(arangoQueryBuilder.string())
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "packagesType")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
 	}
@@ -524,7 +524,7 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 
 	fmt.Println(arangoQueryBuilder.string())
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "packagesNamespace")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
 	}
@@ -604,7 +604,7 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 
 	fmt.Println(arangoQueryBuilder.string())
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "packagesName")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
 	}

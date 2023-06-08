@@ -147,7 +147,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 		  "origin": isDependency.origin
 	  }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, values)
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, values, "IngestDependency")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
 	}
