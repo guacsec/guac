@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -36,7 +37,9 @@ func (IsOccurrence) Edges() []ent.Edge {
 // Indexes of the IsOccurrence.
 func (IsOccurrence) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("justification", "origin", "collector").Edges("package", "artifact").Unique(),
+		index.Fields("justification", "origin", "collector").Edges("package", "artifact").Unique().Annotations(
+			entsql.IndexWhere("package_id <> NULL OR source_id <> NULL"),
+		),
 		//index.Fields("justification", "origin", "collector").Edges("package", "source", "artifact").Unique(),
 	}
 }

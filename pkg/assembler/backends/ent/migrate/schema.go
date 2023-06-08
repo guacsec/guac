@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -79,6 +80,9 @@ var (
 				Name:    "isoccurrence_justification_origin_collector_package_id_artifact_id",
 				Unique:  true,
 				Columns: []*schema.Column{IsOccurrencesColumns[2], IsOccurrencesColumns[3], IsOccurrencesColumns[4], IsOccurrencesColumns[5], IsOccurrencesColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id <> NULL OR source_id <> NULL",
+				},
 			},
 		},
 	}
