@@ -117,6 +117,9 @@ func TestPurlConvert(t *testing.T) {
 			purlUri:  "pkg:github/package-url/purl-spec@244fd47e07d1004#everybody/loves/dogs",
 			expected: pkg("github", "package-url", "purl-spec", "244fd47e07d1004", "everybody/loves/dogs", map[string]string{}),
 		}, {
+			purlUri:  "pkg:githubactions/shufo/auto-assign-reviewer-by-files@1.1.4",
+			expected: pkg("githubactions", "shufo", "auto-assign-reviewer-by-files", "1.1.4", "", map[string]string{}),
+		}, {
 			purlUri:  "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c#api",
 			expected: pkg("golang", "github.com/gorilla", "context", "234fd47e07d1004f0aed9c", "api", map[string]string{}),
 		}, {
