@@ -49,3 +49,4 @@
 ./pkg/assembler/graphql/resolvers/path.resolvers.go
 ./pkg/assembler/graphql/generated/path.generated.go
 ./internal/testing/mocks/scorecard.go
+./internal/testing/mocks/documentparser.go
