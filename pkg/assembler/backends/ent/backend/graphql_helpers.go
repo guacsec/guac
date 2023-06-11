@@ -1,4 +1,4 @@
-package ent
+package backend
 
 import (
 	"context"

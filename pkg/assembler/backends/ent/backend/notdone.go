@@ -1,4 +1,4 @@
-package ent
+package backend
 
 import (
 	"context"
@@ -72,9 +72,6 @@ func (b *EntBackend) IngestMaterials(ctx context.Context, materials []*model.Art
 	return nil, nil
 }
 func (b *EntBackend) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
-	return nil, nil
-}
-func (b *EntBackend) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
 	return nil, nil
 }
 

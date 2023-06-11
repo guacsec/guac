@@ -1,4 +1,4 @@
-package tests
+package backend
 
 // Usually this would be part of ent, but the import cycle doesn't allow for it.
 
@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/testutils"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/stretchr/testify/suite"
@@ -21,7 +20,7 @@ func TestSoftwareTreeSuite(t *testing.T) {
 }
 
 func (s *Suite) TestCreateSoftwareTree() {
-	be, err := ent.GetBackend(s.Client)
+	be, err := GetBackend(s.Client)
 	s.NoError(err)
 
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
@@ -81,7 +80,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 }
 
 func (s *Suite) TestVersionUpsertsWithQualifiers() {
-	be, err := ent.GetBackend(s.Client)
+	be, err := GetBackend(s.Client)
 	s.NoError(err)
 
 	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
@@ -120,6 +119,37 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 
 	s.T().Log(v.Qualifiers)
 	s.Error(err, "Should error on constraint")
+}
+
+func (s *Suite) TestIngestOccurrence_Package() {
+	be, err := GetBackend(s.Client)
+	s.NoError(err)
+
+	_, err = be.IngestArtifact(s.Ctx, &model.ArtifactInputSpec{
+		Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+	})
+	s.NoError(err)
+
+	// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
+	oc, err := be.IngestOccurrence(s.Ctx,
+		model.PackageOrSourceInput{
+			Package: &model.PkgInputSpec{
+				Type: "apk", Namespace: ptr("alpine"), Name: "apk", Version: ptr("2.12.9-r3"), Subpath: nil,
+			},
+		},
+		model.ArtifactInputSpec{
+			Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+		},
+		model.IsOccurrenceInputSpec{
+			Justification: "this artifact is an occurrence of this openssl",
+			Origin:        "Demo ingestion",
+			Collector:     "Demo ingestion",
+		},
+	)
+	s.NoError(err)
+	s.NotNil(oc)
+	// pv := s.Client.PackageNode.Query().Where(packagenode.ID(parseNodeID(pkg1.ID))).QueryNamespaces().QueryNames().QueryVersions().FirstX(s.Ctx)
+
 }
 
 func parseNodeID(id string) int {
