@@ -18,18 +18,12 @@
 # Defines the GraphQL operations to ingest that a package or source has an SBOM (specified by a URI) into GUAC
 
 mutation HasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-  ingestPackage(pkg: $pkg) {
-    ...AllPkgTree
-  }
   ingestHasSBOM(subject: {package: $pkg}, hasSBOM: $hasSBOM) {
     ...allHasSBOMTree
   }
 }
 
 mutation HasSBOMArtifact($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-  ingestArtifact(artifact: $artifact) {
-    ...AllArtifactTree
-  }
   ingestHasSBOM(subject: {artifact: $artifact}, hasSBOM: $hasSBOM) {
     ...allHasSBOMTree
   }
