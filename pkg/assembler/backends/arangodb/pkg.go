@@ -95,32 +95,16 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	values["qualifier"] = qualifiers
 
 	query := `LET root = FIRST(
-		UPSERT { root: "pkg" }
-		INSERT { root: "pkg" }
+		UPSERT { root: "pkg", type: @pkgType, namespace: @namespace }
+		INSERT { root: "pkg", type: @pkgType, namespace: @namespace }
 		UPDATE {}
-		IN Pkg
-		RETURN NEW
-	  )
-	  
-	  LET type = FIRST(
-		UPSERT { type: @pkgType, _parent: root._id }
-		INSERT { type: @pkgType, _parent: root._id }
-		UPDATE {}
-		IN PkgType OPTIONS { indexHint: "byType" }
-		RETURN NEW
-	  )
-	  
-	  LET ns = FIRST(
-		UPSERT { namespace: @namespace, _parent: type._id }
-		INSERT { namespace: @namespace, _parent: type._id }
-		UPDATE {}
-		IN PkgNamespace OPTIONS { indexHint: "byNamespace" }
+		IN Pkg OPTIONS { indexHint: "byRootTypeNamespace" }
 		RETURN NEW
 	  )
 	  
 	  LET name = FIRST(
-		UPSERT { name: @name, _parent: ns._id }
-		INSERT { name: @name, _parent: ns._id }
+		UPSERT { name: @name, _parent: root._id }
+		INSERT { name: @name, _parent: root._id }
 		UPDATE {}
 		IN PkgName OPTIONS { indexHint: "byName" }
 		RETURN NEW
@@ -133,34 +117,22 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		IN PkgVersion OPTIONS { indexHint: "byAllVersion" }
 		RETURN NEW
 	  )
-	
-	  LET pkgHasTypeCollection = (
-		UPSERT { _from: root._id, _to: type._id, label : "PkgHasType" }
-		  INSERT { _from: root._id, _to: type._id, label : "PkgHasType" }
-		  UPDATE {} IN PkgHasType
-		)
-	   
-		LET pkgHasNamespaceCollection = (
-		UPSERT { _from: type._id, _to: ns._id, label : "PkgHasNamespace" }
-		  INSERT { _from: type._id, _to: ns._id, label : "PkgHasNamespace" }
-		  UPDATE {} IN PkgHasNamespace
-		)
 	  
-		LET pkgHasNameCollection = (
-		UPSERT { _from: ns._id, _to: name._id, label : "PkgHasName" }
-		  INSERT { _from: ns._id, _to: name._id, label : "PkgHasName" }
+	  LET pkgHasNameCollection = (
+		UPSERT { _from: root._id, _to: name._id, label : "PkgHasName" }
+		  INSERT { _from: root._id, _to: name._id, label : "PkgHasName" }
 		  UPDATE {} IN PkgHasName
-		)
+	  )
 	  
-		LET pkgHasVersionCollection = (
+	  LET pkgHasVersionCollection = (
 		UPSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
 		  INSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
 		  UPDATE {} IN PkgHasVersion
-		)
+	  )
 		
 	RETURN {
-    "type": type.type,
-    "namespace": ns.namespace,
+    "type": root.type,
+    "namespace": root.namespace,
     "name": name.name,
     "version": pkgVersionObj.version,
     "subpath": pkgVersionObj.subpath,
@@ -305,17 +277,21 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 	values := map[string]any{}
 
 	arangoQueryBuilder := newForQuery("Pkg", "pkg")
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
-	if pkgSpec.Type != nil {
-		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+	filter := arangoQueryBuilder.filter("root", "pkg", "==", "@pkg")
+	values["pkg"] = "pkg"
+	if pkgSpec.Type != nil && pkgSpec.Namespace != nil {
+		filter.and("type", "pkg", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
-	}
-	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pkgHasNamespace", "pkgHasType")
-	if pkgSpec.Namespace != nil {
-		arangoQueryBuilder.filter("namespace", "pkgHasNamespace", "==", "@namespace")
+		filter.and("namespace", "pkg", "==", "@namespace")
+		values["namespace"] = *pkgSpec.Namespace
+	} else if pkgSpec.Type != nil {
+		filter.and("type", "pkg", "==", "@pkgType")
+		values["pkgType"] = *pkgSpec.Type
+	} else if pkgSpec.Namespace != nil {
+		filter.and("namespace", "pkg", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasName", "pkgHasName", "pkgHasNamespace")
+	arangoQueryBuilder.ForOutBound("PkgHasName", "pkgHasName", "pkg")
 	if pkgSpec.Name != nil {
 		arangoQueryBuilder.filter("name", "pkgHasName", "==", "@name")
 		values["name"] = *pkgSpec.Name
@@ -335,10 +311,10 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
-		"type_id": pkgHasType._id,
-		"type": pkgHasType.type,
-		"namespace_id": pkgHasNamespace._id,
-		"namespace": pkgHasNamespace.namespace,
+		"type_id": pkg._id,
+		"type": pkg.type,
+		"namespace_id": pkg._id,
+		"namespace": pkg.namespace,
 		"name_id": pkgHasName._id,
 		"name": pkgHasName.name,
 		"version_id": pkgHasVersion._id,
@@ -453,9 +429,10 @@ func (c *arangoClient) packagesType(ctx context.Context, pkgSpec *model.PkgSpec)
 	values := map[string]any{}
 
 	arangoQueryBuilder := newForQuery("Pkg", "pkg")
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
+	filter := arangoQueryBuilder.filter("root", "pkg", "==", "@pkg")
+	values["pkg"] = "pkg"
 	if pkgSpec.Type != nil {
-		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+		filter.and("type", "pkg", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
 	}
 	arangoQueryBuilder.query.WriteString("\n")
@@ -504,22 +481,26 @@ func (c *arangoClient) packagesNamespace(ctx context.Context, pkgSpec *model.Pkg
 	values := map[string]any{}
 
 	arangoQueryBuilder := newForQuery("Pkg", "pkg")
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
-	if pkgSpec.Type != nil {
-		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+	filter := arangoQueryBuilder.filter("root", "pkg", "==", "@pkg")
+	values["pkg"] = "pkg"
+	if pkgSpec.Type != nil && pkgSpec.Namespace != nil {
+		filter.and("type", "pkg", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
-	}
-	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pkgHasNamespace", "pkgHasType")
-	if pkgSpec.Namespace != nil {
-		arangoQueryBuilder.filter("namespace", "pkgHasNamespace", "==", "@namespace")
+		filter.and("namespace", "pkg", "==", "@namespace")
+		values["namespace"] = *pkgSpec.Namespace
+	} else if pkgSpec.Type != nil {
+		filter.and("type", "pkg", "==", "@pkgType")
+		values["pkgType"] = *pkgSpec.Type
+	} else if pkgSpec.Namespace != nil {
+		filter.and("namespace", "pkg", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
-		"type_id": pkgHasType._id,
-		"type": pkgHasType.type,
-		"namespace_id": pkgHasNamespace._id,
-		"namespace": pkgHasNamespace.namespace,
+		"type_id": pkg._id,
+		"type": pkg.type,
+		"namespace_id": pkg._id,
+		"namespace": pkg.namespace,
 	  }`)
 
 	fmt.Println(arangoQueryBuilder.string())
@@ -577,27 +558,31 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 	values := map[string]any{}
 
 	arangoQueryBuilder := newForQuery("Pkg", "pkg")
-	arangoQueryBuilder.ForOutBound("PkgHasType", "pkgHasType", "pkg")
-	if pkgSpec.Type != nil {
-		arangoQueryBuilder.filter("type", "pkgHasType", "==", "@pkgType")
+	filter := arangoQueryBuilder.filter("root", "pkg", "==", "@pkg")
+	values["pkg"] = "pkg"
+	if pkgSpec.Type != nil && pkgSpec.Namespace != nil {
+		filter.and("type", "pkg", "==", "@pkgType")
 		values["pkgType"] = *pkgSpec.Type
-	}
-	arangoQueryBuilder.ForOutBound("PkgHasNamespace", "pkgHasNamespace", "pkgHasType")
-	if pkgSpec.Namespace != nil {
-		arangoQueryBuilder.filter("namespace", "pkgHasNamespace", "==", "@namespace")
+		filter.and("namespace", "pkg", "==", "@namespace")
+		values["namespace"] = *pkgSpec.Namespace
+	} else if pkgSpec.Type != nil {
+		filter.and("type", "pkg", "==", "@pkgType")
+		values["pkgType"] = *pkgSpec.Type
+	} else if pkgSpec.Namespace != nil {
+		filter.and("namespace", "pkg", "==", "@namespace")
 		values["namespace"] = *pkgSpec.Namespace
 	}
-	arangoQueryBuilder.ForOutBound("PkgHasName", "pkgHasName", "pkgHasNamespace")
+	arangoQueryBuilder.ForOutBound("PkgHasName", "pkgHasName", "pkg")
 	if pkgSpec.Name != nil {
 		arangoQueryBuilder.filter("name", "pkgHasName", "==", "@name")
 		values["name"] = *pkgSpec.Name
 	}
 	arangoQueryBuilder.query.WriteString("\n")
 	arangoQueryBuilder.query.WriteString(`RETURN {
-		"type_id": pkgHasType._id,
-		"type": pkgHasType.type,
-		"namespace_id": pkgHasNamespace._id,
-		"namespace": pkgHasNamespace.namespace,
+		"type_id": pkg._id,
+		"type": pkg.type,
+		"namespace_id": pkg._id,
+		"namespace": pkg.namespace,
 		"name_id": pkgHasName._id,
 		"name": pkgHasName.name,
 	  }`)
