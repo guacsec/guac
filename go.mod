@@ -158,7 +158,7 @@ require (
 )
 
 require (
-	github.com/99designs/gqlgen v0.17.31
+	github.com/99designs/gqlgen v0.17.32
 	github.com/CycloneDX/cyclonedx-go v0.7.1
 	github.com/Khan/genqlient v0.6.0
 	github.com/Masterminds/semver v1.5.0
@@ -183,7 +183,7 @@ require (
 	github.com/sigstore/sigstore v1.6.5
 	github.com/spdx/tools-golang v0.5.2
 	github.com/spf13/viper v1.16.0
-	github.com/vektah/gqlparser/v2 v2.5.1
+	github.com/vektah/gqlparser/v2 v2.5.2-0.20230422221642-25e09f9d292d
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	gopkg.in/yaml.v3 v3.0.1
 )
