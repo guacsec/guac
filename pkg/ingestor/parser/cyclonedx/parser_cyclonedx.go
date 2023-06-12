@@ -197,10 +197,28 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 	return c.identifierStrings, nil
 }
 
+func (s *cyclonedxParser) getSoftwareTrees(ctx context.Context, preds *assembler.IngestPredicates) {
+	var packageIngest []*model.PkgInputSpec
+	var artifactIngest []*model.ArtifactInputSpec
+
+	for _, packList := range s.packagePackages {
+		packageIngest = append(packageIngest, packList...)
+	}
+
+	for _, artList := range s.packageArtifacts {
+		artifactIngest = append(artifactIngest, artList...)
+	}
+
+	preds.Package = packageIngest
+	preds.Artifact = artifactIngest
+}
+
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 
 	preds := &assembler.IngestPredicates{}
+
+	c.getSoftwareTrees(ctx, preds)
 
 	toplevel := c.getPackageElement(string(c.cdxBom.Metadata.Component.BOMRef))
 	// adding top level package edge manually for all depends on package

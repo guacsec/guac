@@ -173,10 +173,35 @@ func (s *spdxParser) getFileElement(elementID string) []*model.PkgInputSpec {
 	return nil
 }
 
+func (s *spdxParser) getSoftwareTrees(ctx context.Context, preds *assembler.IngestPredicates) {
+	var packageIngest []*model.PkgInputSpec
+	var artifactIngest []*model.ArtifactInputSpec
+
+	for _, packList := range s.packagePackages {
+		packageIngest = append(packageIngest, packList...)
+	}
+	for _, filePackList := range s.filePackages {
+		packageIngest = append(packageIngest, filePackList...)
+	}
+
+	for _, artList := range s.packageArtifacts {
+		artifactIngest = append(artifactIngest, artList...)
+	}
+
+	for _, fileArtList := range s.fileArtifacts {
+		artifactIngest = append(artifactIngest, fileArtList...)
+	}
+
+	preds.Package = packageIngest
+	preds.Artifact = artifactIngest
+}
+
 func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 
 	preds := &assembler.IngestPredicates{}
+
+	s.getSoftwareTrees(ctx, preds)
 
 	toplevel := s.getPackageElement("DOCUMENT")
 	// adding top level package edge manually for all depends on package
