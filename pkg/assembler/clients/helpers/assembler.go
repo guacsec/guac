@@ -30,6 +30,48 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
+			logger.Infof("assembling Package: %v", len(p.Package))
+			for _, v := range p.Package {
+				if err := ingestPackage(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling Source: %v", len(p.Source))
+			for _, v := range p.Source {
+				if err := ingestSource(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling Artifact: %v", len(p.Artifact))
+			for _, v := range p.Artifact {
+				if err := ingestArtifact(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling CVE: %v", len(p.CVE))
+			for _, v := range p.CVE {
+				if err := ingestCVE(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling OSV: %v", len(p.OSV))
+			for _, v := range p.OSV {
+				if err := ingestOSV(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling GHSA: %v", len(p.GHSA))
+			for _, v := range p.GHSA {
+				if err := ingestGHSA(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
 				if err := ingestCertifyScorecards(ctx, gqlclient, v); err != nil {
@@ -102,6 +144,36 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 		}
 		return nil
 	}
+}
+
+func ingestPackage(ctx context.Context, client graphql.Client, v *model.PkgInputSpec) error {
+	_, err := model.IngestPackage(ctx, client, *v)
+	return err
+}
+
+func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInputSpec) error {
+	_, err := model.IngestSource(ctx, client, *v)
+	return err
+}
+
+func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) error {
+	_, err := model.IngestArtifact(ctx, client, *v)
+	return err
+}
+
+func ingestCVE(ctx context.Context, client graphql.Client, v *model.CVEInputSpec) error {
+	_, err := model.IngestCVE(ctx, client, *v)
+	return err
+}
+
+func ingestOSV(ctx context.Context, client graphql.Client, v *model.OSVInputSpec) error {
+	_, err := model.IngestOSV(ctx, client, *v)
+	return err
+}
+
+func ingestGHSA(ctx context.Context, client graphql.Client, v *model.GHSAInputSpec) error {
+	_, err := model.IngestGHSA(ctx, client, *v)
+	return err
 }
 
 func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v assembler.CertifyScorecardIngest) error {

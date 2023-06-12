@@ -15,6 +15,14 @@
 
 # NOTE: This is experimental and might change in the future!
 
+# Ingest Source
+
+mutation IngestSource($source: SourceInputSpec!) {
+  ingestSource(source: $source) {
+    ...AllSourceTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC sources
 
 query Sources($filter: SourceSpec) {

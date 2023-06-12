@@ -15,6 +15,14 @@
 
 # NOTE: This is experimental and might change in the future!
 
+# Ingest Artifact
+
+mutation IngestArtifact($artifact: ArtifactInputSpec!) {
+  ingestArtifact(artifact: $artifact) {
+    ...AllArtifactTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC sources
 
 query Artifacts($filter: ArtifactSpec) {

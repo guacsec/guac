@@ -18,12 +18,6 @@
 # Defines the GraphQL operations to certify that two artifacts are identical
 
 mutation HashEqual($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
-  artifact: ingestArtifact(artifact: $artifact) {
-    ...AllArtifactTree
-  }
-  otherArtifact: ingestArtifact(artifact: $otherArtifact) {
-    ...AllArtifactTree
-  }
   ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual) {
     ...allHashEqualTree
   }

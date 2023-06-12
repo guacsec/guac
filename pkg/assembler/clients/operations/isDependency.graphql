@@ -18,12 +18,6 @@
 # Defines the GraphQL operations to ingest dependency information into GUAC
 
 mutation IsDependency($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: IsDependencyInputSpec!) {
-  pkg: ingestPackage(pkg: $pkg) {
-    ...AllPkgTree
-  }
-  dependentPkg: ingestPackage(pkg: $depPkg) {
-    ...AllPkgTree
-  }
   ingestDependency(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
     ...allIsDependencyTree
   }
