@@ -15,210 +15,197 @@
 
 package parser
 
-// TODO(bulldozer): PAUSE TESTING
-//
-// import (
-// 	"context"
-// 	"encoding/json"
-// 	"errors"
-// 	"strings"
-// 	"testing"
-// 	"time"
-//
-// 	"github.com/guacsec/guac/internal/testing/mockverifier"
-// 	nats_test "github.com/guacsec/guac/internal/testing/nats"
-// 	"github.com/guacsec/guac/internal/testing/testdata"
-// 	"github.com/guacsec/guac/pkg/assembler"
-// 	"github.com/guacsec/guac/pkg/emitter"
-// 	"github.com/guacsec/guac/pkg/handler/processor"
-// 	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
-// 	"github.com/guacsec/guac/pkg/ingestor/verifier"
-// 	"github.com/guacsec/guac/pkg/logging"
-// )
-//
-// var (
-// 	dsseDocTree = processor.DocumentNode{
-// 		Document: &testdata.Ite6DSSEDoc,
-// 		Children: []*processor.DocumentNode{
-// 			{
-// 				Document: &testdata.Ite6SLSADoc,
-// 				Children: []*processor.DocumentNode{},
-// 			},
-// 		},
-// 	}
-//
-// 	spdxDocTree = processor.DocumentNode{
-// 		Document: &processor.Document{
-// 			Blob:   testdata.SpdxExampleAlpine,
-// 			Format: processor.FormatJSON,
-// 			Type:   processor.DocumentSPDX,
-// 			SourceInformation: processor.SourceInformation{
-// 				Collector: "TestCollector",
-// 				Source:    "TestSource",
-// 			},
-// 		},
-// 		Children: []*processor.DocumentNode{},
-// 	}
-//
-// 	// TODO(bulldozer): update test graph inputs
-// 	graphInput = []assembler.AssemblerInput{{
-// 		Nodes: testdata.DsseNodes,
-// 		Edges: testdata.DsseEdges,
-// 	}, {
-// 		Nodes: testdata.SlsaNodes,
-// 		Edges: testdata.SlsaEdges,
-// 	}}
-//
-// 	spdxGraphInput = []assembler.AssemblerInput{{
-// 		Nodes: testdata.SpdxNodes,
-// 		Edges: testdata.SpdxEdges,
-// 	}}
-// )
-//
-// func TestParseDocumentTree(t *testing.T) {
-// 	ctx := logging.WithLogger(context.Background())
-// 	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
-// 	if err != nil {
-// 		if !strings.Contains(err.Error(), "the verification provider is being overwritten") {
-// 			t.Errorf("unexpected error: %v", err)
-// 		}
-// 	}
-//
-// 	tests := []struct {
-// 		name    string
-// 		tree    processor.DocumentTree
-// 		want    []assembler.AssemblerInput
-// 		wantErr bool
-// 	}{{
-// 		name:    "valid dsse",
-// 		tree:    processor.DocumentTree(&dsseDocTree),
-// 		want:    graphInput,
-// 		wantErr: false,
-// 	}, {
-// 		name:    "valid big SPDX document",
-// 		tree:    processor.DocumentTree(&spdxDocTree),
-// 		want:    spdxGraphInput,
-// 		wantErr: false,
-// 	}}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			// TODO: add tests for checking identifier strings
-// 			got, _, err := ParseDocumentTree(ctx, tt.tree)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if err != nil {
-// 				return
-// 			}
-// 			if len(got) != len(tt.want) {
-// 				t.Errorf("ParseDocumentTree() = %v, want %v", got, tt.want)
-// 				return
-// 			}
-// 			for i := range got {
-// 				compare(t, got[i].Edges, tt.want[i].Edges, got[i].Nodes, tt.want[i].Nodes)
-// 			}
-// 		})
-// 	}
-// }
-//
-// func compare(t *testing.T, gotEdges, wantEdges []assembler.GuacEdge, gotNodes, wantNodes []assembler.GuacNode) {
-// 	if !testdata.GuacEdgeSliceEqual(gotEdges, wantEdges) {
-// 		t.Errorf("ParseDocumentTree() = %v, want %v", gotEdges, wantEdges)
-// 	}
-// 	if !testdata.GuacNodeSliceEqual(gotNodes, wantNodes) {
-// 		t.Errorf("ParseDocumentTree() = %v, want %v", gotNodes, wantNodes)
-// 	}
-// }
-//
-// TODO: Fix tests to check for logger messages instead of err text (https://github.com/guacsec/guac/issues/765)
-// func Test_ParserSubscribe(t *testing.T) {
-// 	ctx := logging.WithLogger(context.Background())
-// 	err := verifier.RegisterVerifier(mockverifier.NewMockSigstoreVerifier(), "sigstore")
-// 	if err != nil {
-// 		if !strings.Contains(err.Error(), "the verification provider is being overwritten") {
-// 			t.Errorf("unexpected error: %v", err)
-// 		}
-// 	}
-//
-// 	natsTest := nats_test.NewNatsTestServer()
-// 	url, err := natsTest.EnableJetStreamForTest()
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	defer natsTest.Shutdown()
-//
-// 	testCases := []struct {
-// 		name       string
-// 		tree       processor.DocumentTree
-// 		want       []assembler.AssemblerInput
-// 		wantErr    bool
-// 		errMessage error
-// 	}{{
-// 		name:       "valid dsse",
-// 		tree:       processor.DocumentTree(&dsseDocTree),
-// 		want:       graphInput,
-// 		wantErr:    true,
-// 		errMessage: context.DeadlineExceeded,
-// 	}, {
-// 		name:       "valid big SPDX document",
-// 		tree:       processor.DocumentTree(&spdxDocTree),
-// 		want:       spdxGraphInput,
-// 		wantErr:    true,
-// 		errMessage: context.DeadlineExceeded,
-// 	}}
-// 	for _, tt := range testCases {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			jetStream := emitter.NewJetStream(url, "", "")
-// 			ctx, err = jetStream.JetStreamInit(ctx)
-// 			if err != nil {
-// 				t.Fatalf("unexpected error initializing jetstream: %v", err)
-// 			}
-// 			err = jetStream.RecreateStream(ctx)
-// 			if err != nil {
-// 				t.Fatalf("unexpected error recreating jetstream: %v", err)
-// 			}
-// 			defer jetStream.Close()
-// 			err := testPublish(ctx, tt.tree)
-// 			if err != nil {
-// 				t.Fatalf("unexpected error on emit: %v", err)
-// 			}
-// 			var cancel context.CancelFunc
-//
-// 			ctx, cancel = context.WithTimeout(ctx, time.Second)
-// 			defer cancel()
-//
-// 			transportFunc := func(d []assembler.Graph, _ []*parser_common.IdentifierStrings) error {
-// 				if len(d) != len(tt.want) {
-// 					t.Errorf("ParseDocumentTree() = %v, want %v", d, tt.want)
-// 				}
-// 				for i := range d {
-// 					compare(t, d[i].Edges, tt.want[i].Edges, d[i].Nodes, tt.want[i].Nodes)
-// 				}
-// 				return nil
-// 			}
-//
-// 			err = Subscribe(ctx, transportFunc)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
-// 			}
-// 			if err != nil {
-// 				if !errors.Is(err, tt.errMessage) {
-// 					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
-// 				}
-// 			}
-// 		})
-// 	}
-// }
-//
-// func testPublish(ctx context.Context, documentTree processor.DocumentTree) error {
-// 	docTreeJSON, err := json.Marshal(documentTree)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeJSON)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"github.com/guacsec/guac/internal/testing/mocks"
+
+	"github.com/golang/mock/gomock"
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+)
+
+func TestParserHelper(t *testing.T) {
+	tests := []struct {
+		name         string
+		registerArgs processor.DocumentType
+		parseArg     *processor.Document
+		isParseErr   bool
+		wantErr      bool
+	}{
+		{
+			name:         "default",
+			registerArgs: processor.DocumentType("test"),
+			parseArg: &processor.Document{
+				Type: processor.DocumentType("test"),
+			},
+		},
+		{
+			name:         "invalid register",
+			registerArgs: processor.DocumentType("test"),
+			parseArg: &processor.Document{
+				Type: processor.DocumentType("invalid"),
+			},
+			wantErr: true,
+		},
+		{
+			name:         "parse error",
+			registerArgs: processor.DocumentType("test"),
+			parseArg: &processor.Document{
+				Type: processor.DocumentType("test"),
+			},
+			isParseErr: true,
+			wantErr:    true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockDocumentParser := mocks.NewMockDocumentParser(ctrl)
+			ctx := context.Background()
+
+			parser := common.DocumentParser(mockDocumentParser)
+
+			f := func() common.DocumentParser {
+				return parser
+			}
+
+			mockDocumentParser.EXPECT().Parse(ctx, test.parseArg).DoAndReturn(func(ctx context.Context, doc *processor.Document) error {
+				if test.isParseErr {
+					return errors.New("parse error")
+				}
+				return nil
+			}).AnyTimes()
+			mockDocumentParser.EXPECT().GetIdentities(ctx).Return([]common.TrustInformation{}).AnyTimes()
+
+			_ = RegisterDocumentParser(f, test.registerArgs) // Ignoring error because it is mutating a global variable
+
+			if _, err := parseHelper(ctx, test.parseArg); err != nil { // Ignoring the graphBuilder because the mock will always return an empty graphBuilder
+				t.Logf("error parsing document: %v", err)
+			}
+		})
+	}
+}
+
+func Test_docTreeBuilder_parse(t *testing.T) {
+	type fields struct {
+		identities    []common.TrustInformation
+		graphBuilders []*common.GraphBuilder
+	}
+	tests := []struct {
+		name            string
+		fields          fields
+		root            processor.DocumentTree
+		registerDocType processor.DocumentType
+		// The registerDocType is used to register the document parser, it is different from the roots own
+		// processor.DocumentType so that we can test the error case
+		makeOverflow bool
+		// makeOverflow is used to know whether we should try to make the stack overflow.
+		// The makeOverflow flag makes the roots child point back to the root so that it will overflow
+		wantErr bool
+	}{
+		{
+			name: "default",
+			root: &processor.DocumentNode{
+				Document: &processor.Document{
+					Type: "test",
+				},
+				Children: []*processor.DocumentNode{
+					{
+						Document: &processor.Document{
+							Type: "test",
+						},
+					},
+					{
+						Document: &processor.Document{
+							Type: "test",
+						},
+					},
+				},
+			},
+			registerDocType: "test",
+		},
+		{
+			name: "parseHelper error",
+			root: &processor.DocumentNode{
+				Document: &processor.Document{
+					Type: "invalid",
+				},
+			},
+			registerDocType: "test",
+			wantErr:         true,
+		},
+		{
+			name: "parse children error",
+			root: &processor.DocumentNode{
+				Document: &processor.Document{
+					Type: "test",
+				},
+				Children: []*processor.DocumentNode{
+					{
+						Document: &processor.Document{
+							Type: "invalid",
+						},
+					},
+				},
+			},
+			registerDocType: "test",
+			wantErr:         true,
+		},
+		{
+			name: "can overflow",
+			root: &processor.DocumentNode{
+				Document: &processor.Document{
+					Type: processor.DocumentType("test"),
+				},
+			},
+			registerDocType: "test",
+			makeOverflow:    true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t1 *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockDocumentParser := mocks.NewMockDocumentParser(ctrl)
+			ctx := context.Background()
+
+			parser := common.DocumentParser(mockDocumentParser)
+
+			f := func() common.DocumentParser {
+				return parser
+			}
+
+			mockDocumentParser.EXPECT().Parse(ctx, test.root.Document).DoAndReturn(func(ctx context.Context, doc *processor.Document) error {
+				return nil
+			}).AnyTimes()
+			mockDocumentParser.EXPECT().GetIdentities(ctx).Return([]common.TrustInformation{}).AnyTimes()
+
+			_ = RegisterDocumentParser(f, test.registerDocType) // Ignoring error because it is mutating a global variable
+
+			if test.makeOverflow {
+				// make the roots child point back to the root so that it will overflow
+				root := test.root
+				root.Children = append(root.Children, &processor.DocumentNode{ // create child
+					Document: &processor.Document{
+						Type: test.root.Document.Type,
+					},
+				})
+				root = root.Children[0]
+				root.Children = append(root.Children, test.root) // make the child point back to the root
+			}
+
+			treeBuilder := &docTreeBuilder{
+				identities:    test.fields.identities,
+				graphBuilders: test.fields.graphBuilders,
+			}
+			if err := treeBuilder.parse(ctx, test.root, map[visitedKey]bool{}); (err != nil) != test.wantErr {
+				t1.Errorf("parse() error = %v, wantErr %v", err, test.wantErr)
+			}
+		})
+	}
+}

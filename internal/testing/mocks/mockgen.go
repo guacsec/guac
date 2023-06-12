@@ -16,6 +16,7 @@
 package mocks
 
 //go:generate go run github.com/golang/mock/mockgen -source=../../../pkg/certifier/scorecard/types.go -destination=../../../internal/testing/mocks/scorecard.go -package mocks
+//go:generate go run github.com/golang/mock/mockgen -source=../../../pkg/ingestor/parser/common/types.go -destination=../../../internal/testing/mocks/documentparser.go -package mocks
 
 // This file is currently empty and used only to allow generating the mocked code via mockgen
 // by executing `go generate ./...`.
