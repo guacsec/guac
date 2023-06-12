@@ -1,0 +1,113 @@
+version: "3"
+
+volumes:
+  arangodb_data_container:
+  arangodb_apps_data_container:
+  prometheus_data:
+  grafana_data:
+
+services:
+  arangodb_db_container:
+    image: arangodb:latest
+    environment:
+      ARANGO_ROOT_PASSWORD: test123
+      #ARANGO_ROOT_PASSWORD: rootpassword
+    ports:
+      - 8529:8529
+    volumes:
+      - arangodb_data_container:/var/lib/arangodb3
+      - arangodb_apps_data_container:/var/lib/arangodb3-apps
+
+  # Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.6
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 9411:9411 
+  
+
+  # Monitoring Stack
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    volumes:
+      - ./container_files/prometheus:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    # links:
+    #   - cadvisor:cadvisor
+    #   # - alertmanager:alertmanager
+    # depends_on:
+    #   - cadvisor
+
+  node-exporter:
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - '^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    ports:
+      - 9100:9100
+    restart: always
+    deploy:
+      mode: global
+
+  # alertmanager:
+  #   image: prom/alertmanager
+  #   restart: always
+  #   ports:
+  #     - 9093:9093
+  #   volumes:
+  #     - ./alertmanager/:/etc/alertmanager/
+  #   command:
+  #     - '--config.file=/etc/alertmanager/config.yml'
+  #     - '--storage.path=/alertmanager'
+
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor
+  #   platform: linux/amd64
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   ports:
+  #     - 8088:8080
+  #   restart: always
+  #   deploy:
+  #     mode: global
+
+  grafana:
+    image: grafana/grafana
+    user: '472'
+    restart: always
+    environment:
+      GF_INSTALL_PLUGINS: 'grafana-clock-panel,grafana-simple-json-datasource'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./container_files/grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./container_files/grafana/config.monitoring
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
