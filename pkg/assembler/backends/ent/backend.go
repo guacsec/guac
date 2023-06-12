@@ -263,7 +263,7 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 			return nil, errors.Wrap(err, "upsert package node")
 		}
 
-		nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(*pkg.Namespace).
+		nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(valueOrDefault(pkg.Namespace, "")).
 			OnConflict(entsql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).UpdateNewValues().ID(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "upsert package namespace")
@@ -275,13 +275,9 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 			return nil, errors.Wrap(err, "upsert package name")
 		}
 
-		if pkg.Version == nil {
-			empty := ""
-			pkg.Version = &empty
-		}
 		_, err = client.PackageVersion.Create().
 			SetNameID(nameID).
-			SetVersion(*pkg.Version).
+			SetVersion(valueOrDefault(pkg.Version, "")).
 			SetSubpath(valueOrDefault(pkg.Subpath, "")).
 			SetQualifiers(qualifiersToString(pkg.Qualifiers)).
 			OnConflict(
@@ -306,11 +302,13 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 	// TODO: Figure out if we need to preload the edges from the graphql query
 	record, err := b.client.PackageNode.Query().Where(packagenode.ID(*recordID)).
 		WithNamespaces(func(q *PackageNamespaceQuery) {
-			q.Order(Asc(packagenamespace.FieldNamespace))
+			q.Where(packagenamespace.Namespace(valueOrDefault(pkg.Namespace, "")))
 			q.WithNames(func(q *PackageNameQuery) {
-				q.Order(Asc(packagename.FieldName))
+				q.Where(packagename.Name(pkg.Name))
 				q.WithVersions(func(q *PackageVersionQuery) {
-					q.Order(Asc(packageversion.FieldVersion))
+					q.Where(packageversion.Version(valueOrDefault(pkg.Version, "")))
+					q.Where(packageversion.Subpath(valueOrDefault(pkg.Subpath, "")))
+					q.Where(packageversion.Qualifiers(qualifiersToString(pkg.Qualifiers)))
 				})
 			})
 		}).
