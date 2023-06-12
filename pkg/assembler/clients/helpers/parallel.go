@@ -39,6 +39,61 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 		g.SetLimit(20)
 
 		for _, p := range preds {
+
+			logger.Infof("assembling Package: %v", len(p.Package))
+			for _, v := range p.Package {
+				if ctx.Err() != nil {
+					break
+				}
+				v := v
+				g.Go(func() error { return ingestPackage(ctx, gqlclient, v) })
+			}
+
+			logger.Infof("assembling Source: %v", len(p.Source))
+			for _, v := range p.Source {
+				if ctx.Err() != nil {
+					break
+				}
+				v := v
+				g.Go(func() error { return ingestSource(ctx, gqlclient, v) })
+			}
+
+			logger.Infof("assembling Artifact: %v", len(p.Artifact))
+			for _, v := range p.Artifact {
+				if ctx.Err() != nil {
+					break
+				}
+				v := v
+				g.Go(func() error { return ingestArtifact(ctx, gqlclient, v) })
+			}
+
+			logger.Infof("assembling CVE: %v", len(p.CVE))
+			for _, v := range p.CVE {
+				if ctx.Err() != nil {
+					break
+				}
+				v := v
+				g.Go(func() error { return ingestCVE(ctx, gqlclient, v) })
+			}
+
+			logger.Infof("assembling OSV: %v", len(p.OSV))
+			for _, v := range p.OSV {
+				if ctx.Err() != nil {
+					break
+				}
+				v := v
+				g.Go(func() error { return ingestOSV(ctx, gqlclient, v) })
+			}
+
+			logger.Infof("assembling GHSA: %v", len(p.GHSA))
+			for _, v := range p.GHSA {
+				if ctx.Err() != nil {
+					break
+				}
+				v := v
+				g.Go(func() error { return ingestGHSA(ctx, gqlclient, v) })
+			}
+
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
 				if ctx.Err() != nil {
