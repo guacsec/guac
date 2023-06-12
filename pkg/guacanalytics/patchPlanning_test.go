@@ -19,13 +19,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 	"testing"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"go.uber.org/zap"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
@@ -379,7 +378,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	// 	},
 	// }
 	fmt.Printf("before start server\n")
-	startTestServer()
+	server, logger := startTestServer()
 	fmt.Printf("after start server\n")
 	ctx := logging.WithLogger(context.Background())
 
@@ -401,28 +400,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		}
 	})
 	//}
-}
 
-func startTestServer() {
-	ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
-
-	srv, err := getGraphqlTestServer()
-	if err != nil {
-		logger.Errorf("unable to initialize graphql server: %v", err)
-		os.Exit(1)
-	}
-	http.Handle("/query", srv)
-
-	server := &http.Server{Addr: fmt.Sprintf(":%d", 9090)}
-	logger.Info("starting server")
-	go func() {
-		logger.Infof("server finished: %s", server.ListenAndServe())
-	}()
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM) // don't need for testing
-	s := <-sigs
-	logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
 	done := make(chan bool, 1)
 	ctx, cf := context.WithCancel(ctx)
 	go func() {
@@ -437,6 +415,30 @@ func startTestServer() {
 		server.Close()
 	}
 	cf()
+}
+
+func startTestServer() (*http.Server, *zap.SugaredLogger) {
+	ctx := logging.WithLogger(context.Background())
+	logger := logging.FromContext(ctx)
+
+	srv, err := getGraphqlTestServer()
+	if err != nil {
+		logger.Errorf("unable to initialize graphql server: %v", err)
+		os.Exit(1)
+	}
+	http.Handle("/query", srv)
+
+	server := &http.Server{Addr: fmt.Sprintf(":%d", 9090)}
+	logger.Info("starting server")
+
+	return server, logger
+	// go func() {
+	// 	logger.Infof("server finished: %s", server.ListenAndServe())
+	// }()
+	// sigs := make(chan os.Signal, 1)
+	// signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM) // don't need for testing
+	// s := <-sigs
+	// logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
 }
 
 func getGraphqlTestServer() (*handler.Server, error) {
