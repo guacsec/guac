@@ -80,14 +80,14 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 		    FILTER pkg.root == "pkg" && pkg.type == @pkgType && pkg.namespace == @namespace && pkg.name == @name
 				FOR pkgHasVersion IN OUTBOUND pkg PkgHasVersion
 						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
-				  RETURN {
-					"type": pkg.type,
-					"namespace": pkg.namespace,
-					"name": pkg.name,
-					"version": pkgHasVersion.version,
-					"subpath": pkgHasVersion.subpath,
-					"qualifier_list": pkgHasVersion.qualifier_list,
-					"versionDoc": pkgHasVersion
+				RETURN {
+				  "type": pkg.type,
+				  "namespace": pkg.namespace,
+				  "name": pkg.name,
+				  "version": pkgHasVersion.version,
+				  "subpath": pkgHasVersion.subpath,
+				  "qualifier_list": pkgHasVersion.qualifier_list,
+				  "versionDoc": pkgHasVersion
 				}
 	  )
 	  
