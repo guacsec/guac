@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/spf13/cobra"
 
@@ -55,6 +56,12 @@ func startServer(cmd *cobra.Command) {
 		logger.Errorf("unable to initialize graphql server: %v", err)
 		os.Exit(1)
 	}
+
+	if flags.tracegql {
+		tracer := &debug.Tracer{}
+		srv.Use(tracer)
+	}
+
 	http.Handle("/query", srv)
 	if flags.debug {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
