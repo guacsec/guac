@@ -5,11 +5,13 @@ import (
 
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -90,6 +92,112 @@ func pkgTreeFromVersion(ctx context.Context, pv *PackageVersion) (*PackageNode, 
 			})
 		}).
 		Only(ctx)
+}
+
+func pkgTreeFromName(ctx context.Context, pn *PackageName) (*PackageNode, error) {
+	ns, err := pn.QueryNamespace().Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ns.QueryPackage().
+		WithNamespaces(func(q *PackageNamespaceQuery) {
+			q.Where(packagenamespace.Namespace(ns.Namespace))
+			q.WithNames(func(q *PackageNameQuery) {
+				q.Where(packagename.Name(pn.Name))
+			})
+		}).
+		Only(ctx)
+}
+
+func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
+	funcName := "IsDependency"
+	query := b.client.IsDependency.Query().Order(Asc(isdependency.FieldID))
+
+	if isDependencySpec != nil {
+		query.Where(
+			IDEQ(isDependencySpec.ID),
+			isdependency.HasPackageWith(pkgVersionPreds(isDependencySpec.Package)...),
+			isdependency.HasDependentPackageWith(pkgNamePreds(isDependencySpec.DependentPackage)...),
+			optionalPredicate(isDependencySpec.VersionRange, isdependency.VersionRange),
+			optionalPredicate(isDependencySpec.Justification, isdependency.Justification),
+			optionalPredicate(isDependencySpec.Origin, isdependency.Origin),
+			optionalPredicate(isDependencySpec.Collector, isdependency.Collector),
+		)
+		if isDependencySpec.DependencyType != nil {
+			query.Where(isdependency.DependencyType(string(*isDependencySpec.DependencyType)))
+		}
+	} else {
+		query.Limit(100)
+	}
+
+	ids, err := query.
+		WithPackage().
+		WithDependentPackage().
+		All(ctx)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	rv, err := collectWithError(ctx, ids, toModelIsDependency)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+	return rv, nil
+}
+
+func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+	funcName := "IngestDependency"
+
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+		client := FromContext(ctx)
+		p, err := b.getPkgVersion(ctx, &pkg)
+		if err != nil {
+			return nil, err
+		}
+		dp, err := b.getPkgName(ctx, &depPkg)
+		if err != nil {
+			return nil, err
+		}
+		id, err := client.IsDependency.Create().
+			SetPackage(p). // Should I be using SetPackageID() here?
+			SetDependentPackage(dp).
+			SetVersionRange(dependency.VersionRange).
+			SetDependencyType(string(dependency.DependencyType)).
+			SetJustification(dependency.Justification).
+			SetOrigin(dependency.Origin).
+			SetCollector(dependency.Collector).
+			OnConflict(
+				entsql.ConflictColumns(
+					isdependency.FieldPackageID,
+					isdependency.FieldDependentPackageID,
+					isdependency.FieldVersionRange,
+					isdependency.FieldDependencyType,
+					isdependency.FieldJustification,
+					isdependency.FieldOrigin,
+					isdependency.FieldCollector,
+				),
+			).
+			UpdateNewValues().ID(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return &id, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	// Upsert only gets ID, so need to query the object
+	record, err := b.client.IsDependency.Query().
+		Where(isdependency.ID(*recordID)).
+		WithPackage().
+		WithDependentPackage().
+		Only(ctx)
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	return toModelIsDependency(ctx, record)
 }
 
 func (b *EntBackend) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, art model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
@@ -175,4 +283,70 @@ func toModelIsOccurrence(ctx context.Context, o *IsOccurrence) (*model.IsOccurre
 		Origin:        o.Origin,
 		Collector:     o.Collector,
 	}, nil
+}
+
+func toModelIsDependency(ctx context.Context, id *IsDependency) (*model.IsDependency, error) {
+	p, err := pkgTreeFromVersion(ctx, id.Edges.Package)
+	if err != nil {
+		return nil, err
+	}
+	dp, err := pkgTreeFromName(ctx, id.Edges.DependentPackage)
+	if err != nil {
+		return nil, err
+	}
+	return &model.IsDependency{
+		ID:               nodeid(id.ID),
+		Package:          toModelPackage(p),
+		DependentPackage: toModelPackage(dp),
+		VersionRange:     id.VersionRange,
+		DependencyType:   model.DependencyType(id.DependencyType),
+		Justification:    id.Justification,
+		Origin:           id.Origin,
+		Collector:        id.Collector,
+	}, nil
+}
+
+func pkgVersionPreds(spec *model.PkgSpec) []predicate.PackageVersion {
+	if spec == nil {
+		return nil
+	}
+	rv := []predicate.PackageVersion{
+		IDEQ(spec.ID),
+		optionalPredicate(spec.Version, packageversion.Version),
+		optionalPredicate(spec.Subpath, packageversion.Subpath),
+		packageversion.HasNameWith(
+			optionalPredicate(spec.Name, packagename.Name),
+			packagename.HasNamespaceWith(
+				optionalPredicate(spec.Namespace, packagenamespace.Namespace),
+				packagenamespace.HasPackageWith(
+					optionalPredicate(spec.Type, packagenode.Type),
+				),
+			),
+		),
+	}
+
+	if spec.MatchOnlyEmptyQualifiers != nil && *spec.MatchOnlyEmptyQualifiers {
+		rv = append(rv, packageversion.Qualifiers(""))
+	} else if spec.Qualifiers != nil {
+		// FIXME need to do custom filtering to allow specifying partial qualifiers? or key only??
+		// query.Where(isdependency.HasPackageWith(packageversion.Qualifiers(qualifiersToString(isDependencySpec.Package.Qualifiers))))
+	}
+
+	return rv
+}
+
+func pkgNamePreds(spec *model.PkgNameSpec) []predicate.PackageName {
+	if spec == nil {
+		return nil
+	}
+	return []predicate.PackageName{
+		IDEQ(spec.ID),
+		optionalPredicate(spec.Name, packagename.Name),
+		packagename.HasNamespaceWith(
+			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
+			packagenamespace.HasPackageWith(
+				optionalPredicate(spec.Type, packagenode.Type),
+			),
+		),
+	}
 }

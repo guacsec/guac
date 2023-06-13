@@ -16,6 +16,8 @@ type Tx struct {
 	Artifact *ArtifactClient
 	// BuilderNode is the client for interacting with the BuilderNode builders.
 	BuilderNode *BuilderNodeClient
+	// IsDependency is the client for interacting with the IsDependency builders.
+	IsDependency *IsDependencyClient
 	// IsOccurrence is the client for interacting with the IsOccurrence builders.
 	IsOccurrence *IsOccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
@@ -159,6 +161,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Artifact = NewArtifactClient(tx.config)
 	tx.BuilderNode = NewBuilderNodeClient(tx.config)
+	tx.IsDependency = NewIsDependencyClient(tx.config)
 	tx.IsOccurrence = NewIsOccurrenceClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)

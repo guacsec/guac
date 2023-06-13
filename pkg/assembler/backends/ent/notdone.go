@@ -45,9 +45,10 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.Has
 func (b *EntBackend) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	return nil, nil
 }
-func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	return nil, nil
-}
+
+//	func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
+//		return nil, nil
+//	}
 func (b *EntBackend) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	return nil, nil
 }
@@ -88,9 +89,10 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
 	return nil, nil
 }
-func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
-	return nil, nil
-}
+
+//	func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+//		return nil, nil
+//	}
 func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) (*model.HasSbom, error) {
 	return nil, nil
 }
