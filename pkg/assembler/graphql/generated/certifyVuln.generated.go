@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -939,48 +940,53 @@ var certifyVulnImplementors = []string{"CertifyVuln", "Node"}
 
 func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyVuln) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, certifyVulnImplementors)
+
 	out := graphql.NewFieldSet(fields)
-	var invalids uint32
+	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CertifyVuln")
 		case "id":
-
 			out.Values[i] = ec._CertifyVuln_id(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "package":
-
 			out.Values[i] = ec._CertifyVuln_package(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "vulnerability":
-
 			out.Values[i] = ec._CertifyVuln_vulnerability(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "metadata":
-
 			out.Values[i] = ec._CertifyVuln_metadata(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
-	if invalids > 0 {
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
 		return graphql.Null
 	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
 	return out
 }
 
@@ -988,27 +994,38 @@ var noVulnImplementors = []string{"NoVuln", "Vulnerability", "Node"}
 
 func (ec *executionContext) _NoVuln(ctx context.Context, sel ast.SelectionSet, obj *model.NoVuln) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, noVulnImplementors)
+
 	out := graphql.NewFieldSet(fields)
-	var invalids uint32
+	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("NoVuln")
 		case "id":
-
 			out.Values[i] = ec._NoVuln_id(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
-	if invalids > 0 {
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
 		return graphql.Null
 	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
 	return out
 }
 
@@ -1016,69 +1033,68 @@ var vulnerabilityMetaDataImplementors = []string{"VulnerabilityMetaData"}
 
 func (ec *executionContext) _VulnerabilityMetaData(ctx context.Context, sel ast.SelectionSet, obj *model.VulnerabilityMetaData) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, vulnerabilityMetaDataImplementors)
+
 	out := graphql.NewFieldSet(fields)
-	var invalids uint32
+	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("VulnerabilityMetaData")
 		case "timeScanned":
-
 			out.Values[i] = ec._VulnerabilityMetaData_timeScanned(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "dbUri":
-
 			out.Values[i] = ec._VulnerabilityMetaData_dbUri(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "dbVersion":
-
 			out.Values[i] = ec._VulnerabilityMetaData_dbVersion(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "scannerUri":
-
 			out.Values[i] = ec._VulnerabilityMetaData_scannerUri(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "scannerVersion":
-
 			out.Values[i] = ec._VulnerabilityMetaData_scannerVersion(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "origin":
-
 			out.Values[i] = ec._VulnerabilityMetaData_origin(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		case "collector":
-
 			out.Values[i] = ec._VulnerabilityMetaData_collector(ctx, field, obj)
-
 			if out.Values[i] == graphql.Null {
-				invalids++
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch()
-	if invalids > 0 {
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
 		return graphql.Null
 	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
 	return out
 }
 
