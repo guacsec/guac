@@ -205,12 +205,10 @@ LET hashEqual = FIRST(
 		RETURN NEW
 )
 LET edgeCollection = (FOR edgeData IN [
-    {from: hashEqual._id, to: equalArtifact._id, label: "is_equal"}, 
-    {from: artifact._id, to: hashEqual._id, label: "subject"}]
+    {fromKey: hashEqual._key, toKey: equalArtifact._key, from: hashEqual._id, to: equalArtifact._id, label: "is_equal"}, 
+    {fromKey: artifact._key, toKey: hashEqual._key, from: artifact._id, to: hashEqual._id, label: "subject"}]
 
-  UPSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-    INSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-    UPDATE {} IN hashEqualsEdges
+    INSERT { _key: CONCAT("hashEqualsEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO hashEqualsEdges OPTIONS { overwriteMode: "ignore" }
 )
 RETURN {
 	"artAlgo": artifact.algorithm,

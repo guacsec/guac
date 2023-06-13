@@ -90,15 +90,13 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 
 	query := `LET firstPkg = FIRST(
 		FOR pkg IN Pkg
-		  FILTER pkg.root == "pkg" && pkg.type == @pkgType && pkg.namespace == @namespace
-			  FOR pkgHasName IN OUTBOUND pkg PkgHasName
-					  FILTER pkgHasName.name == @name
-				FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
+		  FILTER pkg.root == "pkg" && pkg.type == @pkgType && pkg.namespace == @namespace && pkg.name == @name
+				FOR pkgHasVersion IN OUTBOUND pkg PkgHasVersion
 						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
 				  RETURN {
 					"type": pkg.type,
 					"namespace": pkg.namespace,
-					"name": pkgHasName.name,
+					"name": pkg.name,
 					"version": pkgHasVersion.version,
 					"subpath": pkgHasVersion.subpath,
 					"qualifier_list": pkgHasVersion.qualifier_list,
@@ -116,12 +114,10 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 	  )
 	  
 	  LET edgeCollection = (FOR edgeData IN [
-		  {from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
-		  {from: firstPkg.versionDoc._id, to: isOccurrence._id, label: "subject"}]
+		  {fromKey: isOccurrence._key, toKey: artifact._key, from: isOccurrence._id, to: artifact._id, label: "has_occurrence"}, 
+		  {fromKey: firstPkg.versionDoc._key, toKey: isOccurrence._key, from: firstPkg.versionDoc._id, to: isOccurrence._id, label: "subject"}]
 	  
-		UPSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-		  INSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-		  UPDATE {} IN isOccurrencesEdges
+		INSERT { _key: CONCAT("isOccurrencesEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isOccurrencesEdges OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  RETURN {

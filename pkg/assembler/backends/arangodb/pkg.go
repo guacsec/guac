@@ -95,45 +95,29 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	values["qualifier"] = qualifiers
 
 	query := `LET root = FIRST(
-		UPSERT { root: "pkg", type: @pkgType, namespace: @namespace }
-		INSERT { root: "pkg", type: @pkgType, namespace: @namespace }
+		UPSERT { root: "pkg", type: @pkgType, namespace: @namespace, name: @name }
+		INSERT { root: "pkg", type: @pkgType, namespace: @namespace, name: @name }
 		UPDATE {}
-		IN Pkg OPTIONS { indexHint: "byRootTypeNamespace" }
-		RETURN NEW
-	  )
-	  
-	  LET name = FIRST(
-		UPSERT { name: @name, _parent: root._id }
-		INSERT { name: @name, _parent: root._id }
-		UPDATE {}
-		IN PkgName OPTIONS { indexHint: "byName" }
+		IN Pkg OPTIONS { indexHint: "byRootTypeNamespaceName" }
 		RETURN NEW
 	  )
 	  
 	  LET pkgVersionObj = FIRST(
-		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
-		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
+		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: root._id }
+		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: root._id }
 		UPDATE {}
 		IN PkgVersion OPTIONS { indexHint: "byAllVersion" }
 		RETURN NEW
 	  )
 	  
-	  LET pkgHasNameCollection = (
-		UPSERT { _from: root._id, _to: name._id, label : "PkgHasName" }
-		  INSERT { _from: root._id, _to: name._id, label : "PkgHasName" }
-		  UPDATE {} IN PkgHasName
-	  )
-	  
 	  LET pkgHasVersionCollection = (
-		UPSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
-		  INSERT { _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" }
-		  UPDATE {} IN PkgHasVersion
+		INSERT { _key: CONCAT("pkgHasVersion", root._key, pkgVersionObj._key), _from: root._id, _to: pkgVersionObj._id, label : "PkgHasVersion" } INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	  )
 		
 	RETURN {
     "type": root.type,
     "namespace": root.namespace,
-    "name": name.name,
+    "name": root.name,
     "version": pkgVersionObj.version,
     "subpath": pkgVersionObj.subpath,
     "qualifier_list": pkgVersionObj.qualifier_list

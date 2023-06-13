@@ -209,7 +209,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "Pkg", []string{"root", "type", "namespace"}, true, "byRootTypeNamespace"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "Pkg", []string{"root", "type", "namespace", "name"}, true, "byRootTypeNamespaceName"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for Pkg: %w", err)
 		}
 
@@ -224,9 +224,9 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// 	return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
 		// }
 
-		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false, "byName"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
-		}
+		// if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false, "byName"); err != nil {
+		// 	return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
+		// }
 
 		if err := createIndexPerCollection(ctx, db, "PkgHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasName: %w", err)

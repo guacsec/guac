@@ -77,32 +77,28 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 
 	query := `LET firstPkg = FIRST(
 		FOR pkg IN Pkg
-		    FILTER pkg.root == "pkg" && pkg.type == @pkgType && pkg.namespace == @namespace
-			  FOR pkgHasName IN OUTBOUND pkg PkgHasName
-					  FILTER pkgHasName.name == @name
-				FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
+		    FILTER pkg.root == "pkg" && pkg.type == @pkgType && pkg.namespace == @namespace && pkg.name == @name
+				FOR pkgHasVersion IN OUTBOUND pkg PkgHasVersion
 						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
 				  RETURN {
 					"type": pkg.type,
 					"namespace": pkg.namespace,
-					"name": pkgHasName.name,
+					"name": pkg.name,
 					"version": pkgHasVersion.version,
 					"subpath": pkgHasVersion.subpath,
 					"qualifier_list": pkgHasVersion.qualifier_list,
 					"versionDoc": pkgHasVersion
-				  }
+				}
 	  )
 	  
 	  LET secondPkg = FIRST(
 		FOR pkg IN Pkg
-		  FILTER pkg.root == "pkg" && pkg.type == @secondPkgType && pkg.namespace == @secondNamespace
-			  FOR pkgHasName IN OUTBOUND pkg PkgHasName
-					  FILTER pkgHasName.name == @secondName
+		  FILTER pkg.root == "pkg" && pkg.type == @secondPkgType && pkg.namespace == @secondNamespace && pkg.name == @secondName
 				  RETURN {
 					"type": pkg.type,
 					"namespace": pkg.namespace,
-					"name": pkgHasName.name,
-					"nameDoc": pkgHasName
+					"name": pkg.name,
+					"nameDoc": pkg
 				  }
 	  )
 	  
@@ -114,12 +110,10 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	  )
 	  
 	  LET edgeCollection = (FOR edgeData IN [
-		  {from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
-		  {from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
+		  {fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
+		  {fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
 	  
-		UPSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-		  INSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-		  UPDATE {} IN isDependencyEdges
+		  INSERT { _key: CONCAT("isDependencyEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  RETURN {
