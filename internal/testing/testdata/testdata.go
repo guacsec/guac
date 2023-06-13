@@ -1127,7 +1127,7 @@ var (
 				 "qualifiers":null,
 				 "subpath":"",
 				 "type":"pypi",
-				 "version":"3.12.1"
+				 "version":"3.12.2"
 			  },
 			  "DepPackages":null,
 			  "IsDepPackages":null,
@@ -1219,7 +1219,7 @@ var (
 				 "qualifiers":null,
 				 "subpath":"",
 				 "type":"pypi",
-				 "version":"3.12.1"
+				 "version":"3.12.2"
 			  },
 			  "IsDependency":{
 				 "collector":"",
