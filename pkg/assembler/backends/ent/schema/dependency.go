@@ -13,6 +13,12 @@ type Dependency struct {
 	ent.Schema
 }
 
+// func (Dependency) Annotations() []schema.Annotation {
+// 	return []schema.Annotation{
+// 		// field.ID("package_id", "dependent_package_id"),
+// 	}
+// }
+
 func (Dependency) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		// field.ID("package_id", "dependent_package_id"),
@@ -36,13 +42,13 @@ func (Dependency) Fields() []ent.Field {
 func (Dependency) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("package", PackageVersion.Type).
+			Required().
 			Field("package_id").
-			Unique().
-			Required(),
+			Unique(),
 		edge.To("dependent_package", PackageName.Type).
+			Required().
 			Field("dependent_package_id").
-			Unique().
-			Required(),
+			Unique(),
 	}
 }
 
