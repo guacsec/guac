@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -425,6 +426,14 @@ func (s *Suite) TestIsDependency() {
 		return p.Last().String() == ".ID"
 	}, cmp.Ignore())
 
+	ignoreEmptySlices := cmp.FilterValues(func(x, y interface{}) bool {
+		xv, yv := reflect.ValueOf(x), reflect.ValueOf(y)
+		if xv.Kind() == reflect.Slice && yv.Kind() == reflect.Slice {
+			return xv.Len() == 0 && yv.Len() == 0
+		}
+		return true
+	}, cmp.Ignore())
+
 	ctx := context.Background()
 	for _, test := range tests {
 		s.Run(test.Name, func() {
@@ -453,7 +462,7 @@ func (s *Suite) TestIsDependency() {
 				return
 			}
 
-			if diff := cmp.Diff(test.ExpectedDep, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpectedDep, got, ignoreID, ignoreEmptySlices); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

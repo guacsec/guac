@@ -60,8 +60,8 @@ var p1outName = &model.Package{
 	Type: "pypi",
 	Namespaces: []*model.PackageNamespace{{
 		Names: []*model.PackageName{{
-			Name: "tensorflow",
-			// Versions: []*model.PackageVersion{},
+			Name:     "tensorflow",
+			Versions: []*model.PackageVersion{},
 		}},
 	}},
 }
