@@ -91,7 +91,7 @@ format: fmt-md
 fmt-md:
 	npx --yes prettier --write --prose-wrap always **/*.md
 
-# generate code from autogen tools (gqlgen, genqlclient, mockgen)
+# generate code from autogen tools (gqlgen, genqlclient, mockgen, ent)
 .PHONY: generate
 generate:
 	go generate ./...
