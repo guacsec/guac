@@ -5,6 +5,6 @@ RUN rm -rf bin/ && make build
 
 FROM docker.io/library/ubuntu:22.04
 RUN apt update
-RUN apt install -y ca-certificates
+RUN apt install -y ca-certificates wget
 WORKDIR /root
 COPY --from=builder /go/src/github.com/guacsec/guac/bin/ /opt/guac/

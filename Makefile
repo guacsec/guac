@@ -99,7 +99,6 @@ generate:
 .PHONY: container
 container: check-docker-tool-check
 	$(CONTAINER) build -f dockerfiles/Dockerfile.guac-cont -t local-organic-guac .
-	$(CONTAINER) build -f dockerfiles/Dockerfile.healthcheck -t local-healthcheck .
 
 
 # To run the service, run `make container` and then `make service`

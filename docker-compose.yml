@@ -16,7 +16,7 @@ services:
   #   restart: on-failure
 
   nats:
-    image: "nats:2.9.14"
+    image: "nats:2.9.17-alpine"
     command: "--config /config/nats/js.conf -m 8222"
     ports:
       - "4222:4222"
@@ -25,29 +25,12 @@ services:
     volumes:
       - ./container_files/nats:/config/nats
     restart: on-failure
-
-  # Due to the following issues, we have another container to perform the healthcheck
-  #
-  # TODO(lumjjb): I attempted to do health check for neo4j as well, but
-  # the service running via neo4j status is not a good indication of if
-  # the service is ready for incoming requests.
-  # TODO(lumjjb): no good way right now to do a healtcheck for nats-server since
-  # it doesn't have utilities within it to perform the check from the container
-  # itself.
-  service-health-1:
-    image: $GUAC_HEALTH_IMAGE
-    stdin_open: true
-    tty: true
-    command:
-      - /bin/bash
-      - -c
-      - |
-        echo "checking-for-services";
-        until curl -I http://nats:8222 > /dev/null 2>&1; do sleep 5; done;
-        echo "nats-up";
-        # Neo4j is turned down for now since we are currently only using the in memory backend
-        # until curl -I http://neo4j:7474> /dev/null 2>&1; do sleep 5; done;
-        # echo "neo4j-up";
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
   guac-collectsub:
     image: $GUAC_IMAGE
@@ -57,10 +40,16 @@ services:
     ports:
       - "2782:2782"
     depends_on:
-      service-health-1:
-        condition: service_completed_successfully
+      nats:
+        condition: service_healthy
     volumes:
       - ./container_files/guac:/guac
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:2782"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
   guac-graphql:
     image: $GUAC_IMAGE
@@ -68,32 +57,18 @@ services:
     working_dir: /guac
     restart: on-failure
     depends_on:
-      service-health-1:
-        condition: service_completed_successfully
+      nats:
+        condition: service_healthy
     ports:
       - "$GUAC_API_PORT:8080"
     volumes:
       - ./container_files/guac:/guac
-
-  # GUAC ingestor and oci collector are dependent on the collectsub service to be up
-  service-health-2:
-    image: $GUAC_HEALTH_IMAGE
-    stdin_open: true
-    tty: true
-    command:
-      - /bin/bash
-      - -c
-      - |
-        echo "checking-for-services";
-        until nc -z guac-collectsub 2782 > /dev/null 2>&1; do sleep 5; done;
-        echo "guac collectsub up";
-        until curl -I http://guac-graphql:8080/query > /dev/null 2>&1; do sleep 5; done;
-        echo "graphql up";
-
-    depends_on:
-      service-health-1:
-        condition: service_completed_successfully
-
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
   guac-ingestor:
     image: $GUAC_IMAGE
@@ -101,11 +76,12 @@ services:
     working_dir: /guac
     restart: on-failure
     depends_on:
-      service-health-2:
-        condition: service_completed_successfully
+      guac-collectsub:
+        condition: service_healthy
+      guac-graphql:
+        condition: service_healthy
     volumes:
       - ./container_files/guac:/guac
-
 
   oci-collector:
     image: $GUAC_IMAGE
@@ -113,10 +89,13 @@ services:
     working_dir: /guac
     restart: on-failure
     depends_on:
-      service-health-2:
-        condition: service_completed_successfully
+      guac-collectsub:
+        condition: service_healthy
+      guac-graphql:
+        condition: service_healthy
     volumes:
       - ./container_files/guac:/guac
+
   depsdev-collector:
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect deps_dev"
@@ -125,17 +104,22 @@ services:
     environment:
       - DEPS_DEV_APIKEY
     depends_on:
-      service-health-2:
-        condition: service_completed_successfully
+      guac-collectsub:
+        condition: service_healthy
+      guac-graphql:
+        condition: service_healthy
     volumes:
       - ./container_files/guac:/guac
+
   osv-certifier:
     image: $GUAC_IMAGE
     command: "/opt/guac/guacone certifier osv"
     working_dir: /guac
     restart: on-failure
     depends_on:
-      service-health-2:
-        condition: service_completed_successfully
+      guac-collectsub:
+        condition: service_healthy
+      guac-graphql:
+        condition: service_healthy
     volumes:
       - ./container_files/guac:/guac

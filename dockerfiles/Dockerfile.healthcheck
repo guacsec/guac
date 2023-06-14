@@ -1,2 +1,0 @@
-FROM docker.io/library/ubuntu:22.04
-RUN apt update && apt install -y curl netcat
