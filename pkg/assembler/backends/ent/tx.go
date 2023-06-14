@@ -26,6 +26,12 @@ type Tx struct {
 	PackageNode *PackageNodeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
+	// Source is the client for interacting with the Source builders.
+	Source *SourceClient
+	// SourceName is the client for interacting with the SourceName builders.
+	SourceName *SourceNameClient
+	// SourceNamespace is the client for interacting with the SourceNamespace builders.
+	SourceNamespace *SourceNamespaceClient
 
 	// lazily loaded.
 	client     *Client
@@ -164,6 +170,9 @@ func (tx *Tx) init() {
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
 	tx.PackageNode = NewPackageNodeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
+	tx.Source = NewSourceClient(tx.config)
+	tx.SourceName = NewSourceNameClient(tx.config)
+	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

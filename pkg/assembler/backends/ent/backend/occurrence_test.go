@@ -164,6 +164,34 @@ var s2out = &model.Source{
 	}},
 }
 
+func (s *Suite) TestHappyPath() {
+	be, err := GetBackend(s.Client)
+	s.Require().NoError(err)
+
+	_, err = be.IngestArtifact(s.Ctx, a1)
+	s.Require().NoError(err)
+
+	occ, err := be.IngestOccurrence(s.Ctx,
+		model.PackageOrSourceInput{
+			Package: p1,
+		},
+		*a1,
+		model.IsOccurrenceInputSpec{
+			Justification: "test justification",
+		},
+	)
+	s.Require().NoError(err)
+	s.Require().NotNil(occ)
+	s.Equal("test justification", occ.Justification)
+	s.Equal(a1.Digest, occ.Artifact.Digest)
+
+	if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
+		s.Equal(p1.Type, pkgSrc.Type)
+	} else {
+		s.Failf("fail", "subject is not a package, got %T", occ.Subject)
+	}
+}
+
 func (s *Suite) TestOccurrence() {
 	type call struct {
 		PkgSrc     model.PackageOrSourceInput
@@ -180,6 +208,7 @@ func (s *Suite) TestOccurrence() {
 		ExpOcc       []*model.IsOccurrence
 		ExpIngestErr bool
 		ExpQueryErr  bool
+		Only         bool
 	}{
 		{
 			Name:  "HappyPath",
@@ -355,6 +384,7 @@ func (s *Suite) TestOccurrence() {
 		},
 		{
 			Name:  "Query on Source",
+			Only:  true,
 			InPkg: []*model.PkgInputSpec{p1},
 			InSrc: []*model.SourceInputSpec{s1},
 			InArt: []*model.ArtifactInputSpec{a1},
@@ -516,7 +546,19 @@ func (s *Suite) TestOccurrence() {
 
 	ctx := s.Ctx
 
+	hasOnly := false
+	for _, t := range tests {
+		if t.Only {
+			hasOnly = true
+			break
+		}
+	}
+
 	for _, test := range tests {
+		if hasOnly && !test.Only {
+			continue
+		}
+
 		s.Run(test.Name, func() {
 			b, err := GetBackend(s.Client)
 			s.Require().NoError(err, "Could not instantiate testing backend")

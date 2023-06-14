@@ -26,6 +26,8 @@ func (PackageName) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("namespace", PackageNamespace.Type).Required().Field("namespace_id").Ref("names").Unique(),
 		edge.To("versions", PackageVersion.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		// edge.From("occurrences", PackageName.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		// edge.To("depends_on", PackageName.Type).Through("dependencies", IsOccurrence),
 	}
 }
 

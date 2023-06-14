@@ -4,6 +4,7 @@ package artifact
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -190,6 +191,29 @@ func DigestEqualFold(v string) predicate.Artifact {
 // DigestContainsFold applies the ContainsFold predicate on the "digest" field.
 func DigestContainsFold(v string) predicate.Artifact {
 	return predicate.Artifact(sql.FieldContainsFold(FieldDigest, v))
+}
+
+// HasOccurrences applies the HasEdge predicate on the "occurrences" edge.
+func HasOccurrences() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, OccurrencesTable, OccurrencesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOccurrencesWith applies the HasEdge predicate on the "occurrences" edge with a given conditions (other predicates).
+func HasOccurrencesWith(preds ...predicate.IsOccurrence) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newOccurrencesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

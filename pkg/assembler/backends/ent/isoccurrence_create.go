@@ -13,6 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // IsOccurrenceCreate is the builder for creating a IsOccurrence entity.
@@ -75,9 +76,28 @@ func (ioc *IsOccurrenceCreate) SetCollector(s string) *IsOccurrenceCreate {
 	return ioc
 }
 
-// SetPackage sets the "package" edge to the PackageVersion entity.
-func (ioc *IsOccurrenceCreate) SetPackage(p *PackageVersion) *IsOccurrenceCreate {
-	return ioc.SetPackageID(p.ID)
+// SetPackageVersionID sets the "package_version" edge to the PackageVersion entity by ID.
+func (ioc *IsOccurrenceCreate) SetPackageVersionID(id int) *IsOccurrenceCreate {
+	ioc.mutation.SetPackageVersionID(id)
+	return ioc
+}
+
+// SetNillablePackageVersionID sets the "package_version" edge to the PackageVersion entity by ID if the given value is not nil.
+func (ioc *IsOccurrenceCreate) SetNillablePackageVersionID(id *int) *IsOccurrenceCreate {
+	if id != nil {
+		ioc = ioc.SetPackageVersionID(*id)
+	}
+	return ioc
+}
+
+// SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
+func (ioc *IsOccurrenceCreate) SetPackageVersion(p *PackageVersion) *IsOccurrenceCreate {
+	return ioc.SetPackageVersionID(p.ID)
+}
+
+// SetSource sets the "source" edge to the SourceName entity.
+func (ioc *IsOccurrenceCreate) SetSource(s *SourceName) *IsOccurrenceCreate {
+	return ioc.SetSourceID(s.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
@@ -161,10 +181,6 @@ func (ioc *IsOccurrenceCreate) createSpec() (*IsOccurrence, *sqlgraph.CreateSpec
 		_spec = sqlgraph.NewCreateSpec(isoccurrence.Table, sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ioc.conflict
-	if value, ok := ioc.mutation.SourceID(); ok {
-		_spec.SetField(isoccurrence.FieldSourceID, field.TypeInt, value)
-		_node.SourceID = value
-	}
 	if value, ok := ioc.mutation.Justification(); ok {
 		_spec.SetField(isoccurrence.FieldJustification, field.TypeString, value)
 		_node.Justification = value
@@ -177,12 +193,12 @@ func (ioc *IsOccurrenceCreate) createSpec() (*IsOccurrence, *sqlgraph.CreateSpec
 		_spec.SetField(isoccurrence.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if nodes := ioc.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := ioc.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   isoccurrence.PackageTable,
-			Columns: []string{isoccurrence.PackageColumn},
+			Table:   isoccurrence.PackageVersionTable,
+			Columns: []string{isoccurrence.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -191,7 +207,24 @@ func (ioc *IsOccurrenceCreate) createSpec() (*IsOccurrence, *sqlgraph.CreateSpec
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.PackageID = nodes[0]
+		_node.PackageID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ioc.mutation.SourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   isoccurrence.SourceTable,
+			Columns: []string{isoccurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.SourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ioc.mutation.ArtifactIDs(); len(nodes) > 0 {
@@ -290,12 +323,6 @@ func (u *IsOccurrenceUpsert) SetSourceID(v int) *IsOccurrenceUpsert {
 // UpdateSourceID sets the "source_id" field to the value that was provided on create.
 func (u *IsOccurrenceUpsert) UpdateSourceID() *IsOccurrenceUpsert {
 	u.SetExcluded(isoccurrence.FieldSourceID)
-	return u
-}
-
-// AddSourceID adds v to the "source_id" field.
-func (u *IsOccurrenceUpsert) AddSourceID(v int) *IsOccurrenceUpsert {
-	u.Add(isoccurrence.FieldSourceID, v)
 	return u
 }
 
@@ -418,13 +445,6 @@ func (u *IsOccurrenceUpsertOne) ClearPackageID() *IsOccurrenceUpsertOne {
 func (u *IsOccurrenceUpsertOne) SetSourceID(v int) *IsOccurrenceUpsertOne {
 	return u.Update(func(s *IsOccurrenceUpsert) {
 		s.SetSourceID(v)
-	})
-}
-
-// AddSourceID adds v to the "source_id" field.
-func (u *IsOccurrenceUpsertOne) AddSourceID(v int) *IsOccurrenceUpsertOne {
-	return u.Update(func(s *IsOccurrenceUpsert) {
-		s.AddSourceID(v)
 	})
 }
 
@@ -722,13 +742,6 @@ func (u *IsOccurrenceUpsertBulk) ClearPackageID() *IsOccurrenceUpsertBulk {
 func (u *IsOccurrenceUpsertBulk) SetSourceID(v int) *IsOccurrenceUpsertBulk {
 	return u.Update(func(s *IsOccurrenceUpsert) {
 		s.SetSourceID(v)
-	})
-}
-
-// AddSourceID adds v to the "source_id" field.
-func (u *IsOccurrenceUpsertBulk) AddSourceID(v int) *IsOccurrenceUpsertBulk {
-	return u.Update(func(s *IsOccurrenceUpsert) {
-		s.AddSourceID(v)
 	})
 }
 

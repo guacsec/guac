@@ -19,6 +19,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -86,6 +89,9 @@ func checkColumn(table, column string) error {
 			packagenamespace.Table: packagenamespace.ValidColumn,
 			packagenode.Table:      packagenode.ValidColumn,
 			packageversion.Table:   packageversion.ValidColumn,
+			source.Table:           source.ValidColumn,
+			sourcename.Table:       sourcename.ValidColumn,
+			sourcenamespace.Table:  sourcenamespace.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

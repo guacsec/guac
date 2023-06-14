@@ -24,19 +24,28 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
-	// EdgePackage holds the string denoting the package edge name in mutations.
-	EdgePackage = "package"
+	// EdgePackageVersion holds the string denoting the package_version edge name in mutations.
+	EdgePackageVersion = "package_version"
+	// EdgeSource holds the string denoting the source edge name in mutations.
+	EdgeSource = "source"
 	// EdgeArtifact holds the string denoting the artifact edge name in mutations.
 	EdgeArtifact = "artifact"
 	// Table holds the table name of the isoccurrence in the database.
 	Table = "is_occurrences"
-	// PackageTable is the table that holds the package relation/edge.
-	PackageTable = "is_occurrences"
-	// PackageInverseTable is the table name for the PackageVersion entity.
+	// PackageVersionTable is the table that holds the package_version relation/edge.
+	PackageVersionTable = "is_occurrences"
+	// PackageVersionInverseTable is the table name for the PackageVersion entity.
 	// It exists in this package in order to avoid circular dependency with the "packageversion" package.
-	PackageInverseTable = "package_versions"
-	// PackageColumn is the table column denoting the package relation/edge.
-	PackageColumn = "package_id"
+	PackageVersionInverseTable = "package_versions"
+	// PackageVersionColumn is the table column denoting the package_version relation/edge.
+	PackageVersionColumn = "package_id"
+	// SourceTable is the table that holds the source relation/edge.
+	SourceTable = "is_occurrences"
+	// SourceInverseTable is the table name for the SourceName entity.
+	// It exists in this package in order to avoid circular dependency with the "sourcename" package.
+	SourceInverseTable = "source_names"
+	// SourceColumn is the table column denoting the source relation/edge.
+	SourceColumn = "source_id"
 	// ArtifactTable is the table that holds the artifact relation/edge.
 	ArtifactTable = "is_occurrences"
 	// ArtifactInverseTable is the table name for the Artifact entity.
@@ -105,10 +114,17 @@ func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
 }
 
-// ByPackageField orders the results by package field.
-func ByPackageField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByPackageVersionField orders the results by package_version field.
+func ByPackageVersionField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPackageStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newPackageVersionStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// BySourceField orders the results by source field.
+func BySourceField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSourceStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -118,11 +134,18 @@ func ByArtifactField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newArtifactStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newPackageStep() *sqlgraph.Step {
+func newPackageVersionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PackageInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, PackageTable, PackageColumn),
+		sqlgraph.To(PackageVersionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, PackageVersionTable, PackageVersionColumn),
+	)
+}
+func newSourceStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SourceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, SourceTable, SourceColumn),
 	)
 }
 func newArtifactStep() *sqlgraph.Step {

@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -35,7 +36,7 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInpu
 		client := ent.FromContext(ctx)
 		id, err := client.Artifact.Create().
 			SetAlgorithm(art.Algorithm).
-			SetDigest(art.Digest).
+			SetDigest(strings.ToLower(art.Digest)).
 			OnConflict(
 				sql.ConflictColumns(
 					artifact.FieldAlgorithm,

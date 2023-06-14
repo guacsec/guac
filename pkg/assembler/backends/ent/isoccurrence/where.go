@@ -133,26 +133,6 @@ func SourceIDNotIn(vs ...int) predicate.IsOccurrence {
 	return predicate.IsOccurrence(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
-// SourceIDGT applies the GT predicate on the "source_id" field.
-func SourceIDGT(v int) predicate.IsOccurrence {
-	return predicate.IsOccurrence(sql.FieldGT(FieldSourceID, v))
-}
-
-// SourceIDGTE applies the GTE predicate on the "source_id" field.
-func SourceIDGTE(v int) predicate.IsOccurrence {
-	return predicate.IsOccurrence(sql.FieldGTE(FieldSourceID, v))
-}
-
-// SourceIDLT applies the LT predicate on the "source_id" field.
-func SourceIDLT(v int) predicate.IsOccurrence {
-	return predicate.IsOccurrence(sql.FieldLT(FieldSourceID, v))
-}
-
-// SourceIDLTE applies the LTE predicate on the "source_id" field.
-func SourceIDLTE(v int) predicate.IsOccurrence {
-	return predicate.IsOccurrence(sql.FieldLTE(FieldSourceID, v))
-}
-
 // SourceIDIsNil applies the IsNil predicate on the "source_id" field.
 func SourceIDIsNil() predicate.IsOccurrence {
 	return predicate.IsOccurrence(sql.FieldIsNull(FieldSourceID))
@@ -378,21 +358,44 @@ func CollectorContainsFold(v string) predicate.IsOccurrence {
 	return predicate.IsOccurrence(sql.FieldContainsFold(FieldCollector, v))
 }
 
-// HasPackage applies the HasEdge predicate on the "package" edge.
-func HasPackage() predicate.IsOccurrence {
+// HasPackageVersion applies the HasEdge predicate on the "package_version" edge.
+func HasPackageVersion() predicate.IsOccurrence {
 	return predicate.IsOccurrence(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, PackageTable, PackageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, PackageVersionTable, PackageVersionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPackageWith applies the HasEdge predicate on the "package" edge with a given conditions (other predicates).
-func HasPackageWith(preds ...predicate.PackageVersion) predicate.IsOccurrence {
+// HasPackageVersionWith applies the HasEdge predicate on the "package_version" edge with a given conditions (other predicates).
+func HasPackageVersionWith(preds ...predicate.PackageVersion) predicate.IsOccurrence {
 	return predicate.IsOccurrence(func(s *sql.Selector) {
-		step := newPackageStep()
+		step := newPackageVersionStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSource applies the HasEdge predicate on the "source" edge.
+func HasSource() predicate.IsOccurrence {
+	return predicate.IsOccurrence(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, SourceTable, SourceColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSourceWith applies the HasEdge predicate on the "source" edge with a given conditions (other predicates).
+func HasSourceWith(preds ...predicate.SourceName) predicate.IsOccurrence {
+	return predicate.IsOccurrence(func(s *sql.Selector) {
+		step := newSourceStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

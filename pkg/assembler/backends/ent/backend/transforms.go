@@ -94,9 +94,23 @@ func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
 }
 
 func (e *EntBackend) buildPackageResponse(ctx context.Context, id int, filter model.PkgSpec) (*model.Package, error) {
+	// e.client.PackageNode.Query().
+	// 	Where().
+	// 	WithNamespaces(func(q *ent.PackageNamespaceQuery) {
+	// 		q.Where(optionalPredicate(filter.Namespace, packagenamespace.NamespaceEQ))
+	// 		q.WithNames(func(q *ent.PackageNameQuery) {
+	// 			q.Where(optionalPredicate(filter.Name, packagename.NameEQ))
+	// 			q.WithVersions(func(q *ent.PackageVersionQuery) {
+	// 				q.Where(optionalPredicate(filter.Version, packageversion.VersionEQ))
+	// 				q.Where(optionalPredicate(filter.Subpath, packageversion.SubpathEQ))
+	// 			})
+	// 		})
+	// 	})
+
 	// Version
 	records, err := e.client.PackageVersion.Query().
 		Where(
+			optionalPredicate(filter.ID, IDEQ),
 			optionalPredicate(filter.Version, packageversion.VersionEQ),
 			optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
 		).
@@ -110,9 +124,9 @@ func (e *EntBackend) buildPackageResponse(ctx context.Context, id int, filter mo
 		return nil, nil
 	}
 
-	if filter.Name == nil {
-		return nil, nil
-	}
+	// if filter.Name == nil {
+	// 	return nil, nil
+	// }
 	pvl := collect(records, toModelPackageVersion)
 
 	// Name
@@ -127,8 +141,7 @@ func (e *EntBackend) buildPackageResponse(ctx context.Context, id int, filter mo
 
 	// Namespace
 	pnsl := []*model.PackageNamespace{}
-	pnsq := nameRecord.QueryNamespace().Where(optionalPredicate(filter.Namespace, packagenamespace.NamespaceEQ))
-	nsRecord, err := pnsq.Only(ctx)
+	nsRecord, err := nameRecord.QueryNamespace().Where(optionalPredicate(filter.Namespace, packagenamespace.NamespaceEQ)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ package artifact
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -15,8 +16,17 @@ const (
 	FieldAlgorithm = "algorithm"
 	// FieldDigest holds the string denoting the digest field in the database.
 	FieldDigest = "digest"
+	// EdgeOccurrences holds the string denoting the occurrences edge name in mutations.
+	EdgeOccurrences = "occurrences"
 	// Table holds the table name of the artifact in the database.
 	Table = "artifacts"
+	// OccurrencesTable is the table that holds the occurrences relation/edge.
+	OccurrencesTable = "is_occurrences"
+	// OccurrencesInverseTable is the table name for the IsOccurrence entity.
+	// It exists in this package in order to avoid circular dependency with the "isoccurrence" package.
+	OccurrencesInverseTable = "is_occurrences"
+	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
+	OccurrencesColumn = "artifact_id"
 )
 
 // Columns holds all SQL columns for artifact fields.
@@ -52,4 +62,25 @@ func ByAlgorithm(opts ...sql.OrderTermOption) OrderOption {
 // ByDigest orders the results by the digest field.
 func ByDigest(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDigest, opts...).ToFunc()
+}
+
+// ByOccurrencesCount orders the results by occurrences count.
+func ByOccurrencesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOccurrencesStep(), opts...)
+	}
+}
+
+// ByOccurrences orders the results by occurrences terms.
+func ByOccurrences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOccurrencesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newOccurrencesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OccurrencesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, OccurrencesTable, OccurrencesColumn),
+	)
 }

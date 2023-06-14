@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 )
 
 // ArtifactCreate is the builder for creating a Artifact entity.
@@ -31,6 +32,21 @@ func (ac *ArtifactCreate) SetAlgorithm(s string) *ArtifactCreate {
 func (ac *ArtifactCreate) SetDigest(s string) *ArtifactCreate {
 	ac.mutation.SetDigest(s)
 	return ac
+}
+
+// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by IDs.
+func (ac *ArtifactCreate) AddOccurrenceIDs(ids ...int) *ArtifactCreate {
+	ac.mutation.AddOccurrenceIDs(ids...)
+	return ac
+}
+
+// AddOccurrences adds the "occurrences" edges to the IsOccurrence entity.
+func (ac *ArtifactCreate) AddOccurrences(i ...*IsOccurrence) *ArtifactCreate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return ac.AddOccurrenceIDs(ids...)
 }
 
 // Mutation returns the ArtifactMutation object of the builder.
@@ -107,6 +123,22 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.Digest(); ok {
 		_spec.SetField(artifact.FieldDigest, field.TypeString, value)
 		_node.Digest = value
+	}
+	if nodes := ac.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

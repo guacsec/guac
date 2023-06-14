@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -11,16 +12,18 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ArtifactQuery is the builder for querying Artifact entities.
 type ArtifactQuery struct {
 	config
-	ctx        *QueryContext
-	order      []artifact.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Artifact
+	ctx             *QueryContext
+	order           []artifact.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.Artifact
+	withOccurrences *IsOccurrenceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -55,6 +58,28 @@ func (aq *ArtifactQuery) Unique(unique bool) *ArtifactQuery {
 func (aq *ArtifactQuery) Order(o ...artifact.OrderOption) *ArtifactQuery {
 	aq.order = append(aq.order, o...)
 	return aq
+}
+
+// QueryOccurrences chains the current query on the "occurrences" edge.
+func (aq *ArtifactQuery) QueryOccurrences() *IsOccurrenceQuery {
+	query := (&IsOccurrenceClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(isoccurrence.Table, isoccurrence.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.OccurrencesTable, artifact.OccurrencesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Artifact entity from the query.
@@ -244,15 +269,27 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		return nil
 	}
 	return &ArtifactQuery{
-		config:     aq.config,
-		ctx:        aq.ctx.Clone(),
-		order:      append([]artifact.OrderOption{}, aq.order...),
-		inters:     append([]Interceptor{}, aq.inters...),
-		predicates: append([]predicate.Artifact{}, aq.predicates...),
+		config:          aq.config,
+		ctx:             aq.ctx.Clone(),
+		order:           append([]artifact.OrderOption{}, aq.order...),
+		inters:          append([]Interceptor{}, aq.inters...),
+		predicates:      append([]predicate.Artifact{}, aq.predicates...),
+		withOccurrences: aq.withOccurrences.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
 	}
+}
+
+// WithOccurrences tells the query-builder to eager-load the nodes that are connected to
+// the "occurrences" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithOccurrences(opts ...func(*IsOccurrenceQuery)) *ArtifactQuery {
+	query := (&IsOccurrenceClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withOccurrences = query
+	return aq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -331,8 +368,11 @@ func (aq *ArtifactQuery) prepareQuery(ctx context.Context) error {
 
 func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Artifact, error) {
 	var (
-		nodes = []*Artifact{}
-		_spec = aq.querySpec()
+		nodes       = []*Artifact{}
+		_spec       = aq.querySpec()
+		loadedTypes = [1]bool{
+			aq.withOccurrences != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Artifact).scanValues(nil, columns)
@@ -340,6 +380,7 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Artifact{config: aq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -351,7 +392,45 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := aq.withOccurrences; query != nil {
+		if err := aq.loadOccurrences(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Occurrences = []*IsOccurrence{} },
+			func(n *Artifact, e *IsOccurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *IsOccurrenceQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *IsOccurrence)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(isoccurrence.FieldArtifactID)
+	}
+	query.Where(predicate.IsOccurrence(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.OccurrencesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ArtifactID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (aq *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {

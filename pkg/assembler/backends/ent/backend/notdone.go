@@ -48,9 +48,7 @@ func (b *EntBackend) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqu
 func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	return nil, nil
 }
-func (b *EntBackend) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	return nil, nil
-}
+
 func (b *EntBackend) IsVulnerability(ctx context.Context, isVulnerabilitySpec *model.IsVulnerabilitySpec) ([]*model.IsVulnerability, error) {
 	return nil, nil
 }

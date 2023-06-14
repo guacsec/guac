@@ -26,3 +26,12 @@ type PackageNode func(*sql.Selector)
 
 // PackageVersion is the predicate function for packageversion builders.
 type PackageVersion func(*sql.Selector)
+
+// Source is the predicate function for source builders.
+type Source func(*sql.Selector)
+
+// SourceName is the predicate function for sourcename builders.
+type SourceName func(*sql.Selector)
+
+// SourceNamespace is the predicate function for sourcenamespace builders.
+type SourceNamespace func(*sql.Selector)

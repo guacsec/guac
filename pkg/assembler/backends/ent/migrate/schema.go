@@ -3,7 +3,6 @@
 package migrate
 
 import (
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -49,11 +48,11 @@ var (
 	// IsOccurrencesColumns holds the columns for the "is_occurrences" table.
 	IsOccurrencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "source_id", Type: field.TypeInt, Nullable: true},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "package_id", Type: field.TypeInt, Nullable: true},
+		{Name: "source_id", Type: field.TypeInt, Nullable: true},
 		{Name: "artifact_id", Type: field.TypeInt},
 	}
 	// IsOccurrencesTable holds the schema information for the "is_occurrences" table.
@@ -63,9 +62,15 @@ var (
 		PrimaryKey: []*schema.Column{IsOccurrencesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "is_occurrences_package_versions_package",
-				Columns:    []*schema.Column{IsOccurrencesColumns[5]},
+				Symbol:     "is_occurrences_package_versions_package_version",
+				Columns:    []*schema.Column{IsOccurrencesColumns[4]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "is_occurrences_source_names_source",
+				Columns:    []*schema.Column{IsOccurrencesColumns[5]},
+				RefColumns: []*schema.Column{SourceNamesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
@@ -77,12 +82,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "isoccurrence_justification_origin_collector_package_id_artifact_id",
+				Name:    "occurrence_unique_package",
 				Unique:  true,
-				Columns: []*schema.Column{IsOccurrencesColumns[2], IsOccurrencesColumns[3], IsOccurrencesColumns[4], IsOccurrencesColumns[5], IsOccurrencesColumns[6]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "package_id <> NULL OR source_id <> NULL",
-				},
+				Columns: []*schema.Column{IsOccurrencesColumns[1], IsOccurrencesColumns[2], IsOccurrencesColumns[3], IsOccurrencesColumns[5], IsOccurrencesColumns[4], IsOccurrencesColumns[6]},
 			},
 		},
 	}
@@ -180,6 +182,84 @@ var (
 			},
 		},
 	}
+	// SourcesColumns holds the columns for the "sources" table.
+	SourcesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeString},
+		{Name: "namespace", Type: field.TypeString, Nullable: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "tag", Type: field.TypeString, Nullable: true},
+		{Name: "commit", Type: field.TypeString, Nullable: true},
+	}
+	// SourcesTable holds the schema information for the "sources" table.
+	SourcesTable = &schema.Table{
+		Name:       "sources",
+		Columns:    SourcesColumns,
+		PrimaryKey: []*schema.Column{SourcesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "source_type_namespace_name_tag_commit",
+				Unique:  true,
+				Columns: []*schema.Column{SourcesColumns[1], SourcesColumns[2], SourcesColumns[3], SourcesColumns[4], SourcesColumns[5]},
+			},
+		},
+	}
+	// SourceNamesColumns holds the columns for the "source_names" table.
+	SourceNamesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "commit", Type: field.TypeString, Nullable: true},
+		{Name: "tag", Type: field.TypeString, Nullable: true},
+		{Name: "namespace_id", Type: field.TypeInt},
+	}
+	// SourceNamesTable holds the schema information for the "source_names" table.
+	SourceNamesTable = &schema.Table{
+		Name:       "source_names",
+		Columns:    SourceNamesColumns,
+		PrimaryKey: []*schema.Column{SourceNamesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "source_names_source_namespaces_namespace",
+				Columns:    []*schema.Column{SourceNamesColumns[4]},
+				RefColumns: []*schema.Column{SourceNamespacesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sourcename_name_commit_tag",
+				Unique:  true,
+				Columns: []*schema.Column{SourceNamesColumns[1], SourceNamesColumns[2], SourceNamesColumns[3]},
+			},
+		},
+	}
+	// SourceNamespacesColumns holds the columns for the "source_namespaces" table.
+	SourceNamespacesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "namespace", Type: field.TypeString},
+		{Name: "source_id", Type: field.TypeInt},
+	}
+	// SourceNamespacesTable holds the schema information for the "source_namespaces" table.
+	SourceNamespacesTable = &schema.Table{
+		Name:       "source_namespaces",
+		Columns:    SourceNamespacesColumns,
+		PrimaryKey: []*schema.Column{SourceNamespacesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "source_namespaces_sources_source",
+				Columns:    []*schema.Column{SourceNamespacesColumns[2]},
+				RefColumns: []*schema.Column{SourcesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sourcenamespace_namespace_source_id",
+				Unique:  true,
+				Columns: []*schema.Column{SourceNamespacesColumns[1], SourceNamespacesColumns[2]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
@@ -189,13 +269,19 @@ var (
 		PackageNamespacesTable,
 		PackageNodesTable,
 		PackageVersionsTable,
+		SourcesTable,
+		SourceNamesTable,
+		SourceNamespacesTable,
 	}
 )
 
 func init() {
 	IsOccurrencesTable.ForeignKeys[0].RefTable = PackageVersionsTable
-	IsOccurrencesTable.ForeignKeys[1].RefTable = ArtifactsTable
+	IsOccurrencesTable.ForeignKeys[1].RefTable = SourceNamesTable
+	IsOccurrencesTable.ForeignKeys[2].RefTable = ArtifactsTable
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageNodesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
+	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
+	SourceNamespacesTable.ForeignKeys[0].RefTable = SourcesTable
 }

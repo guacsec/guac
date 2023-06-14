@@ -14,6 +14,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // IsOccurrenceUpdate is the builder for updating IsOccurrence entities.
@@ -51,7 +52,6 @@ func (iou *IsOccurrenceUpdate) ClearPackageID() *IsOccurrenceUpdate {
 
 // SetSourceID sets the "source_id" field.
 func (iou *IsOccurrenceUpdate) SetSourceID(i int) *IsOccurrenceUpdate {
-	iou.mutation.ResetSourceID()
 	iou.mutation.SetSourceID(i)
 	return iou
 }
@@ -61,12 +61,6 @@ func (iou *IsOccurrenceUpdate) SetNillableSourceID(i *int) *IsOccurrenceUpdate {
 	if i != nil {
 		iou.SetSourceID(*i)
 	}
-	return iou
-}
-
-// AddSourceID adds i to the "source_id" field.
-func (iou *IsOccurrenceUpdate) AddSourceID(i int) *IsOccurrenceUpdate {
-	iou.mutation.AddSourceID(i)
 	return iou
 }
 
@@ -100,9 +94,28 @@ func (iou *IsOccurrenceUpdate) SetCollector(s string) *IsOccurrenceUpdate {
 	return iou
 }
 
-// SetPackage sets the "package" edge to the PackageVersion entity.
-func (iou *IsOccurrenceUpdate) SetPackage(p *PackageVersion) *IsOccurrenceUpdate {
-	return iou.SetPackageID(p.ID)
+// SetPackageVersionID sets the "package_version" edge to the PackageVersion entity by ID.
+func (iou *IsOccurrenceUpdate) SetPackageVersionID(id int) *IsOccurrenceUpdate {
+	iou.mutation.SetPackageVersionID(id)
+	return iou
+}
+
+// SetNillablePackageVersionID sets the "package_version" edge to the PackageVersion entity by ID if the given value is not nil.
+func (iou *IsOccurrenceUpdate) SetNillablePackageVersionID(id *int) *IsOccurrenceUpdate {
+	if id != nil {
+		iou = iou.SetPackageVersionID(*id)
+	}
+	return iou
+}
+
+// SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
+func (iou *IsOccurrenceUpdate) SetPackageVersion(p *PackageVersion) *IsOccurrenceUpdate {
+	return iou.SetPackageVersionID(p.ID)
+}
+
+// SetSource sets the "source" edge to the SourceName entity.
+func (iou *IsOccurrenceUpdate) SetSource(s *SourceName) *IsOccurrenceUpdate {
+	return iou.SetSourceID(s.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
@@ -115,9 +128,15 @@ func (iou *IsOccurrenceUpdate) Mutation() *IsOccurrenceMutation {
 	return iou.mutation
 }
 
-// ClearPackage clears the "package" edge to the PackageVersion entity.
-func (iou *IsOccurrenceUpdate) ClearPackage() *IsOccurrenceUpdate {
-	iou.mutation.ClearPackage()
+// ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
+func (iou *IsOccurrenceUpdate) ClearPackageVersion() *IsOccurrenceUpdate {
+	iou.mutation.ClearPackageVersion()
+	return iou
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (iou *IsOccurrenceUpdate) ClearSource() *IsOccurrenceUpdate {
+	iou.mutation.ClearSource()
 	return iou
 }
 
@@ -174,15 +193,6 @@ func (iou *IsOccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := iou.mutation.SourceID(); ok {
-		_spec.SetField(isoccurrence.FieldSourceID, field.TypeInt, value)
-	}
-	if value, ok := iou.mutation.AddedSourceID(); ok {
-		_spec.AddField(isoccurrence.FieldSourceID, field.TypeInt, value)
-	}
-	if iou.mutation.SourceIDCleared() {
-		_spec.ClearField(isoccurrence.FieldSourceID, field.TypeInt)
-	}
 	if value, ok := iou.mutation.Justification(); ok {
 		_spec.SetField(isoccurrence.FieldJustification, field.TypeString, value)
 	}
@@ -192,12 +202,12 @@ func (iou *IsOccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := iou.mutation.Collector(); ok {
 		_spec.SetField(isoccurrence.FieldCollector, field.TypeString, value)
 	}
-	if iou.mutation.PackageCleared() {
+	if iou.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   isoccurrence.PackageTable,
-			Columns: []string{isoccurrence.PackageColumn},
+			Table:   isoccurrence.PackageVersionTable,
+			Columns: []string{isoccurrence.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -205,15 +215,44 @@ func (iou *IsOccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iou.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := iou.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   isoccurrence.PackageTable,
-			Columns: []string{isoccurrence.PackageColumn},
+			Table:   isoccurrence.PackageVersionTable,
+			Columns: []string{isoccurrence.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if iou.mutation.SourceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   isoccurrence.SourceTable,
+			Columns: []string{isoccurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iou.mutation.SourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   isoccurrence.SourceTable,
+			Columns: []string{isoccurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -292,7 +331,6 @@ func (iouo *IsOccurrenceUpdateOne) ClearPackageID() *IsOccurrenceUpdateOne {
 
 // SetSourceID sets the "source_id" field.
 func (iouo *IsOccurrenceUpdateOne) SetSourceID(i int) *IsOccurrenceUpdateOne {
-	iouo.mutation.ResetSourceID()
 	iouo.mutation.SetSourceID(i)
 	return iouo
 }
@@ -302,12 +340,6 @@ func (iouo *IsOccurrenceUpdateOne) SetNillableSourceID(i *int) *IsOccurrenceUpda
 	if i != nil {
 		iouo.SetSourceID(*i)
 	}
-	return iouo
-}
-
-// AddSourceID adds i to the "source_id" field.
-func (iouo *IsOccurrenceUpdateOne) AddSourceID(i int) *IsOccurrenceUpdateOne {
-	iouo.mutation.AddSourceID(i)
 	return iouo
 }
 
@@ -341,9 +373,28 @@ func (iouo *IsOccurrenceUpdateOne) SetCollector(s string) *IsOccurrenceUpdateOne
 	return iouo
 }
 
-// SetPackage sets the "package" edge to the PackageVersion entity.
-func (iouo *IsOccurrenceUpdateOne) SetPackage(p *PackageVersion) *IsOccurrenceUpdateOne {
-	return iouo.SetPackageID(p.ID)
+// SetPackageVersionID sets the "package_version" edge to the PackageVersion entity by ID.
+func (iouo *IsOccurrenceUpdateOne) SetPackageVersionID(id int) *IsOccurrenceUpdateOne {
+	iouo.mutation.SetPackageVersionID(id)
+	return iouo
+}
+
+// SetNillablePackageVersionID sets the "package_version" edge to the PackageVersion entity by ID if the given value is not nil.
+func (iouo *IsOccurrenceUpdateOne) SetNillablePackageVersionID(id *int) *IsOccurrenceUpdateOne {
+	if id != nil {
+		iouo = iouo.SetPackageVersionID(*id)
+	}
+	return iouo
+}
+
+// SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
+func (iouo *IsOccurrenceUpdateOne) SetPackageVersion(p *PackageVersion) *IsOccurrenceUpdateOne {
+	return iouo.SetPackageVersionID(p.ID)
+}
+
+// SetSource sets the "source" edge to the SourceName entity.
+func (iouo *IsOccurrenceUpdateOne) SetSource(s *SourceName) *IsOccurrenceUpdateOne {
+	return iouo.SetSourceID(s.ID)
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
@@ -356,9 +407,15 @@ func (iouo *IsOccurrenceUpdateOne) Mutation() *IsOccurrenceMutation {
 	return iouo.mutation
 }
 
-// ClearPackage clears the "package" edge to the PackageVersion entity.
-func (iouo *IsOccurrenceUpdateOne) ClearPackage() *IsOccurrenceUpdateOne {
-	iouo.mutation.ClearPackage()
+// ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
+func (iouo *IsOccurrenceUpdateOne) ClearPackageVersion() *IsOccurrenceUpdateOne {
+	iouo.mutation.ClearPackageVersion()
+	return iouo
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (iouo *IsOccurrenceUpdateOne) ClearSource() *IsOccurrenceUpdateOne {
+	iouo.mutation.ClearSource()
 	return iouo
 }
 
@@ -445,15 +502,6 @@ func (iouo *IsOccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *IsOccurr
 			}
 		}
 	}
-	if value, ok := iouo.mutation.SourceID(); ok {
-		_spec.SetField(isoccurrence.FieldSourceID, field.TypeInt, value)
-	}
-	if value, ok := iouo.mutation.AddedSourceID(); ok {
-		_spec.AddField(isoccurrence.FieldSourceID, field.TypeInt, value)
-	}
-	if iouo.mutation.SourceIDCleared() {
-		_spec.ClearField(isoccurrence.FieldSourceID, field.TypeInt)
-	}
 	if value, ok := iouo.mutation.Justification(); ok {
 		_spec.SetField(isoccurrence.FieldJustification, field.TypeString, value)
 	}
@@ -463,12 +511,12 @@ func (iouo *IsOccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *IsOccurr
 	if value, ok := iouo.mutation.Collector(); ok {
 		_spec.SetField(isoccurrence.FieldCollector, field.TypeString, value)
 	}
-	if iouo.mutation.PackageCleared() {
+	if iouo.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   isoccurrence.PackageTable,
-			Columns: []string{isoccurrence.PackageColumn},
+			Table:   isoccurrence.PackageVersionTable,
+			Columns: []string{isoccurrence.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
@@ -476,15 +524,44 @@ func (iouo *IsOccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *IsOccurr
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iouo.mutation.PackageIDs(); len(nodes) > 0 {
+	if nodes := iouo.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   isoccurrence.PackageTable,
-			Columns: []string{isoccurrence.PackageColumn},
+			Table:   isoccurrence.PackageVersionTable,
+			Columns: []string{isoccurrence.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if iouo.mutation.SourceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   isoccurrence.SourceTable,
+			Columns: []string{isoccurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iouo.mutation.SourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   isoccurrence.SourceTable,
+			Columns: []string{isoccurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

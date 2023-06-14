@@ -14,17 +14,19 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // IsOccurrenceQuery is the builder for querying IsOccurrence entities.
 type IsOccurrenceQuery struct {
 	config
-	ctx          *QueryContext
-	order        []isoccurrence.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.IsOccurrence
-	withPackage  *PackageVersionQuery
-	withArtifact *ArtifactQuery
+	ctx                *QueryContext
+	order              []isoccurrence.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.IsOccurrence
+	withPackageVersion *PackageVersionQuery
+	withSource         *SourceNameQuery
+	withArtifact       *ArtifactQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,8 +63,8 @@ func (ioq *IsOccurrenceQuery) Order(o ...isoccurrence.OrderOption) *IsOccurrence
 	return ioq
 }
 
-// QueryPackage chains the current query on the "package" edge.
-func (ioq *IsOccurrenceQuery) QueryPackage() *PackageVersionQuery {
+// QueryPackageVersion chains the current query on the "package_version" edge.
+func (ioq *IsOccurrenceQuery) QueryPackageVersion() *PackageVersionQuery {
 	query := (&PackageVersionClient{config: ioq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ioq.prepareQuery(ctx); err != nil {
@@ -75,7 +77,29 @@ func (ioq *IsOccurrenceQuery) QueryPackage() *PackageVersionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(isoccurrence.Table, isoccurrence.FieldID, selector),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.PackageTable, isoccurrence.PackageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.PackageVersionTable, isoccurrence.PackageVersionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ioq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySource chains the current query on the "source" edge.
+func (ioq *IsOccurrenceQuery) QuerySource() *SourceNameQuery {
+	query := (&SourceNameClient{config: ioq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ioq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ioq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(isoccurrence.Table, isoccurrence.FieldID, selector),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.SourceTable, isoccurrence.SourceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ioq.driver.Dialect(), step)
 		return fromU, nil
@@ -292,27 +316,39 @@ func (ioq *IsOccurrenceQuery) Clone() *IsOccurrenceQuery {
 		return nil
 	}
 	return &IsOccurrenceQuery{
-		config:       ioq.config,
-		ctx:          ioq.ctx.Clone(),
-		order:        append([]isoccurrence.OrderOption{}, ioq.order...),
-		inters:       append([]Interceptor{}, ioq.inters...),
-		predicates:   append([]predicate.IsOccurrence{}, ioq.predicates...),
-		withPackage:  ioq.withPackage.Clone(),
-		withArtifact: ioq.withArtifact.Clone(),
+		config:             ioq.config,
+		ctx:                ioq.ctx.Clone(),
+		order:              append([]isoccurrence.OrderOption{}, ioq.order...),
+		inters:             append([]Interceptor{}, ioq.inters...),
+		predicates:         append([]predicate.IsOccurrence{}, ioq.predicates...),
+		withPackageVersion: ioq.withPackageVersion.Clone(),
+		withSource:         ioq.withSource.Clone(),
+		withArtifact:       ioq.withArtifact.Clone(),
 		// clone intermediate query.
 		sql:  ioq.sql.Clone(),
 		path: ioq.path,
 	}
 }
 
-// WithPackage tells the query-builder to eager-load the nodes that are connected to
-// the "package" edge. The optional arguments are used to configure the query builder of the edge.
-func (ioq *IsOccurrenceQuery) WithPackage(opts ...func(*PackageVersionQuery)) *IsOccurrenceQuery {
+// WithPackageVersion tells the query-builder to eager-load the nodes that are connected to
+// the "package_version" edge. The optional arguments are used to configure the query builder of the edge.
+func (ioq *IsOccurrenceQuery) WithPackageVersion(opts ...func(*PackageVersionQuery)) *IsOccurrenceQuery {
 	query := (&PackageVersionClient{config: ioq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	ioq.withPackage = query
+	ioq.withPackageVersion = query
+	return ioq
+}
+
+// WithSource tells the query-builder to eager-load the nodes that are connected to
+// the "source" edge. The optional arguments are used to configure the query builder of the edge.
+func (ioq *IsOccurrenceQuery) WithSource(opts ...func(*SourceNameQuery)) *IsOccurrenceQuery {
+	query := (&SourceNameClient{config: ioq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	ioq.withSource = query
 	return ioq
 }
 
@@ -405,8 +441,9 @@ func (ioq *IsOccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	var (
 		nodes       = []*IsOccurrence{}
 		_spec       = ioq.querySpec()
-		loadedTypes = [2]bool{
-			ioq.withPackage != nil,
+		loadedTypes = [3]bool{
+			ioq.withPackageVersion != nil,
+			ioq.withSource != nil,
 			ioq.withArtifact != nil,
 		}
 	)
@@ -428,9 +465,15 @@ func (ioq *IsOccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := ioq.withPackage; query != nil {
-		if err := ioq.loadPackage(ctx, query, nodes, nil,
-			func(n *IsOccurrence, e *PackageVersion) { n.Edges.Package = e }); err != nil {
+	if query := ioq.withPackageVersion; query != nil {
+		if err := ioq.loadPackageVersion(ctx, query, nodes, nil,
+			func(n *IsOccurrence, e *PackageVersion) { n.Edges.PackageVersion = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := ioq.withSource; query != nil {
+		if err := ioq.loadSource(ctx, query, nodes, nil,
+			func(n *IsOccurrence, e *SourceName) { n.Edges.Source = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -443,11 +486,14 @@ func (ioq *IsOccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	return nodes, nil
 }
 
-func (ioq *IsOccurrenceQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*IsOccurrence, init func(*IsOccurrence), assign func(*IsOccurrence, *PackageVersion)) error {
+func (ioq *IsOccurrenceQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*IsOccurrence, init func(*IsOccurrence), assign func(*IsOccurrence, *PackageVersion)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*IsOccurrence)
 	for i := range nodes {
-		fk := nodes[i].PackageID
+		if nodes[i].PackageID == nil {
+			continue
+		}
+		fk := *nodes[i].PackageID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -465,6 +511,38 @@ func (ioq *IsOccurrenceQuery) loadPackage(ctx context.Context, query *PackageVer
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "package_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (ioq *IsOccurrenceQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*IsOccurrence, init func(*IsOccurrence), assign func(*IsOccurrence, *SourceName)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*IsOccurrence)
+	for i := range nodes {
+		if nodes[i].SourceID == nil {
+			continue
+		}
+		fk := *nodes[i].SourceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(sourcename.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "source_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -527,8 +605,11 @@ func (ioq *IsOccurrenceQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if ioq.withPackage != nil {
+		if ioq.withPackageVersion != nil {
 			_spec.Node.AddColumnOnce(isoccurrence.FieldPackageID)
+		}
+		if ioq.withSource != nil {
+			_spec.Node.AddColumnOnce(isoccurrence.FieldSourceID)
 		}
 		if ioq.withArtifact != nil {
 			_spec.Node.AddColumnOnce(isoccurrence.FieldArtifactID)

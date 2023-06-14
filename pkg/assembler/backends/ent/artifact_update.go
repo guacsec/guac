@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -39,9 +40,45 @@ func (au *ArtifactUpdate) SetDigest(s string) *ArtifactUpdate {
 	return au
 }
 
+// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by IDs.
+func (au *ArtifactUpdate) AddOccurrenceIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.AddOccurrenceIDs(ids...)
+	return au
+}
+
+// AddOccurrences adds the "occurrences" edges to the IsOccurrence entity.
+func (au *ArtifactUpdate) AddOccurrences(i ...*IsOccurrence) *ArtifactUpdate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return au.AddOccurrenceIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (au *ArtifactUpdate) Mutation() *ArtifactMutation {
 	return au.mutation
+}
+
+// ClearOccurrences clears all "occurrences" edges to the IsOccurrence entity.
+func (au *ArtifactUpdate) ClearOccurrences() *ArtifactUpdate {
+	au.mutation.ClearOccurrences()
+	return au
+}
+
+// RemoveOccurrenceIDs removes the "occurrences" edge to IsOccurrence entities by IDs.
+func (au *ArtifactUpdate) RemoveOccurrenceIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.RemoveOccurrenceIDs(ids...)
+	return au
+}
+
+// RemoveOccurrences removes "occurrences" edges to IsOccurrence entities.
+func (au *ArtifactUpdate) RemoveOccurrences(i ...*IsOccurrence) *ArtifactUpdate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return au.RemoveOccurrenceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -86,6 +123,51 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := au.mutation.Digest(); ok {
 		_spec.SetField(artifact.FieldDigest, field.TypeString, value)
 	}
+	if au.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !au.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{artifact.Label}
@@ -118,9 +200,45 @@ func (auo *ArtifactUpdateOne) SetDigest(s string) *ArtifactUpdateOne {
 	return auo
 }
 
+// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by IDs.
+func (auo *ArtifactUpdateOne) AddOccurrenceIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.AddOccurrenceIDs(ids...)
+	return auo
+}
+
+// AddOccurrences adds the "occurrences" edges to the IsOccurrence entity.
+func (auo *ArtifactUpdateOne) AddOccurrences(i ...*IsOccurrence) *ArtifactUpdateOne {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return auo.AddOccurrenceIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (auo *ArtifactUpdateOne) Mutation() *ArtifactMutation {
 	return auo.mutation
+}
+
+// ClearOccurrences clears all "occurrences" edges to the IsOccurrence entity.
+func (auo *ArtifactUpdateOne) ClearOccurrences() *ArtifactUpdateOne {
+	auo.mutation.ClearOccurrences()
+	return auo
+}
+
+// RemoveOccurrenceIDs removes the "occurrences" edge to IsOccurrence entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveOccurrenceIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.RemoveOccurrenceIDs(ids...)
+	return auo
+}
+
+// RemoveOccurrences removes "occurrences" edges to IsOccurrence entities.
+func (auo *ArtifactUpdateOne) RemoveOccurrences(i ...*IsOccurrence) *ArtifactUpdateOne {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return auo.RemoveOccurrenceIDs(ids...)
 }
 
 // Where appends a list predicates to the ArtifactUpdate builder.
@@ -194,6 +312,51 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 	}
 	if value, ok := auo.mutation.Digest(); ok {
 		_spec.SetField(artifact.FieldDigest, field.TypeString, value)
+	}
+	if auo.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !auo.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.OccurrencesTable,
+			Columns: []string{artifact.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Artifact{config: auo.config}
 	_spec.Assign = _node.assignValues

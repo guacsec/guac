@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -18,7 +19,12 @@ func (b *EntBackend) IngestSource(ctx context.Context, src model.SourceInputSpec
 		return nil, err
 	}
 
-	sourceRecord, err := b.client.Source.Get(ctx, *id)
+	sourceRecord, err := b.client.Source.Query().
+		Where(source.IDEQ(*id)).
+		WithNamespaces(func(q *ent.SourceNamespaceQuery) {
+			q.WithNames()
+		}).
+		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -27,12 +33,17 @@ func (b *EntBackend) IngestSource(ctx context.Context, src model.SourceInputSpec
 }
 
 func ingestSource(ctx context.Context, client *ent.Client, src model.SourceInputSpec) (*int, error) {
-	id, err := client.Source.Create().
-		SetName(src.Name).
-		SetNamespace(src.Namespace).
-		SetNillableCommit(src.Commit).
-		SetNillableTag(src.Tag).
+	create := client.Source.Create().
 		SetType(src.Type).
+		SetName(src.Name).
+		SetNamespace(src.Namespace)
+
+	if src.Commit != nil {
+		create.SetCommit(strings.ToLower(*src.Commit))
+	}
+
+	id, err := create.
+		SetNillableTag(src.Tag).
 		OnConflict(sql.ConflictColumns(
 			source.FieldType,
 			source.FieldName,

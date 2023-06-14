@@ -18,6 +18,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 )
 
 const (
@@ -36,20 +39,26 @@ const (
 	TypePackageNamespace = "PackageNamespace"
 	TypePackageNode      = "PackageNode"
 	TypePackageVersion   = "PackageVersion"
+	TypeSource           = "Source"
+	TypeSourceName       = "SourceName"
+	TypeSourceNamespace  = "SourceNamespace"
 )
 
 // ArtifactMutation represents an operation that mutates the Artifact nodes in the graph.
 type ArtifactMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	algorithm     *string
-	digest        *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Artifact, error)
-	predicates    []predicate.Artifact
+	op                 Op
+	typ                string
+	id                 *int
+	algorithm          *string
+	digest             *string
+	clearedFields      map[string]struct{}
+	occurrences        map[int]struct{}
+	removedoccurrences map[int]struct{}
+	clearedoccurrences bool
+	done               bool
+	oldValue           func(context.Context) (*Artifact, error)
+	predicates         []predicate.Artifact
 }
 
 var _ ent.Mutation = (*ArtifactMutation)(nil)
@@ -222,6 +231,60 @@ func (m *ArtifactMutation) ResetDigest() {
 	m.digest = nil
 }
 
+// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by ids.
+func (m *ArtifactMutation) AddOccurrenceIDs(ids ...int) {
+	if m.occurrences == nil {
+		m.occurrences = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.occurrences[ids[i]] = struct{}{}
+	}
+}
+
+// ClearOccurrences clears the "occurrences" edge to the IsOccurrence entity.
+func (m *ArtifactMutation) ClearOccurrences() {
+	m.clearedoccurrences = true
+}
+
+// OccurrencesCleared reports if the "occurrences" edge to the IsOccurrence entity was cleared.
+func (m *ArtifactMutation) OccurrencesCleared() bool {
+	return m.clearedoccurrences
+}
+
+// RemoveOccurrenceIDs removes the "occurrences" edge to the IsOccurrence entity by IDs.
+func (m *ArtifactMutation) RemoveOccurrenceIDs(ids ...int) {
+	if m.removedoccurrences == nil {
+		m.removedoccurrences = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.occurrences, ids[i])
+		m.removedoccurrences[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedOccurrences returns the removed IDs of the "occurrences" edge to the IsOccurrence entity.
+func (m *ArtifactMutation) RemovedOccurrencesIDs() (ids []int) {
+	for id := range m.removedoccurrences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// OccurrencesIDs returns the "occurrences" edge IDs in the mutation.
+func (m *ArtifactMutation) OccurrencesIDs() (ids []int) {
+	for id := range m.occurrences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetOccurrences resets all changes to the "occurrences" edge.
+func (m *ArtifactMutation) ResetOccurrences() {
+	m.occurrences = nil
+	m.clearedoccurrences = false
+	m.removedoccurrences = nil
+}
+
 // Where appends a list predicates to the ArtifactMutation builder.
 func (m *ArtifactMutation) Where(ps ...predicate.Artifact) {
 	m.predicates = append(m.predicates, ps...)
@@ -372,49 +435,85 @@ func (m *ArtifactMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArtifactMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.occurrences != nil {
+		edges = append(edges, artifact.EdgeOccurrences)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case artifact.EdgeOccurrences:
+		ids := make([]ent.Value, 0, len(m.occurrences))
+		for id := range m.occurrences {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ArtifactMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedoccurrences != nil {
+		edges = append(edges, artifact.EdgeOccurrences)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case artifact.EdgeOccurrences:
+		ids := make([]ent.Value, 0, len(m.removedoccurrences))
+		for id := range m.removedoccurrences {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArtifactMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedoccurrences {
+		edges = append(edges, artifact.EdgeOccurrences)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ArtifactMutation) EdgeCleared(name string) bool {
+	switch name {
+	case artifact.EdgeOccurrences:
+		return m.clearedoccurrences
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ArtifactMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Artifact unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ArtifactMutation) ResetEdge(name string) error {
+	switch name {
+	case artifact.EdgeOccurrences:
+		m.ResetOccurrences()
+		return nil
+	}
 	return fmt.Errorf("unknown Artifact edge %s", name)
 }
 
@@ -747,22 +846,22 @@ func (m *BuilderNodeMutation) ResetEdge(name string) error {
 // IsOccurrenceMutation represents an operation that mutates the IsOccurrence nodes in the graph.
 type IsOccurrenceMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	source_id       *int
-	addsource_id    *int
-	justification   *string
-	origin          *string
-	collector       *string
-	clearedFields   map[string]struct{}
-	_package        *int
-	cleared_package bool
-	artifact        *int
-	clearedartifact bool
-	done            bool
-	oldValue        func(context.Context) (*IsOccurrence, error)
-	predicates      []predicate.IsOccurrence
+	op                     Op
+	typ                    string
+	id                     *int
+	justification          *string
+	origin                 *string
+	collector              *string
+	clearedFields          map[string]struct{}
+	package_version        *int
+	clearedpackage_version bool
+	source                 *int
+	clearedsource          bool
+	artifact               *int
+	clearedartifact        bool
+	done                   bool
+	oldValue               func(context.Context) (*IsOccurrence, error)
+	predicates             []predicate.IsOccurrence
 }
 
 var _ ent.Mutation = (*IsOccurrenceMutation)(nil)
@@ -865,12 +964,12 @@ func (m *IsOccurrenceMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetPackageID sets the "package_id" field.
 func (m *IsOccurrenceMutation) SetPackageID(i int) {
-	m._package = &i
+	m.package_version = &i
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
 func (m *IsOccurrenceMutation) PackageID() (r int, exists bool) {
-	v := m._package
+	v := m.package_version
 	if v == nil {
 		return
 	}
@@ -880,7 +979,7 @@ func (m *IsOccurrenceMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the IsOccurrence entity.
 // If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldPackageID(ctx context.Context) (v int, err error) {
+func (m *IsOccurrenceMutation) OldPackageID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -896,7 +995,7 @@ func (m *IsOccurrenceMutation) OldPackageID(ctx context.Context) (v int, err err
 
 // ClearPackageID clears the value of the "package_id" field.
 func (m *IsOccurrenceMutation) ClearPackageID() {
-	m._package = nil
+	m.package_version = nil
 	m.clearedFields[isoccurrence.FieldPackageID] = struct{}{}
 }
 
@@ -908,19 +1007,18 @@ func (m *IsOccurrenceMutation) PackageIDCleared() bool {
 
 // ResetPackageID resets all changes to the "package_id" field.
 func (m *IsOccurrenceMutation) ResetPackageID() {
-	m._package = nil
+	m.package_version = nil
 	delete(m.clearedFields, isoccurrence.FieldPackageID)
 }
 
 // SetSourceID sets the "source_id" field.
 func (m *IsOccurrenceMutation) SetSourceID(i int) {
-	m.source_id = &i
-	m.addsource_id = nil
+	m.source = &i
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
 func (m *IsOccurrenceMutation) SourceID() (r int, exists bool) {
-	v := m.source_id
+	v := m.source
 	if v == nil {
 		return
 	}
@@ -930,7 +1028,7 @@ func (m *IsOccurrenceMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the IsOccurrence entity.
 // If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldSourceID(ctx context.Context) (v int, err error) {
+func (m *IsOccurrenceMutation) OldSourceID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -944,28 +1042,9 @@ func (m *IsOccurrenceMutation) OldSourceID(ctx context.Context) (v int, err erro
 	return oldValue.SourceID, nil
 }
 
-// AddSourceID adds i to the "source_id" field.
-func (m *IsOccurrenceMutation) AddSourceID(i int) {
-	if m.addsource_id != nil {
-		*m.addsource_id += i
-	} else {
-		m.addsource_id = &i
-	}
-}
-
-// AddedSourceID returns the value that was added to the "source_id" field in this mutation.
-func (m *IsOccurrenceMutation) AddedSourceID() (r int, exists bool) {
-	v := m.addsource_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ClearSourceID clears the value of the "source_id" field.
 func (m *IsOccurrenceMutation) ClearSourceID() {
-	m.source_id = nil
-	m.addsource_id = nil
+	m.source = nil
 	m.clearedFields[isoccurrence.FieldSourceID] = struct{}{}
 }
 
@@ -977,8 +1056,7 @@ func (m *IsOccurrenceMutation) SourceIDCleared() bool {
 
 // ResetSourceID resets all changes to the "source_id" field.
 func (m *IsOccurrenceMutation) ResetSourceID() {
-	m.source_id = nil
-	m.addsource_id = nil
+	m.source = nil
 	delete(m.clearedFields, isoccurrence.FieldSourceID)
 }
 
@@ -1126,30 +1204,69 @@ func (m *IsOccurrenceMutation) ResetCollector() {
 	m.collector = nil
 }
 
-// ClearPackage clears the "package" edge to the PackageVersion entity.
-func (m *IsOccurrenceMutation) ClearPackage() {
-	m.cleared_package = true
+// SetPackageVersionID sets the "package_version" edge to the PackageVersion entity by id.
+func (m *IsOccurrenceMutation) SetPackageVersionID(id int) {
+	m.package_version = &id
 }
 
-// PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
-func (m *IsOccurrenceMutation) PackageCleared() bool {
-	return m.PackageIDCleared() || m.cleared_package
+// ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
+func (m *IsOccurrenceMutation) ClearPackageVersion() {
+	m.clearedpackage_version = true
 }
 
-// PackageIDs returns the "package" edge IDs in the mutation.
+// PackageVersionCleared reports if the "package_version" edge to the PackageVersion entity was cleared.
+func (m *IsOccurrenceMutation) PackageVersionCleared() bool {
+	return m.PackageIDCleared() || m.clearedpackage_version
+}
+
+// PackageVersionID returns the "package_version" edge ID in the mutation.
+func (m *IsOccurrenceMutation) PackageVersionID() (id int, exists bool) {
+	if m.package_version != nil {
+		return *m.package_version, true
+	}
+	return
+}
+
+// PackageVersionIDs returns the "package_version" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PackageID instead. It exists only for internal usage by the builders.
-func (m *IsOccurrenceMutation) PackageIDs() (ids []int) {
-	if id := m._package; id != nil {
+// PackageVersionID instead. It exists only for internal usage by the builders.
+func (m *IsOccurrenceMutation) PackageVersionIDs() (ids []int) {
+	if id := m.package_version; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetPackage resets all changes to the "package" edge.
-func (m *IsOccurrenceMutation) ResetPackage() {
-	m._package = nil
-	m.cleared_package = false
+// ResetPackageVersion resets all changes to the "package_version" edge.
+func (m *IsOccurrenceMutation) ResetPackageVersion() {
+	m.package_version = nil
+	m.clearedpackage_version = false
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (m *IsOccurrenceMutation) ClearSource() {
+	m.clearedsource = true
+}
+
+// SourceCleared reports if the "source" edge to the SourceName entity was cleared.
+func (m *IsOccurrenceMutation) SourceCleared() bool {
+	return m.SourceIDCleared() || m.clearedsource
+}
+
+// SourceIDs returns the "source" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SourceID instead. It exists only for internal usage by the builders.
+func (m *IsOccurrenceMutation) SourceIDs() (ids []int) {
+	if id := m.source; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSource resets all changes to the "source" edge.
+func (m *IsOccurrenceMutation) ResetSource() {
+	m.source = nil
+	m.clearedsource = false
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
@@ -1213,10 +1330,10 @@ func (m *IsOccurrenceMutation) Type() string {
 // AddedFields().
 func (m *IsOccurrenceMutation) Fields() []string {
 	fields := make([]string, 0, 6)
-	if m._package != nil {
+	if m.package_version != nil {
 		fields = append(fields, isoccurrence.FieldPackageID)
 	}
-	if m.source_id != nil {
+	if m.source != nil {
 		fields = append(fields, isoccurrence.FieldSourceID)
 	}
 	if m.artifact != nil {
@@ -1331,9 +1448,6 @@ func (m *IsOccurrenceMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *IsOccurrenceMutation) AddedFields() []string {
 	var fields []string
-	if m.addsource_id != nil {
-		fields = append(fields, isoccurrence.FieldSourceID)
-	}
 	return fields
 }
 
@@ -1342,8 +1456,6 @@ func (m *IsOccurrenceMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *IsOccurrenceMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case isoccurrence.FieldSourceID:
-		return m.AddedSourceID()
 	}
 	return nil, false
 }
@@ -1353,13 +1465,6 @@ func (m *IsOccurrenceMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *IsOccurrenceMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case isoccurrence.FieldSourceID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSourceID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown IsOccurrence numeric field %s", name)
 }
@@ -1426,9 +1531,12 @@ func (m *IsOccurrenceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *IsOccurrenceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m._package != nil {
-		edges = append(edges, isoccurrence.EdgePackage)
+	edges := make([]string, 0, 3)
+	if m.package_version != nil {
+		edges = append(edges, isoccurrence.EdgePackageVersion)
+	}
+	if m.source != nil {
+		edges = append(edges, isoccurrence.EdgeSource)
 	}
 	if m.artifact != nil {
 		edges = append(edges, isoccurrence.EdgeArtifact)
@@ -1440,8 +1548,12 @@ func (m *IsOccurrenceMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *IsOccurrenceMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case isoccurrence.EdgePackage:
-		if id := m._package; id != nil {
+	case isoccurrence.EdgePackageVersion:
+		if id := m.package_version; id != nil {
+			return []ent.Value{*id}
+		}
+	case isoccurrence.EdgeSource:
+		if id := m.source; id != nil {
 			return []ent.Value{*id}
 		}
 	case isoccurrence.EdgeArtifact:
@@ -1454,7 +1566,7 @@ func (m *IsOccurrenceMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *IsOccurrenceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -1466,9 +1578,12 @@ func (m *IsOccurrenceMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *IsOccurrenceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.cleared_package {
-		edges = append(edges, isoccurrence.EdgePackage)
+	edges := make([]string, 0, 3)
+	if m.clearedpackage_version {
+		edges = append(edges, isoccurrence.EdgePackageVersion)
+	}
+	if m.clearedsource {
+		edges = append(edges, isoccurrence.EdgeSource)
 	}
 	if m.clearedartifact {
 		edges = append(edges, isoccurrence.EdgeArtifact)
@@ -1480,8 +1595,10 @@ func (m *IsOccurrenceMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *IsOccurrenceMutation) EdgeCleared(name string) bool {
 	switch name {
-	case isoccurrence.EdgePackage:
-		return m.cleared_package
+	case isoccurrence.EdgePackageVersion:
+		return m.clearedpackage_version
+	case isoccurrence.EdgeSource:
+		return m.clearedsource
 	case isoccurrence.EdgeArtifact:
 		return m.clearedartifact
 	}
@@ -1492,8 +1609,11 @@ func (m *IsOccurrenceMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *IsOccurrenceMutation) ClearEdge(name string) error {
 	switch name {
-	case isoccurrence.EdgePackage:
-		m.ClearPackage()
+	case isoccurrence.EdgePackageVersion:
+		m.ClearPackageVersion()
+		return nil
+	case isoccurrence.EdgeSource:
+		m.ClearSource()
 		return nil
 	case isoccurrence.EdgeArtifact:
 		m.ClearArtifact()
@@ -1506,8 +1626,11 @@ func (m *IsOccurrenceMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *IsOccurrenceMutation) ResetEdge(name string) error {
 	switch name {
-	case isoccurrence.EdgePackage:
-		m.ResetPackage()
+	case isoccurrence.EdgePackageVersion:
+		m.ResetPackageVersion()
+		return nil
+	case isoccurrence.EdgeSource:
+		m.ResetSource()
 		return nil
 	case isoccurrence.EdgeArtifact:
 		m.ResetArtifact()
@@ -3519,4 +3642,1909 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion edge %s", name)
+}
+
+// SourceMutation represents an operation that mutates the Source nodes in the graph.
+type SourceMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	_type             *string
+	namespace         *string
+	name              *string
+	tag               *string
+	commit            *string
+	clearedFields     map[string]struct{}
+	namespaces        map[int]struct{}
+	removednamespaces map[int]struct{}
+	clearednamespaces bool
+	done              bool
+	oldValue          func(context.Context) (*Source, error)
+	predicates        []predicate.Source
+}
+
+var _ ent.Mutation = (*SourceMutation)(nil)
+
+// sourceOption allows management of the mutation configuration using functional options.
+type sourceOption func(*SourceMutation)
+
+// newSourceMutation creates new mutation for the Source entity.
+func newSourceMutation(c config, op Op, opts ...sourceOption) *SourceMutation {
+	m := &SourceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSource,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSourceID sets the ID field of the mutation.
+func withSourceID(id int) sourceOption {
+	return func(m *SourceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Source
+		)
+		m.oldValue = func(ctx context.Context) (*Source, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Source.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSource sets the old Source of the mutation.
+func withSource(node *Source) sourceOption {
+	return func(m *SourceMutation) {
+		m.oldValue = func(context.Context) (*Source, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SourceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SourceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SourceMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SourceMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Source.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetType sets the "type" field.
+func (m *SourceMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *SourceMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Source entity.
+// If the Source object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *SourceMutation) ResetType() {
+	m._type = nil
+}
+
+// SetNamespace sets the "namespace" field.
+func (m *SourceMutation) SetNamespace(s string) {
+	m.namespace = &s
+}
+
+// Namespace returns the value of the "namespace" field in the mutation.
+func (m *SourceMutation) Namespace() (r string, exists bool) {
+	v := m.namespace
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNamespace returns the old "namespace" field's value of the Source entity.
+// If the Source object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceMutation) OldNamespace(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNamespace is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNamespace requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNamespace: %w", err)
+	}
+	return oldValue.Namespace, nil
+}
+
+// ClearNamespace clears the value of the "namespace" field.
+func (m *SourceMutation) ClearNamespace() {
+	m.namespace = nil
+	m.clearedFields[source.FieldNamespace] = struct{}{}
+}
+
+// NamespaceCleared returns if the "namespace" field was cleared in this mutation.
+func (m *SourceMutation) NamespaceCleared() bool {
+	_, ok := m.clearedFields[source.FieldNamespace]
+	return ok
+}
+
+// ResetNamespace resets all changes to the "namespace" field.
+func (m *SourceMutation) ResetNamespace() {
+	m.namespace = nil
+	delete(m.clearedFields, source.FieldNamespace)
+}
+
+// SetName sets the "name" field.
+func (m *SourceMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *SourceMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Source entity.
+// If the Source object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *SourceMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[source.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *SourceMutation) NameCleared() bool {
+	_, ok := m.clearedFields[source.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *SourceMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, source.FieldName)
+}
+
+// SetTag sets the "tag" field.
+func (m *SourceMutation) SetTag(s string) {
+	m.tag = &s
+}
+
+// Tag returns the value of the "tag" field in the mutation.
+func (m *SourceMutation) Tag() (r string, exists bool) {
+	v := m.tag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTag returns the old "tag" field's value of the Source entity.
+// If the Source object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceMutation) OldTag(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTag is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTag requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTag: %w", err)
+	}
+	return oldValue.Tag, nil
+}
+
+// ClearTag clears the value of the "tag" field.
+func (m *SourceMutation) ClearTag() {
+	m.tag = nil
+	m.clearedFields[source.FieldTag] = struct{}{}
+}
+
+// TagCleared returns if the "tag" field was cleared in this mutation.
+func (m *SourceMutation) TagCleared() bool {
+	_, ok := m.clearedFields[source.FieldTag]
+	return ok
+}
+
+// ResetTag resets all changes to the "tag" field.
+func (m *SourceMutation) ResetTag() {
+	m.tag = nil
+	delete(m.clearedFields, source.FieldTag)
+}
+
+// SetCommit sets the "commit" field.
+func (m *SourceMutation) SetCommit(s string) {
+	m.commit = &s
+}
+
+// Commit returns the value of the "commit" field in the mutation.
+func (m *SourceMutation) Commit() (r string, exists bool) {
+	v := m.commit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommit returns the old "commit" field's value of the Source entity.
+// If the Source object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceMutation) OldCommit(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommit: %w", err)
+	}
+	return oldValue.Commit, nil
+}
+
+// ClearCommit clears the value of the "commit" field.
+func (m *SourceMutation) ClearCommit() {
+	m.commit = nil
+	m.clearedFields[source.FieldCommit] = struct{}{}
+}
+
+// CommitCleared returns if the "commit" field was cleared in this mutation.
+func (m *SourceMutation) CommitCleared() bool {
+	_, ok := m.clearedFields[source.FieldCommit]
+	return ok
+}
+
+// ResetCommit resets all changes to the "commit" field.
+func (m *SourceMutation) ResetCommit() {
+	m.commit = nil
+	delete(m.clearedFields, source.FieldCommit)
+}
+
+// AddNamespaceIDs adds the "namespaces" edge to the SourceNamespace entity by ids.
+func (m *SourceMutation) AddNamespaceIDs(ids ...int) {
+	if m.namespaces == nil {
+		m.namespaces = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.namespaces[ids[i]] = struct{}{}
+	}
+}
+
+// ClearNamespaces clears the "namespaces" edge to the SourceNamespace entity.
+func (m *SourceMutation) ClearNamespaces() {
+	m.clearednamespaces = true
+}
+
+// NamespacesCleared reports if the "namespaces" edge to the SourceNamespace entity was cleared.
+func (m *SourceMutation) NamespacesCleared() bool {
+	return m.clearednamespaces
+}
+
+// RemoveNamespaceIDs removes the "namespaces" edge to the SourceNamespace entity by IDs.
+func (m *SourceMutation) RemoveNamespaceIDs(ids ...int) {
+	if m.removednamespaces == nil {
+		m.removednamespaces = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.namespaces, ids[i])
+		m.removednamespaces[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedNamespaces returns the removed IDs of the "namespaces" edge to the SourceNamespace entity.
+func (m *SourceMutation) RemovedNamespacesIDs() (ids []int) {
+	for id := range m.removednamespaces {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// NamespacesIDs returns the "namespaces" edge IDs in the mutation.
+func (m *SourceMutation) NamespacesIDs() (ids []int) {
+	for id := range m.namespaces {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetNamespaces resets all changes to the "namespaces" edge.
+func (m *SourceMutation) ResetNamespaces() {
+	m.namespaces = nil
+	m.clearednamespaces = false
+	m.removednamespaces = nil
+}
+
+// Where appends a list predicates to the SourceMutation builder.
+func (m *SourceMutation) Where(ps ...predicate.Source) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SourceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SourceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Source, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SourceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SourceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Source).
+func (m *SourceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SourceMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m._type != nil {
+		fields = append(fields, source.FieldType)
+	}
+	if m.namespace != nil {
+		fields = append(fields, source.FieldNamespace)
+	}
+	if m.name != nil {
+		fields = append(fields, source.FieldName)
+	}
+	if m.tag != nil {
+		fields = append(fields, source.FieldTag)
+	}
+	if m.commit != nil {
+		fields = append(fields, source.FieldCommit)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SourceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case source.FieldType:
+		return m.GetType()
+	case source.FieldNamespace:
+		return m.Namespace()
+	case source.FieldName:
+		return m.Name()
+	case source.FieldTag:
+		return m.Tag()
+	case source.FieldCommit:
+		return m.Commit()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SourceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case source.FieldType:
+		return m.OldType(ctx)
+	case source.FieldNamespace:
+		return m.OldNamespace(ctx)
+	case source.FieldName:
+		return m.OldName(ctx)
+	case source.FieldTag:
+		return m.OldTag(ctx)
+	case source.FieldCommit:
+		return m.OldCommit(ctx)
+	}
+	return nil, fmt.Errorf("unknown Source field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case source.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case source.FieldNamespace:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNamespace(v)
+		return nil
+	case source.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case source.FieldTag:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTag(v)
+		return nil
+	case source.FieldCommit:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommit(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Source field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SourceMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SourceMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Source numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SourceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(source.FieldNamespace) {
+		fields = append(fields, source.FieldNamespace)
+	}
+	if m.FieldCleared(source.FieldName) {
+		fields = append(fields, source.FieldName)
+	}
+	if m.FieldCleared(source.FieldTag) {
+		fields = append(fields, source.FieldTag)
+	}
+	if m.FieldCleared(source.FieldCommit) {
+		fields = append(fields, source.FieldCommit)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SourceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SourceMutation) ClearField(name string) error {
+	switch name {
+	case source.FieldNamespace:
+		m.ClearNamespace()
+		return nil
+	case source.FieldName:
+		m.ClearName()
+		return nil
+	case source.FieldTag:
+		m.ClearTag()
+		return nil
+	case source.FieldCommit:
+		m.ClearCommit()
+		return nil
+	}
+	return fmt.Errorf("unknown Source nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SourceMutation) ResetField(name string) error {
+	switch name {
+	case source.FieldType:
+		m.ResetType()
+		return nil
+	case source.FieldNamespace:
+		m.ResetNamespace()
+		return nil
+	case source.FieldName:
+		m.ResetName()
+		return nil
+	case source.FieldTag:
+		m.ResetTag()
+		return nil
+	case source.FieldCommit:
+		m.ResetCommit()
+		return nil
+	}
+	return fmt.Errorf("unknown Source field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SourceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.namespaces != nil {
+		edges = append(edges, source.EdgeNamespaces)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SourceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case source.EdgeNamespaces:
+		ids := make([]ent.Value, 0, len(m.namespaces))
+		for id := range m.namespaces {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SourceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removednamespaces != nil {
+		edges = append(edges, source.EdgeNamespaces)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SourceMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case source.EdgeNamespaces:
+		ids := make([]ent.Value, 0, len(m.removednamespaces))
+		for id := range m.removednamespaces {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SourceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearednamespaces {
+		edges = append(edges, source.EdgeNamespaces)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SourceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case source.EdgeNamespaces:
+		return m.clearednamespaces
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SourceMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Source unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SourceMutation) ResetEdge(name string) error {
+	switch name {
+	case source.EdgeNamespaces:
+		m.ResetNamespaces()
+		return nil
+	}
+	return fmt.Errorf("unknown Source edge %s", name)
+}
+
+// SourceNameMutation represents an operation that mutates the SourceName nodes in the graph.
+type SourceNameMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *int
+	name               *string
+	commit             *string
+	tag                *string
+	clearedFields      map[string]struct{}
+	namespace          *int
+	clearednamespace   bool
+	occurrences        map[int]struct{}
+	removedoccurrences map[int]struct{}
+	clearedoccurrences bool
+	done               bool
+	oldValue           func(context.Context) (*SourceName, error)
+	predicates         []predicate.SourceName
+}
+
+var _ ent.Mutation = (*SourceNameMutation)(nil)
+
+// sourcenameOption allows management of the mutation configuration using functional options.
+type sourcenameOption func(*SourceNameMutation)
+
+// newSourceNameMutation creates new mutation for the SourceName entity.
+func newSourceNameMutation(c config, op Op, opts ...sourcenameOption) *SourceNameMutation {
+	m := &SourceNameMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSourceName,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSourceNameID sets the ID field of the mutation.
+func withSourceNameID(id int) sourcenameOption {
+	return func(m *SourceNameMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SourceName
+		)
+		m.oldValue = func(ctx context.Context) (*SourceName, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SourceName.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSourceName sets the old SourceName of the mutation.
+func withSourceName(node *SourceName) sourcenameOption {
+	return func(m *SourceNameMutation) {
+		m.oldValue = func(context.Context) (*SourceName, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SourceNameMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SourceNameMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SourceNameMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SourceNameMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SourceName.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *SourceNameMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *SourceNameMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the SourceName entity.
+// If the SourceName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceNameMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *SourceNameMutation) ResetName() {
+	m.name = nil
+}
+
+// SetCommit sets the "commit" field.
+func (m *SourceNameMutation) SetCommit(s string) {
+	m.commit = &s
+}
+
+// Commit returns the value of the "commit" field in the mutation.
+func (m *SourceNameMutation) Commit() (r string, exists bool) {
+	v := m.commit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommit returns the old "commit" field's value of the SourceName entity.
+// If the SourceName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceNameMutation) OldCommit(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommit: %w", err)
+	}
+	return oldValue.Commit, nil
+}
+
+// ClearCommit clears the value of the "commit" field.
+func (m *SourceNameMutation) ClearCommit() {
+	m.commit = nil
+	m.clearedFields[sourcename.FieldCommit] = struct{}{}
+}
+
+// CommitCleared returns if the "commit" field was cleared in this mutation.
+func (m *SourceNameMutation) CommitCleared() bool {
+	_, ok := m.clearedFields[sourcename.FieldCommit]
+	return ok
+}
+
+// ResetCommit resets all changes to the "commit" field.
+func (m *SourceNameMutation) ResetCommit() {
+	m.commit = nil
+	delete(m.clearedFields, sourcename.FieldCommit)
+}
+
+// SetTag sets the "tag" field.
+func (m *SourceNameMutation) SetTag(s string) {
+	m.tag = &s
+}
+
+// Tag returns the value of the "tag" field in the mutation.
+func (m *SourceNameMutation) Tag() (r string, exists bool) {
+	v := m.tag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTag returns the old "tag" field's value of the SourceName entity.
+// If the SourceName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceNameMutation) OldTag(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTag is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTag requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTag: %w", err)
+	}
+	return oldValue.Tag, nil
+}
+
+// ClearTag clears the value of the "tag" field.
+func (m *SourceNameMutation) ClearTag() {
+	m.tag = nil
+	m.clearedFields[sourcename.FieldTag] = struct{}{}
+}
+
+// TagCleared returns if the "tag" field was cleared in this mutation.
+func (m *SourceNameMutation) TagCleared() bool {
+	_, ok := m.clearedFields[sourcename.FieldTag]
+	return ok
+}
+
+// ResetTag resets all changes to the "tag" field.
+func (m *SourceNameMutation) ResetTag() {
+	m.tag = nil
+	delete(m.clearedFields, sourcename.FieldTag)
+}
+
+// SetNamespaceID sets the "namespace_id" field.
+func (m *SourceNameMutation) SetNamespaceID(i int) {
+	m.namespace = &i
+}
+
+// NamespaceID returns the value of the "namespace_id" field in the mutation.
+func (m *SourceNameMutation) NamespaceID() (r int, exists bool) {
+	v := m.namespace
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNamespaceID returns the old "namespace_id" field's value of the SourceName entity.
+// If the SourceName object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceNameMutation) OldNamespaceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNamespaceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNamespaceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNamespaceID: %w", err)
+	}
+	return oldValue.NamespaceID, nil
+}
+
+// ResetNamespaceID resets all changes to the "namespace_id" field.
+func (m *SourceNameMutation) ResetNamespaceID() {
+	m.namespace = nil
+}
+
+// ClearNamespace clears the "namespace" edge to the SourceNamespace entity.
+func (m *SourceNameMutation) ClearNamespace() {
+	m.clearednamespace = true
+}
+
+// NamespaceCleared reports if the "namespace" edge to the SourceNamespace entity was cleared.
+func (m *SourceNameMutation) NamespaceCleared() bool {
+	return m.clearednamespace
+}
+
+// NamespaceIDs returns the "namespace" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// NamespaceID instead. It exists only for internal usage by the builders.
+func (m *SourceNameMutation) NamespaceIDs() (ids []int) {
+	if id := m.namespace; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetNamespace resets all changes to the "namespace" edge.
+func (m *SourceNameMutation) ResetNamespace() {
+	m.namespace = nil
+	m.clearednamespace = false
+}
+
+// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by ids.
+func (m *SourceNameMutation) AddOccurrenceIDs(ids ...int) {
+	if m.occurrences == nil {
+		m.occurrences = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.occurrences[ids[i]] = struct{}{}
+	}
+}
+
+// ClearOccurrences clears the "occurrences" edge to the IsOccurrence entity.
+func (m *SourceNameMutation) ClearOccurrences() {
+	m.clearedoccurrences = true
+}
+
+// OccurrencesCleared reports if the "occurrences" edge to the IsOccurrence entity was cleared.
+func (m *SourceNameMutation) OccurrencesCleared() bool {
+	return m.clearedoccurrences
+}
+
+// RemoveOccurrenceIDs removes the "occurrences" edge to the IsOccurrence entity by IDs.
+func (m *SourceNameMutation) RemoveOccurrenceIDs(ids ...int) {
+	if m.removedoccurrences == nil {
+		m.removedoccurrences = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.occurrences, ids[i])
+		m.removedoccurrences[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedOccurrences returns the removed IDs of the "occurrences" edge to the IsOccurrence entity.
+func (m *SourceNameMutation) RemovedOccurrencesIDs() (ids []int) {
+	for id := range m.removedoccurrences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// OccurrencesIDs returns the "occurrences" edge IDs in the mutation.
+func (m *SourceNameMutation) OccurrencesIDs() (ids []int) {
+	for id := range m.occurrences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetOccurrences resets all changes to the "occurrences" edge.
+func (m *SourceNameMutation) ResetOccurrences() {
+	m.occurrences = nil
+	m.clearedoccurrences = false
+	m.removedoccurrences = nil
+}
+
+// Where appends a list predicates to the SourceNameMutation builder.
+func (m *SourceNameMutation) Where(ps ...predicate.SourceName) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SourceNameMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SourceNameMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SourceName, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SourceNameMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SourceNameMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SourceName).
+func (m *SourceNameMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SourceNameMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.name != nil {
+		fields = append(fields, sourcename.FieldName)
+	}
+	if m.commit != nil {
+		fields = append(fields, sourcename.FieldCommit)
+	}
+	if m.tag != nil {
+		fields = append(fields, sourcename.FieldTag)
+	}
+	if m.namespace != nil {
+		fields = append(fields, sourcename.FieldNamespaceID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SourceNameMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sourcename.FieldName:
+		return m.Name()
+	case sourcename.FieldCommit:
+		return m.Commit()
+	case sourcename.FieldTag:
+		return m.Tag()
+	case sourcename.FieldNamespaceID:
+		return m.NamespaceID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SourceNameMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sourcename.FieldName:
+		return m.OldName(ctx)
+	case sourcename.FieldCommit:
+		return m.OldCommit(ctx)
+	case sourcename.FieldTag:
+		return m.OldTag(ctx)
+	case sourcename.FieldNamespaceID:
+		return m.OldNamespaceID(ctx)
+	}
+	return nil, fmt.Errorf("unknown SourceName field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceNameMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sourcename.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case sourcename.FieldCommit:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommit(v)
+		return nil
+	case sourcename.FieldTag:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTag(v)
+		return nil
+	case sourcename.FieldNamespaceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNamespaceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SourceName field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SourceNameMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SourceNameMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceNameMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SourceName numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SourceNameMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(sourcename.FieldCommit) {
+		fields = append(fields, sourcename.FieldCommit)
+	}
+	if m.FieldCleared(sourcename.FieldTag) {
+		fields = append(fields, sourcename.FieldTag)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SourceNameMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SourceNameMutation) ClearField(name string) error {
+	switch name {
+	case sourcename.FieldCommit:
+		m.ClearCommit()
+		return nil
+	case sourcename.FieldTag:
+		m.ClearTag()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceName nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SourceNameMutation) ResetField(name string) error {
+	switch name {
+	case sourcename.FieldName:
+		m.ResetName()
+		return nil
+	case sourcename.FieldCommit:
+		m.ResetCommit()
+		return nil
+	case sourcename.FieldTag:
+		m.ResetTag()
+		return nil
+	case sourcename.FieldNamespaceID:
+		m.ResetNamespaceID()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceName field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SourceNameMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.namespace != nil {
+		edges = append(edges, sourcename.EdgeNamespace)
+	}
+	if m.occurrences != nil {
+		edges = append(edges, sourcename.EdgeOccurrences)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SourceNameMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case sourcename.EdgeNamespace:
+		if id := m.namespace; id != nil {
+			return []ent.Value{*id}
+		}
+	case sourcename.EdgeOccurrences:
+		ids := make([]ent.Value, 0, len(m.occurrences))
+		for id := range m.occurrences {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SourceNameMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedoccurrences != nil {
+		edges = append(edges, sourcename.EdgeOccurrences)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SourceNameMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case sourcename.EdgeOccurrences:
+		ids := make([]ent.Value, 0, len(m.removedoccurrences))
+		for id := range m.removedoccurrences {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SourceNameMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearednamespace {
+		edges = append(edges, sourcename.EdgeNamespace)
+	}
+	if m.clearedoccurrences {
+		edges = append(edges, sourcename.EdgeOccurrences)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SourceNameMutation) EdgeCleared(name string) bool {
+	switch name {
+	case sourcename.EdgeNamespace:
+		return m.clearednamespace
+	case sourcename.EdgeOccurrences:
+		return m.clearedoccurrences
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SourceNameMutation) ClearEdge(name string) error {
+	switch name {
+	case sourcename.EdgeNamespace:
+		m.ClearNamespace()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceName unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SourceNameMutation) ResetEdge(name string) error {
+	switch name {
+	case sourcename.EdgeNamespace:
+		m.ResetNamespace()
+		return nil
+	case sourcename.EdgeOccurrences:
+		m.ResetOccurrences()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceName edge %s", name)
+}
+
+// SourceNamespaceMutation represents an operation that mutates the SourceNamespace nodes in the graph.
+type SourceNamespaceMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	namespace     *string
+	clearedFields map[string]struct{}
+	source        *int
+	clearedsource bool
+	names         map[int]struct{}
+	removednames  map[int]struct{}
+	clearednames  bool
+	done          bool
+	oldValue      func(context.Context) (*SourceNamespace, error)
+	predicates    []predicate.SourceNamespace
+}
+
+var _ ent.Mutation = (*SourceNamespaceMutation)(nil)
+
+// sourcenamespaceOption allows management of the mutation configuration using functional options.
+type sourcenamespaceOption func(*SourceNamespaceMutation)
+
+// newSourceNamespaceMutation creates new mutation for the SourceNamespace entity.
+func newSourceNamespaceMutation(c config, op Op, opts ...sourcenamespaceOption) *SourceNamespaceMutation {
+	m := &SourceNamespaceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSourceNamespace,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSourceNamespaceID sets the ID field of the mutation.
+func withSourceNamespaceID(id int) sourcenamespaceOption {
+	return func(m *SourceNamespaceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SourceNamespace
+		)
+		m.oldValue = func(ctx context.Context) (*SourceNamespace, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SourceNamespace.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSourceNamespace sets the old SourceNamespace of the mutation.
+func withSourceNamespace(node *SourceNamespace) sourcenamespaceOption {
+	return func(m *SourceNamespaceMutation) {
+		m.oldValue = func(context.Context) (*SourceNamespace, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SourceNamespaceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SourceNamespaceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SourceNamespaceMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SourceNamespaceMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SourceNamespace.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetNamespace sets the "namespace" field.
+func (m *SourceNamespaceMutation) SetNamespace(s string) {
+	m.namespace = &s
+}
+
+// Namespace returns the value of the "namespace" field in the mutation.
+func (m *SourceNamespaceMutation) Namespace() (r string, exists bool) {
+	v := m.namespace
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNamespace returns the old "namespace" field's value of the SourceNamespace entity.
+// If the SourceNamespace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceNamespaceMutation) OldNamespace(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNamespace is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNamespace requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNamespace: %w", err)
+	}
+	return oldValue.Namespace, nil
+}
+
+// ResetNamespace resets all changes to the "namespace" field.
+func (m *SourceNamespaceMutation) ResetNamespace() {
+	m.namespace = nil
+}
+
+// SetSourceID sets the "source_id" field.
+func (m *SourceNamespaceMutation) SetSourceID(i int) {
+	m.source = &i
+}
+
+// SourceID returns the value of the "source_id" field in the mutation.
+func (m *SourceNamespaceMutation) SourceID() (r int, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceID returns the old "source_id" field's value of the SourceNamespace entity.
+// If the SourceNamespace object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceNamespaceMutation) OldSourceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
+	}
+	return oldValue.SourceID, nil
+}
+
+// ResetSourceID resets all changes to the "source_id" field.
+func (m *SourceNamespaceMutation) ResetSourceID() {
+	m.source = nil
+}
+
+// ClearSource clears the "source" edge to the Source entity.
+func (m *SourceNamespaceMutation) ClearSource() {
+	m.clearedsource = true
+}
+
+// SourceCleared reports if the "source" edge to the Source entity was cleared.
+func (m *SourceNamespaceMutation) SourceCleared() bool {
+	return m.clearedsource
+}
+
+// SourceIDs returns the "source" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SourceID instead. It exists only for internal usage by the builders.
+func (m *SourceNamespaceMutation) SourceIDs() (ids []int) {
+	if id := m.source; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSource resets all changes to the "source" edge.
+func (m *SourceNamespaceMutation) ResetSource() {
+	m.source = nil
+	m.clearedsource = false
+}
+
+// AddNameIDs adds the "names" edge to the SourceName entity by ids.
+func (m *SourceNamespaceMutation) AddNameIDs(ids ...int) {
+	if m.names == nil {
+		m.names = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.names[ids[i]] = struct{}{}
+	}
+}
+
+// ClearNames clears the "names" edge to the SourceName entity.
+func (m *SourceNamespaceMutation) ClearNames() {
+	m.clearednames = true
+}
+
+// NamesCleared reports if the "names" edge to the SourceName entity was cleared.
+func (m *SourceNamespaceMutation) NamesCleared() bool {
+	return m.clearednames
+}
+
+// RemoveNameIDs removes the "names" edge to the SourceName entity by IDs.
+func (m *SourceNamespaceMutation) RemoveNameIDs(ids ...int) {
+	if m.removednames == nil {
+		m.removednames = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.names, ids[i])
+		m.removednames[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedNames returns the removed IDs of the "names" edge to the SourceName entity.
+func (m *SourceNamespaceMutation) RemovedNamesIDs() (ids []int) {
+	for id := range m.removednames {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// NamesIDs returns the "names" edge IDs in the mutation.
+func (m *SourceNamespaceMutation) NamesIDs() (ids []int) {
+	for id := range m.names {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetNames resets all changes to the "names" edge.
+func (m *SourceNamespaceMutation) ResetNames() {
+	m.names = nil
+	m.clearednames = false
+	m.removednames = nil
+}
+
+// Where appends a list predicates to the SourceNamespaceMutation builder.
+func (m *SourceNamespaceMutation) Where(ps ...predicate.SourceNamespace) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SourceNamespaceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SourceNamespaceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SourceNamespace, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SourceNamespaceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SourceNamespaceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SourceNamespace).
+func (m *SourceNamespaceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SourceNamespaceMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.namespace != nil {
+		fields = append(fields, sourcenamespace.FieldNamespace)
+	}
+	if m.source != nil {
+		fields = append(fields, sourcenamespace.FieldSourceID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SourceNamespaceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sourcenamespace.FieldNamespace:
+		return m.Namespace()
+	case sourcenamespace.FieldSourceID:
+		return m.SourceID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SourceNamespaceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sourcenamespace.FieldNamespace:
+		return m.OldNamespace(ctx)
+	case sourcenamespace.FieldSourceID:
+		return m.OldSourceID(ctx)
+	}
+	return nil, fmt.Errorf("unknown SourceNamespace field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceNamespaceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sourcenamespace.FieldNamespace:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNamespace(v)
+		return nil
+	case sourcenamespace.FieldSourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SourceNamespace field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SourceNamespaceMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SourceNamespaceMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceNamespaceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SourceNamespace numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SourceNamespaceMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SourceNamespaceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SourceNamespaceMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown SourceNamespace nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SourceNamespaceMutation) ResetField(name string) error {
+	switch name {
+	case sourcenamespace.FieldNamespace:
+		m.ResetNamespace()
+		return nil
+	case sourcenamespace.FieldSourceID:
+		m.ResetSourceID()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceNamespace field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SourceNamespaceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.source != nil {
+		edges = append(edges, sourcenamespace.EdgeSource)
+	}
+	if m.names != nil {
+		edges = append(edges, sourcenamespace.EdgeNames)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SourceNamespaceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case sourcenamespace.EdgeSource:
+		if id := m.source; id != nil {
+			return []ent.Value{*id}
+		}
+	case sourcenamespace.EdgeNames:
+		ids := make([]ent.Value, 0, len(m.names))
+		for id := range m.names {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SourceNamespaceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removednames != nil {
+		edges = append(edges, sourcenamespace.EdgeNames)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SourceNamespaceMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case sourcenamespace.EdgeNames:
+		ids := make([]ent.Value, 0, len(m.removednames))
+		for id := range m.removednames {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SourceNamespaceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedsource {
+		edges = append(edges, sourcenamespace.EdgeSource)
+	}
+	if m.clearednames {
+		edges = append(edges, sourcenamespace.EdgeNames)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SourceNamespaceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case sourcenamespace.EdgeSource:
+		return m.clearedsource
+	case sourcenamespace.EdgeNames:
+		return m.clearednames
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SourceNamespaceMutation) ClearEdge(name string) error {
+	switch name {
+	case sourcenamespace.EdgeSource:
+		m.ClearSource()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceNamespace unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SourceNamespaceMutation) ResetEdge(name string) error {
+	switch name {
+	case sourcenamespace.EdgeSource:
+		m.ResetSource()
+		return nil
+	case sourcenamespace.EdgeNames:
+		m.ResetNames()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceNamespace edge %s", name)
 }

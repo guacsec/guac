@@ -18,6 +18,7 @@ import (
 )
 
 func init() {
+	// txdb.Register("txdb", "postgres", "postgresql://guac:guac@localhost/guac_test?sslmode=disable")
 	txdb.Register("txdb", "postgres", "postgresql://localhost/guac_test?sslmode=disable")
 }
 

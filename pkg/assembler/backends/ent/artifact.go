@@ -19,8 +19,29 @@ type Artifact struct {
 	// Algorithm holds the value of the "algorithm" field.
 	Algorithm string `json:"algorithm,omitempty"`
 	// Digest holds the value of the "digest" field.
-	Digest       string `json:"digest,omitempty"`
+	Digest string `json:"digest,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ArtifactQuery when eager-loading is set.
+	Edges        ArtifactEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// ArtifactEdges holds the relations/edges for other nodes in the graph.
+type ArtifactEdges struct {
+	// Occurrences holds the value of the occurrences edge.
+	Occurrences []*IsOccurrence `json:"occurrences,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// OccurrencesOrErr returns the Occurrences value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) OccurrencesOrErr() ([]*IsOccurrence, error) {
+	if e.loadedTypes[0] {
+		return e.Occurrences, nil
+	}
+	return nil, &NotLoadedError{edge: "occurrences"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -76,6 +97,11 @@ func (a *Artifact) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (a *Artifact) Value(name string) (ent.Value, error) {
 	return a.selectValues.Get(name)
+}
+
+// QueryOccurrences queries the "occurrences" edge of the Artifact entity.
+func (a *Artifact) QueryOccurrences() *IsOccurrenceQuery {
+	return NewArtifactClient(a.config).QueryOccurrences(a)
 }
 
 // Update returns a builder for updating this Artifact.

@@ -11,6 +11,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // IsOccurrence is the model entity for the IsOccurrence schema.
@@ -19,16 +20,16 @@ type IsOccurrence struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID int `json:"package_id,omitempty"`
+	PackageID *int `json:"package_id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID int `json:"source_id,omitempty"`
-	// ArtifactID holds the value of the "artifact_id" field.
+	SourceID *int `json:"source_id,omitempty"`
+	// The artifact in the relationship
 	ArtifactID int `json:"artifact_id,omitempty"`
-	// Justification holds the value of the "justification" field.
+	// Justification for the attested relationship
 	Justification string `json:"justification,omitempty"`
-	// Origin holds the value of the "origin" field.
+	// Document from which this attestation is generated from
 	Origin string `json:"origin,omitempty"`
-	// Collector holds the value of the "collector" field.
+	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the IsOccurrenceQuery when eager-loading is set.
@@ -38,32 +39,47 @@ type IsOccurrence struct {
 
 // IsOccurrenceEdges holds the relations/edges for other nodes in the graph.
 type IsOccurrenceEdges struct {
-	// Package holds the value of the package edge.
-	Package *PackageVersion `json:"package,omitempty"`
+	// PackageVersion holds the value of the package_version edge.
+	PackageVersion *PackageVersion `json:"package_version,omitempty"`
+	// Source holds the value of the source edge.
+	Source *SourceName `json:"source,omitempty"`
 	// Artifact holds the value of the artifact edge.
 	Artifact *Artifact `json:"artifact,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
-// PackageOrErr returns the Package value or an error if the edge
+// PackageVersionOrErr returns the PackageVersion value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e IsOccurrenceEdges) PackageOrErr() (*PackageVersion, error) {
+func (e IsOccurrenceEdges) PackageVersionOrErr() (*PackageVersion, error) {
 	if e.loadedTypes[0] {
-		if e.Package == nil {
+		if e.PackageVersion == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: packageversion.Label}
 		}
-		return e.Package, nil
+		return e.PackageVersion, nil
 	}
-	return nil, &NotLoadedError{edge: "package"}
+	return nil, &NotLoadedError{edge: "package_version"}
+}
+
+// SourceOrErr returns the Source value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e IsOccurrenceEdges) SourceOrErr() (*SourceName, error) {
+	if e.loadedTypes[1] {
+		if e.Source == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: sourcename.Label}
+		}
+		return e.Source, nil
+	}
+	return nil, &NotLoadedError{edge: "source"}
 }
 
 // ArtifactOrErr returns the Artifact value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e IsOccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		if e.Artifact == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: artifact.Label}
@@ -107,13 +123,15 @@ func (io *IsOccurrence) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				io.PackageID = int(value.Int64)
+				io.PackageID = new(int)
+				*io.PackageID = int(value.Int64)
 			}
 		case isoccurrence.FieldSourceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				io.SourceID = int(value.Int64)
+				io.SourceID = new(int)
+				*io.SourceID = int(value.Int64)
 			}
 		case isoccurrence.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -152,9 +170,14 @@ func (io *IsOccurrence) Value(name string) (ent.Value, error) {
 	return io.selectValues.Get(name)
 }
 
-// QueryPackage queries the "package" edge of the IsOccurrence entity.
-func (io *IsOccurrence) QueryPackage() *PackageVersionQuery {
-	return NewIsOccurrenceClient(io.config).QueryPackage(io)
+// QueryPackageVersion queries the "package_version" edge of the IsOccurrence entity.
+func (io *IsOccurrence) QueryPackageVersion() *PackageVersionQuery {
+	return NewIsOccurrenceClient(io.config).QueryPackageVersion(io)
+}
+
+// QuerySource queries the "source" edge of the IsOccurrence entity.
+func (io *IsOccurrence) QuerySource() *SourceNameQuery {
+	return NewIsOccurrenceClient(io.config).QuerySource(io)
 }
 
 // QueryArtifact queries the "artifact" edge of the IsOccurrence entity.
@@ -185,11 +208,15 @@ func (io *IsOccurrence) String() string {
 	var builder strings.Builder
 	builder.WriteString("IsOccurrence(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", io.ID))
-	builder.WriteString("package_id=")
-	builder.WriteString(fmt.Sprintf("%v", io.PackageID))
+	if v := io.PackageID; v != nil {
+		builder.WriteString("package_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("source_id=")
-	builder.WriteString(fmt.Sprintf("%v", io.SourceID))
+	if v := io.SourceID; v != nil {
+		builder.WriteString("source_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("artifact_id=")
 	builder.WriteString(fmt.Sprintf("%v", io.ArtifactID))
