@@ -45,8 +45,8 @@ var (
 			},
 		},
 	}
-	// IsDependenciesColumns holds the columns for the "is_dependencies" table.
-	IsDependenciesColumns = []*schema.Column{
+	// DependenciesColumns holds the columns for the "dependencies" table.
+	DependenciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "version_range", Type: field.TypeString},
 		{Name: "dependency_type", Type: field.TypeString},
@@ -56,30 +56,30 @@ var (
 		{Name: "package_id", Type: field.TypeInt},
 		{Name: "dependent_package_id", Type: field.TypeInt},
 	}
-	// IsDependenciesTable holds the schema information for the "is_dependencies" table.
-	IsDependenciesTable = &schema.Table{
-		Name:       "is_dependencies",
-		Columns:    IsDependenciesColumns,
-		PrimaryKey: []*schema.Column{IsDependenciesColumns[0]},
+	// DependenciesTable holds the schema information for the "dependencies" table.
+	DependenciesTable = &schema.Table{
+		Name:       "dependencies",
+		Columns:    DependenciesColumns,
+		PrimaryKey: []*schema.Column{DependenciesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "is_dependencies_package_versions_package",
-				Columns:    []*schema.Column{IsDependenciesColumns[6]},
+				Symbol:     "dependencies_package_versions_package",
+				Columns:    []*schema.Column{DependenciesColumns[6]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "is_dependencies_package_names_dependent_package",
-				Columns:    []*schema.Column{IsDependenciesColumns[7]},
+				Symbol:     "dependencies_package_names_dependent_package",
+				Columns:    []*schema.Column{DependenciesColumns[7]},
 				RefColumns: []*schema.Column{PackageNamesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "isdependency_version_range_dependency_type_justification_origin_collector_package_id_dependent_package_id",
+				Name:    "dependency_version_range_dependency_type_justification_origin_collector_package_id_dependent_package_id",
 				Unique:  true,
-				Columns: []*schema.Column{IsDependenciesColumns[1], IsDependenciesColumns[2], IsDependenciesColumns[3], IsDependenciesColumns[4], IsDependenciesColumns[5], IsDependenciesColumns[6], IsDependenciesColumns[7]},
+				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7]},
 			},
 		},
 	}
@@ -302,7 +302,7 @@ var (
 	Tables = []*schema.Table{
 		ArtifactsTable,
 		BuilderNodesTable,
-		IsDependenciesTable,
+		DependenciesTable,
 		IsOccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
@@ -315,8 +315,8 @@ var (
 )
 
 func init() {
-	IsDependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
-	IsDependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
+	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
 	IsOccurrencesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	IsOccurrencesTable.ForeignKeys[1].RefTable = SourceNamesTable
 	IsOccurrencesTable.ForeignKeys[2].RefTable = ArtifactsTable

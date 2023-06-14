@@ -2,18 +2,25 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
 
-// IsDependency holds the schema definition for the IsDependency entity.
-type IsDependency struct {
+// Dependency holds the schema definition for the Dependency entity.
+type Dependency struct {
 	ent.Schema
 }
 
+func (Dependency) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		// field.ID("package_id", "dependent_package_id"),
+	}
+}
+
 // Fields of the IsDependency.
-func (IsDependency) Fields() []ent.Field {
+func (Dependency) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("package_id"),
 		field.Int("dependent_package_id"),
@@ -26,7 +33,7 @@ func (IsDependency) Fields() []ent.Field {
 }
 
 // Edges of the IsDependency.
-func (IsDependency) Edges() []ent.Edge {
+func (Dependency) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("package", PackageVersion.Type).
 			Field("package_id").
@@ -40,7 +47,7 @@ func (IsDependency) Edges() []ent.Edge {
 }
 
 // Indexes of the IsDependency.
-func (IsDependency) Indexes() []ent.Index {
+func (Dependency) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("version_range", "dependency_type", "justification", "origin", "collector").
 			Edges("package", "dependent_package").

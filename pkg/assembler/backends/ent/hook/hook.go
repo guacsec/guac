@@ -33,16 +33,16 @@ func (f BuilderNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BuilderNodeMutation", m)
 }
 
-// The IsDependencyFunc type is an adapter to allow the use of ordinary
-// function as IsDependency mutator.
-type IsDependencyFunc func(context.Context, *ent.IsDependencyMutation) (ent.Value, error)
+// The DependencyFunc type is an adapter to allow the use of ordinary
+// function as Dependency mutator.
+type DependencyFunc func(context.Context, *ent.DependencyMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f IsDependencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.IsDependencyMutation); ok {
+func (f DependencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DependencyMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IsDependencyMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DependencyMutation", m)
 }
 
 // The IsOccurrenceFunc type is an adapter to allow the use of ordinary

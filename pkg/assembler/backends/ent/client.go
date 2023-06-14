@@ -16,7 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -36,8 +36,8 @@ type Client struct {
 	Artifact *ArtifactClient
 	// BuilderNode is the client for interacting with the BuilderNode builders.
 	BuilderNode *BuilderNodeClient
-	// IsDependency is the client for interacting with the IsDependency builders.
-	IsDependency *IsDependencyClient
+	// Dependency is the client for interacting with the Dependency builders.
+	Dependency *DependencyClient
 	// IsOccurrence is the client for interacting with the IsOccurrence builders.
 	IsOccurrence *IsOccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
@@ -69,7 +69,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Artifact = NewArtifactClient(c.config)
 	c.BuilderNode = NewBuilderNodeClient(c.config)
-	c.IsDependency = NewIsDependencyClient(c.config)
+	c.Dependency = NewDependencyClient(c.config)
 	c.IsOccurrence = NewIsOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
@@ -162,7 +162,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
-		IsDependency:     NewIsDependencyClient(cfg),
+		Dependency:       NewDependencyClient(cfg),
 		IsOccurrence:     NewIsOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
@@ -192,7 +192,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:           cfg,
 		Artifact:         NewArtifactClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
-		IsDependency:     NewIsDependencyClient(cfg),
+		Dependency:       NewDependencyClient(cfg),
 		IsOccurrence:     NewIsOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
@@ -230,7 +230,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BuilderNode, c.IsDependency, c.IsOccurrence, c.PackageName,
+		c.Artifact, c.BuilderNode, c.Dependency, c.IsOccurrence, c.PackageName,
 		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
 		c.SourceNamespace,
 	} {
@@ -242,7 +242,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BuilderNode, c.IsDependency, c.IsOccurrence, c.PackageName,
+		c.Artifact, c.BuilderNode, c.Dependency, c.IsOccurrence, c.PackageName,
 		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
 		c.SourceNamespace,
 	} {
@@ -257,8 +257,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Artifact.mutate(ctx, m)
 	case *BuilderNodeMutation:
 		return c.BuilderNode.mutate(ctx, m)
-	case *IsDependencyMutation:
-		return c.IsDependency.mutate(ctx, m)
+	case *DependencyMutation:
+		return c.Dependency.mutate(ctx, m)
 	case *IsOccurrenceMutation:
 		return c.IsOccurrence.mutate(ctx, m)
 	case *PackageNameMutation:
@@ -532,92 +532,92 @@ func (c *BuilderNodeClient) mutate(ctx context.Context, m *BuilderNodeMutation) 
 	}
 }
 
-// IsDependencyClient is a client for the IsDependency schema.
-type IsDependencyClient struct {
+// DependencyClient is a client for the Dependency schema.
+type DependencyClient struct {
 	config
 }
 
-// NewIsDependencyClient returns a client for the IsDependency from the given config.
-func NewIsDependencyClient(c config) *IsDependencyClient {
-	return &IsDependencyClient{config: c}
+// NewDependencyClient returns a client for the Dependency from the given config.
+func NewDependencyClient(c config) *DependencyClient {
+	return &DependencyClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `isdependency.Hooks(f(g(h())))`.
-func (c *IsDependencyClient) Use(hooks ...Hook) {
-	c.hooks.IsDependency = append(c.hooks.IsDependency, hooks...)
+// A call to `Use(f, g, h)` equals to `dependency.Hooks(f(g(h())))`.
+func (c *DependencyClient) Use(hooks ...Hook) {
+	c.hooks.Dependency = append(c.hooks.Dependency, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `isdependency.Intercept(f(g(h())))`.
-func (c *IsDependencyClient) Intercept(interceptors ...Interceptor) {
-	c.inters.IsDependency = append(c.inters.IsDependency, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `dependency.Intercept(f(g(h())))`.
+func (c *DependencyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Dependency = append(c.inters.Dependency, interceptors...)
 }
 
-// Create returns a builder for creating a IsDependency entity.
-func (c *IsDependencyClient) Create() *IsDependencyCreate {
-	mutation := newIsDependencyMutation(c.config, OpCreate)
-	return &IsDependencyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Dependency entity.
+func (c *DependencyClient) Create() *DependencyCreate {
+	mutation := newDependencyMutation(c.config, OpCreate)
+	return &DependencyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of IsDependency entities.
-func (c *IsDependencyClient) CreateBulk(builders ...*IsDependencyCreate) *IsDependencyCreateBulk {
-	return &IsDependencyCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Dependency entities.
+func (c *DependencyClient) CreateBulk(builders ...*DependencyCreate) *DependencyCreateBulk {
+	return &DependencyCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for IsDependency.
-func (c *IsDependencyClient) Update() *IsDependencyUpdate {
-	mutation := newIsDependencyMutation(c.config, OpUpdate)
-	return &IsDependencyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Dependency.
+func (c *DependencyClient) Update() *DependencyUpdate {
+	mutation := newDependencyMutation(c.config, OpUpdate)
+	return &DependencyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *IsDependencyClient) UpdateOne(id *IsDependency) *IsDependencyUpdateOne {
-	mutation := newIsDependencyMutation(c.config, OpUpdateOne, withIsDependency(id))
-	return &IsDependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DependencyClient) UpdateOne(d *Dependency) *DependencyUpdateOne {
+	mutation := newDependencyMutation(c.config, OpUpdateOne, withDependency(d))
+	return &DependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *IsDependencyClient) UpdateOneID(id int) *IsDependencyUpdateOne {
-	mutation := newIsDependencyMutation(c.config, OpUpdateOne, withIsDependencyID(id))
-	return &IsDependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DependencyClient) UpdateOneID(id int) *DependencyUpdateOne {
+	mutation := newDependencyMutation(c.config, OpUpdateOne, withDependencyID(id))
+	return &DependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for IsDependency.
-func (c *IsDependencyClient) Delete() *IsDependencyDelete {
-	mutation := newIsDependencyMutation(c.config, OpDelete)
-	return &IsDependencyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Dependency.
+func (c *DependencyClient) Delete() *DependencyDelete {
+	mutation := newDependencyMutation(c.config, OpDelete)
+	return &DependencyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *IsDependencyClient) DeleteOne(id *IsDependency) *IsDependencyDeleteOne {
-	return c.DeleteOneID(id.ID)
+func (c *DependencyClient) DeleteOne(d *Dependency) *DependencyDeleteOne {
+	return c.DeleteOneID(d.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *IsDependencyClient) DeleteOneID(id int) *IsDependencyDeleteOne {
-	builder := c.Delete().Where(isdependency.ID(id))
+func (c *DependencyClient) DeleteOneID(id int) *DependencyDeleteOne {
+	builder := c.Delete().Where(dependency.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &IsDependencyDeleteOne{builder}
+	return &DependencyDeleteOne{builder}
 }
 
-// Query returns a query builder for IsDependency.
-func (c *IsDependencyClient) Query() *IsDependencyQuery {
-	return &IsDependencyQuery{
+// Query returns a query builder for Dependency.
+func (c *DependencyClient) Query() *DependencyQuery {
+	return &DependencyQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeIsDependency},
+		ctx:    &QueryContext{Type: TypeDependency},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a IsDependency entity by its id.
-func (c *IsDependencyClient) Get(ctx context.Context, id int) (*IsDependency, error) {
-	return c.Query().Where(isdependency.ID(id)).Only(ctx)
+// Get returns a Dependency entity by its id.
+func (c *DependencyClient) Get(ctx context.Context, id int) (*Dependency, error) {
+	return c.Query().Where(dependency.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *IsDependencyClient) GetX(ctx context.Context, id int) *IsDependency {
+func (c *DependencyClient) GetX(ctx context.Context, id int) *Dependency {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -625,60 +625,60 @@ func (c *IsDependencyClient) GetX(ctx context.Context, id int) *IsDependency {
 	return obj
 }
 
-// QueryPackage queries the package edge of a IsDependency.
-func (c *IsDependencyClient) QueryPackage(node *IsDependency) *PackageVersionQuery {
+// QueryPackage queries the package edge of a Dependency.
+func (c *DependencyClient) QueryPackage(d *Dependency) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := node.ID
+		id := d.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(isdependency.Table, isdependency.FieldID, id),
+			sqlgraph.From(dependency.Table, dependency.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isdependency.PackageTable, isdependency.PackageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, dependency.PackageTable, dependency.PackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(node.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryDependentPackage queries the dependent_package edge of a IsDependency.
-func (c *IsDependencyClient) QueryDependentPackage(node *IsDependency) *PackageNameQuery {
+// QueryDependentPackage queries the dependent_package edge of a Dependency.
+func (c *DependencyClient) QueryDependentPackage(d *Dependency) *PackageNameQuery {
 	query := (&PackageNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := node.ID
+		id := d.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(isdependency.Table, isdependency.FieldID, id),
+			sqlgraph.From(dependency.Table, dependency.FieldID, id),
 			sqlgraph.To(packagename.Table, packagename.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isdependency.DependentPackageTable, isdependency.DependentPackageColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageTable, dependency.DependentPackageColumn),
 		)
-		fromV = sqlgraph.Neighbors(node.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *IsDependencyClient) Hooks() []Hook {
-	return c.hooks.IsDependency
+func (c *DependencyClient) Hooks() []Hook {
+	return c.hooks.Dependency
 }
 
 // Interceptors returns the client interceptors.
-func (c *IsDependencyClient) Interceptors() []Interceptor {
-	return c.inters.IsDependency
+func (c *DependencyClient) Interceptors() []Interceptor {
+	return c.inters.Dependency
 }
 
-func (c *IsDependencyClient) mutate(ctx context.Context, m *IsDependencyMutation) (Value, error) {
+func (c *DependencyClient) mutate(ctx context.Context, m *DependencyMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&IsDependencyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DependencyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&IsDependencyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DependencyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&IsDependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&IsDependencyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&DependencyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown IsDependency mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Dependency mutation op: %q", m.Op())
 	}
 }
 
@@ -1853,13 +1853,12 @@ func (c *SourceNamespaceClient) mutate(ctx context.Context, m *SourceNamespaceMu
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BuilderNode, IsDependency, IsOccurrence, PackageName,
-		PackageNamespace, PackageNode, PackageVersion, Source, SourceName,
-		SourceNamespace []ent.Hook
+		Artifact, BuilderNode, Dependency, IsOccurrence, PackageName, PackageNamespace,
+		PackageNode, PackageVersion, Source, SourceName, SourceNamespace []ent.Hook
 	}
 	inters struct {
-		Artifact, BuilderNode, IsDependency, IsOccurrence, PackageName,
-		PackageNamespace, PackageNode, PackageVersion, Source, SourceName,
+		Artifact, BuilderNode, Dependency, IsOccurrence, PackageName, PackageNamespace,
+		PackageNode, PackageVersion, Source, SourceName,
 		SourceNamespace []ent.Interceptor
 	}
 )

@@ -8,13 +8,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
 
-// IsDependency is the model entity for the IsDependency schema.
-type IsDependency struct {
+// Dependency is the model entity for the Dependency schema.
+type Dependency struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -33,13 +33,13 @@ type IsDependency struct {
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the IsDependencyQuery when eager-loading is set.
-	Edges        IsDependencyEdges `json:"edges"`
+	// The values are being populated by the DependencyQuery when eager-loading is set.
+	Edges        DependencyEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// IsDependencyEdges holds the relations/edges for other nodes in the graph.
-type IsDependencyEdges struct {
+// DependencyEdges holds the relations/edges for other nodes in the graph.
+type DependencyEdges struct {
 	// Package holds the value of the package edge.
 	Package *PackageVersion `json:"package,omitempty"`
 	// DependentPackage holds the value of the dependent_package edge.
@@ -51,7 +51,7 @@ type IsDependencyEdges struct {
 
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e IsDependencyEdges) PackageOrErr() (*PackageVersion, error) {
+func (e DependencyEdges) PackageOrErr() (*PackageVersion, error) {
 	if e.loadedTypes[0] {
 		if e.Package == nil {
 			// Edge was loaded but was not found.
@@ -64,7 +64,7 @@ func (e IsDependencyEdges) PackageOrErr() (*PackageVersion, error) {
 
 // DependentPackageOrErr returns the DependentPackage value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e IsDependencyEdges) DependentPackageOrErr() (*PackageName, error) {
+func (e DependencyEdges) DependentPackageOrErr() (*PackageName, error) {
 	if e.loadedTypes[1] {
 		if e.DependentPackage == nil {
 			// Edge was loaded but was not found.
@@ -76,13 +76,13 @@ func (e IsDependencyEdges) DependentPackageOrErr() (*PackageName, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*IsDependency) scanValues(columns []string) ([]any, error) {
+func (*Dependency) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case isdependency.FieldID, isdependency.FieldPackageID, isdependency.FieldDependentPackageID:
+		case dependency.FieldID, dependency.FieldPackageID, dependency.FieldDependentPackageID:
 			values[i] = new(sql.NullInt64)
-		case isdependency.FieldVersionRange, isdependency.FieldDependencyType, isdependency.FieldJustification, isdependency.FieldOrigin, isdependency.FieldCollector:
+		case dependency.FieldVersionRange, dependency.FieldDependencyType, dependency.FieldJustification, dependency.FieldOrigin, dependency.FieldCollector:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -92,130 +92,130 @@ func (*IsDependency) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the IsDependency fields.
-func (id *IsDependency) assignValues(columns []string, values []any) error {
+// to the Dependency fields.
+func (d *Dependency) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case isdependency.FieldID:
+		case dependency.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			id.ID = int(value.Int64)
-		case isdependency.FieldPackageID:
+			d.ID = int(value.Int64)
+		case dependency.FieldPackageID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				id.PackageID = int(value.Int64)
+				d.PackageID = int(value.Int64)
 			}
-		case isdependency.FieldDependentPackageID:
+		case dependency.FieldDependentPackageID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field dependent_package_id", values[i])
 			} else if value.Valid {
-				id.DependentPackageID = int(value.Int64)
+				d.DependentPackageID = int(value.Int64)
 			}
-		case isdependency.FieldVersionRange:
+		case dependency.FieldVersionRange:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field version_range", values[i])
 			} else if value.Valid {
-				id.VersionRange = value.String
+				d.VersionRange = value.String
 			}
-		case isdependency.FieldDependencyType:
+		case dependency.FieldDependencyType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field dependency_type", values[i])
 			} else if value.Valid {
-				id.DependencyType = value.String
+				d.DependencyType = value.String
 			}
-		case isdependency.FieldJustification:
+		case dependency.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				id.Justification = value.String
+				d.Justification = value.String
 			}
-		case isdependency.FieldOrigin:
+		case dependency.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				id.Origin = value.String
+				d.Origin = value.String
 			}
-		case isdependency.FieldCollector:
+		case dependency.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				id.Collector = value.String
+				d.Collector = value.String
 			}
 		default:
-			id.selectValues.Set(columns[i], values[i])
+			d.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the IsDependency.
+// Value returns the ent.Value that was dynamically selected and assigned to the Dependency.
 // This includes values selected through modifiers, order, etc.
-func (id *IsDependency) Value(name string) (ent.Value, error) {
-	return id.selectValues.Get(name)
+func (d *Dependency) Value(name string) (ent.Value, error) {
+	return d.selectValues.Get(name)
 }
 
-// QueryPackage queries the "package" edge of the IsDependency entity.
-func (id *IsDependency) QueryPackage() *PackageVersionQuery {
-	return NewIsDependencyClient(id.config).QueryPackage(id)
+// QueryPackage queries the "package" edge of the Dependency entity.
+func (d *Dependency) QueryPackage() *PackageVersionQuery {
+	return NewDependencyClient(d.config).QueryPackage(d)
 }
 
-// QueryDependentPackage queries the "dependent_package" edge of the IsDependency entity.
-func (id *IsDependency) QueryDependentPackage() *PackageNameQuery {
-	return NewIsDependencyClient(id.config).QueryDependentPackage(id)
+// QueryDependentPackage queries the "dependent_package" edge of the Dependency entity.
+func (d *Dependency) QueryDependentPackage() *PackageNameQuery {
+	return NewDependencyClient(d.config).QueryDependentPackage(d)
 }
 
-// Update returns a builder for updating this IsDependency.
-// Note that you need to call IsDependency.Unwrap() before calling this method if this IsDependency
+// Update returns a builder for updating this Dependency.
+// Note that you need to call Dependency.Unwrap() before calling this method if this Dependency
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (id *IsDependency) Update() *IsDependencyUpdateOne {
-	return NewIsDependencyClient(id.config).UpdateOne(id)
+func (d *Dependency) Update() *DependencyUpdateOne {
+	return NewDependencyClient(d.config).UpdateOne(d)
 }
 
-// Unwrap unwraps the IsDependency entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Dependency entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (id *IsDependency) Unwrap() *IsDependency {
-	_tx, ok := id.config.driver.(*txDriver)
+func (d *Dependency) Unwrap() *Dependency {
+	_tx, ok := d.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: IsDependency is not a transactional entity")
+		panic("ent: Dependency is not a transactional entity")
 	}
-	id.config.driver = _tx.drv
-	return id
+	d.config.driver = _tx.drv
+	return d
 }
 
 // String implements the fmt.Stringer.
-func (id *IsDependency) String() string {
+func (d *Dependency) String() string {
 	var builder strings.Builder
-	builder.WriteString("IsDependency(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", id.ID))
+	builder.WriteString("Dependency(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
 	builder.WriteString("package_id=")
-	builder.WriteString(fmt.Sprintf("%v", id.PackageID))
+	builder.WriteString(fmt.Sprintf("%v", d.PackageID))
 	builder.WriteString(", ")
 	builder.WriteString("dependent_package_id=")
-	builder.WriteString(fmt.Sprintf("%v", id.DependentPackageID))
+	builder.WriteString(fmt.Sprintf("%v", d.DependentPackageID))
 	builder.WriteString(", ")
 	builder.WriteString("version_range=")
-	builder.WriteString(id.VersionRange)
+	builder.WriteString(d.VersionRange)
 	builder.WriteString(", ")
 	builder.WriteString("dependency_type=")
-	builder.WriteString(id.DependencyType)
+	builder.WriteString(d.DependencyType)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(id.Justification)
+	builder.WriteString(d.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(id.Origin)
+	builder.WriteString(d.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(id.Collector)
+	builder.WriteString(d.Collector)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// IsDependencies is a parsable slice of IsDependency.
-type IsDependencies []*IsDependency
+// Dependencies is a parsable slice of Dependency.
+type Dependencies []*Dependency

@@ -6,7 +6,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdependency"
+	entdependency "github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -110,22 +110,22 @@ func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode
 		Only(ctx)
 }
 
-func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	funcName := "IsDependency"
-	query := b.client.IsDependency.Query().Order(ent.Asc(isdependency.FieldID))
+func (b *EntBackend) Dependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
+	funcName := "Dependency"
+	query := b.client.Dependency.Query().Order(ent.Asc(entdependency.FieldID))
 
 	if isDependencySpec != nil {
 		query.Where(
 			optionalPredicate(isDependencySpec.ID, IDEQ),
-			isdependency.HasPackageWith(pkgVersionPreds(isDependencySpec.Package)...),
-			isdependency.HasDependentPackageWith(pkgNamePreds(isDependencySpec.DependentPackage)...),
-			optionalPredicate(isDependencySpec.VersionRange, isdependency.VersionRange),
-			optionalPredicate(isDependencySpec.Justification, isdependency.Justification),
-			optionalPredicate(isDependencySpec.Origin, isdependency.Origin),
-			optionalPredicate(isDependencySpec.Collector, isdependency.Collector),
+			entdependency.HasPackageWith(pkgVersionPreds(isDependencySpec.Package)...),
+			entdependency.HasDependentPackageWith(pkgNamePreds(isDependencySpec.DependentPackage)...),
+			optionalPredicate(isDependencySpec.VersionRange, entdependency.VersionRange),
+			optionalPredicate(isDependencySpec.Justification, entdependency.Justification),
+			optionalPredicate(isDependencySpec.Origin, entdependency.Origin),
+			optionalPredicate(isDependencySpec.Collector, entdependency.Collector),
 		)
 		if isDependencySpec.DependencyType != nil {
-			query.Where(isdependency.DependencyType(string(*isDependencySpec.DependencyType)))
+			query.Where(entdependency.DependencyType(string(*isDependencySpec.DependencyType)))
 		}
 	} else {
 		query.Limit(100)
@@ -159,7 +159,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 		if err != nil {
 			return nil, err
 		}
-		id, err := client.IsDependency.Create().
+		id, err := client.Dependency.Create().
 			SetPackage(p). // Should I be using SetPackageID() here?
 			SetDependentPackage(dp).
 			SetVersionRange(dependency.VersionRange).
@@ -169,13 +169,13 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 			SetCollector(dependency.Collector).
 			OnConflict(
 				entsql.ConflictColumns(
-					isdependency.FieldPackageID,
-					isdependency.FieldDependentPackageID,
-					isdependency.FieldVersionRange,
-					isdependency.FieldDependencyType,
-					isdependency.FieldJustification,
-					isdependency.FieldOrigin,
-					isdependency.FieldCollector,
+					entdependency.FieldPackageID,
+					entdependency.FieldDependentPackageID,
+					entdependency.FieldVersionRange,
+					entdependency.FieldDependencyType,
+					entdependency.FieldJustification,
+					entdependency.FieldOrigin,
+					entdependency.FieldCollector,
 				),
 			).
 			UpdateNewValues().ID(ctx)
@@ -189,8 +189,8 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	}
 
 	// Upsert only gets ID, so need to query the object
-	record, err := b.client.IsDependency.Query().
-		Where(isdependency.ID(*recordID)).
+	record, err := b.client.Dependency.Query().
+		Where(entdependency.ID(*recordID)).
 		WithPackage().
 		WithDependentPackage().
 		Only(ctx)
@@ -286,7 +286,7 @@ func toModelIsOccurrenceErr(ctx context.Context, o *ent.IsOccurrence) (*model.Is
 	}, nil
 }
 
-func toModelIsDependency(ctx context.Context, id *ent.IsDependency) (*model.IsDependency, error) {
+func toModelIsDependency(ctx context.Context, id *ent.Dependency) (*model.IsDependency, error) {
 	p, err := pkgTreeFromVersion(ctx, id.Edges.Package)
 	if err != nil {
 		return nil, err
