@@ -15,7 +15,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
@@ -86,7 +86,7 @@ func checkColumn(table, column string) error {
 			artifact.Table:         artifact.ValidColumn,
 			buildernode.Table:      buildernode.ValidColumn,
 			dependency.Table:       dependency.ValidColumn,
-			isoccurrence.Table:     isoccurrence.ValidColumn,
+			occurrence.Table:       occurrence.ValidColumn,
 			packagename.Table:      packagename.ValidColumn,
 			packagenamespace.Table: packagenamespace.ValidColumn,
 			packagenode.Table:      packagenode.ValidColumn,

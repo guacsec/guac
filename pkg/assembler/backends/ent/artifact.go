@@ -29,7 +29,7 @@ type Artifact struct {
 // ArtifactEdges holds the relations/edges for other nodes in the graph.
 type ArtifactEdges struct {
 	// Occurrences holds the value of the occurrences edge.
-	Occurrences []*IsOccurrence `json:"occurrences,omitempty"`
+	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -37,7 +37,7 @@ type ArtifactEdges struct {
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
 // was not loaded in eager-loading.
-func (e ArtifactEdges) OccurrencesOrErr() ([]*IsOccurrence, error) {
+func (e ArtifactEdges) OccurrencesOrErr() ([]*Occurrence, error) {
 	if e.loadedTypes[0] {
 		return e.Occurrences, nil
 	}
@@ -100,7 +100,7 @@ func (a *Artifact) Value(name string) (ent.Value, error) {
 }
 
 // QueryOccurrences queries the "occurrences" edge of the Artifact entity.
-func (a *Artifact) QueryOccurrences() *IsOccurrenceQuery {
+func (a *Artifact) QueryOccurrences() *OccurrenceQuery {
 	return NewArtifactClient(a.config).QueryOccurrences(a)
 }
 

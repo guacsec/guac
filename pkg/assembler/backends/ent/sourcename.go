@@ -36,7 +36,7 @@ type SourceNameEdges struct {
 	// Namespace holds the value of the namespace edge.
 	Namespace *SourceNamespace `json:"namespace,omitempty"`
 	// Occurrences holds the value of the occurrences edge.
-	Occurrences []*IsOccurrence `json:"occurrences,omitempty"`
+	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -57,7 +57,7 @@ func (e SourceNameEdges) NamespaceOrErr() (*SourceNamespace, error) {
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
 // was not loaded in eager-loading.
-func (e SourceNameEdges) OccurrencesOrErr() ([]*IsOccurrence, error) {
+func (e SourceNameEdges) OccurrencesOrErr() ([]*Occurrence, error) {
 	if e.loadedTypes[1] {
 		return e.Occurrences, nil
 	}
@@ -137,7 +137,7 @@ func (sn *SourceName) QueryNamespace() *SourceNamespaceQuery {
 }
 
 // QueryOccurrences queries the "occurrences" edge of the SourceName entity.
-func (sn *SourceName) QueryOccurrences() *IsOccurrenceQuery {
+func (sn *SourceName) QueryOccurrences() *OccurrenceQuery {
 	return NewSourceNameClient(sn.config).QueryOccurrences(sn)
 }
 

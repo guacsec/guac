@@ -7,13 +7,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// IsOccurrence holds the schema definition for the IsOccurrence entity.
-type IsOccurrence struct {
+// Occurrence holds the schema definition for the Occurrence entity.
+type Occurrence struct {
 	ent.Schema
 }
 
-// Fields of the IsOccurrence.
-func (IsOccurrence) Fields() []ent.Field {
+// Fields of the Occurrence.
+func (Occurrence) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("package_id").Optional().Nillable(),
 		field.Int("source_id").Optional().Nillable(),
@@ -24,8 +24,8 @@ func (IsOccurrence) Fields() []ent.Field {
 	}
 }
 
-// Edges of the IsOccurrence.
-func (IsOccurrence) Edges() []ent.Edge {
+// Edges of the Occurrence.
+func (Occurrence) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("package_version", PackageVersion.Type).Field("package_id").Unique(),
 		edge.To("source", SourceName.Type).Field("source_id").Unique(),
@@ -33,8 +33,8 @@ func (IsOccurrence) Edges() []ent.Edge {
 	}
 }
 
-// Indexes of the IsOccurrence.
-func (IsOccurrence) Indexes() []ent.Index {
+// Indexes of the Occurrence.
+func (Occurrence) Indexes() []ent.Index {
 	return []ent.Index{
 		// FIXME: (ivanvanderbyl) Unique constraints don't work with NULLs
 		index.Fields("justification", "origin", "collector").Edges("source", "package_version", "artifact").Unique().

@@ -21,10 +21,10 @@ const (
 	// Table holds the table name of the artifact in the database.
 	Table = "artifacts"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
-	OccurrencesTable = "is_occurrences"
-	// OccurrencesInverseTable is the table name for the IsOccurrence entity.
-	// It exists in this package in order to avoid circular dependency with the "isoccurrence" package.
-	OccurrencesInverseTable = "is_occurrences"
+	OccurrencesTable = "occurrences"
+	// OccurrencesInverseTable is the table name for the Occurrence entity.
+	// It exists in this package in order to avoid circular dependency with the "occurrence" package.
+	OccurrencesInverseTable = "occurrences"
 	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
 	OccurrencesColumn = "artifact_id"
 )

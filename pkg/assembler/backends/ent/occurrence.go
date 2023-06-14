@@ -9,13 +9,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
-// IsOccurrence is the model entity for the IsOccurrence schema.
-type IsOccurrence struct {
+// Occurrence is the model entity for the Occurrence schema.
+type Occurrence struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -32,13 +32,13 @@ type IsOccurrence struct {
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the IsOccurrenceQuery when eager-loading is set.
-	Edges        IsOccurrenceEdges `json:"edges"`
+	// The values are being populated by the OccurrenceQuery when eager-loading is set.
+	Edges        OccurrenceEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// IsOccurrenceEdges holds the relations/edges for other nodes in the graph.
-type IsOccurrenceEdges struct {
+// OccurrenceEdges holds the relations/edges for other nodes in the graph.
+type OccurrenceEdges struct {
 	// PackageVersion holds the value of the package_version edge.
 	PackageVersion *PackageVersion `json:"package_version,omitempty"`
 	// Source holds the value of the source edge.
@@ -52,7 +52,7 @@ type IsOccurrenceEdges struct {
 
 // PackageVersionOrErr returns the PackageVersion value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e IsOccurrenceEdges) PackageVersionOrErr() (*PackageVersion, error) {
+func (e OccurrenceEdges) PackageVersionOrErr() (*PackageVersion, error) {
 	if e.loadedTypes[0] {
 		if e.PackageVersion == nil {
 			// Edge was loaded but was not found.
@@ -65,7 +65,7 @@ func (e IsOccurrenceEdges) PackageVersionOrErr() (*PackageVersion, error) {
 
 // SourceOrErr returns the Source value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e IsOccurrenceEdges) SourceOrErr() (*SourceName, error) {
+func (e OccurrenceEdges) SourceOrErr() (*SourceName, error) {
 	if e.loadedTypes[1] {
 		if e.Source == nil {
 			// Edge was loaded but was not found.
@@ -78,7 +78,7 @@ func (e IsOccurrenceEdges) SourceOrErr() (*SourceName, error) {
 
 // ArtifactOrErr returns the Artifact value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e IsOccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
+func (e OccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
 	if e.loadedTypes[2] {
 		if e.Artifact == nil {
 			// Edge was loaded but was not found.
@@ -90,13 +90,13 @@ func (e IsOccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*IsOccurrence) scanValues(columns []string) ([]any, error) {
+func (*Occurrence) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case isoccurrence.FieldID, isoccurrence.FieldPackageID, isoccurrence.FieldSourceID, isoccurrence.FieldArtifactID:
+		case occurrence.FieldID, occurrence.FieldPackageID, occurrence.FieldSourceID, occurrence.FieldArtifactID:
 			values[i] = new(sql.NullInt64)
-		case isoccurrence.FieldJustification, isoccurrence.FieldOrigin, isoccurrence.FieldCollector:
+		case occurrence.FieldJustification, occurrence.FieldOrigin, occurrence.FieldCollector:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -106,132 +106,132 @@ func (*IsOccurrence) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the IsOccurrence fields.
-func (io *IsOccurrence) assignValues(columns []string, values []any) error {
+// to the Occurrence fields.
+func (o *Occurrence) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case isoccurrence.FieldID:
+		case occurrence.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			io.ID = int(value.Int64)
-		case isoccurrence.FieldPackageID:
+			o.ID = int(value.Int64)
+		case occurrence.FieldPackageID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				io.PackageID = new(int)
-				*io.PackageID = int(value.Int64)
+				o.PackageID = new(int)
+				*o.PackageID = int(value.Int64)
 			}
-		case isoccurrence.FieldSourceID:
+		case occurrence.FieldSourceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				io.SourceID = new(int)
-				*io.SourceID = int(value.Int64)
+				o.SourceID = new(int)
+				*o.SourceID = int(value.Int64)
 			}
-		case isoccurrence.FieldArtifactID:
+		case occurrence.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				io.ArtifactID = int(value.Int64)
+				o.ArtifactID = int(value.Int64)
 			}
-		case isoccurrence.FieldJustification:
+		case occurrence.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
-				io.Justification = value.String
+				o.Justification = value.String
 			}
-		case isoccurrence.FieldOrigin:
+		case occurrence.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
 			} else if value.Valid {
-				io.Origin = value.String
+				o.Origin = value.String
 			}
-		case isoccurrence.FieldCollector:
+		case occurrence.FieldCollector:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
-				io.Collector = value.String
+				o.Collector = value.String
 			}
 		default:
-			io.selectValues.Set(columns[i], values[i])
+			o.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the IsOccurrence.
+// Value returns the ent.Value that was dynamically selected and assigned to the Occurrence.
 // This includes values selected through modifiers, order, etc.
-func (io *IsOccurrence) Value(name string) (ent.Value, error) {
-	return io.selectValues.Get(name)
+func (o *Occurrence) Value(name string) (ent.Value, error) {
+	return o.selectValues.Get(name)
 }
 
-// QueryPackageVersion queries the "package_version" edge of the IsOccurrence entity.
-func (io *IsOccurrence) QueryPackageVersion() *PackageVersionQuery {
-	return NewIsOccurrenceClient(io.config).QueryPackageVersion(io)
+// QueryPackageVersion queries the "package_version" edge of the Occurrence entity.
+func (o *Occurrence) QueryPackageVersion() *PackageVersionQuery {
+	return NewOccurrenceClient(o.config).QueryPackageVersion(o)
 }
 
-// QuerySource queries the "source" edge of the IsOccurrence entity.
-func (io *IsOccurrence) QuerySource() *SourceNameQuery {
-	return NewIsOccurrenceClient(io.config).QuerySource(io)
+// QuerySource queries the "source" edge of the Occurrence entity.
+func (o *Occurrence) QuerySource() *SourceNameQuery {
+	return NewOccurrenceClient(o.config).QuerySource(o)
 }
 
-// QueryArtifact queries the "artifact" edge of the IsOccurrence entity.
-func (io *IsOccurrence) QueryArtifact() *ArtifactQuery {
-	return NewIsOccurrenceClient(io.config).QueryArtifact(io)
+// QueryArtifact queries the "artifact" edge of the Occurrence entity.
+func (o *Occurrence) QueryArtifact() *ArtifactQuery {
+	return NewOccurrenceClient(o.config).QueryArtifact(o)
 }
 
-// Update returns a builder for updating this IsOccurrence.
-// Note that you need to call IsOccurrence.Unwrap() before calling this method if this IsOccurrence
+// Update returns a builder for updating this Occurrence.
+// Note that you need to call Occurrence.Unwrap() before calling this method if this Occurrence
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (io *IsOccurrence) Update() *IsOccurrenceUpdateOne {
-	return NewIsOccurrenceClient(io.config).UpdateOne(io)
+func (o *Occurrence) Update() *OccurrenceUpdateOne {
+	return NewOccurrenceClient(o.config).UpdateOne(o)
 }
 
-// Unwrap unwraps the IsOccurrence entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Occurrence entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (io *IsOccurrence) Unwrap() *IsOccurrence {
-	_tx, ok := io.config.driver.(*txDriver)
+func (o *Occurrence) Unwrap() *Occurrence {
+	_tx, ok := o.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: IsOccurrence is not a transactional entity")
+		panic("ent: Occurrence is not a transactional entity")
 	}
-	io.config.driver = _tx.drv
-	return io
+	o.config.driver = _tx.drv
+	return o
 }
 
 // String implements the fmt.Stringer.
-func (io *IsOccurrence) String() string {
+func (o *Occurrence) String() string {
 	var builder strings.Builder
-	builder.WriteString("IsOccurrence(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", io.ID))
-	if v := io.PackageID; v != nil {
+	builder.WriteString("Occurrence(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", o.ID))
+	if v := o.PackageID; v != nil {
 		builder.WriteString("package_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := io.SourceID; v != nil {
+	if v := o.SourceID; v != nil {
 		builder.WriteString("source_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("artifact_id=")
-	builder.WriteString(fmt.Sprintf("%v", io.ArtifactID))
+	builder.WriteString(fmt.Sprintf("%v", o.ArtifactID))
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
-	builder.WriteString(io.Justification)
+	builder.WriteString(o.Justification)
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
-	builder.WriteString(io.Origin)
+	builder.WriteString(o.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
-	builder.WriteString(io.Collector)
+	builder.WriteString(o.Collector)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// IsOccurrences is a parsable slice of IsOccurrence.
-type IsOccurrences []*IsOccurrence
+// Occurrences is a parsable slice of Occurrence.
+type Occurrences []*Occurrence

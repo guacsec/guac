@@ -83,8 +83,8 @@ var (
 			},
 		},
 	}
-	// IsOccurrencesColumns holds the columns for the "is_occurrences" table.
-	IsOccurrencesColumns = []*schema.Column{
+	// OccurrencesColumns holds the columns for the "occurrences" table.
+	OccurrencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
@@ -93,27 +93,27 @@ var (
 		{Name: "source_id", Type: field.TypeInt, Nullable: true},
 		{Name: "artifact_id", Type: field.TypeInt},
 	}
-	// IsOccurrencesTable holds the schema information for the "is_occurrences" table.
-	IsOccurrencesTable = &schema.Table{
-		Name:       "is_occurrences",
-		Columns:    IsOccurrencesColumns,
-		PrimaryKey: []*schema.Column{IsOccurrencesColumns[0]},
+	// OccurrencesTable holds the schema information for the "occurrences" table.
+	OccurrencesTable = &schema.Table{
+		Name:       "occurrences",
+		Columns:    OccurrencesColumns,
+		PrimaryKey: []*schema.Column{OccurrencesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "is_occurrences_package_versions_package_version",
-				Columns:    []*schema.Column{IsOccurrencesColumns[4]},
+				Symbol:     "occurrences_package_versions_package_version",
+				Columns:    []*schema.Column{OccurrencesColumns[4]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "is_occurrences_source_names_source",
-				Columns:    []*schema.Column{IsOccurrencesColumns[5]},
+				Symbol:     "occurrences_source_names_source",
+				Columns:    []*schema.Column{OccurrencesColumns[5]},
 				RefColumns: []*schema.Column{SourceNamesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "is_occurrences_artifacts_artifact",
-				Columns:    []*schema.Column{IsOccurrencesColumns[6]},
+				Symbol:     "occurrences_artifacts_artifact",
+				Columns:    []*schema.Column{OccurrencesColumns[6]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -122,7 +122,7 @@ var (
 			{
 				Name:    "occurrence_unique_package",
 				Unique:  true,
-				Columns: []*schema.Column{IsOccurrencesColumns[1], IsOccurrencesColumns[2], IsOccurrencesColumns[3], IsOccurrencesColumns[5], IsOccurrencesColumns[4], IsOccurrencesColumns[6]},
+				Columns: []*schema.Column{OccurrencesColumns[1], OccurrencesColumns[2], OccurrencesColumns[3], OccurrencesColumns[5], OccurrencesColumns[4], OccurrencesColumns[6]},
 			},
 		},
 	}
@@ -303,7 +303,7 @@ var (
 		ArtifactsTable,
 		BuilderNodesTable,
 		DependenciesTable,
-		IsOccurrencesTable,
+		OccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
 		PackageNodesTable,
@@ -317,9 +317,9 @@ var (
 func init() {
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
-	IsOccurrencesTable.ForeignKeys[0].RefTable = PackageVersionsTable
-	IsOccurrencesTable.ForeignKeys[1].RefTable = SourceNamesTable
-	IsOccurrencesTable.ForeignKeys[2].RefTable = ArtifactsTable
+	OccurrencesTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	OccurrencesTable.ForeignKeys[1].RefTable = SourceNamesTable
+	OccurrencesTable.ForeignKeys[2].RefTable = ArtifactsTable
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageNodesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable

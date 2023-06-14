@@ -15,8 +15,8 @@ type BuilderNode func(*sql.Selector)
 // Dependency is the predicate function for dependency builders.
 type Dependency func(*sql.Selector)
 
-// IsOccurrence is the predicate function for isoccurrence builders.
-type IsOccurrence func(*sql.Selector)
+// Occurrence is the predicate function for occurrence builders.
+type Occurrence func(*sql.Selector)
 
 // PackageName is the predicate function for packagename builders.
 type PackageName func(*sql.Selector)

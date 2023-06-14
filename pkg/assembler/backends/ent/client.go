@@ -17,7 +17,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
@@ -38,8 +38,8 @@ type Client struct {
 	BuilderNode *BuilderNodeClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
-	// IsOccurrence is the client for interacting with the IsOccurrence builders.
-	IsOccurrence *IsOccurrenceClient
+	// Occurrence is the client for interacting with the Occurrence builders.
+	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
 	PackageName *PackageNameClient
 	// PackageNamespace is the client for interacting with the PackageNamespace builders.
@@ -70,7 +70,7 @@ func (c *Client) init() {
 	c.Artifact = NewArtifactClient(c.config)
 	c.BuilderNode = NewBuilderNodeClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
-	c.IsOccurrence = NewIsOccurrenceClient(c.config)
+	c.Occurrence = NewOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
 	c.PackageNode = NewPackageNodeClient(c.config)
@@ -163,7 +163,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Artifact:         NewArtifactClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
-		IsOccurrence:     NewIsOccurrenceClient(cfg),
+		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageNode:      NewPackageNodeClient(cfg),
@@ -193,7 +193,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Artifact:         NewArtifactClient(cfg),
 		BuilderNode:      NewBuilderNodeClient(cfg),
 		Dependency:       NewDependencyClient(cfg),
-		IsOccurrence:     NewIsOccurrenceClient(cfg),
+		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageNode:      NewPackageNodeClient(cfg),
@@ -230,7 +230,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BuilderNode, c.Dependency, c.IsOccurrence, c.PackageName,
+		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
 		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
 		c.SourceNamespace,
 	} {
@@ -242,7 +242,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BuilderNode, c.Dependency, c.IsOccurrence, c.PackageName,
+		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
 		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
 		c.SourceNamespace,
 	} {
@@ -259,8 +259,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.BuilderNode.mutate(ctx, m)
 	case *DependencyMutation:
 		return c.Dependency.mutate(ctx, m)
-	case *IsOccurrenceMutation:
-		return c.IsOccurrence.mutate(ctx, m)
+	case *OccurrenceMutation:
+		return c.Occurrence.mutate(ctx, m)
 	case *PackageNameMutation:
 		return c.PackageName.mutate(ctx, m)
 	case *PackageNamespaceMutation:
@@ -374,13 +374,13 @@ func (c *ArtifactClient) GetX(ctx context.Context, id int) *Artifact {
 }
 
 // QueryOccurrences queries the occurrences edge of a Artifact.
-func (c *ArtifactClient) QueryOccurrences(a *Artifact) *IsOccurrenceQuery {
-	query := (&IsOccurrenceClient{config: c.config}).Query()
+func (c *ArtifactClient) QueryOccurrences(a *Artifact) *OccurrenceQuery {
+	query := (&OccurrenceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
-			sqlgraph.To(isoccurrence.Table, isoccurrence.FieldID),
+			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.OccurrencesTable, artifact.OccurrencesColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
@@ -682,92 +682,92 @@ func (c *DependencyClient) mutate(ctx context.Context, m *DependencyMutation) (V
 	}
 }
 
-// IsOccurrenceClient is a client for the IsOccurrence schema.
-type IsOccurrenceClient struct {
+// OccurrenceClient is a client for the Occurrence schema.
+type OccurrenceClient struct {
 	config
 }
 
-// NewIsOccurrenceClient returns a client for the IsOccurrence from the given config.
-func NewIsOccurrenceClient(c config) *IsOccurrenceClient {
-	return &IsOccurrenceClient{config: c}
+// NewOccurrenceClient returns a client for the Occurrence from the given config.
+func NewOccurrenceClient(c config) *OccurrenceClient {
+	return &OccurrenceClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `isoccurrence.Hooks(f(g(h())))`.
-func (c *IsOccurrenceClient) Use(hooks ...Hook) {
-	c.hooks.IsOccurrence = append(c.hooks.IsOccurrence, hooks...)
+// A call to `Use(f, g, h)` equals to `occurrence.Hooks(f(g(h())))`.
+func (c *OccurrenceClient) Use(hooks ...Hook) {
+	c.hooks.Occurrence = append(c.hooks.Occurrence, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `isoccurrence.Intercept(f(g(h())))`.
-func (c *IsOccurrenceClient) Intercept(interceptors ...Interceptor) {
-	c.inters.IsOccurrence = append(c.inters.IsOccurrence, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `occurrence.Intercept(f(g(h())))`.
+func (c *OccurrenceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Occurrence = append(c.inters.Occurrence, interceptors...)
 }
 
-// Create returns a builder for creating a IsOccurrence entity.
-func (c *IsOccurrenceClient) Create() *IsOccurrenceCreate {
-	mutation := newIsOccurrenceMutation(c.config, OpCreate)
-	return &IsOccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Occurrence entity.
+func (c *OccurrenceClient) Create() *OccurrenceCreate {
+	mutation := newOccurrenceMutation(c.config, OpCreate)
+	return &OccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of IsOccurrence entities.
-func (c *IsOccurrenceClient) CreateBulk(builders ...*IsOccurrenceCreate) *IsOccurrenceCreateBulk {
-	return &IsOccurrenceCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Occurrence entities.
+func (c *OccurrenceClient) CreateBulk(builders ...*OccurrenceCreate) *OccurrenceCreateBulk {
+	return &OccurrenceCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for IsOccurrence.
-func (c *IsOccurrenceClient) Update() *IsOccurrenceUpdate {
-	mutation := newIsOccurrenceMutation(c.config, OpUpdate)
-	return &IsOccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Occurrence.
+func (c *OccurrenceClient) Update() *OccurrenceUpdate {
+	mutation := newOccurrenceMutation(c.config, OpUpdate)
+	return &OccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *IsOccurrenceClient) UpdateOne(io *IsOccurrence) *IsOccurrenceUpdateOne {
-	mutation := newIsOccurrenceMutation(c.config, OpUpdateOne, withIsOccurrence(io))
-	return &IsOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *OccurrenceClient) UpdateOne(o *Occurrence) *OccurrenceUpdateOne {
+	mutation := newOccurrenceMutation(c.config, OpUpdateOne, withOccurrence(o))
+	return &OccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *IsOccurrenceClient) UpdateOneID(id int) *IsOccurrenceUpdateOne {
-	mutation := newIsOccurrenceMutation(c.config, OpUpdateOne, withIsOccurrenceID(id))
-	return &IsOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *OccurrenceClient) UpdateOneID(id int) *OccurrenceUpdateOne {
+	mutation := newOccurrenceMutation(c.config, OpUpdateOne, withOccurrenceID(id))
+	return &OccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for IsOccurrence.
-func (c *IsOccurrenceClient) Delete() *IsOccurrenceDelete {
-	mutation := newIsOccurrenceMutation(c.config, OpDelete)
-	return &IsOccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Occurrence.
+func (c *OccurrenceClient) Delete() *OccurrenceDelete {
+	mutation := newOccurrenceMutation(c.config, OpDelete)
+	return &OccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *IsOccurrenceClient) DeleteOne(io *IsOccurrence) *IsOccurrenceDeleteOne {
-	return c.DeleteOneID(io.ID)
+func (c *OccurrenceClient) DeleteOne(o *Occurrence) *OccurrenceDeleteOne {
+	return c.DeleteOneID(o.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *IsOccurrenceClient) DeleteOneID(id int) *IsOccurrenceDeleteOne {
-	builder := c.Delete().Where(isoccurrence.ID(id))
+func (c *OccurrenceClient) DeleteOneID(id int) *OccurrenceDeleteOne {
+	builder := c.Delete().Where(occurrence.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &IsOccurrenceDeleteOne{builder}
+	return &OccurrenceDeleteOne{builder}
 }
 
-// Query returns a query builder for IsOccurrence.
-func (c *IsOccurrenceClient) Query() *IsOccurrenceQuery {
-	return &IsOccurrenceQuery{
+// Query returns a query builder for Occurrence.
+func (c *OccurrenceClient) Query() *OccurrenceQuery {
+	return &OccurrenceQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeIsOccurrence},
+		ctx:    &QueryContext{Type: TypeOccurrence},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a IsOccurrence entity by its id.
-func (c *IsOccurrenceClient) Get(ctx context.Context, id int) (*IsOccurrence, error) {
-	return c.Query().Where(isoccurrence.ID(id)).Only(ctx)
+// Get returns a Occurrence entity by its id.
+func (c *OccurrenceClient) Get(ctx context.Context, id int) (*Occurrence, error) {
+	return c.Query().Where(occurrence.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *IsOccurrenceClient) GetX(ctx context.Context, id int) *IsOccurrence {
+func (c *OccurrenceClient) GetX(ctx context.Context, id int) *Occurrence {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -775,76 +775,76 @@ func (c *IsOccurrenceClient) GetX(ctx context.Context, id int) *IsOccurrence {
 	return obj
 }
 
-// QueryPackageVersion queries the package_version edge of a IsOccurrence.
-func (c *IsOccurrenceClient) QueryPackageVersion(io *IsOccurrence) *PackageVersionQuery {
+// QueryPackageVersion queries the package_version edge of a Occurrence.
+func (c *OccurrenceClient) QueryPackageVersion(o *Occurrence) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := io.ID
+		id := o.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(isoccurrence.Table, isoccurrence.FieldID, id),
+			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.PackageVersionTable, isoccurrence.PackageVersionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.PackageVersionTable, occurrence.PackageVersionColumn),
 		)
-		fromV = sqlgraph.Neighbors(io.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QuerySource queries the source edge of a IsOccurrence.
-func (c *IsOccurrenceClient) QuerySource(io *IsOccurrence) *SourceNameQuery {
+// QuerySource queries the source edge of a Occurrence.
+func (c *OccurrenceClient) QuerySource(o *Occurrence) *SourceNameQuery {
 	query := (&SourceNameClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := io.ID
+		id := o.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(isoccurrence.Table, isoccurrence.FieldID, id),
+			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.SourceTable, isoccurrence.SourceColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.SourceTable, occurrence.SourceColumn),
 		)
-		fromV = sqlgraph.Neighbors(io.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryArtifact queries the artifact edge of a IsOccurrence.
-func (c *IsOccurrenceClient) QueryArtifact(io *IsOccurrence) *ArtifactQuery {
+// QueryArtifact queries the artifact edge of a Occurrence.
+func (c *OccurrenceClient) QueryArtifact(o *Occurrence) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := io.ID
+		id := o.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(isoccurrence.Table, isoccurrence.FieldID, id),
+			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isoccurrence.ArtifactTable, isoccurrence.ArtifactColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.ArtifactTable, occurrence.ArtifactColumn),
 		)
-		fromV = sqlgraph.Neighbors(io.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *IsOccurrenceClient) Hooks() []Hook {
-	return c.hooks.IsOccurrence
+func (c *OccurrenceClient) Hooks() []Hook {
+	return c.hooks.Occurrence
 }
 
 // Interceptors returns the client interceptors.
-func (c *IsOccurrenceClient) Interceptors() []Interceptor {
-	return c.inters.IsOccurrence
+func (c *OccurrenceClient) Interceptors() []Interceptor {
+	return c.inters.Occurrence
 }
 
-func (c *IsOccurrenceClient) mutate(ctx context.Context, m *IsOccurrenceMutation) (Value, error) {
+func (c *OccurrenceClient) mutate(ctx context.Context, m *OccurrenceMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&IsOccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&OccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&IsOccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&OccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&IsOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&OccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&IsOccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&OccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown IsOccurrence mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Occurrence mutation op: %q", m.Op())
 	}
 }
 
@@ -1660,13 +1660,13 @@ func (c *SourceNameClient) QueryNamespace(sn *SourceName) *SourceNamespaceQuery 
 }
 
 // QueryOccurrences queries the occurrences edge of a SourceName.
-func (c *SourceNameClient) QueryOccurrences(sn *SourceName) *IsOccurrenceQuery {
-	query := (&IsOccurrenceClient{config: c.config}).Query()
+func (c *SourceNameClient) QueryOccurrences(sn *SourceName) *OccurrenceQuery {
+	query := (&OccurrenceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := sn.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
-			sqlgraph.To(isoccurrence.Table, isoccurrence.FieldID),
+			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.OccurrencesTable, sourcename.OccurrencesColumn),
 		)
 		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
@@ -1853,11 +1853,11 @@ func (c *SourceNamespaceClient) mutate(ctx context.Context, m *SourceNamespaceMu
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BuilderNode, Dependency, IsOccurrence, PackageName, PackageNamespace,
+		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
 		PackageNode, PackageVersion, Source, SourceName, SourceNamespace []ent.Hook
 	}
 	inters struct {
-		Artifact, BuilderNode, Dependency, IsOccurrence, PackageName, PackageNamespace,
+		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
 		PackageNode, PackageVersion, Source, SourceName,
 		SourceNamespace []ent.Interceptor
 	}

@@ -205,7 +205,7 @@ func HasOccurrences() predicate.Artifact {
 }
 
 // HasOccurrencesWith applies the HasEdge predicate on the "occurrences" edge with a given conditions (other predicates).
-func HasOccurrencesWith(preds ...predicate.IsOccurrence) predicate.Artifact {
+func HasOccurrencesWith(preds ...predicate.Occurrence) predicate.Artifact {
 	return predicate.Artifact(func(s *sql.Selector) {
 		step := newOccurrencesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

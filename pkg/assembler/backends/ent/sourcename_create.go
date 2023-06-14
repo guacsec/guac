@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 )
@@ -68,17 +68,17 @@ func (snc *SourceNameCreate) SetNamespace(s *SourceNamespace) *SourceNameCreate 
 	return snc.SetNamespaceID(s.ID)
 }
 
-// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by IDs.
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
 func (snc *SourceNameCreate) AddOccurrenceIDs(ids ...int) *SourceNameCreate {
 	snc.mutation.AddOccurrenceIDs(ids...)
 	return snc
 }
 
-// AddOccurrences adds the "occurrences" edges to the IsOccurrence entity.
-func (snc *SourceNameCreate) AddOccurrences(i ...*IsOccurrence) *SourceNameCreate {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+// AddOccurrences adds the "occurrences" edges to the Occurrence entity.
+func (snc *SourceNameCreate) AddOccurrences(o ...*Occurrence) *SourceNameCreate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
 	}
 	return snc.AddOccurrenceIDs(ids...)
 }
@@ -190,7 +190,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

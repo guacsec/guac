@@ -13,7 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
@@ -36,7 +36,7 @@ const (
 	TypeArtifact         = "Artifact"
 	TypeBuilderNode      = "BuilderNode"
 	TypeDependency       = "Dependency"
-	TypeIsOccurrence     = "IsOccurrence"
+	TypeOccurrence       = "Occurrence"
 	TypePackageName      = "PackageName"
 	TypePackageNamespace = "PackageNamespace"
 	TypePackageNode      = "PackageNode"
@@ -233,7 +233,7 @@ func (m *ArtifactMutation) ResetDigest() {
 	m.digest = nil
 }
 
-// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by ids.
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by ids.
 func (m *ArtifactMutation) AddOccurrenceIDs(ids ...int) {
 	if m.occurrences == nil {
 		m.occurrences = make(map[int]struct{})
@@ -243,17 +243,17 @@ func (m *ArtifactMutation) AddOccurrenceIDs(ids ...int) {
 	}
 }
 
-// ClearOccurrences clears the "occurrences" edge to the IsOccurrence entity.
+// ClearOccurrences clears the "occurrences" edge to the Occurrence entity.
 func (m *ArtifactMutation) ClearOccurrences() {
 	m.clearedoccurrences = true
 }
 
-// OccurrencesCleared reports if the "occurrences" edge to the IsOccurrence entity was cleared.
+// OccurrencesCleared reports if the "occurrences" edge to the Occurrence entity was cleared.
 func (m *ArtifactMutation) OccurrencesCleared() bool {
 	return m.clearedoccurrences
 }
 
-// RemoveOccurrenceIDs removes the "occurrences" edge to the IsOccurrence entity by IDs.
+// RemoveOccurrenceIDs removes the "occurrences" edge to the Occurrence entity by IDs.
 func (m *ArtifactMutation) RemoveOccurrenceIDs(ids ...int) {
 	if m.removedoccurrences == nil {
 		m.removedoccurrences = make(map[int]struct{})
@@ -264,7 +264,7 @@ func (m *ArtifactMutation) RemoveOccurrenceIDs(ids ...int) {
 	}
 }
 
-// RemovedOccurrences returns the removed IDs of the "occurrences" edge to the IsOccurrence entity.
+// RemovedOccurrences returns the removed IDs of the "occurrences" edge to the Occurrence entity.
 func (m *ArtifactMutation) RemovedOccurrencesIDs() (ids []int) {
 	for id := range m.removedoccurrences {
 		ids = append(ids, id)
@@ -1596,8 +1596,8 @@ func (m *DependencyMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Dependency edge %s", name)
 }
 
-// IsOccurrenceMutation represents an operation that mutates the IsOccurrence nodes in the graph.
-type IsOccurrenceMutation struct {
+// OccurrenceMutation represents an operation that mutates the Occurrence nodes in the graph.
+type OccurrenceMutation struct {
 	config
 	op                     Op
 	typ                    string
@@ -1613,21 +1613,21 @@ type IsOccurrenceMutation struct {
 	artifact               *int
 	clearedartifact        bool
 	done                   bool
-	oldValue               func(context.Context) (*IsOccurrence, error)
-	predicates             []predicate.IsOccurrence
+	oldValue               func(context.Context) (*Occurrence, error)
+	predicates             []predicate.Occurrence
 }
 
-var _ ent.Mutation = (*IsOccurrenceMutation)(nil)
+var _ ent.Mutation = (*OccurrenceMutation)(nil)
 
-// isoccurrenceOption allows management of the mutation configuration using functional options.
-type isoccurrenceOption func(*IsOccurrenceMutation)
+// occurrenceOption allows management of the mutation configuration using functional options.
+type occurrenceOption func(*OccurrenceMutation)
 
-// newIsOccurrenceMutation creates new mutation for the IsOccurrence entity.
-func newIsOccurrenceMutation(c config, op Op, opts ...isoccurrenceOption) *IsOccurrenceMutation {
-	m := &IsOccurrenceMutation{
+// newOccurrenceMutation creates new mutation for the Occurrence entity.
+func newOccurrenceMutation(c config, op Op, opts ...occurrenceOption) *OccurrenceMutation {
+	m := &OccurrenceMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeIsOccurrence,
+		typ:           TypeOccurrence,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -1636,20 +1636,20 @@ func newIsOccurrenceMutation(c config, op Op, opts ...isoccurrenceOption) *IsOcc
 	return m
 }
 
-// withIsOccurrenceID sets the ID field of the mutation.
-func withIsOccurrenceID(id int) isoccurrenceOption {
-	return func(m *IsOccurrenceMutation) {
+// withOccurrenceID sets the ID field of the mutation.
+func withOccurrenceID(id int) occurrenceOption {
+	return func(m *OccurrenceMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *IsOccurrence
+			value *Occurrence
 		)
-		m.oldValue = func(ctx context.Context) (*IsOccurrence, error) {
+		m.oldValue = func(ctx context.Context) (*Occurrence, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().IsOccurrence.Get(ctx, id)
+					value, err = m.Client().Occurrence.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -1658,10 +1658,10 @@ func withIsOccurrenceID(id int) isoccurrenceOption {
 	}
 }
 
-// withIsOccurrence sets the old IsOccurrence of the mutation.
-func withIsOccurrence(node *IsOccurrence) isoccurrenceOption {
-	return func(m *IsOccurrenceMutation) {
-		m.oldValue = func(context.Context) (*IsOccurrence, error) {
+// withOccurrence sets the old Occurrence of the mutation.
+func withOccurrence(node *Occurrence) occurrenceOption {
+	return func(m *OccurrenceMutation) {
+		m.oldValue = func(context.Context) (*Occurrence, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -1670,7 +1670,7 @@ func withIsOccurrence(node *IsOccurrence) isoccurrenceOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m IsOccurrenceMutation) Client() *Client {
+func (m OccurrenceMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -1678,7 +1678,7 @@ func (m IsOccurrenceMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m IsOccurrenceMutation) Tx() (*Tx, error) {
+func (m OccurrenceMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -1689,7 +1689,7 @@ func (m IsOccurrenceMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *IsOccurrenceMutation) ID() (id int, exists bool) {
+func (m *OccurrenceMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1700,7 +1700,7 @@ func (m *IsOccurrenceMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *IsOccurrenceMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *OccurrenceMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -1709,19 +1709,19 @@ func (m *IsOccurrenceMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().IsOccurrence.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Occurrence.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *IsOccurrenceMutation) SetPackageID(i int) {
+func (m *OccurrenceMutation) SetPackageID(i int) {
 	m.package_version = &i
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *IsOccurrenceMutation) PackageID() (r int, exists bool) {
+func (m *OccurrenceMutation) PackageID() (r int, exists bool) {
 	v := m.package_version
 	if v == nil {
 		return
@@ -1729,10 +1729,10 @@ func (m *IsOccurrenceMutation) PackageID() (r int, exists bool) {
 	return *v, true
 }
 
-// OldPackageID returns the old "package_id" field's value of the IsOccurrence entity.
-// If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// OldPackageID returns the old "package_id" field's value of the Occurrence entity.
+// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+func (m *OccurrenceMutation) OldPackageID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -1747,30 +1747,30 @@ func (m *IsOccurrenceMutation) OldPackageID(ctx context.Context) (v *int, err er
 }
 
 // ClearPackageID clears the value of the "package_id" field.
-func (m *IsOccurrenceMutation) ClearPackageID() {
+func (m *OccurrenceMutation) ClearPackageID() {
 	m.package_version = nil
-	m.clearedFields[isoccurrence.FieldPackageID] = struct{}{}
+	m.clearedFields[occurrence.FieldPackageID] = struct{}{}
 }
 
 // PackageIDCleared returns if the "package_id" field was cleared in this mutation.
-func (m *IsOccurrenceMutation) PackageIDCleared() bool {
-	_, ok := m.clearedFields[isoccurrence.FieldPackageID]
+func (m *OccurrenceMutation) PackageIDCleared() bool {
+	_, ok := m.clearedFields[occurrence.FieldPackageID]
 	return ok
 }
 
 // ResetPackageID resets all changes to the "package_id" field.
-func (m *IsOccurrenceMutation) ResetPackageID() {
+func (m *OccurrenceMutation) ResetPackageID() {
 	m.package_version = nil
-	delete(m.clearedFields, isoccurrence.FieldPackageID)
+	delete(m.clearedFields, occurrence.FieldPackageID)
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *IsOccurrenceMutation) SetSourceID(i int) {
+func (m *OccurrenceMutation) SetSourceID(i int) {
 	m.source = &i
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *IsOccurrenceMutation) SourceID() (r int, exists bool) {
+func (m *OccurrenceMutation) SourceID() (r int, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -1778,10 +1778,10 @@ func (m *IsOccurrenceMutation) SourceID() (r int, exists bool) {
 	return *v, true
 }
 
-// OldSourceID returns the old "source_id" field's value of the IsOccurrence entity.
-// If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// OldSourceID returns the old "source_id" field's value of the Occurrence entity.
+// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+func (m *OccurrenceMutation) OldSourceID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -1796,30 +1796,30 @@ func (m *IsOccurrenceMutation) OldSourceID(ctx context.Context) (v *int, err err
 }
 
 // ClearSourceID clears the value of the "source_id" field.
-func (m *IsOccurrenceMutation) ClearSourceID() {
+func (m *OccurrenceMutation) ClearSourceID() {
 	m.source = nil
-	m.clearedFields[isoccurrence.FieldSourceID] = struct{}{}
+	m.clearedFields[occurrence.FieldSourceID] = struct{}{}
 }
 
 // SourceIDCleared returns if the "source_id" field was cleared in this mutation.
-func (m *IsOccurrenceMutation) SourceIDCleared() bool {
-	_, ok := m.clearedFields[isoccurrence.FieldSourceID]
+func (m *OccurrenceMutation) SourceIDCleared() bool {
+	_, ok := m.clearedFields[occurrence.FieldSourceID]
 	return ok
 }
 
 // ResetSourceID resets all changes to the "source_id" field.
-func (m *IsOccurrenceMutation) ResetSourceID() {
+func (m *OccurrenceMutation) ResetSourceID() {
 	m.source = nil
-	delete(m.clearedFields, isoccurrence.FieldSourceID)
+	delete(m.clearedFields, occurrence.FieldSourceID)
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (m *IsOccurrenceMutation) SetArtifactID(i int) {
+func (m *OccurrenceMutation) SetArtifactID(i int) {
 	m.artifact = &i
 }
 
 // ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *IsOccurrenceMutation) ArtifactID() (r int, exists bool) {
+func (m *OccurrenceMutation) ArtifactID() (r int, exists bool) {
 	v := m.artifact
 	if v == nil {
 		return
@@ -1827,10 +1827,10 @@ func (m *IsOccurrenceMutation) ArtifactID() (r int, exists bool) {
 	return *v, true
 }
 
-// OldArtifactID returns the old "artifact_id" field's value of the IsOccurrence entity.
-// If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// OldArtifactID returns the old "artifact_id" field's value of the Occurrence entity.
+// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldArtifactID(ctx context.Context) (v int, err error) {
+func (m *OccurrenceMutation) OldArtifactID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
 	}
@@ -1845,17 +1845,17 @@ func (m *IsOccurrenceMutation) OldArtifactID(ctx context.Context) (v int, err er
 }
 
 // ResetArtifactID resets all changes to the "artifact_id" field.
-func (m *IsOccurrenceMutation) ResetArtifactID() {
+func (m *OccurrenceMutation) ResetArtifactID() {
 	m.artifact = nil
 }
 
 // SetJustification sets the "justification" field.
-func (m *IsOccurrenceMutation) SetJustification(s string) {
+func (m *OccurrenceMutation) SetJustification(s string) {
 	m.justification = &s
 }
 
 // Justification returns the value of the "justification" field in the mutation.
-func (m *IsOccurrenceMutation) Justification() (r string, exists bool) {
+func (m *OccurrenceMutation) Justification() (r string, exists bool) {
 	v := m.justification
 	if v == nil {
 		return
@@ -1863,10 +1863,10 @@ func (m *IsOccurrenceMutation) Justification() (r string, exists bool) {
 	return *v, true
 }
 
-// OldJustification returns the old "justification" field's value of the IsOccurrence entity.
-// If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// OldJustification returns the old "justification" field's value of the Occurrence entity.
+// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldJustification(ctx context.Context) (v string, err error) {
+func (m *OccurrenceMutation) OldJustification(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
 	}
@@ -1881,17 +1881,17 @@ func (m *IsOccurrenceMutation) OldJustification(ctx context.Context) (v string, 
 }
 
 // ResetJustification resets all changes to the "justification" field.
-func (m *IsOccurrenceMutation) ResetJustification() {
+func (m *OccurrenceMutation) ResetJustification() {
 	m.justification = nil
 }
 
 // SetOrigin sets the "origin" field.
-func (m *IsOccurrenceMutation) SetOrigin(s string) {
+func (m *OccurrenceMutation) SetOrigin(s string) {
 	m.origin = &s
 }
 
 // Origin returns the value of the "origin" field in the mutation.
-func (m *IsOccurrenceMutation) Origin() (r string, exists bool) {
+func (m *OccurrenceMutation) Origin() (r string, exists bool) {
 	v := m.origin
 	if v == nil {
 		return
@@ -1899,10 +1899,10 @@ func (m *IsOccurrenceMutation) Origin() (r string, exists bool) {
 	return *v, true
 }
 
-// OldOrigin returns the old "origin" field's value of the IsOccurrence entity.
-// If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// OldOrigin returns the old "origin" field's value of the Occurrence entity.
+// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldOrigin(ctx context.Context) (v string, err error) {
+func (m *OccurrenceMutation) OldOrigin(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
 	}
@@ -1917,17 +1917,17 @@ func (m *IsOccurrenceMutation) OldOrigin(ctx context.Context) (v string, err err
 }
 
 // ResetOrigin resets all changes to the "origin" field.
-func (m *IsOccurrenceMutation) ResetOrigin() {
+func (m *OccurrenceMutation) ResetOrigin() {
 	m.origin = nil
 }
 
 // SetCollector sets the "collector" field.
-func (m *IsOccurrenceMutation) SetCollector(s string) {
+func (m *OccurrenceMutation) SetCollector(s string) {
 	m.collector = &s
 }
 
 // Collector returns the value of the "collector" field in the mutation.
-func (m *IsOccurrenceMutation) Collector() (r string, exists bool) {
+func (m *OccurrenceMutation) Collector() (r string, exists bool) {
 	v := m.collector
 	if v == nil {
 		return
@@ -1935,10 +1935,10 @@ func (m *IsOccurrenceMutation) Collector() (r string, exists bool) {
 	return *v, true
 }
 
-// OldCollector returns the old "collector" field's value of the IsOccurrence entity.
-// If the IsOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// OldCollector returns the old "collector" field's value of the Occurrence entity.
+// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsOccurrenceMutation) OldCollector(ctx context.Context) (v string, err error) {
+func (m *OccurrenceMutation) OldCollector(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
 	}
@@ -1953,27 +1953,27 @@ func (m *IsOccurrenceMutation) OldCollector(ctx context.Context) (v string, err 
 }
 
 // ResetCollector resets all changes to the "collector" field.
-func (m *IsOccurrenceMutation) ResetCollector() {
+func (m *OccurrenceMutation) ResetCollector() {
 	m.collector = nil
 }
 
 // SetPackageVersionID sets the "package_version" edge to the PackageVersion entity by id.
-func (m *IsOccurrenceMutation) SetPackageVersionID(id int) {
+func (m *OccurrenceMutation) SetPackageVersionID(id int) {
 	m.package_version = &id
 }
 
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
-func (m *IsOccurrenceMutation) ClearPackageVersion() {
+func (m *OccurrenceMutation) ClearPackageVersion() {
 	m.clearedpackage_version = true
 }
 
 // PackageVersionCleared reports if the "package_version" edge to the PackageVersion entity was cleared.
-func (m *IsOccurrenceMutation) PackageVersionCleared() bool {
+func (m *OccurrenceMutation) PackageVersionCleared() bool {
 	return m.PackageIDCleared() || m.clearedpackage_version
 }
 
 // PackageVersionID returns the "package_version" edge ID in the mutation.
-func (m *IsOccurrenceMutation) PackageVersionID() (id int, exists bool) {
+func (m *OccurrenceMutation) PackageVersionID() (id int, exists bool) {
 	if m.package_version != nil {
 		return *m.package_version, true
 	}
@@ -1983,7 +1983,7 @@ func (m *IsOccurrenceMutation) PackageVersionID() (id int, exists bool) {
 // PackageVersionIDs returns the "package_version" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageVersionID instead. It exists only for internal usage by the builders.
-func (m *IsOccurrenceMutation) PackageVersionIDs() (ids []int) {
+func (m *OccurrenceMutation) PackageVersionIDs() (ids []int) {
 	if id := m.package_version; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1991,25 +1991,25 @@ func (m *IsOccurrenceMutation) PackageVersionIDs() (ids []int) {
 }
 
 // ResetPackageVersion resets all changes to the "package_version" edge.
-func (m *IsOccurrenceMutation) ResetPackageVersion() {
+func (m *OccurrenceMutation) ResetPackageVersion() {
 	m.package_version = nil
 	m.clearedpackage_version = false
 }
 
 // ClearSource clears the "source" edge to the SourceName entity.
-func (m *IsOccurrenceMutation) ClearSource() {
+func (m *OccurrenceMutation) ClearSource() {
 	m.clearedsource = true
 }
 
 // SourceCleared reports if the "source" edge to the SourceName entity was cleared.
-func (m *IsOccurrenceMutation) SourceCleared() bool {
+func (m *OccurrenceMutation) SourceCleared() bool {
 	return m.SourceIDCleared() || m.clearedsource
 }
 
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *IsOccurrenceMutation) SourceIDs() (ids []int) {
+func (m *OccurrenceMutation) SourceIDs() (ids []int) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2017,25 +2017,25 @@ func (m *IsOccurrenceMutation) SourceIDs() (ids []int) {
 }
 
 // ResetSource resets all changes to the "source" edge.
-func (m *IsOccurrenceMutation) ResetSource() {
+func (m *OccurrenceMutation) ResetSource() {
 	m.source = nil
 	m.clearedsource = false
 }
 
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
-func (m *IsOccurrenceMutation) ClearArtifact() {
+func (m *OccurrenceMutation) ClearArtifact() {
 	m.clearedartifact = true
 }
 
 // ArtifactCleared reports if the "artifact" edge to the Artifact entity was cleared.
-func (m *IsOccurrenceMutation) ArtifactCleared() bool {
+func (m *OccurrenceMutation) ArtifactCleared() bool {
 	return m.clearedartifact
 }
 
 // ArtifactIDs returns the "artifact" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ArtifactID instead. It exists only for internal usage by the builders.
-func (m *IsOccurrenceMutation) ArtifactIDs() (ids []int) {
+func (m *OccurrenceMutation) ArtifactIDs() (ids []int) {
 	if id := m.artifact; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2043,20 +2043,20 @@ func (m *IsOccurrenceMutation) ArtifactIDs() (ids []int) {
 }
 
 // ResetArtifact resets all changes to the "artifact" edge.
-func (m *IsOccurrenceMutation) ResetArtifact() {
+func (m *OccurrenceMutation) ResetArtifact() {
 	m.artifact = nil
 	m.clearedartifact = false
 }
 
-// Where appends a list predicates to the IsOccurrenceMutation builder.
-func (m *IsOccurrenceMutation) Where(ps ...predicate.IsOccurrence) {
+// Where appends a list predicates to the OccurrenceMutation builder.
+func (m *OccurrenceMutation) Where(ps ...predicate.Occurrence) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the IsOccurrenceMutation builder. Using this method,
+// WhereP appends storage-level predicates to the OccurrenceMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *IsOccurrenceMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.IsOccurrence, len(ps))
+func (m *OccurrenceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Occurrence, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -2064,42 +2064,42 @@ func (m *IsOccurrenceMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *IsOccurrenceMutation) Op() Op {
+func (m *OccurrenceMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *IsOccurrenceMutation) SetOp(op Op) {
+func (m *OccurrenceMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (IsOccurrence).
-func (m *IsOccurrenceMutation) Type() string {
+// Type returns the node type of this mutation (Occurrence).
+func (m *OccurrenceMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *IsOccurrenceMutation) Fields() []string {
+func (m *OccurrenceMutation) Fields() []string {
 	fields := make([]string, 0, 6)
 	if m.package_version != nil {
-		fields = append(fields, isoccurrence.FieldPackageID)
+		fields = append(fields, occurrence.FieldPackageID)
 	}
 	if m.source != nil {
-		fields = append(fields, isoccurrence.FieldSourceID)
+		fields = append(fields, occurrence.FieldSourceID)
 	}
 	if m.artifact != nil {
-		fields = append(fields, isoccurrence.FieldArtifactID)
+		fields = append(fields, occurrence.FieldArtifactID)
 	}
 	if m.justification != nil {
-		fields = append(fields, isoccurrence.FieldJustification)
+		fields = append(fields, occurrence.FieldJustification)
 	}
 	if m.origin != nil {
-		fields = append(fields, isoccurrence.FieldOrigin)
+		fields = append(fields, occurrence.FieldOrigin)
 	}
 	if m.collector != nil {
-		fields = append(fields, isoccurrence.FieldCollector)
+		fields = append(fields, occurrence.FieldCollector)
 	}
 	return fields
 }
@@ -2107,19 +2107,19 @@ func (m *IsOccurrenceMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *IsOccurrenceMutation) Field(name string) (ent.Value, bool) {
+func (m *OccurrenceMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case isoccurrence.FieldPackageID:
+	case occurrence.FieldPackageID:
 		return m.PackageID()
-	case isoccurrence.FieldSourceID:
+	case occurrence.FieldSourceID:
 		return m.SourceID()
-	case isoccurrence.FieldArtifactID:
+	case occurrence.FieldArtifactID:
 		return m.ArtifactID()
-	case isoccurrence.FieldJustification:
+	case occurrence.FieldJustification:
 		return m.Justification()
-	case isoccurrence.FieldOrigin:
+	case occurrence.FieldOrigin:
 		return m.Origin()
-	case isoccurrence.FieldCollector:
+	case occurrence.FieldCollector:
 		return m.Collector()
 	}
 	return nil, false
@@ -2128,65 +2128,65 @@ func (m *IsOccurrenceMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *IsOccurrenceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *OccurrenceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case isoccurrence.FieldPackageID:
+	case occurrence.FieldPackageID:
 		return m.OldPackageID(ctx)
-	case isoccurrence.FieldSourceID:
+	case occurrence.FieldSourceID:
 		return m.OldSourceID(ctx)
-	case isoccurrence.FieldArtifactID:
+	case occurrence.FieldArtifactID:
 		return m.OldArtifactID(ctx)
-	case isoccurrence.FieldJustification:
+	case occurrence.FieldJustification:
 		return m.OldJustification(ctx)
-	case isoccurrence.FieldOrigin:
+	case occurrence.FieldOrigin:
 		return m.OldOrigin(ctx)
-	case isoccurrence.FieldCollector:
+	case occurrence.FieldCollector:
 		return m.OldCollector(ctx)
 	}
-	return nil, fmt.Errorf("unknown IsOccurrence field %s", name)
+	return nil, fmt.Errorf("unknown Occurrence field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *IsOccurrenceMutation) SetField(name string, value ent.Value) error {
+func (m *OccurrenceMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case isoccurrence.FieldPackageID:
+	case occurrence.FieldPackageID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageID(v)
 		return nil
-	case isoccurrence.FieldSourceID:
+	case occurrence.FieldSourceID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceID(v)
 		return nil
-	case isoccurrence.FieldArtifactID:
+	case occurrence.FieldArtifactID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetArtifactID(v)
 		return nil
-	case isoccurrence.FieldJustification:
+	case occurrence.FieldJustification:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetJustification(v)
 		return nil
-	case isoccurrence.FieldOrigin:
+	case occurrence.FieldOrigin:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOrigin(v)
 		return nil
-	case isoccurrence.FieldCollector:
+	case occurrence.FieldCollector:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -2194,12 +2194,12 @@ func (m *IsOccurrenceMutation) SetField(name string, value ent.Value) error {
 		m.SetCollector(v)
 		return nil
 	}
-	return fmt.Errorf("unknown IsOccurrence field %s", name)
+	return fmt.Errorf("unknown Occurrence field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *IsOccurrenceMutation) AddedFields() []string {
+func (m *OccurrenceMutation) AddedFields() []string {
 	var fields []string
 	return fields
 }
@@ -2207,7 +2207,7 @@ func (m *IsOccurrenceMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *IsOccurrenceMutation) AddedField(name string) (ent.Value, bool) {
+func (m *OccurrenceMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	}
 	return nil, false
@@ -2216,100 +2216,100 @@ func (m *IsOccurrenceMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *IsOccurrenceMutation) AddField(name string, value ent.Value) error {
+func (m *OccurrenceMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown IsOccurrence numeric field %s", name)
+	return fmt.Errorf("unknown Occurrence numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *IsOccurrenceMutation) ClearedFields() []string {
+func (m *OccurrenceMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(isoccurrence.FieldPackageID) {
-		fields = append(fields, isoccurrence.FieldPackageID)
+	if m.FieldCleared(occurrence.FieldPackageID) {
+		fields = append(fields, occurrence.FieldPackageID)
 	}
-	if m.FieldCleared(isoccurrence.FieldSourceID) {
-		fields = append(fields, isoccurrence.FieldSourceID)
+	if m.FieldCleared(occurrence.FieldSourceID) {
+		fields = append(fields, occurrence.FieldSourceID)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *IsOccurrenceMutation) FieldCleared(name string) bool {
+func (m *OccurrenceMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *IsOccurrenceMutation) ClearField(name string) error {
+func (m *OccurrenceMutation) ClearField(name string) error {
 	switch name {
-	case isoccurrence.FieldPackageID:
+	case occurrence.FieldPackageID:
 		m.ClearPackageID()
 		return nil
-	case isoccurrence.FieldSourceID:
+	case occurrence.FieldSourceID:
 		m.ClearSourceID()
 		return nil
 	}
-	return fmt.Errorf("unknown IsOccurrence nullable field %s", name)
+	return fmt.Errorf("unknown Occurrence nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *IsOccurrenceMutation) ResetField(name string) error {
+func (m *OccurrenceMutation) ResetField(name string) error {
 	switch name {
-	case isoccurrence.FieldPackageID:
+	case occurrence.FieldPackageID:
 		m.ResetPackageID()
 		return nil
-	case isoccurrence.FieldSourceID:
+	case occurrence.FieldSourceID:
 		m.ResetSourceID()
 		return nil
-	case isoccurrence.FieldArtifactID:
+	case occurrence.FieldArtifactID:
 		m.ResetArtifactID()
 		return nil
-	case isoccurrence.FieldJustification:
+	case occurrence.FieldJustification:
 		m.ResetJustification()
 		return nil
-	case isoccurrence.FieldOrigin:
+	case occurrence.FieldOrigin:
 		m.ResetOrigin()
 		return nil
-	case isoccurrence.FieldCollector:
+	case occurrence.FieldCollector:
 		m.ResetCollector()
 		return nil
 	}
-	return fmt.Errorf("unknown IsOccurrence field %s", name)
+	return fmt.Errorf("unknown Occurrence field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *IsOccurrenceMutation) AddedEdges() []string {
+func (m *OccurrenceMutation) AddedEdges() []string {
 	edges := make([]string, 0, 3)
 	if m.package_version != nil {
-		edges = append(edges, isoccurrence.EdgePackageVersion)
+		edges = append(edges, occurrence.EdgePackageVersion)
 	}
 	if m.source != nil {
-		edges = append(edges, isoccurrence.EdgeSource)
+		edges = append(edges, occurrence.EdgeSource)
 	}
 	if m.artifact != nil {
-		edges = append(edges, isoccurrence.EdgeArtifact)
+		edges = append(edges, occurrence.EdgeArtifact)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *IsOccurrenceMutation) AddedIDs(name string) []ent.Value {
+func (m *OccurrenceMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case isoccurrence.EdgePackageVersion:
+	case occurrence.EdgePackageVersion:
 		if id := m.package_version; id != nil {
 			return []ent.Value{*id}
 		}
-	case isoccurrence.EdgeSource:
+	case occurrence.EdgeSource:
 		if id := m.source; id != nil {
 			return []ent.Value{*id}
 		}
-	case isoccurrence.EdgeArtifact:
+	case occurrence.EdgeArtifact:
 		if id := m.artifact; id != nil {
 			return []ent.Value{*id}
 		}
@@ -2318,41 +2318,41 @@ func (m *IsOccurrenceMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *IsOccurrenceMutation) RemovedEdges() []string {
+func (m *OccurrenceMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 3)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *IsOccurrenceMutation) RemovedIDs(name string) []ent.Value {
+func (m *OccurrenceMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *IsOccurrenceMutation) ClearedEdges() []string {
+func (m *OccurrenceMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 3)
 	if m.clearedpackage_version {
-		edges = append(edges, isoccurrence.EdgePackageVersion)
+		edges = append(edges, occurrence.EdgePackageVersion)
 	}
 	if m.clearedsource {
-		edges = append(edges, isoccurrence.EdgeSource)
+		edges = append(edges, occurrence.EdgeSource)
 	}
 	if m.clearedartifact {
-		edges = append(edges, isoccurrence.EdgeArtifact)
+		edges = append(edges, occurrence.EdgeArtifact)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *IsOccurrenceMutation) EdgeCleared(name string) bool {
+func (m *OccurrenceMutation) EdgeCleared(name string) bool {
 	switch name {
-	case isoccurrence.EdgePackageVersion:
+	case occurrence.EdgePackageVersion:
 		return m.clearedpackage_version
-	case isoccurrence.EdgeSource:
+	case occurrence.EdgeSource:
 		return m.clearedsource
-	case isoccurrence.EdgeArtifact:
+	case occurrence.EdgeArtifact:
 		return m.clearedartifact
 	}
 	return false
@@ -2360,36 +2360,36 @@ func (m *IsOccurrenceMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *IsOccurrenceMutation) ClearEdge(name string) error {
+func (m *OccurrenceMutation) ClearEdge(name string) error {
 	switch name {
-	case isoccurrence.EdgePackageVersion:
+	case occurrence.EdgePackageVersion:
 		m.ClearPackageVersion()
 		return nil
-	case isoccurrence.EdgeSource:
+	case occurrence.EdgeSource:
 		m.ClearSource()
 		return nil
-	case isoccurrence.EdgeArtifact:
+	case occurrence.EdgeArtifact:
 		m.ClearArtifact()
 		return nil
 	}
-	return fmt.Errorf("unknown IsOccurrence unique edge %s", name)
+	return fmt.Errorf("unknown Occurrence unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *IsOccurrenceMutation) ResetEdge(name string) error {
+func (m *OccurrenceMutation) ResetEdge(name string) error {
 	switch name {
-	case isoccurrence.EdgePackageVersion:
+	case occurrence.EdgePackageVersion:
 		m.ResetPackageVersion()
 		return nil
-	case isoccurrence.EdgeSource:
+	case occurrence.EdgeSource:
 		m.ResetSource()
 		return nil
-	case isoccurrence.EdgeArtifact:
+	case occurrence.EdgeArtifact:
 		m.ResetArtifact()
 		return nil
 	}
-	return fmt.Errorf("unknown IsOccurrence edge %s", name)
+	return fmt.Errorf("unknown Occurrence edge %s", name)
 }
 
 // PackageNameMutation represents an operation that mutates the PackageName nodes in the graph.
@@ -5425,7 +5425,7 @@ func (m *SourceNameMutation) ResetNamespace() {
 	m.clearednamespace = false
 }
 
-// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by ids.
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by ids.
 func (m *SourceNameMutation) AddOccurrenceIDs(ids ...int) {
 	if m.occurrences == nil {
 		m.occurrences = make(map[int]struct{})
@@ -5435,17 +5435,17 @@ func (m *SourceNameMutation) AddOccurrenceIDs(ids ...int) {
 	}
 }
 
-// ClearOccurrences clears the "occurrences" edge to the IsOccurrence entity.
+// ClearOccurrences clears the "occurrences" edge to the Occurrence entity.
 func (m *SourceNameMutation) ClearOccurrences() {
 	m.clearedoccurrences = true
 }
 
-// OccurrencesCleared reports if the "occurrences" edge to the IsOccurrence entity was cleared.
+// OccurrencesCleared reports if the "occurrences" edge to the Occurrence entity was cleared.
 func (m *SourceNameMutation) OccurrencesCleared() bool {
 	return m.clearedoccurrences
 }
 
-// RemoveOccurrenceIDs removes the "occurrences" edge to the IsOccurrence entity by IDs.
+// RemoveOccurrenceIDs removes the "occurrences" edge to the Occurrence entity by IDs.
 func (m *SourceNameMutation) RemoveOccurrenceIDs(ids ...int) {
 	if m.removedoccurrences == nil {
 		m.removedoccurrences = make(map[int]struct{})
@@ -5456,7 +5456,7 @@ func (m *SourceNameMutation) RemoveOccurrenceIDs(ids ...int) {
 	}
 }
 
-// RemovedOccurrences returns the removed IDs of the "occurrences" edge to the IsOccurrence entity.
+// RemovedOccurrences returns the removed IDs of the "occurrences" edge to the Occurrence entity.
 func (m *SourceNameMutation) RemovedOccurrencesIDs() (ids []int) {
 	for id := range m.removedoccurrences {
 		ids = append(ids, id)

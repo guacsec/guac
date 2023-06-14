@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
@@ -86,17 +86,17 @@ func (snu *SourceNameUpdate) SetNamespace(s *SourceNamespace) *SourceNameUpdate 
 	return snu.SetNamespaceID(s.ID)
 }
 
-// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by IDs.
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
 func (snu *SourceNameUpdate) AddOccurrenceIDs(ids ...int) *SourceNameUpdate {
 	snu.mutation.AddOccurrenceIDs(ids...)
 	return snu
 }
 
-// AddOccurrences adds the "occurrences" edges to the IsOccurrence entity.
-func (snu *SourceNameUpdate) AddOccurrences(i ...*IsOccurrence) *SourceNameUpdate {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+// AddOccurrences adds the "occurrences" edges to the Occurrence entity.
+func (snu *SourceNameUpdate) AddOccurrences(o ...*Occurrence) *SourceNameUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
 	}
 	return snu.AddOccurrenceIDs(ids...)
 }
@@ -112,23 +112,23 @@ func (snu *SourceNameUpdate) ClearNamespace() *SourceNameUpdate {
 	return snu
 }
 
-// ClearOccurrences clears all "occurrences" edges to the IsOccurrence entity.
+// ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
 func (snu *SourceNameUpdate) ClearOccurrences() *SourceNameUpdate {
 	snu.mutation.ClearOccurrences()
 	return snu
 }
 
-// RemoveOccurrenceIDs removes the "occurrences" edge to IsOccurrence entities by IDs.
+// RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
 func (snu *SourceNameUpdate) RemoveOccurrenceIDs(ids ...int) *SourceNameUpdate {
 	snu.mutation.RemoveOccurrenceIDs(ids...)
 	return snu
 }
 
-// RemoveOccurrences removes "occurrences" edges to IsOccurrence entities.
-func (snu *SourceNameUpdate) RemoveOccurrences(i ...*IsOccurrence) *SourceNameUpdate {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+// RemoveOccurrences removes "occurrences" edges to Occurrence entities.
+func (snu *SourceNameUpdate) RemoveOccurrences(o ...*Occurrence) *SourceNameUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
 	}
 	return snu.RemoveOccurrenceIDs(ids...)
 }
@@ -232,7 +232,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -245,7 +245,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -261,7 +261,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -346,17 +346,17 @@ func (snuo *SourceNameUpdateOne) SetNamespace(s *SourceNamespace) *SourceNameUpd
 	return snuo.SetNamespaceID(s.ID)
 }
 
-// AddOccurrenceIDs adds the "occurrences" edge to the IsOccurrence entity by IDs.
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
 func (snuo *SourceNameUpdateOne) AddOccurrenceIDs(ids ...int) *SourceNameUpdateOne {
 	snuo.mutation.AddOccurrenceIDs(ids...)
 	return snuo
 }
 
-// AddOccurrences adds the "occurrences" edges to the IsOccurrence entity.
-func (snuo *SourceNameUpdateOne) AddOccurrences(i ...*IsOccurrence) *SourceNameUpdateOne {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+// AddOccurrences adds the "occurrences" edges to the Occurrence entity.
+func (snuo *SourceNameUpdateOne) AddOccurrences(o ...*Occurrence) *SourceNameUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
 	}
 	return snuo.AddOccurrenceIDs(ids...)
 }
@@ -372,23 +372,23 @@ func (snuo *SourceNameUpdateOne) ClearNamespace() *SourceNameUpdateOne {
 	return snuo
 }
 
-// ClearOccurrences clears all "occurrences" edges to the IsOccurrence entity.
+// ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
 func (snuo *SourceNameUpdateOne) ClearOccurrences() *SourceNameUpdateOne {
 	snuo.mutation.ClearOccurrences()
 	return snuo
 }
 
-// RemoveOccurrenceIDs removes the "occurrences" edge to IsOccurrence entities by IDs.
+// RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
 func (snuo *SourceNameUpdateOne) RemoveOccurrenceIDs(ids ...int) *SourceNameUpdateOne {
 	snuo.mutation.RemoveOccurrenceIDs(ids...)
 	return snuo
 }
 
-// RemoveOccurrences removes "occurrences" edges to IsOccurrence entities.
-func (snuo *SourceNameUpdateOne) RemoveOccurrences(i ...*IsOccurrence) *SourceNameUpdateOne {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+// RemoveOccurrences removes "occurrences" edges to Occurrence entities.
+func (snuo *SourceNameUpdateOne) RemoveOccurrences(o ...*Occurrence) *SourceNameUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
 	}
 	return snuo.RemoveOccurrenceIDs(ids...)
 }
@@ -522,7 +522,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -535,7 +535,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -551,7 +551,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(isoccurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

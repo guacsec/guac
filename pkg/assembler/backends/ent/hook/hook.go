@@ -45,16 +45,16 @@ func (f DependencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DependencyMutation", m)
 }
 
-// The IsOccurrenceFunc type is an adapter to allow the use of ordinary
-// function as IsOccurrence mutator.
-type IsOccurrenceFunc func(context.Context, *ent.IsOccurrenceMutation) (ent.Value, error)
+// The OccurrenceFunc type is an adapter to allow the use of ordinary
+// function as Occurrence mutator.
+type OccurrenceFunc func(context.Context, *ent.OccurrenceMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f IsOccurrenceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.IsOccurrenceMutation); ok {
+func (f OccurrenceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.OccurrenceMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IsOccurrenceMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OccurrenceMutation", m)
 }
 
 // The PackageNameFunc type is an adapter to allow the use of ordinary

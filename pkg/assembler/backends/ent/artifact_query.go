@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -23,7 +23,7 @@ type ArtifactQuery struct {
 	order           []artifact.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.Artifact
-	withOccurrences *IsOccurrenceQuery
+	withOccurrences *OccurrenceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,8 +61,8 @@ func (aq *ArtifactQuery) Order(o ...artifact.OrderOption) *ArtifactQuery {
 }
 
 // QueryOccurrences chains the current query on the "occurrences" edge.
-func (aq *ArtifactQuery) QueryOccurrences() *IsOccurrenceQuery {
-	query := (&IsOccurrenceClient{config: aq.config}).Query()
+func (aq *ArtifactQuery) QueryOccurrences() *OccurrenceQuery {
+	query := (&OccurrenceClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,7 +73,7 @@ func (aq *ArtifactQuery) QueryOccurrences() *IsOccurrenceQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
-			sqlgraph.To(isoccurrence.Table, isoccurrence.FieldID),
+			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.OccurrencesTable, artifact.OccurrencesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
@@ -283,8 +283,8 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 
 // WithOccurrences tells the query-builder to eager-load the nodes that are connected to
 // the "occurrences" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithOccurrences(opts ...func(*IsOccurrenceQuery)) *ArtifactQuery {
-	query := (&IsOccurrenceClient{config: aq.config}).Query()
+func (aq *ArtifactQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *ArtifactQuery {
+	query := (&OccurrenceClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -394,15 +394,15 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	}
 	if query := aq.withOccurrences; query != nil {
 		if err := aq.loadOccurrences(ctx, query, nodes,
-			func(n *Artifact) { n.Edges.Occurrences = []*IsOccurrence{} },
-			func(n *Artifact, e *IsOccurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
+			func(n *Artifact) { n.Edges.Occurrences = []*Occurrence{} },
+			func(n *Artifact, e *Occurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *IsOccurrenceQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *IsOccurrence)) error {
+func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Artifact)
 	for i := range nodes {
@@ -413,9 +413,9 @@ func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *IsOccurrenc
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(isoccurrence.FieldArtifactID)
+		query.ctx.AppendFieldOnce(occurrence.FieldArtifactID)
 	}
-	query.Where(predicate.IsOccurrence(func(s *sql.Selector) {
+	query.Where(predicate.Occurrence(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(artifact.OccurrencesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
