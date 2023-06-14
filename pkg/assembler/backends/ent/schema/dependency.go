@@ -13,19 +13,14 @@ type Dependency struct {
 	ent.Schema
 }
 
-// func (Dependency) Annotations() []schema.Annotation {
-// 	return []schema.Annotation{
-// 		// field.ID("package_id", "dependent_package_id"),
-// 	}
-// }
-
+// Annotations of the Dependency.
 func (Dependency) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		// field.ID("package_id", "dependent_package_id"),
+		// field.ID("dependent_package_id", "package_id"),
 	}
 }
 
-// Fields of the IsDependency.
+// Fields of the Dependency.
 func (Dependency) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("package_id"),
@@ -38,7 +33,7 @@ func (Dependency) Fields() []ent.Field {
 	}
 }
 
-// Edges of the IsDependency.
+// Edges of the Dependency.
 func (Dependency) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("package", PackageVersion.Type).
@@ -52,7 +47,7 @@ func (Dependency) Edges() []ent.Edge {
 	}
 }
 
-// Indexes of the IsDependency.
+// Indexes of the Dependency.
 func (Dependency) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("version_range", "dependency_type", "justification", "origin", "collector").

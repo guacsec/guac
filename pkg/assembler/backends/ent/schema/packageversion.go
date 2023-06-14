@@ -26,7 +26,7 @@ func (PackageVersion) Fields() []ent.Field {
 func (PackageVersion) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("name", PackageName.Type).Required().Field("name_id").Ref("versions").Unique(),
-		// edge.To("package", PackageNode.Type).Through("name", )
+		// edge.To("dependencies", PackageVersion.Type).Through("package", Dependency.Type),
 	}
 }
 
