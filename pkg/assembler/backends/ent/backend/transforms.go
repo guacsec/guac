@@ -241,7 +241,7 @@ func packageVersionToModelPackage(pv *ent.PackageVersion) *model.Package {
 	}
 }
 
-func toModelIsOccurrence(o *ent.IsOccurrence, sub model.PackageOrSource) *model.IsOccurrence {
+func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.IsOccurrence {
 	return &model.IsOccurrence{
 		ID:            nodeID(o.ID),
 		Subject:       sub,

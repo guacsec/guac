@@ -6,8 +6,8 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	entdependency "github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	isdependency "github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	isoccurrence "github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
@@ -112,20 +112,20 @@ func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode
 
 func (b *EntBackend) Dependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	funcName := "Dependency"
-	query := b.client.Dependency.Query().Order(ent.Asc(entdependency.FieldID))
+	query := b.client.Dependency.Query().Order(ent.Asc(isdependency.FieldID))
 
 	if isDependencySpec != nil {
 		query.Where(
 			optionalPredicate(isDependencySpec.ID, IDEQ),
-			entdependency.HasPackageWith(pkgVersionPreds(isDependencySpec.Package)...),
-			entdependency.HasDependentPackageWith(pkgNamePreds(isDependencySpec.DependentPackage)...),
-			optionalPredicate(isDependencySpec.VersionRange, entdependency.VersionRange),
-			optionalPredicate(isDependencySpec.Justification, entdependency.Justification),
-			optionalPredicate(isDependencySpec.Origin, entdependency.Origin),
-			optionalPredicate(isDependencySpec.Collector, entdependency.Collector),
+			isdependency.HasPackageWith(pkgVersionPreds(isDependencySpec.Package)...),
+			isdependency.HasDependentPackageWith(pkgNamePreds(isDependencySpec.DependentPackage)...),
+			optionalPredicate(isDependencySpec.VersionRange, isdependency.VersionRange),
+			optionalPredicate(isDependencySpec.Justification, isdependency.Justification),
+			optionalPredicate(isDependencySpec.Origin, isdependency.Origin),
+			optionalPredicate(isDependencySpec.Collector, isdependency.Collector),
 		)
 		if isDependencySpec.DependencyType != nil {
-			query.Where(entdependency.DependencyType(string(*isDependencySpec.DependencyType)))
+			query.Where(isdependency.DependencyType(string(*isDependencySpec.DependencyType)))
 		}
 	} else {
 		query.Limit(100)
@@ -169,13 +169,13 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 			SetCollector(dependency.Collector).
 			OnConflict(
 				entsql.ConflictColumns(
-					entdependency.FieldPackageID,
-					entdependency.FieldDependentPackageID,
-					entdependency.FieldVersionRange,
-					entdependency.FieldDependencyType,
-					entdependency.FieldJustification,
-					entdependency.FieldOrigin,
-					entdependency.FieldCollector,
+					isdependency.FieldPackageID,
+					isdependency.FieldDependentPackageID,
+					isdependency.FieldVersionRange,
+					isdependency.FieldDependencyType,
+					isdependency.FieldJustification,
+					isdependency.FieldOrigin,
+					isdependency.FieldCollector,
 				),
 			).
 			UpdateNewValues().ID(ctx)
@@ -190,7 +190,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 
 	// Upsert only gets ID, so need to query the object
 	record, err := b.client.Dependency.Query().
-		Where(entdependency.ID(*recordID)).
+		Where(isdependency.ID(*recordID)).
 		WithPackage().
 		WithDependentPackage().
 		Only(ctx)
@@ -225,7 +225,7 @@ func (b *EntBackend) IngestOccurrence2(ctx context.Context, subject model.Packag
 		if err != nil {
 			return nil, err
 		}
-		id, err := client.IsOccurrence.Create().
+		id, err := client.Occurrence.Create().
 			// SetPackage(p). // Should I be using SetPackageID() here?
 			SetArtifact(a).
 			SetJustification(occurrence.Justification).
@@ -252,7 +252,7 @@ func (b *EntBackend) IngestOccurrence2(ctx context.Context, subject model.Packag
 	}
 
 	// Upsert only gets ID, so need to query the object
-	record, err := b.client.IsOccurrence.Query().
+	record, err := b.client.Occurrence.Query().
 		Where(isoccurrence.ID(*recordID)).
 		WithArtifact().
 		// WithPackage().
@@ -264,7 +264,7 @@ func (b *EntBackend) IngestOccurrence2(ctx context.Context, subject model.Packag
 	return toModelIsOccurrenceErr(ctx, record)
 }
 
-func toModelIsOccurrenceErr(ctx context.Context, o *ent.IsOccurrence) (*model.IsOccurrence, error) {
+func toModelIsOccurrenceErr(ctx context.Context, o *ent.Occurrence) (*model.IsOccurrence, error) {
 	var sub model.PackageOrSource
 	if o.PackageID != nil { // how do we indicate that this is linked to pkg and not src??
 		top, err := pkgTreeFromVersion(ctx, o.Edges.PackageVersion)

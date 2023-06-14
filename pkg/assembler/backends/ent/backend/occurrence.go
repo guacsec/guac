@@ -6,14 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
+	isoccurrence "github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	records, err := b.client.IsOccurrence.Query().
+	records, err := b.client.Occurrence.Query().
 		Where().
 		WithArtifact().
 		WithSource().
@@ -102,7 +102,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		// } else {
 		// }
 
-		id, err := client.Debug().IsOccurrence.Create().
+		id, err := client.Debug().Occurrence.Create().
 			SetNillablePackageVersionID(pvID).
 			SetNillableSourceID(srcID).
 			SetArtifact(art).
@@ -129,7 +129,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	record, err := b.client.IsOccurrence.Query().
+	record, err := b.client.Occurrence.Query().
 		Where(isoccurrence.ID(*recordID)).
 		WithArtifact().
 		WithPackageVersion().
