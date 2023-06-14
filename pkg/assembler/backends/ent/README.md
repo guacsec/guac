@@ -26,3 +26,5 @@ For example:
 createdb guac_test
 go test ./pkg/assembler/backends/ent/backend/
 ```
+
+All tests run within a transaction, so they should not leave any data in the db, and each run should start with a clean slate.
