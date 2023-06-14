@@ -2,7 +2,6 @@ package backend
 
 import (
 	"context"
-	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -16,13 +15,13 @@ func (s *Suite) TestIsDependency() {
 		Input *model.IsDependencyInputSpec
 	}
 	tests := []struct {
-		Name         string
-		IngestPkg    []*model.PkgInputSpec
-		Calls        []call
-		Query        *model.IsDependencySpec
-		Expected     []*model.IsDependency
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name              string
+		IngestPkg         []*model.PkgInputSpec
+		Calls             []call
+		Query             *model.IsDependencySpec
+		ExpectedDep       []*model.IsDependency
+		ExpectedIngestErr bool
+		ExpectedQueryErr  bool
 	}{
 		{
 			Name:      "HappyPath",
@@ -39,7 +38,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -69,7 +68,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -99,7 +98,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -129,7 +128,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification one"),
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -154,11 +153,13 @@ func (s *Suite) TestIsDependency() {
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					// ID: ptrfrom.String("5"),
+					// ID: ptrfrom.String("9"),
 					Type: ptrfrom.String("pypi"),
+					Name: ptrfrom.String("tensorflow"),
+					// Version: ptrfrom.String("2.11.1"),
 				},
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -185,7 +186,7 @@ func (s *Suite) TestIsDependency() {
 					Name: ptrfrom.String("openssl"),
 				},
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p2out,
 					DependentPackage: p4outName,
@@ -212,7 +213,7 @@ func (s *Suite) TestIsDependency() {
 					Type: ptrfrom.String("pypi"),
 				},
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p1outName,
@@ -246,7 +247,7 @@ func (s *Suite) TestIsDependency() {
 					Name: ptrfrom.String("openssl"),
 				},
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p3out,
 					DependentPackage: p4outName,
@@ -278,7 +279,7 @@ func (s *Suite) TestIsDependency() {
 					Subpath: ptrfrom.String("asdf"),
 				},
 			},
-			Expected: nil,
+			ExpectedDep: nil,
 		},
 		{
 			Name:      "Query on ID",
@@ -303,7 +304,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				ID: ptrfrom.String("9"),
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p2out,
 					DependentPackage: p1outName,
@@ -332,7 +333,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				VersionRange: ptrfrom.String("1-3"),
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p1outName,
@@ -362,7 +363,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				DependencyType: (*model.DependencyType)(ptrfrom.String(string(model.DependencyTypeIndirect))),
 			},
-			Expected: []*model.IsDependency{
+			ExpectedDep: []*model.IsDependency{
 				{
 					Package:          p2out,
 					DependentPackage: p1outName,
@@ -380,7 +381,7 @@ func (s *Suite) TestIsDependency() {
 					Input: &model.IsDependencyInputSpec{},
 				},
 			},
-			ExpIngestErr: true,
+			ExpectedIngestErr: true,
 		},
 		{
 			Name:      "Ingest no P2",
@@ -392,7 +393,7 @@ func (s *Suite) TestIsDependency() {
 					Input: &model.IsDependencyInputSpec{},
 				},
 			},
-			ExpIngestErr: true,
+			ExpectedIngestErr: true,
 		},
 		{
 			Name:      "Query bad ID",
@@ -417,12 +418,13 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: true,
+			ExpectedQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+		return p.Last().String() == ".ID"
 	}, cmp.Ignore())
+
 	ctx := context.Background()
 	for _, test := range tests {
 		s.Run(test.Name, func() {
@@ -436,22 +438,22 @@ func (s *Suite) TestIsDependency() {
 			}
 			for _, o := range test.Calls {
 				_, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.Input)
-				if (err != nil) != test.ExpIngestErr {
-					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				if (err != nil) != test.ExpectedIngestErr {
+					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpectedIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
 			}
 			got, err := b.IsDependency(ctx, test.Query)
-			if (err != nil) != test.ExpQueryErr {
-				s.T().Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+			if (err != nil) != test.ExpectedQueryErr {
+				s.T().Fatalf("did not get expected query error, want: %v, got: %v", test.ExpectedQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
 
-			if diff := cmp.Diff(test.Expected, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpectedDep, got, ignoreID); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
