@@ -30,43 +30,63 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
-			logger.Infof("assembling Package: %v", len(p.Package))
-			for _, v := range p.Package {
+			packages := p.GetPackages(ctx)
+			logger.Infof("assembling Package: %v", len(packages))
+			for _, v := range packages {
 				if err := ingestPackage(ctx, gqlclient, v); err != nil {
 					return err
 				}
 			}
 
-			logger.Infof("assembling Source: %v", len(p.Source))
-			for _, v := range p.Source {
+			sources := p.GetSources(ctx)
+			logger.Infof("assembling Source: %v", len(sources))
+			for _, v := range sources {
 				if err := ingestSource(ctx, gqlclient, v); err != nil {
 					return err
 				}
 			}
 
-			logger.Infof("assembling Artifact: %v", len(p.Artifact))
-			for _, v := range p.Artifact {
+			artifacts := p.GetArtifacts(ctx)
+			logger.Infof("assembling Artifact: %v", len(artifacts))
+			for _, v := range artifacts {
 				if err := ingestArtifact(ctx, gqlclient, v); err != nil {
 					return err
 				}
 			}
 
-			logger.Infof("assembling CVE: %v", len(p.CVE))
-			for _, v := range p.CVE {
+			builders := p.GetBuilders(ctx)
+			logger.Infof("assembling Builder: %v", len(builders))
+			for _, v := range builders {
+				if err := ingestBuilder(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			materials := p.GetMaterials(ctx)
+			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
+				return err
+			}
+
+			cves := p.GetCVEs(ctx)
+			logger.Infof("assembling CVE: %v", len(cves))
+			for _, v := range cves {
 				if err := ingestCVE(ctx, gqlclient, v); err != nil {
 					return err
 				}
 			}
 
-			logger.Infof("assembling OSV: %v", len(p.OSV))
-			for _, v := range p.OSV {
+			osvs := p.GetOSVs(ctx)
+			logger.Infof("assembling OSV: %v", len(osvs))
+			for _, v := range osvs {
 				if err := ingestOSV(ctx, gqlclient, v); err != nil {
 					return err
 				}
 			}
 
-			logger.Infof("assembling GHSA: %v", len(p.GHSA))
-			for _, v := range p.GHSA {
+			ghsas := p.GetGHSAs(ctx)
+			logger.Infof("assembling GHSA: %v", len(ghsas))
+			for _, v := range ghsas {
 				if err := ingestGHSA(ctx, gqlclient, v); err != nil {
 					return err
 				}
@@ -158,6 +178,16 @@ func ingestSource(ctx context.Context, client graphql.Client, v *model.SourceInp
 
 func ingestArtifact(ctx context.Context, client graphql.Client, v *model.ArtifactInputSpec) error {
 	_, err := model.IngestArtifact(ctx, client, *v)
+	return err
+}
+
+func ingestMaterials(ctx context.Context, client graphql.Client, v []model.ArtifactInputSpec) error {
+	_, err := model.IngestMaterials(ctx, client, v)
+	return err
+}
+
+func ingestBuilder(ctx context.Context, client graphql.Client, v *model.BuilderInputSpec) error {
+	_, err := model.IngestBuilder(ctx, client, *v)
 	return err
 }
 
