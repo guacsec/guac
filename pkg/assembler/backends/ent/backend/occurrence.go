@@ -102,7 +102,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		// } else {
 		// }
 
-		id, err := client.Debug().Occurrence.Create().
+		id, err := client.Occurrence.Create().
 			SetNillablePackageVersionID(pvID).
 			SetNillableSourceID(srcID).
 			SetArtifact(art).

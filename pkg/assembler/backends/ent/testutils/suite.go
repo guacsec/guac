@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"os"
 
 	"github.com/DATA-DOG/go-txdb"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -18,8 +19,12 @@ import (
 )
 
 func init() {
-	// txdb.Register("txdb", "postgres", "postgresql://guac:guac@localhost/guac_test?sslmode=disable")
-	txdb.Register("txdb", "postgres", "postgresql://localhost/guac_test?sslmode=disable")
+	db := os.Getenv("ENT_TEST_DATABASE_URL")
+	if db == "" {
+		db = "postgresql://localhost/guac_test?sslmode=disable"
+	}
+
+	txdb.Register("txdb", "postgres", db)
 }
 
 type Suite struct {
