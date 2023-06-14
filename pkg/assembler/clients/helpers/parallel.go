@@ -80,7 +80,7 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 			}
 
 			materials := p.GetMaterials(ctx)
-			logger.Infof("assembling Materials (Artifact): %v", len(materials))
+			logger.Infof("assembling Materials: %v", len(materials))
 			nouns.Go(func() error { return ingestMaterials(ctx, gqlclient, materials) })
 
 			cves := p.GetCVEs(ctx)
@@ -117,8 +117,6 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 		if err := nouns.Wait(); err != nil {
 			return err
 		}
-
-		logger.Infof("completed ingesting all nouns")
 
 		verbs, ctx := errgroup.WithContext(ctx)
 

@@ -264,7 +264,7 @@ type VexIngest struct {
 	CVE  *generated.CVEInputSpec
 	GHSA *generated.GHSAInputSpec
 
-	VexData *generated.HashEqualInputSpec
+	VexData *generated.VexStatementInputSpec
 }
 
 type HashEqualIngest struct {
@@ -272,7 +272,7 @@ type HashEqualIngest struct {
 	Artifact      *generated.ArtifactInputSpec
 	EqualArtifact *generated.ArtifactInputSpec
 
-	HasSBOM *generated.HasSBOMInputSpec
+	HashEqual *generated.HashEqualInputSpec
 }
 
 type PkgEqualIngest struct {
