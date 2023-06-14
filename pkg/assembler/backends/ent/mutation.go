@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
@@ -34,6 +35,7 @@ const (
 	// Node types.
 	TypeArtifact         = "Artifact"
 	TypeBuilderNode      = "BuilderNode"
+	TypeIsDependency     = "IsDependency"
 	TypeIsOccurrence     = "IsOccurrence"
 	TypePackageName      = "PackageName"
 	TypePackageNamespace = "PackageNamespace"
@@ -841,6 +843,757 @@ func (m *BuilderNodeMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *BuilderNodeMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown BuilderNode edge %s", name)
+}
+
+// IsDependencyMutation represents an operation that mutates the IsDependency nodes in the graph.
+type IsDependencyMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *int
+	version_range            *string
+	dependency_type          *string
+	justification            *string
+	origin                   *string
+	collector                *string
+	clearedFields            map[string]struct{}
+	_package                 *int
+	cleared_package          bool
+	dependent_package        *int
+	cleareddependent_package bool
+	done                     bool
+	oldValue                 func(context.Context) (*IsDependency, error)
+	predicates               []predicate.IsDependency
+}
+
+var _ ent.Mutation = (*IsDependencyMutation)(nil)
+
+// isdependencyOption allows management of the mutation configuration using functional options.
+type isdependencyOption func(*IsDependencyMutation)
+
+// newIsDependencyMutation creates new mutation for the IsDependency entity.
+func newIsDependencyMutation(c config, op Op, opts ...isdependencyOption) *IsDependencyMutation {
+	m := &IsDependencyMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeIsDependency,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withIsDependencyID sets the ID field of the mutation.
+func withIsDependencyID(id int) isdependencyOption {
+	return func(m *IsDependencyMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *IsDependency
+		)
+		m.oldValue = func(ctx context.Context) (*IsDependency, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().IsDependency.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withIsDependency sets the old IsDependency of the mutation.
+func withIsDependency(node *IsDependency) isdependencyOption {
+	return func(m *IsDependencyMutation) {
+		m.oldValue = func(context.Context) (*IsDependency, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m IsDependencyMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m IsDependencyMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *IsDependencyMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *IsDependencyMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().IsDependency.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPackageID sets the "package_id" field.
+func (m *IsDependencyMutation) SetPackageID(i int) {
+	m._package = &i
+}
+
+// PackageID returns the value of the "package_id" field in the mutation.
+func (m *IsDependencyMutation) PackageID() (r int, exists bool) {
+	v := m._package
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageID returns the old "package_id" field's value of the IsDependency entity.
+// If the IsDependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDependencyMutation) OldPackageID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageID: %w", err)
+	}
+	return oldValue.PackageID, nil
+}
+
+// ResetPackageID resets all changes to the "package_id" field.
+func (m *IsDependencyMutation) ResetPackageID() {
+	m._package = nil
+}
+
+// SetDependentPackageID sets the "dependent_package_id" field.
+func (m *IsDependencyMutation) SetDependentPackageID(i int) {
+	m.dependent_package = &i
+}
+
+// DependentPackageID returns the value of the "dependent_package_id" field in the mutation.
+func (m *IsDependencyMutation) DependentPackageID() (r int, exists bool) {
+	v := m.dependent_package
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDependentPackageID returns the old "dependent_package_id" field's value of the IsDependency entity.
+// If the IsDependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDependencyMutation) OldDependentPackageID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDependentPackageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDependentPackageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDependentPackageID: %w", err)
+	}
+	return oldValue.DependentPackageID, nil
+}
+
+// ResetDependentPackageID resets all changes to the "dependent_package_id" field.
+func (m *IsDependencyMutation) ResetDependentPackageID() {
+	m.dependent_package = nil
+}
+
+// SetVersionRange sets the "version_range" field.
+func (m *IsDependencyMutation) SetVersionRange(s string) {
+	m.version_range = &s
+}
+
+// VersionRange returns the value of the "version_range" field in the mutation.
+func (m *IsDependencyMutation) VersionRange() (r string, exists bool) {
+	v := m.version_range
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVersionRange returns the old "version_range" field's value of the IsDependency entity.
+// If the IsDependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDependencyMutation) OldVersionRange(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVersionRange is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVersionRange requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVersionRange: %w", err)
+	}
+	return oldValue.VersionRange, nil
+}
+
+// ResetVersionRange resets all changes to the "version_range" field.
+func (m *IsDependencyMutation) ResetVersionRange() {
+	m.version_range = nil
+}
+
+// SetDependencyType sets the "dependency_type" field.
+func (m *IsDependencyMutation) SetDependencyType(s string) {
+	m.dependency_type = &s
+}
+
+// DependencyType returns the value of the "dependency_type" field in the mutation.
+func (m *IsDependencyMutation) DependencyType() (r string, exists bool) {
+	v := m.dependency_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDependencyType returns the old "dependency_type" field's value of the IsDependency entity.
+// If the IsDependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDependencyMutation) OldDependencyType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDependencyType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDependencyType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDependencyType: %w", err)
+	}
+	return oldValue.DependencyType, nil
+}
+
+// ResetDependencyType resets all changes to the "dependency_type" field.
+func (m *IsDependencyMutation) ResetDependencyType() {
+	m.dependency_type = nil
+}
+
+// SetJustification sets the "justification" field.
+func (m *IsDependencyMutation) SetJustification(s string) {
+	m.justification = &s
+}
+
+// Justification returns the value of the "justification" field in the mutation.
+func (m *IsDependencyMutation) Justification() (r string, exists bool) {
+	v := m.justification
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJustification returns the old "justification" field's value of the IsDependency entity.
+// If the IsDependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDependencyMutation) OldJustification(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJustification is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJustification requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJustification: %w", err)
+	}
+	return oldValue.Justification, nil
+}
+
+// ResetJustification resets all changes to the "justification" field.
+func (m *IsDependencyMutation) ResetJustification() {
+	m.justification = nil
+}
+
+// SetOrigin sets the "origin" field.
+func (m *IsDependencyMutation) SetOrigin(s string) {
+	m.origin = &s
+}
+
+// Origin returns the value of the "origin" field in the mutation.
+func (m *IsDependencyMutation) Origin() (r string, exists bool) {
+	v := m.origin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrigin returns the old "origin" field's value of the IsDependency entity.
+// If the IsDependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDependencyMutation) OldOrigin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrigin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrigin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrigin: %w", err)
+	}
+	return oldValue.Origin, nil
+}
+
+// ResetOrigin resets all changes to the "origin" field.
+func (m *IsDependencyMutation) ResetOrigin() {
+	m.origin = nil
+}
+
+// SetCollector sets the "collector" field.
+func (m *IsDependencyMutation) SetCollector(s string) {
+	m.collector = &s
+}
+
+// Collector returns the value of the "collector" field in the mutation.
+func (m *IsDependencyMutation) Collector() (r string, exists bool) {
+	v := m.collector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCollector returns the old "collector" field's value of the IsDependency entity.
+// If the IsDependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IsDependencyMutation) OldCollector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCollector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCollector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCollector: %w", err)
+	}
+	return oldValue.Collector, nil
+}
+
+// ResetCollector resets all changes to the "collector" field.
+func (m *IsDependencyMutation) ResetCollector() {
+	m.collector = nil
+}
+
+// ClearPackage clears the "package" edge to the PackageVersion entity.
+func (m *IsDependencyMutation) ClearPackage() {
+	m.cleared_package = true
+}
+
+// PackageCleared reports if the "package" edge to the PackageVersion entity was cleared.
+func (m *IsDependencyMutation) PackageCleared() bool {
+	return m.cleared_package
+}
+
+// PackageIDs returns the "package" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageID instead. It exists only for internal usage by the builders.
+func (m *IsDependencyMutation) PackageIDs() (ids []int) {
+	if id := m._package; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackage resets all changes to the "package" edge.
+func (m *IsDependencyMutation) ResetPackage() {
+	m._package = nil
+	m.cleared_package = false
+}
+
+// ClearDependentPackage clears the "dependent_package" edge to the PackageName entity.
+func (m *IsDependencyMutation) ClearDependentPackage() {
+	m.cleareddependent_package = true
+}
+
+// DependentPackageCleared reports if the "dependent_package" edge to the PackageName entity was cleared.
+func (m *IsDependencyMutation) DependentPackageCleared() bool {
+	return m.cleareddependent_package
+}
+
+// DependentPackageIDs returns the "dependent_package" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DependentPackageID instead. It exists only for internal usage by the builders.
+func (m *IsDependencyMutation) DependentPackageIDs() (ids []int) {
+	if id := m.dependent_package; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDependentPackage resets all changes to the "dependent_package" edge.
+func (m *IsDependencyMutation) ResetDependentPackage() {
+	m.dependent_package = nil
+	m.cleareddependent_package = false
+}
+
+// Where appends a list predicates to the IsDependencyMutation builder.
+func (m *IsDependencyMutation) Where(ps ...predicate.IsDependency) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the IsDependencyMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *IsDependencyMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.IsDependency, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *IsDependencyMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *IsDependencyMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (IsDependency).
+func (m *IsDependencyMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *IsDependencyMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m._package != nil {
+		fields = append(fields, isdependency.FieldPackageID)
+	}
+	if m.dependent_package != nil {
+		fields = append(fields, isdependency.FieldDependentPackageID)
+	}
+	if m.version_range != nil {
+		fields = append(fields, isdependency.FieldVersionRange)
+	}
+	if m.dependency_type != nil {
+		fields = append(fields, isdependency.FieldDependencyType)
+	}
+	if m.justification != nil {
+		fields = append(fields, isdependency.FieldJustification)
+	}
+	if m.origin != nil {
+		fields = append(fields, isdependency.FieldOrigin)
+	}
+	if m.collector != nil {
+		fields = append(fields, isdependency.FieldCollector)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *IsDependencyMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case isdependency.FieldPackageID:
+		return m.PackageID()
+	case isdependency.FieldDependentPackageID:
+		return m.DependentPackageID()
+	case isdependency.FieldVersionRange:
+		return m.VersionRange()
+	case isdependency.FieldDependencyType:
+		return m.DependencyType()
+	case isdependency.FieldJustification:
+		return m.Justification()
+	case isdependency.FieldOrigin:
+		return m.Origin()
+	case isdependency.FieldCollector:
+		return m.Collector()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *IsDependencyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case isdependency.FieldPackageID:
+		return m.OldPackageID(ctx)
+	case isdependency.FieldDependentPackageID:
+		return m.OldDependentPackageID(ctx)
+	case isdependency.FieldVersionRange:
+		return m.OldVersionRange(ctx)
+	case isdependency.FieldDependencyType:
+		return m.OldDependencyType(ctx)
+	case isdependency.FieldJustification:
+		return m.OldJustification(ctx)
+	case isdependency.FieldOrigin:
+		return m.OldOrigin(ctx)
+	case isdependency.FieldCollector:
+		return m.OldCollector(ctx)
+	}
+	return nil, fmt.Errorf("unknown IsDependency field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IsDependencyMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case isdependency.FieldPackageID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageID(v)
+		return nil
+	case isdependency.FieldDependentPackageID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDependentPackageID(v)
+		return nil
+	case isdependency.FieldVersionRange:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVersionRange(v)
+		return nil
+	case isdependency.FieldDependencyType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDependencyType(v)
+		return nil
+	case isdependency.FieldJustification:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJustification(v)
+		return nil
+	case isdependency.FieldOrigin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrigin(v)
+		return nil
+	case isdependency.FieldCollector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCollector(v)
+		return nil
+	}
+	return fmt.Errorf("unknown IsDependency field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *IsDependencyMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *IsDependencyMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IsDependencyMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown IsDependency numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *IsDependencyMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *IsDependencyMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *IsDependencyMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown IsDependency nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *IsDependencyMutation) ResetField(name string) error {
+	switch name {
+	case isdependency.FieldPackageID:
+		m.ResetPackageID()
+		return nil
+	case isdependency.FieldDependentPackageID:
+		m.ResetDependentPackageID()
+		return nil
+	case isdependency.FieldVersionRange:
+		m.ResetVersionRange()
+		return nil
+	case isdependency.FieldDependencyType:
+		m.ResetDependencyType()
+		return nil
+	case isdependency.FieldJustification:
+		m.ResetJustification()
+		return nil
+	case isdependency.FieldOrigin:
+		m.ResetOrigin()
+		return nil
+	case isdependency.FieldCollector:
+		m.ResetCollector()
+		return nil
+	}
+	return fmt.Errorf("unknown IsDependency field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *IsDependencyMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m._package != nil {
+		edges = append(edges, isdependency.EdgePackage)
+	}
+	if m.dependent_package != nil {
+		edges = append(edges, isdependency.EdgeDependentPackage)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *IsDependencyMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case isdependency.EdgePackage:
+		if id := m._package; id != nil {
+			return []ent.Value{*id}
+		}
+	case isdependency.EdgeDependentPackage:
+		if id := m.dependent_package; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *IsDependencyMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *IsDependencyMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *IsDependencyMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleared_package {
+		edges = append(edges, isdependency.EdgePackage)
+	}
+	if m.cleareddependent_package {
+		edges = append(edges, isdependency.EdgeDependentPackage)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *IsDependencyMutation) EdgeCleared(name string) bool {
+	switch name {
+	case isdependency.EdgePackage:
+		return m.cleared_package
+	case isdependency.EdgeDependentPackage:
+		return m.cleareddependent_package
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *IsDependencyMutation) ClearEdge(name string) error {
+	switch name {
+	case isdependency.EdgePackage:
+		m.ClearPackage()
+		return nil
+	case isdependency.EdgeDependentPackage:
+		m.ClearDependentPackage()
+		return nil
+	}
+	return fmt.Errorf("unknown IsDependency unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *IsDependencyMutation) ResetEdge(name string) error {
+	switch name {
+	case isdependency.EdgePackage:
+		m.ResetPackage()
+		return nil
+	case isdependency.EdgeDependentPackage:
+		m.ResetDependentPackage()
+		return nil
+	}
+	return fmt.Errorf("unknown IsDependency edge %s", name)
 }
 
 // IsOccurrenceMutation represents an operation that mutates the IsOccurrence nodes in the graph.

@@ -177,6 +177,22 @@ func collect[T any, R any](items []T, transformer func(T) R) []R {
 	return out
 }
 
+func collectWithError[T any, R any](ctx context.Context, items []T, transformer func(context.Context, T) (R, error)) ([]R, error) {
+	if items == nil {
+		return nil, nil
+	}
+
+	out := make([]R, len(items))
+	for i, item := range items {
+		t, err := transformer(ctx, item)
+		if err != nil {
+			return nil, err
+		}
+		out[i] = t
+	}
+	return out, nil
+}
+
 func nodeID(id int) string {
 	return fmt.Sprintf("%d", id)
 }

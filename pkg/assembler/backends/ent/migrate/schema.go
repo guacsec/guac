@@ -45,6 +45,44 @@ var (
 			},
 		},
 	}
+	// IsDependenciesColumns holds the columns for the "is_dependencies" table.
+	IsDependenciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "version_range", Type: field.TypeString},
+		{Name: "dependency_type", Type: field.TypeString},
+		{Name: "justification", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
+		{Name: "package_id", Type: field.TypeInt},
+		{Name: "dependent_package_id", Type: field.TypeInt},
+	}
+	// IsDependenciesTable holds the schema information for the "is_dependencies" table.
+	IsDependenciesTable = &schema.Table{
+		Name:       "is_dependencies",
+		Columns:    IsDependenciesColumns,
+		PrimaryKey: []*schema.Column{IsDependenciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "is_dependencies_package_versions_package",
+				Columns:    []*schema.Column{IsDependenciesColumns[6]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "is_dependencies_package_names_dependent_package",
+				Columns:    []*schema.Column{IsDependenciesColumns[7]},
+				RefColumns: []*schema.Column{PackageNamesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "isdependency_version_range_dependency_type_justification_origin_collector_package_id_dependent_package_id",
+				Unique:  true,
+				Columns: []*schema.Column{IsDependenciesColumns[1], IsDependenciesColumns[2], IsDependenciesColumns[3], IsDependenciesColumns[4], IsDependenciesColumns[5], IsDependenciesColumns[6], IsDependenciesColumns[7]},
+			},
+		},
+	}
 	// IsOccurrencesColumns holds the columns for the "is_occurrences" table.
 	IsOccurrencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -264,6 +302,7 @@ var (
 	Tables = []*schema.Table{
 		ArtifactsTable,
 		BuilderNodesTable,
+		IsDependenciesTable,
 		IsOccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
@@ -276,6 +315,8 @@ var (
 )
 
 func init() {
+	IsDependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	IsDependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
 	IsOccurrencesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	IsOccurrencesTable.ForeignKeys[1].RefTable = SourceNamesTable
 	IsOccurrencesTable.ForeignKeys[2].RefTable = ArtifactsTable
