@@ -82,10 +82,15 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 		Where(packageversion.ID(*pvID)).QueryName().QueryNamespace().QueryPackage().
 		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 			q.Order(ent.Asc(packagenamespace.FieldNamespace))
+			q.Where(packagenamespace.Namespace(valueOrDefault(pkg.Namespace, "")))
 			q.WithNames(func(q *ent.PackageNameQuery) {
 				q.Order(ent.Asc(packagename.FieldName))
+				q.Where(packagename.Name(pkg.Name))
 				q.WithVersions(func(q *ent.PackageVersionQuery) {
 					q.Order(ent.Asc(packageversion.FieldVersion))
+					q.Where(packageversion.Version(valueOrDefault(pkg.Version, "")))
+					q.Where(packageversion.Subpath(valueOrDefault(pkg.Subpath, "")))
+					q.Where(packageversion.Qualifiers(qualifiersToString(pkg.Qualifiers)))
 				})
 			})
 		}).
@@ -123,7 +128,7 @@ func ingestPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 		pkg.Namespace = &empty
 	}
 
-	nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(*pkg.Namespace).
+	nsID, err := client.PackageNamespace.Create().SetPackageID(pkgID).SetNamespace(valueOrDefault(pkg.Namespace, "")).
 		OnConflict(sql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).UpdateNewValues().ID(ctx)
 	if err != nil {
 		return 0, errors.Wrap(err, "upsert package namespace")
@@ -141,7 +146,7 @@ func ingestPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 	}
 	pvID, err := client.PackageVersion.Create().
 		SetNameID(nameID).
-		SetVersion(*pkg.Version).
+		SetVersion(valueOrDefault(pkg.Version, "")).
 		SetSubpath(valueOrDefault(pkg.Subpath, "")).
 		SetQualifiers(qualifiersToString(pkg.Qualifiers)).
 		OnConflict(

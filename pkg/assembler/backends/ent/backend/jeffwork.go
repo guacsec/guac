@@ -1,9 +1,10 @@
-package ent
+package backend
 
 import (
 	"context"
 
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isdependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isoccurrence"
@@ -29,7 +30,7 @@ import (
 // These queries need to be fast, all the fields are present in an "InputSpec"
 // and should allow using the db index.
 
-func (b *EntBackend) getPkgName(ctx context.Context, pkgin *model.PkgInputSpec) (*PackageName, error) {
+func (b *EntBackend) getPkgName(ctx context.Context, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
 	t, err := b.client.PackageNode.Query().
 		Where(packagenode.Type(pkgin.Type)).
 		Only(ctx)
@@ -47,7 +48,7 @@ func (b *EntBackend) getPkgName(ctx context.Context, pkgin *model.PkgInputSpec) 
 		Only(ctx)
 }
 
-func (b *EntBackend) getPkgVersion(ctx context.Context, pkgin *model.PkgInputSpec) (*PackageVersion, error) {
+func (b *EntBackend) getPkgVersion(ctx context.Context, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
 	n, err := b.getPkgName(ctx, pkgin)
 	if err != nil {
 		return nil, err
@@ -59,7 +60,7 @@ func (b *EntBackend) getPkgVersion(ctx context.Context, pkgin *model.PkgInputSpe
 		Only(ctx)
 }
 
-func (b *EntBackend) getArtifact(ctx context.Context, artin *model.ArtifactInputSpec) (*Artifact, error) {
+func (b *EntBackend) getArtifact(ctx context.Context, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
 	return b.client.Artifact.Query().
 		Where(artifact.Algorithm(artin.Algorithm)).
 		Where(artifact.Digest(artin.Digest)).
@@ -70,7 +71,7 @@ func (b *EntBackend) getArtifact(ctx context.Context, artin *model.ArtifactInput
 // rebuild the full top level tree object with just the nested objects that are
 // part of the path to that node
 
-func pkgTreeFromVersion(ctx context.Context, pv *PackageVersion) (*PackageNode, error) {
+func pkgTreeFromVersion(ctx context.Context, pv *ent.PackageVersion) (*ent.PackageNode, error) {
 	n, err := pv.QueryName().Only(ctx)
 	if err != nil {
 		return nil, err
@@ -80,11 +81,11 @@ func pkgTreeFromVersion(ctx context.Context, pv *PackageVersion) (*PackageNode, 
 		return nil, err
 	}
 	return ns.QueryPackage().
-		WithNamespaces(func(q *PackageNamespaceQuery) {
+		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 			q.Where(packagenamespace.Namespace(ns.Namespace))
-			q.WithNames(func(q *PackageNameQuery) {
+			q.WithNames(func(q *ent.PackageNameQuery) {
 				q.Where(packagename.Name(n.Name))
-				q.WithVersions(func(q *PackageVersionQuery) {
+				q.WithVersions(func(q *ent.PackageVersionQuery) {
 					q.Where(packageversion.Version(pv.Version))
 					q.Where(packageversion.Subpath(pv.Subpath))
 					q.Where(packageversion.Qualifiers(pv.Qualifiers))
@@ -94,15 +95,15 @@ func pkgTreeFromVersion(ctx context.Context, pv *PackageVersion) (*PackageNode, 
 		Only(ctx)
 }
 
-func pkgTreeFromName(ctx context.Context, pn *PackageName) (*PackageNode, error) {
+func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode, error) {
 	ns, err := pn.QueryNamespace().Only(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return ns.QueryPackage().
-		WithNamespaces(func(q *PackageNamespaceQuery) {
+		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 			q.Where(packagenamespace.Namespace(ns.Namespace))
-			q.WithNames(func(q *PackageNameQuery) {
+			q.WithNames(func(q *ent.PackageNameQuery) {
 				q.Where(packagename.Name(pn.Name))
 			})
 		}).
@@ -111,11 +112,11 @@ func pkgTreeFromName(ctx context.Context, pn *PackageName) (*PackageNode, error)
 
 func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	funcName := "IsDependency"
-	query := b.client.IsDependency.Query().Order(Asc(isdependency.FieldID))
+	query := b.client.IsDependency.Query().Order(ent.Asc(isdependency.FieldID))
 
 	if isDependencySpec != nil {
 		query.Where(
-			IDEQ(isDependencySpec.ID),
+			optionalPredicate(isDependencySpec.ID, IDEQ),
 			isdependency.HasPackageWith(pkgVersionPreds(isDependencySpec.Package)...),
 			isdependency.HasDependentPackageWith(pkgNamePreds(isDependencySpec.DependentPackage)...),
 			optionalPredicate(isDependencySpec.VersionRange, isdependency.VersionRange),
@@ -149,7 +150,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	funcName := "IngestDependency"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		client := FromContext(ctx)
+		client := ent.FromContext(ctx)
 		p, err := b.getPkgVersion(ctx, &pkg)
 		if err != nil {
 			return nil, err
@@ -200,23 +201,23 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	return toModelIsDependency(ctx, record)
 }
 
-func (b *EntBackend) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, art model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (b *EntBackend) IngestOccurrence2(ctx context.Context, subject model.PackageOrSourceInput, art model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	funcName := "IngestOccurrence"
 	if err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence"); err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		client := FromContext(ctx)
-		var p *PackageVersion
+		client := ent.FromContext(ctx)
+		// var p *ent.PackageVersion
 		//var s *ent.SourceName
-		if subject.Package != nil {
-			var err error
-			p, err = b.getPkgVersion(ctx, subject.Package)
-			if err != nil {
-				return nil, err
-			}
-		}
+		// if subject.Package != nil {
+		// 	var err error
+		// 	p, err = b.getPkgVersion(ctx, subject.Package)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// }
 		if subject.Source != nil {
 			return nil, gqlerror.Errorf("Dropping occurrences on sources right now")
 		}
@@ -225,7 +226,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context, subject model.Package
 			return nil, err
 		}
 		id, err := client.IsOccurrence.Create().
-			SetPackage(p). // Should I be using SetPackageID() here?
+			// SetPackage(p). // Should I be using SetPackageID() here?
 			SetArtifact(a).
 			SetJustification(occurrence.Justification).
 			SetOrigin(occurrence.Origin).
@@ -254,19 +255,19 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context, subject model.Package
 	record, err := b.client.IsOccurrence.Query().
 		Where(isoccurrence.ID(*recordID)).
 		WithArtifact().
-		WithPackage().
+		// WithPackage().
 		Only(ctx)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	return toModelIsOccurrence(ctx, record)
+	return toModelIsOccurrenceErr(ctx, record)
 }
 
-func toModelIsOccurrence(ctx context.Context, o *IsOccurrence) (*model.IsOccurrence, error) {
+func toModelIsOccurrenceErr(ctx context.Context, o *ent.IsOccurrence) (*model.IsOccurrence, error) {
 	var sub model.PackageOrSource
-	if o.PackageID != 0 { // how do we indicate that this is linked to pkg and not src??
-		top, err := pkgTreeFromVersion(ctx, o.Edges.Package)
+	if o.PackageID != nil { // how do we indicate that this is linked to pkg and not src??
+		top, err := pkgTreeFromVersion(ctx, o.Edges.PackageVersion)
 		if err != nil {
 			return nil, err
 		}
@@ -276,7 +277,7 @@ func toModelIsOccurrence(ctx context.Context, o *IsOccurrence) (*model.IsOccurre
 	// 	sub = toModelSource(o.Edges.Source)
 	// }
 	return &model.IsOccurrence{
-		ID:            nodeid(o.ID),
+		ID:            nodeID(o.ID),
 		Subject:       sub,
 		Artifact:      toModelArtifact(o.Edges.Artifact),
 		Justification: o.Justification,
@@ -285,7 +286,7 @@ func toModelIsOccurrence(ctx context.Context, o *IsOccurrence) (*model.IsOccurre
 	}, nil
 }
 
-func toModelIsDependency(ctx context.Context, id *IsDependency) (*model.IsDependency, error) {
+func toModelIsDependency(ctx context.Context, id *ent.IsDependency) (*model.IsDependency, error) {
 	p, err := pkgTreeFromVersion(ctx, id.Edges.Package)
 	if err != nil {
 		return nil, err
@@ -295,7 +296,7 @@ func toModelIsDependency(ctx context.Context, id *IsDependency) (*model.IsDepend
 		return nil, err
 	}
 	return &model.IsDependency{
-		ID:               nodeid(id.ID),
+		ID:               nodeID(id.ID),
 		Package:          toModelPackage(p),
 		DependentPackage: toModelPackage(dp),
 		VersionRange:     id.VersionRange,
@@ -311,7 +312,7 @@ func pkgVersionPreds(spec *model.PkgSpec) []predicate.PackageVersion {
 		return nil
 	}
 	rv := []predicate.PackageVersion{
-		IDEQ(spec.ID),
+		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Version, packageversion.Version),
 		optionalPredicate(spec.Subpath, packageversion.Subpath),
 		packageversion.HasNameWith(
@@ -340,7 +341,7 @@ func pkgNamePreds(spec *model.PkgNameSpec) []predicate.PackageName {
 		return nil
 	}
 	return []predicate.PackageName{
-		IDEQ(spec.ID),
+		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Name, packagename.Name),
 		packagename.HasNamespaceWith(
 			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
