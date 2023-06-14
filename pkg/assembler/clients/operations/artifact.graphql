@@ -23,6 +23,14 @@ mutation IngestArtifact($artifact: ArtifactInputSpec!) {
   }
 }
 
+# Ingest Materials (artifacts) used by hasSLSA
+
+mutation IngestMaterials($materials: [ArtifactInputSpec!]!) {
+  ingestMaterials(materials: $materials) {
+    ...AllArtifactTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC sources
 
 query Artifacts($filter: ArtifactSpec) {
