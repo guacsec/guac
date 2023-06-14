@@ -44,13 +44,14 @@ func ingestDependencies(ctx context.Context, client graphql.Client) {
 	version := "1.19.0.4"
 	depns := "openssl.org"
 	smartentryNs := "smartentry"
+	nodeID := "123"
 
 	ingestDependencies := []struct {
 		name       string
 		pkg        model.PkgInputSpec
 		depPkg     model.PkgInputSpec
 		dependency model.IsDependencyInputSpec
-		isDep      model.AllArtifactTree
+		node       model.PkgSpec
 	}{{
 		name: "deb: part of SBOM - openssl",
 		pkg: model.PkgInputSpec{
@@ -74,8 +75,8 @@ func ingestDependencies(ctx context.Context, client graphql.Client) {
 			Origin:         "Demo ingestion",
 			Collector:      "Demo ingestion",
 		},
-		isDep: model.AllArtifactTree{
-			Id: "hi",
+		node: model.PkgSpec{
+			Id: &nodeID,
 		},
 	}, {
 		name: "docker: part of SBOM - openssl",
@@ -383,7 +384,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 
 	httpClient := http.Client{}
-	gqlclient := graphql.NewClient("http://localhost:9090", &httpClient)
+	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 	ingestVulnerabilities(ctx, gqlclient)
 	ingestDependencies(ctx, gqlclient)
 	// startTestServer()
@@ -391,7 +392,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	//for _, tt := range testCases {
 
 	t.Run("test1", func(t *testing.T) {
-		got, _, err := searchSubgraphFromVuln(ctx, gqlclient, "hi", "", 0)
+		got, _, err := searchSubgraphFromVuln(ctx, gqlclient, "123", "", 0)
 		if err != nil {
 			t.Errorf("got err from Search: %v", err)
 			return
@@ -431,14 +432,14 @@ func startTestServer() (*http.Server, *zap.SugaredLogger) {
 	server := &http.Server{Addr: fmt.Sprintf(":%d", 9090)}
 	logger.Info("starting server")
 
-	return server, logger
-	// go func() {
-	// 	logger.Infof("server finished: %s", server.ListenAndServe())
-	// }()
+	go func() {
+		logger.Infof("server finished: %s", server.ListenAndServe())
+	}()
 	// sigs := make(chan os.Signal, 1)
 	// signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM) // don't need for testing
 	// s := <-sigs
 	// logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+	return server, logger
 }
 
 func getGraphqlTestServer() (*handler.Server, error) {
