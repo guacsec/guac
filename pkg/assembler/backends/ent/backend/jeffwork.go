@@ -139,7 +139,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.I
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	rv, err := collectWithError(ctx, ids, toModelIsDependency)
+	rv, err := collectErr(ctx, ids, toModelIsDependency)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}

@@ -11,27 +11,27 @@ import (
 
 func (s *Suite) TestIsDependency() {
 	type call struct {
-		P1 *model.PkgInputSpec
-		P2 *model.PkgInputSpec
-		ID *model.IsDependencyInputSpec
+		P1    *model.PkgInputSpec
+		P2    *model.PkgInputSpec
+		Input *model.IsDependencyInputSpec
 	}
 	tests := []struct {
 		Name         string
-		InPkg        []*model.PkgInputSpec
+		IngestPkg    []*model.PkgInputSpec
 		Calls        []call
 		Query        *model.IsDependencySpec
-		ExpID        []*model.IsDependency
+		Expected     []*model.IsDependency
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
 		{
-			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{p1, p2},
+			Name:      "HappyPath",
+			IngestPkg: []*model.PkgInputSpec{p1, p2},
 			Calls: []call{
 				{
 					P1: p1,
 					P2: p2,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -39,7 +39,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -48,20 +48,20 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Ingest same",
-			InPkg: []*model.PkgInputSpec{p1, p2},
+			Name:      "Ingest same",
+			IngestPkg: []*model.PkgInputSpec{p1, p2},
 			Calls: []call{
 				{
 					P1: p1,
 					P2: p2,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					P1: p1,
 					P2: p2,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -69,7 +69,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -78,20 +78,20 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Ingest same, different version",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Name:      "Ingest same, different version",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
 					P1: p1,
 					P2: p2,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					P1: p1,
 					P2: p3,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -99,7 +99,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -108,20 +108,20 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query on Justification",
-			InPkg: []*model.PkgInputSpec{p1, p2},
+			Name:      "Query on Justification",
+			IngestPkg: []*model.PkgInputSpec{p1, p2},
 			Calls: []call{
 				{
 					P1: p1,
 					P2: p2,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						Justification: "test justification one",
 					},
 				},
 				{
 					P1: p1,
 					P2: p2,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						Justification: "test justification two",
 					},
 				},
@@ -129,7 +129,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				Justification: ptrfrom.String("test justification one"),
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -138,26 +138,27 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query on pkg",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Name:      "Query on pkg",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p2,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p2,
-					P2: p3,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p2,
+					P2:    p3,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			Query: &model.IsDependencySpec{
 				Package: &model.PkgSpec{
-					ID: ptrfrom.String("5"),
+					// ID: ptrfrom.String("5"),
+					Type: ptrfrom.String("pypi"),
 				},
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p2outName,
@@ -165,18 +166,18 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query on dep pkg",
-			InPkg: []*model.PkgInputSpec{p1, p2, p4},
+			Name:      "Query on dep pkg",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p4},
 			Calls: []call{
 				{
-					P1: p2,
-					P2: p4,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p2,
+					P2:    p4,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p2,
-					P2: p1,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p2,
+					P2:    p1,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			Query: &model.IsDependencySpec{
@@ -184,7 +185,7 @@ func (s *Suite) TestIsDependency() {
 					Name: ptrfrom.String("openssl"),
 				},
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p2out,
 					DependentPackage: p4outName,
@@ -192,18 +193,18 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query on pkg multiple",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Name:      "Query on pkg multiple",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p2,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p3,
-					P2: p2,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p3,
+					P2:    p2,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			Query: &model.IsDependencySpec{
@@ -211,7 +212,7 @@ func (s *Suite) TestIsDependency() {
 					Type: ptrfrom.String("pypi"),
 				},
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p1outName,
@@ -223,18 +224,18 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query on both pkgs",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3, p4},
+			Name:      "Query on both pkgs",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p3, p4},
 			Calls: []call{
 				{
-					P1: p2,
-					P2: p1,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p2,
+					P2:    p1,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p3,
-					P2: p4,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p3,
+					P2:    p4,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			Query: &model.IsDependencySpec{
@@ -245,7 +246,7 @@ func (s *Suite) TestIsDependency() {
 					Name: ptrfrom.String("openssl"),
 				},
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p3out,
 					DependentPackage: p4outName,
@@ -253,23 +254,23 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query none",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Name:      "Query none",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p2,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p2,
-					P2: p3,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p2,
+					P2:    p3,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p1,
-					P2: p3,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p3,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			Query: &model.IsDependencySpec{
@@ -277,32 +278,32 @@ func (s *Suite) TestIsDependency() {
 					Subpath: ptrfrom.String("asdf"),
 				},
 			},
-			ExpID: nil,
+			Expected: nil,
 		},
 		{
-			Name:  "Query on ID",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Name:      "Query on ID",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p2,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p2,
-					P2: p3,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p2,
+					P2:    p3,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p1,
-					P2: p3,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p3,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			Query: &model.IsDependencySpec{
 				ID: ptrfrom.String("9"),
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p2out,
 					DependentPackage: p1outName,
@@ -310,20 +311,20 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query on Range",
-			InPkg: []*model.PkgInputSpec{p1, p2},
+			Name:      "Query on Range",
+			IngestPkg: []*model.PkgInputSpec{p1, p2},
 			Calls: []call{
 				{
 					P1: p1,
 					P2: p1,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						VersionRange: "1-3",
 					},
 				},
 				{
 					P1: p2,
 					P2: p1,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						VersionRange: "4-5",
 					},
 				},
@@ -331,7 +332,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				VersionRange: ptrfrom.String("1-3"),
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p1out,
 					DependentPackage: p1outName,
@@ -340,20 +341,20 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Query on DependencyType",
-			InPkg: []*model.PkgInputSpec{p1, p2},
+			Name:      "Query on DependencyType",
+			IngestPkg: []*model.PkgInputSpec{p1, p2},
 			Calls: []call{
 				{
 					P1: p1,
 					P2: p1,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
 					},
 				},
 				{
 					P1: p2,
 					P2: p1,
-					ID: &model.IsDependencyInputSpec{
+					Input: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeIndirect,
 					},
 				},
@@ -361,7 +362,7 @@ func (s *Suite) TestIsDependency() {
 			Query: &model.IsDependencySpec{
 				DependencyType: (*model.DependencyType)(ptrfrom.String(string(model.DependencyTypeIndirect))),
 			},
-			ExpID: []*model.IsDependency{
+			Expected: []*model.IsDependency{
 				{
 					Package:          p2out,
 					DependentPackage: p1outName,
@@ -370,47 +371,47 @@ func (s *Suite) TestIsDependency() {
 			},
 		},
 		{
-			Name:  "Ingest no P1",
-			InPkg: []*model.PkgInputSpec{p2},
+			Name:      "Ingest no P1",
+			IngestPkg: []*model.PkgInputSpec{p2},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p2,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Ingest no P2",
-			InPkg: []*model.PkgInputSpec{p1},
+			Name:      "Ingest no P2",
+			IngestPkg: []*model.PkgInputSpec{p1},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p4,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p4,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
 		},
 		{
-			Name:  "Query bad ID",
-			InPkg: []*model.PkgInputSpec{p1, p2, p3},
+			Name:      "Query bad ID",
+			IngestPkg: []*model.PkgInputSpec{p1, p2, p3},
 			Calls: []call{
 				{
-					P1: p1,
-					P2: p2,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p2,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p2,
-					P2: p3,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p2,
+					P2:    p3,
+					Input: &model.IsDependencyInputSpec{},
 				},
 				{
-					P1: p1,
-					P2: p3,
-					ID: &model.IsDependencyInputSpec{},
+					P1:    p1,
+					P2:    p3,
+					Input: &model.IsDependencyInputSpec{},
 				},
 			},
 			Query: &model.IsDependencySpec{
@@ -428,13 +429,13 @@ func (s *Suite) TestIsDependency() {
 			b, err := GetBackend(s.Client)
 			s.Require().NoError(err, "Could not instantiate testing backend")
 
-			for _, a := range test.InPkg {
+			for _, a := range test.IngestPkg {
 				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					s.Require().NoError(err, "Could not ingest pkg")
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.ID)
+				_, err := b.IngestDependency(ctx, *o.P1, *o.P2, *o.Input)
 				if (err != nil) != test.ExpIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -450,7 +451,7 @@ func (s *Suite) TestIsDependency() {
 				return
 			}
 
-			if diff := cmp.Diff(test.ExpID, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.Expected, got, ignoreID); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

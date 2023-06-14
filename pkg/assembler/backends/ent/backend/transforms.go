@@ -169,15 +169,17 @@ func collect[T any, R any](items []T, transformer func(T) R) []R {
 	if items == nil {
 		return nil
 	}
-
 	out := make([]R, len(items))
 	for i, item := range items {
 		out[i] = transformer(item)
 	}
+	if len(out) == 0 {
+		return nil
+	}
 	return out
 }
 
-func collectWithError[T any, R any](ctx context.Context, items []T, transformer func(context.Context, T) (R, error)) ([]R, error) {
+func collectErr[T any, R any](ctx context.Context, items []T, transformer func(context.Context, T) (R, error)) ([]R, error) {
 	if items == nil {
 		return nil, nil
 	}
