@@ -28,7 +28,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/spf13/cobra"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	entbackend "github.com/guacsec/guac/pkg/assembler/backends/ent/backend"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	"github.com/guacsec/guac/pkg/assembler/backends/neo4j"
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
@@ -107,7 +107,7 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 
 	switch flags.backend {
 	case ents:
-		client, err := ent.SetupBackend(ctx, ent.BackendOptions{
+		client, err := entbackend.SetupBackend(ctx, entbackend.BackendOptions{
 			DriverName:  flags.dbDriver,
 			Address:     flags.dbAddress,
 			Debug:       flags.dbDebug,
@@ -117,7 +117,7 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 			return nil, err
 		}
 
-		backend, err := ent.GetBackend(client)
+		backend, err := entbackend.GetBackend(client)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating ent backend: %w", err)
 		}
