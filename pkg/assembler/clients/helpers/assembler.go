@@ -161,6 +161,27 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 					return err
 				}
 			}
+
+			logger.Infof("assembling VEX : %v", len(p.Vex))
+			for _, v := range p.Vex {
+				if err := ingestVex(ctx, gqlclient, v); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling HashEqual : %v", len(p.HashEqual))
+			for _, equal := range p.HashEqual {
+				if err := ingestHashEqual(ctx, gqlclient, equal); err != nil {
+					return err
+				}
+			}
+
+			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
+			for _, equal := range p.PkgEqual {
+				if err := ingestPkgEqual(ctx, gqlclient, equal); err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	}
@@ -329,6 +350,91 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 	return err
 }
 
+func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexIngest) error {
+	if err := ValidateVulnerabilityInput(vi.OSV, vi.CVE, vi.GHSA, "VexIngest"); err != nil {
+		return fmt.Errorf("input validation failed for VexIngest: %w", err)
+	}
+
+	if vi.Artifact != nil && vi.Pkg != nil {
+		return fmt.Errorf("unable to create VexIngest with both Pkg and Artifact specified")
+	}
+
+	if vi.Artifact == nil && vi.Pkg == nil {
+		return fmt.Errorf("unable to create VexIngest without either Pkg or Artifact specified")
+	}
+
+	if vi.CVE != nil {
+		if vi.Pkg != nil {
+			_, err := model.VexPackageAndCve(ctx, client, *vi.Pkg, *vi.CVE, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+
+		if vi.Artifact != nil {
+			_, err := model.VexArtifactAndCve(ctx, client, *vi.Artifact, *vi.CVE, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if vi.GHSA != nil {
+		if vi.Pkg != nil {
+			_, err := model.VEXPackageAndGhsa(ctx, client, *vi.Pkg, *vi.GHSA, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+
+		if vi.Artifact != nil {
+			_, err := model.VexArtifactAndGhsa(ctx, client, *vi.Artifact, *vi.GHSA, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if vi.OSV != nil {
+		if vi.Pkg != nil {
+			_, err := model.VexPackageAndOsv(ctx, client, *vi.Pkg, *vi.OSV, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+
+		if vi.Artifact != nil {
+			_, err := model.VexArtifactAndOsv(ctx, client, *vi.Artifact, *vi.OSV, *vi.VexData)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func ingestPkgEqual(ctx context.Context, client graphql.Client, v assembler.PkgEqualIngest) error {
+	if v.Pkg == nil {
+		return fmt.Errorf("unable to create pkgEqual without Pkg")
+	}
+	if v.EqualPkg == nil {
+		return fmt.Errorf("unable to create pkgEqual without EqualPkg")
+	}
+	_, err := model.PkgEqual(ctx, client, *v.Pkg, *v.EqualPkg, *v.PkgEqual)
+	return err
+}
+
+func ingestHashEqual(ctx context.Context, client graphql.Client, v assembler.HashEqualIngest) error {
+	if v.Artifact == nil {
+		return fmt.Errorf("unable to create HashEqual without artifact")
+	}
+	if v.EqualArtifact == nil {
+		return fmt.Errorf("unable to create HashEqual without equal artifact")
+	}
+	_, err := model.HashEqual(ctx, client, *v.Artifact, *v.EqualArtifact, *v.HashEqual)
+	return err
+}
+
 func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.SourceInputSpec, artifact *model.ArtifactInputSpec, path string) error {
 	valuesDefined := 0
 	if pkg != nil {
@@ -341,7 +447,7 @@ func validatePackageSourceOrArtifactInput(pkg *model.PkgInputSpec, src *model.So
 		valuesDefined = valuesDefined + 1
 	}
 	if valuesDefined != 1 {
-		return fmt.Errorf("Must specify at most one package, source, or artifact for %v", path)
+		return fmt.Errorf("must specify at most one package, source, or artifact for %v", path)
 	}
 
 	return nil
@@ -359,7 +465,7 @@ func ValidateVulnerabilityInput(osv *model.OSVInputSpec, cve *model.CVEInputSpec
 		vulnDefined = vulnDefined + 1
 	}
 	if vulnDefined > 2 {
-		return fmt.Errorf("Must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
+		return fmt.Errorf("must specify at most one vulnerability (cve, osv, or ghsa) for %v", path)
 	}
 	return nil
 }
