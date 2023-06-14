@@ -1,9 +1,7 @@
 FROM docker.io/library/golang:1.19 as builder
 WORKDIR /go/src/github.com/guacsec/guac/
-COPY go.* .
-RUN go mod download
 ADD . /go/src/github.com/guacsec/guac/
-RUN --mount=type=cache,target=/root/.cache/go-build rm -rf bin/ && make build
+RUN --mount=type=cache,target=/go/pkg/mod make build
 
 FROM docker.io/library/ubuntu:22.04
 RUN apt update
