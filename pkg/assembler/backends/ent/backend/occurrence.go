@@ -85,22 +85,15 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			}
 			srcID = id
 		}
-		// if subject.Source != nil {
-		// 	s, err = // query for source name object
-		// }
 
 		conflictColumns := []string{
 			isoccurrence.FieldArtifactID,
+			isoccurrence.FieldSourceID,
+			isoccurrence.FieldPackageID,
 			isoccurrence.FieldJustification,
 			isoccurrence.FieldOrigin,
 			isoccurrence.FieldCollector,
 		}
-
-		conflictColumns = append(conflictColumns, isoccurrence.FieldSourceID)
-		conflictColumns = append(conflictColumns, isoccurrence.FieldPackageID)
-		// if srcID != nil {
-		// } else {
-		// }
 
 		id, err := client.Occurrence.Create().
 			SetNillablePackageVersionID(pvID).

@@ -201,7 +201,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	return toModelIsDependency(ctx, record)
 }
 
-func (b *EntBackend) IngestOccurrence2(ctx context.Context, subject model.PackageOrSourceInput, art model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (b *EntBackend) IngestOccurrence_Jeff(ctx context.Context, subject model.PackageOrSourceInput, art model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	funcName := "IngestOccurrence"
 	if err := helper.ValidatePackageOrSourceInput(&subject, "IngestOccurrence"); err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
@@ -234,7 +234,7 @@ func (b *EntBackend) IngestOccurrence2(ctx context.Context, subject model.Packag
 			OnConflict(
 				entsql.ConflictColumns(
 					isoccurrence.FieldPackageID,
-					//isoccurrence.FieldSourceID,
+					isoccurrence.FieldSourceID,
 					isoccurrence.FieldArtifactID,
 					isoccurrence.FieldJustification,
 					isoccurrence.FieldOrigin,
