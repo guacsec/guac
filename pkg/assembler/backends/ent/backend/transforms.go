@@ -190,6 +190,11 @@ func collectWithError[T any, R any](ctx context.Context, items []T, transformer 
 		}
 		out[i] = t
 	}
+
+	if len(out) == 0 {
+		return nil, nil
+	}
+
 	return out, nil
 }
 

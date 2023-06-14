@@ -60,8 +60,8 @@ var p1outName = &model.Package{
 	Type: "pypi",
 	Namespaces: []*model.PackageNamespace{{
 		Names: []*model.PackageName{{
-			Name:     "tensorflow",
-			Versions: []*model.PackageVersion{},
+			Name: "tensorflow",
+			// Versions: []*model.PackageVersion{},
 		}},
 	}},
 }
@@ -87,8 +87,8 @@ var p2outName = &model.Package{
 	Type: "pypi",
 	Namespaces: []*model.PackageNamespace{{
 		Names: []*model.PackageName{{
-			Name:     "tensorflow",
-			Versions: []*model.PackageVersion{},
+			Name: "tensorflow",
+			// Versions: []*model.PackageVersion{},
 		}},
 	}},
 }
@@ -124,8 +124,8 @@ var p4outName = &model.Package{
 	Namespaces: []*model.PackageNamespace{{
 		Namespace: "openssl.org",
 		Names: []*model.PackageName{{
-			Name:     "openssl",
-			Versions: []*model.PackageVersion{},
+			Name: "openssl",
+			// Versions: []*model.PackageVersion{},
 		}},
 	}},
 }

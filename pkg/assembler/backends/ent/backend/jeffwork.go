@@ -110,7 +110,7 @@ func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode
 		Only(ctx)
 }
 
-func (b *EntBackend) Dependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
+func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	funcName := "Dependency"
 	query := b.client.Dependency.Query().Order(ent.Asc(isdependency.FieldID))
 
