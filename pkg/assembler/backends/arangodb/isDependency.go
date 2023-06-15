@@ -122,12 +122,10 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	  )
 	  
 	  LET edgeCollection = (FOR edgeData IN [
-		  {from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
-		  {from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
-	  
-		UPSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-		  INSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-		  UPDATE {} IN isDependencyEdges
+		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
+		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
+	
+		INSERT { _key: CONCAT("isDependencyEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  RETURN {

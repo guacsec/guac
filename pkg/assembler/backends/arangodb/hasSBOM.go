@@ -68,12 +68,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				  RETURN NEW
 		  )
 		  
-		  LET edgeCollection = (FOR edgeData IN [
-			  {from: artifact._id, to: hasSBOM._id, label: "hasSBOM"}]
-		  
-			UPSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-			  INSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-			  UPDATE {} IN hasSBOMEdges
+		  LET edgeCollection = (
+			INSERT {  _key: CONCAT("hasSBOMEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {
@@ -226,12 +222,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				  RETURN NEW
 		  )
 		  
-		  LET edgeCollection = (FOR edgeData IN [
-			  {from: firstPkg.versionDoc._id, to: hasSBOM._id, label: "hasSBOM"}]
-		  
-			UPSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-			  INSERT { _from: edgeData.from, _to: edgeData.to, label : edgeData.label }
-			  UPDATE {} IN hasSBOMEdges
+		  LET edgeCollection = (
+			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.versionDoc._id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN {

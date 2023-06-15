@@ -631,7 +631,7 @@ func (c *arangoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec
 	panic(fmt.Errorf("not implemented: IngestGhsa - IngestGhsa"))
 }
 func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: IngestMaterials - IngestMaterials"))
+	return nil, nil
 }
 func (c *arangoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
 	panic(fmt.Errorf("not implemented: IngestOsv - IngestOsv"))
