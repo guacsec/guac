@@ -36,7 +36,7 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 
 		// Backend can only process one write at a time, but make
 		// sure there are enough in flight so we don't wait for any round trips.
-		nouns.SetLimit(20)
+		nouns.SetLimit(50)
 
 		for _, p := range preds {
 			packages := p.GetPackages(errGroupNounCtx)
@@ -122,7 +122,7 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 
 		// Backend can only process one write at a time, but make
 		// sure there are enough in flight so we don't wait for any round trips.
-		verbs.SetLimit(20)
+		verbs.SetLimit(50)
 
 		for _, p := range preds {
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
