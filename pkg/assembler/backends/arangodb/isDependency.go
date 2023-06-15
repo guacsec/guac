@@ -77,28 +77,40 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 
 	query := `LET firstPkg = FIRST(
 		FOR pkg IN Pkg
-		    FILTER pkg.root == "pkg" && pkg.type == @pkgType && pkg.namespace == @namespace && pkg.name == @name
-				FOR pkgHasVersion IN OUTBOUND pkg PkgHasVersion
+		  FILTER pkg.root == "pkg"
+		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
+			  FILTER pkgHasType.type == @pkgType
+			FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+				  FILTER pkgHasNamespace.namespace == @namespace
+			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
+					  FILTER pkgHasName.name == @name
+				FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
 						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
-				RETURN {
-				  "type": pkg.type,
-				  "namespace": pkg.namespace,
-				  "name": pkg.name,
-				  "version": pkgHasVersion.version,
-				  "subpath": pkgHasVersion.subpath,
-				  "qualifier_list": pkgHasVersion.qualifier_list,
-				  "versionDoc": pkgHasVersion
-				}
+				  RETURN {
+					"type": pkgHasType.type,
+					"namespace": pkgHasNamespace.namespace,
+					"name": pkgHasName.name,
+					"version": pkgHasVersion.version,
+					"subpath": pkgHasVersion.subpath,
+					"qualifier_list": pkgHasVersion.qualifier_list,
+					"versionDoc": pkgHasVersion
+				  }
 	  )
 	  
 	  LET secondPkg = FIRST(
 		FOR pkg IN Pkg
-		  FILTER pkg.root == "pkg" && pkg.type == @secondPkgType && pkg.namespace == @secondNamespace && pkg.name == @secondName
+		  FILTER pkg.root == "pkg"
+		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
+			  FILTER pkgHasType.type == @secondPkgType
+			FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+				  FILTER pkgHasNamespace.namespace == @secondNamespace
+			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
+					  FILTER pkgHasName.name == @secondName
 				  RETURN {
-					"type": pkg.type,
-					"namespace": pkg.namespace,
-					"name": pkg.name,
-					"nameDoc": pkg
+					"type": pkgHasType.type,
+					"namespace": pkgHasNamespace.namespace,
+					"name": pkgHasName.name,
+					"nameDoc": pkgHasName
 				  }
 	  )
 	  
@@ -110,10 +122,10 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	  )
 	  
 	  LET edgeCollection = (FOR edgeData IN [
-		  {fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
-		  {fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
-	  
-		  INSERT { _key: CONCAT("isDependencyEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
+		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: "dependency"}, 
+		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: "subject"}]
+	
+		INSERT { _key: CONCAT("isDependencyEdges", edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  RETURN {

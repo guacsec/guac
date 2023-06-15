@@ -67,7 +67,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
-
+		  
 		  LET edgeCollection = (
 			INSERT {  _key: CONCAT("hasSBOMEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
 		  )
@@ -195,13 +195,19 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 
 		query := `LET firstPkg = FIRST(
 			FOR pkg IN Pkg
-		      FILTER pkg.root == "pkg" && pkg.type == @pkgType && pkg.namespace == @namespace && pkg.name == @name
-					FOR pkgHasVersion IN OUTBOUND pkg PkgHasVersion
-						FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
+			  FILTER pkg.root == "pkg"
+			  FOR pkgHasType IN OUTBOUND pkg PkgHasType
+				  FILTER pkgHasType.type == @pkgType
+				FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+					  FILTER pkgHasNamespace.namespace == @namespace
+				  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
+						  FILTER pkgHasName.name == @name
+					FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
+							  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
 					  RETURN {
-						"type": pkg.type,
-						"namespace": pkg.namespace,
-						"name": pkg.name,
+						"type": pkgHasType.type,
+						"namespace": pkgHasNamespace.namespace,
+						"name": pkgHasName.name,
 						"version": pkgHasVersion.version,
 						"subpath": pkgHasVersion.subpath,
 						"qualifier_list": pkgHasVersion.qualifier_list,
@@ -215,7 +221,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				  UPDATE {} IN hasSBOMs
 				  RETURN NEW
 		  )
-
+		  
 		  LET edgeCollection = (
 			INSERT {  _key: CONCAT("hasSBOMEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.versionDoc._id, _to: hasSBOM._id, label : "hasSBOM" } INTO hasSBOMEdges OPTIONS { overwriteMode: "ignore" }
 		  )

@@ -209,24 +209,24 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "Pkg", []string{"root", "type", "namespace", "name"}, true, "byRootTypeNamespaceName"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for Pkg: %w", err)
+		if err := createIndexPerCollection(ctx, db, "PkgType", []string{"type"}, true, "byType"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgType: %w", err)
 		}
 
-		// if err := createIndexPerCollection(ctx, db, "PkgHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-		// 	return nil, fmt.Errorf("failed to generate index for PkgHasType: %w", err)
-		// }
+		if err := createIndexPerCollection(ctx, db, "PkgHasType", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgHasType: %w", err)
+		}
 
-		// if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"namespace"}, false, "byNamespace"); err != nil {
-		// 	return nil, fmt.Errorf("failed to generate index for PkgNamespace: %w", err)
-		// }
-		// if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
-		// 	return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
-		// }
+		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"namespace"}, false, "byNamespace"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgNamespace: %w", err)
+		}
+		if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
+		}
 
-		// if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false, "byName"); err != nil {
-		// 	return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
-		// }
+		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false, "byName"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
+		}
 
 		if err := createIndexPerCollection(ctx, db, "PkgHasName", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasName: %w", err)
@@ -447,12 +447,17 @@ func newArangoQueryFilter(queryBuilder *arangoQueryBuilder) *arangoQueryFilter {
 	}
 }
 
-func (aqf *arangoQueryFilter) and(fieldName string, counterName string, condition string, value string) *arangoQueryFilter {
+func (aqf *arangoQueryFilter) and(fieldName string, condition string, value interface{}, counterName string) *arangoQueryFilter {
 	aqf.arangoQueryBuilder.query.WriteString(" ")
 	aqf.arangoQueryBuilder.query.WriteString("AND")
 	aqf.arangoQueryBuilder.query.WriteString(" ")
 
-	aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %s", counterName, fieldName, condition, value))
+	switch value.(type) {
+	case string:
+		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %q", counterName, fieldName, condition, value))
+	default:
+		aqf.arangoQueryBuilder.query.WriteString(fmt.Sprintf("%s.%s %s %v", counterName, fieldName, condition, value))
+	}
 
 	return aqf
 }
@@ -626,7 +631,7 @@ func (c *arangoClient) IngestGhsa(ctx context.Context, ghsa *model.GHSAInputSpec
 	panic(fmt.Errorf("not implemented: IngestGhsa - IngestGhsa"))
 }
 func (c *arangoClient) IngestMaterials(ctx context.Context, materials []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	panic(fmt.Errorf("not implemented: IngestMaterials - IngestMaterials"))
+	return nil, nil
 }
 func (c *arangoClient) IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error) {
 	panic(fmt.Errorf("not implemented: IngestOsv - IngestOsv"))
