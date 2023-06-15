@@ -266,17 +266,17 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for PkgHasVersion: %w", err)
 		}
 
-		// if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID"}, true, "byPkgIDDepPkgID"); err != nil {
-		// 	return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
-		// }
+		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID"}, true, "byPkgIDDepPkgID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
+		}
 
 		if err := createIndexPerCollection(ctx, db, "isDependencyEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencyEdges: %w", err)
 		}
 
-		// if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID"}, true, "byPkgIDArtID"); err != nil {
-		// 	return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
-		// }
+		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID"}, true, "byPkgIDArtID"); err != nil {
+			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
+		}
 
 		if err := createIndexPerCollection(ctx, db, "isOccurrencesEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrencesEdges: %w", err)
