@@ -40,7 +40,7 @@ const (
 	statement     string        = "statement"
 	statusNotes   string        = "statusNotes"
 	maxRetires    int           = 20
-	retryTImer    time.Duration = time.Second
+	retryTImer    time.Duration = time.Microsecond
 )
 
 type ArangoConfig struct {
