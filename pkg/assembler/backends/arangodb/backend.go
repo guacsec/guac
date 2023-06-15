@@ -40,7 +40,7 @@ const (
 	statement     string        = "statement"
 	statusNotes   string        = "statusNotes"
 	maxRetires    int           = 20
-	retryTImer    time.Duration = time.Second
+	retryTImer    time.Duration = time.Millisecond
 )
 
 type ArangoConfig struct {
@@ -54,10 +54,24 @@ type arangoQueryBuilder struct {
 	query strings.Builder
 }
 
+type pkgRootData struct {
+	Key     string `json:"_key"`
+	Id      string `json:"_id"`
+	PkgRoot string `json:"root"`
+}
+
+type pkgTypeData struct {
+	Key     string `json:"_key"`
+	Id      string `json:"_id"`
+	PkgType string `json:"type"`
+}
+
 type arangoClient struct {
-	client driver.Client
-	db     driver.Database
-	graph  driver.Graph
+	client     driver.Client
+	db         driver.Database
+	graph      driver.Graph
+	pkgRoot    *pkgRootData
+	pkgTypeMap map[string]*pkgTypeData
 }
 
 func arangoDBConnect(address, user, password string) (driver.Client, error) {
@@ -277,7 +291,17 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		}
 	}
 
-	arangoClient := &arangoClient{arangodbClient, db, graph}
+	collectedRootData, err := preIngestPkgRoot(ctx, db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create package root: %w", err)
+	}
+	ingestPkgTypes := []string{"pypi", "conan", "guac", "deb", "maven"}
+	collectedPkgTypes, err := preIngestPkgTypes(ctx, db, collectedRootData, ingestPkgTypes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create package root: %w", err)
+	}
+
+	arangoClient := &arangoClient{client: arangodbClient, db: db, graph: graph, pkgRoot: collectedRootData, pkgTypeMap: collectedPkgTypes}
 	registerAllArtifacts(ctx, arangoClient)
 	registerAllPackages(ctx, arangoClient)
 	if err != nil {
@@ -682,4 +706,95 @@ func (c *arangoClient) Nodes(ctx context.Context, nodes []string) ([]model.Node,
 }
 func (c *arangoClient) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Path - Path"))
+}
+
+func preIngestPkgRoot(ctx context.Context, db driver.Database) (*pkgRootData, error) {
+	query := `
+		UPSERT { root: "pkg" }
+		INSERT { root: "pkg" }
+		UPDATE {}
+		IN Pkg
+		RETURN NEW`
+
+	cursor, err := executeQueryWithRetry(ctx, db, query, nil, "preIngestPkgRoot")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+	}
+
+	var createdValues []pkgRootData
+	for {
+		var doc pkgRootData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				cursor.Close()
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest pkg root: %w", err)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	if len(createdValues) == 1 {
+		return &createdValues[0], nil
+	} else {
+		return nil, fmt.Errorf("number of pkg root ingested is too great")
+	}
+}
+
+func preIngestPkgTypes(ctx context.Context, db driver.Database, pkgRoot *pkgRootData, pkgTypes []string) (map[string]*pkgTypeData, error) {
+	collectedPkgTypes := map[string]*pkgTypeData{}
+	for _, pkgType := range pkgTypes {
+		values := map[string]any{}
+		values["pkgType"] = pkgType
+		values["rootID"] = pkgRoot.Id
+		values["rootKey"] = pkgRoot.Key
+		query := `
+		  LET type = FIRST(
+			UPSERT { type: @pkgType, _parent: @rootID }
+			INSERT { type: @pkgType, _parent: @rootID }
+			UPDATE {}
+			IN PkgType OPTIONS { indexHint: "byType" }
+			RETURN NEW
+		  )
+	
+		  LET pkgHasTypeCollection = (
+			INSERT { _key: CONCAT("pkgHasType", @rootKey, type._key), _from: @rootID, _to: type._id, label : "PkgHasType" } INTO PkgHasType OPTIONS { overwriteMode: "ignore" }
+		  )
+	
+		RETURN {
+		"type": type.type,
+		"_id": type._id,
+		"_key": type._key
+		}`
+
+		cursor, err := executeQueryWithRetry(ctx, db, query, values, "preIngestPkgTypes")
+		if err != nil {
+			return nil, fmt.Errorf("failed to create vertex documents: %w, values: %v", err, values)
+		}
+
+		var createdValues []pkgTypeData
+		for {
+			var doc pkgTypeData
+			_, err := cursor.ReadDocument(ctx, &doc)
+			if err != nil {
+				if driver.IsNoMoreDocuments(err) {
+					cursor.Close()
+					break
+				} else {
+					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				}
+			} else {
+				createdValues = append(createdValues, doc)
+			}
+		}
+		if len(createdValues) == 1 {
+			collectedPkgTypes[createdValues[0].PkgType] = &createdValues[0]
+		} else {
+			return nil, fmt.Errorf("number of hashEqual ingested is too great")
+		}
+	}
+	return collectedPkgTypes, nil
 }

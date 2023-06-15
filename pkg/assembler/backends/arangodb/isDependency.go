@@ -34,7 +34,6 @@ const (
 func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	values := map[string]any{}
 
-	values["pkgType"] = pkg.Type
 	values["name"] = pkg.Name
 	if pkg.Namespace != nil {
 		values["namespace"] = *pkg.Namespace
@@ -66,7 +65,6 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	}
 	values["qualifier"] = qualifiers
 
-	values["secondPkgType"] = depPkg.Type
 	values["secondNamespace"] = depPkg.Namespace
 	values["secondName"] = depPkg.Name
 	values[versionRange] = dependency.VersionRange
@@ -74,20 +72,20 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	values[justification] = dependency.Justification
 	values[origin] = dependency.Origin
 	values[collector] = dependency.Collector
+	values["typeID"] = c.pkgTypeMap[pkg.Type].Id
+	values["typeValue"] = c.pkgTypeMap[pkg.Type].PkgType
+	values["secondTypeID"] = c.pkgTypeMap[depPkg.Type].Id
+	values["secondTypeValue"] = c.pkgTypeMap[depPkg.Type].PkgType
 
 	query := `LET firstPkg = FIRST(
-		FOR pkg IN Pkg
-		  FILTER pkg.root == "pkg"
-		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			  FILTER pkgHasType.type == @pkgType
-			FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+			FOR pkgHasNamespace IN OUTBOUND @typeID PkgHasNamespace
 				  FILTER pkgHasNamespace.namespace == @namespace
 			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
 					  FILTER pkgHasName.name == @name
 				FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
 						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
 				  RETURN {
-					"type": pkgHasType.type,
+					"type": @typeValue,
 					"namespace": pkgHasNamespace.namespace,
 					"name": pkgHasName.name,
 					"version": pkgHasVersion.version,
@@ -98,16 +96,12 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	  )
 	  
 	  LET secondPkg = FIRST(
-		FOR pkg IN Pkg
-		  FILTER pkg.root == "pkg"
-		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			  FILTER pkgHasType.type == @secondPkgType
-			FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+			FOR pkgHasNamespace IN OUTBOUND @secondTypeID PkgHasNamespace
 				  FILTER pkgHasNamespace.namespace == @secondNamespace
 			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
 					  FILTER pkgHasName.name == @secondName
 				  RETURN {
-					"type": pkgHasType.type,
+					"type": @secondTypeValue,
 					"namespace": pkgHasNamespace.namespace,
 					"name": pkgHasName.name,
 					"nameDoc": pkgHasName
@@ -176,7 +170,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 			if driver.IsNoMoreDocuments(err) {
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w, values: %v", err, values)
+				return nil, fmt.Errorf("failed to ingest dependency: %w, values: %v", err, values)
 			}
 		} else {
 			createdValues = append(createdValues, doc)

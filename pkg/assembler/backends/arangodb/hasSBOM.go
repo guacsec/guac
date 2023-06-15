@@ -111,7 +111,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				if driver.IsNoMoreDocuments(err) {
 					break
 				} else {
-					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+					return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
 				}
 			} else {
 				createdValues = append(createdValues, doc)
@@ -272,7 +272,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 				if driver.IsNoMoreDocuments(err) {
 					break
 				} else {
-					return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+					return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
 				}
 			} else {
 				createdValues = append(createdValues, doc)

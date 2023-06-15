@@ -62,7 +62,6 @@ func registerAllPackages(ctx context.Context, client *arangoClient) {
 
 func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	values := map[string]any{}
-	values["pkgType"] = pkg.Type
 	values["name"] = pkg.Name
 	if pkg.Namespace != nil {
 		values["namespace"] = *pkg.Namespace
@@ -93,26 +92,14 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		qualifiers = append(qualifiers, k, qualifiersMap[k])
 	}
 	values["qualifier"] = qualifiers
+	values["typeID"] = c.pkgTypeMap[pkg.Type].Id
+	values["typeKey"] = c.pkgTypeMap[pkg.Type].Key
+	values["typeValue"] = c.pkgTypeMap[pkg.Type].PkgType
 
-	query := `LET root = FIRST(
-		UPSERT { root: "pkg" }
-		INSERT { root: "pkg" }
-		UPDATE {}
-		IN Pkg
-		RETURN NEW
-	  )
-	  
-	  LET type = FIRST(
-		UPSERT { type: @pkgType, _parent: root._id }
-		INSERT { type: @pkgType, _parent: root._id }
-		UPDATE {}
-		IN PkgType OPTIONS { indexHint: "byType" }
-		RETURN NEW
-	  )
-	  
+	query := `	  
 	  LET ns = FIRST(
-		UPSERT { namespace: @namespace, _parent: type._id }
-		INSERT { namespace: @namespace, _parent: type._id }
+		UPSERT { namespace: @namespace, _parent: @typeID }
+		INSERT { namespace: @namespace, _parent: @typeID }
 		UPDATE {}
 		IN PkgNamespace OPTIONS { indexHint: "byNamespace" }
 		RETURN NEW
@@ -134,12 +121,8 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		RETURN NEW
 	  )
 	
-	  LET pkgHasTypeCollection = (
-		INSERT { _key: CONCAT("pkgHasType", root._key, type._key), _from: root._id, _to: type._id, label : "PkgHasType" } INTO PkgHasType OPTIONS { overwriteMode: "ignore" }
-	  )
-	   
 	  LET pkgHasNamespaceCollection = (
-        INSERT { _key: CONCAT("pkgHasNamespace", type._key, ns._key), _from: type._id, _to: ns._id, label : "PkgHasNamespace" } INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+        INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "PkgHasNamespace" } INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasNameCollection = (
@@ -151,7 +134,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	  )
 		
 	RETURN {
-    "type": type.type,
+    "type": @typeValue,
     "namespace": ns.namespace,
     "name": name.name,
     "version": pkgVersionObj.version,
@@ -182,7 +165,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 				cursor.Close()
 				break
 			} else {
-				return nil, fmt.Errorf("failed to ingest artifact: %w", err)
+				return nil, fmt.Errorf("failed to ingest package: %w", err)
 			}
 		} else {
 			createdValues = append(createdValues, doc)
