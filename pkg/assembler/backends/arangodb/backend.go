@@ -252,7 +252,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for PkgHasVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID"}, true, "byPkgIDDepPkgID"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isDependencies", []string{"packageID", "depPackageID", "origin"}, true, "byPkgIDDepPkgIDOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
 		}
 
@@ -260,7 +260,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for isDependencyEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID"}, true, "byPkgIDArtID"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "isOccurrences", []string{"packageID", "artifactID", "origin"}, true, "byPkgIDArtIDOrigin"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
 		}
 
