@@ -168,10 +168,10 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
-	err = initTracer()
-	if err != nil {
-		return nil, fmt.Errorf("Error initializing tracer: %w", err)
-	}
+	// err = initTracer()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Error initializing tracer: %w", err)
+	// }
 	srv.Use(otelgqlgen.Middleware())
 
 	return srv, nil
