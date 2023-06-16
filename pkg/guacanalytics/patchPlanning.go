@@ -62,7 +62,7 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 		queue = queue[1:]
 		nowNode := nodeMap[now]
 
-		parentNeighborResponses, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{})
+		pkgNameResponses, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{})
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed getting package parent:%v", err)
 		}
@@ -71,13 +71,15 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 			break
 		}
 
-		for _, neighbor := range parentNeighborResponses.Neighbors {
+		for _, neighbor := range pkgNameResponses.Neighbors {
 			if pkgName, ok := neighbor.(*model.NeighborsNeighborsPackage); ok {
 
 				if len(pkgName.Namespaces) == 0 {
 					continue
 				}
 
+				fmt.Println(vuln)
+				fmt.Println(pkgName)
 				isDependencyNeighborResponses, err := model.Neighbors(ctx, gqlclient, pkgName.Namespaces[0].Names[0].Id, []model.Edge{model.EdgePackageIsDependency})
 				if err != nil {
 					return nil, nil, fmt.Errorf("failed getting package parent:%v", err)
@@ -95,6 +97,7 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 						if stopID == isDependency.Package.Namespaces[0].Names[0].Versions[0].Id {
 							found = true
 						}
+
 						if !seen {
 							dfsN = DfsNode{
 								parent:       now,
@@ -103,6 +106,7 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 							}
 							nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsN
 						}
+
 						if !dfsN.expanded {
 							queue = append(queue, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
 							collectedIDs = append(collectedIDs, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
@@ -125,9 +129,10 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 	var now string
 
 	// construct a path of nodes to return for visualizer purposes
-	if vulnID != "" {
-		now = vulnID
-		for now != stopID {
+	if stopID != "" {
+		now = stopID
+		for now != vulnID {
+			fmt.Printf(nodeMap[now].isDependency.Id)
 			path = append(path, nodeMap[now].isDependency.Id, nodeMap[now].isDependency.DependentPackage.Namespaces[0].Names[0].Id,
 				nodeMap[now].isDependency.DependentPackage.Namespaces[0].Id, nodeMap[now].isDependency.DependentPackage.Id,
 				nodeMap[now].isDependency.Package.Namespaces[0].Names[0].Versions[0].Id,

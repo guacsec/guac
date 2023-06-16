@@ -40,83 +40,55 @@ const (
 func ingestDependencies(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
-	ns := "ubuntu"
-	version := "1.19.0.4"
-	depns := "openssl.org"
-	smartentryNs := "smartentry"
-	nodeID := "123"
+	ns1 := "test_namespace1"
+	version1 := "6.1.3"
+	depns1 := "test_dep_namespace1"
+	ns2 := "test_namespace2"
 
 	ingestDependencies := []struct {
 		name       string
 		pkg        model.PkgInputSpec
 		depPkg     model.PkgInputSpec
 		dependency model.IsDependencyInputSpec
-		node       model.PkgSpec
 	}{{
-		name: "deb: part of SBOM - openssl",
+		name: "part of SBOM",
 		pkg: model.PkgInputSpec{
-			Type:      "deb",
-			Namespace: &ns,
-			Name:      "dpkg",
-			Version:   &version,
+			Type:      "type1",
+			Namespace: &ns1,
+			Name:      "test_dpkg1",
+			Version:   &version1,
 			Qualifiers: []model.PackageQualifierInputSpec{
-				{Key: "arch", Value: "amd64"},
+				{Key: "test_key", Value: "test_val"},
 			},
 		},
 		depPkg: model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &depns,
-			Name:      "openssl",
+			Type:      "dep_type1",
+			Namespace: &depns1,
+			Name:      "dep_name1",
 		},
 		dependency: model.IsDependencyInputSpec{
-			VersionRange:   "<3.0.3",
+			VersionRange:   ">3.0.3",
 			DependencyType: model.DependencyTypeDirect,
-			Justification:  "deb: part of SBOM - openssl",
+			Justification:  "part of SBOM",
 			Origin:         "Demo ingestion",
 			Collector:      "Demo ingestion",
 		},
-		node: model.PkgSpec{
-			Id: &nodeID,
-		},
 	}, {
-		name: "docker: part of SBOM - openssl",
+		name: "part of SBOM",
 		pkg: model.PkgInputSpec{
-			Type:      "docker",
-			Namespace: &smartentryNs,
-			Name:      "debian",
+			Type:      "type2",
+			Namespace: &ns2,
+			Name:      "name2",
 		},
 		depPkg: model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &depns,
-			Name:      "openssl",
+			Type:      "dep_type2",
+			Namespace: &depns1,
+			Name:      "dep_name2",
 		},
 		dependency: model.IsDependencyInputSpec{
 			VersionRange:   "<3.0.3",
 			DependencyType: model.DependencyTypeIndirect,
 			Justification:  "docker: part of SBOM - openssl",
-			Origin:         "Demo ingestion",
-			Collector:      "Demo ingestion",
-		},
-	}, {
-		name: "deb: part of SBOM - openssl (duplicate)",
-		pkg: model.PkgInputSpec{
-			Type:      "deb",
-			Namespace: &ns,
-			Name:      "dpkg",
-			Version:   &version,
-			Qualifiers: []model.PackageQualifierInputSpec{
-				{Key: "arch", Value: "amd64"},
-			},
-		},
-		depPkg: model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &depns,
-			Name:      "openssl",
-		},
-		dependency: model.IsDependencyInputSpec{
-			VersionRange:   "<3.0.3",
-			DependencyType: model.DependencyTypeDirect,
-			Justification:  "deb: part of SBOM - openssl",
 			Origin:         "Demo ingestion",
 			Collector:      "Demo ingestion",
 		},
@@ -131,11 +103,11 @@ func ingestDependencies(ctx context.Context, client graphql.Client) {
 
 func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
-	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
+	tm, _ := time.Parse(time.RFC3339, "2023-11-14T17:45:50.52Z")
 
-	opensslNs := "openssl.org"
-	opensslVersion := "3.0"
-	djangoNs := ""
+	ns1 := "test_namespace1"
+	version := "4.0"
+	ns2 := "test_namespace2"
 
 	ingestVulnerabilities := []struct {
 		name          string
@@ -145,49 +117,49 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		ghsa          *model.GHSAInputSpec
 		vulnerability model.VulnerabilityMetaDataInput
 	}{{
-		name: "cve openssl",
+		name: "cve",
 		pkg: &model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &opensslNs,
-			Name:      "openssl",
-			Version:   &opensslVersion,
+			Type:      "test_type1",
+			Namespace: &ns1,
+			Name:      "test_name1",
+			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
-				{Key: "user", Value: "bincrafters"},
-				{Key: "channel", Value: "stable"},
+				{Key: "test_user", Value: "test_bincrafters"},
+				{Key: "test_channel", Value: "test_stable"},
 			},
 		},
 		cve: &model.CVEInputSpec{
 			Year:  2019,
-			CveId: "CVE-2019-13110",
+			CveId: "CVE-2023-61300",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.0.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.0.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
 			Collector:      "Demo ingestion",
 		},
 	}, {
-		name: "osv openssl",
+		name: "osv",
 		pkg: &model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &opensslNs,
-			Name:      "openssl",
-			Version:   &opensslVersion,
+			Type:      "test_type1",
+			Namespace: &ns1,
+			Name:      "test_name1",
+			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
-				{Key: "user", Value: "bincrafters"},
-				{Key: "channel", Value: "stable"},
+				{Key: "test_user", Value: "test_bincrafters"},
+				{Key: "test_channel", Value: "test_stable"},
 			},
 		},
 		osv: &model.OSVInputSpec{
-			OsvId: "CVE-2019-13110",
+			OsvId: "CVE-2023-61300",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.0.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.0.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -196,13 +168,13 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "ghsa openssl",
 		pkg: &model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &opensslNs,
+			Type:      "test_type1",
+			Namespace: &ns1,
 			Name:      "openssl",
-			Version:   &opensslVersion,
+			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
-				{Key: "user", Value: "bincrafters"},
-				{Key: "channel", Value: "stable"},
+				{Key: "test_user", Value: "test_bincrafters"},
+				{Key: "test_channel", Value: "test_stable"},
 			},
 		},
 		ghsa: &model.GHSAInputSpec{
@@ -210,8 +182,8 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.0.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.0.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -221,17 +193,17 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		name: "cve django",
 		pkg: &model.PkgInputSpec{
 			Type:      "pypi",
-			Namespace: &djangoNs,
-			Name:      "django",
+			Namespace: &ns2,
+			Name:      "test_name2",
 		},
 		cve: &model.CVEInputSpec{
 			Year:  2018,
-			CveId: "CVE-2018-12310",
+			CveId: "CVE-2014-11000",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.2.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.2.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -241,16 +213,16 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		name: "osv django",
 		pkg: &model.PkgInputSpec{
 			Type:      "pypi",
-			Namespace: &djangoNs,
-			Name:      "django",
+			Namespace: &ns2,
+			Name:      "name_2",
 		},
 		osv: &model.OSVInputSpec{
-			OsvId: "CVE-2018-12310",
+			OsvId: "CVE-2014-11000",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.2.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.2.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -260,16 +232,16 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		name: "ghsa django",
 		pkg: &model.PkgInputSpec{
 			Type:      "pypi",
-			Namespace: &djangoNs,
-			Name:      "django",
+			Namespace: &ns2,
+			Name:      "test_name2",
 		},
 		ghsa: &model.GHSAInputSpec{
 			GhsaId: "GHSA-f45f-jj4w-2rv2",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.2.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.2.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -278,23 +250,23 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "cve openssl (duplicate)",
 		pkg: &model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &opensslNs,
+			Type:      "type1",
+			Namespace: &ns1,
 			Name:      "openssl",
-			Version:   &opensslVersion,
+			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
-				{Key: "user", Value: "bincrafters"},
-				{Key: "channel", Value: "stable"},
+				{Key: "test_user", Value: "test_bincrafters"},
+				{Key: "test_channel", Value: "test_stable"},
 			},
 		},
 		cve: &model.CVEInputSpec{
 			Year:  2019,
-			CveId: "CVE-2019-13110",
+			CveId: "CVE-2023-61300",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.0.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.0.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -304,16 +276,16 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		name: "ghsa django (duplicate)",
 		pkg: &model.PkgInputSpec{
 			Type:      "pypi",
-			Namespace: &djangoNs,
-			Name:      "django",
+			Namespace: &ns2,
+			Name:      "test_name2",
 		},
 		ghsa: &model.GHSAInputSpec{
 			GhsaId: "GHSA-f45f-jj4w-2rv2",
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
-			DbVersion:      "v1.2.0",
+			DbUri:          "URI",
+			DbVersion:      "v4.2.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
 			Origin:         "Demo ingestion",
@@ -322,13 +294,13 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "osv openssl (duplicate)",
 		pkg: &model.PkgInputSpec{
-			Type:      "conan",
-			Namespace: &opensslNs,
+			Type:      "type1",
+			Namespace: &ns1,
 			Name:      "openssl",
-			Version:   &opensslVersion,
+			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
-				{Key: "user", Value: "bincrafters"},
-				{Key: "channel", Value: "stable"},
+				{Key: "test_user", Value: "test_bincrafters"},
+				{Key: "test_channel", Value: "test_stable"},
 			},
 		},
 		osv: &model.OSVInputSpec{
@@ -336,7 +308,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		},
 		vulnerability: model.VulnerabilityMetaDataInput{
 			TimeScanned:    tm,
-			DbUri:          "MITRE",
+			DbUri:          "URI",
 			DbVersion:      "v1.0.0",
 			ScannerUri:     "osv.dev",
 			ScannerVersion: "0.0.14",
@@ -367,6 +339,10 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 }
 
 func Test_SearchSubgraphFromVuln(t *testing.T) {
+	type1 := "test_type1"
+	ns := "test_namespace1"
+	nodeName := "test_name1"
+	version := "4.0"
 	// testCases := []struct {
 	// 	vulnID      string
 	// 	retNodeList []string
@@ -387,20 +363,36 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 	ingestVulnerabilities(ctx, gqlclient)
 	ingestDependencies(ctx, gqlclient)
+
+	pkgFilter := &model.PkgSpec{
+		Type:      &type1,
+		Namespace: &ns,
+		Name:      &nodeName,
+		Version:   &version,
+	}
+	pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+
+	if err != nil {
+		fmt.Println("ERROR")
+	}
+	id := pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+
 	// startTestServer()
 
 	//for _, tt := range testCases {
 
-	t.Run("test1", func(t *testing.T) {
-		got, _, err := searchSubgraphFromVuln(ctx, gqlclient, "123", "", 0)
-		if err != nil {
-			t.Errorf("got err from Search: %v", err)
-			return
-		} else {
-			fmt.Printf("test got " + got[0])
+	// t.Run("test1", func(t *testing.T) {
+	_, map1, err := searchSubgraphFromVuln(ctx, gqlclient, id, "", 2)
+	if err != nil {
+		t.Errorf("got err from Search: %v", err)
+		return
+	} else {
+		for k, m := range map1 {
+			fmt.Println(k, "value is", m)
 		}
-	})
-	//}
+	}
+	// })
+	// }
 
 	done := make(chan bool, 1)
 	ctx, cf := context.WithCancel(ctx)
