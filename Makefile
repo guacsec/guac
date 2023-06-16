@@ -112,7 +112,7 @@ build_local_container:
 # Build and package a guac container for local testing
 # Separate build_container as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
 .PHONY: container
-container: check-docker-tool-check build_local_container
+container: check-docker-tool-check check-goreleaser-tool-check build_local_container
     # tag/name the image according to current docs to avoid changes
 	@$(CONTAINER) tag \
 	"$(shell cat dist/artifacts.json | jq --raw-output '.[] | select( .type =="Docker Image" ) | select( .goarch =="$(CPUTYPE)" ).name')" \
