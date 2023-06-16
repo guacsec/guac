@@ -34,13 +34,13 @@ type DocumentParser interface {
 
 	// GetIdentifiers returns a set of identifiers that the parser has found to help provide context
 	// for collectors to gather more information around found software identifiers.
-	// This is an optional function to implement and it should return an error if not implemented.
+	// This is an optional function to implement, and it should return an error if not implemented.
 	//
 	// Ref: https://github.com/guacsec/guac/issues/244
 	GetIdentifiers(ctx context.Context) (*IdentifierStrings, error)
 }
 
-// Identifiers represent a set of strings that can be used to a set of
+// IdentifierStrings represent a set of strings that can be used to a set of
 // identifiers that the parser has found to help provide context for collectors
 // to gather more information around found software identifiers.
 //
