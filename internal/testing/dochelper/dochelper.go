@@ -86,21 +86,44 @@ func ConsistentJsonBytes(b []byte) []byte {
 }
 
 func StringTree(n *processor.DocumentNode) string {
-	return stringTreeHelper(n, "")
+	return stringTreeHelper(n, "", map[visitedKey]bool{visitedKey{docType: n.Document.Type, format: n.Document.Format, sourceInformation: n.Document.SourceInformation}: true})
 }
 
-func stringTreeHelper(n *processor.DocumentNode, prefix string) string {
+// this is a helper struct to use in map to avoid infinite recursion.
+type visitedKey struct {
+	docType           processor.DocumentType
+	format            processor.FormatType
+	sourceInformation processor.SourceInformation
+}
+
+// stringTreeHelper is a helper function to print the tree in a string format.
+// it uses a map to keep track of visited nodes to avoid infinite recursion.
+func stringTreeHelper(n *processor.DocumentNode, prefix string, visited map[visitedKey]bool) string {
 	str := fmt.Sprintf("%s { doc: %s, %v, %v, %v}", prefix, string(ConsistentJsonBytes(n.Document.Blob)),
 		n.Document.Format,
 		n.Document.Type,
 		n.Document.SourceInformation,
 	)
 	for _, c := range n.Children {
-		str += "\n" + stringTreeHelper(c, prefix+"-")
+		// we use a visitedKey struct instead of *processor.DocumentNode as *processor.DocumentNode is not
+		// hashable due to the Blob field inside Document which is an undefined length byte array.
+		v := visitedKey{
+			docType:           c.Document.Type,
+			format:            c.Document.Format,
+			sourceInformation: c.Document.SourceInformation,
+		}
+		// if we have already visited this node, then we skip it to avoid infinite recursion.
+		if visited[v] {
+			continue
+		}
+		// we set it to visited for the dfs traversal, so that we can skip it down the line.
+		visited[v] = true
+		str += "\n" + stringTreeHelper(c, prefix+"-", visited)
+		// we set it to false, so that we can visit it again in the future for the other possible recursive calls.
+		visited[v] = false
 	}
 	return str
 }
-
 func DocNode(v *processor.Document, children ...*processor.DocumentNode) *processor.DocumentNode {
 	return &processor.DocumentNode{
 		Document: v,
