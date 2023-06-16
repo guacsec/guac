@@ -142,6 +142,31 @@ builds:
 
 universal_binaries:
 - replace: true
+  name_template: guacone
+  id: guacone
+  ids:
+  - guacone
+- replace: true
+  name_template: guacingest
+  id: guacingest
+  ids:
+  - guacingest
+- replace: true
+  name_template: guaccsub
+  id: guaccsub
+  ids:
+  - guaccsub
+- replace: true
+  name_template: guaccollect
+  id: guaccollect
+  ids:
+  - guaccollect
+- replace: true
+  name_template: guacgql
+  id: guacgql
+  ids:
+  - guacgql
+
 
 sboms:
   - id: bins 
