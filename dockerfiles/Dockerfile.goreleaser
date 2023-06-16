@@ -1,7 +1,7 @@
 FROM --platform=$BUILDPLATFORM alpine:latest as certs
 RUN apk --update add ca-certificates
 
-FROM alpine:latest
+FROM --platform=$BUILDPLATFORM alpine:latest
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 RUN apk --update --no-cache add wget && rm -rf /var/cache/apk/*
 
