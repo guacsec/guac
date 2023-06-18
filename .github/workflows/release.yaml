@@ -16,6 +16,8 @@ name: release
 
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
+  schedule:
+    - cron: 0 0 * * * # every day at 0:00, build latest on default branch (main)
   push:
     branches:
       - main
