@@ -174,7 +174,7 @@ require (
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nats-io/nats-server/v2 v2.9.17
+	github.com/nats-io/nats-server/v2 v2.9.18
 	github.com/nats-io/nats.go v1.27.0
 	github.com/ossf/scorecard/v4 v4.10.5
 	github.com/package-url/packageurl-go v0.1.1-0.20220428063043-89078438f170
