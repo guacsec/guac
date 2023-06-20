@@ -64,6 +64,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_CURRENT_TAG: v0.0.0-snapshot-tag
+          DOCKER_CONTEXT: default
       - name: Run GoReleaser Release
         if: startsWith(github.ref, 'refs/tags/')
         id: run-goreleaser-release
@@ -74,6 +75,7 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_CONTEXT: default
 
       - name: Generate hashes and extract image digest
         id: hash
