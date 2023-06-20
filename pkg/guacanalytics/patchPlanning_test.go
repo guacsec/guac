@@ -41,7 +41,7 @@ func ingestDependencies(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
 	ns1 := "test_namespace1"
-	version1 := "6.1.3"
+	version := "6.1.3"
 	depns1 := "test_dep_namespace1"
 	ns2 := "test_namespace2"
 
@@ -53,10 +53,10 @@ func ingestDependencies(ctx context.Context, client graphql.Client) {
 	}{{
 		name: "part of SBOM",
 		pkg: model.PkgInputSpec{
-			Type:      "type1",
+			Type:      "test_type1",
 			Namespace: &ns1,
-			Name:      "test_dpkg1",
-			Version:   &version1,
+			Name:      "test_name1",
+			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "test_key", Value: "test_val"},
 			},
@@ -76,9 +76,9 @@ func ingestDependencies(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "part of SBOM",
 		pkg: model.PkgInputSpec{
-			Type:      "type2",
+			Type:      "test_type2",
 			Namespace: &ns2,
-			Name:      "name2",
+			Name:      "test_name2",
 		},
 		depPkg: model.PkgInputSpec{
 			Type:      "dep_type2",
@@ -170,7 +170,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 		pkg: &model.PkgInputSpec{
 			Type:      "test_type1",
 			Namespace: &ns1,
-			Name:      "openssl",
+			Name:      "test_name1",
 			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "test_user", Value: "test_bincrafters"},
@@ -192,7 +192,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "cve django",
 		pkg: &model.PkgInputSpec{
-			Type:      "pypi",
+			Type:      "test_type2",
 			Namespace: &ns2,
 			Name:      "test_name2",
 		},
@@ -212,9 +212,9 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "osv django",
 		pkg: &model.PkgInputSpec{
-			Type:      "pypi",
+			Type:      "test_type2",
 			Namespace: &ns2,
-			Name:      "name_2",
+			Name:      "test_name2",
 		},
 		osv: &model.OSVInputSpec{
 			OsvId: "CVE-2014-11000",
@@ -231,7 +231,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "ghsa django",
 		pkg: &model.PkgInputSpec{
-			Type:      "pypi",
+			Type:      "test_type2",
 			Namespace: &ns2,
 			Name:      "test_name2",
 		},
@@ -250,9 +250,9 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "cve openssl (duplicate)",
 		pkg: &model.PkgInputSpec{
-			Type:      "type1",
+			Type:      "test_type1",
 			Namespace: &ns1,
-			Name:      "openssl",
+			Name:      "test_name1",
 			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "test_user", Value: "test_bincrafters"},
@@ -275,7 +275,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "ghsa django (duplicate)",
 		pkg: &model.PkgInputSpec{
-			Type:      "pypi",
+			Type:      "test_type2",
 			Namespace: &ns2,
 			Name:      "test_name2",
 		},
@@ -294,9 +294,9 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
 	}, {
 		name: "osv openssl (duplicate)",
 		pkg: &model.PkgInputSpec{
-			Type:      "type1",
+			Type:      "test_type1",
 			Namespace: &ns1,
-			Name:      "openssl",
+			Name:      "test_name1",
 			Version:   &version,
 			Qualifiers: []model.PackageQualifierInputSpec{
 				{Key: "test_user", Value: "test_bincrafters"},
@@ -354,9 +354,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	// 		retNodeMap:  nil,
 	// 	},
 	// }
-	fmt.Printf("before start server\n")
 	server, logger := startTestServer()
-	fmt.Printf("after start server\n")
 	ctx := logging.WithLogger(context.Background())
 
 	httpClient := http.Client{}
@@ -377,12 +375,13 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	}
 	id := pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
 
+	fmt.Println("starting node id is " + id)
 	// startTestServer()
 
 	//for _, tt := range testCases {
 
 	// t.Run("test1", func(t *testing.T) {
-	_, map1, err := searchSubgraphFromVuln(ctx, gqlclient, id, "", 2)
+	path, map1, err := searchSubgraphFromVuln(ctx, gqlclient, id, "", 2)
 	if err != nil {
 		t.Errorf("got err from Search: %v", err)
 		return
@@ -390,10 +389,12 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		for k, m := range map1 {
 			fmt.Println(k, "value is", m)
 		}
+		fmt.Println(path)
 	}
 	// })
 	// }
 
+	// cleaning up server instance
 	done := make(chan bool, 1)
 	ctx, cf := context.WithCancel(ctx)
 	go func() {

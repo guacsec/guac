@@ -34,6 +34,7 @@ type DfsNode struct {
 // TODO: make more robust usuing predicates
 func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnID string, stopID string, maxDepth int) ([]string, map[string]DfsNode, error) {
 	vulnNode, err := model.Node(ctx, gqlclient, vulnID)
+	fmt.Println(vulnNode.GetNode())
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed getting intial node with given ID:%v", err)
@@ -78,8 +79,6 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 					continue
 				}
 
-				fmt.Println(vuln)
-				fmt.Println(pkgName)
 				isDependencyNeighborResponses, err := model.Neighbors(ctx, gqlclient, pkgName.Namespaces[0].Names[0].Id, []model.Edge{model.EdgePackageIsDependency})
 				if err != nil {
 					return nil, nil, fmt.Errorf("failed getting package parent:%v", err)
@@ -142,6 +141,7 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 		}
 		return path, nodeMap, nil
 	} else {
+		fmt.Println("enterin gpath")
 		for i := len(collectedIDs) - 1; i >= 0; i-- {
 			if nodeMap[collectedIDs[i]].isDependency != nil {
 				path = append(path, nodeMap[collectedIDs[i]].isDependency.Id, nodeMap[collectedIDs[i]].isDependency.DependentPackage.Namespaces[0].Names[0].Id,
