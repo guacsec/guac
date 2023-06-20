@@ -29,18 +29,19 @@ type DfsNode struct {
 	parent       string
 	isDependency *model.NeighborsNeighborsIsDependency
 	depth        int
+	neighbors    []DfsNode
 }
 
 // TODO: make more robust usuing predicates
-func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnID string, stopID string, maxDepth int) ([]string, map[string]DfsNode, error) {
-	vulnNode, err := model.Node(ctx, gqlclient, vulnID)
-	fmt.Println(vulnNode.GetNode())
+func searchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) ([]string, map[string]DfsNode, error) {
+	startNode, err := model.Node(ctx, gqlclient, startID)
+	fmt.Println(startNode.GetNode())
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed getting intial node with given ID:%v", err)
 	}
 
-	vuln, ok := vulnNode.Node.(*model.NodeNodePackage)
+	start, ok := startNode.Node.(*model.NodeNodePackage)
 
 	if !ok {
 		return nil, nil, fmt.Errorf("Not a package")
@@ -49,19 +50,21 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 	var collectedIDs []string
 	queue := make([]string, 0) // the queue of nodes in bfs
 
-	collectedIDs = append(collectedIDs, vulnID)
+	collectedIDs = append(collectedIDs, startID)
 	nodeMap := map[string]DfsNode{}
-	nodeMap[vulnID] = DfsNode{
+	nodeMap[startID] = DfsNode{
 		expanded: false,
 		depth:    0,
 	}
-	queue = append(queue, vulnID)
+	queue = append(queue, startID)
 	found := false
+	nowNode := DfsNode{}
+	totalNodes := 1
 
 	for len(queue) > 0 {
 		now := queue[0]
 		queue = queue[1:]
-		nowNode := nodeMap[now]
+		nowNode = nodeMap[now]
 
 		pkgNameResponses, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{})
 		if err != nil {
@@ -74,7 +77,6 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 
 		for _, neighbor := range pkgNameResponses.Neighbors {
 			if pkgName, ok := neighbor.(*model.NeighborsNeighborsPackage); ok {
-
 				if len(pkgName.Namespaces) == 0 {
 					continue
 				}
@@ -85,10 +87,12 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 				}
 				for _, neighbor := range isDependencyNeighborResponses.Neighbors {
 					if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
+						fmt.Println(isDependency)
 						doesRangeInclude, err :=
-							depversion.DoesRangeInclude([]string{vuln.Namespaces[0].Names[0].Versions[0].Version}, isDependency.VersionRange)
+							depversion.DoesRangeInclude([]string{start.Namespaces[0].Names[0].Versions[0].Version}, isDependency.VersionRange)
 
 						if err == nil && !doesRangeInclude {
+							fmt.Println("breaking")
 							break
 						}
 
@@ -99,11 +103,13 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 
 						if !seen {
 							dfsN = DfsNode{
+								expanded:     false,
 								parent:       now,
 								isDependency: isDependency,
 								depth:        nowNode.depth + 1,
 							}
 							nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsN
+							totalNodes = totalNodes + 1
 						}
 
 						if !dfsN.expanded {
@@ -124,13 +130,17 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 		nodeMap[now] = nowNode
 	}
 
+	if stopID != "" && !found {
+		return nil, nil, fmt.Errorf("No path found up to specified stop node")
+	}
+
 	var path []string
 	var now string
 
 	// construct a path of nodes to return for visualizer purposes
 	if stopID != "" {
 		now = stopID
-		for now != vulnID {
+		for now != startID {
 			fmt.Printf(nodeMap[now].isDependency.Id)
 			path = append(path, nodeMap[now].isDependency.Id, nodeMap[now].isDependency.DependentPackage.Namespaces[0].Names[0].Id,
 				nodeMap[now].isDependency.DependentPackage.Namespaces[0].Id, nodeMap[now].isDependency.DependentPackage.Id,
@@ -141,7 +151,7 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 		}
 		return path, nodeMap, nil
 	} else {
-		fmt.Println("enterin gpath")
+		fmt.Println(collectedIDs)
 		for i := len(collectedIDs) - 1; i >= 0; i-- {
 			if nodeMap[collectedIDs[i]].isDependency != nil {
 				path = append(path, nodeMap[collectedIDs[i]].isDependency.Id, nodeMap[collectedIDs[i]].isDependency.DependentPackage.Namespaces[0].Names[0].Id,
@@ -153,4 +163,5 @@ func searchSubgraphFromVuln(ctx context.Context, gqlclient graphql.Client, vulnI
 		}
 		return path, nodeMap, nil
 	}
+
 }
