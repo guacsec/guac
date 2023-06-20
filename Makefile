@@ -107,6 +107,7 @@ build_local_container: GORELEASER_CURRENT_TAG ?= v0.0.0-$(LOCAL_IMAGE_NAME)
 build_local_container:
 	GITHUB_REPOSITORY=$(GITHUB_REPOSITORY) \
 	GORELEASER_CURRENT_TAG=$(GORELEASER_CURRENT_TAG) \
+	DOCKER_CONTEXT=$(shell docker context show) \
 	goreleaser release --clean --snapshot --skip-sign --skip-sbom
 
 # Build and package a guac container for local testing
