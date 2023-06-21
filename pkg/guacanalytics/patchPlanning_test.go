@@ -38,322 +38,55 @@ const (
 	inmems = "inmem"
 )
 
-// func ingestDependencies(ctx context.Context, client graphql.Client) {
-// 	logger := logging.FromContext(ctx)
-
-// 	ns1 := "test_namespace1"
-// 	version := "6.1.3"
-// 	depns1 := "test_dep_namespace1"
-// 	ns2 := "test_namespace2"
-
-// 	ingestDependencies := []struct {
-// 		name       string
-// 		pkg        model.PkgInputSpec
-// 		depPkg     model.PkgInputSpec
-// 		dependency model.IsDependencyInputSpec
-// 	}{{
-// 		name: "part of SBOM",
-// 		pkg: model.PkgInputSpec{
-// 			Type:      "test_type1",
-// 			Namespace: &ns1,
-// 			Name:      "test_name1",
-// 			Version:   &version,
-// 			Qualifiers: []model.PackageQualifierInputSpec{
-// 				{Key: "test_key", Value: "test_val"},
-// 			},
-// 		},
-// 		depPkg: model.PkgInputSpec{
-// 			Type:      "dep_type1",
-// 			Namespace: &depns1,
-// 			Name:      "dep_name1",
-// 		},
-// 		dependency: model.IsDependencyInputSpec{
-// 			VersionRange:   ">3.0.3",
-// 			DependencyType: model.DependencyTypeDirect,
-// 			Justification:  "part of SBOM",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "part of SBOM",
-// 		pkg: model.PkgInputSpec{
-// 			Type:      "test_type2",
-// 			Namespace: &ns2,
-// 			Name:      "test_name2",
-// 		},
-// 		depPkg: model.PkgInputSpec{
-// 			Type:      "dep_type2",
-// 			Namespace: &depns1,
-// 			Name:      "dep_name2",
-// 		},
-// 		dependency: model.IsDependencyInputSpec{
-// 			VersionRange:   "<3.0.3",
-// 			DependencyType: model.DependencyTypeIndirect,
-// 			Justification:  "docker: part of SBOM - openssl",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}}
-// 	for _, ingest := range ingestDependencies {
-// 		_, err := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.dependency)
-// 		if err != nil {
-// 			logger.Errorf("Error in ingesting: %v\n", err)
-// 		}
-// 	}
-// }
-
-// func ingestVulnerabilities(ctx context.Context, client graphql.Client) {
-// 	logger := logging.FromContext(ctx)
-// 	tm, _ := time.Parse(time.RFC3339, "2023-11-14T17:45:50.52Z")
-
-// 	ns1 := "test_namespace1"
-// 	version := "4.0"
-// 	ns2 := "test_namespace2"
-
-// 	ingestVulnerabilities := []struct {
-// 		name          string
-// 		pkg           *model.PkgInputSpec
-// 		cve           *model.CVEInputSpec
-// 		osv           *model.OSVInputSpec
-// 		ghsa          *model.GHSAInputSpec
-// 		vulnerability model.VulnerabilityMetaDataInput
-// 	}{{
-// 		name: "cve",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type1",
-// 			Namespace: &ns1,
-// 			Name:      "test_name1",
-// 			Version:   &version,
-// 			Qualifiers: []model.PackageQualifierInputSpec{
-// 				{Key: "test_user", Value: "test_bincrafters"},
-// 				{Key: "test_channel", Value: "test_stable"},
-// 			},
-// 		},
-// 		cve: &model.CVEInputSpec{
-// 			Year:  2019,
-// 			CveId: "CVE-2023-61300",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.0.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "osv",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type1",
-// 			Namespace: &ns1,
-// 			Name:      "test_name1",
-// 			Version:   &version,
-// 			Qualifiers: []model.PackageQualifierInputSpec{
-// 				{Key: "test_user", Value: "test_bincrafters"},
-// 				{Key: "test_channel", Value: "test_stable"},
-// 			},
-// 		},
-// 		osv: &model.OSVInputSpec{
-// 			OsvId: "CVE-2023-61300",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.0.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "ghsa openssl",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type1",
-// 			Namespace: &ns1,
-// 			Name:      "test_name1",
-// 			Version:   &version,
-// 			Qualifiers: []model.PackageQualifierInputSpec{
-// 				{Key: "test_user", Value: "test_bincrafters"},
-// 				{Key: "test_channel", Value: "test_stable"},
-// 			},
-// 		},
-// 		ghsa: &model.GHSAInputSpec{
-// 			GhsaId: "GHSA-h45f-rjvw-2rv2",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.0.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "cve django",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type2",
-// 			Namespace: &ns2,
-// 			Name:      "test_name2",
-// 		},
-// 		cve: &model.CVEInputSpec{
-// 			Year:  2018,
-// 			CveId: "CVE-2014-11000",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.2.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "osv django",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type2",
-// 			Namespace: &ns2,
-// 			Name:      "test_name2",
-// 		},
-// 		osv: &model.OSVInputSpec{
-// 			OsvId: "CVE-2014-11000",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.2.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "ghsa django",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type2",
-// 			Namespace: &ns2,
-// 			Name:      "test_name2",
-// 		},
-// 		ghsa: &model.GHSAInputSpec{
-// 			GhsaId: "GHSA-f45f-jj4w-2rv2",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.2.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "cve openssl (duplicate)",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type1",
-// 			Namespace: &ns1,
-// 			Name:      "test_name1",
-// 			Version:   &version,
-// 			Qualifiers: []model.PackageQualifierInputSpec{
-// 				{Key: "test_user", Value: "test_bincrafters"},
-// 				{Key: "test_channel", Value: "test_stable"},
-// 			},
-// 		},
-// 		cve: &model.CVEInputSpec{
-// 			Year:  2019,
-// 			CveId: "CVE-2023-61300",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.0.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "ghsa django (duplicate)",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type2",
-// 			Namespace: &ns2,
-// 			Name:      "test_name2",
-// 		},
-// 		ghsa: &model.GHSAInputSpec{
-// 			GhsaId: "GHSA-f45f-jj4w-2rv2",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v4.2.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}, {
-// 		name: "osv openssl (duplicate)",
-// 		pkg: &model.PkgInputSpec{
-// 			Type:      "test_type1",
-// 			Namespace: &ns1,
-// 			Name:      "test_name1",
-// 			Version:   &version,
-// 			Qualifiers: []model.PackageQualifierInputSpec{
-// 				{Key: "test_user", Value: "test_bincrafters"},
-// 				{Key: "test_channel", Value: "test_stable"},
-// 			},
-// 		},
-// 		osv: &model.OSVInputSpec{
-// 			OsvId: "CVE-2019-13110",
-// 		},
-// 		vulnerability: model.VulnerabilityMetaDataInput{
-// 			TimeScanned:    tm,
-// 			DbUri:          "URI",
-// 			DbVersion:      "v1.0.0",
-// 			ScannerUri:     "osv.dev",
-// 			ScannerVersion: "0.0.14",
-// 			Origin:         "Demo ingestion",
-// 			Collector:      "Demo ingestion",
-// 		},
-// 	}}
-// 	for _, ingest := range ingestVulnerabilities {
-// 		if ingest.cve != nil {
-// 			_, err := model.CertifyCVE(context.Background(), client, *ingest.pkg, *ingest.cve, ingest.vulnerability)
-// 			if err != nil {
-// 				logger.Errorf("Error in ingesting: %v\n", err)
-// 			}
-// 		} else if ingest.osv != nil {
-// 			_, err := model.CertifyOSV(context.Background(), client, *ingest.pkg, *ingest.osv, ingest.vulnerability)
-// 			if err != nil {
-// 				logger.Errorf("Error in ingesting: %v\n", err)
-// 			}
-// 		} else if ingest.ghsa != nil {
-// 			_, err := model.CertifyGHSA(context.Background(), client, *ingest.pkg, *ingest.ghsa, ingest.vulnerability)
-// 			if err != nil {
-// 				logger.Errorf("Error in ingesting: %v\n", err)
-// 			}
-// 		} else {
-// 			fmt.Printf("input missing for cve, osv or ghsa")
-// 		}
-// 	}
-// }
-
-func ingestData(ctx context.Context, client graphql.Client) {
+func ingestTestData(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
 
+	topns := "topns"
+	topns1 := "topns1"
+	topns2 := "topns2"
+	topns3 := "topns3"
 	ns := "ubuntu"
 	version := "1.19.0"
 	depns := "openssl.org"
+	depns2 := "openssl.org2"
 	opensslVersion := "3.0.3"
 
 	ingestDependencies := []struct {
-		name       string
-		pkg        model.PkgInputSpec
-		depPkg     model.PkgInputSpec
-		dependency model.IsDependencyInputSpec
+		topTopPkg1           model.PkgInputSpec
+		topTopPkg2           model.PkgInputSpec
+		topTopPkg3           model.PkgInputSpec
+		topPkg               model.PkgInputSpec
+		pkg                  model.PkgInputSpec
+		depPkg1              model.PkgInputSpec
+		depPkg2              model.PkgInputSpec
+		dependencyDirect     model.IsDependencyInputSpec
+		dependencyNotInRange model.IsDependencyInputSpec
+		dependencyIndirect   model.IsDependencyInputSpec
 	}{{
-		name: "deb: part of SBOM - openssl",
+		topTopPkg1: model.PkgInputSpec{
+			Type:      "top1",
+			Namespace: &topns1,
+			Name:      "toppkg1",
+			Version:   &version,
+		},
+		topTopPkg2: model.PkgInputSpec{
+			Type:      "top2",
+			Namespace: &topns2,
+			Name:      "toppkg2",
+			Version:   &version,
+		},
+		topTopPkg3: model.PkgInputSpec{
+			Type:      "top3",
+			Namespace: &topns3,
+			Name:      "toppkg3",
+			Version:   &version,
+		},
+		topPkg: model.PkgInputSpec{
+			Type:      "top",
+			Namespace: &topns,
+			Name:      "toppkg",
+			Version:   &version,
+		},
 		pkg: model.PkgInputSpec{
 			Type:      "deb",
 			Namespace: &ns,
@@ -363,35 +96,84 @@ func ingestData(ctx context.Context, client graphql.Client) {
 				{Key: "arch", Value: "amd64"},
 			},
 		},
-		depPkg: model.PkgInputSpec{
+		depPkg1: model.PkgInputSpec{
 			Type:      "conan",
 			Namespace: &depns,
 			Name:      "openssl",
 			Version:   &opensslVersion,
 		},
-		dependency: model.IsDependencyInputSpec{
-			VersionRange:   ">1.19.0",
+		depPkg2: model.PkgInputSpec{
+			Type:      "conan2",
+			Namespace: &depns2,
+			Name:      "openssl2",
+			Version:   &opensslVersion,
+		},
+		dependencyDirect: model.IsDependencyInputSpec{
+			VersionRange:   "=>1.19.0",
 			DependencyType: model.DependencyTypeDirect,
-			Justification:  "deb: part of SBOM - openssl",
+			Justification:  "test justification one",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+		dependencyNotInRange: model.IsDependencyInputSpec{
+			VersionRange:   "<1.19.0",
+			DependencyType: model.DependencyTypeIndirect,
+			Justification:  "test justification one",
+			Origin:         "Demo ingestion",
+			Collector:      "Demo ingestion",
+		},
+		dependencyIndirect: model.IsDependencyInputSpec{
+			VersionRange:   "=>1.19.0",
+			DependencyType: model.DependencyTypeIndirect,
+			Justification:  "test justification one",
 			Origin:         "Demo ingestion",
 			Collector:      "Demo ingestion",
 		},
 	}}
-
 	for _, ingest := range ingestDependencies {
-		_, err := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg, ingest.dependency)
-		if err != nil {
-			logger.Errorf("Error in ingesting: %v\n", err)
+		_, err1 := model.IsDependency(context.Background(), client, ingest.topPkg, ingest.pkg, ingest.dependencyDirect)
+		if err1 != nil {
+			logger.Errorf("Error in ingesting: %v\n", err1)
+		}
+		_, err2 := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg1, ingest.dependencyDirect)
+		if err2 != nil {
+			logger.Errorf("Error in ingesting: %v\n", err2)
+		}
+		_, err3 := model.IsDependency(context.Background(), client, ingest.pkg, ingest.depPkg2, ingest.dependencyDirect)
+		if err3 != nil {
+			logger.Errorf("Error in ingesting: %v\n", err3)
+		}
+		_, err4 := model.IsDependency(context.Background(), client, ingest.topTopPkg1, ingest.topPkg, ingest.dependencyDirect)
+		if err4 != nil {
+			logger.Errorf("Error in ingesting: %v\n", err4)
+		}
+		_, err5 := model.IsDependency(context.Background(), client, ingest.topTopPkg2, ingest.topPkg, ingest.dependencyIndirect)
+		if err5 != nil {
+			logger.Errorf("Error in ingesting: %v\n", err5)
+		}
+		_, err6 := model.IsDependency(context.Background(), client, ingest.topTopPkg3, ingest.topPkg, ingest.dependencyNotInRange)
+		if err6 != nil {
+			logger.Errorf("Error in ingesting: %v\n", err5)
 		}
 	}
-
 }
 
 func Test_SearchSubgraphFromVuln(t *testing.T) {
-	type1 := "conan"
-	ns := "openssl.org"
-	nodeName := "openssl"
-	version := "3.0.3"
+	type1 := "deb"
+	ns1 := "ubuntu"
+	nodeName1 := "dpkg"
+	type2 := "top"
+	ns2 := "topns"
+	nodeName2 := "toppkg"
+	type3 := "top1"
+	ns3 := "topns1"
+	nodeName3 := "toppkg1"
+	type4 := "top2"
+	ns4 := "topns2"
+	nodeName4 := "toppkg2"
+	type5 := "top3"
+	ns5 := "topns3"
+	nodeName5 := "toppkg3"
 
 	server, logger := startTestServer()
 	ctx := logging.WithLogger(context.Background())
@@ -399,65 +181,226 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
-	ingestData(ctx, gqlclient)
+	ingestTestData(ctx, gqlclient)
 
-	pkgFilter := &model.PkgSpec{
+	// filtering for packages IDs needed to be inputted into the tests
+	pkgFilter1 := &model.PkgSpec{
 		Type:      &type1,
-		Namespace: &ns,
-		Name:      &nodeName,
-		Version:   &version,
+		Namespace: &ns1,
+		Name:      &nodeName1,
 	}
-	pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+
+	pkgResponse1, err := model.Packages(ctx, gqlclient, pkgFilter1)
 
 	if err != nil {
-		fmt.Println("ERROR")
+		t.Errorf("Error getting first package node for test case: %s\n", err)
 	}
-	id := pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
-	fmt.Println("starting node id is " + id)
+
+	id1 := pkgResponse1.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+
+	pkgFilter2 := &model.PkgSpec{
+		Type:      &type2,
+		Namespace: &ns2,
+		Name:      &nodeName2,
+	}
+
+	pkgResponse2, err := model.Packages(ctx, gqlclient, pkgFilter2)
+
+	if err != nil {
+		t.Errorf("Error getting second package node for test case: %s\n", err)
+	}
+
+	id2 := pkgResponse2.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+
+	pkgFilter3 := &model.PkgSpec{
+		Type:      &type3,
+		Namespace: &ns3,
+		Name:      &nodeName3,
+	}
+
+	pkgResponse3, err := model.Packages(ctx, gqlclient, pkgFilter3)
+
+	if err != nil {
+		t.Errorf("Error getting third package node for test case: %s\n", err)
+	}
+
+	id3 := pkgResponse3.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+
+	pkgFilter4 := &model.PkgSpec{
+		Type:      &type4,
+		Namespace: &ns4,
+		Name:      &nodeName4,
+	}
+
+	pkgResponse4, err := model.Packages(ctx, gqlclient, pkgFilter4)
+
+	if err != nil {
+		t.Errorf("Error getting fourth package node for test case: %s\n", err)
+	}
+
+	id4 := pkgResponse4.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+
+	pkgFilter5 := &model.PkgSpec{
+		Type:      &type5,
+		Namespace: &ns5,
+		Name:      &nodeName5,
+	}
+
+	pkgResponse5, err := model.Packages(ctx, gqlclient, pkgFilter5)
+
+	if err != nil {
+		t.Errorf("Error getting fifth package node for  test case: %s\n", err)
+	}
+
+	id5 := pkgResponse5.Packages[0].Namespaces[0].Names[0].Versions[0].Id
 
 	testCases := []struct {
-		context    context.Context
-		client     graphql.Client
-		startID    string
-		stopID     string
-		maxDepth   int
-		expectPath []string
-		expectMap  map[string]DfsNode
+		startID  string
+		stopID   string
+		maxDepth int
 	}{
 		{
-			context:    ctx,
-			client:     gqlclient,
-			startID:    id,
-			stopID:     "",
-			maxDepth:   10,
-			expectPath: nil,
-			expectMap:  nil,
+			// test case with two dependencies at the same depth, no stopID and no limiting maxDepth
+			startID:  id1,
+			stopID:   "",
+			maxDepth: 10,
+		},
+		{
+			// test case with two levels of dependencies, no stopID and no limiting maxDepth
+			startID:  id2,
+			stopID:   "",
+			maxDepth: 10,
+		},
+		{
+			// test case with two levels of dependencies, a stopID at the first level and no limiting maxDepth
+			startID:  id2,
+			stopID:   id1,
+			maxDepth: 10,
+		},
+		{
+			// test case with two levels of dependencies, no stopID and a limiting maxDepth at the first level
+			startID:  id3,
+			stopID:   "",
+			maxDepth: 1,
+		},
+		{
+			// test case with two levels of dependencies, no stopID and a limiting maxDepth at the first level
+			startID:  id3,
+			stopID:   "",
+			maxDepth: 1,
+		},
+		{
+			// test case with indirect dependency
+			startID:  id4,
+			stopID:   "",
+			maxDepth: 1,
+		},
+		{
+			// test case with isDep range that does not include the dependency
+			startID:  id5,
+			stopID:   "",
+			maxDepth: 10,
 		},
 	}
 	for _, tt := range testCases {
-		gotPath, gotMap, err := searchDependenciesFromStartNode(ctx, gqlclient, id, "", 3)
+		gotMap, err := searchDependenciesFromStartNode(ctx, gqlclient, tt.startID, tt.stopID, tt.maxDepth)
 
-		t.Run("test1", func(t *testing.T) {
-			if err != nil {
-				t.Errorf("got err from Search: %v", err)
-				return
-			} else {
-				for k, m := range gotMap {
-					fmt.Println(k, "value is", m)
-				}
-				fmt.Println(gotPath)
-			}
+		t.Run("testing searchDependenciesFromStartNode", func(t *testing.T) {
 			if err != nil {
 				t.Errorf("got err from searchDependenciesFromStartNode: %v", err)
 				return
 			}
 
-			if diff := cmp.Diff(tt.expectPath, gotPath); len(diff) > 0 {
-				t.Errorf("Path (-want +got):\n%s", diff)
+			if tt.stopID == "" && tt.maxDepth == 10 {
+				for k, v := range gotMap {
+					if !v.expanded {
+						t.Errorf("All nodes should be expanded but this node was not: node %s \n", k)
+					}
+				}
 			}
 
-			if diff := cmp.Diff(tt.expectMap, gotMap); len(diff) > 0 {
-				t.Errorf("Map(-want +got):\n%s", diff)
+			if tt.startID == id1 {
+				if diff := cmp.Diff(3, len(gotMap)); len(diff) > 0 {
+					t.Errorf("Number of map entries (-want +got):\n%s", diff)
+				}
+
+				for k, v := range gotMap {
+					if k != id1 && (v.parent != id1 || v.depth != 1) {
+						t.Errorf("Incorrect dependency node entry")
+					} else if k == id1 && (v.parent != "" || v.depth != 0) {
+						t.Errorf("Incorrect starting node entry")
+					}
+				}
+			}
+
+			if tt.startID == id2 && tt.stopID == "" && tt.maxDepth == 10 {
+				if diff := cmp.Diff(4, len(gotMap)); len(diff) > 0 {
+					t.Errorf("Number of map entries (-want +got):\n%s", diff)
+				}
+
+				for k, v := range gotMap {
+					if k == id2 && (v.parent != "" || v.depth != 0) {
+						t.Errorf("Incorrect starting node entry")
+					} else if k == id1 && (v.parent != id2 || v.depth != 1) {
+						t.Errorf("Incorrect second node entry")
+					} else if v.parent == id1 && v.depth != 2 {
+						t.Errorf("Incorrect third or fourth node entry")
+					}
+				}
+			}
+
+			if tt.startID == id2 && tt.stopID == id1 {
+				if diff := cmp.Diff(2, len(gotMap)); len(diff) > 0 {
+					t.Errorf("Number of map entries (-want +got):\n%s", diff)
+				}
+
+				for k, v := range gotMap {
+					if k == id2 && (v.parent != "" || v.depth != 0) {
+						t.Errorf("Incorrect starting node entry")
+					} else if k == id1 && (v.parent != id2 || v.depth != 1) {
+						t.Errorf("Incorrect second node entry")
+					}
+				}
+			}
+
+			if tt.startID == id3 {
+				if diff := cmp.Diff(2, len(gotMap)); len(diff) > 0 {
+					t.Errorf("Number of map entries (-want +got):\n%s", diff)
+				}
+
+				for k, v := range gotMap {
+					if k == id3 && (v.parent != "" || v.depth != 0) {
+						t.Errorf("Incorrect starting node entry")
+					} else if k == id2 && (v.parent != id3 || v.depth != 1) {
+						t.Errorf("Incorrect second node entry")
+					}
+				}
+			}
+
+			if tt.startID == id4 {
+				if diff := cmp.Diff(2, len(gotMap)); len(diff) > 0 {
+					t.Errorf("Number of map entries (-want +got):\n%s", diff)
+				}
+
+				for k, v := range gotMap {
+					if k == id4 && (v.parent != "" || v.depth != 0) {
+						t.Errorf("Incorrect starting node entry")
+					} else if k == id2 && (v.parent != id4 || v.depth != 1) {
+						t.Errorf("Incorrect second node entry")
+					}
+				}
+			}
+
+			if tt.startID == id5 {
+				if diff := cmp.Diff(1, len(gotMap)); len(diff) > 0 {
+					t.Errorf("Number of map entries (-want +got):\n%s", diff)
+				}
+
+				for k, v := range gotMap {
+					if k == id1 && (v.parent != "" || v.depth != 0) {
+						t.Errorf("Incorrect starting node entry")
+					}
+				}
 			}
 
 		})
@@ -497,10 +440,6 @@ func startTestServer() (*http.Server, *zap.SugaredLogger) {
 	go func() {
 		logger.Infof("server finished: %s", server.ListenAndServe())
 	}()
-	// sigs := make(chan os.Signal, 1)
-	// signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM) // don't need for testing
-	// s := <-sigs
-	// logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
 	return server, logger
 }
 

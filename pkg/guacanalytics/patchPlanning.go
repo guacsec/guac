@@ -25,143 +25,104 @@ import (
 )
 
 type DfsNode struct {
-	expanded     bool // true once all node neighbors are added to queue
-	parent       string
-	isDependency *model.NeighborsNeighborsIsDependency
-	depth        int
-	neighbors    []DfsNode
+	expanded bool // true once all node neighbors are added to queue
+	parent   string
+	depth    int
 }
 
 // TODO: make more robust usuing predicates
-func searchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) ([]string, map[string]DfsNode, error) {
+func searchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) (map[string]DfsNode, error) {
 	startNode, err := model.Node(ctx, gqlclient, startID)
-	fmt.Println(startNode.GetNode())
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed getting intial node with given ID:%v", err)
+		return nil, fmt.Errorf("failed getting intial node with given ID:%v", err)
 	}
 
-	start, ok := startNode.Node.(*model.NodeNodePackage)
+	_, ok := startNode.Node.(*model.NodeNodePackage)
 
 	if !ok {
-		return nil, nil, fmt.Errorf("Not a package")
+		return nil, fmt.Errorf("Not a package")
 	}
 
-	var collectedIDs []string
+	var path []string
 	queue := make([]string, 0) // the queue of nodes in bfs
 
-	collectedIDs = append(collectedIDs, startID)
 	nodeMap := map[string]DfsNode{}
-	nodeMap[startID] = DfsNode{
-		expanded: false,
-		depth:    0,
-	}
+
+	nodeMap[startID] = DfsNode{}
 	queue = append(queue, startID)
-	found := false
-	nowNode := DfsNode{}
-	totalNodes := 1
 
 	for len(queue) > 0 {
 		now := queue[0]
 		queue = queue[1:]
-		nowNode = nodeMap[now]
+		nowNode := nodeMap[now]
 
-		pkgNameResponses, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{})
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed getting package parent:%v", err)
+		if stopID == now {
+			break
 		}
 
 		if maxDepth != 0 && nowNode.depth >= maxDepth {
 			break
 		}
 
-		for _, neighbor := range pkgNameResponses.Neighbors {
-			if pkgName, ok := neighbor.(*model.NeighborsNeighborsPackage); ok {
-				if len(pkgName.Namespaces) == 0 {
-					continue
+		isDependencyNeighborResponses, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{model.EdgePackageIsDependency})
+		if err != nil {
+			return nil, fmt.Errorf("failed getting package parent:%w", err)
+		}
+		for _, neighbor := range isDependencyNeighborResponses.Neighbors {
+			if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
+				dependentPkgFilter := &model.PkgSpec{
+					Type:      &isDependency.DependentPackage.Type,
+					Namespace: &isDependency.DependentPackage.Namespaces[0].Namespace,
+					Name:      &isDependency.DependentPackage.Namespaces[0].Names[0].Name,
 				}
 
-				isDependencyNeighborResponses, err := model.Neighbors(ctx, gqlclient, pkgName.Namespaces[0].Names[0].Id, []model.Edge{model.EdgePackageIsDependency})
+				depPkgResponse, err := model.Packages(ctx, gqlclient, dependentPkgFilter)
 				if err != nil {
-					return nil, nil, fmt.Errorf("failed getting package parent:%v", err)
+					return nil, fmt.Errorf("error querying for dependent package: %w", err)
 				}
-				for _, neighbor := range isDependencyNeighborResponses.Neighbors {
-					if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
-						fmt.Println(isDependency)
-						doesRangeInclude, err :=
-							depversion.DoesRangeInclude([]string{start.Namespaces[0].Names[0].Versions[0].Version}, isDependency.VersionRange)
 
-						if err == nil && !doesRangeInclude {
-							fmt.Println("breaking")
-							break
-						}
+				depPkgVersionsMap := map[string]string{}
+				depPkgVersions := []string{}
+				for _, depPkgVersion := range depPkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+					depPkgVersions = append(depPkgVersions, depPkgVersion.Version)
+					depPkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Id
+				}
 
-						dfsN, seen := nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id]
-						if stopID == isDependency.Package.Namespaces[0].Names[0].Versions[0].Id {
-							found = true
-						}
+				matchingDepPkgVersions, err := depversion.WhichVersionMatches(depPkgVersions, isDependency.VersionRange)
+				if err != nil {
+					return nil, fmt.Errorf("error determining dependent version matches: %w", err)
+				}
 
-						if !seen {
-							dfsN = DfsNode{
-								expanded:     false,
-								parent:       now,
-								isDependency: isDependency,
-								depth:        nowNode.depth + 1,
-							}
-							nodeMap[isDependency.Package.Namespaces[0].Names[0].Versions[0].Id] = dfsN
-							totalNodes = totalNodes + 1
-						}
+				for matchingDepPkgVersion := range matchingDepPkgVersions {
+					matchingDepPkgVersionID := depPkgVersionsMap[matchingDepPkgVersion]
+					if err != nil {
+						return nil, fmt.Errorf("error querying neighbor: %w", err)
+					}
 
-						if !dfsN.expanded {
-							queue = append(queue, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
-							collectedIDs = append(collectedIDs, isDependency.Package.Namespaces[0].Names[0].Versions[0].Id)
+					path = append(path, isDependency.Id, matchingDepPkgVersionID,
+						depPkgResponse.Packages[0].Namespaces[0].Names[0].Id, depPkgResponse.Packages[0].Namespaces[0].Id,
+						depPkgResponse.Packages[0].Id)
+
+					dfsN, seen := nodeMap[matchingDepPkgVersionID]
+					if !seen {
+						dfsN = DfsNode{
+							parent: now,
+							depth:  nowNode.depth + 1,
 						}
+						nodeMap[matchingDepPkgVersionID] = dfsN
+					}
+					if !dfsN.expanded {
+						queue = append(queue, matchingDepPkgVersionID)
 					}
 				}
-
 			}
-		}
-
-		if found {
-			break
 		}
 
 		nowNode.expanded = true
 		nodeMap[now] = nowNode
 	}
 
-	if stopID != "" && !found {
-		return nil, nil, fmt.Errorf("No path found up to specified stop node")
-	}
-
-	var path []string
-	var now string
-
-	// construct a path of nodes to return for visualizer purposes
-	if stopID != "" {
-		now = stopID
-		for now != startID {
-			fmt.Printf(nodeMap[now].isDependency.Id)
-			path = append(path, nodeMap[now].isDependency.Id, nodeMap[now].isDependency.DependentPackage.Namespaces[0].Names[0].Id,
-				nodeMap[now].isDependency.DependentPackage.Namespaces[0].Id, nodeMap[now].isDependency.DependentPackage.Id,
-				nodeMap[now].isDependency.Package.Namespaces[0].Names[0].Versions[0].Id,
-				nodeMap[now].isDependency.Package.Namespaces[0].Names[0].Id, nodeMap[now].isDependency.Package.Namespaces[0].Id,
-				nodeMap[now].isDependency.Package.Id)
-			now = nodeMap[now].parent
-		}
-		return path, nodeMap, nil
-	} else {
-		fmt.Println(collectedIDs)
-		for i := len(collectedIDs) - 1; i >= 0; i-- {
-			if nodeMap[collectedIDs[i]].isDependency != nil {
-				path = append(path, nodeMap[collectedIDs[i]].isDependency.Id, nodeMap[collectedIDs[i]].isDependency.DependentPackage.Namespaces[0].Names[0].Id,
-					nodeMap[collectedIDs[i]].isDependency.DependentPackage.Namespaces[0].Id, nodeMap[collectedIDs[i]].isDependency.DependentPackage.Id,
-					nodeMap[collectedIDs[i]].isDependency.Package.Namespaces[0].Names[0].Versions[0].Id,
-					nodeMap[collectedIDs[i]].isDependency.Package.Namespaces[0].Names[0].Id, nodeMap[collectedIDs[i]].isDependency.Package.Namespaces[0].Id,
-					nodeMap[collectedIDs[i]].isDependency.Package.Id)
-			}
-		}
-		return path, nodeMap, nil
-	}
+	return nodeMap, nil
 
 }
