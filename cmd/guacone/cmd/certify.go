@@ -90,7 +90,7 @@ var certifyCmd = &cobra.Command{
 				}
 			}
 		} else if opts.certifyType == "source" {
-			srcInput, err = helpers.VcsToSrc(opts.subject)
+			srcInput, err = vcs.VcsToSrc(opts.subject)
 			if err != nil {
 				logger.Fatalf("failed to parse source: %v", err)
 			}
