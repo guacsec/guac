@@ -76,7 +76,9 @@ func startServer(cmd *cobra.Command) {
 		tracer := &debug.Tracer{}
 		srv.Use(tracer)
 	}
-	srv.Use(otelgqlgen.Middleware())
+	if flags.jaegerTracer {
+		srv.Use(otelgqlgen.Middleware())
+	}
 
 	http.Handle("/query", srv)
 	if flags.debug {
@@ -144,11 +146,10 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 
 	case arango:
 		args := arangodb.ArangoConfig{
-			User:   "root",
-			Pass:   "test123",
-			DBAddr: "http://localhost:8529",
+			User:   flags.arangoUser,
+			Pass:   flags.arangoPass,
+			DBAddr: flags.arangoAddr,
 		}
-
 		backend, err := arangodb.GetBackend(ctx, &args)
 		if err != nil {
 			return nil, fmt.Errorf("Error creating arango backend: %w", err)
@@ -170,18 +171,19 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
-	err := initTracer()
-	if err != nil {
-		return nil, fmt.Errorf("Error initializing tracer: %w", err)
+	if flags.jaegerTracer {
+		err := initTracer(flags.jaegerAddr)
+		if err != nil {
+			return nil, fmt.Errorf("Error initializing tracer: %w", err)
+		}
+		srv.Use(otelgqlgen.Middleware())
 	}
-	srv.Use(otelgqlgen.Middleware())
 
 	return srv, nil
 }
 
-func initTracer() error {
-
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
+func initTracer(endpoint string) error {
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(endpoint)))
 	if err != nil {
 		return err
 	}

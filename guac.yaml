@@ -4,6 +4,11 @@ neo4j-pass: s3cr3t
 neo4j-addr: neo4j://localhost:7687
 neo4j-realm: neo4j
 
+# Arangodb setup
+arango-user: root
+arango-pass: rootpassword
+arango-addr: http://localhost:8529
+
 # Nats setup
 nats-addr: nats://localhost:4222
 

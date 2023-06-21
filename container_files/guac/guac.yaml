@@ -4,6 +4,11 @@ neo4j-pass: s3cr3t
 neo4j-addr: neo4j://neo4j:7687
 neo4j-realm: neo4j
 
+# arangodb 
+arango-user: root
+arango-pass: rootpassword
+arango-addr: http://arangodb:8529
+
 # nats
 nats-addr: nats://nats:4222
 
@@ -25,3 +30,6 @@ use-csub: true
 # certifier polling
 poll: true
 interval: 5m
+
+# tracing
+jaeger-addr: http://jaeger:14268/api/traces
