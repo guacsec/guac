@@ -33,11 +33,20 @@ var flags = struct {
 	tracegql bool
 	testData bool
 
+	// Needed only if using jaeger tracer
+	jaegerAddr   string
+	jaegerTracer bool
+
 	// Needed only if using neo4j backend
 	nAddr  string
 	nUser  string
 	nPass  string
 	nRealm string
+
+	// Needed only if using arangodb backend
+	arangoAddr string
+	arangoUser string
+	arangoPass string
 }{}
 
 var rootCmd = &cobra.Command{
@@ -56,6 +65,12 @@ var rootCmd = &cobra.Command{
 		flags.nAddr = viper.GetString("neo4j-addr")
 		flags.nRealm = viper.GetString("neo4j-realm")
 
+		flags.arangoUser = viper.GetString("arango-user")
+		flags.arangoPass = viper.GetString("arango-pass")
+		flags.arangoAddr = viper.GetString("arango-addr")
+
+		flags.jaegerTracer = viper.GetBool("jaeger-tracer")
+		flags.jaegerAddr = viper.GetString("jaeger-addr")
 		startServer(cmd)
 	},
 }
@@ -64,8 +79,10 @@ func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
 	set, err := cli.BuildFlags([]string{
+		"arango-addr", "arango-user", "arango-pass",
 		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm", "gql-test-data",
-		"gql-listen-port", "gql-debug", "gql-backend", "gql-trace"})
+		"gql-listen-port", "gql-debug", "gql-backend", "gql-trace",
+		"jaeger-tracer", "jaeger-addr"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

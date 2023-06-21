@@ -48,6 +48,10 @@ func init() {
 	set.String("neo4j-pass", "", "neo4j password credential to connect to graph db")
 	set.String("neo4j-realm", "neo4j", "realm to connect to graph db")
 
+	set.String("arango-addr", "http://localhost:8529", "address to arango db")
+	set.String("arango-user", "", "arango user to connect to graph db")
+	set.String("arango-pass", "", "arango password to connect to graph db")
+
 	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
 	set.String("verifier-key-path", "", "path to pem file to verify dsse")
@@ -56,6 +60,9 @@ func init() {
 	set.Bool("service-poll", true, "sets the collector or certifier to polling mode")
 	set.BoolP("poll", "p", false, "sets the collector or certifier to polling mode")
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
+
+	set.String("jaeger-addr", "http://localhost:8529", "jaeger trace collector endpoint")
+	set.Bool("jaeger-tracer", false, "flag which enables tracing with jaeger")
 
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
 	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")
