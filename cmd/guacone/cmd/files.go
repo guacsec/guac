@@ -141,7 +141,7 @@ var filesCmd = &cobra.Command{
 			if err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
-				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
+				return fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
 			}
 
 			predicates, idstrings, err := ingestorFunc(docTree)
