@@ -105,3 +105,8 @@ func src(typ, namespace, name string, commit, tag *string) *model.SourceInputSpe
 		Tag:       tag,
 	}
 }
+
+
+func strP(s string) *string {
+	return &s
+}
