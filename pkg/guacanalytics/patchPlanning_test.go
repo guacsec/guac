@@ -230,25 +230,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
-	var pkgIds []string
-
 	ingestTestData(ctx, gqlclient)
-	for _, dep := range isDepTestData.IsDependency {
-
-		pkgFilter := &model.PkgSpec{
-
-			Type:      &dep.Pkg.Type,
-			Namespace: dep.Pkg.Namespace,
-			Name:      &dep.Pkg.Name,
-		}
-		pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
-
-		if err != nil {
-			t.Errorf("Error getting id for isDep test case: %s\n", err)
-		}
-
-		pkgIds = append(pkgIds, pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id)
-	}
 
 	testCases := []struct {
 		startID  string
@@ -257,37 +239,37 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	}{
 		{
 			// 1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth
-			startID:  pkgIds[0],
+			startID:  getPackageId("isDep", 0, ctx, gqlclient),
 			stopID:   "",
 			maxDepth: 10,
 		},
 		{
 			// 2: test case with two levels of dependencies, no stopID and no limiting maxDepth
-			startID:  pkgIds[1],
+			startID:  getPackageId("isDep", 1, ctx, gqlclient),
 			stopID:   "",
 			maxDepth: 10,
 		},
 		{
 			// 3: test case with two levels of dependencies, a stopID at the first level and no limiting maxDepth
-			startID:  pkgIds[1],
-			stopID:   pkgIds[0],
+			startID:  getPackageId("isDep", 1, ctx, gqlclient),
+			stopID:   getPackageId("isDep", 0, ctx, gqlclient),
 			maxDepth: 10,
 		},
 		{
 			// 4: test case with two levels of dependencies, no stopID and a limiting maxDepth at the first level
-			startID:  pkgIds[2],
+			startID:  getPackageId("isDep", 2, ctx, gqlclient),
 			stopID:   "",
 			maxDepth: 1,
 		},
 		{
 			// 5: test case with indirect dependency
-			startID:  pkgIds[3],
+			startID:  getPackageId("isDep", 3, ctx, gqlclient),
 			stopID:   "",
 			maxDepth: 1,
 		},
 		{
 			// 6: test case with isDep range that does not include the dependency
-			startID:  pkgIds[4],
+			startID:  getPackageId("isDep", 4, ctx, gqlclient),
 			stopID:   "",
 			maxDepth: 10,
 		},
@@ -311,90 +293,90 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			// Test Case 1
-			if tt.startID == pkgIds[0] {
+			if tt.startID == getPackageId("isDep", 0, ctx, gqlclient) {
 				if diff := cmp.Diff(3, len(gotMap)); len(diff) > 0 {
 					t.Errorf("Number of map entries (-want +got):\n%s", diff)
 				}
 
 				for k, v := range gotMap {
-					if k != pkgIds[0] && (v.Parent != pkgIds[0] || v.depth != 1) {
+					if k != tt.startID && (v.Parent != tt.startID || v.depth != 1) {
 						t.Errorf("Incorrect dependency node entry")
-					} else if k == pkgIds[0] && (v.Parent != "" || v.depth != 0) {
+					} else if k == tt.startID && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
 					}
 				}
 			}
 
 			// Test Case 2
-			if tt.startID == pkgIds[1] && tt.stopID == "" && tt.maxDepth == 10 {
+			if tt.startID == getPackageId("isDep", 1, ctx, gqlclient) && tt.stopID == "" && tt.maxDepth == 10 {
 				if diff := cmp.Diff(4, len(gotMap)); len(diff) > 0 {
 					t.Errorf("Number of map entries (-want +got):\n%s", diff)
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[1] && (v.Parent != "" || v.depth != 0) {
+					if k == tt.startID && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[0] && (v.Parent != pkgIds[1] || v.depth != 1) {
+					} else if k == getPackageId("isDep", 0, ctx, gqlclient) && (v.Parent != tt.startID || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
-					} else if v.Parent == pkgIds[0] && v.depth != 2 {
+					} else if v.Parent == getPackageId("isDep", 0, ctx, gqlclient) && v.depth != 2 {
 						t.Errorf("Incorrect third or fourth node entry")
 					}
 				}
 			}
 
 			// Test Case 3
-			if tt.startID == pkgIds[1] && tt.stopID == pkgIds[0] {
+			if tt.startID == getPackageId("isDep", 1, ctx, gqlclient) && tt.stopID == getPackageId("isDep", 1, ctx, gqlclient) {
 				if diff := cmp.Diff(2, len(gotMap)); len(diff) > 0 {
 					t.Errorf("Number of map entries (-want +got):\n%s", diff)
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[1] && (v.Parent != "" || v.depth != 0) {
+					if k == tt.startID && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[0] && (v.Parent != pkgIds[1] || v.depth != 1) {
+					} else if k == getPackageId("isDep", 0, ctx, gqlclient) && (v.Parent != tt.startID || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
 					}
 				}
 			}
 
 			// Test Case 4
-			if tt.startID == pkgIds[2] {
+			if tt.startID == getPackageId("isDep", 2, ctx, gqlclient) {
 				if diff := cmp.Diff(2, len(gotMap)); len(diff) > 0 {
 					t.Errorf("Number of map entries (-want +got):\n%s", diff)
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[2] && (v.Parent != "" || v.depth != 0) {
+					if k == tt.startID && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[1] && (v.Parent != pkgIds[2] || v.depth != 1) {
+					} else if k == getPackageId("isDep", 1, ctx, gqlclient) && (v.Parent != tt.startID || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
 					}
 				}
 			}
 
 			// Test Case 5
-			if tt.startID == pkgIds[3] {
+			if tt.startID == getPackageId("isDep", 3, ctx, gqlclient) {
 				if diff := cmp.Diff(2, len(gotMap)); len(diff) > 0 {
 					t.Errorf("Number of map entries (-want +got):\n%s", diff)
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[3] && (v.Parent != "" || v.depth != 0) {
+					if k == tt.startID && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[1] && (v.Parent != pkgIds[3] || v.depth != 1) {
+					} else if k == getPackageId("isDep", 1, ctx, gqlclient) && (v.Parent != tt.startID || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
 					}
 				}
 			}
 
 			// Test Case 6
-			if tt.startID == pkgIds[4] {
+			if tt.startID == getPackageId("isDep", 4, ctx, gqlclient) {
 				if diff := cmp.Diff(1, len(gotMap)); len(diff) > 0 {
 					t.Errorf("Number of map entries (-want +got):\n%s", diff)
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[0] && (v.Parent != "" || v.depth != 0) {
+					if k == getPackageId("isDep", 0, ctx, gqlclient) && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
 					}
 				}
@@ -454,4 +436,25 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	return srv, nil
+}
+
+func getPackageId(graph string, entry int, ctx context.Context, gqlclient graphql.Client) string {
+	if graph == "isDep" {
+		pkgFilter := &model.PkgSpec{
+
+			Type:      &isDepTestData.IsDependency[entry].Pkg.Type,
+			Namespace: isDepTestData.IsDependency[entry].Pkg.Namespace,
+			Name:      &isDepTestData.IsDependency[entry].Pkg.Name,
+		}
+		pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
+
+		if err != nil {
+			fmt.Printf("Error getting id for isDep test case: %s\n", err)
+			return ""
+		}
+
+		return pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
+	}
+
+	return ""
 }
