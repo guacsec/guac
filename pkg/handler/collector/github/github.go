@@ -288,14 +288,35 @@ func ParseGitDataSource(source datasource.Source) (*client.Repo, TagOrLatest, er
 	//using vcs.go helper functions
 	var tol TagOrLatest
 	var r *client.Repo
-	m, err := helpers.VcsToSrc(source.Value)  
+	/*
+		Lines 294-301 are repetitive, this check can be done in VcsToSrc function
+	*/
+	u, err := url.Parse(source.Value)
 	if err != nil {
-		return nil, "", fmt.Errorf("invalid github host: %v", source.Value)
+		return nil, "", err
+	}
+	if u.Host != "github.com" {
+		return nil, "", fmt.Errorf("invalid github host: %v", u.Host)
 	}
 
-	tol = *m.Tag
+	path := strings.Split(u.Path, "/")[1:]
+	if len(path) != 2 {
+		return nil, "", fmt.Errorf("invalid github uri path: %v invalid number of subpaths: %v", u.Path, len(path))
+	}
+	m, err := helpers.VcsToSrc(source.Value)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if m.Tag == nil && m.Commit == nil {
+		tol = Latest
+	} else if m.Tag != nil {
+		tol = *m.Tag
+	} else if m.Commit != nil {
+		tol = *m.Commit
+	}
 	r = &client.Repo{
-		Owner: m.GetNamespace()[strings.LastIndex(m.GetNamespace(), "/")+1:],
+		Owner: m.GetNamespace()[strings.Index(m.GetNamespace(), "/")+1:],
 		Repo:  m.GetName(),
 	}
 	return r, tol, nil

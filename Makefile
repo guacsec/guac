@@ -40,7 +40,7 @@ cover: test
 
 # Check the formatting
 .PHONY: fmt
-fmt: 
+fmt:
 	@echo "Testing formatting and imports"
 	test -z "$(shell find . -name '*.go' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
 	@echo "Testing copyright notice"
