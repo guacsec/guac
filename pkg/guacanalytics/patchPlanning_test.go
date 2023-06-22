@@ -26,6 +26,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/Khan/genqlient/graphql"
 	"github.com/google/go-cmp/cmp"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -36,119 +37,136 @@ import (
 )
 
 var (
-	topns          = "topns"
-	topns1         = "topns1"
-	topns2         = "topns2"
-	topns3         = "topns3"
-	ns             = "ubuntu"
-	version        = "1.19.0"
-	depns          = "openssl.org"
-	depns2         = "openssl.org2"
-	opensslVersion = "3.0.3"
-	isDepTestData  = assembler.IngestPredicates{
+	isDepTestData = assembler.IngestPredicates{
+
 		IsDependency: []assembler.IsDependencyIngest{
+
 			{
+
 				Pkg: &model.PkgInputSpec{
 					Type:      "deb",
-					Namespace: &ns,
+					Namespace: ptrfrom.String("ubuntu"),
 					Name:      "dpkg",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 					Qualifiers: []model.PackageQualifierInputSpec{
 						{Key: "arch", Value: "amd64"},
 					},
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "conan",
-					Namespace: &depns,
+					Namespace: ptrfrom.String("openssl.org"),
 					Name:      "openssl",
-					Version:   &opensslVersion,
+
+					Version: ptrfrom.String("3.0.3"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
 				Pkg: &model.PkgInputSpec{
 					Type:      "top",
-					Namespace: &topns,
+					Namespace: ptrfrom.String("topns"),
 					Name:      "toppkg",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "deb",
-					Namespace: &ns,
+					Namespace: ptrfrom.String("ubuntu"),
 					Name:      "dpkg",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 					Qualifiers: []model.PackageQualifierInputSpec{
 						{Key: "arch", Value: "amd64"},
 					},
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
 				Pkg: &model.PkgInputSpec{
 					Type:      "top1",
-					Namespace: &topns1,
+					Namespace: ptrfrom.String("topns1"),
 					Name:      "toppkg1",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "top",
-					Namespace: &topns,
+					Namespace: ptrfrom.String("topns"),
 					Name:      "toppkg",
-					Version:   &version,
+
+					Version: ptrfrom.String("1.19.0"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
 				Pkg: &model.PkgInputSpec{
 					Type:      "top2",
-					Namespace: &topns2,
+					Namespace: ptrfrom.String("topns2"),
 					Name:      "toppkg2",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "top",
-					Namespace: &topns,
+					Namespace: ptrfrom.String("topns"),
 					Name:      "toppkg",
-					Version:   &version,
+
+					Version: ptrfrom.String("1.19.0"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeIndirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 			{
 				Pkg: &model.PkgInputSpec{
 					Type:      "top3",
-					Namespace: &topns3,
+					Namespace: ptrfrom.String("topns3"),
 					Name:      "toppkg3",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "top",
-					Namespace: &topns,
+					Namespace: ptrfrom.String("topns"),
 					Name:      "toppkg",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 				},
 				IsDependency: &model.IsDependencyInputSpec{
 					VersionRange:   "<1.19.0",
@@ -161,25 +179,31 @@ var (
 			{
 				Pkg: &model.PkgInputSpec{
 					Type:      "deb",
-					Namespace: &ns,
+					Namespace: ptrfrom.String("ubuntu"),
 					Name:      "dpkg",
-					Version:   &version,
+					Version:   ptrfrom.String("1.19.0"),
 					Qualifiers: []model.PackageQualifierInputSpec{
 						{Key: "arch", Value: "amd64"},
 					},
 				},
 				DepPkg: &model.PkgInputSpec{
 					Type:      "conan2",
-					Namespace: &depns2,
+					Namespace: ptrfrom.String("openssl.org2"),
 					Name:      "openssl2",
-					Version:   &opensslVersion,
+
+					Version: ptrfrom.String("3.0.3"),
 				},
+
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   ">=1.19.0",
+
+					VersionRange: ">=1.19.0",
+
 					DependencyType: model.DependencyTypeDirect,
-					Justification:  "test justification one",
-					Origin:         "Demo ingestion",
-					Collector:      "Demo ingestion",
+
+					Justification: "test justification one",
+
+					Origin:    "Demo ingestion",
+					Collector: "Demo ingestion",
 				},
 			},
 		},
@@ -187,10 +211,15 @@ var (
 )
 
 func ingestIsDependencyTestData(ctx context.Context, client graphql.Client) {
+
 	logger := logging.FromContext(ctx)
+
 	for _, ingest := range isDepTestData.IsDependency {
+
 		_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
+
 		if err != nil {
+
 			logger.Errorf("Error in ingesting: %v\n", err)
 		}
 	}
@@ -208,8 +237,11 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	var pkgIds []string
 
 	for _, dep := range isDepTestData.IsDependency {
+
 		pkgFilter := &model.PkgSpec{
-			Type:      &dep.Pkg.Type,
+
+			Type: &dep.Pkg.Type,
+
 			Namespace: dep.Pkg.Namespace,
 			Name:      &dep.Pkg.Name,
 		}
