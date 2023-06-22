@@ -234,6 +234,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
 	testCases := []struct {
+		name        string
 		start       int
 		stop        int
 		maxDepth    int
@@ -241,7 +242,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		graphInput  string
 	}{
 		{
-			// 1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth
+			name:        "1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth",
 			start:       0,
 			stop:        -1,
 			maxDepth:    10,
@@ -249,7 +250,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:  "isDep",
 		},
 		{
-			// 2: test case with two levels of dependencies, no stopID and no limiting maxDepth
+			name:        " 2: two levels of dependencies, no stopID and no limiting maxDepth",
 			start:       1,
 			stop:        -1,
 			maxDepth:    10,
@@ -257,7 +258,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:  "isDep",
 		},
 		{
-			// 3: test case with two levels of dependencies, a stopID at the first level and no limiting maxDepth
+			name:        "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
 			start:       1,
 			stop:        0,
 			maxDepth:    10,
@@ -265,7 +266,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:  "isDep",
 		},
 		{
-			// 4: test case with two levels of dependencies, no stopID and a limiting maxDepth at the first level
+			name:        "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
 			start:       2,
 			stop:        -1,
 			maxDepth:    1,
@@ -273,7 +274,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:  "isDep",
 		},
 		{
-			// 5: test case with indirect dependency
+			name:        "5: indirect dependency",
 			start:       3,
 			stop:        -1,
 			maxDepth:    1,
@@ -281,7 +282,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			graphInput:  "isDep",
 		},
 		{
-			// 6: test case with isDep range that does not include the dependency
+			name:        "// 6: isDep range that does not include the dependency",
 			start:       4,
 			stop:        -1,
 			maxDepth:    10,
@@ -291,7 +292,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		t.Run("testing searchDependenciesFromStartNode", func(t *testing.T) {
+		t.Run(fmt.Sprintf("test case %s\n", tt.name), func(t *testing.T) {
 			ingestTestData(tt.graphInput, ctx, gqlclient)
 			startID := getPackageId("isDep", tt.start, ctx, gqlclient)
 
