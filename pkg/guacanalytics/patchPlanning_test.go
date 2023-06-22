@@ -35,7 +35,6 @@ import (
 )
 
 var (
-	inmems         = "inmem"
 	topns          = "topns"
 	topns1         = "topns1"
 	topns2         = "topns2"
@@ -204,15 +203,6 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
 	ingestIsDependencyTestData(ctx, gqlclient)
-
-	type pkgFilterVar struct {
-		pkgType         string
-		pkgNamespace    string
-		pkgName         string
-		depPkgType      string
-		depPkgNamespace string
-		depPkgName      string
-	}
 
 	var pkgIds []string
 
