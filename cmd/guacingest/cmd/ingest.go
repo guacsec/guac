@@ -19,11 +19,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
@@ -80,11 +82,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	}
 	defer csubClient.Close()
 
-	assemblerFunc, err := getAssembler(ctx, opts)
-	if err != nil {
-		logger.Errorf("error: %v", err)
-		os.Exit(1)
-	}
+	assemblerFunc := getAssembler(ctx, opts.graphqlEndpoint)
 
 	processorTransportFunc := func(d processor.DocumentTree) error {
 		docTreeBytes, err := json.Marshal(d)
@@ -179,9 +177,26 @@ func getIngestor(ctx context.Context, transportFunc func([]assembler.IngestPredi
 	}, nil
 }
 
-func getAssembler(ctx context.Context, opts options) (func([]assembler.IngestPredicates) error, error) {
-	httpClient := http.Client{}
-	gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
-	f := helpers.GetAssembler(ctx, gqlclient)
-	return f, nil
+func getAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.IngestPredicates) error {
+	// Same as https://pkg.go.dev/net/http#DefaultTransport but with greater
+	// MaxIdleConnsPerHost so that we effectively re-use connections when doing
+	// parallel ingestion calls.
+	var dialer = &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	var customTransport http.RoundTripper = &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   30,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+	httpClient := http.Client{Transport: customTransport}
+	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
+	f := helpers.GetParallelAssembler(ctx, gqlclient)
+	return f
 }
