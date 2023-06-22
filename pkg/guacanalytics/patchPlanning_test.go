@@ -210,10 +210,8 @@ var (
 	}
 )
 
-func ingestIsDependencyTestData(ctx context.Context, client graphql.Client) {
-
+func ingestTestData(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
-
 	for _, ingest := range isDepTestData.IsDependency {
 
 		_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
@@ -232,16 +230,14 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
-	ingestIsDependencyTestData(ctx, gqlclient)
-
 	var pkgIds []string
 
+	ingestTestData(ctx, gqlclient)
 	for _, dep := range isDepTestData.IsDependency {
 
 		pkgFilter := &model.PkgSpec{
 
-			Type: &dep.Pkg.Type,
-
+			Type:      &dep.Pkg.Type,
 			Namespace: dep.Pkg.Namespace,
 			Name:      &dep.Pkg.Name,
 		}
@@ -296,10 +292,11 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			maxDepth: 10,
 		},
 	}
+
 	for _, tt := range testCases {
-		gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, tt.startID, tt.stopID, tt.maxDepth)
 
 		t.Run("testing searchDependenciesFromStartNode", func(t *testing.T) {
+			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, tt.startID, tt.stopID, tt.maxDepth)
 			if err != nil {
 				t.Errorf("got err from searchDependenciesFromStartNode: %v", err)
 				return
