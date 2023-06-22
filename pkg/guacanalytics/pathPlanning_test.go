@@ -274,7 +274,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 		},
 	}
 	for _, tt := range testCases {
-		gotMap, err := searchDependenciesFromStartNode(ctx, gqlclient, tt.startID, tt.stopID, tt.maxDepth)
+		gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, tt.startID, tt.stopID, tt.maxDepth)
 
 		t.Run("testing searchDependenciesFromStartNode", func(t *testing.T) {
 			if err != nil {
@@ -297,9 +297,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				for k, v := range gotMap {
-					if k != pkgIds[0] && (v.parent != pkgIds[0] || v.depth != 1) {
+					if k != pkgIds[0] && (v.Parent != pkgIds[0] || v.depth != 1) {
 						t.Errorf("Incorrect dependency node entry")
-					} else if k == pkgIds[0] && (v.parent != "" || v.depth != 0) {
+					} else if k == pkgIds[0] && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
 					}
 				}
@@ -312,11 +312,11 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[1] && (v.parent != "" || v.depth != 0) {
+					if k == pkgIds[1] && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[0] && (v.parent != pkgIds[1] || v.depth != 1) {
+					} else if k == pkgIds[0] && (v.Parent != pkgIds[1] || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
-					} else if v.parent == pkgIds[0] && v.depth != 2 {
+					} else if v.Parent == pkgIds[0] && v.depth != 2 {
 						t.Errorf("Incorrect third or fourth node entry")
 					}
 				}
@@ -329,9 +329,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[1] && (v.parent != "" || v.depth != 0) {
+					if k == pkgIds[1] && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[0] && (v.parent != pkgIds[1] || v.depth != 1) {
+					} else if k == pkgIds[0] && (v.Parent != pkgIds[1] || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
 					}
 				}
@@ -344,9 +344,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[2] && (v.parent != "" || v.depth != 0) {
+					if k == pkgIds[2] && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[1] && (v.parent != pkgIds[2] || v.depth != 1) {
+					} else if k == pkgIds[1] && (v.Parent != pkgIds[2] || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
 					}
 				}
@@ -359,9 +359,9 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[3] && (v.parent != "" || v.depth != 0) {
+					if k == pkgIds[3] && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
-					} else if k == pkgIds[1] && (v.parent != pkgIds[3] || v.depth != 1) {
+					} else if k == pkgIds[1] && (v.Parent != pkgIds[3] || v.depth != 1) {
 						t.Errorf("Incorrect second node entry")
 					}
 				}
@@ -374,7 +374,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 				}
 
 				for k, v := range gotMap {
-					if k == pkgIds[0] && (v.parent != "" || v.depth != 0) {
+					if k == pkgIds[0] && (v.Parent != "" || v.depth != 0) {
 						t.Errorf("Incorrect starting node entry")
 					}
 				}
