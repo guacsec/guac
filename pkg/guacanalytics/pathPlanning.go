@@ -107,7 +107,7 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 					dfsN, seen := nodeMap[matchingDepPkgVersionID]
 					if !seen {
 						dfsN = DfsNode{
-							parent: now,
+							Parent: now,
 							depth:  nowNode.depth + 1,
 						}
 						nodeMap[matchingDepPkgVersionID] = dfsN
