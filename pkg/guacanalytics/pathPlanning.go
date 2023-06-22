@@ -26,12 +26,12 @@ import (
 
 type DfsNode struct {
 	expanded bool // true once all node neighbors are added to queue
-	parent   string
+	Parent   string
 	depth    int
 }
 
 // TODO: make more robust usuing predicates
-func searchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) (map[string]DfsNode, error) {
+func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Client, startID string, stopID string, maxDepth int) (map[string]DfsNode, error) {
 	startNode, err := model.Node(ctx, gqlclient, startID)
 
 	if err != nil {
