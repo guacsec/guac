@@ -45,7 +45,7 @@ var (
 	depns          = "openssl.org"
 	depns2         = "openssl.org2"
 	opensslVersion = "3.0.3"
-	IsDepTests     = assembler.IngestPredicates{
+	isDepTestData  = assembler.IngestPredicates{
 		IsDependency: []assembler.IsDependencyIngest{
 			{
 				Pkg: &model.PkgInputSpec{
@@ -64,7 +64,7 @@ var (
 					Version:   &opensslVersion,
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=>1.19.0",
+					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -88,7 +88,7 @@ var (
 					},
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=>1.19.0",
+					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -109,7 +109,7 @@ var (
 					Version:   &version,
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=>1.19.0",
+					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -130,7 +130,7 @@ var (
 					Version:   &version,
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=>1.19.0",
+					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeIndirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -175,7 +175,7 @@ var (
 					Version:   &opensslVersion,
 				},
 				IsDependency: &model.IsDependencyInputSpec{
-					VersionRange:   "=>1.19.0",
+					VersionRange:   ">=1.19.0",
 					DependencyType: model.DependencyTypeDirect,
 					Justification:  "test justification one",
 					Origin:         "Demo ingestion",
@@ -188,7 +188,7 @@ var (
 
 func ingestIsDependencyTestData(ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
-	for _, ingest := range IsDepTests.IsDependency {
+	for _, ingest := range isDepTestData.IsDependency {
 		_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 		if err != nil {
 			logger.Errorf("Error in ingesting: %v\n", err)
@@ -207,7 +207,7 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 
 	var pkgIds []string
 
-	for _, dep := range IsDepTests.IsDependency {
+	for _, dep := range isDepTestData.IsDependency {
 		pkgFilter := &model.PkgSpec{
 			Type:      &dep.Pkg.Type,
 			Namespace: dep.Pkg.Namespace,
