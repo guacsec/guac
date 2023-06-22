@@ -23,6 +23,7 @@ func (s *Suite) TestIsDependency() {
 		ExpectedDep       []*model.IsDependency
 		ExpectedIngestErr bool
 		ExpectedQueryErr  bool
+		Only              bool
 	}{
 		{
 			Name:      "HappyPath",
@@ -431,11 +432,23 @@ func (s *Suite) TestIsDependency() {
 		if xv.Kind() == reflect.Slice && yv.Kind() == reflect.Slice {
 			return xv.Len() == 0 && yv.Len() == 0
 		}
-		return true
+		return false
 	}, cmp.Ignore())
+
+	hasOnly := false
+	for _, t := range tests {
+		if t.Only {
+			hasOnly = true
+			break
+		}
+	}
 
 	ctx := context.Background()
 	for _, test := range tests {
+		if hasOnly && !test.Only {
+			continue
+		}
+
 		s.Run(test.Name, func() {
 			b, err := GetBackend(s.Client)
 			s.Require().NoError(err, "Could not instantiate testing backend")
