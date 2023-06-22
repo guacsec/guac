@@ -383,8 +383,8 @@ func (s *Suite) TestOccurrence() {
 			},
 		},
 		{
-			Name:  "Query on Source",
-			Only:  true,
+			Name: "Query on Source",
+			// Only:  true,
 			InPkg: []*model.PkgInputSpec{p1},
 			InSrc: []*model.SourceInputSpec{s1},
 			InArt: []*model.ArtifactInputSpec{a1},

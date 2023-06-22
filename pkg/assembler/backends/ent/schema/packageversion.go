@@ -18,7 +18,8 @@ func (PackageVersion) Fields() []ent.Field {
 		field.Int("name_id"),
 		field.String("version"),
 		field.String("subpath"),
-		field.String("qualifiers"),
+		field.Strings("qualifiers").Optional(),
+		field.String("qualifiers_hash").Comment("A SHA1 of the qualifiers field after sorting keys, used to ensure uniqueness of qualifiers"),
 	}
 }
 
@@ -33,6 +34,6 @@ func (PackageVersion) Edges() []ent.Edge {
 // Indexes of the PackageVersion.
 func (PackageVersion) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("version", "subpath", "qualifiers").Edges("name").Unique(),
+		index.Fields("version", "subpath", "qualifiers_hash").Edges("name").Unique(),
 	}
 }

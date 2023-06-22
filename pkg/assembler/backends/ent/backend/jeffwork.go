@@ -132,7 +132,9 @@ func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.I
 	}
 
 	ids, err := query.
-		WithPackage().
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.Limit(1)
+		}).
 		WithDependentPackage().
 		All(ctx)
 	if err != nil {
@@ -191,7 +193,9 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 	// Upsert only gets ID, so need to query the object
 	record, err := b.client.Dependency.Query().
 		Where(isdependency.ID(*recordID)).
-		WithPackage().
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.Limit(1)
+		}).
 		WithDependentPackage().
 		Only(ctx)
 	if err != nil {
