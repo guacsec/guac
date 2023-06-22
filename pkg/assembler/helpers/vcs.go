@@ -60,8 +60,8 @@ func VcsToSrc(vcsUri string) (*model.SourceInputSpec, error) {
 	m.Namespace = u.Host
 
 	idx := strings.LastIndex(u.Path, "/")
-	if idx > 0 {
-		m.Name = u.Path[idx+1:]
+	if idx > 0 { //if idx >= 0?
+		m.Name = u.Path[idx+1:] 
 		m.Namespace += u.Path[:idx]
 	} else {
 		m.Name = strings.TrimPrefix(u.Path, "/")
