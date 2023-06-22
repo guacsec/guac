@@ -210,15 +210,18 @@ var (
 	}
 )
 
-func ingestTestData(ctx context.Context, client graphql.Client) {
+func ingestTestData(graphInput string, ctx context.Context, client graphql.Client) {
 	logger := logging.FromContext(ctx)
-	for _, ingest := range isDepTestData.IsDependency {
+	switch graphInput {
+	case "isDep":
+		for _, ingest := range isDepTestData.IsDependency {
 
-		_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
+			_, err := model.IsDependency(context.Background(), client, *ingest.Pkg, *ingest.DepPkg, *ingest.IsDependency)
 
-		if err != nil {
+			if err != nil {
 
-			logger.Errorf("Error in ingesting: %v\n", err)
+				logger.Errorf("Error in ingesting: %v\n", err)
+			}
 		}
 	}
 }
@@ -230,68 +233,82 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
-	ingestTestData(ctx, gqlclient)
-
 	testCases := []struct {
-		startID     string
-		stopID      string
+		start       int
+		stop        int
 		maxDepth    int
 		expectedLen int
+		graphInput  string
 	}{
 		{
 			// 1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth
-			startID:     getPackageId("isDep", 0, ctx, gqlclient),
-			stopID:      "",
+			start:       0,
+			stop:        -1,
 			maxDepth:    10,
 			expectedLen: 3,
+			graphInput:  "isDep",
 		},
 		{
 			// 2: test case with two levels of dependencies, no stopID and no limiting maxDepth
-			startID:     getPackageId("isDep", 1, ctx, gqlclient),
-			stopID:      "",
+			start:       1,
+			stop:        -1,
 			maxDepth:    10,
 			expectedLen: 4,
+			graphInput:  "isDep",
 		},
 		{
 			// 3: test case with two levels of dependencies, a stopID at the first level and no limiting maxDepth
-			startID:     getPackageId("isDep", 1, ctx, gqlclient),
-			stopID:      getPackageId("isDep", 0, ctx, gqlclient),
+			start:       1,
+			stop:        0,
 			maxDepth:    10,
 			expectedLen: 2,
+			graphInput:  "isDep",
 		},
 		{
 			// 4: test case with two levels of dependencies, no stopID and a limiting maxDepth at the first level
-			startID:     getPackageId("isDep", 2, ctx, gqlclient),
-			stopID:      "",
+			start:       2,
+			stop:        -1,
 			maxDepth:    1,
 			expectedLen: 2,
+			graphInput:  "isDep",
 		},
 		{
 			// 5: test case with indirect dependency
-			startID:     getPackageId("isDep", 3, ctx, gqlclient),
-			stopID:      "",
+			start:       3,
+			stop:        -1,
 			maxDepth:    1,
 			expectedLen: 2,
+			graphInput:  "isDep",
 		},
 		{
 			// 6: test case with isDep range that does not include the dependency
-			startID:     getPackageId("isDep", 4, ctx, gqlclient),
-			stopID:      "",
+			start:       4,
+			stop:        -1,
 			maxDepth:    10,
 			expectedLen: 1,
+			graphInput:  "isDep",
 		},
 	}
 
 	for _, tt := range testCases {
-
 		t.Run("testing searchDependenciesFromStartNode", func(t *testing.T) {
-			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, tt.startID, tt.stopID, tt.maxDepth)
+			ingestTestData(tt.graphInput, ctx, gqlclient)
+			startID := getPackageId("isDep", tt.start, ctx, gqlclient)
+
+			var stopID string
+			if tt.stop >= 0 {
+				stopID = getPackageId("isDep", tt.stop, ctx, gqlclient)
+			} else {
+				stopID = ""
+			}
+
+			gotMap, err := SearchDependenciesFromStartNode(ctx, gqlclient, startID, stopID, tt.maxDepth)
 			if err != nil {
 				t.Errorf("got err from searchDependenciesFromStartNode: %v", err)
 				return
 			}
 
-			if tt.stopID == "" && tt.maxDepth == 10 {
+			if stopID == "" && tt.maxDepth == 10 {
 				for k, v := range gotMap {
 					if !v.expanded {
 						t.Errorf("All nodes should be expanded but this node was not: node %s \n", k)
@@ -304,10 +321,10 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			for k, v := range gotMap {
-				if k == tt.startID && (v.Parent != "" || v.depth != 0) {
+				if k == startID && (v.Parent != "" || v.depth != 0) {
 					t.Errorf("Incorrect starting node entry")
 				}
-				if k != tt.startID && (v.Parent == "" || v.depth < 1) {
+				if k != startID && (v.Parent == "" || v.depth < 1) {
 					t.Errorf("Incorrect dependency node entry")
 				}
 			}
