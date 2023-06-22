@@ -2,12 +2,14 @@ VERSION=$(shell git describe --tags --always)
 COMMIT=$(shell git rev-parse HEAD)
 BUILD=$(shell date +%FT%T%z)
 PKG=github.com/guacsec/guac/pkg/version
-
 LDFLAGS="-X $(PKG).Version=$(VERSION) -X $(PKG).Commit=$(COMMIT) -X $(PKG).Date=$(BUILD)"
 
-.DEFAULT_GOAL := build
-
 CONTAINER ?= docker
+CPUTYPE=$(shell uname -m)
+GITHUB_REPOSITORY ?= guacsec/guac
+LOCAL_IMAGE_NAME ?= local-organic-guac
+
+.DEFAULT_GOAL := build
 
 .PHONY: all
 all: test cover fmt lint build generate
@@ -54,15 +56,6 @@ generated_up_to_date: generate
 lint: check-golangci-lint-tool-check
 	golangci-lint run ./...
 
-# Build a version
-.PHONY: build
-build: generate
-	go build -ldflags ${LDFLAGS} -o bin/guaccollect cmd/guaccollect/main.go
-	go build -ldflags ${LDFLAGS} -o bin/guacingest cmd/guacingest/main.go
-	go build -ldflags ${LDFLAGS} -o bin/guacone cmd/guacone/main.go
-	go build -ldflags ${LDFLAGS} -o bin/guacgql cmd/guacgql/main.go
-	go build -ldflags ${LDFLAGS} -o bin/guaccsub cmd/guaccsub/main.go
-
 .PHONY: proto
 proto:
 	protoc --go_out=. --go_opt=paths=source_relative \
@@ -96,11 +89,36 @@ fmt-md:
 generate:
 	go generate ./...
 
-.PHONY: container
-container: check-docker-tool-check
-	$(CONTAINER) build -f dockerfiles/Dockerfile.guac-cont -t local-organic-guac .
-	$(CONTAINER) build -f dockerfiles/Dockerfile.healthcheck -t local-healthcheck .
+# build bins for goos/goarch of current host
+.PHONY: build_bins
+build_bins:
+	goreleaser build --clean --snapshot --single-target 
 
+# Build bins and copy to ./bin to align with docs
+# Separate build_bins as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
+.PHONY: build
+build: build_bins
+	@mkdir -p bin
+	@echo "$(shell cat dist/artifacts.json | jq '.[]| { path: .path, name: .extra.ID } | join(" ")' -r)" | xargs -n 2 sh -c 'cp $$0 ./bin/$$1'
+	@echo "\nThe guac bins are available in ./bin"
+
+.PHONY: build_local_container
+build_local_container: GORELEASER_CURRENT_TAG ?= v0.0.0-$(LOCAL_IMAGE_NAME)
+build_local_container:
+	GITHUB_REPOSITORY=$(GITHUB_REPOSITORY) \
+	GORELEASER_CURRENT_TAG=$(GORELEASER_CURRENT_TAG) \
+	DOCKER_CONTEXT=$(shell docker context show) \
+	goreleaser release --clean --snapshot --skip-sign --skip-sbom
+
+# Build and package a guac container for local testing
+# Separate build_container as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
+.PHONY: container
+container: check-docker-tool-check check-goreleaser-tool-check build_local_container
+    # tag/name the image according to current docs to avoid changes
+	@$(CONTAINER) tag \
+	"$(shell cat dist/artifacts.json | jq --raw-output '.[] | select( .type =="Docker Image" ) | select( .goarch =="$(CPUTYPE)" ).name')" \
+	$(LOCAL_IMAGE_NAME)
+	@echo "\nThe guac container image is tagged locally as $(LOCAL_IMAGE_NAME)"
 
 # To run the service, run `make container` and then `make service`
 # making the container is a longer process and thus not a dependency of service.
@@ -148,6 +166,13 @@ check-mockgen-tool-check:
 		exit 1; \
 	fi
 
+.PHONY: check-goreleaser-tool-check
+check-goreleaser-tool-check:
+	@if ! command -v goreleaser >/dev/null 2>&1; then \
+		echo "goreleaser is not installed. Please install goreleaser and try again."; \
+		exit 1; \
+	fi
+
 # Check that all the tools are installed.
 .PHONY: check-tools
-check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check
+check-tools: check-docker-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check check-goreleaser-tool-check

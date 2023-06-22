@@ -30,6 +30,7 @@ var flags = struct {
 	backend  string
 	port     int
 	debug    bool
+	tracegql bool
 	testData bool
 
 	// Needed only if using neo4j backend
@@ -53,6 +54,7 @@ var rootCmd = &cobra.Command{
 		flags.backend = viper.GetString("gql-backend")
 		flags.port = viper.GetInt("gql-listen-port")
 		flags.debug = viper.GetBool("gql-debug")
+		flags.tracegql = viper.GetBool("gql-trace")
 		flags.testData = viper.GetBool("gql-test-data")
 
 		flags.nUser = viper.GetString("neo4j-user")
@@ -75,7 +77,7 @@ func init() {
 
 	set, err := cli.BuildFlags([]string{
 		"neo4j-addr", "neo4j-user", "neo4j-pass", "neo4j-realm",
-		"gql-test-data", "gql-listen-port", "gql-debug", "gql-backend",
+		"gql-test-data", "gql-listen-port", "gql-debug", "gql-backend", "gql-trace",
 		"db-address", "db-driver", "db-debug", "db-migrate",
 	})
 	if err != nil {

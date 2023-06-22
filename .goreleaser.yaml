@@ -20,6 +20,7 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--builder={{ .Env.DOCKER_CONTEXT }}"
   - use: buildx
     goos: linux
     goarch: arm64
@@ -33,6 +34,7 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--builder={{ .Env.DOCKER_CONTEXT }}"
 
 docker_manifests:
 - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}"
@@ -142,6 +144,31 @@ builds:
 
 universal_binaries:
 - replace: true
+  name_template: guacone
+  id: guacone
+  ids:
+  - guacone
+- replace: true
+  name_template: guacingest
+  id: guacingest
+  ids:
+  - guacingest
+- replace: true
+  name_template: guaccsub
+  id: guaccsub
+  ids:
+  - guaccsub
+- replace: true
+  name_template: guaccollect
+  id: guaccollect
+  ids:
+  - guaccollect
+- replace: true
+  name_template: guacgql
+  id: guacgql
+  ids:
+  - guacgql
+
 
 sboms:
   - id: bins 

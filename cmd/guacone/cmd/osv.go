@@ -95,7 +95,7 @@ var osvCmd = &cobra.Command{
 			docTree, err := processorFunc(d)
 			if err != nil {
 				gotErr = true
-				return fmt.Errorf("unable to process doc: %v, fomat: %v, document: %v", err, d.Format, d.Type)
+				return fmt.Errorf("unable to process doc: %v, format: %v, document: %v", err, d.Format, d.Type)
 			}
 
 			predicates, idstrings, err := ingestorFunc(docTree)

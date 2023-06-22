@@ -84,12 +84,23 @@ func (dp *SimpleDocProc) ValidateSchema(d *processor.Document) error {
 	return validateSimpleDoc(p)
 }
 
+// Calling validateSimpleDocHelper, so that extra parameters can be passed in
 func validateSimpleDoc(pd SimpleDoc) error {
+	return validateSimpleDocHelper(pd, map[string]bool{})
+}
+
+func validateSimpleDocHelper(pd SimpleDoc, visited map[string]bool) error {
 	if pd.Issuer == "" {
 		return fmt.Errorf("issuer shouldn't be empty")
 	}
 	for _, nestedDoc := range pd.Nested {
-		if err := validateSimpleDoc(nestedDoc); err != nil {
+		// if we've already visited this issuer, then we've already validated it
+		if visited[nestedDoc.Issuer] {
+			continue
+		}
+		// we assign this issuer as visited, and then recursively validate it
+		visited[nestedDoc.Issuer] = true
+		if err := validateSimpleDocHelper(nestedDoc, visited); err != nil {
 			return err
 		}
 	}
