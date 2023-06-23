@@ -76,6 +76,15 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		s.Empty(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx))
 	})
 
+	s.Run("No Qualifiers", func() {
+		spec.Qualifiers = nil
+		pkg, err = ingestPackage(s.Ctx, s.Client, spec)
+		s.Require().NoError(err)
+		s.Require().NotNil(pkg)
+
+		s.NotEmpty(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx))
+	})
+
 	s.Run("Single key", func() {
 		versions := s.Client.PackageVersion.Query().Where(packageversion.QualifiersWithKeys("arch", "a")).AllX(s.Ctx)
 		s.NotEmpty(versions)
