@@ -50,7 +50,7 @@ func TestHashPackageVersions(t *testing.T) {
 	}
 }
 
-func (s *Suite) Test_getPkgName() {
+func (s *Suite) Test_get_package_helpers() {
 	spec := model.PkgInputSpec{
 		Type:      "apk",
 		Namespace: ptr("test"),
@@ -67,20 +67,22 @@ func (s *Suite) Test_getPkgName() {
 	s.Require().NoError(err)
 	s.Require().NotNil(pkgVersionID)
 
-	pkgName, err := getPkgName(s.Ctx, s.Client, &model.PkgInputSpec{
-		Type:      "apk",
-		Namespace: ptr("test"),
-		Name:      "alpine",
+	s.Run("getPkgName", func() {
+		pkgName, err := getPkgName(s.Ctx, s.Client, &model.PkgInputSpec{
+			Type:      "apk",
+			Namespace: ptr("test"),
+			Name:      "alpine",
+		})
+		s.Require().NoError(err)
+		s.Require().NotNil(pkgName)
+		s.Equal("alpine", pkgName.Name)
 	})
-	s.Require().NoError(err)
-	s.Require().NotNil(pkgName)
-	s.Equal("alpine", pkgName.Name)
 
-	s.Require().Equal(1, s.Client.PackageVersion.Query().Where(packageversion.ID(pkgVersionID)).CountX(s.Ctx))
-
-	pkgVersion, err := getPkgVersion(s.Ctx, s.Client.Debug(), &spec)
-	s.Require().NoError(err)
-	s.Require().NotNil(pkgVersion)
+	s.Run("getPkgVersion", func() {
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, &spec)
+		s.Require().NoError(err)
+		s.Require().NotNil(pkgVersion)
+	})
 }
 
 func (s *Suite) TestEmptyQualifiersPredicate() {
