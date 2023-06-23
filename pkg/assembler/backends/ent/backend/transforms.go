@@ -259,3 +259,17 @@ func toOccurrenceSubject(s *ent.OccurrenceSubject) model.PackageOrSource {
 	}
 	return nil
 }
+
+func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
+	if input == nil {
+		return nil
+	}
+	out := make([]*model.PackageQualifierSpec, len(input))
+	for i, in := range input {
+		out[i] = &model.PackageQualifierSpec{
+			Key:   in.Key,
+			Value: &in.Value,
+		}
+	}
+	return out
+}

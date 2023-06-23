@@ -63,11 +63,11 @@ func (s *Suite) Test_getPkgName() {
 		},
 	}
 
-	pkg, err := upsertPackage(s.Ctx, s.Client, spec)
+	pkgVersionID, err := upsertPackage(s.Ctx, s.Client, spec)
 	s.Require().NoError(err)
-	s.Require().NotNil(pkg)
+	s.Require().NotNil(pkgVersionID)
 
-	pkgName, err := getPkgName(s.Ctx, s.Client.Debug(), &model.PkgInputSpec{
+	pkgName, err := getPkgName(s.Ctx, s.Client, &model.PkgInputSpec{
 		Type:      "apk",
 		Namespace: ptr("test"),
 		Name:      "alpine",
@@ -75,6 +75,12 @@ func (s *Suite) Test_getPkgName() {
 	s.Require().NoError(err)
 	s.Require().NotNil(pkgName)
 	s.Equal("alpine", pkgName.Name)
+
+	s.Require().Equal(1, s.Client.PackageVersion.Query().Where(packageversion.ID(pkgVersionID)).CountX(s.Ctx))
+
+	pkgVersion, err := getPkgVersion(s.Ctx, s.Client.Debug(), &spec)
+	s.Require().NoError(err)
+	s.Require().NotNil(pkgVersion)
 }
 
 func (s *Suite) TestEmptyQualifiersPredicate() {

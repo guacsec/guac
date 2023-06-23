@@ -36,19 +36,22 @@ func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSp
 		QueryNames().Where(packagename.Name(pkgin.Name)).Only(ctx)
 }
 
-func (b *EntBackend) getPkgVersion(ctx context.Context, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
-	n, err := getPkgName(ctx, b.client, pkgin)
-	if err != nil {
-		return nil, err
-	}
-	return n.QueryVersions().
+func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
+	return client.PackageVersion.Query().
 		Where(
-			packageversion.Version(valueOrDefault(pkgin.Version, "")),
-			packageversion.Subpath(valueOrDefault(pkgin.Subpath, "")),
-			// packageversion.QualifiersMatchSpec(pkgin.Qualifiers),
+			optionalPredicate(pkgin.Version, packageversion.VersionEQ),
+			optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
+			packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
+			packageversion.HasNameWith(
+				packagename.Name(pkgin.Name),
+				packagename.HasNamespaceWith(
+					packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, "")),
+					packagenamespace.HasPackageWith(
+						packagenode.Type(pkgin.Type),
+					),
+				),
+			),
 		).
-
-		// Where(packageversion.Qualifiers(qualifiersToString(pkgin.Qualifiers))).
 		Only(ctx)
 }
 
@@ -144,7 +147,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.FromContext(ctx)
-		p, err := b.getPkgVersion(ctx, &pkg)
+		p, err := getPkgVersion(ctx, client, &pkg)
 		if err != nil {
 			return nil, err
 		}

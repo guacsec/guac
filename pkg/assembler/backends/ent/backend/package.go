@@ -159,7 +159,8 @@ func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 				packageversion.FieldNameID,
 			),
 		).
-		UpdateNewValues().ID(ctx)
+		UpdateNewValues().
+		ID(ctx)
 	if err != nil {
 		return 0, errors.Wrap(err, "upsert package version")
 	}
