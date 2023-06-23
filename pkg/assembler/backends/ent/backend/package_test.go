@@ -94,7 +94,7 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 	})
 
 	s.Run("Using spec - Multiple", func() {
-		versions := s.Client.Debug().PackageVersion.Query().Where(
+		versions := s.Client.PackageVersion.Query().Where(
 			packageversion.QualifiersMatchSpec([]*model.PackageQualifierSpec{
 				{Key: "arch"},
 				{Key: "a", Value: ptr("b")},
