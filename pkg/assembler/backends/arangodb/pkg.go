@@ -101,7 +101,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { namespace: @namespace, _parent: @typeID }
 		INSERT { namespace: @namespace, _parent: @typeID }
 		UPDATE {}
-		IN PkgNamespace OPTIONS { indexHint: "byNamespace" }
+		IN PkgNamespace OPTIONS { indexHint: "byNamespaceParent" }
 		RETURN NEW
 	  )
 	  
@@ -109,7 +109,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { name: @name, _parent: ns._id }
 		INSERT { name: @name, _parent: ns._id }
 		UPDATE {}
-		IN PkgName OPTIONS { indexHint: "byName" }
+		IN PkgName OPTIONS { indexHint: "byNameParent" }
 		RETURN NEW
 	  )
 	  
@@ -117,7 +117,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
 		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
 		UPDATE {}
-		IN PkgVersion OPTIONS { indexHint: "byAllVersion" }
+		IN PkgVersion OPTIONS { indexHint: "byAllVersionParent" }
 		RETURN NEW
 	  )
 	

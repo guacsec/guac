@@ -223,7 +223,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for hashEqualsEdges: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgType", []string{"type"}, true, "byType"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgType", []string{"type", "_parent"}, true, "byTypeParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgType: %w", err)
 		}
 
@@ -231,14 +231,14 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for PkgHasType: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"namespace"}, false, "byNamespace"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"namespace", "_parent"}, false, "byNamespaceParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgNamespace: %w", err)
 		}
 		if err := createIndexPerCollection(ctx, db, "PkgHasNamespace", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgHasNamespace: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name"}, false, "byName"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"name", "_parent"}, false, "byNameParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgName: %w", err)
 		}
 
@@ -258,7 +258,7 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
 		}
 
-		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version", "subpath", "qualifier_list[*]"}, false, "byAllVersion"); err != nil {
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"version", "subpath", "qualifier_list[*]", "_parent"}, false, "byAllVersionParent"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for PkgVersion: %w", err)
 		}
 

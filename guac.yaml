@@ -6,7 +6,7 @@ neo4j-realm: neo4j
 
 # Arangodb setup
 arango-user: root
-arango-pass: rootpassword
+arango-pass: test123
 arango-addr: http://localhost:8529
 
 # Nats setup

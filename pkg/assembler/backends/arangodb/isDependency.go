@@ -83,13 +83,13 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 		FOR pkg IN Pkg
 		FILTER pkg.root == "pkg"
 		FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			FILTER pkgHasType.type == @pkgType
+			FILTER pkgHasType.type == @pkgType && pkgHasType._parent == pkg._id
 		  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-				  FILTER pkgHasNamespace.namespace == @namespace
+				  FILTER pkgHasNamespace.namespace == @namespace && pkgHasNamespace._parent == pkgHasType._id
 			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-					  FILTER pkgHasName.name == @name
+					  FILTER pkgHasName.name == @name && pkgHasName._parent == pkgHasNamespace._id
 				FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
-						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier
+						  FILTER pkgHasVersion.version == @version && pkgHasVersion.subpath == @subpath && pkgHasVersion.qualifier_list == @qualifier && pkgHasVersion._parent == pkgHasName._id
 				  RETURN {
 					"type": pkgHasType.type,
 					"namespace": pkgHasNamespace.namespace,
@@ -105,11 +105,11 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 		FOR pkg IN Pkg
 		  FILTER pkg.root == "pkg"
 		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			  FILTER pkgHasType.type == @secondPkgType
+			  FILTER pkgHasType.type == @secondPkgType && pkgHasType._parent == pkg._id
 			FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-				FILTER pkgHasNamespace.namespace == @secondNamespace
+				FILTER pkgHasNamespace.namespace == @secondNamespace && pkgHasNamespace._parent == pkgHasType._id
 			  FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-					  FILTER pkgHasName.name == @secondName
+					  FILTER pkgHasName.name == @secondName && pkgHasName._parent == pkgHasNamespace._id
 				  RETURN {
 					"type": pkgHasType.type,
 					"namespace": pkgHasNamespace.namespace,
