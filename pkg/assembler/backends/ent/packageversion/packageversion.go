@@ -20,6 +20,8 @@ const (
 	FieldSubpath = "subpath"
 	// FieldQualifiers holds the string denoting the qualifiers field in the database.
 	FieldQualifiers = "qualifiers"
+	// FieldHash holds the string denoting the hash field in the database.
+	FieldHash = "hash"
 	// EdgeName holds the string denoting the name edge name in mutations.
 	EdgeName = "name"
 	// Table holds the table name of the packageversion in the database.
@@ -40,6 +42,7 @@ var Columns = []string{
 	FieldVersion,
 	FieldSubpath,
 	FieldQualifiers,
+	FieldHash,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -75,9 +78,9 @@ func BySubpath(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSubpath, opts...).ToFunc()
 }
 
-// ByQualifiers orders the results by the qualifiers field.
-func ByQualifiers(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldQualifiers, opts...).ToFunc()
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
 }
 
 // ByNameField orders the results by name field.

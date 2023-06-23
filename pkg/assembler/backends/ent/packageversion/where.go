@@ -68,9 +68,9 @@ func Subpath(v string) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldEQ(FieldSubpath, v))
 }
 
-// Qualifiers applies equality check predicate on the "qualifiers" field. It's identical to QualifiersEQ.
-func Qualifiers(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldEQ(FieldQualifiers, v))
+// Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
+func Hash(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldEQ(FieldHash, v))
 }
 
 // NameIDEQ applies the EQ predicate on the "name_id" field.
@@ -223,69 +223,79 @@ func SubpathContainsFold(v string) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldContainsFold(FieldSubpath, v))
 }
 
-// QualifiersEQ applies the EQ predicate on the "qualifiers" field.
-func QualifiersEQ(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldEQ(FieldQualifiers, v))
+// QualifiersIsNil applies the IsNil predicate on the "qualifiers" field.
+func QualifiersIsNil() predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldIsNull(FieldQualifiers))
 }
 
-// QualifiersNEQ applies the NEQ predicate on the "qualifiers" field.
-func QualifiersNEQ(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldNEQ(FieldQualifiers, v))
+// QualifiersNotNil applies the NotNil predicate on the "qualifiers" field.
+func QualifiersNotNil() predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldNotNull(FieldQualifiers))
 }
 
-// QualifiersIn applies the In predicate on the "qualifiers" field.
-func QualifiersIn(vs ...string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldIn(FieldQualifiers, vs...))
+// HashEQ applies the EQ predicate on the "hash" field.
+func HashEQ(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldEQ(FieldHash, v))
 }
 
-// QualifiersNotIn applies the NotIn predicate on the "qualifiers" field.
-func QualifiersNotIn(vs ...string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldNotIn(FieldQualifiers, vs...))
+// HashNEQ applies the NEQ predicate on the "hash" field.
+func HashNEQ(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldNEQ(FieldHash, v))
 }
 
-// QualifiersGT applies the GT predicate on the "qualifiers" field.
-func QualifiersGT(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldGT(FieldQualifiers, v))
+// HashIn applies the In predicate on the "hash" field.
+func HashIn(vs ...string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldIn(FieldHash, vs...))
 }
 
-// QualifiersGTE applies the GTE predicate on the "qualifiers" field.
-func QualifiersGTE(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldGTE(FieldQualifiers, v))
+// HashNotIn applies the NotIn predicate on the "hash" field.
+func HashNotIn(vs ...string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldNotIn(FieldHash, vs...))
 }
 
-// QualifiersLT applies the LT predicate on the "qualifiers" field.
-func QualifiersLT(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldLT(FieldQualifiers, v))
+// HashGT applies the GT predicate on the "hash" field.
+func HashGT(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldGT(FieldHash, v))
 }
 
-// QualifiersLTE applies the LTE predicate on the "qualifiers" field.
-func QualifiersLTE(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldLTE(FieldQualifiers, v))
+// HashGTE applies the GTE predicate on the "hash" field.
+func HashGTE(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldGTE(FieldHash, v))
 }
 
-// QualifiersContains applies the Contains predicate on the "qualifiers" field.
-func QualifiersContains(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldContains(FieldQualifiers, v))
+// HashLT applies the LT predicate on the "hash" field.
+func HashLT(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldLT(FieldHash, v))
 }
 
-// QualifiersHasPrefix applies the HasPrefix predicate on the "qualifiers" field.
-func QualifiersHasPrefix(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldHasPrefix(FieldQualifiers, v))
+// HashLTE applies the LTE predicate on the "hash" field.
+func HashLTE(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldLTE(FieldHash, v))
 }
 
-// QualifiersHasSuffix applies the HasSuffix predicate on the "qualifiers" field.
-func QualifiersHasSuffix(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldHasSuffix(FieldQualifiers, v))
+// HashContains applies the Contains predicate on the "hash" field.
+func HashContains(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldContains(FieldHash, v))
 }
 
-// QualifiersEqualFold applies the EqualFold predicate on the "qualifiers" field.
-func QualifiersEqualFold(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldEqualFold(FieldQualifiers, v))
+// HashHasPrefix applies the HasPrefix predicate on the "hash" field.
+func HashHasPrefix(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldHasPrefix(FieldHash, v))
 }
 
-// QualifiersContainsFold applies the ContainsFold predicate on the "qualifiers" field.
-func QualifiersContainsFold(v string) predicate.PackageVersion {
-	return predicate.PackageVersion(sql.FieldContainsFold(FieldQualifiers, v))
+// HashHasSuffix applies the HasSuffix predicate on the "hash" field.
+func HashHasSuffix(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldHasSuffix(FieldHash, v))
+}
+
+// HashEqualFold applies the EqualFold predicate on the "hash" field.
+func HashEqualFold(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldEqualFold(FieldHash, v))
+}
+
+// HashContainsFold applies the ContainsFold predicate on the "hash" field.
+func HashContainsFold(v string) predicate.PackageVersion {
+	return predicate.PackageVersion(sql.FieldContainsFold(FieldHash, v))
 }
 
 // HasName applies the HasEdge predicate on the "name" edge.
