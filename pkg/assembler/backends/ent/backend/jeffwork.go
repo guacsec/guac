@@ -5,103 +5,10 @@ import (
 
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	isdependency "github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
-
-// Each "noun" node will need a "get" for any time an ingest happens on a
-// "verb" node that points to it. All but Package and Source are simple. For
-// Package, some verbs link to Name and some to Version, or some both. For
-// Source, we will want a SourceName.
-//
-// It is tempting to try to make generic helpers function that are used in both
-// this usecase and also in querying, but I find that gets too complicated to
-// understand easily.
-//
-// These queries need to be fast, all the fields are present in an "InputSpec"
-// and should allow using the db index.
-
-func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
-	return client.PackageNode.Query().
-		Where(packagenode.Type(pkgin.Type)).
-		QueryNamespaces().
-		Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.Name(pkgin.Name)).Only(ctx)
-}
-
-func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
-	return client.PackageVersion.Query().
-		Where(
-			optionalPredicate(pkgin.Version, packageversion.VersionEQ),
-			optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
-			packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
-			packageversion.HasNameWith(
-				packagename.Name(pkgin.Name),
-				packagename.HasNamespaceWith(
-					packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, "")),
-					packagenamespace.HasPackageWith(
-						packagenode.Type(pkgin.Type),
-					),
-				),
-			),
-		).
-		Only(ctx)
-}
-
-func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
-	return client.Artifact.Query().
-		Where(artifact.Algorithm(artin.Algorithm), artifact.Digest(artin.Digest)).
-		Only(ctx)
-}
-
-// When verb nodes point to a PackageName/Version or SourceName we need to
-// rebuild the full top level tree object with just the nested objects that are
-// part of the path to that node
-
-func pkgTreeFromVersion(ctx context.Context, pv *ent.PackageVersion) (*ent.PackageNode, error) {
-	n, err := pv.QueryName().Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	ns, err := n.QueryNamespace().Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return ns.QueryPackage().
-		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.Where(packagenamespace.Namespace(ns.Namespace))
-			q.WithNames(func(q *ent.PackageNameQuery) {
-				q.Where(packagename.Name(n.Name))
-				q.WithVersions(func(q *ent.PackageVersionQuery) {
-					q.Where(packageversion.Hash(hashPackageVersion(pv.Version, pv.Subpath, pv.Qualifiers)))
-				})
-			})
-		}).
-		Only(ctx)
-}
-
-func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode, error) {
-	ns, err := pn.QueryNamespace().Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return ns.QueryPackage().
-		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.Where(packagenamespace.Namespace(ns.Namespace))
-			q.WithNames(func(q *ent.PackageNameQuery) {
-				q.Where(packagename.Name(pn.Name))
-			})
-		}).
-		Only(ctx)
-}
 
 func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	funcName := "IsDependency"
@@ -110,8 +17,8 @@ func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.I
 	if isDependencySpec != nil {
 		query.Where(
 			optionalPredicate(isDependencySpec.ID, IDEQ),
-			isdependency.HasPackageWith(pkgVersionPreds(isDependencySpec.Package)...),
-			isdependency.HasDependentPackageWith(pkgNamePreds(isDependencySpec.DependentPackage)...),
+			isdependency.HasPackageWith(pkgVersionPredicates(isDependencySpec.Package)...),
+			isdependency.HasDependentPackageWith(pkgNamePredicates(isDependencySpec.DependentPackage)...),
 			optionalPredicate(isDependencySpec.VersionRange, isdependency.VersionRange),
 			optionalPredicate(isDependencySpec.Justification, isdependency.Justification),
 			optionalPredicate(isDependencySpec.Origin, isdependency.Origin),
@@ -303,69 +210,3 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 // 		Collector:     o.Collector,
 // 	}, nil
 // }
-
-func toModelIsDependency(ctx context.Context, id *ent.Dependency) (*model.IsDependency, error) {
-	p, err := pkgTreeFromVersion(ctx, id.Edges.Package)
-	if err != nil {
-		return nil, err
-	}
-	dp, err := pkgTreeFromName(ctx, id.Edges.DependentPackage)
-	if err != nil {
-		return nil, err
-	}
-	return &model.IsDependency{
-		ID:               nodeID(id.ID),
-		Package:          toModelPackage(p),
-		DependentPackage: toModelPackage(dp),
-		VersionRange:     id.VersionRange,
-		DependencyType:   model.DependencyType(id.DependencyType),
-		Justification:    id.Justification,
-		Origin:           id.Origin,
-		Collector:        id.Collector,
-	}, nil
-}
-
-func pkgVersionPreds(spec *model.PkgSpec) []predicate.PackageVersion {
-	if spec == nil {
-		return nil
-	}
-	rv := []predicate.PackageVersion{
-		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.Version, packageversion.Version),
-		optionalPredicate(spec.Subpath, packageversion.Subpath),
-		packageversion.HasNameWith(
-			optionalPredicate(spec.Name, packagename.Name),
-			packagename.HasNamespaceWith(
-				optionalPredicate(spec.Namespace, packagenamespace.Namespace),
-				packagenamespace.HasPackageWith(
-					optionalPredicate(spec.Type, packagenode.Type),
-				),
-			),
-		),
-	}
-
-	if spec.MatchOnlyEmptyQualifiers != nil && *spec.MatchOnlyEmptyQualifiers {
-		rv = append(rv, packageversion.QualifiersIsEmpty())
-	} else if spec.Qualifiers != nil {
-		// FIXME need to do custom filtering to allow specifying partial qualifiers? or key only??
-		// query.Where(isdependency.HasPackageWith(packageversion.Qualifiers(qualifiersToString(isDependencySpec.Package.Qualifiers))))
-	}
-
-	return rv
-}
-
-func pkgNamePreds(spec *model.PkgNameSpec) []predicate.PackageName {
-	if spec == nil {
-		return nil
-	}
-	return []predicate.PackageName{
-		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.Name, packagename.Name),
-		packagename.HasNamespaceWith(
-			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
-			packagenamespace.HasPackageWith(
-				optionalPredicate(spec.Type, packagenode.Type),
-			),
-		),
-	}
-}

@@ -85,7 +85,7 @@ func (s *Suite) Test_get_package_helpers() {
 	})
 
 	s.Run("pkgTreeFromVersion", func() {
-		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, &spec)
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client.Debug(), &spec)
 		s.Require().NoError(err)
 		pkgTree, err := pkgTreeFromVersion(s.Ctx, pkgVersion)
 		s.Require().NoError(err)

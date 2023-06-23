@@ -13,6 +13,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 )
@@ -201,4 +202,43 @@ func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model
 	}
 
 	return qualifiers
+}
+
+func pkgVersionPredicates(spec *model.PkgSpec) []predicate.PackageVersion {
+	if spec == nil {
+		return nil
+	}
+	rv := []predicate.PackageVersion{
+		optionalPredicate(spec.ID, IDEQ),
+		optionalPredicate(spec.Version, packageversion.Version),
+		optionalPredicate(spec.Subpath, packageversion.Subpath),
+		packageversion.QualifiersMatchSpec(spec.Qualifiers),
+		packageversion.HasNameWith(
+			optionalPredicate(spec.Name, packagename.Name),
+			packagename.HasNamespaceWith(
+				optionalPredicate(spec.Namespace, packagenamespace.Namespace),
+				packagenamespace.HasPackageWith(
+					optionalPredicate(spec.Type, packagenode.Type),
+				),
+			),
+		),
+	}
+
+	return rv
+}
+
+func pkgNamePredicates(spec *model.PkgNameSpec) []predicate.PackageName {
+	if spec == nil {
+		return nil
+	}
+	return []predicate.PackageName{
+		optionalPredicate(spec.ID, IDEQ),
+		optionalPredicate(spec.Name, packagename.Name),
+		packagename.HasNamespaceWith(
+			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
+			packagenamespace.HasPackageWith(
+				optionalPredicate(spec.Type, packagenode.Type),
+			),
+		),
+	}
 }

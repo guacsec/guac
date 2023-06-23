@@ -273,3 +273,24 @@ func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) 
 	}
 	return out
 }
+
+func toModelIsDependency(ctx context.Context, id *ent.Dependency) (*model.IsDependency, error) {
+	p, err := pkgTreeFromVersion(ctx, id.Edges.Package)
+	if err != nil {
+		return nil, err
+	}
+	dp, err := pkgTreeFromName(ctx, id.Edges.DependentPackage)
+	if err != nil {
+		return nil, err
+	}
+	return &model.IsDependency{
+		ID:               nodeID(id.ID),
+		Package:          toModelPackage(p),
+		DependentPackage: toModelPackage(dp),
+		VersionRange:     id.VersionRange,
+		DependencyType:   model.DependencyType(id.DependencyType),
+		Justification:    id.Justification,
+		Origin:           id.Origin,
+		Collector:        id.Collector,
+	}, nil
+}
