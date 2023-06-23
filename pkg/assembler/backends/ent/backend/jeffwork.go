@@ -28,26 +28,16 @@ import (
 // These queries need to be fast, all the fields are present in an "InputSpec"
 // and should allow using the db index.
 
-func (b *EntBackend) getPkgName(ctx context.Context, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
-	t, err := b.client.PackageNode.Query().
+func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
+	return client.PackageNode.Query().
 		Where(packagenode.Type(pkgin.Type)).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	ns, err := t.QueryNamespaces().
+		QueryNamespaces().
 		Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return ns.QueryNames().
-		Where(packagename.Name(pkgin.Name)). // Does this combine with link up to namespace to use index??
-		Only(ctx)
+		QueryNames().Where(packagename.Name(pkgin.Name)).Only(ctx)
 }
 
 func (b *EntBackend) getPkgVersion(ctx context.Context, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
-	n, err := b.getPkgName(ctx, pkgin)
+	n, err := getPkgName(ctx, b.client, pkgin)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +148,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 		if err != nil {
 			return nil, err
 		}
-		dp, err := b.getPkgName(ctx, &depPkg)
+		dp, err := getPkgName(ctx, client, &depPkg)
 		if err != nil {
 			return nil, err
 		}

@@ -50,6 +50,33 @@ func TestHashPackageVersions(t *testing.T) {
 	}
 }
 
+func (s *Suite) Test_getPkgName() {
+	spec := model.PkgInputSpec{
+		Type:      "apk",
+		Namespace: ptr("test"),
+		Name:      "alpine",
+		Version:   ptr("1.0.0"),
+		Subpath:   ptr("subpath"),
+		Qualifiers: []*model.PackageQualifierInputSpec{
+			{Key: "arch", Value: "arm64"},
+			{Key: "a", Value: "b"},
+		},
+	}
+
+	pkg, err := upsertPackage(s.Ctx, s.Client, spec)
+	s.Require().NoError(err)
+	s.Require().NotNil(pkg)
+
+	pkgName, err := getPkgName(s.Ctx, s.Client.Debug(), &model.PkgInputSpec{
+		Type:      "apk",
+		Namespace: ptr("test"),
+		Name:      "alpine",
+	})
+	s.Require().NoError(err)
+	s.Require().NotNil(pkgName)
+	s.Equal("alpine", pkgName.Name)
+}
+
 func (s *Suite) TestEmptyQualifiersPredicate() {
 	spec := model.PkgInputSpec{
 		Type:      "apk",
