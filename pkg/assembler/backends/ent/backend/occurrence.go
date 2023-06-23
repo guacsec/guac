@@ -2,22 +2,31 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
-	isoccurrence "github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageoccurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourceoccurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	records, err := b.client.Occurrence.Query().
+func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	if query.Subject == nil {
+		return nil, gqlerror.Errorf("IsOccurrence :: subject is required")
+	}
+
+	if query.Subject.Package != nil {
+	}
+
+	records, err := b.client.PackageOccurrence.Query().
 		Where().
 		WithArtifact().
-		WithSource().
-		WithPackageVersion().
+		// WithSource().
+		WithPackage().
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -27,7 +36,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.I
 	for i, record := range records {
 		var sub model.PackageOrSource
 
-		if record.Edges.PackageVersion != nil {
+		if record.Edges.Package != nil {
 			sub, err = b.buildPackageResponse(ctx, record.Edges.PackageVersion.ID, model.PkgSpec{})
 			if err != nil {
 				return nil, err
@@ -39,10 +48,14 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.I
 			// }
 		}
 
-		models[i] = toModelIsOccurrence(record, sub)
+		models[i] = normalizePackageOccurrence(record, sub)
 	}
 
 	return models, nil
+}
+
+func buildOccurrenceQuery(ctx context.Context, client *ent.Client, query *model.IsOccurrenceSpec) (ent.SourceOccurrenceQuery, error) {
+
 }
 
 func (b *EntBackend) IngestOccurrence(ctx context.Context,
@@ -61,89 +74,92 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 
 		art, err := client.Artifact.Query().
 			Order(ent.Asc(artifact.FieldID)). // is order important here?
-			Where(artifact.Algorithm(art.Algorithm)).
-			Where(artifact.Digest(art.Digest)).
+			Where(artifact.Algorithm(art.Algorithm), artifact.Digest(art.Digest)).
 			Only(ctx) // should already be ingested
 		if err != nil {
 			return nil, err
 		}
 
-		// art.QueryOccurrences()
-
-		var pvID *int
-		var srcID *int
 		if subject.Package != nil {
-			id, err := ingestPackage(ctx, client, *subject.Package)
+			packageID, err := upsertPackage(ctx, client, *subject.Package)
 			if err != nil {
 				return nil, err
 			}
-			pvID = &id
+
+			id, err := client.PackageOccurrence.Create().
+				SetPackageID(packageID).
+				SetArtifact(art).
+				SetJustification(occurrence.Justification).
+				SetOrigin(occurrence.Origin).
+				SetCollector(occurrence.Collector).
+				OnConflict(
+					sql.ConflictColumns(
+						packageoccurrence.FieldArtifactID,
+						packageoccurrence.FieldPackageID,
+						packageoccurrence.FieldJustification,
+						packageoccurrence.FieldOrigin,
+						packageoccurrence.FieldCollector,
+					),
+				).
+				UpdateNewValues().
+				ID(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return &id, nil
 		} else if subject.Source != nil {
-			id, err := ingestSource(ctx, client, *subject.Source)
+			sourceID, err := ingestSource(ctx, client, *subject.Source)
 			if err != nil {
 				return nil, err
 			}
-			srcID = id
+
+			id, err := client.SourceOccurrence.Create().
+				SetSourceID(*sourceID).
+				SetArtifact(art).
+				SetJustification(occurrence.Justification).
+				SetOrigin(occurrence.Origin).
+				SetCollector(occurrence.Collector).
+				OnConflict(
+					sql.ConflictColumns(
+						sourceoccurrence.FieldArtifactID,
+						sourceoccurrence.FieldSourceID,
+						sourceoccurrence.FieldJustification,
+						sourceoccurrence.FieldOrigin,
+						sourceoccurrence.FieldCollector,
+					),
+				).
+				UpdateNewValues().
+				ID(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return &id, nil
 		}
 
-		conflictColumns := []string{
-			isoccurrence.FieldArtifactID,
-			isoccurrence.FieldSourceID,
-			isoccurrence.FieldPackageID,
-			isoccurrence.FieldJustification,
-			isoccurrence.FieldOrigin,
-			isoccurrence.FieldCollector,
-		}
-
-		id, err := client.Occurrence.Create().
-			SetNillablePackageVersionID(pvID).
-			SetNillableSourceID(srcID).
-			SetArtifact(art).
-			SetJustification(occurrence.Justification).
-			SetOrigin(occurrence.Origin).
-			SetCollector(occurrence.Collector).
-			// OnConflict(sql.ConflictColumns(conflictColumns...)).
-			OnConflict(
-				// sql.ConflictConstraint("occurrence_unique_source"),
-				sql.ConflictColumns(conflictColumns...),
-				// sql.ConflictWhere(
-				// 	// source_id <> NULL AND package_id is NULL
-				// 	sql.And(sql.NotNull("source_id"), sql.IsNull("package_id")),
-				// ),
-			).
-			UpdateNewValues().
-			ID(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return &id, nil
+		return nil, fmt.Errorf("subject is required")
 	})
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	record, err := b.client.Occurrence.Query().
-		Where(isoccurrence.ID(*recordID)).
+	// TODO: Prepare response using a resusable resolver that accounts for preloads.
+
+	record, err := b.client.PackageOccurrence.Query().
+		Where(packageoccurrence.ID(*recordID)).
 		WithArtifact().
-		WithPackageVersion().
-		WithSource().
+		WithPackage().
 		Only(ctx)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
 	var sub model.PackageOrSource
-	if record.Edges.PackageVersion != nil {
-		sub, err = b.buildPackageResponse(ctx, record.Edges.PackageVersion.ID, model.PkgSpec{})
+	if record.Edges.Package != nil {
+		sub, err = b.buildPackageResponse(ctx, record.Edges.Package.ID, model.PkgSpec{})
 		if err != nil {
 			return nil, err
 		}
-	} else if record.Edges.Source != nil {
-		// sub, err = b.buildSourceResponse(ctx, record.Edges.Source.ID, model.SourceSpec{})
-		// if err != nil {
-		// 	return nil, err
-		// }
 	}
 
-	return toModelIsOccurrence(record, sub), nil
+	return normalizePackageOccurrence(record, sub), nil
 }

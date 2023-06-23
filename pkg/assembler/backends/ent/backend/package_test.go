@@ -63,12 +63,12 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 		},
 	}
 
-	pkg, err := ingestPackage(s.Ctx, s.Client, spec)
+	pkg, err := upsertPackage(s.Ctx, s.Client, spec)
 	s.Require().NoError(err)
 	s.Require().NotNil(pkg)
 
 	// Ingest twice to ensure upserts are working
-	pkg, err = ingestPackage(s.Ctx, s.Client, spec)
+	pkg, err = upsertPackage(s.Ctx, s.Client, spec)
 	s.Require().NoError(err)
 	s.Require().NotNil(pkg)
 
@@ -78,11 +78,11 @@ func (s *Suite) TestEmptyQualifiersPredicate() {
 
 	s.Run("No Qualifiers", func() {
 		spec.Qualifiers = nil
-		pkg, err = ingestPackage(s.Ctx, s.Client, spec)
+		pkg, err = upsertPackage(s.Ctx, s.Client, spec)
 		s.Require().NoError(err)
 		s.Require().NotNil(pkg)
 
-		s.NotEmpty(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx))
+		s.Len(s.Client.PackageVersion.Query().Where(packageversion.QualifiersIsEmpty()).AllX(s.Ctx), 1)
 	})
 
 	s.Run("Single key", func() {

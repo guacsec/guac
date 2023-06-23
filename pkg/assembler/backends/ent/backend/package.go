@@ -71,7 +71,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	pvID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.FromContext(ctx)
-		pvID, err := ingestPackage(ctx, client, pkg)
+		pvID, err := upsertPackage(ctx, client, pkg)
 		if err != nil {
 			return nil, err
 		}
@@ -117,7 +117,7 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 	return toModelPackage(record), nil
 }
 
-func ingestPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSpec) (int, error) {
+func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSpec) (int, error) {
 	// ingestPackage is used in multiple places, so we extract it to a function.
 	pkgID, err := client.PackageNode.Create().SetType(pkg.Type).
 		OnConflict(sql.ConflictColumns(packagenode.FieldType)).UpdateNewValues().ID(ctx)
