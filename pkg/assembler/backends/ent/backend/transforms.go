@@ -3,7 +3,6 @@ package backend
 import (
 	"context"
 	"fmt"
-	"net/url"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -73,22 +72,11 @@ func toModelSource(s *ent.Source) *model.Source {
 }
 
 func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
-	qualifiers := []*model.PackageQualifier{}
-
-	vals, err := url.ParseQuery(v.Qualifiers)
-	if err == nil {
-		for k, v := range vals {
-			qualifiers = append(qualifiers, &model.PackageQualifier{
-				Key:   k,
-				Value: v[0],
-			})
-		}
-	}
 
 	return &model.PackageVersion{
 		ID:         nodeID(v.ID),
 		Version:    v.Version,
-		Qualifiers: qualifiers,
+		Qualifiers: toPtrSlice(v.Qualifiers),
 		Subpath:    v.Subpath,
 	}
 }
@@ -209,19 +197,6 @@ func valueOrDefault[T any](v *T, def T) T {
 		return def
 	}
 	return *v
-}
-
-func qualifiersToString(qualifiers []*model.PackageQualifierInputSpec) string {
-	if qualifiers == nil {
-		return ""
-	}
-
-	qs := url.Values{}
-	for _, q := range qualifiers {
-		qs.Add(q.Key, q.Value)
-	}
-
-	return qs.Encode()
 }
 
 func packageToModelPackage(p *ent.PackageNode) *model.Package {

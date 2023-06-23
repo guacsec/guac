@@ -54,9 +54,13 @@ func (b *EntBackend) getPkgVersion(ctx context.Context, pkgin *model.PkgInputSpe
 		return nil, err
 	}
 	return n.QueryVersions().
-		Where(packageversion.Version(valueOrDefault(pkgin.Version, ""))).
-		Where(packageversion.Subpath(valueOrDefault(pkgin.Subpath, ""))).
-		Where(packageversion.Qualifiers(qualifiersToString(pkgin.Qualifiers))).
+		Where(
+			packageversion.Version(valueOrDefault(pkgin.Version, "")),
+			packageversion.Subpath(valueOrDefault(pkgin.Subpath, "")),
+			// packageversion.QualifiersMatchSpec(pkgin.Qualifiers),
+		).
+
+		// Where(packageversion.Qualifiers(qualifiersToString(pkgin.Qualifiers))).
 		Only(ctx)
 }
 
@@ -80,15 +84,14 @@ func pkgTreeFromVersion(ctx context.Context, pv *ent.PackageVersion) (*ent.Packa
 	if err != nil {
 		return nil, err
 	}
+
 	return ns.QueryPackage().
 		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 			q.Where(packagenamespace.Namespace(ns.Namespace))
 			q.WithNames(func(q *ent.PackageNameQuery) {
 				q.Where(packagename.Name(n.Name))
 				q.WithVersions(func(q *ent.PackageVersionQuery) {
-					q.Where(packageversion.Version(pv.Version))
-					q.Where(packageversion.Subpath(pv.Subpath))
-					q.Where(packageversion.Qualifiers(pv.Qualifiers))
+					q.Where(packageversion.Hash(hashPackageVersion(pv.Version, pv.Subpath, pv.Qualifiers)))
 				})
 			})
 		}).
@@ -111,7 +114,7 @@ func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode
 }
 
 func (b *EntBackend) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	funcName := "Dependency"
+	funcName := "IsDependency"
 	query := b.client.Dependency.Query().Order(ent.Asc(isdependency.FieldID))
 
 	if isDependencySpec != nil {
@@ -331,7 +334,7 @@ func pkgVersionPreds(spec *model.PkgSpec) []predicate.PackageVersion {
 	}
 
 	if spec.MatchOnlyEmptyQualifiers != nil && *spec.MatchOnlyEmptyQualifiers {
-		rv = append(rv, packageversion.Qualifiers(""))
+		rv = append(rv, packageversion.QualifiersIsEmpty())
 	} else if spec.Qualifiers != nil {
 		// FIXME need to do custom filtering to allow specifying partial qualifiers? or key only??
 		// query.Where(isdependency.HasPackageWith(packageversion.Qualifiers(qualifiersToString(isDependencySpec.Package.Qualifiers))))

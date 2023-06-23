@@ -38,6 +38,8 @@ func (PackageVersion) Edges() []ent.Edge {
 func (PackageVersion) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("hash").Edges("name").Unique(),
-		index.Fields("qualifiers").Annotations(entsql.IndexTypes(map[string]string{dialect.Postgres: "GIN"})),
+		index.Fields("qualifiers").Annotations(
+			entsql.IndexTypes(map[string]string{dialect.Postgres: "GIN"}),
+		),
 	}
 }

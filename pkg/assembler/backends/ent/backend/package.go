@@ -1,8 +1,11 @@
 package backend
 
 import (
+	"bytes"
 	"context"
-	"log"
+	"crypto/sha1"
+	"fmt"
+	"sort"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -18,9 +21,6 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	query := b.client.PackageNode.Query().Order(ent.Asc(packagenode.FieldType))
 
 	paths := getPreloads(ctx)
-	if len(paths) > 0 {
-		log.Println("Preloading Packages", "paths", paths)
-	}
 
 	if pkgSpec == nil {
 		pkgSpec = &model.PkgSpec{}
@@ -41,7 +41,11 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 					if PathContains(paths, "namespaces.names.versions") {
 						q.WithVersions(func(q *ent.PackageVersionQuery) {
 							q.Order(ent.Asc(packageversion.FieldVersion))
-							q.Where(optionalPredicate(pkgSpec.Version, packageversion.VersionEQ))
+							q.Where(
+								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
+								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEQ),
+								packageversion.QualifiersMatchSpec(pkgSpec.Qualifiers),
+							)
 						})
 					}
 				})
@@ -88,9 +92,7 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 				q.Where(packagename.Name(pkg.Name))
 				q.WithVersions(func(q *ent.PackageVersionQuery) {
 					q.Order(ent.Asc(packageversion.FieldVersion))
-					q.Where(packageversion.Version(valueOrDefault(pkg.Version, "")))
-					q.Where(packageversion.Subpath(valueOrDefault(pkg.Subpath, "")))
-					q.Where(packageversion.Qualifiers(qualifiersToString(pkg.Qualifiers)))
+					q.Where(packageversion.Hash(versionHashFromInputSpec(pkg)))
 				})
 			})
 		}).
@@ -144,16 +146,16 @@ func ingestPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 		empty := ""
 		pkg.Version = &empty
 	}
+
 	pvID, err := client.PackageVersion.Create().
 		SetNameID(nameID).
 		SetVersion(valueOrDefault(pkg.Version, "")).
 		SetSubpath(valueOrDefault(pkg.Subpath, "")).
-		SetQualifiers(qualifiersToString(pkg.Qualifiers)).
+		SetQualifiers(normalizeInputQualifiers(pkg.Qualifiers)).
+		SetHash(versionHashFromInputSpec(pkg)).
 		OnConflict(
 			sql.ConflictColumns(
-				packageversion.FieldVersion,
-				packageversion.FieldSubpath,
-				packageversion.FieldQualifiers,
+				packageversion.FieldHash,
 				packageversion.FieldNameID,
 			),
 		).
@@ -162,4 +164,40 @@ func ingestPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSp
 		return 0, errors.Wrap(err, "upsert package version")
 	}
 	return pvID, nil
+}
+
+func versionHashFromInputSpec(pkg model.PkgInputSpec) string {
+	return hashPackageVersion(
+		valueOrDefault(pkg.Version, ""),
+		valueOrDefault(pkg.Subpath, ""),
+		normalizeInputQualifiers(pkg.Qualifiers))
+}
+
+func hashPackageVersion(version, subpath string, qualifiers []model.PackageQualifier) string {
+	hash := sha1.New()
+	hash.Write([]byte(version))
+	hash.Write([]byte(subpath))
+	qualifiersBuffer := bytes.NewBuffer(nil)
+
+	sort.Slice(qualifiers, func(i, j int) bool { return qualifiers[i].Key < qualifiers[j].Key })
+
+	for _, qualifier := range qualifiers {
+		qualifiersBuffer.WriteString(qualifier.Key)
+		qualifiersBuffer.WriteString(qualifier.Value)
+	}
+
+	hash.Write(qualifiersBuffer.Bytes())
+	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model.PackageQualifier {
+	qualifiers := []model.PackageQualifier{}
+	for _, q := range inputs {
+		qualifiers = append(qualifiers, model.PackageQualifier{
+			Key:   q.Key,
+			Value: q.Value,
+		})
+	}
+
+	return qualifiers
 }

@@ -23,3 +23,11 @@ func optionalPredicate[P Predicate](value *string, fn func(s string) P) P {
 
 	return fn(*value)
 }
+
+func toPtrSlice[T any](slice []T) []*T {
+	ptrs := make([]*T, len(slice))
+	for i := range slice {
+		ptrs[i] = &slice[i]
+	}
+	return ptrs
+}
