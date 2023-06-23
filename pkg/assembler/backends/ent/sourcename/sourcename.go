@@ -34,10 +34,10 @@ const (
 	// NamespaceColumn is the table column denoting the namespace relation/edge.
 	NamespaceColumn = "namespace_id"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
-	OccurrencesTable = "occurrences"
-	// OccurrencesInverseTable is the table name for the Occurrence entity.
-	// It exists in this package in order to avoid circular dependency with the "occurrence" package.
-	OccurrencesInverseTable = "occurrences"
+	OccurrencesTable = "occurrence_subjects"
+	// OccurrencesInverseTable is the table name for the OccurrenceSubject entity.
+	// It exists in this package in order to avoid circular dependency with the "occurrencesubject" package.
+	OccurrencesInverseTable = "occurrence_subjects"
 	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
 	OccurrencesColumn = "source_id"
 )

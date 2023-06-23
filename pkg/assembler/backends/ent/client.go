@@ -18,6 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
@@ -40,6 +41,8 @@ type Client struct {
 	Dependency *DependencyClient
 	// Occurrence is the client for interacting with the Occurrence builders.
 	Occurrence *OccurrenceClient
+	// OccurrenceSubject is the client for interacting with the OccurrenceSubject builders.
+	OccurrenceSubject *OccurrenceSubjectClient
 	// PackageName is the client for interacting with the PackageName builders.
 	PackageName *PackageNameClient
 	// PackageNamespace is the client for interacting with the PackageNamespace builders.
@@ -71,6 +74,7 @@ func (c *Client) init() {
 	c.BuilderNode = NewBuilderNodeClient(c.config)
 	c.Dependency = NewDependencyClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
+	c.OccurrenceSubject = NewOccurrenceSubjectClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
 	c.PackageNode = NewPackageNodeClient(c.config)
@@ -158,19 +162,20 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:              ctx,
-		config:           cfg,
-		Artifact:         NewArtifactClient(cfg),
-		BuilderNode:      NewBuilderNodeClient(cfg),
-		Dependency:       NewDependencyClient(cfg),
-		Occurrence:       NewOccurrenceClient(cfg),
-		PackageName:      NewPackageNameClient(cfg),
-		PackageNamespace: NewPackageNamespaceClient(cfg),
-		PackageNode:      NewPackageNodeClient(cfg),
-		PackageVersion:   NewPackageVersionClient(cfg),
-		Source:           NewSourceClient(cfg),
-		SourceName:       NewSourceNameClient(cfg),
-		SourceNamespace:  NewSourceNamespaceClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		Artifact:          NewArtifactClient(cfg),
+		BuilderNode:       NewBuilderNodeClient(cfg),
+		Dependency:        NewDependencyClient(cfg),
+		Occurrence:        NewOccurrenceClient(cfg),
+		OccurrenceSubject: NewOccurrenceSubjectClient(cfg),
+		PackageName:       NewPackageNameClient(cfg),
+		PackageNamespace:  NewPackageNamespaceClient(cfg),
+		PackageNode:       NewPackageNodeClient(cfg),
+		PackageVersion:    NewPackageVersionClient(cfg),
+		Source:            NewSourceClient(cfg),
+		SourceName:        NewSourceNameClient(cfg),
+		SourceNamespace:   NewSourceNamespaceClient(cfg),
 	}, nil
 }
 
@@ -188,19 +193,20 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:              ctx,
-		config:           cfg,
-		Artifact:         NewArtifactClient(cfg),
-		BuilderNode:      NewBuilderNodeClient(cfg),
-		Dependency:       NewDependencyClient(cfg),
-		Occurrence:       NewOccurrenceClient(cfg),
-		PackageName:      NewPackageNameClient(cfg),
-		PackageNamespace: NewPackageNamespaceClient(cfg),
-		PackageNode:      NewPackageNodeClient(cfg),
-		PackageVersion:   NewPackageVersionClient(cfg),
-		Source:           NewSourceClient(cfg),
-		SourceName:       NewSourceNameClient(cfg),
-		SourceNamespace:  NewSourceNamespaceClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		Artifact:          NewArtifactClient(cfg),
+		BuilderNode:       NewBuilderNodeClient(cfg),
+		Dependency:        NewDependencyClient(cfg),
+		Occurrence:        NewOccurrenceClient(cfg),
+		OccurrenceSubject: NewOccurrenceSubjectClient(cfg),
+		PackageName:       NewPackageNameClient(cfg),
+		PackageNamespace:  NewPackageNamespaceClient(cfg),
+		PackageNode:       NewPackageNodeClient(cfg),
+		PackageVersion:    NewPackageVersionClient(cfg),
+		Source:            NewSourceClient(cfg),
+		SourceName:        NewSourceNameClient(cfg),
+		SourceNamespace:   NewSourceNamespaceClient(cfg),
 	}, nil
 }
 
@@ -230,9 +236,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
-		c.SourceNamespace,
+		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.OccurrenceSubject,
+		c.PackageName, c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source,
+		c.SourceName, c.SourceNamespace,
 	} {
 		n.Use(hooks...)
 	}
@@ -242,9 +248,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
-		c.SourceNamespace,
+		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.OccurrenceSubject,
+		c.PackageName, c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source,
+		c.SourceName, c.SourceNamespace,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -261,6 +267,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Dependency.mutate(ctx, m)
 	case *OccurrenceMutation:
 		return c.Occurrence.mutate(ctx, m)
+	case *OccurrenceSubjectMutation:
+		return c.OccurrenceSubject.mutate(ctx, m)
 	case *PackageNameMutation:
 		return c.PackageName.mutate(ctx, m)
 	case *PackageNamespaceMutation:
@@ -775,31 +783,15 @@ func (c *OccurrenceClient) GetX(ctx context.Context, id int) *Occurrence {
 	return obj
 }
 
-// QueryPackageVersion queries the package_version edge of a Occurrence.
-func (c *OccurrenceClient) QueryPackageVersion(o *Occurrence) *PackageVersionQuery {
-	query := (&PackageVersionClient{config: c.config}).Query()
+// QuerySubject queries the subject edge of a Occurrence.
+func (c *OccurrenceClient) QuerySubject(o *Occurrence) *OccurrenceSubjectQuery {
+	query := (&OccurrenceSubjectClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := o.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
-			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.PackageVersionTable, occurrence.PackageVersionColumn),
-		)
-		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QuerySource queries the source edge of a Occurrence.
-func (c *OccurrenceClient) QuerySource(o *Occurrence) *SourceNameQuery {
-	query := (&SourceNameClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := o.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
-			sqlgraph.To(sourcename.Table, sourcename.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.SourceTable, occurrence.SourceColumn),
+			sqlgraph.To(occurrencesubject.Table, occurrencesubject.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, occurrence.SubjectTable, occurrence.SubjectColumn),
 		)
 		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
 		return fromV, nil
@@ -845,6 +837,172 @@ func (c *OccurrenceClient) mutate(ctx context.Context, m *OccurrenceMutation) (V
 		return (&OccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Occurrence mutation op: %q", m.Op())
+	}
+}
+
+// OccurrenceSubjectClient is a client for the OccurrenceSubject schema.
+type OccurrenceSubjectClient struct {
+	config
+}
+
+// NewOccurrenceSubjectClient returns a client for the OccurrenceSubject from the given config.
+func NewOccurrenceSubjectClient(c config) *OccurrenceSubjectClient {
+	return &OccurrenceSubjectClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `occurrencesubject.Hooks(f(g(h())))`.
+func (c *OccurrenceSubjectClient) Use(hooks ...Hook) {
+	c.hooks.OccurrenceSubject = append(c.hooks.OccurrenceSubject, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `occurrencesubject.Intercept(f(g(h())))`.
+func (c *OccurrenceSubjectClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OccurrenceSubject = append(c.inters.OccurrenceSubject, interceptors...)
+}
+
+// Create returns a builder for creating a OccurrenceSubject entity.
+func (c *OccurrenceSubjectClient) Create() *OccurrenceSubjectCreate {
+	mutation := newOccurrenceSubjectMutation(c.config, OpCreate)
+	return &OccurrenceSubjectCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OccurrenceSubject entities.
+func (c *OccurrenceSubjectClient) CreateBulk(builders ...*OccurrenceSubjectCreate) *OccurrenceSubjectCreateBulk {
+	return &OccurrenceSubjectCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OccurrenceSubject.
+func (c *OccurrenceSubjectClient) Update() *OccurrenceSubjectUpdate {
+	mutation := newOccurrenceSubjectMutation(c.config, OpUpdate)
+	return &OccurrenceSubjectUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OccurrenceSubjectClient) UpdateOne(os *OccurrenceSubject) *OccurrenceSubjectUpdateOne {
+	mutation := newOccurrenceSubjectMutation(c.config, OpUpdateOne, withOccurrenceSubject(os))
+	return &OccurrenceSubjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OccurrenceSubjectClient) UpdateOneID(id int) *OccurrenceSubjectUpdateOne {
+	mutation := newOccurrenceSubjectMutation(c.config, OpUpdateOne, withOccurrenceSubjectID(id))
+	return &OccurrenceSubjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OccurrenceSubject.
+func (c *OccurrenceSubjectClient) Delete() *OccurrenceSubjectDelete {
+	mutation := newOccurrenceSubjectMutation(c.config, OpDelete)
+	return &OccurrenceSubjectDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OccurrenceSubjectClient) DeleteOne(os *OccurrenceSubject) *OccurrenceSubjectDeleteOne {
+	return c.DeleteOneID(os.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OccurrenceSubjectClient) DeleteOneID(id int) *OccurrenceSubjectDeleteOne {
+	builder := c.Delete().Where(occurrencesubject.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OccurrenceSubjectDeleteOne{builder}
+}
+
+// Query returns a query builder for OccurrenceSubject.
+func (c *OccurrenceSubjectClient) Query() *OccurrenceSubjectQuery {
+	return &OccurrenceSubjectQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOccurrenceSubject},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OccurrenceSubject entity by its id.
+func (c *OccurrenceSubjectClient) Get(ctx context.Context, id int) (*OccurrenceSubject, error) {
+	return c.Query().Where(occurrencesubject.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OccurrenceSubjectClient) GetX(ctx context.Context, id int) *OccurrenceSubject {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOccurrence queries the occurrence edge of a OccurrenceSubject.
+func (c *OccurrenceSubjectClient) QueryOccurrence(os *OccurrenceSubject) *OccurrenceQuery {
+	query := (&OccurrenceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := os.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(occurrencesubject.Table, occurrencesubject.FieldID, id),
+			sqlgraph.To(occurrence.Table, occurrence.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, occurrencesubject.OccurrenceTable, occurrencesubject.OccurrenceColumn),
+		)
+		fromV = sqlgraph.Neighbors(os.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPackage queries the package edge of a OccurrenceSubject.
+func (c *OccurrenceSubjectClient) QueryPackage(os *OccurrenceSubject) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := os.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(occurrencesubject.Table, occurrencesubject.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, occurrencesubject.PackageTable, occurrencesubject.PackageColumn),
+		)
+		fromV = sqlgraph.Neighbors(os.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySource queries the source edge of a OccurrenceSubject.
+func (c *OccurrenceSubjectClient) QuerySource(os *OccurrenceSubject) *SourceNameQuery {
+	query := (&SourceNameClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := os.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(occurrencesubject.Table, occurrencesubject.FieldID, id),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, occurrencesubject.SourceTable, occurrencesubject.SourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(os.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *OccurrenceSubjectClient) Hooks() []Hook {
+	return c.hooks.OccurrenceSubject
+}
+
+// Interceptors returns the client interceptors.
+func (c *OccurrenceSubjectClient) Interceptors() []Interceptor {
+	return c.inters.OccurrenceSubject
+}
+
+func (c *OccurrenceSubjectClient) mutate(ctx context.Context, m *OccurrenceSubjectMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OccurrenceSubjectCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OccurrenceSubjectUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OccurrenceSubjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OccurrenceSubjectDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OccurrenceSubject mutation op: %q", m.Op())
 	}
 }
 
@@ -1660,13 +1818,13 @@ func (c *SourceNameClient) QueryNamespace(sn *SourceName) *SourceNamespaceQuery 
 }
 
 // QueryOccurrences queries the occurrences edge of a SourceName.
-func (c *SourceNameClient) QueryOccurrences(sn *SourceName) *OccurrenceQuery {
-	query := (&OccurrenceClient{config: c.config}).Query()
+func (c *SourceNameClient) QueryOccurrences(sn *SourceName) *OccurrenceSubjectQuery {
+	query := (&OccurrenceSubjectClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := sn.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
-			sqlgraph.To(occurrence.Table, occurrence.FieldID),
+			sqlgraph.To(occurrencesubject.Table, occurrencesubject.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.OccurrencesTable, sourcename.OccurrencesColumn),
 		)
 		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
@@ -1853,12 +2011,13 @@ func (c *SourceNamespaceClient) mutate(ctx context.Context, m *SourceNamespaceMu
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageNode, PackageVersion, Source, SourceName, SourceNamespace []ent.Hook
+		Artifact, BuilderNode, Dependency, Occurrence, OccurrenceSubject, PackageName,
+		PackageNamespace, PackageNode, PackageVersion, Source, SourceName,
+		SourceNamespace []ent.Hook
 	}
 	inters struct {
-		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageNode, PackageVersion, Source, SourceName,
+		Artifact, BuilderNode, Dependency, Occurrence, OccurrenceSubject, PackageName,
+		PackageNamespace, PackageNode, PackageVersion, Source, SourceName,
 		SourceNamespace []ent.Interceptor
 	}
 )

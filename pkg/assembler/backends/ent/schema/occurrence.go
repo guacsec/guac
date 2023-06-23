@@ -15,8 +15,7 @@ type Occurrence struct {
 // Fields of the Occurrence.
 func (Occurrence) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_id").Optional().Nillable(),
-		field.Int("source_id").Optional().Nillable(),
+		field.Int("subject_id"),
 		field.Int("artifact_id").Comment("The artifact in the relationship"),
 		field.String("justification").Comment("Justification for the attested relationship"),
 		field.String("origin").Comment("Document from which this attestation is generated from"),
@@ -27,8 +26,7 @@ func (Occurrence) Fields() []ent.Field {
 // Edges of the Occurrence.
 func (Occurrence) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("package_version", PackageVersion.Type).Field("package_id").Unique(),
-		edge.To("source", SourceName.Type).Field("source_id").Unique(),
+		edge.From("subject", OccurrenceSubject.Type).Field("subject_id").Unique().Required().Ref("occurrence"),
 		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique().Required(),
 	}
 }
@@ -36,10 +34,11 @@ func (Occurrence) Edges() []ent.Edge {
 // Indexes of the Occurrence.
 func (Occurrence) Indexes() []ent.Index {
 	return []ent.Index{
-		// FIXME: (ivanvanderbyl) Unique constraints don't work with NULLs
-		index.Fields("justification", "origin", "collector").Edges("source", "package_version", "artifact").Unique().
-			// Annotations(entsql.IndexWhere("package_id <> NULL AND source_id is NULL")).
-			StorageKey("occurrence_unique_package"),
+		index.Fields("justification", "origin", "collector").
+			Edges("subject", "artifact").
+			Unique().
+			StorageKey("occurrence_uniq"),
+		// Annotations(entsql.IndexWhere("package_id <> NULL AND source_id is NULL")).
 		// index.Fields("justification", "origin", "collector").Edges("source", "artifact").Unique().
 		// Annotations(entsql.IndexWhere("source_id <> NULL AND package_id is NULL")).
 		// StorageKey("occurrence_unique_source"),

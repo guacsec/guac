@@ -53,14 +53,9 @@ func IDLTE(id int) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldLTE(FieldID, id))
 }
 
-// PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldEQ(FieldPackageID, v))
-}
-
-// SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
-func SourceID(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldEQ(FieldSourceID, v))
+// SubjectID applies equality check predicate on the "subject_id" field. It's identical to SubjectIDEQ.
+func SubjectID(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldEQ(FieldSubjectID, v))
 }
 
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
@@ -83,64 +78,24 @@ func Collector(v string) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldCollector, v))
 }
 
-// PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldEQ(FieldPackageID, v))
+// SubjectIDEQ applies the EQ predicate on the "subject_id" field.
+func SubjectIDEQ(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldEQ(FieldSubjectID, v))
 }
 
-// PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNEQ(FieldPackageID, v))
+// SubjectIDNEQ applies the NEQ predicate on the "subject_id" field.
+func SubjectIDNEQ(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNEQ(FieldSubjectID, v))
 }
 
-// PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldIn(FieldPackageID, vs...))
+// SubjectIDIn applies the In predicate on the "subject_id" field.
+func SubjectIDIn(vs ...int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldIn(FieldSubjectID, vs...))
 }
 
-// PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNotIn(FieldPackageID, vs...))
-}
-
-// PackageIDIsNil applies the IsNil predicate on the "package_id" field.
-func PackageIDIsNil() predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldIsNull(FieldPackageID))
-}
-
-// PackageIDNotNil applies the NotNil predicate on the "package_id" field.
-func PackageIDNotNil() predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNotNull(FieldPackageID))
-}
-
-// SourceIDEQ applies the EQ predicate on the "source_id" field.
-func SourceIDEQ(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldEQ(FieldSourceID, v))
-}
-
-// SourceIDNEQ applies the NEQ predicate on the "source_id" field.
-func SourceIDNEQ(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNEQ(FieldSourceID, v))
-}
-
-// SourceIDIn applies the In predicate on the "source_id" field.
-func SourceIDIn(vs ...int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldIn(FieldSourceID, vs...))
-}
-
-// SourceIDNotIn applies the NotIn predicate on the "source_id" field.
-func SourceIDNotIn(vs ...int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNotIn(FieldSourceID, vs...))
-}
-
-// SourceIDIsNil applies the IsNil predicate on the "source_id" field.
-func SourceIDIsNil() predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldIsNull(FieldSourceID))
-}
-
-// SourceIDNotNil applies the NotNil predicate on the "source_id" field.
-func SourceIDNotNil() predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNotNull(FieldSourceID))
+// SubjectIDNotIn applies the NotIn predicate on the "subject_id" field.
+func SubjectIDNotIn(vs ...int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNotIn(FieldSubjectID, vs...))
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
@@ -358,44 +313,21 @@ func CollectorContainsFold(v string) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldContainsFold(FieldCollector, v))
 }
 
-// HasPackageVersion applies the HasEdge predicate on the "package_version" edge.
-func HasPackageVersion() predicate.Occurrence {
+// HasSubject applies the HasEdge predicate on the "subject" edge.
+func HasSubject() predicate.Occurrence {
 	return predicate.Occurrence(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, PackageVersionTable, PackageVersionColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, SubjectTable, SubjectColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPackageVersionWith applies the HasEdge predicate on the "package_version" edge with a given conditions (other predicates).
-func HasPackageVersionWith(preds ...predicate.PackageVersion) predicate.Occurrence {
+// HasSubjectWith applies the HasEdge predicate on the "subject" edge with a given conditions (other predicates).
+func HasSubjectWith(preds ...predicate.OccurrenceSubject) predicate.Occurrence {
 	return predicate.Occurrence(func(s *sql.Selector) {
-		step := newPackageVersionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasSource applies the HasEdge predicate on the "source" edge.
-func HasSource() predicate.Occurrence {
-	return predicate.Occurrence(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, SourceTable, SourceColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasSourceWith applies the HasEdge predicate on the "source" edge with a given conditions (other predicates).
-func HasSourceWith(preds ...predicate.SourceName) predicate.Occurrence {
-	return predicate.Occurrence(func(s *sql.Selector) {
-		step := newSourceStep()
+		step := newSubjectStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

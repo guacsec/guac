@@ -168,6 +168,7 @@ func collect[T any, R any](items []T, transformer func(T) R) []R {
 }
 
 func collectErr[T any, R any](ctx context.Context, items []T, transformer func(context.Context, T) (R, error)) ([]R, error) {
+	// NOTE: In most cases this shouldn't be needed, but it's here for completeness
 	if items == nil {
 		return nil, nil
 	}
@@ -223,6 +224,17 @@ func packageVersionToModelPackage(pv *ent.PackageVersion) *model.Package {
 	}
 }
 
+func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
+	return &model.IsOccurrence{
+		ID:            nodeID(o.ID),
+		Subject:       toOccurrenceSubject(o.Edges.Subject),
+		Artifact:      toModelArtifact(o.Edges.Artifact),
+		Justification: o.Justification,
+		Origin:        o.Origin,
+		Collector:     o.Collector,
+	}
+}
+
 func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.IsOccurrence {
 	return &model.IsOccurrence{
 		ID:            nodeID(o.ID),
@@ -232,4 +244,18 @@ func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.Is
 		Origin:        o.Origin,
 		Collector:     o.Collector,
 	}
+}
+
+func toOccurrenceSubject(s *ent.OccurrenceSubject) model.PackageOrSource {
+	if s.Edges.Package != nil &&
+		s.Edges.Package.Edges.Name != nil &&
+		s.Edges.Package.Edges.Name.Edges.Namespace != nil &&
+		s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package != nil {
+		return toModelPackage(s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+	} else if s.Edges.Source != nil &&
+		s.Edges.Source.Edges.Namespace != nil &&
+		s.Edges.Source.Edges.Namespace.Edges.Source != nil {
+		return toModelSource(s.Edges.Source.Edges.Namespace.Edges.Source)
+	}
+	return nil
 }

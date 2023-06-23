@@ -12,21 +12,19 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // OccurrenceQuery is the builder for querying Occurrence entities.
 type OccurrenceQuery struct {
 	config
-	ctx                *QueryContext
-	order              []occurrence.OrderOption
-	inters             []Interceptor
-	predicates         []predicate.Occurrence
-	withPackageVersion *PackageVersionQuery
-	withSource         *SourceNameQuery
-	withArtifact       *ArtifactQuery
+	ctx          *QueryContext
+	order        []occurrence.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Occurrence
+	withSubject  *OccurrenceSubjectQuery
+	withArtifact *ArtifactQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,9 +61,9 @@ func (oq *OccurrenceQuery) Order(o ...occurrence.OrderOption) *OccurrenceQuery {
 	return oq
 }
 
-// QueryPackageVersion chains the current query on the "package_version" edge.
-func (oq *OccurrenceQuery) QueryPackageVersion() *PackageVersionQuery {
-	query := (&PackageVersionClient{config: oq.config}).Query()
+// QuerySubject chains the current query on the "subject" edge.
+func (oq *OccurrenceQuery) QuerySubject() *OccurrenceSubjectQuery {
+	query := (&OccurrenceSubjectClient{config: oq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := oq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,30 +74,8 @@ func (oq *OccurrenceQuery) QueryPackageVersion() *PackageVersionQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
-			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.PackageVersionTable, occurrence.PackageVersionColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QuerySource chains the current query on the "source" edge.
-func (oq *OccurrenceQuery) QuerySource() *SourceNameQuery {
-	query := (&SourceNameClient{config: oq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := oq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := oq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
-			sqlgraph.To(sourcename.Table, sourcename.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.SourceTable, occurrence.SourceColumn),
+			sqlgraph.To(occurrencesubject.Table, occurrencesubject.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, occurrence.SubjectTable, occurrence.SubjectColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
 		return fromU, nil
@@ -316,39 +292,27 @@ func (oq *OccurrenceQuery) Clone() *OccurrenceQuery {
 		return nil
 	}
 	return &OccurrenceQuery{
-		config:             oq.config,
-		ctx:                oq.ctx.Clone(),
-		order:              append([]occurrence.OrderOption{}, oq.order...),
-		inters:             append([]Interceptor{}, oq.inters...),
-		predicates:         append([]predicate.Occurrence{}, oq.predicates...),
-		withPackageVersion: oq.withPackageVersion.Clone(),
-		withSource:         oq.withSource.Clone(),
-		withArtifact:       oq.withArtifact.Clone(),
+		config:       oq.config,
+		ctx:          oq.ctx.Clone(),
+		order:        append([]occurrence.OrderOption{}, oq.order...),
+		inters:       append([]Interceptor{}, oq.inters...),
+		predicates:   append([]predicate.Occurrence{}, oq.predicates...),
+		withSubject:  oq.withSubject.Clone(),
+		withArtifact: oq.withArtifact.Clone(),
 		// clone intermediate query.
 		sql:  oq.sql.Clone(),
 		path: oq.path,
 	}
 }
 
-// WithPackageVersion tells the query-builder to eager-load the nodes that are connected to
-// the "package_version" edge. The optional arguments are used to configure the query builder of the edge.
-func (oq *OccurrenceQuery) WithPackageVersion(opts ...func(*PackageVersionQuery)) *OccurrenceQuery {
-	query := (&PackageVersionClient{config: oq.config}).Query()
+// WithSubject tells the query-builder to eager-load the nodes that are connected to
+// the "subject" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OccurrenceQuery) WithSubject(opts ...func(*OccurrenceSubjectQuery)) *OccurrenceQuery {
+	query := (&OccurrenceSubjectClient{config: oq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	oq.withPackageVersion = query
-	return oq
-}
-
-// WithSource tells the query-builder to eager-load the nodes that are connected to
-// the "source" edge. The optional arguments are used to configure the query builder of the edge.
-func (oq *OccurrenceQuery) WithSource(opts ...func(*SourceNameQuery)) *OccurrenceQuery {
-	query := (&SourceNameClient{config: oq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	oq.withSource = query
+	oq.withSubject = query
 	return oq
 }
 
@@ -369,12 +333,12 @@ func (oq *OccurrenceQuery) WithArtifact(opts ...func(*ArtifactQuery)) *Occurrenc
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		SubjectID int `json:"subject_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Occurrence.Query().
-//		GroupBy(occurrence.FieldPackageID).
+//		GroupBy(occurrence.FieldSubjectID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (oq *OccurrenceQuery) GroupBy(field string, fields ...string) *OccurrenceGroupBy {
@@ -392,11 +356,11 @@ func (oq *OccurrenceQuery) GroupBy(field string, fields ...string) *OccurrenceGr
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		SubjectID int `json:"subject_id,omitempty"`
 //	}
 //
 //	client.Occurrence.Query().
-//		Select(occurrence.FieldPackageID).
+//		Select(occurrence.FieldSubjectID).
 //		Scan(ctx, &v)
 func (oq *OccurrenceQuery) Select(fields ...string) *OccurrenceSelect {
 	oq.ctx.Fields = append(oq.ctx.Fields, fields...)
@@ -441,9 +405,8 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	var (
 		nodes       = []*Occurrence{}
 		_spec       = oq.querySpec()
-		loadedTypes = [3]bool{
-			oq.withPackageVersion != nil,
-			oq.withSource != nil,
+		loadedTypes = [2]bool{
+			oq.withSubject != nil,
 			oq.withArtifact != nil,
 		}
 	)
@@ -465,15 +428,9 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := oq.withPackageVersion; query != nil {
-		if err := oq.loadPackageVersion(ctx, query, nodes, nil,
-			func(n *Occurrence, e *PackageVersion) { n.Edges.PackageVersion = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := oq.withSource; query != nil {
-		if err := oq.loadSource(ctx, query, nodes, nil,
-			func(n *Occurrence, e *SourceName) { n.Edges.Source = e }); err != nil {
+	if query := oq.withSubject; query != nil {
+		if err := oq.loadSubject(ctx, query, nodes, nil,
+			func(n *Occurrence, e *OccurrenceSubject) { n.Edges.Subject = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -486,14 +443,11 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	return nodes, nil
 }
 
-func (oq *OccurrenceQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *PackageVersion)) error {
+func (oq *OccurrenceQuery) loadSubject(ctx context.Context, query *OccurrenceSubjectQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *OccurrenceSubject)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Occurrence)
 	for i := range nodes {
-		if nodes[i].PackageID == nil {
-			continue
-		}
-		fk := *nodes[i].PackageID
+		fk := nodes[i].SubjectID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -502,7 +456,7 @@ func (oq *OccurrenceQuery) loadPackageVersion(ctx context.Context, query *Packag
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(packageversion.IDIn(ids...))
+	query.Where(occurrencesubject.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -510,39 +464,7 @@ func (oq *OccurrenceQuery) loadPackageVersion(ctx context.Context, query *Packag
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "package_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (oq *OccurrenceQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Occurrence)
-	for i := range nodes {
-		if nodes[i].SourceID == nil {
-			continue
-		}
-		fk := *nodes[i].SourceID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(sourcename.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "source_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "subject_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -605,11 +527,8 @@ func (oq *OccurrenceQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if oq.withPackageVersion != nil {
-			_spec.Node.AddColumnOnce(occurrence.FieldPackageID)
-		}
-		if oq.withSource != nil {
-			_spec.Node.AddColumnOnce(occurrence.FieldSourceID)
+		if oq.withSubject != nil {
+			_spec.Node.AddColumnOnce(occurrence.FieldSubjectID)
 		}
 		if oq.withArtifact != nil {
 			_spec.Node.AddColumnOnce(occurrence.FieldArtifactID)
