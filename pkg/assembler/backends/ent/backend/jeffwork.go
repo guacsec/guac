@@ -55,10 +55,9 @@ func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInpu
 		Only(ctx)
 }
 
-func (b *EntBackend) getArtifact(ctx context.Context, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
-	return b.client.Artifact.Query().
-		Where(artifact.Algorithm(artin.Algorithm)).
-		Where(artifact.Digest(artin.Digest)).
+func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
+	return client.Artifact.Query().
+		Where(artifact.Algorithm(artin.Algorithm), artifact.Digest(artin.Digest)).
 		Only(ctx)
 }
 

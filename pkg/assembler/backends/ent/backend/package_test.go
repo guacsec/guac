@@ -83,6 +83,21 @@ func (s *Suite) Test_get_package_helpers() {
 		s.Require().NoError(err)
 		s.Require().NotNil(pkgVersion)
 	})
+
+	s.Run("pkgTreeFromVersion", func() {
+		pkgVersion, err := getPkgVersion(s.Ctx, s.Client, &spec)
+		s.Require().NoError(err)
+		pkgTree, err := pkgTreeFromVersion(s.Ctx, pkgVersion)
+		s.Require().NoError(err)
+		s.Require().NotNil(pkgTree)
+		if s.Len(pkgTree.Edges.Namespaces, 1) {
+			if s.Len(pkgTree.Edges.Namespaces[0].Edges.Names, 1) {
+				if s.Len(pkgTree.Edges.Namespaces[0].Edges.Names[0].Edges.Versions, 1) {
+					s.Equal("1.0.0", pkgTree.Edges.Namespaces[0].Edges.Names[0].Edges.Versions[0].Version)
+				}
+			}
+		}
+	})
 }
 
 func (s *Suite) TestEmptyQualifiersPredicate() {
