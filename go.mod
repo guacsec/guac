@@ -48,16 +48,19 @@ require (
 )
 
 require (
+	ariga.io/atlas v0.10.2-0.20230502203727-939293626ab2 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/BurntSushi/toml v1.3.0 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230518184743-7afd39499903 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
+	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/alexflint/go-arg v1.4.2 // indirect
 	github.com/alexflint/go-scalar v1.0.0 // indirect
 	github.com/anchore/go-struct-converter v0.0.0-20221118182256-c68fdcfa2092 // indirect
+	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bombsimon/logrusr/v2 v2.0.1 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0 // indirect
@@ -69,6 +72,7 @@ require (
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
 	github.com/containerd/typeurl v1.0.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/cli v23.0.5+incompatible // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.0+incompatible // indirect
@@ -79,6 +83,7 @@ require (
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.4.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
+	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/google/go-containerregistry v0.15.2 // indirect
@@ -94,6 +99,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
@@ -106,6 +112,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
+	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/buildkit v0.11.4 // indirect
 	github.com/nats-io/jwt/v2 v2.4.1 // indirect
@@ -116,6 +123,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc3 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
@@ -141,6 +149,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
+	github.com/zclconf/go-cty v1.8.0 // indirect
 	gocloud.dev v0.29.0 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/term v0.8.0 // indirect
@@ -159,8 +168,10 @@ require (
 )
 
 require (
+	entgo.io/ent v0.12.4-0.20230609061957-ee7a50bc4804
 	github.com/99designs/gqlgen v0.17.33
 	github.com/CycloneDX/cyclonedx-go v0.7.1
+	github.com/DATA-DOG/go-txdb v0.1.6
 	github.com/Khan/genqlient v0.6.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/fsnotify/fsnotify v1.6.0
@@ -172,6 +183,7 @@ require (
 	github.com/google/osv-scanner v1.3.4
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/jeremywohl/flatten v1.0.1
+	github.com/lib/pq v1.10.7
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.9.18
@@ -181,9 +193,11 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.15.1
 	github.com/regclient/regclient v0.4.8
+	github.com/segmentio/ksuid v1.0.4
 	github.com/sigstore/sigstore v1.6.5
 	github.com/spdx/tools-golang v0.5.2
 	github.com/spf13/viper v1.16.0
+	github.com/stretchr/testify v1.8.4
 	github.com/vektah/gqlparser/v2 v2.5.3
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	gopkg.in/yaml.v3 v3.0.1

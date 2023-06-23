@@ -13,5 +13,8 @@ go.work
 *pkg/.DS_Store
 *.swp
 *.swo
+container_files/pg/
+
+dist/
 
 dist/

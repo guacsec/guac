@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 
 services:
   # Neo4j is turned down for now since we are currently only using the in memory backend
@@ -15,7 +15,20 @@ services:
   #     - "7687:7687"
   #   restart: on-failure
 
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: guac
+      POSTGRES_PASSWORD: guac
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks: [frontend]
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./container_files/pg:/var/lib/postgresql/data
+
   nats:
+    networks: [frontend]
     image: "nats:2.9.17-alpine"
     command: "--config /config/nats/js.conf -m 8222"
     ports:
@@ -33,6 +46,7 @@ services:
       start_period: 5s
 
   guac-collectsub:
+    networks: [frontend]
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccsub"
     working_dir: /guac
@@ -52,6 +66,7 @@ services:
       start_period: 5s
 
   guac-graphql:
+    networks: [frontend]
     image: $GUAC_IMAGE
     command: "/opt/guac/guacgql"
     working_dir: /guac
@@ -71,6 +86,7 @@ services:
       start_period: 5s
 
   guac-ingestor:
+    networks: [frontend]
     image: $GUAC_IMAGE
     command: "/opt/guac/guacingest"
     working_dir: /guac
@@ -84,6 +100,7 @@ services:
       - ./container_files/guac:/guac
 
   oci-collector:
+    networks: [frontend]
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect image"
     working_dir: /guac
@@ -97,6 +114,7 @@ services:
       - ./container_files/guac:/guac
 
   depsdev-collector:
+    networks: [frontend]
     image: $GUAC_IMAGE
     command: "/opt/guac/guaccollect deps_dev"
     working_dir: /guac
@@ -112,6 +130,7 @@ services:
       - ./container_files/guac:/guac
 
   osv-certifier:
+    networks: [frontend]
     image: $GUAC_IMAGE
     command: "/opt/guac/guacone certifier osv"
     working_dir: /guac
@@ -123,3 +142,7 @@ services:
         condition: service_healthy
     volumes:
       - ./container_files/guac:/guac
+
+networks:
+  frontend:
+    driver: bridge
