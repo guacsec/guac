@@ -9,10 +9,12 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // PackageVersionUpdate is the builder for updating PackageVersion entities.
@@ -47,8 +49,26 @@ func (pvu *PackageVersionUpdate) SetSubpath(s string) *PackageVersionUpdate {
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (pvu *PackageVersionUpdate) SetQualifiers(s string) *PackageVersionUpdate {
-	pvu.mutation.SetQualifiers(s)
+func (pvu *PackageVersionUpdate) SetQualifiers(mq []model.PackageQualifier) *PackageVersionUpdate {
+	pvu.mutation.SetQualifiers(mq)
+	return pvu
+}
+
+// AppendQualifiers appends mq to the "qualifiers" field.
+func (pvu *PackageVersionUpdate) AppendQualifiers(mq []model.PackageQualifier) *PackageVersionUpdate {
+	pvu.mutation.AppendQualifiers(mq)
+	return pvu
+}
+
+// ClearQualifiers clears the value of the "qualifiers" field.
+func (pvu *PackageVersionUpdate) ClearQualifiers() *PackageVersionUpdate {
+	pvu.mutation.ClearQualifiers()
+	return pvu
+}
+
+// SetHash sets the "hash" field.
+func (pvu *PackageVersionUpdate) SetHash(s string) *PackageVersionUpdate {
+	pvu.mutation.SetHash(s)
 	return pvu
 }
 
@@ -122,7 +142,18 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		_spec.SetField(packageversion.FieldSubpath, field.TypeString, value)
 	}
 	if value, ok := pvu.mutation.Qualifiers(); ok {
-		_spec.SetField(packageversion.FieldQualifiers, field.TypeString, value)
+		_spec.SetField(packageversion.FieldQualifiers, field.TypeJSON, value)
+	}
+	if value, ok := pvu.mutation.AppendedQualifiers(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, packageversion.FieldQualifiers, value)
+		})
+	}
+	if pvu.mutation.QualifiersCleared() {
+		_spec.ClearField(packageversion.FieldQualifiers, field.TypeJSON)
+	}
+	if value, ok := pvu.mutation.Hash(); ok {
+		_spec.SetField(packageversion.FieldHash, field.TypeString, value)
 	}
 	if pvu.mutation.NameCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -192,8 +223,26 @@ func (pvuo *PackageVersionUpdateOne) SetSubpath(s string) *PackageVersionUpdateO
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (pvuo *PackageVersionUpdateOne) SetQualifiers(s string) *PackageVersionUpdateOne {
-	pvuo.mutation.SetQualifiers(s)
+func (pvuo *PackageVersionUpdateOne) SetQualifiers(mq []model.PackageQualifier) *PackageVersionUpdateOne {
+	pvuo.mutation.SetQualifiers(mq)
+	return pvuo
+}
+
+// AppendQualifiers appends mq to the "qualifiers" field.
+func (pvuo *PackageVersionUpdateOne) AppendQualifiers(mq []model.PackageQualifier) *PackageVersionUpdateOne {
+	pvuo.mutation.AppendQualifiers(mq)
+	return pvuo
+}
+
+// ClearQualifiers clears the value of the "qualifiers" field.
+func (pvuo *PackageVersionUpdateOne) ClearQualifiers() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearQualifiers()
+	return pvuo
+}
+
+// SetHash sets the "hash" field.
+func (pvuo *PackageVersionUpdateOne) SetHash(s string) *PackageVersionUpdateOne {
+	pvuo.mutation.SetHash(s)
 	return pvuo
 }
 
@@ -297,7 +346,18 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 		_spec.SetField(packageversion.FieldSubpath, field.TypeString, value)
 	}
 	if value, ok := pvuo.mutation.Qualifiers(); ok {
-		_spec.SetField(packageversion.FieldQualifiers, field.TypeString, value)
+		_spec.SetField(packageversion.FieldQualifiers, field.TypeJSON, value)
+	}
+	if value, ok := pvuo.mutation.AppendedQualifiers(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, packageversion.FieldQualifiers, value)
+		})
+	}
+	if pvuo.mutation.QualifiersCleared() {
+		_spec.ClearField(packageversion.FieldQualifiers, field.TypeJSON)
+	}
+	if value, ok := pvuo.mutation.Hash(); ok {
+		_spec.SetField(packageversion.FieldHash, field.TypeString, value)
 	}
 	if pvuo.mutation.NameCleared() {
 		edge := &sqlgraph.EdgeSpec{

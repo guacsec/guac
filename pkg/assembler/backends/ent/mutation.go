@@ -22,6 +22,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 const (
@@ -3856,18 +3857,20 @@ func (m *PackageNodeMutation) ResetEdge(name string) error {
 // PackageVersionMutation represents an operation that mutates the PackageVersion nodes in the graph.
 type PackageVersionMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	version       *string
-	subpath       *string
-	qualifiers    *string
-	clearedFields map[string]struct{}
-	name          *int
-	clearedname   bool
-	done          bool
-	oldValue      func(context.Context) (*PackageVersion, error)
-	predicates    []predicate.PackageVersion
+	op               Op
+	typ              string
+	id               *int
+	version          *string
+	subpath          *string
+	qualifiers       *[]model.PackageQualifier
+	appendqualifiers []model.PackageQualifier
+	hash             *string
+	clearedFields    map[string]struct{}
+	name             *int
+	clearedname      bool
+	done             bool
+	oldValue         func(context.Context) (*PackageVersion, error)
+	predicates       []predicate.PackageVersion
 }
 
 var _ ent.Mutation = (*PackageVersionMutation)(nil)
@@ -4077,12 +4080,13 @@ func (m *PackageVersionMutation) ResetSubpath() {
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (m *PackageVersionMutation) SetQualifiers(s string) {
-	m.qualifiers = &s
+func (m *PackageVersionMutation) SetQualifiers(mq []model.PackageQualifier) {
+	m.qualifiers = &mq
+	m.appendqualifiers = nil
 }
 
 // Qualifiers returns the value of the "qualifiers" field in the mutation.
-func (m *PackageVersionMutation) Qualifiers() (r string, exists bool) {
+func (m *PackageVersionMutation) Qualifiers() (r []model.PackageQualifier, exists bool) {
 	v := m.qualifiers
 	if v == nil {
 		return
@@ -4093,7 +4097,7 @@ func (m *PackageVersionMutation) Qualifiers() (r string, exists bool) {
 // OldQualifiers returns the old "qualifiers" field's value of the PackageVersion entity.
 // If the PackageVersion object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PackageVersionMutation) OldQualifiers(ctx context.Context) (v string, err error) {
+func (m *PackageVersionMutation) OldQualifiers(ctx context.Context) (v []model.PackageQualifier, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldQualifiers is only allowed on UpdateOne operations")
 	}
@@ -4107,9 +4111,73 @@ func (m *PackageVersionMutation) OldQualifiers(ctx context.Context) (v string, e
 	return oldValue.Qualifiers, nil
 }
 
+// AppendQualifiers adds mq to the "qualifiers" field.
+func (m *PackageVersionMutation) AppendQualifiers(mq []model.PackageQualifier) {
+	m.appendqualifiers = append(m.appendqualifiers, mq...)
+}
+
+// AppendedQualifiers returns the list of values that were appended to the "qualifiers" field in this mutation.
+func (m *PackageVersionMutation) AppendedQualifiers() ([]model.PackageQualifier, bool) {
+	if len(m.appendqualifiers) == 0 {
+		return nil, false
+	}
+	return m.appendqualifiers, true
+}
+
+// ClearQualifiers clears the value of the "qualifiers" field.
+func (m *PackageVersionMutation) ClearQualifiers() {
+	m.qualifiers = nil
+	m.appendqualifiers = nil
+	m.clearedFields[packageversion.FieldQualifiers] = struct{}{}
+}
+
+// QualifiersCleared returns if the "qualifiers" field was cleared in this mutation.
+func (m *PackageVersionMutation) QualifiersCleared() bool {
+	_, ok := m.clearedFields[packageversion.FieldQualifiers]
+	return ok
+}
+
 // ResetQualifiers resets all changes to the "qualifiers" field.
 func (m *PackageVersionMutation) ResetQualifiers() {
 	m.qualifiers = nil
+	m.appendqualifiers = nil
+	delete(m.clearedFields, packageversion.FieldQualifiers)
+}
+
+// SetHash sets the "hash" field.
+func (m *PackageVersionMutation) SetHash(s string) {
+	m.hash = &s
+}
+
+// Hash returns the value of the "hash" field in the mutation.
+func (m *PackageVersionMutation) Hash() (r string, exists bool) {
+	v := m.hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHash returns the old "hash" field's value of the PackageVersion entity.
+// If the PackageVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageVersionMutation) OldHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHash: %w", err)
+	}
+	return oldValue.Hash, nil
+}
+
+// ResetHash resets all changes to the "hash" field.
+func (m *PackageVersionMutation) ResetHash() {
+	m.hash = nil
 }
 
 // ClearName clears the "name" edge to the PackageName entity.
@@ -4172,7 +4240,7 @@ func (m *PackageVersionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PackageVersionMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, packageversion.FieldNameID)
 	}
@@ -4184,6 +4252,9 @@ func (m *PackageVersionMutation) Fields() []string {
 	}
 	if m.qualifiers != nil {
 		fields = append(fields, packageversion.FieldQualifiers)
+	}
+	if m.hash != nil {
+		fields = append(fields, packageversion.FieldHash)
 	}
 	return fields
 }
@@ -4201,6 +4272,8 @@ func (m *PackageVersionMutation) Field(name string) (ent.Value, bool) {
 		return m.Subpath()
 	case packageversion.FieldQualifiers:
 		return m.Qualifiers()
+	case packageversion.FieldHash:
+		return m.Hash()
 	}
 	return nil, false
 }
@@ -4218,6 +4291,8 @@ func (m *PackageVersionMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldSubpath(ctx)
 	case packageversion.FieldQualifiers:
 		return m.OldQualifiers(ctx)
+	case packageversion.FieldHash:
+		return m.OldHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown PackageVersion field %s", name)
 }
@@ -4249,11 +4324,18 @@ func (m *PackageVersionMutation) SetField(name string, value ent.Value) error {
 		m.SetSubpath(v)
 		return nil
 	case packageversion.FieldQualifiers:
-		v, ok := value.(string)
+		v, ok := value.([]model.PackageQualifier)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetQualifiers(v)
+		return nil
+	case packageversion.FieldHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion field %s", name)
@@ -4287,7 +4369,11 @@ func (m *PackageVersionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PackageVersionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(packageversion.FieldQualifiers) {
+		fields = append(fields, packageversion.FieldQualifiers)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -4300,6 +4386,11 @@ func (m *PackageVersionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PackageVersionMutation) ClearField(name string) error {
+	switch name {
+	case packageversion.FieldQualifiers:
+		m.ClearQualifiers()
+		return nil
+	}
 	return fmt.Errorf("unknown PackageVersion nullable field %s", name)
 }
 
@@ -4318,6 +4409,9 @@ func (m *PackageVersionMutation) ResetField(name string) error {
 		return nil
 	case packageversion.FieldQualifiers:
 		m.ResetQualifiers()
+		return nil
+	case packageversion.FieldHash:
+		m.ResetHash()
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion field %s", name)

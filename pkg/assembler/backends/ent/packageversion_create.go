@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // PackageVersionCreate is the builder for creating a PackageVersion entity.
@@ -41,8 +42,14 @@ func (pvc *PackageVersionCreate) SetSubpath(s string) *PackageVersionCreate {
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (pvc *PackageVersionCreate) SetQualifiers(s string) *PackageVersionCreate {
-	pvc.mutation.SetQualifiers(s)
+func (pvc *PackageVersionCreate) SetQualifiers(mq []model.PackageQualifier) *PackageVersionCreate {
+	pvc.mutation.SetQualifiers(mq)
+	return pvc
+}
+
+// SetHash sets the "hash" field.
+func (pvc *PackageVersionCreate) SetHash(s string) *PackageVersionCreate {
+	pvc.mutation.SetHash(s)
 	return pvc
 }
 
@@ -94,8 +101,8 @@ func (pvc *PackageVersionCreate) check() error {
 	if _, ok := pvc.mutation.Subpath(); !ok {
 		return &ValidationError{Name: "subpath", err: errors.New(`ent: missing required field "PackageVersion.subpath"`)}
 	}
-	if _, ok := pvc.mutation.Qualifiers(); !ok {
-		return &ValidationError{Name: "qualifiers", err: errors.New(`ent: missing required field "PackageVersion.qualifiers"`)}
+	if _, ok := pvc.mutation.Hash(); !ok {
+		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "PackageVersion.hash"`)}
 	}
 	if _, ok := pvc.mutation.NameID(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required edge "PackageVersion.name"`)}
@@ -136,8 +143,12 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		_node.Subpath = value
 	}
 	if value, ok := pvc.mutation.Qualifiers(); ok {
-		_spec.SetField(packageversion.FieldQualifiers, field.TypeString, value)
+		_spec.SetField(packageversion.FieldQualifiers, field.TypeJSON, value)
 		_node.Qualifiers = value
+	}
+	if value, ok := pvc.mutation.Hash(); ok {
+		_spec.SetField(packageversion.FieldHash, field.TypeString, value)
+		_node.Hash = value
 	}
 	if nodes := pvc.mutation.NameIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -245,7 +256,7 @@ func (u *PackageVersionUpsert) UpdateSubpath() *PackageVersionUpsert {
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (u *PackageVersionUpsert) SetQualifiers(v string) *PackageVersionUpsert {
+func (u *PackageVersionUpsert) SetQualifiers(v []model.PackageQualifier) *PackageVersionUpsert {
 	u.Set(packageversion.FieldQualifiers, v)
 	return u
 }
@@ -253,6 +264,24 @@ func (u *PackageVersionUpsert) SetQualifiers(v string) *PackageVersionUpsert {
 // UpdateQualifiers sets the "qualifiers" field to the value that was provided on create.
 func (u *PackageVersionUpsert) UpdateQualifiers() *PackageVersionUpsert {
 	u.SetExcluded(packageversion.FieldQualifiers)
+	return u
+}
+
+// ClearQualifiers clears the value of the "qualifiers" field.
+func (u *PackageVersionUpsert) ClearQualifiers() *PackageVersionUpsert {
+	u.SetNull(packageversion.FieldQualifiers)
+	return u
+}
+
+// SetHash sets the "hash" field.
+func (u *PackageVersionUpsert) SetHash(v string) *PackageVersionUpsert {
+	u.Set(packageversion.FieldHash, v)
+	return u
+}
+
+// UpdateHash sets the "hash" field to the value that was provided on create.
+func (u *PackageVersionUpsert) UpdateHash() *PackageVersionUpsert {
+	u.SetExcluded(packageversion.FieldHash)
 	return u
 }
 
@@ -339,7 +368,7 @@ func (u *PackageVersionUpsertOne) UpdateSubpath() *PackageVersionUpsertOne {
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (u *PackageVersionUpsertOne) SetQualifiers(v string) *PackageVersionUpsertOne {
+func (u *PackageVersionUpsertOne) SetQualifiers(v []model.PackageQualifier) *PackageVersionUpsertOne {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.SetQualifiers(v)
 	})
@@ -349,6 +378,27 @@ func (u *PackageVersionUpsertOne) SetQualifiers(v string) *PackageVersionUpsertO
 func (u *PackageVersionUpsertOne) UpdateQualifiers() *PackageVersionUpsertOne {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.UpdateQualifiers()
+	})
+}
+
+// ClearQualifiers clears the value of the "qualifiers" field.
+func (u *PackageVersionUpsertOne) ClearQualifiers() *PackageVersionUpsertOne {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.ClearQualifiers()
+	})
+}
+
+// SetHash sets the "hash" field.
+func (u *PackageVersionUpsertOne) SetHash(v string) *PackageVersionUpsertOne {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.SetHash(v)
+	})
+}
+
+// UpdateHash sets the "hash" field to the value that was provided on create.
+func (u *PackageVersionUpsertOne) UpdateHash() *PackageVersionUpsertOne {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.UpdateHash()
 	})
 }
 
@@ -594,7 +644,7 @@ func (u *PackageVersionUpsertBulk) UpdateSubpath() *PackageVersionUpsertBulk {
 }
 
 // SetQualifiers sets the "qualifiers" field.
-func (u *PackageVersionUpsertBulk) SetQualifiers(v string) *PackageVersionUpsertBulk {
+func (u *PackageVersionUpsertBulk) SetQualifiers(v []model.PackageQualifier) *PackageVersionUpsertBulk {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.SetQualifiers(v)
 	})
@@ -604,6 +654,27 @@ func (u *PackageVersionUpsertBulk) SetQualifiers(v string) *PackageVersionUpsert
 func (u *PackageVersionUpsertBulk) UpdateQualifiers() *PackageVersionUpsertBulk {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.UpdateQualifiers()
+	})
+}
+
+// ClearQualifiers clears the value of the "qualifiers" field.
+func (u *PackageVersionUpsertBulk) ClearQualifiers() *PackageVersionUpsertBulk {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.ClearQualifiers()
+	})
+}
+
+// SetHash sets the "hash" field.
+func (u *PackageVersionUpsertBulk) SetHash(v string) *PackageVersionUpsertBulk {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.SetHash(v)
+	})
+}
+
+// UpdateHash sets the "hash" field to the value that was provided on create.
+func (u *PackageVersionUpsertBulk) UpdateHash() *PackageVersionUpsertBulk {
+	return u.Update(func(s *PackageVersionUpsert) {
+		s.UpdateHash()
 	})
 }
 

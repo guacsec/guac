@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -196,7 +197,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "version", Type: field.TypeString},
 		{Name: "subpath", Type: field.TypeString},
-		{Name: "qualifiers", Type: field.TypeString},
+		{Name: "qualifiers", Type: field.TypeJSON, Nullable: true},
+		{Name: "hash", Type: field.TypeString},
 		{Name: "name_id", Type: field.TypeInt},
 	}
 	// PackageVersionsTable holds the schema information for the "package_versions" table.
@@ -207,16 +209,26 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "package_versions_package_names_versions",
-				Columns:    []*schema.Column{PackageVersionsColumns[4]},
+				Columns:    []*schema.Column{PackageVersionsColumns[5]},
 				RefColumns: []*schema.Column{PackageNamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "packageversion_version_subpath_qualifiers_name_id",
+				Name:    "packageversion_hash_name_id",
 				Unique:  true,
-				Columns: []*schema.Column{PackageVersionsColumns[1], PackageVersionsColumns[2], PackageVersionsColumns[3], PackageVersionsColumns[4]},
+				Columns: []*schema.Column{PackageVersionsColumns[4], PackageVersionsColumns[5]},
+			},
+			{
+				Name:    "packageversion_qualifiers",
+				Unique:  false,
+				Columns: []*schema.Column{PackageVersionsColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Types: map[string]string{
+						"postgres": "GIN",
+					},
+				},
 			},
 		},
 	}

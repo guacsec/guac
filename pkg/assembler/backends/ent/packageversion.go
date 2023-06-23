@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // PackageVersion is the model entity for the PackageVersion schema.
@@ -24,7 +26,9 @@ type PackageVersion struct {
 	// Subpath holds the value of the "subpath" field.
 	Subpath string `json:"subpath,omitempty"`
 	// Qualifiers holds the value of the "qualifiers" field.
-	Qualifiers string `json:"qualifiers,omitempty"`
+	Qualifiers []model.PackageQualifier `json:"qualifiers,omitempty"`
+	// A SHA1 of the qualifiers, subpath, version fields after sorting keys, used to ensure uniqueness of version records.
+	Hash string `json:"hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PackageVersionQuery when eager-loading is set.
 	Edges        PackageVersionEdges `json:"edges"`
@@ -58,9 +62,11 @@ func (*PackageVersion) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case packageversion.FieldQualifiers:
+			values[i] = new([]byte)
 		case packageversion.FieldID, packageversion.FieldNameID:
 			values[i] = new(sql.NullInt64)
-		case packageversion.FieldVersion, packageversion.FieldSubpath, packageversion.FieldQualifiers:
+		case packageversion.FieldVersion, packageversion.FieldSubpath, packageversion.FieldHash:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -102,10 +108,18 @@ func (pv *PackageVersion) assignValues(columns []string, values []any) error {
 				pv.Subpath = value.String
 			}
 		case packageversion.FieldQualifiers:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field qualifiers", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &pv.Qualifiers); err != nil {
+					return fmt.Errorf("unmarshal field qualifiers: %w", err)
+				}
+			}
+		case packageversion.FieldHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
-				pv.Qualifiers = value.String
+				pv.Hash = value.String
 			}
 		default:
 			pv.selectValues.Set(columns[i], values[i])
@@ -158,7 +172,10 @@ func (pv *PackageVersion) String() string {
 	builder.WriteString(pv.Subpath)
 	builder.WriteString(", ")
 	builder.WriteString("qualifiers=")
-	builder.WriteString(pv.Qualifiers)
+	builder.WriteString(fmt.Sprintf("%v", pv.Qualifiers))
+	builder.WriteString(", ")
+	builder.WriteString("hash=")
+	builder.WriteString(pv.Hash)
 	builder.WriteByte(')')
 	return builder.String()
 }
