@@ -118,8 +118,9 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 	return toModelPackage(record), nil
 }
 
+// upsertPackage is a helper function to create or update a package node and its associated edges.
+// It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSpec) (int, error) {
-	// ingestPackage is used in multiple places, so we extract it to a function.
 	pkgID, err := client.PackageNode.Create().SetType(pkg.Type).
 		OnConflict(sql.ConflictColumns(packagenode.FieldType)).UpdateNewValues().ID(ctx)
 	if err != nil {

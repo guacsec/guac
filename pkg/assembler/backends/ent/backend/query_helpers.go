@@ -27,28 +27,40 @@ import (
 func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
 	return client.PackageNode.Query().
 		Where(packagenode.Type(pkgin.Type)).
-		QueryNamespaces().
-		Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
-		QueryNames().Where(packagename.Name(pkgin.Name)).Only(ctx)
+		QueryNamespaces().Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
+		QueryNames().Where(packagename.Name(pkgin.Name)).
+		Only(ctx)
 }
 
 func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
-	return client.PackageVersion.Query().
+	return client.PackageNode.Query().
+		Where(packagenode.Type(pkgin.Type)).
+		QueryNamespaces().Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
+		QueryNames().Where(packagename.Name(pkgin.Name)).
+		QueryVersions().
 		Where(
 			optionalPredicate(pkgin.Version, packageversion.VersionEQ),
 			optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
 			packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
-			packageversion.HasNameWith(
-				packagename.Name(pkgin.Name),
-				packagename.HasNamespaceWith(
-					packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, "")),
-					packagenamespace.HasPackageWith(
-						packagenode.Type(pkgin.Type),
-					),
-				),
-			),
 		).
 		Only(ctx)
+
+	// return client.PackageVersion.Query().
+	// 	Where(
+	// 		optionalPredicate(pkgin.Version, packageversion.VersionEQ),
+	// 		optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
+	// 		packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
+	// 		packageversion.HasNameWith(
+	// 			packagename.Name(pkgin.Name),
+	// 			packagename.HasNamespaceWith(
+	// 				packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, "")),
+	// 				packagenamespace.HasPackageWith(
+	// 					packagenode.Type(pkgin.Type),
+	// 				),
+	// 			),
+	// 		),
+	// 	).
+	// 	Only(ctx)
 }
 
 func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {
