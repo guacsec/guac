@@ -5,7 +5,7 @@ PKG=github.com/guacsec/guac/pkg/version
 LDFLAGS="-X $(PKG).Version=$(VERSION) -X $(PKG).Commit=$(COMMIT) -X $(PKG).Date=$(BUILD)"
 
 CONTAINER ?= docker
-CPUTYPE=$(shell uname -m)
+CPUTYPE=$(shell uname -m | sed 's/x86_64/amd64/')
 GITHUB_REPOSITORY ?= guacsec/guac
 LOCAL_IMAGE_NAME ?= local-organic-guac
 

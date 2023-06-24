@@ -2,7 +2,6 @@ package backend
 
 import (
 	"context"
-
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
@@ -73,23 +72,33 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return nil, err
 		}
 
+		var packageID int
+		var sourceID *int
 		if subject.Package != nil {
-			// packageID, err := upsertPackage(ctx, client, *subject.Package)
-			// if err != nil {
-			// 	return nil, err
-			// }
-
+			packageID, err = upsertPackage(ctx, client, *subject.Package)
+			if err != nil {
+				return nil, err
+			}
 		} else if subject.Source != nil {
-			// sourceID, err := ingestSource(ctx, client, *subject.Source)
-			// if err != nil {
-			// 	return nil, err
-			// }
+			sourceID, err = ingestSource(ctx, client, *subject.Source)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		occurrenceSubject, err := client.OccurrenceSubject.Create().
+			SetNillablePackageID(&packageID).
+			SetNillableSourceID(sourceID).
+			Save(ctx)
+		if err != nil {
+			return nil, err
 		}
 		id, err := client.Occurrence.Create().
 			SetArtifact(art).
 			SetJustification(spec.Justification).
 			SetOrigin(spec.Origin).
 			SetCollector(spec.Collector).
+			SetSubject(occurrenceSubject).
 			OnConflict(
 				sql.ConflictColumns(
 					occurrence.FieldArtifactID,
@@ -115,19 +124,32 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	record, err := b.client.Occurrence.Query().
 		Where(occurrence.ID(*recordID)).
 		WithArtifact().
-		WithSubject().
+		WithSubject(func(q *ent.OccurrenceSubjectQuery) {
+			q.WithPackage(func(q *ent.PackageVersionQuery) {
+				q.WithName(func(q *ent.PackageNameQuery) {
+					q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
+						q.WithPackage()
+					})
+				})
+			}).
+			WithSource(func(q *ent.SourceNameQuery) {
+				q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
+					q.WithSource()
+				})
+			})
+		}).
 		Only(ctx)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	var sub model.PackageOrSource
-	if record.Edges.Subject != nil {
+	//var sub model.PackageOrSource
+	//if record.Edges.Subject != nil {
 		// 	sub, err = b.buildPackageResponse(ctx, record.Edges.Package.ID, model.PkgSpec{})
 		// 	if err != nil {
 		// 		return nil, err
 		// 	}
-	}
+	//}
 
-	return toModelIsOccurrence(record, sub), nil
+	return toModelIsOccurrenceWithSubject(record), nil
 }
