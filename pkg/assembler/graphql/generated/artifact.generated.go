@@ -34,7 +34,9 @@ type MutationResolver interface {
 	IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error)
 	IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error)
 	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error)
+	IngestDependencies(ctx context.Context, pkg []*model.PkgInputSpec, depPkg []*model.PkgInputSpec, dependency []*model.IsDependencyInputSpec) ([]*model.IsDependency, error)
 	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error)
+	IngestOccurrences(ctx context.Context, subject model.PackagesOrSourcesInput, artifact []*model.ArtifactInputSpec, occurrence []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error)
 	IngestIsVulnerability(ctx context.Context, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) (*model.IsVulnerability, error)
 	IngestOsv(ctx context.Context, osv *model.OSVInputSpec) (*model.Osv, error)
 	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error)
@@ -204,6 +206,39 @@ func (ec *executionContext) field_Mutation_ingestCertifyGood_args(ctx context.Co
 		}
 	}
 	args["certifyGood"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []*model.PkgInputSpec
+	if tmp, ok := rawArgs["pkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+		arg0, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkg"] = arg0
+	var arg1 []*model.PkgInputSpec
+	if tmp, ok := rawArgs["depPkg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
+		arg1, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["depPkg"] = arg1
+	var arg2 []*model.IsDependencyInputSpec
+	if tmp, ok := rawArgs["dependency"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependency"))
+		arg2, err = ec.unmarshalNIsDependencyInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["dependency"] = arg2
 	return args, nil
 }
 
@@ -442,6 +477,39 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Con
 	if tmp, ok := rawArgs["occurrence"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrence"))
 		arg2, err = ec.unmarshalNIsOccurrenceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["occurrence"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PackagesOrSourcesInput
+	if tmp, ok := rawArgs["subject"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+		arg0, err = ec.unmarshalNPackagesOrSourcesInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackagesOrSourcesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["subject"] = arg0
+	var arg1 []*model.ArtifactInputSpec
+	if tmp, ok := rawArgs["artifact"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
+		arg1, err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["artifact"] = arg1
+	var arg2 []*model.IsOccurrenceInputSpec
+	if tmp, ok := rawArgs["occurrence"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrence"))
+		arg2, err = ec.unmarshalNIsOccurrenceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceInputSpecᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2171,6 +2239,79 @@ func (ec *executionContext) fieldContext_Mutation_ingestDependency(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_ingestDependencies(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestDependencies(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestDependencies(rctx, fc.Args["pkg"].([]*model.PkgInputSpec), fc.Args["depPkg"].([]*model.PkgInputSpec), fc.Args["dependency"].([]*model.IsDependencyInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.IsDependency)
+	fc.Result = res
+	return ec.marshalNIsDependency2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestDependencies(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsDependency_id(ctx, field)
+			case "package":
+				return ec.fieldContext_IsDependency_package(ctx, field)
+			case "dependentPackage":
+				return ec.fieldContext_IsDependency_dependentPackage(ctx, field)
+			case "versionRange":
+				return ec.fieldContext_IsDependency_versionRange(ctx, field)
+			case "dependencyType":
+				return ec.fieldContext_IsDependency_dependencyType(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsDependency_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsDependency_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsDependency_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestDependencies_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_ingestOccurrence(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_ingestOccurrence(ctx, field)
 	if err != nil {
@@ -2234,6 +2375,75 @@ func (ec *executionContext) fieldContext_Mutation_ingestOccurrence(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_ingestOccurrence_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ingestOccurrences(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ingestOccurrences(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().IngestOccurrences(rctx, fc.Args["subject"].(model.PackagesOrSourcesInput), fc.Args["artifact"].([]*model.ArtifactInputSpec), fc.Args["occurrence"].([]*model.IsOccurrenceInputSpec))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.IsOccurrence)
+	fc.Result = res
+	return ec.marshalNIsOccurrence2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ingestOccurrences(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_IsOccurrence_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_IsOccurrence_subject(ctx, field)
+			case "artifact":
+				return ec.fieldContext_IsOccurrence_artifact(ctx, field)
+			case "justification":
+				return ec.fieldContext_IsOccurrence_justification(ctx, field)
+			case "origin":
+				return ec.fieldContext_IsOccurrence_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_IsOccurrence_collector(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsOccurrence", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ingestOccurrences_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4510,9 +4720,23 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "ingestDependencies":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestDependencies(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "ingestOccurrence":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_ingestOccurrence(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ingestOccurrences":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ingestOccurrences(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

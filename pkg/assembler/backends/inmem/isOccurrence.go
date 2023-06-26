@@ -97,6 +97,11 @@ func (n *isOccurrenceStruct) BuildModelNode(c *demoClient) (model.Node, error) {
 // }
 
 // Ingest IsOccurrence
+
+func (c *demoClient) IngestOccurrences(ctx context.Context, subject model.PackagesOrSourcesInput, artifact []*model.ArtifactInputSpec, occurrence []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
+	panic("not implemented")
+}
+
 func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
 	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
 }

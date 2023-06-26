@@ -51,6 +51,11 @@ func (n *isDependencyLink) BuildModelNode(c *demoClient) (model.Node, error) {
 }
 
 // Ingest IsDependency
+
+func (c *demoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgInputSpec, depPkg []*model.PkgInputSpec, dependency []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+	panic("not implemented")
+}
+
 func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	return c.ingestDependency(ctx, packageArg, dependentPackageArg, dependency, true)
 }

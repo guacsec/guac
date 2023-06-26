@@ -15,6 +15,11 @@ func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.P
 	return r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
 }
 
+// IngestOccurrences is the resolver for the ingestOccurrences field.
+func (r *mutationResolver) IngestOccurrences(ctx context.Context, subject model.PackagesOrSourcesInput, artifact []*model.ArtifactInputSpec, occurrence []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
+	return r.Backend.IngestOccurrences(ctx, subject, artifact, occurrence)
+}
+
 // IsOccurrence is the resolver for the IsOccurrence field.
 func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	return r.Backend.IsOccurrence(ctx, isOccurrenceSpec)

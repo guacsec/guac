@@ -28,3 +28,15 @@ mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec
     ...AllIsOccurrencesTree
   }
 }
+
+mutation IsOccurrencesPkg($pkg: [PkgInputSpec!]!, $artifact: [ArtifactInputSpec!]!, $occurrence: [IsOccurrenceInputSpec!]!) {
+  ingestOccurrences(subject: {packages: $pkg}, artifact: $artifact, occurrence: $occurrence) {
+    ...AllIsOccurrencesTree
+  }
+}
+
+mutation IsOccurrencesSrc($source: [SourceInputSpec!]!, $artifact: [ArtifactInputSpec!]!, $occurrence: [IsOccurrenceInputSpec!]!) {
+  ingestOccurrences(subject: {sources: $source}, artifact: $artifact, occurrence: $occurrence) {
+    ...AllIsOccurrencesTree
+  }
+}

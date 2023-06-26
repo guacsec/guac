@@ -97,4 +97,5 @@ extend type Query {
 extend type Mutation {
   "Adds a dependency between two packages"
   ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
+  ingestDependencies(pkg: [PkgInputSpec!]!, depPkg: [PkgInputSpec!]!, dependency: [IsDependencyInputSpec!]!): [IsDependency!]!
 }

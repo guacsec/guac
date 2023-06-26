@@ -17,8 +17,10 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -30,6 +32,231 @@ const (
 )
 
 // Ingest IsDependency
+
+func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgInputSpec, depPkg []*model.PkgInputSpec, dependency []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+
+	if len(pkg) != len(depPkg) {
+		return nil, fmt.Errorf("uneven packages and dependent packages for ingestion")
+	} else if len(pkg) != len(dependency) {
+		return nil, fmt.Errorf("uneven packages and isDependency for ingestion")
+	}
+
+	listOfValues := []map[string]any{}
+
+	for i, _ := range pkg {
+		values := map[string]any{}
+
+		values["pkgType"] = pkg[i].Type
+		values["name"] = pkg[i].Name
+		if pkg[i].Namespace != nil {
+			values["namespace"] = *pkg[i].Namespace
+		} else {
+			values["namespace"] = ""
+		}
+		if pkg[i].Version != nil {
+			values["version"] = *pkg[i].Version
+		} else {
+			values["version"] = ""
+		}
+		if pkg[i].Subpath != nil {
+			values["subpath"] = *pkg[i].Subpath
+		} else {
+			values["subpath"] = ""
+		}
+
+		// To ensure consistency, always sort the qualifiers by key
+		qualifiersMap := map[string]string{}
+		keys := []string{}
+		for _, kv := range pkg[i].Qualifiers {
+			qualifiersMap[kv.Key] = kv.Value
+			keys = append(keys, kv.Key)
+		}
+		sort.Strings(keys)
+		qualifiers := []string{}
+		for _, k := range keys {
+			qualifiers = append(qualifiers, k, qualifiersMap[k])
+		}
+		values["qualifier"] = qualifiers
+
+		// dependent package
+		values["secondPkgType"] = depPkg[i].Type
+		if depPkg[i].Namespace != nil {
+			values["secondNamespace"] = *depPkg[i].Namespace
+		} else {
+			values["secondNamespace"] = ""
+		}
+		values["secondName"] = depPkg[i].Name
+
+		// isDependency
+
+		values[versionRange] = dependency[i].VersionRange
+		values[dependencyType] = dependency[i].DependencyType.String()
+		values[justification] = dependency[i].Justification
+		values[origin] = dependency[i].Origin
+		values[collector] = dependency[i].Collector
+		listOfValues = append(listOfValues, values)
+	}
+
+	var documents []string
+	for _, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		documents = append(documents, string(bs))
+	}
+
+	queryValues := map[string]any{}
+	queryValues["documents"] = fmt.Sprint(strings.Join(documents, ","))
+
+	var sb strings.Builder
+
+	sb.WriteString("for doc in [")
+	for i, val := range listOfValues {
+		bs, _ := json.Marshal(val)
+		if i == len(listOfValues)-1 {
+			sb.WriteString(string(bs))
+		} else {
+			sb.WriteString(string(bs) + ",")
+		}
+	}
+	sb.WriteString("]")
+
+	query := `
+	LET firstPkg = FIRST(
+		FOR pkg IN Pkg
+		FILTER pkg.root == 'pkg'
+		FOR pkgHasType IN OUTBOUND pkg PkgHasType
+		  FILTER pkgHasType.type == doc.pkgType && pkgHasType._parent == pkg._id
+		  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+			  FILTER pkgHasNamespace.namespace == doc.namespace && pkgHasNamespace._parent == pkgHasType._id
+			FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
+				FILTER pkgHasName.name == doc.name && pkgHasName._parent == pkgHasNamespace._id
+			FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
+				  FILTER pkgHasVersion.version == doc.version && pkgHasVersion.subpath == doc.subpath && pkgHasVersion.qualifier_list == doc.qualifier && pkgHasVersion._parent == pkgHasName._id
+			  RETURN {
+			  'type': pkgHasType.type,
+			  'namespace': pkgHasNamespace.namespace,
+			  'name': pkgHasName.name,
+			  'version': pkgHasVersion.version,
+			  'subpath': pkgHasVersion.subpath,
+			  'qualifier_list': pkgHasVersion.qualifier_list,
+			  'versionDoc': pkgHasVersion
+			  }
+		)
+		
+	LET secondPkg = FIRST(
+		FOR pkg IN Pkg
+		  FILTER pkg.root == 'pkg'
+		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
+			FILTER pkgHasType.type == doc.secondPkgType && pkgHasType._parent == pkg._id
+		  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
+			FILTER pkgHasNamespace.namespace == doc.secondNamespace && pkgHasNamespace._parent == pkgHasType._id
+			FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
+				FILTER pkgHasName.name == doc.secondName && pkgHasName._parent == pkgHasNamespace._id
+			  RETURN {
+			  'type': pkgHasType.type,
+			  'namespace': pkgHasNamespace.namespace,
+			  'name': pkgHasName.name,
+			  'nameDoc': pkgHasName
+			  }
+		)
+		
+	LET isDependency = FIRST(
+		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin }
+			UPDATE {} IN isDependencies
+			RETURN NEW
+		)
+		
+	LET edgeCollection = (FOR edgeData IN [
+		{fromKey: isDependency._key, toKey: secondPkg.nameDoc._key, from: isDependency._id, to: secondPkg.nameDoc._id, label: 'dependency'}, 
+		{fromKey: firstPkg.versionDoc._key, toKey: isDependency._key, from: firstPkg.versionDoc._id, to: isDependency._id, label: 'subject'}]
+	  
+		INSERT { _key: CONCAT('isDependencyEdges', edgeData.fromKey, edgeData.toKey), _from: edgeData.from, _to: edgeData.to, label : edgeData.label } INTO isDependencyEdges OPTIONS { overwriteMode: 'ignore' }
+		)
+		
+	RETURN {
+		  'firstPkgType': firstPkg.type,
+		  'firstPkgNamespace': firstPkg.namespace,
+		  'firstPkgName': firstPkg.name,
+		  'firstPkgVersion': firstPkg.version,
+		  'firstPkgSubpath': firstPkg.subpath,
+		  'firstPkgQualifier_list': firstPkg.qualifier_list,
+		  'secondPkgType': secondPkg.type,
+		  'secondPkgNamespace': secondPkg.namespace,
+		  'secondPkgName': secondPkg.name,
+		  'versionRange': isDependency.versionRange,
+		  'dependencyType': isDependency.dependencyType,
+		  'justification': isDependency.justification,
+		  'collector': isDependency.collector,
+		  'origin': isDependency.origin
+	}`
+
+	sb.WriteString(query)
+
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestDependency")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vertex documents: %w", err)
+	}
+	defer cursor.Close()
+
+	type collectedData struct {
+		FirstPkgType          string      `json:"firstPkgType"`
+		FirstPkgNamespace     string      `json:"firstPkgNamespace"`
+		FirstPkgName          string      `json:"firstPkgName"`
+		FirstPkgVersion       string      `json:"firstPkgVersion"`
+		FirstPkgSubpath       string      `json:"firstPkgSubpath"`
+		FirstPkgQualifierList interface{} `json:"firstPkgQualifier_list"`
+		SecondPkgType         string      `json:"secondPkgType"`
+		SecondPkgNamespace    string      `json:"secondPkgNamespace"`
+		SecondPkgName         string      `json:"secondPkgName"`
+		VersionRange          string      `json:"versionRange"`
+		DependencyType        string      `json:"dependencyType"`
+		Justification         string      `json:"justification"`
+		Collector             string      `json:"collector"`
+		Origin                string      `json:"origin"`
+	}
+
+	var createdValues []collectedData
+	for {
+		var doc collectedData
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to ingest dependency: %w, values: %v", err, queryValues)
+			}
+		} else {
+			createdValues = append(createdValues, doc)
+		}
+	}
+
+	var isDependencyList []*model.IsDependency
+	for _, createdValue := range createdValues {
+		pkg := generateModelPackage(createdValue.FirstPkgType, createdValue.FirstPkgNamespace,
+			createdValue.FirstPkgName, createdValue.FirstPkgVersion, createdValue.FirstPkgSubpath, createdValue.FirstPkgQualifierList)
+
+		depPkg := generateModelPackage(createdValue.SecondPkgType, createdValue.SecondPkgNamespace,
+			createdValue.SecondPkgName, nil, nil, nil)
+
+		dependencyTypeEnum, err := convertDependencyTypeToEnum(createdValue.DependencyType)
+		if err != nil {
+			return nil, fmt.Errorf("convertDependencyTypeToEnum failed with error: %w", err)
+		}
+
+		isDependency := &model.IsDependency{
+			Package:          pkg,
+			DependentPackage: depPkg,
+			VersionRange:     createdValue.VersionRange,
+			DependencyType:   dependencyTypeEnum,
+			Origin:           createdValue.Collector,
+			Collector:        createdValue.Origin,
+		}
+		isDependencyList = append(isDependencyList, isDependency)
+	}
+
+	return isDependencyList, nil
+
+}
 
 func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
 	values := map[string]any{}

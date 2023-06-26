@@ -180,6 +180,7 @@ type ComplexityRoot struct {
 		IngestCertifyBad      func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) int
 		IngestCertifyGood     func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) int
 		IngestCve             func(childComplexity int, cve *model.CVEInputSpec) int
+		IngestDependencies    func(childComplexity int, pkg []*model.PkgInputSpec, depPkg []*model.PkgInputSpec, dependency []*model.IsDependencyInputSpec) int
 		IngestDependency      func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, dependency model.IsDependencyInputSpec) int
 		IngestGhsa            func(childComplexity int, ghsa *model.GHSAInputSpec) int
 		IngestHasSbom         func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
@@ -188,6 +189,7 @@ type ComplexityRoot struct {
 		IngestIsVulnerability func(childComplexity int, osv model.OSVInputSpec, vulnerability model.CveOrGhsaInput, isVulnerability model.IsVulnerabilityInputSpec) int
 		IngestMaterials       func(childComplexity int, materials []*model.ArtifactInputSpec) int
 		IngestOccurrence      func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
+		IngestOccurrences     func(childComplexity int, subject model.PackagesOrSourcesInput, artifact []*model.ArtifactInputSpec, occurrence []*model.IsOccurrenceInputSpec) int
 		IngestOsv             func(childComplexity int, osv *model.OSVInputSpec) int
 		IngestPackage         func(childComplexity int, pkg model.PkgInputSpec) int
 		IngestPkgEqual        func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
@@ -1001,6 +1003,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestCve(childComplexity, args["cve"].(*model.CVEInputSpec)), true
 
+	case "Mutation.ingestDependencies":
+		if e.complexity.Mutation.IngestDependencies == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestDependencies_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestDependencies(childComplexity, args["pkg"].([]*model.PkgInputSpec), args["depPkg"].([]*model.PkgInputSpec), args["dependency"].([]*model.IsDependencyInputSpec)), true
+
 	case "Mutation.ingestDependency":
 		if e.complexity.Mutation.IngestDependency == nil {
 			break
@@ -1096,6 +1110,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.IngestOccurrence(childComplexity, args["subject"].(model.PackageOrSourceInput), args["artifact"].(model.ArtifactInputSpec), args["occurrence"].(model.IsOccurrenceInputSpec)), true
+
+	case "Mutation.ingestOccurrences":
+		if e.complexity.Mutation.IngestOccurrences == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_ingestOccurrences_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.IngestOccurrences(childComplexity, args["subject"].(model.PackagesOrSourcesInput), args["artifact"].([]*model.ArtifactInputSpec), args["occurrence"].([]*model.IsOccurrenceInputSpec)), true
 
 	case "Mutation.ingestOSV":
 		if e.complexity.Mutation.IngestOsv == nil {
@@ -1940,6 +1966,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputPackageQualifierSpec,
 		ec.unmarshalInputPackageSourceOrArtifactInput,
 		ec.unmarshalInputPackageSourceOrArtifactSpec,
+		ec.unmarshalInputPackagesOrSourcesInput,
 		ec.unmarshalInputPkgEqualInputSpec,
 		ec.unmarshalInputPkgEqualSpec,
 		ec.unmarshalInputPkgInputSpec,
@@ -3359,6 +3386,7 @@ extend type Query {
 extend type Mutation {
   "Adds a dependency between two packages"
   ingestDependency(pkg: PkgInputSpec!, depPkg: PkgInputSpec!, dependency: IsDependencyInputSpec!): IsDependency!
+  ingestDependencies(pkg: [PkgInputSpec!]!, depPkg: [PkgInputSpec!]!, dependency: [IsDependencyInputSpec!]!): [IsDependency!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isOccurrence.graphql", Input: `#
@@ -3401,6 +3429,16 @@ Exactly one field must be specified.
 input PackageOrSourceInput {
   package: PkgInputSpec
   source: SourceInputSpec
+}
+
+"""
+PackagesOrSourcesInput allows using PackageOrSource list union as input for mutations.
+
+Exactly one field must be specified.
+"""
+input PackagesOrSourcesInput {
+  packages: [PkgInputSpec!]
+  sources: [SourceInputSpec!]
 }
 
 """
@@ -3450,6 +3488,7 @@ extend type Query {
 extend type Mutation {
   "Ingest that an artifact is produced from a package or source."
   ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  ingestOccurrences(subject: PackagesOrSourcesInput!, artifact: [ArtifactInputSpec!]!, occurrence: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/isVulnerability.graphql", Input: `#

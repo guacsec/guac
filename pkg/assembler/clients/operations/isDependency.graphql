@@ -22,3 +22,9 @@ mutation IsDependency($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $dependency: 
     ...allIsDependencyTree
   }
 }
+
+mutation IsDependencies($pkg: [PkgInputSpec!]!, $depPkg: [PkgInputSpec!]!, $dependency: [IsDependencyInputSpec!]!) {
+  ingestDependencies(pkg: $pkg, depPkg: $depPkg, dependency: $dependency) {
+    ...allIsDependencyTree
+  }
+}

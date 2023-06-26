@@ -875,6 +875,14 @@ type PackageVersion struct {
 	Subpath    string              `json:"subpath"`
 }
 
+// PackagesOrSourcesInput allows using PackageOrSource list union as input for mutations.
+//
+// Exactly one field must be specified.
+type PackagesOrSourcesInput struct {
+	Packages []*PkgInputSpec    `json:"packages,omitempty"`
+	Sources  []*SourceInputSpec `json:"sources,omitempty"`
+}
+
 // PkgEqual is an attestation that a set of packages are similar.
 type PkgEqual struct {
 	ID string `json:"id"`
