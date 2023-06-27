@@ -19,6 +19,8 @@ type OccurrenceSubject struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// OccurrenceID holds the value of the "occurrence_id" field.
+	OccurrenceID int `json:"occurrence_id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
 	SourceID *int `json:"source_id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
@@ -86,7 +88,7 @@ func (*OccurrenceSubject) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case occurrencesubject.FieldID, occurrencesubject.FieldSourceID, occurrencesubject.FieldPackageID:
+		case occurrencesubject.FieldID, occurrencesubject.FieldOccurrenceID, occurrencesubject.FieldSourceID, occurrencesubject.FieldPackageID:
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -109,6 +111,12 @@ func (os *OccurrenceSubject) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			os.ID = int(value.Int64)
+		case occurrencesubject.FieldOccurrenceID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field occurrence_id", values[i])
+			} else if value.Valid {
+				os.OccurrenceID = int(value.Int64)
+			}
 		case occurrencesubject.FieldSourceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
@@ -174,6 +182,9 @@ func (os *OccurrenceSubject) String() string {
 	var builder strings.Builder
 	builder.WriteString("OccurrenceSubject(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", os.ID))
+	builder.WriteString("occurrence_id=")
+	builder.WriteString(fmt.Sprintf("%v", os.OccurrenceID))
+	builder.WriteString(", ")
 	if v := os.SourceID; v != nil {
 		builder.WriteString("source_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))

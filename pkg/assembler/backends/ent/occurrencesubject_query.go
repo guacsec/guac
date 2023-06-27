@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -78,7 +77,7 @@ func (osq *OccurrenceSubjectQuery) QueryOccurrence() *OccurrenceQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrencesubject.Table, occurrencesubject.FieldID, selector),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, occurrencesubject.OccurrenceTable, occurrencesubject.OccurrenceColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, occurrencesubject.OccurrenceTable, occurrencesubject.OccurrenceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(osq.driver.Dialect(), step)
 		return fromU, nil
@@ -370,12 +369,12 @@ func (osq *OccurrenceSubjectQuery) WithSource(opts ...func(*SourceNameQuery)) *O
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		OccurrenceID int `json:"occurrence_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.OccurrenceSubject.Query().
-//		GroupBy(occurrencesubject.FieldSourceID).
+//		GroupBy(occurrencesubject.FieldOccurrenceID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (osq *OccurrenceSubjectQuery) GroupBy(field string, fields ...string) *OccurrenceSubjectGroupBy {
@@ -393,11 +392,11 @@ func (osq *OccurrenceSubjectQuery) GroupBy(field string, fields ...string) *Occu
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		OccurrenceID int `json:"occurrence_id,omitempty"`
 //	}
 //
 //	client.OccurrenceSubject.Query().
-//		Select(occurrencesubject.FieldSourceID).
+//		Select(occurrencesubject.FieldOccurrenceID).
 //		Scan(ctx, &v)
 func (osq *OccurrenceSubjectQuery) Select(fields ...string) *OccurrenceSubjectSelect {
 	osq.ctx.Fields = append(osq.ctx.Fields, fields...)
@@ -488,29 +487,31 @@ func (osq *OccurrenceSubjectQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 }
 
 func (osq *OccurrenceSubjectQuery) loadOccurrence(ctx context.Context, query *OccurrenceQuery, nodes []*OccurrenceSubject, init func(*OccurrenceSubject), assign func(*OccurrenceSubject, *Occurrence)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*OccurrenceSubject)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*OccurrenceSubject)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+		fk := nodes[i].OccurrenceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(occurrence.FieldSubjectID)
+	if len(ids) == 0 {
+		return nil
 	}
-	query.Where(predicate.Occurrence(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(occurrencesubject.OccurrenceColumn), fks...))
-	}))
+	query.Where(occurrence.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.SubjectID
-		node, ok := nodeids[fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "subject_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "occurrence_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -603,6 +604,9 @@ func (osq *OccurrenceSubjectQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != occurrencesubject.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if osq.withOccurrence != nil {
+			_spec.Node.AddColumnOnce(occurrencesubject.FieldOccurrenceID)
 		}
 		if osq.withPackage != nil {
 			_spec.Node.AddColumnOnce(occurrencesubject.FieldPackageID)

@@ -1716,42 +1716,6 @@ func (m *OccurrenceMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetSubjectID sets the "subject_id" field.
-func (m *OccurrenceMutation) SetSubjectID(i int) {
-	m.subject = &i
-}
-
-// SubjectID returns the value of the "subject_id" field in the mutation.
-func (m *OccurrenceMutation) SubjectID() (r int, exists bool) {
-	v := m.subject
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSubjectID returns the old "subject_id" field's value of the Occurrence entity.
-// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OccurrenceMutation) OldSubjectID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSubjectID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSubjectID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSubjectID: %w", err)
-	}
-	return oldValue.SubjectID, nil
-}
-
-// ResetSubjectID resets all changes to the "subject_id" field.
-func (m *OccurrenceMutation) ResetSubjectID() {
-	m.subject = nil
-}
-
 // SetArtifactID sets the "artifact_id" field.
 func (m *OccurrenceMutation) SetArtifactID(i int) {
 	m.artifact = &i
@@ -1896,6 +1860,11 @@ func (m *OccurrenceMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetSubjectID sets the "subject" edge to the OccurrenceSubject entity by id.
+func (m *OccurrenceMutation) SetSubjectID(id int) {
+	m.subject = &id
+}
+
 // ClearSubject clears the "subject" edge to the OccurrenceSubject entity.
 func (m *OccurrenceMutation) ClearSubject() {
 	m.clearedsubject = true
@@ -1904,6 +1873,14 @@ func (m *OccurrenceMutation) ClearSubject() {
 // SubjectCleared reports if the "subject" edge to the OccurrenceSubject entity was cleared.
 func (m *OccurrenceMutation) SubjectCleared() bool {
 	return m.clearedsubject
+}
+
+// SubjectID returns the "subject" edge ID in the mutation.
+func (m *OccurrenceMutation) SubjectID() (id int, exists bool) {
+	if m.subject != nil {
+		return *m.subject, true
+	}
+	return
 }
 
 // SubjectIDs returns the "subject" edge IDs in the mutation.
@@ -1982,10 +1959,7 @@ func (m *OccurrenceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OccurrenceMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.subject != nil {
-		fields = append(fields, occurrence.FieldSubjectID)
-	}
+	fields := make([]string, 0, 4)
 	if m.artifact != nil {
 		fields = append(fields, occurrence.FieldArtifactID)
 	}
@@ -2006,8 +1980,6 @@ func (m *OccurrenceMutation) Fields() []string {
 // schema.
 func (m *OccurrenceMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case occurrence.FieldSubjectID:
-		return m.SubjectID()
 	case occurrence.FieldArtifactID:
 		return m.ArtifactID()
 	case occurrence.FieldJustification:
@@ -2025,8 +1997,6 @@ func (m *OccurrenceMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *OccurrenceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case occurrence.FieldSubjectID:
-		return m.OldSubjectID(ctx)
 	case occurrence.FieldArtifactID:
 		return m.OldArtifactID(ctx)
 	case occurrence.FieldJustification:
@@ -2044,13 +2014,6 @@ func (m *OccurrenceMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *OccurrenceMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case occurrence.FieldSubjectID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSubjectID(v)
-		return nil
 	case occurrence.FieldArtifactID:
 		v, ok := value.(int)
 		if !ok {
@@ -2131,9 +2094,6 @@ func (m *OccurrenceMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *OccurrenceMutation) ResetField(name string) error {
 	switch name {
-	case occurrence.FieldSubjectID:
-		m.ResetSubjectID()
-		return nil
 	case occurrence.FieldArtifactID:
 		m.ResetArtifactID()
 		return nil
@@ -2358,6 +2318,42 @@ func (m *OccurrenceSubjectMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetOccurrenceID sets the "occurrence_id" field.
+func (m *OccurrenceSubjectMutation) SetOccurrenceID(i int) {
+	m.occurrence = &i
+}
+
+// OccurrenceID returns the value of the "occurrence_id" field in the mutation.
+func (m *OccurrenceSubjectMutation) OccurrenceID() (r int, exists bool) {
+	v := m.occurrence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOccurrenceID returns the old "occurrence_id" field's value of the OccurrenceSubject entity.
+// If the OccurrenceSubject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OccurrenceSubjectMutation) OldOccurrenceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOccurrenceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOccurrenceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOccurrenceID: %w", err)
+	}
+	return oldValue.OccurrenceID, nil
+}
+
+// ResetOccurrenceID resets all changes to the "occurrence_id" field.
+func (m *OccurrenceSubjectMutation) ResetOccurrenceID() {
+	m.occurrence = nil
+}
+
 // SetSourceID sets the "source_id" field.
 func (m *OccurrenceSubjectMutation) SetSourceID(i int) {
 	m.source = &i
@@ -2456,11 +2452,6 @@ func (m *OccurrenceSubjectMutation) ResetPackageID() {
 	delete(m.clearedFields, occurrencesubject.FieldPackageID)
 }
 
-// SetOccurrenceID sets the "occurrence" edge to the Occurrence entity by id.
-func (m *OccurrenceSubjectMutation) SetOccurrenceID(id int) {
-	m.occurrence = &id
-}
-
 // ClearOccurrence clears the "occurrence" edge to the Occurrence entity.
 func (m *OccurrenceSubjectMutation) ClearOccurrence() {
 	m.clearedoccurrence = true
@@ -2469,14 +2460,6 @@ func (m *OccurrenceSubjectMutation) ClearOccurrence() {
 // OccurrenceCleared reports if the "occurrence" edge to the Occurrence entity was cleared.
 func (m *OccurrenceSubjectMutation) OccurrenceCleared() bool {
 	return m.clearedoccurrence
-}
-
-// OccurrenceID returns the "occurrence" edge ID in the mutation.
-func (m *OccurrenceSubjectMutation) OccurrenceID() (id int, exists bool) {
-	if m.occurrence != nil {
-		return *m.occurrence, true
-	}
-	return
 }
 
 // OccurrenceIDs returns the "occurrence" edge IDs in the mutation.
@@ -2581,7 +2564,10 @@ func (m *OccurrenceSubjectMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OccurrenceSubjectMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
+	if m.occurrence != nil {
+		fields = append(fields, occurrencesubject.FieldOccurrenceID)
+	}
 	if m.source != nil {
 		fields = append(fields, occurrencesubject.FieldSourceID)
 	}
@@ -2596,6 +2582,8 @@ func (m *OccurrenceSubjectMutation) Fields() []string {
 // schema.
 func (m *OccurrenceSubjectMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case occurrencesubject.FieldOccurrenceID:
+		return m.OccurrenceID()
 	case occurrencesubject.FieldSourceID:
 		return m.SourceID()
 	case occurrencesubject.FieldPackageID:
@@ -2609,6 +2597,8 @@ func (m *OccurrenceSubjectMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *OccurrenceSubjectMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case occurrencesubject.FieldOccurrenceID:
+		return m.OldOccurrenceID(ctx)
 	case occurrencesubject.FieldSourceID:
 		return m.OldSourceID(ctx)
 	case occurrencesubject.FieldPackageID:
@@ -2622,6 +2612,13 @@ func (m *OccurrenceSubjectMutation) OldField(ctx context.Context, name string) (
 // type.
 func (m *OccurrenceSubjectMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case occurrencesubject.FieldOccurrenceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOccurrenceID(v)
+		return nil
 	case occurrencesubject.FieldSourceID:
 		v, ok := value.(int)
 		if !ok {
@@ -2703,6 +2700,9 @@ func (m *OccurrenceSubjectMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *OccurrenceSubjectMutation) ResetField(name string) error {
 	switch name {
+	case occurrencesubject.FieldOccurrenceID:
+		m.ResetOccurrenceID()
+		return nil
 	case occurrencesubject.FieldSourceID:
 		m.ResetSourceID()
 		return nil

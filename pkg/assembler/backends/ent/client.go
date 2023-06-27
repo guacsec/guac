@@ -791,7 +791,7 @@ func (c *OccurrenceClient) QuerySubject(o *Occurrence) *OccurrenceSubjectQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
 			sqlgraph.To(occurrencesubject.Table, occurrencesubject.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, occurrence.SubjectTable, occurrence.SubjectColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, occurrence.SubjectTable, occurrence.SubjectColumn),
 		)
 		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
 		return fromV, nil
@@ -941,7 +941,7 @@ func (c *OccurrenceSubjectClient) QueryOccurrence(os *OccurrenceSubject) *Occurr
 		step := sqlgraph.NewStep(
 			sqlgraph.From(occurrencesubject.Table, occurrencesubject.FieldID, id),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, occurrencesubject.OccurrenceTable, occurrencesubject.OccurrenceColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, occurrencesubject.OccurrenceTable, occurrencesubject.OccurrenceColumn),
 		)
 		fromV = sqlgraph.Neighbors(os.driver.Dialect(), step)
 		return fromV, nil

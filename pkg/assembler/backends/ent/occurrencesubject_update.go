@@ -30,6 +30,12 @@ func (osu *OccurrenceSubjectUpdate) Where(ps ...predicate.OccurrenceSubject) *Oc
 	return osu
 }
 
+// SetOccurrenceID sets the "occurrence_id" field.
+func (osu *OccurrenceSubjectUpdate) SetOccurrenceID(i int) *OccurrenceSubjectUpdate {
+	osu.mutation.SetOccurrenceID(i)
+	return osu
+}
+
 // SetSourceID sets the "source_id" field.
 func (osu *OccurrenceSubjectUpdate) SetSourceID(i int) *OccurrenceSubjectUpdate {
 	osu.mutation.SetSourceID(i)
@@ -67,20 +73,6 @@ func (osu *OccurrenceSubjectUpdate) SetNillablePackageID(i *int) *OccurrenceSubj
 // ClearPackageID clears the value of the "package_id" field.
 func (osu *OccurrenceSubjectUpdate) ClearPackageID() *OccurrenceSubjectUpdate {
 	osu.mutation.ClearPackageID()
-	return osu
-}
-
-// SetOccurrenceID sets the "occurrence" edge to the Occurrence entity by ID.
-func (osu *OccurrenceSubjectUpdate) SetOccurrenceID(id int) *OccurrenceSubjectUpdate {
-	osu.mutation.SetOccurrenceID(id)
-	return osu
-}
-
-// SetNillableOccurrenceID sets the "occurrence" edge to the Occurrence entity by ID if the given value is not nil.
-func (osu *OccurrenceSubjectUpdate) SetNillableOccurrenceID(id *int) *OccurrenceSubjectUpdate {
-	if id != nil {
-		osu = osu.SetOccurrenceID(*id)
-	}
 	return osu
 }
 
@@ -149,7 +141,18 @@ func (osu *OccurrenceSubjectUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (osu *OccurrenceSubjectUpdate) check() error {
+	if _, ok := osu.mutation.OccurrenceID(); osu.mutation.OccurrenceCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "OccurrenceSubject.occurrence"`)
+	}
+	return nil
+}
+
 func (osu *OccurrenceSubjectUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := osu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(occurrencesubject.Table, occurrencesubject.Columns, sqlgraph.NewFieldSpec(occurrencesubject.FieldID, field.TypeInt))
 	if ps := osu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -161,7 +164,7 @@ func (osu *OccurrenceSubjectUpdate) sqlSave(ctx context.Context) (n int, err err
 	if osu.mutation.OccurrenceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   occurrencesubject.OccurrenceTable,
 			Columns: []string{occurrencesubject.OccurrenceColumn},
 			Bidi:    false,
@@ -174,7 +177,7 @@ func (osu *OccurrenceSubjectUpdate) sqlSave(ctx context.Context) (n int, err err
 	if nodes := osu.mutation.OccurrenceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   occurrencesubject.OccurrenceTable,
 			Columns: []string{occurrencesubject.OccurrenceColumn},
 			Bidi:    false,
@@ -265,6 +268,12 @@ type OccurrenceSubjectUpdateOne struct {
 	mutation *OccurrenceSubjectMutation
 }
 
+// SetOccurrenceID sets the "occurrence_id" field.
+func (osuo *OccurrenceSubjectUpdateOne) SetOccurrenceID(i int) *OccurrenceSubjectUpdateOne {
+	osuo.mutation.SetOccurrenceID(i)
+	return osuo
+}
+
 // SetSourceID sets the "source_id" field.
 func (osuo *OccurrenceSubjectUpdateOne) SetSourceID(i int) *OccurrenceSubjectUpdateOne {
 	osuo.mutation.SetSourceID(i)
@@ -302,20 +311,6 @@ func (osuo *OccurrenceSubjectUpdateOne) SetNillablePackageID(i *int) *Occurrence
 // ClearPackageID clears the value of the "package_id" field.
 func (osuo *OccurrenceSubjectUpdateOne) ClearPackageID() *OccurrenceSubjectUpdateOne {
 	osuo.mutation.ClearPackageID()
-	return osuo
-}
-
-// SetOccurrenceID sets the "occurrence" edge to the Occurrence entity by ID.
-func (osuo *OccurrenceSubjectUpdateOne) SetOccurrenceID(id int) *OccurrenceSubjectUpdateOne {
-	osuo.mutation.SetOccurrenceID(id)
-	return osuo
-}
-
-// SetNillableOccurrenceID sets the "occurrence" edge to the Occurrence entity by ID if the given value is not nil.
-func (osuo *OccurrenceSubjectUpdateOne) SetNillableOccurrenceID(id *int) *OccurrenceSubjectUpdateOne {
-	if id != nil {
-		osuo = osuo.SetOccurrenceID(*id)
-	}
 	return osuo
 }
 
@@ -397,7 +392,18 @@ func (osuo *OccurrenceSubjectUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (osuo *OccurrenceSubjectUpdateOne) check() error {
+	if _, ok := osuo.mutation.OccurrenceID(); osuo.mutation.OccurrenceCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "OccurrenceSubject.occurrence"`)
+	}
+	return nil
+}
+
 func (osuo *OccurrenceSubjectUpdateOne) sqlSave(ctx context.Context) (_node *OccurrenceSubject, err error) {
+	if err := osuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(occurrencesubject.Table, occurrencesubject.Columns, sqlgraph.NewFieldSpec(occurrencesubject.FieldID, field.TypeInt))
 	id, ok := osuo.mutation.ID()
 	if !ok {
@@ -426,7 +432,7 @@ func (osuo *OccurrenceSubjectUpdateOne) sqlSave(ctx context.Context) (_node *Occ
 	if osuo.mutation.OccurrenceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   occurrencesubject.OccurrenceTable,
 			Columns: []string{occurrencesubject.OccurrenceColumn},
 			Bidi:    false,
@@ -439,7 +445,7 @@ func (osuo *OccurrenceSubjectUpdateOne) sqlSave(ctx context.Context) (_node *Occ
 	if nodes := osuo.mutation.OccurrenceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   occurrencesubject.OccurrenceTable,
 			Columns: []string{occurrencesubject.OccurrenceColumn},
 			Bidi:    false,

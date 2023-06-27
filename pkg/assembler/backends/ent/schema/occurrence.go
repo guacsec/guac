@@ -12,10 +12,16 @@ type Occurrence struct {
 	ent.Schema
 }
 
+// func (Occurrence) Annotations() []schema.Annotation {
+// 	return []schema.Annotation{
+// 		field.ID("subject_id", "artifact_id"),
+// 	}
+// }
+
 // Fields of the Occurrence.
 func (Occurrence) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("subject_id"),
+		// field.Int("subject_id"),
 		field.Int("artifact_id").Comment("The artifact in the relationship"),
 		field.String("justification").Comment("Justification for the attested relationship"),
 		field.String("origin").Comment("Document from which this attestation is generated from"),
@@ -26,7 +32,8 @@ func (Occurrence) Fields() []ent.Field {
 // Edges of the Occurrence.
 func (Occurrence) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("subject", OccurrenceSubject.Type).Field("subject_id").Unique().Required().Ref("occurrence"),
+		// edge.From("subject", OccurrenceSubject.Type).Field("subject_id").Unique().Required().Ref("occurrence"),
+		edge.To("subject", OccurrenceSubject.Type).Unique(),
 		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique().Required(),
 	}
 }
@@ -35,7 +42,7 @@ func (Occurrence) Edges() []ent.Edge {
 func (Occurrence) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("justification", "origin", "collector").
-			Edges("subject", "artifact").
+			Edges("artifact").
 			Unique().
 			StorageKey("occurrence_uniq"),
 		// Annotations(entsql.IndexWhere("package_id <> NULL AND source_id is NULL")).

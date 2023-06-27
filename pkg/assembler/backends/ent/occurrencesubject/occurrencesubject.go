@@ -12,6 +12,8 @@ const (
 	Label = "occurrence_subject"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldOccurrenceID holds the string denoting the occurrence_id field in the database.
+	FieldOccurrenceID = "occurrence_id"
 	// FieldSourceID holds the string denoting the source_id field in the database.
 	FieldSourceID = "source_id"
 	// FieldPackageID holds the string denoting the package_id field in the database.
@@ -25,12 +27,12 @@ const (
 	// Table holds the table name of the occurrencesubject in the database.
 	Table = "occurrence_subjects"
 	// OccurrenceTable is the table that holds the occurrence relation/edge.
-	OccurrenceTable = "occurrences"
+	OccurrenceTable = "occurrence_subjects"
 	// OccurrenceInverseTable is the table name for the Occurrence entity.
 	// It exists in this package in order to avoid circular dependency with the "occurrence" package.
 	OccurrenceInverseTable = "occurrences"
 	// OccurrenceColumn is the table column denoting the occurrence relation/edge.
-	OccurrenceColumn = "subject_id"
+	OccurrenceColumn = "occurrence_id"
 	// PackageTable is the table that holds the package relation/edge.
 	PackageTable = "occurrence_subjects"
 	// PackageInverseTable is the table name for the PackageVersion entity.
@@ -50,6 +52,7 @@ const (
 // Columns holds all SQL columns for occurrencesubject fields.
 var Columns = []string{
 	FieldID,
+	FieldOccurrenceID,
 	FieldSourceID,
 	FieldPackageID,
 }
@@ -70,6 +73,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByOccurrenceID orders the results by the occurrence_id field.
+func ByOccurrenceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOccurrenceID, opts...).ToFunc()
 }
 
 // BySourceID orders the results by the source_id field.
@@ -106,7 +114,7 @@ func newOccurrenceStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(OccurrenceInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, OccurrenceTable, OccurrenceColumn),
+		sqlgraph.Edge(sqlgraph.O2O, true, OccurrenceTable, OccurrenceColumn),
 	)
 }
 func newPackageStep() *sqlgraph.Step {

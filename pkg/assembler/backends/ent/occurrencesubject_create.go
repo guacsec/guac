@@ -24,6 +24,12 @@ type OccurrenceSubjectCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetOccurrenceID sets the "occurrence_id" field.
+func (osc *OccurrenceSubjectCreate) SetOccurrenceID(i int) *OccurrenceSubjectCreate {
+	osc.mutation.SetOccurrenceID(i)
+	return osc
+}
+
 // SetSourceID sets the "source_id" field.
 func (osc *OccurrenceSubjectCreate) SetSourceID(i int) *OccurrenceSubjectCreate {
 	osc.mutation.SetSourceID(i)
@@ -48,20 +54,6 @@ func (osc *OccurrenceSubjectCreate) SetPackageID(i int) *OccurrenceSubjectCreate
 func (osc *OccurrenceSubjectCreate) SetNillablePackageID(i *int) *OccurrenceSubjectCreate {
 	if i != nil {
 		osc.SetPackageID(*i)
-	}
-	return osc
-}
-
-// SetOccurrenceID sets the "occurrence" edge to the Occurrence entity by ID.
-func (osc *OccurrenceSubjectCreate) SetOccurrenceID(id int) *OccurrenceSubjectCreate {
-	osc.mutation.SetOccurrenceID(id)
-	return osc
-}
-
-// SetNillableOccurrenceID sets the "occurrence" edge to the Occurrence entity by ID if the given value is not nil.
-func (osc *OccurrenceSubjectCreate) SetNillableOccurrenceID(id *int) *OccurrenceSubjectCreate {
-	if id != nil {
-		osc = osc.SetOccurrenceID(*id)
 	}
 	return osc
 }
@@ -115,6 +107,12 @@ func (osc *OccurrenceSubjectCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (osc *OccurrenceSubjectCreate) check() error {
+	if _, ok := osc.mutation.OccurrenceID(); !ok {
+		return &ValidationError{Name: "occurrence_id", err: errors.New(`ent: missing required field "OccurrenceSubject.occurrence_id"`)}
+	}
+	if _, ok := osc.mutation.OccurrenceID(); !ok {
+		return &ValidationError{Name: "occurrence", err: errors.New(`ent: missing required edge "OccurrenceSubject.occurrence"`)}
+	}
 	return nil
 }
 
@@ -145,7 +143,7 @@ func (osc *OccurrenceSubjectCreate) createSpec() (*OccurrenceSubject, *sqlgraph.
 	if nodes := osc.mutation.OccurrenceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   occurrencesubject.OccurrenceTable,
 			Columns: []string{occurrencesubject.OccurrenceColumn},
 			Bidi:    false,
@@ -156,6 +154,7 @@ func (osc *OccurrenceSubjectCreate) createSpec() (*OccurrenceSubject, *sqlgraph.
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.OccurrenceID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := osc.mutation.PackageIDs(); len(nodes) > 0 {
@@ -199,7 +198,7 @@ func (osc *OccurrenceSubjectCreate) createSpec() (*OccurrenceSubject, *sqlgraph.
 // of the `INSERT` statement. For example:
 //
 //	client.OccurrenceSubject.Create().
-//		SetSourceID(v).
+//		SetOccurrenceID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -208,7 +207,7 @@ func (osc *OccurrenceSubjectCreate) createSpec() (*OccurrenceSubject, *sqlgraph.
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.OccurrenceSubjectUpsert) {
-//			SetSourceID(v+v).
+//			SetOccurrenceID(v+v).
 //		}).
 //		Exec(ctx)
 func (osc *OccurrenceSubjectCreate) OnConflict(opts ...sql.ConflictOption) *OccurrenceSubjectUpsertOne {
@@ -243,6 +242,18 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetOccurrenceID sets the "occurrence_id" field.
+func (u *OccurrenceSubjectUpsert) SetOccurrenceID(v int) *OccurrenceSubjectUpsert {
+	u.Set(occurrencesubject.FieldOccurrenceID, v)
+	return u
+}
+
+// UpdateOccurrenceID sets the "occurrence_id" field to the value that was provided on create.
+func (u *OccurrenceSubjectUpsert) UpdateOccurrenceID() *OccurrenceSubjectUpsert {
+	u.SetExcluded(occurrencesubject.FieldOccurrenceID)
+	return u
+}
 
 // SetSourceID sets the "source_id" field.
 func (u *OccurrenceSubjectUpsert) SetSourceID(v int) *OccurrenceSubjectUpsert {
@@ -318,6 +329,20 @@ func (u *OccurrenceSubjectUpsertOne) Update(set func(*OccurrenceSubjectUpsert)) 
 		set(&OccurrenceSubjectUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetOccurrenceID sets the "occurrence_id" field.
+func (u *OccurrenceSubjectUpsertOne) SetOccurrenceID(v int) *OccurrenceSubjectUpsertOne {
+	return u.Update(func(s *OccurrenceSubjectUpsert) {
+		s.SetOccurrenceID(v)
+	})
+}
+
+// UpdateOccurrenceID sets the "occurrence_id" field to the value that was provided on create.
+func (u *OccurrenceSubjectUpsertOne) UpdateOccurrenceID() *OccurrenceSubjectUpsertOne {
+	return u.Update(func(s *OccurrenceSubjectUpsert) {
+		s.UpdateOccurrenceID()
+	})
 }
 
 // SetSourceID sets the "source_id" field.
@@ -492,7 +517,7 @@ func (oscb *OccurrenceSubjectCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.OccurrenceSubjectUpsert) {
-//			SetSourceID(v+v).
+//			SetOccurrenceID(v+v).
 //		}).
 //		Exec(ctx)
 func (oscb *OccurrenceSubjectCreateBulk) OnConflict(opts ...sql.ConflictOption) *OccurrenceSubjectUpsertBulk {
@@ -559,6 +584,20 @@ func (u *OccurrenceSubjectUpsertBulk) Update(set func(*OccurrenceSubjectUpsert))
 		set(&OccurrenceSubjectUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetOccurrenceID sets the "occurrence_id" field.
+func (u *OccurrenceSubjectUpsertBulk) SetOccurrenceID(v int) *OccurrenceSubjectUpsertBulk {
+	return u.Update(func(s *OccurrenceSubjectUpsert) {
+		s.SetOccurrenceID(v)
+	})
+}
+
+// UpdateOccurrenceID sets the "occurrence_id" field to the value that was provided on create.
+func (u *OccurrenceSubjectUpsertBulk) UpdateOccurrenceID() *OccurrenceSubjectUpsertBulk {
+	return u.Update(func(s *OccurrenceSubjectUpsert) {
+		s.UpdateOccurrenceID()
+	})
 }
 
 // SetSourceID sets the "source_id" field.

@@ -53,6 +53,11 @@ func IDLTE(id int) predicate.OccurrenceSubject {
 	return predicate.OccurrenceSubject(sql.FieldLTE(FieldID, id))
 }
 
+// OccurrenceID applies equality check predicate on the "occurrence_id" field. It's identical to OccurrenceIDEQ.
+func OccurrenceID(v int) predicate.OccurrenceSubject {
+	return predicate.OccurrenceSubject(sql.FieldEQ(FieldOccurrenceID, v))
+}
+
 // SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
 func SourceID(v int) predicate.OccurrenceSubject {
 	return predicate.OccurrenceSubject(sql.FieldEQ(FieldSourceID, v))
@@ -61,6 +66,26 @@ func SourceID(v int) predicate.OccurrenceSubject {
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
 func PackageID(v int) predicate.OccurrenceSubject {
 	return predicate.OccurrenceSubject(sql.FieldEQ(FieldPackageID, v))
+}
+
+// OccurrenceIDEQ applies the EQ predicate on the "occurrence_id" field.
+func OccurrenceIDEQ(v int) predicate.OccurrenceSubject {
+	return predicate.OccurrenceSubject(sql.FieldEQ(FieldOccurrenceID, v))
+}
+
+// OccurrenceIDNEQ applies the NEQ predicate on the "occurrence_id" field.
+func OccurrenceIDNEQ(v int) predicate.OccurrenceSubject {
+	return predicate.OccurrenceSubject(sql.FieldNEQ(FieldOccurrenceID, v))
+}
+
+// OccurrenceIDIn applies the In predicate on the "occurrence_id" field.
+func OccurrenceIDIn(vs ...int) predicate.OccurrenceSubject {
+	return predicate.OccurrenceSubject(sql.FieldIn(FieldOccurrenceID, vs...))
+}
+
+// OccurrenceIDNotIn applies the NotIn predicate on the "occurrence_id" field.
+func OccurrenceIDNotIn(vs ...int) predicate.OccurrenceSubject {
+	return predicate.OccurrenceSubject(sql.FieldNotIn(FieldOccurrenceID, vs...))
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
@@ -128,7 +153,7 @@ func HasOccurrence() predicate.OccurrenceSubject {
 	return predicate.OccurrenceSubject(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, OccurrenceTable, OccurrenceColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, OccurrenceTable, OccurrenceColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

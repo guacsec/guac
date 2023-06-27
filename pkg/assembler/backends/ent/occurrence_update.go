@@ -29,12 +29,6 @@ func (ou *OccurrenceUpdate) Where(ps ...predicate.Occurrence) *OccurrenceUpdate 
 	return ou
 }
 
-// SetSubjectID sets the "subject_id" field.
-func (ou *OccurrenceUpdate) SetSubjectID(i int) *OccurrenceUpdate {
-	ou.mutation.SetSubjectID(i)
-	return ou
-}
-
 // SetArtifactID sets the "artifact_id" field.
 func (ou *OccurrenceUpdate) SetArtifactID(i int) *OccurrenceUpdate {
 	ou.mutation.SetArtifactID(i)
@@ -56,6 +50,20 @@ func (ou *OccurrenceUpdate) SetOrigin(s string) *OccurrenceUpdate {
 // SetCollector sets the "collector" field.
 func (ou *OccurrenceUpdate) SetCollector(s string) *OccurrenceUpdate {
 	ou.mutation.SetCollector(s)
+	return ou
+}
+
+// SetSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID.
+func (ou *OccurrenceUpdate) SetSubjectID(id int) *OccurrenceUpdate {
+	ou.mutation.SetSubjectID(id)
+	return ou
+}
+
+// SetNillableSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillableSubjectID(id *int) *OccurrenceUpdate {
+	if id != nil {
+		ou = ou.SetSubjectID(*id)
+	}
 	return ou
 }
 
@@ -115,9 +123,6 @@ func (ou *OccurrenceUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ou *OccurrenceUpdate) check() error {
-	if _, ok := ou.mutation.SubjectID(); ou.mutation.SubjectCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Occurrence.subject"`)
-	}
 	if _, ok := ou.mutation.ArtifactID(); ou.mutation.ArtifactCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Occurrence.artifact"`)
 	}
@@ -148,7 +153,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ou.mutation.SubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   occurrence.SubjectTable,
 			Columns: []string{occurrence.SubjectColumn},
 			Bidi:    false,
@@ -161,7 +166,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ou.mutation.SubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   occurrence.SubjectTable,
 			Columns: []string{occurrence.SubjectColumn},
 			Bidi:    false,
@@ -223,12 +228,6 @@ type OccurrenceUpdateOne struct {
 	mutation *OccurrenceMutation
 }
 
-// SetSubjectID sets the "subject_id" field.
-func (ouo *OccurrenceUpdateOne) SetSubjectID(i int) *OccurrenceUpdateOne {
-	ouo.mutation.SetSubjectID(i)
-	return ouo
-}
-
 // SetArtifactID sets the "artifact_id" field.
 func (ouo *OccurrenceUpdateOne) SetArtifactID(i int) *OccurrenceUpdateOne {
 	ouo.mutation.SetArtifactID(i)
@@ -250,6 +249,20 @@ func (ouo *OccurrenceUpdateOne) SetOrigin(s string) *OccurrenceUpdateOne {
 // SetCollector sets the "collector" field.
 func (ouo *OccurrenceUpdateOne) SetCollector(s string) *OccurrenceUpdateOne {
 	ouo.mutation.SetCollector(s)
+	return ouo
+}
+
+// SetSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID.
+func (ouo *OccurrenceUpdateOne) SetSubjectID(id int) *OccurrenceUpdateOne {
+	ouo.mutation.SetSubjectID(id)
+	return ouo
+}
+
+// SetNillableSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillableSubjectID(id *int) *OccurrenceUpdateOne {
+	if id != nil {
+		ouo = ouo.SetSubjectID(*id)
+	}
 	return ouo
 }
 
@@ -322,9 +335,6 @@ func (ouo *OccurrenceUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ouo *OccurrenceUpdateOne) check() error {
-	if _, ok := ouo.mutation.SubjectID(); ouo.mutation.SubjectCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Occurrence.subject"`)
-	}
 	if _, ok := ouo.mutation.ArtifactID(); ouo.mutation.ArtifactCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Occurrence.artifact"`)
 	}
@@ -372,7 +382,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 	if ouo.mutation.SubjectCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   occurrence.SubjectTable,
 			Columns: []string{occurrence.SubjectColumn},
 			Bidi:    false,
@@ -385,7 +395,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 	if nodes := ouo.mutation.SubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   occurrence.SubjectTable,
 			Columns: []string{occurrence.SubjectColumn},
 			Bidi:    false,

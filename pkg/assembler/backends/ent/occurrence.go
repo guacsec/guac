@@ -18,8 +18,6 @@ type Occurrence struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// SubjectID holds the value of the "subject_id" field.
-	SubjectID int `json:"subject_id,omitempty"`
 	// The artifact in the relationship
 	ArtifactID int `json:"artifact_id,omitempty"`
 	// Justification for the attested relationship
@@ -76,7 +74,7 @@ func (*Occurrence) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case occurrence.FieldID, occurrence.FieldSubjectID, occurrence.FieldArtifactID:
+		case occurrence.FieldID, occurrence.FieldArtifactID:
 			values[i] = new(sql.NullInt64)
 		case occurrence.FieldJustification, occurrence.FieldOrigin, occurrence.FieldCollector:
 			values[i] = new(sql.NullString)
@@ -101,12 +99,6 @@ func (o *Occurrence) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			o.ID = int(value.Int64)
-		case occurrence.FieldSubjectID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field subject_id", values[i])
-			} else if value.Valid {
-				o.SubjectID = int(value.Int64)
-			}
 		case occurrence.FieldArtifactID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
@@ -177,9 +169,6 @@ func (o *Occurrence) String() string {
 	var builder strings.Builder
 	builder.WriteString("Occurrence(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", o.ID))
-	builder.WriteString("subject_id=")
-	builder.WriteString(fmt.Sprintf("%v", o.SubjectID))
-	builder.WriteString(", ")
 	builder.WriteString("artifact_id=")
 	builder.WriteString(fmt.Sprintf("%v", o.ArtifactID))
 	builder.WriteString(", ")

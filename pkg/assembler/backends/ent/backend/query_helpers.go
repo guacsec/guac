@@ -103,17 +103,32 @@ func pkgTreeFromVersion(ctx context.Context, pv *ent.PackageVersion) (*ent.Packa
 		return nil, err
 	}
 
-	return ns.QueryPackage().
-		WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.Where(packagenamespace.Namespace(ns.Namespace))
-			q.WithNames(func(q *ent.PackageNameQuery) {
-				q.Where(packagename.Name(n.Name))
-				q.WithVersions(func(q *ent.PackageVersionQuery) {
-					q.Where(packageversion.Hash(hashPackageVersion(pv.Version, pv.Subpath, pv.Qualifiers)))
-				})
+	q := ns.QueryPackage()
+	buildPackageTreeQuery(q, ns.Namespace, n.Name, pv)
+
+	// return ns.QueryPackage().
+	// 	WithNamespaces(func(q *ent.PackageNamespaceQuery) {
+	// 		q.Where(packagenamespace.Namespace(ns.Namespace))
+	// 		q.WithNames(func(q *ent.PackageNameQuery) {
+	// 			q.Where(packagename.Name(n.Name))
+	// 			q.WithVersions(func(q *ent.PackageVersionQuery) {
+	// 				q.Where(packageversion.Hash(hashPackageVersion(pv.Version, pv.Subpath, pv.Qualifiers)))
+	// 			})
+	// 		})
+	// 	}).
+	return q.Only(ctx)
+}
+
+func buildPackageTreeQuery(q *ent.PackageNodeQuery, ns, packageName string, pv *ent.PackageVersion) {
+	q.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
+		q.Where(packagenamespace.Namespace(ns))
+		q.WithNames(func(q *ent.PackageNameQuery) {
+			q.Where(packagename.Name(packageName))
+			q.WithVersions(func(q *ent.PackageVersionQuery) {
+				q.Where(packageversion.Hash(hashPackageVersion(pv.Version, pv.Subpath, pv.Qualifiers)))
 			})
-		}).
-		Only(ctx)
+		})
+	})
 }
 
 func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode, error) {

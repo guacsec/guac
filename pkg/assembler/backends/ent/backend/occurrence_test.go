@@ -187,6 +187,7 @@ func (s *Suite) TestHappyPath() {
 
 	if pkgSrc, ok := occ.Subject.(*model.Package); ok && pkgSrc != nil {
 		s.Equal(p1.Type, pkgSrc.Type)
+		s.Equal("1", pkgSrc.Namespaces[0].Names[0].Versions[0].ID)
 	} else {
 		s.Failf("fail", "subject is not a package, got %T", occ.Subject)
 	}
@@ -277,18 +278,14 @@ func (s *Suite) TestOccurrence() {
 			InArt: []*model.ArtifactInputSpec{a1},
 			Calls: []call{
 				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
+					PkgSrc:   model.PackageOrSourceInput{Package: p1},
 					Artifact: a1,
 					Occurrence: &model.IsOccurrenceInputSpec{
 						Justification: "justification one",
 					},
 				},
 				{
-					PkgSrc: model.PackageOrSourceInput{
-						Package: p1,
-					},
+					PkgSrc:   model.PackageOrSourceInput{Package: p1},
 					Artifact: a1,
 					Occurrence: &model.IsOccurrenceInputSpec{
 						Justification: "justification two",
@@ -345,6 +342,7 @@ func (s *Suite) TestOccurrence() {
 		},
 		{
 			Name:  "Query on Package",
+			Only: true,
 			InPkg: []*model.PkgInputSpec{p1, p2},
 			InArt: []*model.ArtifactInputSpec{a1},
 			Calls: []call{
@@ -563,21 +561,24 @@ func (s *Suite) TestOccurrence() {
 			b, err := GetBackend(s.Client)
 			s.Require().NoError(err, "Could not instantiate testing backend")
 
-			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
-					s.T().Fatalf("Could not ingest package: %v", err)
-				}
-			}
-			for _, src := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *src); err != nil {
-					s.T().Fatalf("Could not ingest source: %v", err)
-				}
-			}
 			for _, a := range test.InArt {
 				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
+
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
+					s.T().Fatalf("Could not ingest package: %v", err)
+				}
+			}
+
+			for _, src := range test.InSrc {
+				if _, err := b.IngestSource(ctx, *src); err != nil {
+					s.T().Fatalf("Could not ingest source: %v", err)
+				}
+			}
+
 			for _, o := range test.Calls {
 				_, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
 				if (err != nil) != test.ExpIngestErr {

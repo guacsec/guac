@@ -23,12 +23,6 @@ type OccurrenceCreate struct {
 	conflict []sql.ConflictOption
 }
 
-// SetSubjectID sets the "subject_id" field.
-func (oc *OccurrenceCreate) SetSubjectID(i int) *OccurrenceCreate {
-	oc.mutation.SetSubjectID(i)
-	return oc
-}
-
 // SetArtifactID sets the "artifact_id" field.
 func (oc *OccurrenceCreate) SetArtifactID(i int) *OccurrenceCreate {
 	oc.mutation.SetArtifactID(i)
@@ -50,6 +44,20 @@ func (oc *OccurrenceCreate) SetOrigin(s string) *OccurrenceCreate {
 // SetCollector sets the "collector" field.
 func (oc *OccurrenceCreate) SetCollector(s string) *OccurrenceCreate {
 	oc.mutation.SetCollector(s)
+	return oc
+}
+
+// SetSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID.
+func (oc *OccurrenceCreate) SetSubjectID(id int) *OccurrenceCreate {
+	oc.mutation.SetSubjectID(id)
+	return oc
+}
+
+// SetNillableSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID if the given value is not nil.
+func (oc *OccurrenceCreate) SetNillableSubjectID(id *int) *OccurrenceCreate {
+	if id != nil {
+		oc = oc.SetSubjectID(*id)
+	}
 	return oc
 }
 
@@ -97,9 +105,6 @@ func (oc *OccurrenceCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (oc *OccurrenceCreate) check() error {
-	if _, ok := oc.mutation.SubjectID(); !ok {
-		return &ValidationError{Name: "subject_id", err: errors.New(`ent: missing required field "Occurrence.subject_id"`)}
-	}
 	if _, ok := oc.mutation.ArtifactID(); !ok {
 		return &ValidationError{Name: "artifact_id", err: errors.New(`ent: missing required field "Occurrence.artifact_id"`)}
 	}
@@ -111,9 +116,6 @@ func (oc *OccurrenceCreate) check() error {
 	}
 	if _, ok := oc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Occurrence.collector"`)}
-	}
-	if _, ok := oc.mutation.SubjectID(); !ok {
-		return &ValidationError{Name: "subject", err: errors.New(`ent: missing required edge "Occurrence.subject"`)}
 	}
 	if _, ok := oc.mutation.ArtifactID(); !ok {
 		return &ValidationError{Name: "artifact", err: errors.New(`ent: missing required edge "Occurrence.artifact"`)}
@@ -160,7 +162,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 	if nodes := oc.mutation.SubjectIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   occurrence.SubjectTable,
 			Columns: []string{occurrence.SubjectColumn},
 			Bidi:    false,
@@ -171,7 +173,6 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.SubjectID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := oc.mutation.ArtifactIDs(); len(nodes) > 0 {
@@ -198,7 +199,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Occurrence.Create().
-//		SetSubjectID(v).
+//		SetArtifactID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -207,7 +208,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.OccurrenceUpsert) {
-//			SetSubjectID(v+v).
+//			SetArtifactID(v+v).
 //		}).
 //		Exec(ctx)
 func (oc *OccurrenceCreate) OnConflict(opts ...sql.ConflictOption) *OccurrenceUpsertOne {
@@ -242,18 +243,6 @@ type (
 		*sql.UpdateSet
 	}
 )
-
-// SetSubjectID sets the "subject_id" field.
-func (u *OccurrenceUpsert) SetSubjectID(v int) *OccurrenceUpsert {
-	u.Set(occurrence.FieldSubjectID, v)
-	return u
-}
-
-// UpdateSubjectID sets the "subject_id" field to the value that was provided on create.
-func (u *OccurrenceUpsert) UpdateSubjectID() *OccurrenceUpsert {
-	u.SetExcluded(occurrence.FieldSubjectID)
-	return u
-}
 
 // SetArtifactID sets the "artifact_id" field.
 func (u *OccurrenceUpsert) SetArtifactID(v int) *OccurrenceUpsert {
@@ -341,20 +330,6 @@ func (u *OccurrenceUpsertOne) Update(set func(*OccurrenceUpsert)) *OccurrenceUps
 		set(&OccurrenceUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetSubjectID sets the "subject_id" field.
-func (u *OccurrenceUpsertOne) SetSubjectID(v int) *OccurrenceUpsertOne {
-	return u.Update(func(s *OccurrenceUpsert) {
-		s.SetSubjectID(v)
-	})
-}
-
-// UpdateSubjectID sets the "subject_id" field to the value that was provided on create.
-func (u *OccurrenceUpsertOne) UpdateSubjectID() *OccurrenceUpsertOne {
-	return u.Update(func(s *OccurrenceUpsert) {
-		s.UpdateSubjectID()
-	})
 }
 
 // SetArtifactID sets the "artifact_id" field.
@@ -543,7 +518,7 @@ func (ocb *OccurrenceCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.OccurrenceUpsert) {
-//			SetSubjectID(v+v).
+//			SetArtifactID(v+v).
 //		}).
 //		Exec(ctx)
 func (ocb *OccurrenceCreateBulk) OnConflict(opts ...sql.ConflictOption) *OccurrenceUpsertBulk {
@@ -610,20 +585,6 @@ func (u *OccurrenceUpsertBulk) Update(set func(*OccurrenceUpsert)) *OccurrenceUp
 		set(&OccurrenceUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetSubjectID sets the "subject_id" field.
-func (u *OccurrenceUpsertBulk) SetSubjectID(v int) *OccurrenceUpsertBulk {
-	return u.Update(func(s *OccurrenceUpsert) {
-		s.SetSubjectID(v)
-	})
-}
-
-// UpdateSubjectID sets the "subject_id" field to the value that was provided on create.
-func (u *OccurrenceUpsertBulk) UpdateSubjectID() *OccurrenceUpsertBulk {
-	return u.Update(func(s *OccurrenceUpsert) {
-		s.UpdateSubjectID()
-	})
 }
 
 // SetArtifactID sets the "artifact_id" field.

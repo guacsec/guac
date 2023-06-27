@@ -53,11 +53,6 @@ func IDLTE(id int) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldLTE(FieldID, id))
 }
 
-// SubjectID applies equality check predicate on the "subject_id" field. It's identical to SubjectIDEQ.
-func SubjectID(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldEQ(FieldSubjectID, v))
-}
-
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
 func ArtifactID(v int) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldArtifactID, v))
@@ -76,26 +71,6 @@ func Origin(v string) predicate.Occurrence {
 // Collector applies equality check predicate on the "collector" field. It's identical to CollectorEQ.
 func Collector(v string) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldCollector, v))
-}
-
-// SubjectIDEQ applies the EQ predicate on the "subject_id" field.
-func SubjectIDEQ(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldEQ(FieldSubjectID, v))
-}
-
-// SubjectIDNEQ applies the NEQ predicate on the "subject_id" field.
-func SubjectIDNEQ(v int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNEQ(FieldSubjectID, v))
-}
-
-// SubjectIDIn applies the In predicate on the "subject_id" field.
-func SubjectIDIn(vs ...int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldIn(FieldSubjectID, vs...))
-}
-
-// SubjectIDNotIn applies the NotIn predicate on the "subject_id" field.
-func SubjectIDNotIn(vs ...int) predicate.Occurrence {
-	return predicate.Occurrence(sql.FieldNotIn(FieldSubjectID, vs...))
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
@@ -318,7 +293,7 @@ func HasSubject() predicate.Occurrence {
 	return predicate.Occurrence(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, SubjectTable, SubjectColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, SubjectTable, SubjectColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
