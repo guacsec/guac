@@ -20,71 +20,67 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/version"
 )
 
 type gcs struct {
 	bucket       string
 	reader       gcsReader
+	client       *storage.Client
 	lastDownload time.Time
 	poll         bool
 	interval     time.Duration
 }
 
-const (
-	// gcsCredsEnv is the env variable to hold the json creds file
-	gcsCredsEnv = "GOOGLE_APPLICATION_CREDENTIALS"
-	// Specify the GCS bucket address
-	bucketEnv    = "GCS_BUCKET_ADDRESS"
-	CollectorGCS = "GCS"
-)
+const CollectorGCS = "GCS"
 
-func getBucketPath() string {
-	if env := os.Getenv(bucketEnv); env != "" {
-		return env
+// NewGCSCollector initializes the gcs and sets it for polling or one time run
+func NewGCSCollector(opts ...Opt) (*gcs, error) {
+	gstore := &gcs{}
+
+	for _, opt := range opts {
+		opt(gstore)
 	}
-	return ""
-}
 
-func getCredsPath() string {
-	if env := os.Getenv(gcsCredsEnv); env != "" {
-		return env
-	}
-	return ""
-}
+	// Set reader using both the client and bucket
+	gstore.reader = &reader{client: gstore.client, bucket: gstore.bucket}
 
-// NewGCSClient initializes the gcs and sets it for polling or one time run
-func NewGCSClient(ctx context.Context, poll bool, interval time.Duration) (*gcs, error) {
-	// TODO: Change to pass in token via command line
-	if getCredsPath() == "" {
+	if gstore.bucket == "" {
 		return nil, errors.New("gcs bucket not specified")
 	}
-	client, err := storage.NewClient(ctx,
-		option.WithCredentialsFile(os.Getenv(gcsCredsEnv)),
-		option.WithUserAgent(version.UserAgent))
-	if err != nil {
-		return nil, err
+
+	if gstore.client == nil {
+		return nil, errors.New("gcs client not specified")
 	}
-	bucket := getBucketPath()
-	if bucket == "" {
-		return nil, errors.New("gcs bucket not specified")
-	}
-	gstore := &gcs{
-		bucket:   bucket,
-		reader:   &reader{client: client, bucket: bucket},
-		poll:     poll,
-		interval: interval,
-	}
+
 	return gstore, nil
+}
+
+type Opt func(*gcs)
+
+func WithPolling(interval time.Duration) Opt {
+	return func(g *gcs) {
+		g.poll = true
+		g.interval = interval
+	}
+}
+
+func WithClient(client *storage.Client) Opt {
+	return func(g *gcs) {
+		g.client = client
+	}
+}
+
+func WithBucket(bucket string) Opt {
+	return func(g *gcs) {
+		g.bucket = bucket
+	}
 }
 
 // Type is the collector type of the collector
@@ -174,7 +170,7 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 		if g.lastDownload.IsZero() || attrs.Updated.After(g.lastDownload) {
 			payload, err := g.getObject(ctx, attrs.Name)
 			if err != nil {
-				logger.Warnf("failed to retrieve object: %s from bucket: %s", attrs.Name, g.bucket)
+				logger.Warnf("failed to retrieve object: %s from bucket: %s, error: %w", attrs.Name, g.bucket, err)
 				continue
 			}
 			if len(payload) == 0 {
