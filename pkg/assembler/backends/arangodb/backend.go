@@ -289,6 +289,20 @@ func GetBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		if err := createIndexPerCollection(ctx, db, "hasSBOMEdges", []string{"_from", "_to"}, true, "byFromTo"); err != nil {
 			return nil, fmt.Errorf("failed to generate index for hasSBOMEdges: %w", err)
 		}
+
+		// GUAC key indices
+		if err := createIndexPerCollection(ctx, db, "PkgNamespace", []string{"guacKey"}, false, "byNsGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for PkgNamespace: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgName", []string{"guacKey"}, false, "byNameGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for PkgName: %w", err)
+		}
+
+		if err := createIndexPerCollection(ctx, db, "PkgVersion", []string{"guacKey"}, false, "byVersionGuacKey"); err != nil {
+			return nil, fmt.Errorf("failed to generate guackey index for PkgVersion: %w", err)
+		}
+
 	}
 
 	collectedRootData, err := preIngestPkgRoot(ctx, db)

@@ -35,6 +35,8 @@ const (
 
 func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgInputSpec, depPkg []*model.PkgInputSpec, dependency []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
 
+	//return []*model.IsDependency{}, nil
+
 	if len(pkg) != len(depPkg) {
 		return nil, fmt.Errorf("uneven packages and dependent packages for ingestion")
 	} else if len(pkg) != len(dependency) {
@@ -43,8 +45,14 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 
 	listOfValues := []map[string]any{}
 
-	for i, _ := range pkg {
+	for i := range pkg {
 		values := map[string]any{}
+
+		// add guac keys
+		pkgId := guacPkgId(*pkg[i])
+		depPkgId := guacPkgId(*depPkg[i])
+		values["pkgVersionGuacKey"] = pkgId.VersionId
+		values["secondPkgNameGuacKey"] = depPkgId.NameId
 
 		values["pkgType"] = pkg[i].Type
 		values["name"] = pkg[i].Name
@@ -120,44 +128,43 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkg []*model.PkgI
 	sb.WriteString("]")
 
 	query := `
+
 	LET firstPkg = FIRST(
-		FOR pkg IN Pkg
-		FILTER pkg.root == 'pkg'
-		FOR pkgHasType IN OUTBOUND pkg PkgHasType
-		  FILTER pkgHasType.type == doc.pkgType && pkgHasType._parent == pkg._id
-		  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-			  FILTER pkgHasNamespace.namespace == doc.namespace && pkgHasNamespace._parent == pkgHasType._id
-			FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-				FILTER pkgHasName.name == doc.name && pkgHasName._parent == pkgHasNamespace._id
-			FOR pkgHasVersion IN OUTBOUND pkgHasName PkgHasVersion
-				  FILTER pkgHasVersion.version == doc.version && pkgHasVersion.subpath == doc.subpath && pkgHasVersion.qualifier_list == doc.qualifier && pkgHasVersion._parent == pkgHasName._id
-			  RETURN {
-			  'type': pkgHasType.type,
-			  'namespace': pkgHasNamespace.namespace,
-			  'name': pkgHasName.name,
-			  'version': pkgHasVersion.version,
-			  'subpath': pkgHasVersion.subpath,
-			  'qualifier_list': pkgHasVersion.qualifier_list,
-			  'versionDoc': pkgHasVersion
-			  }
-		)
-		
-	LET secondPkg = FIRST(
-		FOR pkg IN Pkg
-		  FILTER pkg.root == 'pkg'
-		  FOR pkgHasType IN OUTBOUND pkg PkgHasType
-			FILTER pkgHasType.type == doc.secondPkgType && pkgHasType._parent == pkg._id
-		  FOR pkgHasNamespace IN OUTBOUND pkgHasType PkgHasNamespace
-			FILTER pkgHasNamespace.namespace == doc.secondNamespace && pkgHasNamespace._parent == pkgHasType._id
-			FOR pkgHasName IN OUTBOUND pkgHasNamespace PkgHasName
-				FILTER pkgHasName.name == doc.secondName && pkgHasName._parent == pkgHasNamespace._id
-			  RETURN {
-			  'type': pkgHasType.type,
-			  'namespace': pkgHasNamespace.namespace,
-			  'name': pkgHasName.name,
-			  'nameDoc': pkgHasName
-			  }
-		)
+		  FOR pVersion in PkgVersion
+			FILTER pVersion.guacKey == doc.pkgVersionGuacKey
+			FOR pName in PkgName
+			FILTER pName._id == pVersion._parent
+			FOR pNs in PkgNamespace
+			FILTER pNs._id == pName._parent
+			FOR pType in PkgType
+			FILTER pType._id == pNs._parent
+
+				RETURN {
+				'type': pType.type,
+				'namespace': pNs.namespace,
+				'name': pName.name,
+				'version': pVersion.version,
+				'subpath': pVersion.subpath,
+				'qualifier_list': pVersion.qualifier_list,
+				'versionDoc': pVersion
+				}
+		  )
+
+  LET secondPkg = FIRST(
+      FOR pName in PkgName
+        FILTER pName.guacKey == doc.secondPkgNameGuacKey
+        FOR pNs in PkgNamespace
+        FILTER pNs._id == pName._parent
+        FOR pType in PkgType
+        FILTER pType._id == pNs._parent
+
+            RETURN {
+            'type': pType.type,
+            'namespace': pNs.namespace,
+            'name': pName.name,
+            'nameDoc': pName
+            }
+      )
 		
 	LET isDependency = FIRST(
 		  UPSERT { packageID:firstPkg.versionDoc._id, depPackageID:secondPkg.nameDoc._id, versionRange:doc.versionRange, dependencyType:doc.dependencyType, justification:doc.justification, collector:doc.collector, origin:doc.origin } 

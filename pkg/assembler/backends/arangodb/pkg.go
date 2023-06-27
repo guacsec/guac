@@ -60,7 +60,44 @@ func registerAllPackages(ctx context.Context, client *arangoClient) {
 	client.IngestPackage(ctx, p4)
 }
 
+type PkgIds struct {
+	TypeId      string
+	NamespaceId string
+	NameId      string
+	VersionId   string
+}
+
+func guacPkgId(pkg model.PkgInputSpec) PkgIds {
+	ids := PkgIds{}
+
+	ids.TypeId = pkg.Type
+
+	var ns string
+	if pkg.Namespace != nil {
+		ns = *pkg.Namespace
+	}
+	ids.NamespaceId = fmt.Sprintf("%s::%s", ids.TypeId, ns)
+	ids.NameId = fmt.Sprintf("%s::%s", ids.NamespaceId, pkg.Name)
+
+	if pkg.Version == nil {
+		return ids
+	}
+
+	var subpath string
+	if pkg.Subpath != nil {
+		subpath = *pkg.Subpath
+	}
+
+	ids.VersionId = fmt.Sprintf("%s::%s::%s?", ids.NameId, *pkg.Version, subpath)
+	for _, v := range pkg.Qualifiers {
+		ids.VersionId += fmt.Sprintf("%s=%s&", v.Key, v.Value)
+	}
+
+	return ids
+}
+
 func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
+
 	values := map[string]any{}
 	values["name"] = pkg.Name
 	if pkg.Namespace != nil {
@@ -96,41 +133,46 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	values["typeKey"] = c.pkgTypeMap[pkg.Type].Key
 	values["typeValue"] = c.pkgTypeMap[pkg.Type].PkgType
 
+	guacIds := guacPkgId(pkg)
+	values["guacNsKey"] = guacIds.NamespaceId
+	values["guacNameKey"] = guacIds.NameId
+	values["guacVersionKey"] = guacIds.VersionId
+
 	query := `	  
 	  LET ns = FIRST(
-		UPSERT { namespace: @namespace, _parent: @typeID }
-		INSERT { namespace: @namespace, _parent: @typeID }
+		UPSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
+		INSERT { namespace: @namespace, _parent: @typeID , guacKey: @guacNsKey}
 		UPDATE {}
 		IN PkgNamespace OPTIONS { indexHint: "byNamespaceParent" }
 		RETURN NEW
 	  )
 	  
 	  LET name = FIRST(
-		UPSERT { name: @name, _parent: ns._id }
-		INSERT { name: @name, _parent: ns._id }
+		UPSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
+		INSERT { name: @name, _parent: ns._id, guacKey: @guacNameKey}
 		UPDATE {}
 		IN PkgName OPTIONS { indexHint: "byNameParent" }
 		RETURN NEW
 	  )
 	  
 	  LET pkgVersionObj = FIRST(
-		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
-		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id }
+		UPSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
+		INSERT { version: @version, subpath: @subpath, qualifier_list: @qualifier, _parent: name._id, guacKey: @guacVersionKey}
 		UPDATE {}
 		IN PkgVersion OPTIONS { indexHint: "byAllVersionParent" }
 		RETURN NEW
 	  )
 	
 	  LET pkgHasNamespaceCollection = (
-        INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "PkgHasNamespace" } INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasNamespace", @typeKey, ns._key), _from: @typeID, _to: ns._id, label : "PkgHasNamespace"} INTO PkgHasNamespace OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasNameCollection = (
-		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName" } INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasName", ns._key, name._key), _from: ns._id, _to: name._id, label : "PkgHasName"} INTO PkgHasName OPTIONS { overwriteMode: "ignore" }
 	  )
 	  
 	  LET pkgHasVersionCollection = (
-		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion" } INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("pkgHasVersion", name._key, pkgVersionObj._key), _from: name._id, _to: pkgVersionObj._id, label : "PkgHasVersion"} INTO PkgHasVersion OPTIONS { overwriteMode: "ignore" }
 	  )
 		
 	RETURN {
