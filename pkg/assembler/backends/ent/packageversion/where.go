@@ -321,6 +321,29 @@ func HasNameWith(preds ...predicate.PackageName) predicate.PackageVersion {
 	})
 }
 
+// HasOccurrences applies the HasEdge predicate on the "occurrences" edge.
+func HasOccurrences() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, OccurrencesTable, OccurrencesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOccurrencesWith applies the HasEdge predicate on the "occurrences" edge with a given conditions (other predicates).
+func HasOccurrencesWith(preds ...predicate.Occurrence) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newOccurrencesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.PackageVersion) predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {

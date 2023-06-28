@@ -342,7 +342,7 @@ func (s *Suite) TestOccurrence() {
 		},
 		{
 			Name:  "Query on Package",
-			Only: true,
+			Only:  true,
 			InPkg: []*model.PkgInputSpec{p1, p2},
 			InArt: []*model.ArtifactInputSpec{a1},
 			Calls: []call{
@@ -381,8 +381,7 @@ func (s *Suite) TestOccurrence() {
 			},
 		},
 		{
-			Name: "Query on Source",
-			// Only:  true,
+			Name:  "Query on Source",
 			InPkg: []*model.PkgInputSpec{p1},
 			InSrc: []*model.SourceInputSpec{s1},
 			InArt: []*model.ArtifactInputSpec{a1},

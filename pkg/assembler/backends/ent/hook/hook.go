@@ -57,18 +57,6 @@ func (f OccurrenceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OccurrenceMutation", m)
 }
 
-// The OccurrenceSubjectFunc type is an adapter to allow the use of ordinary
-// function as OccurrenceSubject mutator.
-type OccurrenceSubjectFunc func(context.Context, *ent.OccurrenceSubjectMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f OccurrenceSubjectFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.OccurrenceSubjectMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OccurrenceSubjectMutation", m)
-}
-
 // The PackageNameFunc type is an adapter to allow the use of ordinary
 // function as PackageName mutator.
 type PackageNameFunc func(context.Context, *ent.PackageNameMutation) (ent.Value, error)

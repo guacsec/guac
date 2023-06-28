@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
@@ -25,7 +25,7 @@ type SourceNameQuery struct {
 	inters          []Interceptor
 	predicates      []predicate.SourceName
 	withNamespace   *SourceNamespaceQuery
-	withOccurrences *OccurrenceSubjectQuery
+	withOccurrences *OccurrenceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -85,8 +85,8 @@ func (snq *SourceNameQuery) QueryNamespace() *SourceNamespaceQuery {
 }
 
 // QueryOccurrences chains the current query on the "occurrences" edge.
-func (snq *SourceNameQuery) QueryOccurrences() *OccurrenceSubjectQuery {
-	query := (&OccurrenceSubjectClient{config: snq.config}).Query()
+func (snq *SourceNameQuery) QueryOccurrences() *OccurrenceQuery {
+	query := (&OccurrenceClient{config: snq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := snq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -97,7 +97,7 @@ func (snq *SourceNameQuery) QueryOccurrences() *OccurrenceSubjectQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
-			sqlgraph.To(occurrencesubject.Table, occurrencesubject.FieldID),
+			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.OccurrencesTable, sourcename.OccurrencesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
@@ -319,8 +319,8 @@ func (snq *SourceNameQuery) WithNamespace(opts ...func(*SourceNamespaceQuery)) *
 
 // WithOccurrences tells the query-builder to eager-load the nodes that are connected to
 // the "occurrences" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithOccurrences(opts ...func(*OccurrenceSubjectQuery)) *SourceNameQuery {
-	query := (&OccurrenceSubjectClient{config: snq.config}).Query()
+func (snq *SourceNameQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *SourceNameQuery {
+	query := (&OccurrenceClient{config: snq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -437,8 +437,8 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	}
 	if query := snq.withOccurrences; query != nil {
 		if err := snq.loadOccurrences(ctx, query, nodes,
-			func(n *SourceName) { n.Edges.Occurrences = []*OccurrenceSubject{} },
-			func(n *SourceName, e *OccurrenceSubject) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
+			func(n *SourceName) { n.Edges.Occurrences = []*Occurrence{} },
+			func(n *SourceName, e *Occurrence) { n.Edges.Occurrences = append(n.Edges.Occurrences, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -474,7 +474,7 @@ func (snq *SourceNameQuery) loadNamespace(ctx context.Context, query *SourceName
 	}
 	return nil
 }
-func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *OccurrenceSubjectQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *OccurrenceSubject)) error {
+func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*SourceName)
 	for i := range nodes {
@@ -485,9 +485,9 @@ func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *Occurren
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(occurrencesubject.FieldSourceID)
+		query.ctx.AppendFieldOnce(occurrence.FieldSourceID)
 	}
-	query.Where(predicate.OccurrenceSubject(func(s *sql.Selector) {
+	query.Where(predicate.Occurrence(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(sourcename.OccurrencesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

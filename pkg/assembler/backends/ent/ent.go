@@ -16,7 +16,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/buildernode"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
@@ -84,18 +83,17 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			artifact.Table:          artifact.ValidColumn,
-			buildernode.Table:       buildernode.ValidColumn,
-			dependency.Table:        dependency.ValidColumn,
-			occurrence.Table:        occurrence.ValidColumn,
-			occurrencesubject.Table: occurrencesubject.ValidColumn,
-			packagename.Table:       packagename.ValidColumn,
-			packagenamespace.Table:  packagenamespace.ValidColumn,
-			packagenode.Table:       packagenode.ValidColumn,
-			packageversion.Table:    packageversion.ValidColumn,
-			source.Table:            source.ValidColumn,
-			sourcename.Table:        sourcename.ValidColumn,
-			sourcenamespace.Table:   sourcenamespace.ValidColumn,
+			artifact.Table:         artifact.ValidColumn,
+			buildernode.Table:      buildernode.ValidColumn,
+			dependency.Table:       dependency.ValidColumn,
+			occurrence.Table:       occurrence.ValidColumn,
+			packagename.Table:      packagename.ValidColumn,
+			packagenamespace.Table: packagenamespace.ValidColumn,
+			packagenode.Table:      packagenode.ValidColumn,
+			packageversion.Table:   packageversion.ValidColumn,
+			source.Table:           source.ValidColumn,
+			sourcename.Table:       sourcename.ValidColumn,
+			sourcenamespace.Table:  sourcenamespace.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

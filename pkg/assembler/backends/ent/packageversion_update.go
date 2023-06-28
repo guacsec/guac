@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -77,6 +78,21 @@ func (pvu *PackageVersionUpdate) SetName(p *PackageName) *PackageVersionUpdate {
 	return pvu.SetNameID(p.ID)
 }
 
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
+func (pvu *PackageVersionUpdate) AddOccurrenceIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.AddOccurrenceIDs(ids...)
+	return pvu
+}
+
+// AddOccurrences adds the "occurrences" edges to the Occurrence entity.
+func (pvu *PackageVersionUpdate) AddOccurrences(o ...*Occurrence) *PackageVersionUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return pvu.AddOccurrenceIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvu *PackageVersionUpdate) Mutation() *PackageVersionMutation {
 	return pvu.mutation
@@ -86,6 +102,27 @@ func (pvu *PackageVersionUpdate) Mutation() *PackageVersionMutation {
 func (pvu *PackageVersionUpdate) ClearName() *PackageVersionUpdate {
 	pvu.mutation.ClearName()
 	return pvu
+}
+
+// ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
+func (pvu *PackageVersionUpdate) ClearOccurrences() *PackageVersionUpdate {
+	pvu.mutation.ClearOccurrences()
+	return pvu
+}
+
+// RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveOccurrenceIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.RemoveOccurrenceIDs(ids...)
+	return pvu
+}
+
+// RemoveOccurrences removes "occurrences" edges to Occurrence entities.
+func (pvu *PackageVersionUpdate) RemoveOccurrences(o ...*Occurrence) *PackageVersionUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return pvu.RemoveOccurrenceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -184,6 +221,51 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pvu.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.OccurrencesTable,
+			Columns: []string{packageversion.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !pvu.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.OccurrencesTable,
+			Columns: []string{packageversion.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.OccurrencesTable,
+			Columns: []string{packageversion.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pvu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packageversion.Label}
@@ -251,6 +333,21 @@ func (pvuo *PackageVersionUpdateOne) SetName(p *PackageName) *PackageVersionUpda
 	return pvuo.SetNameID(p.ID)
 }
 
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddOccurrenceIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.AddOccurrenceIDs(ids...)
+	return pvuo
+}
+
+// AddOccurrences adds the "occurrences" edges to the Occurrence entity.
+func (pvuo *PackageVersionUpdateOne) AddOccurrences(o ...*Occurrence) *PackageVersionUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return pvuo.AddOccurrenceIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvuo *PackageVersionUpdateOne) Mutation() *PackageVersionMutation {
 	return pvuo.mutation
@@ -260,6 +357,27 @@ func (pvuo *PackageVersionUpdateOne) Mutation() *PackageVersionMutation {
 func (pvuo *PackageVersionUpdateOne) ClearName() *PackageVersionUpdateOne {
 	pvuo.mutation.ClearName()
 	return pvuo
+}
+
+// ClearOccurrences clears all "occurrences" edges to the Occurrence entity.
+func (pvuo *PackageVersionUpdateOne) ClearOccurrences() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearOccurrences()
+	return pvuo
+}
+
+// RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveOccurrenceIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveOccurrenceIDs(ids...)
+	return pvuo
+}
+
+// RemoveOccurrences removes "occurrences" edges to Occurrence entities.
+func (pvuo *PackageVersionUpdateOne) RemoveOccurrences(o ...*Occurrence) *PackageVersionUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return pvuo.RemoveOccurrenceIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageVersionUpdate builder.
@@ -381,6 +499,51 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.OccurrencesTable,
+			Columns: []string{packageversion.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedOccurrencesIDs(); len(nodes) > 0 && !pvuo.mutation.OccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.OccurrencesTable,
+			Columns: []string{packageversion.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.OccurrencesTable,
+			Columns: []string{packageversion.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -343,7 +343,7 @@ func HasOccurrences() predicate.SourceName {
 }
 
 // HasOccurrencesWith applies the HasEdge predicate on the "occurrences" edge with a given conditions (other predicates).
-func HasOccurrencesWith(preds ...predicate.OccurrenceSubject) predicate.SourceName {
+func HasOccurrencesWith(preds ...predicate.Occurrence) predicate.SourceName {
 	return predicate.SourceName(func(s *sql.Selector) {
 		step := newOccurrencesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

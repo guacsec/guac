@@ -24,6 +24,8 @@ const (
 	FieldHash = "hash"
 	// EdgeName holds the string denoting the name edge name in mutations.
 	EdgeName = "name"
+	// EdgeOccurrences holds the string denoting the occurrences edge name in mutations.
+	EdgeOccurrences = "occurrences"
 	// Table holds the table name of the packageversion in the database.
 	Table = "package_versions"
 	// NameTable is the table that holds the name relation/edge.
@@ -33,6 +35,13 @@ const (
 	NameInverseTable = "package_names"
 	// NameColumn is the table column denoting the name relation/edge.
 	NameColumn = "name_id"
+	// OccurrencesTable is the table that holds the occurrences relation/edge.
+	OccurrencesTable = "occurrences"
+	// OccurrencesInverseTable is the table name for the Occurrence entity.
+	// It exists in this package in order to avoid circular dependency with the "occurrence" package.
+	OccurrencesInverseTable = "occurrences"
+	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
+	OccurrencesColumn = "package_id"
 )
 
 // Columns holds all SQL columns for packageversion fields.
@@ -89,10 +98,31 @@ func ByNameField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newNameStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByOccurrencesCount orders the results by occurrences count.
+func ByOccurrencesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOccurrencesStep(), opts...)
+	}
+}
+
+// ByOccurrences orders the results by occurrences terms.
+func ByOccurrences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOccurrencesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newNameStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(NameInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, NameTable, NameColumn),
+	)
+}
+func newOccurrencesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OccurrencesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, OccurrencesTable, OccurrencesColumn),
 	)
 }

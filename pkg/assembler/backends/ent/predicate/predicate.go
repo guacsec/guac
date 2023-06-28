@@ -18,9 +18,6 @@ type Dependency func(*sql.Selector)
 // Occurrence is the predicate function for occurrence builders.
 type Occurrence func(*sql.Selector)
 
-// OccurrenceSubject is the predicate function for occurrencesubject builders.
-type OccurrenceSubject func(*sql.Selector)
-
 // PackageName is the predicate function for packagename builders.
 type PackageName func(*sql.Selector)
 

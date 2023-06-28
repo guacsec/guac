@@ -73,6 +73,16 @@ func Collector(v string) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldCollector, v))
 }
 
+// SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
+func SourceID(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldEQ(FieldSourceID, v))
+}
+
+// PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
+func PackageID(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldEQ(FieldPackageID, v))
+}
+
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
 func ArtifactIDEQ(v int) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldArtifactID, v))
@@ -288,27 +298,64 @@ func CollectorContainsFold(v string) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldContainsFold(FieldCollector, v))
 }
 
-// HasSubject applies the HasEdge predicate on the "subject" edge.
-func HasSubject() predicate.Occurrence {
-	return predicate.Occurrence(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, SubjectTable, SubjectColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
+// SourceIDEQ applies the EQ predicate on the "source_id" field.
+func SourceIDEQ(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldEQ(FieldSourceID, v))
 }
 
-// HasSubjectWith applies the HasEdge predicate on the "subject" edge with a given conditions (other predicates).
-func HasSubjectWith(preds ...predicate.OccurrenceSubject) predicate.Occurrence {
-	return predicate.Occurrence(func(s *sql.Selector) {
-		step := newSubjectStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
+// SourceIDNEQ applies the NEQ predicate on the "source_id" field.
+func SourceIDNEQ(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNEQ(FieldSourceID, v))
+}
+
+// SourceIDIn applies the In predicate on the "source_id" field.
+func SourceIDIn(vs ...int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldIn(FieldSourceID, vs...))
+}
+
+// SourceIDNotIn applies the NotIn predicate on the "source_id" field.
+func SourceIDNotIn(vs ...int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNotIn(FieldSourceID, vs...))
+}
+
+// SourceIDIsNil applies the IsNil predicate on the "source_id" field.
+func SourceIDIsNil() predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldIsNull(FieldSourceID))
+}
+
+// SourceIDNotNil applies the NotNil predicate on the "source_id" field.
+func SourceIDNotNil() predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNotNull(FieldSourceID))
+}
+
+// PackageIDEQ applies the EQ predicate on the "package_id" field.
+func PackageIDEQ(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldEQ(FieldPackageID, v))
+}
+
+// PackageIDNEQ applies the NEQ predicate on the "package_id" field.
+func PackageIDNEQ(v int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNEQ(FieldPackageID, v))
+}
+
+// PackageIDIn applies the In predicate on the "package_id" field.
+func PackageIDIn(vs ...int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldIn(FieldPackageID, vs...))
+}
+
+// PackageIDNotIn applies the NotIn predicate on the "package_id" field.
+func PackageIDNotIn(vs ...int) predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNotIn(FieldPackageID, vs...))
+}
+
+// PackageIDIsNil applies the IsNil predicate on the "package_id" field.
+func PackageIDIsNil() predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldIsNull(FieldPackageID))
+}
+
+// PackageIDNotNil applies the NotNil predicate on the "package_id" field.
+func PackageIDNotNil() predicate.Occurrence {
+	return predicate.Occurrence(sql.FieldNotNull(FieldPackageID))
 }
 
 // HasArtifact applies the HasEdge predicate on the "artifact" edge.
@@ -326,6 +373,52 @@ func HasArtifact() predicate.Occurrence {
 func HasArtifactWith(preds ...predicate.Artifact) predicate.Occurrence {
 	return predicate.Occurrence(func(s *sql.Selector) {
 		step := newArtifactStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPackage applies the HasEdge predicate on the "package" edge.
+func HasPackage() predicate.Occurrence {
+	return predicate.Occurrence(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, PackageTable, PackageColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPackageWith applies the HasEdge predicate on the "package" edge with a given conditions (other predicates).
+func HasPackageWith(preds ...predicate.PackageVersion) predicate.Occurrence {
+	return predicate.Occurrence(func(s *sql.Selector) {
+		step := newPackageStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSource applies the HasEdge predicate on the "source" edge.
+func HasSource() predicate.Occurrence {
+	return predicate.Occurrence(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, SourceTable, SourceColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSourceWith applies the HasEdge predicate on the "source" edge with a given conditions (other predicates).
+func HasSourceWith(preds ...predicate.SourceName) predicate.Occurrence {
+	return predicate.Occurrence(func(s *sql.Selector) {
+		step := newSourceStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

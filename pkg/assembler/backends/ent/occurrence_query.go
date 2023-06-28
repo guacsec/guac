@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,8 +12,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // OccurrenceQuery is the builder for querying Occurrence entities.
@@ -24,8 +24,9 @@ type OccurrenceQuery struct {
 	order        []occurrence.OrderOption
 	inters       []Interceptor
 	predicates   []predicate.Occurrence
-	withSubject  *OccurrenceSubjectQuery
 	withArtifact *ArtifactQuery
+	withPackage  *PackageVersionQuery
+	withSource   *SourceNameQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,28 +63,6 @@ func (oq *OccurrenceQuery) Order(o ...occurrence.OrderOption) *OccurrenceQuery {
 	return oq
 }
 
-// QuerySubject chains the current query on the "subject" edge.
-func (oq *OccurrenceQuery) QuerySubject() *OccurrenceSubjectQuery {
-	query := (&OccurrenceSubjectClient{config: oq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := oq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := oq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
-			sqlgraph.To(occurrencesubject.Table, occurrencesubject.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, occurrence.SubjectTable, occurrence.SubjectColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryArtifact chains the current query on the "artifact" edge.
 func (oq *OccurrenceQuery) QueryArtifact() *ArtifactQuery {
 	query := (&ArtifactClient{config: oq.config}).Query()
@@ -99,6 +78,50 @@ func (oq *OccurrenceQuery) QueryArtifact() *ArtifactQuery {
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.ArtifactTable, occurrence.ArtifactColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPackage chains the current query on the "package" edge.
+func (oq *OccurrenceQuery) QueryPackage() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: oq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := oq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := oq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.PackageTable, occurrence.PackageColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySource chains the current query on the "source" edge.
+func (oq *OccurrenceQuery) QuerySource() *SourceNameQuery {
+	query := (&SourceNameClient{config: oq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := oq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := oq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
+			sqlgraph.To(sourcename.Table, sourcename.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.SourceTable, occurrence.SourceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
 		return fromU, nil
@@ -298,23 +321,13 @@ func (oq *OccurrenceQuery) Clone() *OccurrenceQuery {
 		order:        append([]occurrence.OrderOption{}, oq.order...),
 		inters:       append([]Interceptor{}, oq.inters...),
 		predicates:   append([]predicate.Occurrence{}, oq.predicates...),
-		withSubject:  oq.withSubject.Clone(),
 		withArtifact: oq.withArtifact.Clone(),
+		withPackage:  oq.withPackage.Clone(),
+		withSource:   oq.withSource.Clone(),
 		// clone intermediate query.
 		sql:  oq.sql.Clone(),
 		path: oq.path,
 	}
-}
-
-// WithSubject tells the query-builder to eager-load the nodes that are connected to
-// the "subject" edge. The optional arguments are used to configure the query builder of the edge.
-func (oq *OccurrenceQuery) WithSubject(opts ...func(*OccurrenceSubjectQuery)) *OccurrenceQuery {
-	query := (&OccurrenceSubjectClient{config: oq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	oq.withSubject = query
-	return oq
 }
 
 // WithArtifact tells the query-builder to eager-load the nodes that are connected to
@@ -325,6 +338,28 @@ func (oq *OccurrenceQuery) WithArtifact(opts ...func(*ArtifactQuery)) *Occurrenc
 		opt(query)
 	}
 	oq.withArtifact = query
+	return oq
+}
+
+// WithPackage tells the query-builder to eager-load the nodes that are connected to
+// the "package" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OccurrenceQuery) WithPackage(opts ...func(*PackageVersionQuery)) *OccurrenceQuery {
+	query := (&PackageVersionClient{config: oq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	oq.withPackage = query
+	return oq
+}
+
+// WithSource tells the query-builder to eager-load the nodes that are connected to
+// the "source" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OccurrenceQuery) WithSource(opts ...func(*SourceNameQuery)) *OccurrenceQuery {
+	query := (&SourceNameClient{config: oq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	oq.withSource = query
 	return oq
 }
 
@@ -406,9 +441,10 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	var (
 		nodes       = []*Occurrence{}
 		_spec       = oq.querySpec()
-		loadedTypes = [2]bool{
-			oq.withSubject != nil,
+		loadedTypes = [3]bool{
 			oq.withArtifact != nil,
+			oq.withPackage != nil,
+			oq.withSource != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -429,48 +465,27 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := oq.withSubject; query != nil {
-		if err := oq.loadSubject(ctx, query, nodes, nil,
-			func(n *Occurrence, e *OccurrenceSubject) { n.Edges.Subject = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := oq.withArtifact; query != nil {
 		if err := oq.loadArtifact(ctx, query, nodes, nil,
 			func(n *Occurrence, e *Artifact) { n.Edges.Artifact = e }); err != nil {
 			return nil, err
 		}
 	}
+	if query := oq.withPackage; query != nil {
+		if err := oq.loadPackage(ctx, query, nodes, nil,
+			func(n *Occurrence, e *PackageVersion) { n.Edges.Package = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := oq.withSource; query != nil {
+		if err := oq.loadSource(ctx, query, nodes, nil,
+			func(n *Occurrence, e *SourceName) { n.Edges.Source = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
-func (oq *OccurrenceQuery) loadSubject(ctx context.Context, query *OccurrenceSubjectQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *OccurrenceSubject)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Occurrence)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(occurrencesubject.FieldOccurrenceID)
-	}
-	query.Where(predicate.OccurrenceSubject(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(occurrence.SubjectColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.OccurrenceID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "occurrence_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (oq *OccurrenceQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *Artifact)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Occurrence)
@@ -493,6 +508,70 @@ func (oq *OccurrenceQuery) loadArtifact(ctx context.Context, query *ArtifactQuer
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "artifact_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (oq *OccurrenceQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *PackageVersion)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Occurrence)
+	for i := range nodes {
+		if nodes[i].PackageID == nil {
+			continue
+		}
+		fk := *nodes[i].PackageID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(packageversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "package_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (oq *OccurrenceQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *SourceName)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Occurrence)
+	for i := range nodes {
+		if nodes[i].SourceID == nil {
+			continue
+		}
+		fk := *nodes[i].SourceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(sourcename.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "source_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -528,6 +607,12 @@ func (oq *OccurrenceQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if oq.withArtifact != nil {
 			_spec.Node.AddColumnOnce(occurrence.FieldArtifactID)
+		}
+		if oq.withPackage != nil {
+			_spec.Node.AddColumnOnce(occurrence.FieldPackageID)
+		}
+		if oq.withSource != nil {
+			_spec.Node.AddColumnOnce(occurrence.FieldSourceID)
 		}
 	}
 	if ps := oq.predicates; len(ps) > 0 {

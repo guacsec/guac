@@ -26,7 +26,7 @@ func (SourceName) Fields() []ent.Field {
 func (SourceName) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("namespace", SourceNamespace.Type).Unique().Required().Field("namespace_id"),
-		edge.From("occurrences", OccurrenceSubject.Type).Ref("source"),
+		edge.From("occurrences", Occurrence.Type).Ref("source"),
 	}
 }
 

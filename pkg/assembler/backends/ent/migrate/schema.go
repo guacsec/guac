@@ -91,6 +91,8 @@ var (
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "artifact_id", Type: field.TypeInt},
+		{Name: "package_id", Type: field.TypeInt, Nullable: true},
+		{Name: "source_id", Type: field.TypeInt, Nullable: true},
 	}
 	// OccurrencesTable holds the schema information for the "occurrences" table.
 	OccurrencesTable = &schema.Table{
@@ -104,68 +106,24 @@ var (
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
-		},
-		Indexes: []*schema.Index{
 			{
-				Name:    "occurrence_uniq",
-				Unique:  true,
-				Columns: []*schema.Column{OccurrencesColumns[1], OccurrencesColumns[2], OccurrencesColumns[3], OccurrencesColumns[4]},
-			},
-		},
-	}
-	// OccurrenceSubjectsColumns holds the columns for the "occurrence_subjects" table.
-	OccurrenceSubjectsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "occurrence_id", Type: field.TypeInt, Unique: true},
-		{Name: "package_id", Type: field.TypeInt, Nullable: true},
-		{Name: "source_id", Type: field.TypeInt, Nullable: true},
-	}
-	// OccurrenceSubjectsTable holds the schema information for the "occurrence_subjects" table.
-	OccurrenceSubjectsTable = &schema.Table{
-		Name:       "occurrence_subjects",
-		Columns:    OccurrenceSubjectsColumns,
-		PrimaryKey: []*schema.Column{OccurrenceSubjectsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "occurrence_subjects_occurrences_subject",
-				Columns:    []*schema.Column{OccurrenceSubjectsColumns[1]},
-				RefColumns: []*schema.Column{OccurrencesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "occurrence_subjects_package_versions_package",
-				Columns:    []*schema.Column{OccurrenceSubjectsColumns[2]},
+				Symbol:     "occurrences_package_versions_package",
+				Columns:    []*schema.Column{OccurrencesColumns[5]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "occurrence_subjects_source_names_source",
-				Columns:    []*schema.Column{OccurrenceSubjectsColumns[3]},
+				Symbol:     "occurrences_source_names_source",
+				Columns:    []*schema.Column{OccurrencesColumns[6]},
 				RefColumns: []*schema.Column{SourceNamesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "occurrencesubject_source_id",
-				Unique:  false,
-				Columns: []*schema.Column{OccurrenceSubjectsColumns[3]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "source_id IS NOT NULL",
-				},
-			},
-			{
-				Name:    "occurrencesubject_package_id",
-				Unique:  false,
-				Columns: []*schema.Column{OccurrenceSubjectsColumns[2]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "package_id IS NOT NULL",
-				},
-			},
-			{
-				Name:    "occurrencesubject_occurrence_id",
+				Name:    "occurrence_package_uniq",
 				Unique:  true,
-				Columns: []*schema.Column{OccurrenceSubjectsColumns[1]},
+				Columns: []*schema.Column{OccurrencesColumns[1], OccurrencesColumns[2], OccurrencesColumns[3], OccurrencesColumns[4], OccurrencesColumns[5]},
 			},
 		},
 	}
@@ -358,7 +316,6 @@ var (
 		BuilderNodesTable,
 		DependenciesTable,
 		OccurrencesTable,
-		OccurrenceSubjectsTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
 		PackageNodesTable,
@@ -373,9 +330,8 @@ func init() {
 	DependenciesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	DependenciesTable.ForeignKeys[1].RefTable = PackageNamesTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
-	OccurrenceSubjectsTable.ForeignKeys[0].RefTable = OccurrencesTable
-	OccurrenceSubjectsTable.ForeignKeys[1].RefTable = PackageVersionsTable
-	OccurrenceSubjectsTable.ForeignKeys[2].RefTable = SourceNamesTable
+	OccurrencesTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	OccurrencesTable.ForeignKeys[2].RefTable = SourceNamesTable
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageNodesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable

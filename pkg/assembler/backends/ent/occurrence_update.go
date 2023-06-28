@@ -12,8 +12,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // OccurrenceUpdate is the builder for updating Occurrence entities.
@@ -53,23 +54,44 @@ func (ou *OccurrenceUpdate) SetCollector(s string) *OccurrenceUpdate {
 	return ou
 }
 
-// SetSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID.
-func (ou *OccurrenceUpdate) SetSubjectID(id int) *OccurrenceUpdate {
-	ou.mutation.SetSubjectID(id)
+// SetSourceID sets the "source_id" field.
+func (ou *OccurrenceUpdate) SetSourceID(i int) *OccurrenceUpdate {
+	ou.mutation.SetSourceID(i)
 	return ou
 }
 
-// SetNillableSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableSubjectID(id *int) *OccurrenceUpdate {
-	if id != nil {
-		ou = ou.SetSubjectID(*id)
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillableSourceID(i *int) *OccurrenceUpdate {
+	if i != nil {
+		ou.SetSourceID(*i)
 	}
 	return ou
 }
 
-// SetSubject sets the "subject" edge to the OccurrenceSubject entity.
-func (ou *OccurrenceUpdate) SetSubject(o *OccurrenceSubject) *OccurrenceUpdate {
-	return ou.SetSubjectID(o.ID)
+// ClearSourceID clears the value of the "source_id" field.
+func (ou *OccurrenceUpdate) ClearSourceID() *OccurrenceUpdate {
+	ou.mutation.ClearSourceID()
+	return ou
+}
+
+// SetPackageID sets the "package_id" field.
+func (ou *OccurrenceUpdate) SetPackageID(i int) *OccurrenceUpdate {
+	ou.mutation.SetPackageID(i)
+	return ou
+}
+
+// SetNillablePackageID sets the "package_id" field if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillablePackageID(i *int) *OccurrenceUpdate {
+	if i != nil {
+		ou.SetPackageID(*i)
+	}
+	return ou
+}
+
+// ClearPackageID clears the value of the "package_id" field.
+func (ou *OccurrenceUpdate) ClearPackageID() *OccurrenceUpdate {
+	ou.mutation.ClearPackageID()
+	return ou
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
@@ -77,20 +99,36 @@ func (ou *OccurrenceUpdate) SetArtifact(a *Artifact) *OccurrenceUpdate {
 	return ou.SetArtifactID(a.ID)
 }
 
+// SetPackage sets the "package" edge to the PackageVersion entity.
+func (ou *OccurrenceUpdate) SetPackage(p *PackageVersion) *OccurrenceUpdate {
+	return ou.SetPackageID(p.ID)
+}
+
+// SetSource sets the "source" edge to the SourceName entity.
+func (ou *OccurrenceUpdate) SetSource(s *SourceName) *OccurrenceUpdate {
+	return ou.SetSourceID(s.ID)
+}
+
 // Mutation returns the OccurrenceMutation object of the builder.
 func (ou *OccurrenceUpdate) Mutation() *OccurrenceMutation {
 	return ou.mutation
 }
 
-// ClearSubject clears the "subject" edge to the OccurrenceSubject entity.
-func (ou *OccurrenceUpdate) ClearSubject() *OccurrenceUpdate {
-	ou.mutation.ClearSubject()
-	return ou
-}
-
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
 func (ou *OccurrenceUpdate) ClearArtifact() *OccurrenceUpdate {
 	ou.mutation.ClearArtifact()
+	return ou
+}
+
+// ClearPackage clears the "package" edge to the PackageVersion entity.
+func (ou *OccurrenceUpdate) ClearPackage() *OccurrenceUpdate {
+	ou.mutation.ClearPackage()
+	return ou
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (ou *OccurrenceUpdate) ClearSource() *OccurrenceUpdate {
+	ou.mutation.ClearSource()
 	return ou
 }
 
@@ -150,35 +188,6 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ou.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
 	}
-	if ou.mutation.SubjectCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   occurrence.SubjectTable,
-			Columns: []string{occurrence.SubjectColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrencesubject.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ou.mutation.SubjectIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   occurrence.SubjectTable,
-			Columns: []string{occurrence.SubjectColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrencesubject.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if ou.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -201,6 +210,64 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ou.mutation.PackageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.PackageTable,
+			Columns: []string{occurrence.PackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.PackageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.PackageTable,
+			Columns: []string{occurrence.PackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ou.mutation.SourceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.SourceTable,
+			Columns: []string{occurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.SourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.SourceTable,
+			Columns: []string{occurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -252,23 +319,44 @@ func (ouo *OccurrenceUpdateOne) SetCollector(s string) *OccurrenceUpdateOne {
 	return ouo
 }
 
-// SetSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID.
-func (ouo *OccurrenceUpdateOne) SetSubjectID(id int) *OccurrenceUpdateOne {
-	ouo.mutation.SetSubjectID(id)
+// SetSourceID sets the "source_id" field.
+func (ouo *OccurrenceUpdateOne) SetSourceID(i int) *OccurrenceUpdateOne {
+	ouo.mutation.SetSourceID(i)
 	return ouo
 }
 
-// SetNillableSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableSubjectID(id *int) *OccurrenceUpdateOne {
-	if id != nil {
-		ouo = ouo.SetSubjectID(*id)
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillableSourceID(i *int) *OccurrenceUpdateOne {
+	if i != nil {
+		ouo.SetSourceID(*i)
 	}
 	return ouo
 }
 
-// SetSubject sets the "subject" edge to the OccurrenceSubject entity.
-func (ouo *OccurrenceUpdateOne) SetSubject(o *OccurrenceSubject) *OccurrenceUpdateOne {
-	return ouo.SetSubjectID(o.ID)
+// ClearSourceID clears the value of the "source_id" field.
+func (ouo *OccurrenceUpdateOne) ClearSourceID() *OccurrenceUpdateOne {
+	ouo.mutation.ClearSourceID()
+	return ouo
+}
+
+// SetPackageID sets the "package_id" field.
+func (ouo *OccurrenceUpdateOne) SetPackageID(i int) *OccurrenceUpdateOne {
+	ouo.mutation.SetPackageID(i)
+	return ouo
+}
+
+// SetNillablePackageID sets the "package_id" field if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillablePackageID(i *int) *OccurrenceUpdateOne {
+	if i != nil {
+		ouo.SetPackageID(*i)
+	}
+	return ouo
+}
+
+// ClearPackageID clears the value of the "package_id" field.
+func (ouo *OccurrenceUpdateOne) ClearPackageID() *OccurrenceUpdateOne {
+	ouo.mutation.ClearPackageID()
+	return ouo
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
@@ -276,20 +364,36 @@ func (ouo *OccurrenceUpdateOne) SetArtifact(a *Artifact) *OccurrenceUpdateOne {
 	return ouo.SetArtifactID(a.ID)
 }
 
+// SetPackage sets the "package" edge to the PackageVersion entity.
+func (ouo *OccurrenceUpdateOne) SetPackage(p *PackageVersion) *OccurrenceUpdateOne {
+	return ouo.SetPackageID(p.ID)
+}
+
+// SetSource sets the "source" edge to the SourceName entity.
+func (ouo *OccurrenceUpdateOne) SetSource(s *SourceName) *OccurrenceUpdateOne {
+	return ouo.SetSourceID(s.ID)
+}
+
 // Mutation returns the OccurrenceMutation object of the builder.
 func (ouo *OccurrenceUpdateOne) Mutation() *OccurrenceMutation {
 	return ouo.mutation
 }
 
-// ClearSubject clears the "subject" edge to the OccurrenceSubject entity.
-func (ouo *OccurrenceUpdateOne) ClearSubject() *OccurrenceUpdateOne {
-	ouo.mutation.ClearSubject()
-	return ouo
-}
-
 // ClearArtifact clears the "artifact" edge to the Artifact entity.
 func (ouo *OccurrenceUpdateOne) ClearArtifact() *OccurrenceUpdateOne {
 	ouo.mutation.ClearArtifact()
+	return ouo
+}
+
+// ClearPackage clears the "package" edge to the PackageVersion entity.
+func (ouo *OccurrenceUpdateOne) ClearPackage() *OccurrenceUpdateOne {
+	ouo.mutation.ClearPackage()
+	return ouo
+}
+
+// ClearSource clears the "source" edge to the SourceName entity.
+func (ouo *OccurrenceUpdateOne) ClearSource() *OccurrenceUpdateOne {
+	ouo.mutation.ClearSource()
 	return ouo
 }
 
@@ -379,35 +483,6 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 	if value, ok := ouo.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
 	}
-	if ouo.mutation.SubjectCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   occurrence.SubjectTable,
-			Columns: []string{occurrence.SubjectColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrencesubject.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ouo.mutation.SubjectIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   occurrence.SubjectTable,
-			Columns: []string{occurrence.SubjectColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrencesubject.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if ouo.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -430,6 +505,64 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ouo.mutation.PackageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.PackageTable,
+			Columns: []string{occurrence.PackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.PackageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.PackageTable,
+			Columns: []string{occurrence.PackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ouo.mutation.SourceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.SourceTable,
+			Columns: []string{occurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.SourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.SourceTable,
+			Columns: []string{occurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -227,7 +227,7 @@ func packageVersionToModelPackage(pv *ent.PackageVersion) *model.Package {
 func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 	return &model.IsOccurrence{
 		ID:            nodeID(o.ID),
-		Subject:       toOccurrenceSubject(o.Edges.Subject),
+		Subject:       toOccurrenceSubject(o),
 		Artifact:      toModelArtifact(o.Edges.Artifact),
 		Justification: o.Justification,
 		Origin:        o.Origin,
@@ -246,7 +246,7 @@ func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.Is
 	}
 }
 
-func toOccurrenceSubject(s *ent.OccurrenceSubject) model.PackageOrSource {
+func toOccurrenceSubject(s *ent.Occurrence) model.PackageOrSource {
 	if s.Edges.Package != nil &&
 		s.Edges.Package.Edges.Name != nil &&
 		s.Edges.Package.Edges.Name.Edges.Namespace != nil &&

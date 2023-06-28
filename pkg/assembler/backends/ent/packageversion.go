@@ -39,9 +39,11 @@ type PackageVersion struct {
 type PackageVersionEdges struct {
 	// Name holds the value of the name edge.
 	Name *PackageName `json:"name,omitempty"`
+	// Occurrences holds the value of the occurrences edge.
+	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // NameOrErr returns the Name value or an error if the edge
@@ -55,6 +57,15 @@ func (e PackageVersionEdges) NameOrErr() (*PackageName, error) {
 		return e.Name, nil
 	}
 	return nil, &NotLoadedError{edge: "name"}
+}
+
+// OccurrencesOrErr returns the Occurrences value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) OccurrencesOrErr() ([]*Occurrence, error) {
+	if e.loadedTypes[1] {
+		return e.Occurrences, nil
+	}
+	return nil, &NotLoadedError{edge: "occurrences"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -137,6 +148,11 @@ func (pv *PackageVersion) Value(name string) (ent.Value, error) {
 // QueryName queries the "name" edge of the PackageVersion entity.
 func (pv *PackageVersion) QueryName() *PackageNameQuery {
 	return NewPackageVersionClient(pv.config).QueryName(pv)
+}
+
+// QueryOccurrences queries the "occurrences" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryOccurrences() *OccurrenceQuery {
+	return NewPackageVersionClient(pv.config).QueryOccurrences(pv)
 }
 
 // Update returns a builder for updating this PackageVersion.

@@ -20,8 +20,6 @@ type Tx struct {
 	Dependency *DependencyClient
 	// Occurrence is the client for interacting with the Occurrence builders.
 	Occurrence *OccurrenceClient
-	// OccurrenceSubject is the client for interacting with the OccurrenceSubject builders.
-	OccurrenceSubject *OccurrenceSubjectClient
 	// PackageName is the client for interacting with the PackageName builders.
 	PackageName *PackageNameClient
 	// PackageNamespace is the client for interacting with the PackageNamespace builders.
@@ -171,7 +169,6 @@ func (tx *Tx) init() {
 	tx.BuilderNode = NewBuilderNodeClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
-	tx.OccurrenceSubject = NewOccurrenceSubjectClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
 	tx.PackageNode = NewPackageNodeClient(tx.config)

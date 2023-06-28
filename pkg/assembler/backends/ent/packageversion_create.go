@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -56,6 +57,21 @@ func (pvc *PackageVersionCreate) SetHash(s string) *PackageVersionCreate {
 // SetName sets the "name" edge to the PackageName entity.
 func (pvc *PackageVersionCreate) SetName(p *PackageName) *PackageVersionCreate {
 	return pvc.SetNameID(p.ID)
+}
+
+// AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
+func (pvc *PackageVersionCreate) AddOccurrenceIDs(ids ...int) *PackageVersionCreate {
+	pvc.mutation.AddOccurrenceIDs(ids...)
+	return pvc
+}
+
+// AddOccurrences adds the "occurrences" edges to the Occurrence entity.
+func (pvc *PackageVersionCreate) AddOccurrences(o ...*Occurrence) *PackageVersionCreate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return pvc.AddOccurrenceIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -165,6 +181,22 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.NameID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.OccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.OccurrencesTable,
+			Columns: []string{packageversion.OccurrencesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

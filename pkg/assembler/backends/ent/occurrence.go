@@ -10,7 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // Occurrence is the model entity for the Occurrence schema.
@@ -26,6 +27,10 @@ type Occurrence struct {
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
+	// SourceID holds the value of the "source_id" field.
+	SourceID *int `json:"source_id,omitempty"`
+	// PackageID holds the value of the "package_id" field.
+	PackageID *int `json:"package_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OccurrenceQuery when eager-loading is set.
 	Edges        OccurrenceEdges `json:"edges"`
@@ -34,32 +39,21 @@ type Occurrence struct {
 
 // OccurrenceEdges holds the relations/edges for other nodes in the graph.
 type OccurrenceEdges struct {
-	// Subject holds the value of the subject edge.
-	Subject *OccurrenceSubject `json:"subject,omitempty"`
 	// Artifact holds the value of the artifact edge.
 	Artifact *Artifact `json:"artifact,omitempty"`
+	// Package holds the value of the package edge.
+	Package *PackageVersion `json:"package,omitempty"`
+	// Source holds the value of the source edge.
+	Source *SourceName `json:"source,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// SubjectOrErr returns the Subject value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e OccurrenceEdges) SubjectOrErr() (*OccurrenceSubject, error) {
-	if e.loadedTypes[0] {
-		if e.Subject == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: occurrencesubject.Label}
-		}
-		return e.Subject, nil
-	}
-	return nil, &NotLoadedError{edge: "subject"}
+	loadedTypes [3]bool
 }
 
 // ArtifactOrErr returns the Artifact value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e OccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		if e.Artifact == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: artifact.Label}
@@ -69,12 +63,38 @@ func (e OccurrenceEdges) ArtifactOrErr() (*Artifact, error) {
 	return nil, &NotLoadedError{edge: "artifact"}
 }
 
+// PackageOrErr returns the Package value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e OccurrenceEdges) PackageOrErr() (*PackageVersion, error) {
+	if e.loadedTypes[1] {
+		if e.Package == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: packageversion.Label}
+		}
+		return e.Package, nil
+	}
+	return nil, &NotLoadedError{edge: "package"}
+}
+
+// SourceOrErr returns the Source value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e OccurrenceEdges) SourceOrErr() (*SourceName, error) {
+	if e.loadedTypes[2] {
+		if e.Source == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: sourcename.Label}
+		}
+		return e.Source, nil
+	}
+	return nil, &NotLoadedError{edge: "source"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Occurrence) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case occurrence.FieldID, occurrence.FieldArtifactID:
+		case occurrence.FieldID, occurrence.FieldArtifactID, occurrence.FieldSourceID, occurrence.FieldPackageID:
 			values[i] = new(sql.NullInt64)
 		case occurrence.FieldJustification, occurrence.FieldOrigin, occurrence.FieldCollector:
 			values[i] = new(sql.NullString)
@@ -123,6 +143,20 @@ func (o *Occurrence) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				o.Collector = value.String
 			}
+		case occurrence.FieldSourceID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field source_id", values[i])
+			} else if value.Valid {
+				o.SourceID = new(int)
+				*o.SourceID = int(value.Int64)
+			}
+		case occurrence.FieldPackageID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field package_id", values[i])
+			} else if value.Valid {
+				o.PackageID = new(int)
+				*o.PackageID = int(value.Int64)
+			}
 		default:
 			o.selectValues.Set(columns[i], values[i])
 		}
@@ -136,14 +170,19 @@ func (o *Occurrence) Value(name string) (ent.Value, error) {
 	return o.selectValues.Get(name)
 }
 
-// QuerySubject queries the "subject" edge of the Occurrence entity.
-func (o *Occurrence) QuerySubject() *OccurrenceSubjectQuery {
-	return NewOccurrenceClient(o.config).QuerySubject(o)
-}
-
 // QueryArtifact queries the "artifact" edge of the Occurrence entity.
 func (o *Occurrence) QueryArtifact() *ArtifactQuery {
 	return NewOccurrenceClient(o.config).QueryArtifact(o)
+}
+
+// QueryPackage queries the "package" edge of the Occurrence entity.
+func (o *Occurrence) QueryPackage() *PackageVersionQuery {
+	return NewOccurrenceClient(o.config).QueryPackage(o)
+}
+
+// QuerySource queries the "source" edge of the Occurrence entity.
+func (o *Occurrence) QuerySource() *SourceNameQuery {
+	return NewOccurrenceClient(o.config).QuerySource(o)
 }
 
 // Update returns a builder for updating this Occurrence.
@@ -180,6 +219,16 @@ func (o *Occurrence) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(o.Collector)
+	builder.WriteString(", ")
+	if v := o.SourceID; v != nil {
+		builder.WriteString("source_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := o.PackageID; v != nil {
+		builder.WriteString("package_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

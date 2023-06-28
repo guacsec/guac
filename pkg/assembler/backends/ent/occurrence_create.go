@@ -12,7 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // OccurrenceCreate is the builder for creating a Occurrence entity.
@@ -47,28 +48,47 @@ func (oc *OccurrenceCreate) SetCollector(s string) *OccurrenceCreate {
 	return oc
 }
 
-// SetSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID.
-func (oc *OccurrenceCreate) SetSubjectID(id int) *OccurrenceCreate {
-	oc.mutation.SetSubjectID(id)
+// SetSourceID sets the "source_id" field.
+func (oc *OccurrenceCreate) SetSourceID(i int) *OccurrenceCreate {
+	oc.mutation.SetSourceID(i)
 	return oc
 }
 
-// SetNillableSubjectID sets the "subject" edge to the OccurrenceSubject entity by ID if the given value is not nil.
-func (oc *OccurrenceCreate) SetNillableSubjectID(id *int) *OccurrenceCreate {
-	if id != nil {
-		oc = oc.SetSubjectID(*id)
+// SetNillableSourceID sets the "source_id" field if the given value is not nil.
+func (oc *OccurrenceCreate) SetNillableSourceID(i *int) *OccurrenceCreate {
+	if i != nil {
+		oc.SetSourceID(*i)
 	}
 	return oc
 }
 
-// SetSubject sets the "subject" edge to the OccurrenceSubject entity.
-func (oc *OccurrenceCreate) SetSubject(o *OccurrenceSubject) *OccurrenceCreate {
-	return oc.SetSubjectID(o.ID)
+// SetPackageID sets the "package_id" field.
+func (oc *OccurrenceCreate) SetPackageID(i int) *OccurrenceCreate {
+	oc.mutation.SetPackageID(i)
+	return oc
+}
+
+// SetNillablePackageID sets the "package_id" field if the given value is not nil.
+func (oc *OccurrenceCreate) SetNillablePackageID(i *int) *OccurrenceCreate {
+	if i != nil {
+		oc.SetPackageID(*i)
+	}
+	return oc
 }
 
 // SetArtifact sets the "artifact" edge to the Artifact entity.
 func (oc *OccurrenceCreate) SetArtifact(a *Artifact) *OccurrenceCreate {
 	return oc.SetArtifactID(a.ID)
+}
+
+// SetPackage sets the "package" edge to the PackageVersion entity.
+func (oc *OccurrenceCreate) SetPackage(p *PackageVersion) *OccurrenceCreate {
+	return oc.SetPackageID(p.ID)
+}
+
+// SetSource sets the "source" edge to the SourceName entity.
+func (oc *OccurrenceCreate) SetSource(s *SourceName) *OccurrenceCreate {
+	return oc.SetSourceID(s.ID)
 }
 
 // Mutation returns the OccurrenceMutation object of the builder.
@@ -159,22 +179,6 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if nodes := oc.mutation.SubjectIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   occurrence.SubjectTable,
-			Columns: []string{occurrence.SubjectColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrencesubject.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := oc.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -190,6 +194,40 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ArtifactID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := oc.mutation.PackageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.PackageTable,
+			Columns: []string{occurrence.PackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PackageID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := oc.mutation.SourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   occurrence.SourceTable,
+			Columns: []string{occurrence.SourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.SourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -292,6 +330,42 @@ func (u *OccurrenceUpsert) UpdateCollector() *OccurrenceUpsert {
 	return u
 }
 
+// SetSourceID sets the "source_id" field.
+func (u *OccurrenceUpsert) SetSourceID(v int) *OccurrenceUpsert {
+	u.Set(occurrence.FieldSourceID, v)
+	return u
+}
+
+// UpdateSourceID sets the "source_id" field to the value that was provided on create.
+func (u *OccurrenceUpsert) UpdateSourceID() *OccurrenceUpsert {
+	u.SetExcluded(occurrence.FieldSourceID)
+	return u
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (u *OccurrenceUpsert) ClearSourceID() *OccurrenceUpsert {
+	u.SetNull(occurrence.FieldSourceID)
+	return u
+}
+
+// SetPackageID sets the "package_id" field.
+func (u *OccurrenceUpsert) SetPackageID(v int) *OccurrenceUpsert {
+	u.Set(occurrence.FieldPackageID, v)
+	return u
+}
+
+// UpdatePackageID sets the "package_id" field to the value that was provided on create.
+func (u *OccurrenceUpsert) UpdatePackageID() *OccurrenceUpsert {
+	u.SetExcluded(occurrence.FieldPackageID)
+	return u
+}
+
+// ClearPackageID clears the value of the "package_id" field.
+func (u *OccurrenceUpsert) ClearPackageID() *OccurrenceUpsert {
+	u.SetNull(occurrence.FieldPackageID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -385,6 +459,48 @@ func (u *OccurrenceUpsertOne) SetCollector(v string) *OccurrenceUpsertOne {
 func (u *OccurrenceUpsertOne) UpdateCollector() *OccurrenceUpsertOne {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetSourceID sets the "source_id" field.
+func (u *OccurrenceUpsertOne) SetSourceID(v int) *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.SetSourceID(v)
+	})
+}
+
+// UpdateSourceID sets the "source_id" field to the value that was provided on create.
+func (u *OccurrenceUpsertOne) UpdateSourceID() *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.UpdateSourceID()
+	})
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (u *OccurrenceUpsertOne) ClearSourceID() *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.ClearSourceID()
+	})
+}
+
+// SetPackageID sets the "package_id" field.
+func (u *OccurrenceUpsertOne) SetPackageID(v int) *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.SetPackageID(v)
+	})
+}
+
+// UpdatePackageID sets the "package_id" field to the value that was provided on create.
+func (u *OccurrenceUpsertOne) UpdatePackageID() *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.UpdatePackageID()
+	})
+}
+
+// ClearPackageID clears the value of the "package_id" field.
+func (u *OccurrenceUpsertOne) ClearPackageID() *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.ClearPackageID()
 	})
 }
 
@@ -640,6 +756,48 @@ func (u *OccurrenceUpsertBulk) SetCollector(v string) *OccurrenceUpsertBulk {
 func (u *OccurrenceUpsertBulk) UpdateCollector() *OccurrenceUpsertBulk {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetSourceID sets the "source_id" field.
+func (u *OccurrenceUpsertBulk) SetSourceID(v int) *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.SetSourceID(v)
+	})
+}
+
+// UpdateSourceID sets the "source_id" field to the value that was provided on create.
+func (u *OccurrenceUpsertBulk) UpdateSourceID() *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.UpdateSourceID()
+	})
+}
+
+// ClearSourceID clears the value of the "source_id" field.
+func (u *OccurrenceUpsertBulk) ClearSourceID() *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.ClearSourceID()
+	})
+}
+
+// SetPackageID sets the "package_id" field.
+func (u *OccurrenceUpsertBulk) SetPackageID(v int) *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.SetPackageID(v)
+	})
+}
+
+// UpdatePackageID sets the "package_id" field to the value that was provided on create.
+func (u *OccurrenceUpsertBulk) UpdatePackageID() *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.UpdatePackageID()
+	})
+}
+
+// ClearPackageID clears the value of the "package_id" field.
+func (u *OccurrenceUpsertBulk) ClearPackageID() *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.ClearPackageID()
 	})
 }
 

@@ -2,12 +2,13 @@ package backend
 
 import (
 	"context"
+	"log"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrencesubject"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -21,7 +22,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 		}
 	}
 
-	records, err := b.client.Occurrence.Query().
+	records, err := b.client.Debug().Occurrence.Query().
 		Where(
 			optionalPredicate(query.Justification, occurrence.JustificationEQ),
 			optionalPredicate(query.Origin, occurrence.OriginEQ),
@@ -33,35 +34,61 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 					optionalPredicate(query.Artifact.ID, IDEQ)(s)
 				}
 			}),
-			occurrence.HasSubjectWith(func(s *sql.Selector) {
-				if query.Subject != nil {
-					if query.Subject.Package != nil {
-						occurrencesubject.HasPackageWith(func(s *sql.Selector) {
-							optionalPredicate(query.Subject.Package.Name, occurrencesubject.PackageNameEQ)(s)
-							// optionalPredicate(query.Subject.Package.Version, occurrencesubject.PackageVersionEQ)(s)
-						})
-						// optionalPredicate(query.Subject.Package.Name, occurrencesubject.PackageNameEQ)(s)
-						// optionalPredicate(query.Subject.Package.Version, occurrencesubject.PackageVersionEQ)(s)
-					}
-				}
-			}),
+			occurrence.HasPackageWith(
+				packageversion.VersionEQ(*query.Subject.Package.Version),
+			),
+
+		// 	occurrence.HasSubjectWith(func(s *sql.Selector) {
+		// 		if query.Subject != nil {
+		// 			if query.Subject.Package != nil {
+		// 				occurrencesubject.HasPackageWith(
+		// 					packageversion.VersionEQ(""),
+		// 					// optionalPredicate(query.Subject.Package.Version, packageversion.VersionEQ),
+		// 				)(s)
+
+		// 				// occurrencesubject.HasPackageWith(func(s *sql.Selector) {
+		// 				// 	optionalPredicate(query.Subject.Package.Version, packageversion.VersionEQ)(s)
+		// 				// 	if query.Subject.Package.Name != nil {
+		// 				// 		packageversion.HasNameWith(packagename.NameEQ(*query.Subject.Package.Name))(s)
+		// 				// 	}
+		// 				// 	if query.Subject.Package.Namespace != nil {
+		// 				// 		packageversion.HasNameWith(
+		// 				// 			packagename.HasNamespaceWith(packagenamespace.NamespaceEQ(*query.Subject.Package.Namespace)),
+		// 				// 		)(s)
+		// 				// 		// packageversion.HasNameWith(packagename.NameEQ(*query.Subject.Package.Name))(s)
+		// 				// 	}
+
+		// 				// 	// optionalPredicate(query.Subject.Package.Name, occurrencesubject.HasPackageWith(
+		// 				// 	// 	packageversion.HasPackageWith(),
+		// 				// 	// ))(s)
+		// 				// 	// optionalPredicate(query.Subject.Package.Name, occurrencesubject.PackageNameEQ)(s)
+		// 				// 	// optionalPredicate(query.Subject.Package.Version, occurrencesubject.PackageVersionEQ)(s)
+		// 				// })
+		// 				// optionalPredicate(query.Subject.Package.Name, occurrencesubject.PackageNameEQ)(s)
+		// 			}
+		// 		}
+		// 	}),
 		).
 		WithArtifact().
-		WithSubject(func(q *ent.OccurrenceSubjectQuery) {
-			q.WithPackage()
-			q.WithSource()
-		}).
+		WithPackage().
+		// WithSubject(func(q *ent.OccurrenceSubjectQuery) {
+		// 	q.WithPackage()
+		// 	q.WithSource()
+
+		// }).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println("Query End")
 
 	models := make([]*model.IsOccurrence, len(records))
 	for i, record := range records {
 
 		var sub model.PackageOrSource
 
-		if pv := record.Edges.Subject.Edges.Package; pv != nil {
+		if pv := record.Edges.Package; pv != nil {
 			p, err := pkgTreeFromVersion(ctx, pv)
 			if err != nil {
 				return nil, err
@@ -111,15 +138,38 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
+		var pkgVersion *ent.PackageVersion
+		if subject.Package != nil {
+			pkgVersion, err = upsertPackage(ctx, client, *subject.Package)
+			if err != nil {
+				return nil, err
+			}
+			// subjectID, err := client.OccurrenceSubject.Create().
+			// 	SetPackage(pkgVersion).
+			// 	SetOccurrenceID(id).
+			// 	OnConflict(
+			// 		sql.ConflictColumns(
+			// 			occurrencesubject.FieldOccurrenceID,
+			// 			// occurrencesubject.FieldPackageID,
+			// 		),
+			// 	).
+			// 	UpdateNewValues().
+			// 	ID(ctx)
+			// if err != nil {
+			// 	return nil, err
+			// }
+		}
 
 		id, err := client.Occurrence.Create().
 			SetArtifact(artRecord).
+			SetPackageID(pkgVersion.ID).
 			SetJustification(spec.Justification).
 			SetOrigin(spec.Origin).
 			SetCollector(spec.Collector).
 			OnConflict(
 				sql.ConflictColumns(
 					occurrence.FieldArtifactID,
+					occurrence.FieldPackageID,
 					occurrence.FieldJustification,
 					occurrence.FieldOrigin,
 					occurrence.FieldCollector,
@@ -129,27 +179,6 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			ID(ctx)
 		if err != nil {
 			return nil, err
-		}
-
-		if subject.Package != nil {
-			pkgVersion, err := upsertPackage(ctx, client, *subject.Package)
-			if err != nil {
-				return nil, err
-			}
-			err = client.OccurrenceSubject.Create().
-				SetPackage(pkgVersion).
-				SetOccurrenceID(id).
-				OnConflict(
-					sql.ConflictColumns(
-						occurrencesubject.FieldOccurrenceID,
-						// occurrencesubject.FieldPackageID,
-					),
-				).
-				UpdateNewValues().
-				Exec(ctx)
-			if err != nil {
-				return nil, err
-			}
 		}
 
 		return &id, nil
@@ -163,22 +192,22 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	record, err := b.client.Occurrence.Query().
 		Where(occurrence.ID(*recordID)).
 		WithArtifact().
-		WithSubject(func(q *ent.OccurrenceSubjectQuery) {
-			q.WithPackage(func(q *ent.PackageVersionQuery) {
-				// q.WithName(func(q *ent.PackageNameQuery) {
-				// 	q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-				// 		q.WithPackage(func(q *ent.PackageNodeQuery) {
-				// 			// buildPackageTreeQuery(q, ns string, packageName string, pv *ent.PackageVersion)
-				// 		})
-				// 	})
-				// })
-			})
-			q.WithSource(func(q *ent.SourceNameQuery) {
-				q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
-					q.WithSource()
-				})
-			})
+		// WithSubject(func(q *ent.OccurrenceSubjectQuery) {
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			// q.WithName(func(q *ent.PackageNameQuery) {
+			// 	q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
+			// 		q.WithPackage(func(q *ent.PackageNodeQuery) {
+			// 			// buildPackageTreeQuery(q, ns string, packageName string, pv *ent.PackageVersion)
+			// 		})
+			// 	})
+			// })
 		}).
+		// q.WithSource(func(q *ent.SourceNameQuery) {
+		// 	q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
+		// 		q.WithSource()
+		// 	})
+		// })
+		// }).
 		Only(ctx)
 	if err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
@@ -186,7 +215,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 
 	var sub model.PackageOrSource
 
-	if pv := record.Edges.Subject.Edges.Package; pv != nil {
+	if pv := record.Edges.Package; pv != nil {
 		p, err := pkgTreeFromVersion(ctx, pv)
 		if err != nil {
 			return nil, err
