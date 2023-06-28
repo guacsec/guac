@@ -41,9 +41,15 @@ func (snu *SourceNamespaceUpdate) SetSourceID(i int) *SourceNamespaceUpdate {
 	return snu
 }
 
-// SetSource sets the "source" edge to the Source entity.
-func (snu *SourceNamespaceUpdate) SetSource(s *Source) *SourceNamespaceUpdate {
-	return snu.SetSourceID(s.ID)
+// SetSourceTypeID sets the "source_type" edge to the Source entity by ID.
+func (snu *SourceNamespaceUpdate) SetSourceTypeID(id int) *SourceNamespaceUpdate {
+	snu.mutation.SetSourceTypeID(id)
+	return snu
+}
+
+// SetSourceType sets the "source_type" edge to the Source entity.
+func (snu *SourceNamespaceUpdate) SetSourceType(s *Source) *SourceNamespaceUpdate {
+	return snu.SetSourceTypeID(s.ID)
 }
 
 // AddNameIDs adds the "names" edge to the SourceName entity by IDs.
@@ -66,9 +72,9 @@ func (snu *SourceNamespaceUpdate) Mutation() *SourceNamespaceMutation {
 	return snu.mutation
 }
 
-// ClearSource clears the "source" edge to the Source entity.
-func (snu *SourceNamespaceUpdate) ClearSource() *SourceNamespaceUpdate {
-	snu.mutation.ClearSource()
+// ClearSourceType clears the "source_type" edge to the Source entity.
+func (snu *SourceNamespaceUpdate) ClearSourceType() *SourceNamespaceUpdate {
+	snu.mutation.ClearSourceType()
 	return snu
 }
 
@@ -122,8 +128,8 @@ func (snu *SourceNamespaceUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (snu *SourceNamespaceUpdate) check() error {
-	if _, ok := snu.mutation.SourceID(); snu.mutation.SourceCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "SourceNamespace.source"`)
+	if _, ok := snu.mutation.SourceTypeID(); snu.mutation.SourceTypeCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "SourceNamespace.source_type"`)
 	}
 	return nil
 }
@@ -143,12 +149,12 @@ func (snu *SourceNamespaceUpdate) sqlSave(ctx context.Context) (n int, err error
 	if value, ok := snu.mutation.Namespace(); ok {
 		_spec.SetField(sourcenamespace.FieldNamespace, field.TypeString, value)
 	}
-	if snu.mutation.SourceCleared() {
+	if snu.mutation.SourceTypeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   sourcenamespace.SourceTable,
-			Columns: []string{sourcenamespace.SourceColumn},
+			Table:   sourcenamespace.SourceTypeTable,
+			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
@@ -156,12 +162,12 @@ func (snu *SourceNamespaceUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snu.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := snu.mutation.SourceTypeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   sourcenamespace.SourceTable,
-			Columns: []string{sourcenamespace.SourceColumn},
+			Table:   sourcenamespace.SourceTypeTable,
+			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
@@ -249,9 +255,15 @@ func (snuo *SourceNamespaceUpdateOne) SetSourceID(i int) *SourceNamespaceUpdateO
 	return snuo
 }
 
-// SetSource sets the "source" edge to the Source entity.
-func (snuo *SourceNamespaceUpdateOne) SetSource(s *Source) *SourceNamespaceUpdateOne {
-	return snuo.SetSourceID(s.ID)
+// SetSourceTypeID sets the "source_type" edge to the Source entity by ID.
+func (snuo *SourceNamespaceUpdateOne) SetSourceTypeID(id int) *SourceNamespaceUpdateOne {
+	snuo.mutation.SetSourceTypeID(id)
+	return snuo
+}
+
+// SetSourceType sets the "source_type" edge to the Source entity.
+func (snuo *SourceNamespaceUpdateOne) SetSourceType(s *Source) *SourceNamespaceUpdateOne {
+	return snuo.SetSourceTypeID(s.ID)
 }
 
 // AddNameIDs adds the "names" edge to the SourceName entity by IDs.
@@ -274,9 +286,9 @@ func (snuo *SourceNamespaceUpdateOne) Mutation() *SourceNamespaceMutation {
 	return snuo.mutation
 }
 
-// ClearSource clears the "source" edge to the Source entity.
-func (snuo *SourceNamespaceUpdateOne) ClearSource() *SourceNamespaceUpdateOne {
-	snuo.mutation.ClearSource()
+// ClearSourceType clears the "source_type" edge to the Source entity.
+func (snuo *SourceNamespaceUpdateOne) ClearSourceType() *SourceNamespaceUpdateOne {
+	snuo.mutation.ClearSourceType()
 	return snuo
 }
 
@@ -343,8 +355,8 @@ func (snuo *SourceNamespaceUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (snuo *SourceNamespaceUpdateOne) check() error {
-	if _, ok := snuo.mutation.SourceID(); snuo.mutation.SourceCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "SourceNamespace.source"`)
+	if _, ok := snuo.mutation.SourceTypeID(); snuo.mutation.SourceTypeCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "SourceNamespace.source_type"`)
 	}
 	return nil
 }
@@ -381,12 +393,12 @@ func (snuo *SourceNamespaceUpdateOne) sqlSave(ctx context.Context) (_node *Sourc
 	if value, ok := snuo.mutation.Namespace(); ok {
 		_spec.SetField(sourcenamespace.FieldNamespace, field.TypeString, value)
 	}
-	if snuo.mutation.SourceCleared() {
+	if snuo.mutation.SourceTypeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   sourcenamespace.SourceTable,
-			Columns: []string{sourcenamespace.SourceColumn},
+			Table:   sourcenamespace.SourceTypeTable,
+			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
@@ -394,12 +406,12 @@ func (snuo *SourceNamespaceUpdateOne) sqlSave(ctx context.Context) (_node *Sourc
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := snuo.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := snuo.mutation.SourceTypeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   sourcenamespace.SourceTable,
-			Columns: []string{sourcenamespace.SourceColumn},
+			Table:   sourcenamespace.SourceTypeTable,
+			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),

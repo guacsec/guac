@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -33,6 +34,6 @@ func (SourceName) Edges() []ent.Edge {
 // Indexes of the SourceName.
 func (SourceName) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name", "commit", "tag").Unique(),
+		index.Fields("namespace_id", "name", "commit", "tag").Unique().Annotations(entsql.IndexWhere("commit IS NOT NULL OR tag IS NOT NULL")),
 	}
 }

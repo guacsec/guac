@@ -28,62 +28,6 @@ func (sc *SourceCreate) SetType(s string) *SourceCreate {
 	return sc
 }
 
-// SetNamespace sets the "namespace" field.
-func (sc *SourceCreate) SetNamespace(s string) *SourceCreate {
-	sc.mutation.SetNamespace(s)
-	return sc
-}
-
-// SetNillableNamespace sets the "namespace" field if the given value is not nil.
-func (sc *SourceCreate) SetNillableNamespace(s *string) *SourceCreate {
-	if s != nil {
-		sc.SetNamespace(*s)
-	}
-	return sc
-}
-
-// SetName sets the "name" field.
-func (sc *SourceCreate) SetName(s string) *SourceCreate {
-	sc.mutation.SetName(s)
-	return sc
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (sc *SourceCreate) SetNillableName(s *string) *SourceCreate {
-	if s != nil {
-		sc.SetName(*s)
-	}
-	return sc
-}
-
-// SetTag sets the "tag" field.
-func (sc *SourceCreate) SetTag(s string) *SourceCreate {
-	sc.mutation.SetTag(s)
-	return sc
-}
-
-// SetNillableTag sets the "tag" field if the given value is not nil.
-func (sc *SourceCreate) SetNillableTag(s *string) *SourceCreate {
-	if s != nil {
-		sc.SetTag(*s)
-	}
-	return sc
-}
-
-// SetCommit sets the "commit" field.
-func (sc *SourceCreate) SetCommit(s string) *SourceCreate {
-	sc.mutation.SetCommit(s)
-	return sc
-}
-
-// SetNillableCommit sets the "commit" field if the given value is not nil.
-func (sc *SourceCreate) SetNillableCommit(s *string) *SourceCreate {
-	if s != nil {
-		sc.SetCommit(*s)
-	}
-	return sc
-}
-
 // AddNamespaceIDs adds the "namespaces" edge to the SourceNamespace entity by IDs.
 func (sc *SourceCreate) AddNamespaceIDs(ids ...int) *SourceCreate {
 	sc.mutation.AddNamespaceIDs(ids...)
@@ -167,22 +111,6 @@ func (sc *SourceCreate) createSpec() (*Source, *sqlgraph.CreateSpec) {
 		_spec.SetField(source.FieldType, field.TypeString, value)
 		_node.Type = value
 	}
-	if value, ok := sc.mutation.Namespace(); ok {
-		_spec.SetField(source.FieldNamespace, field.TypeString, value)
-		_node.Namespace = value
-	}
-	if value, ok := sc.mutation.Name(); ok {
-		_spec.SetField(source.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := sc.mutation.Tag(); ok {
-		_spec.SetField(source.FieldTag, field.TypeString, value)
-		_node.Tag = value
-	}
-	if value, ok := sc.mutation.Commit(); ok {
-		_spec.SetField(source.FieldCommit, field.TypeString, value)
-		_node.Commit = value
-	}
 	if nodes := sc.mutation.NamespacesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -263,78 +191,6 @@ func (u *SourceUpsert) UpdateType() *SourceUpsert {
 	return u
 }
 
-// SetNamespace sets the "namespace" field.
-func (u *SourceUpsert) SetNamespace(v string) *SourceUpsert {
-	u.Set(source.FieldNamespace, v)
-	return u
-}
-
-// UpdateNamespace sets the "namespace" field to the value that was provided on create.
-func (u *SourceUpsert) UpdateNamespace() *SourceUpsert {
-	u.SetExcluded(source.FieldNamespace)
-	return u
-}
-
-// ClearNamespace clears the value of the "namespace" field.
-func (u *SourceUpsert) ClearNamespace() *SourceUpsert {
-	u.SetNull(source.FieldNamespace)
-	return u
-}
-
-// SetName sets the "name" field.
-func (u *SourceUpsert) SetName(v string) *SourceUpsert {
-	u.Set(source.FieldName, v)
-	return u
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *SourceUpsert) UpdateName() *SourceUpsert {
-	u.SetExcluded(source.FieldName)
-	return u
-}
-
-// ClearName clears the value of the "name" field.
-func (u *SourceUpsert) ClearName() *SourceUpsert {
-	u.SetNull(source.FieldName)
-	return u
-}
-
-// SetTag sets the "tag" field.
-func (u *SourceUpsert) SetTag(v string) *SourceUpsert {
-	u.Set(source.FieldTag, v)
-	return u
-}
-
-// UpdateTag sets the "tag" field to the value that was provided on create.
-func (u *SourceUpsert) UpdateTag() *SourceUpsert {
-	u.SetExcluded(source.FieldTag)
-	return u
-}
-
-// ClearTag clears the value of the "tag" field.
-func (u *SourceUpsert) ClearTag() *SourceUpsert {
-	u.SetNull(source.FieldTag)
-	return u
-}
-
-// SetCommit sets the "commit" field.
-func (u *SourceUpsert) SetCommit(v string) *SourceUpsert {
-	u.Set(source.FieldCommit, v)
-	return u
-}
-
-// UpdateCommit sets the "commit" field to the value that was provided on create.
-func (u *SourceUpsert) UpdateCommit() *SourceUpsert {
-	u.SetExcluded(source.FieldCommit)
-	return u
-}
-
-// ClearCommit clears the value of the "commit" field.
-func (u *SourceUpsert) ClearCommit() *SourceUpsert {
-	u.SetNull(source.FieldCommit)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -386,90 +242,6 @@ func (u *SourceUpsertOne) SetType(v string) *SourceUpsertOne {
 func (u *SourceUpsertOne) UpdateType() *SourceUpsertOne {
 	return u.Update(func(s *SourceUpsert) {
 		s.UpdateType()
-	})
-}
-
-// SetNamespace sets the "namespace" field.
-func (u *SourceUpsertOne) SetNamespace(v string) *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetNamespace(v)
-	})
-}
-
-// UpdateNamespace sets the "namespace" field to the value that was provided on create.
-func (u *SourceUpsertOne) UpdateNamespace() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateNamespace()
-	})
-}
-
-// ClearNamespace clears the value of the "namespace" field.
-func (u *SourceUpsertOne) ClearNamespace() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearNamespace()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *SourceUpsertOne) SetName(v string) *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *SourceUpsertOne) UpdateName() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateName()
-	})
-}
-
-// ClearName clears the value of the "name" field.
-func (u *SourceUpsertOne) ClearName() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearName()
-	})
-}
-
-// SetTag sets the "tag" field.
-func (u *SourceUpsertOne) SetTag(v string) *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetTag(v)
-	})
-}
-
-// UpdateTag sets the "tag" field to the value that was provided on create.
-func (u *SourceUpsertOne) UpdateTag() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateTag()
-	})
-}
-
-// ClearTag clears the value of the "tag" field.
-func (u *SourceUpsertOne) ClearTag() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearTag()
-	})
-}
-
-// SetCommit sets the "commit" field.
-func (u *SourceUpsertOne) SetCommit(v string) *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetCommit(v)
-	})
-}
-
-// UpdateCommit sets the "commit" field to the value that was provided on create.
-func (u *SourceUpsertOne) UpdateCommit() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateCommit()
-	})
-}
-
-// ClearCommit clears the value of the "commit" field.
-func (u *SourceUpsertOne) ClearCommit() *SourceUpsertOne {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearCommit()
 	})
 }
 
@@ -683,90 +455,6 @@ func (u *SourceUpsertBulk) SetType(v string) *SourceUpsertBulk {
 func (u *SourceUpsertBulk) UpdateType() *SourceUpsertBulk {
 	return u.Update(func(s *SourceUpsert) {
 		s.UpdateType()
-	})
-}
-
-// SetNamespace sets the "namespace" field.
-func (u *SourceUpsertBulk) SetNamespace(v string) *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetNamespace(v)
-	})
-}
-
-// UpdateNamespace sets the "namespace" field to the value that was provided on create.
-func (u *SourceUpsertBulk) UpdateNamespace() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateNamespace()
-	})
-}
-
-// ClearNamespace clears the value of the "namespace" field.
-func (u *SourceUpsertBulk) ClearNamespace() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearNamespace()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *SourceUpsertBulk) SetName(v string) *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *SourceUpsertBulk) UpdateName() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateName()
-	})
-}
-
-// ClearName clears the value of the "name" field.
-func (u *SourceUpsertBulk) ClearName() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearName()
-	})
-}
-
-// SetTag sets the "tag" field.
-func (u *SourceUpsertBulk) SetTag(v string) *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetTag(v)
-	})
-}
-
-// UpdateTag sets the "tag" field to the value that was provided on create.
-func (u *SourceUpsertBulk) UpdateTag() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateTag()
-	})
-}
-
-// ClearTag clears the value of the "tag" field.
-func (u *SourceUpsertBulk) ClearTag() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearTag()
-	})
-}
-
-// SetCommit sets the "commit" field.
-func (u *SourceUpsertBulk) SetCommit(v string) *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.SetCommit(v)
-	})
-}
-
-// UpdateCommit sets the "commit" field to the value that was provided on create.
-func (u *SourceUpsertBulk) UpdateCommit() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.UpdateCommit()
-	})
-}
-
-// ClearCommit clears the value of the "commit" field.
-func (u *SourceUpsertBulk) ClearCommit() *SourceUpsertBulk {
-	return u.Update(func(s *SourceUpsert) {
-		s.ClearCommit()
 	})
 }
 

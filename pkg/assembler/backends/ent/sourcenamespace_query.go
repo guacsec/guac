@@ -20,12 +20,12 @@ import (
 // SourceNamespaceQuery is the builder for querying SourceNamespace entities.
 type SourceNamespaceQuery struct {
 	config
-	ctx        *QueryContext
-	order      []sourcenamespace.OrderOption
-	inters     []Interceptor
-	predicates []predicate.SourceNamespace
-	withSource *SourceQuery
-	withNames  *SourceNameQuery
+	ctx            *QueryContext
+	order          []sourcenamespace.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.SourceNamespace
+	withSourceType *SourceQuery
+	withNames      *SourceNameQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,8 +62,8 @@ func (snq *SourceNamespaceQuery) Order(o ...sourcenamespace.OrderOption) *Source
 	return snq
 }
 
-// QuerySource chains the current query on the "source" edge.
-func (snq *SourceNamespaceQuery) QuerySource() *SourceQuery {
+// QuerySourceType chains the current query on the "source_type" edge.
+func (snq *SourceNamespaceQuery) QuerySourceType() *SourceQuery {
 	query := (&SourceClient{config: snq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := snq.prepareQuery(ctx); err != nil {
@@ -76,7 +76,7 @@ func (snq *SourceNamespaceQuery) QuerySource() *SourceQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, selector),
 			sqlgraph.To(source.Table, source.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTable, sourcenamespace.SourceColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTypeTable, sourcenamespace.SourceTypeColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
 		return fromU, nil
@@ -293,27 +293,27 @@ func (snq *SourceNamespaceQuery) Clone() *SourceNamespaceQuery {
 		return nil
 	}
 	return &SourceNamespaceQuery{
-		config:     snq.config,
-		ctx:        snq.ctx.Clone(),
-		order:      append([]sourcenamespace.OrderOption{}, snq.order...),
-		inters:     append([]Interceptor{}, snq.inters...),
-		predicates: append([]predicate.SourceNamespace{}, snq.predicates...),
-		withSource: snq.withSource.Clone(),
-		withNames:  snq.withNames.Clone(),
+		config:         snq.config,
+		ctx:            snq.ctx.Clone(),
+		order:          append([]sourcenamespace.OrderOption{}, snq.order...),
+		inters:         append([]Interceptor{}, snq.inters...),
+		predicates:     append([]predicate.SourceNamespace{}, snq.predicates...),
+		withSourceType: snq.withSourceType.Clone(),
+		withNames:      snq.withNames.Clone(),
 		// clone intermediate query.
 		sql:  snq.sql.Clone(),
 		path: snq.path,
 	}
 }
 
-// WithSource tells the query-builder to eager-load the nodes that are connected to
-// the "source" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNamespaceQuery) WithSource(opts ...func(*SourceQuery)) *SourceNamespaceQuery {
+// WithSourceType tells the query-builder to eager-load the nodes that are connected to
+// the "source_type" edge. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNamespaceQuery) WithSourceType(opts ...func(*SourceQuery)) *SourceNamespaceQuery {
 	query := (&SourceClient{config: snq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	snq.withSource = query
+	snq.withSourceType = query
 	return snq
 }
 
@@ -407,7 +407,7 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		nodes       = []*SourceNamespace{}
 		_spec       = snq.querySpec()
 		loadedTypes = [2]bool{
-			snq.withSource != nil,
+			snq.withSourceType != nil,
 			snq.withNames != nil,
 		}
 	)
@@ -429,9 +429,9 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := snq.withSource; query != nil {
-		if err := snq.loadSource(ctx, query, nodes, nil,
-			func(n *SourceNamespace, e *Source) { n.Edges.Source = e }); err != nil {
+	if query := snq.withSourceType; query != nil {
+		if err := snq.loadSourceType(ctx, query, nodes, nil,
+			func(n *SourceNamespace, e *Source) { n.Edges.SourceType = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -445,7 +445,7 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	return nodes, nil
 }
 
-func (snq *SourceNamespaceQuery) loadSource(ctx context.Context, query *SourceQuery, nodes []*SourceNamespace, init func(*SourceNamespace), assign func(*SourceNamespace, *Source)) error {
+func (snq *SourceNamespaceQuery) loadSourceType(ctx context.Context, query *SourceQuery, nodes []*SourceNamespace, init func(*SourceNamespace), assign func(*SourceNamespace, *Source)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*SourceNamespace)
 	for i := range nodes {
@@ -530,7 +530,7 @@ func (snq *SourceNamespaceQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if snq.withSource != nil {
+		if snq.withSourceType != nil {
 			_spec.Node.AddColumnOnce(sourcenamespace.FieldSourceID)
 		}
 	}

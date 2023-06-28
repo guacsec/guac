@@ -1809,15 +1809,15 @@ func (c *SourceNamespaceClient) GetX(ctx context.Context, id int) *SourceNamespa
 	return obj
 }
 
-// QuerySource queries the source edge of a SourceNamespace.
-func (c *SourceNamespaceClient) QuerySource(sn *SourceNamespace) *SourceQuery {
+// QuerySourceType queries the source_type edge of a SourceNamespace.
+func (c *SourceNamespaceClient) QuerySourceType(sn *SourceNamespace) *SourceQuery {
 	query := (&SourceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := sn.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, id),
 			sqlgraph.To(source.Table, source.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTable, sourcenamespace.SourceColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTypeTable, sourcenamespace.SourceTypeColumn),
 		)
 		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
 		return fromV, nil

@@ -246,16 +246,23 @@ func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.Is
 	}
 }
 
-func toOccurrenceSubject(s *ent.Occurrence) model.PackageOrSource {
-	if s.Edges.Package != nil &&
-		s.Edges.Package.Edges.Name != nil &&
-		s.Edges.Package.Edges.Name.Edges.Namespace != nil &&
-		s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package != nil {
-		return toModelPackage(s.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
-	} else if s.Edges.Source != nil &&
-		s.Edges.Source.Edges.Namespace != nil &&
-		s.Edges.Source.Edges.Namespace.Edges.Source != nil {
-		return toModelSource(s.Edges.Source.Edges.Namespace.Edges.Source)
+func toOccurrenceSubject(oc *ent.Occurrence) model.PackageOrSource {
+	if oc.Edges.Package != nil &&
+		oc.Edges.Package.Edges.Name != nil &&
+		oc.Edges.Package.Edges.Name.Edges.Namespace != nil &&
+		oc.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package != nil {
+		return toModelPackage(oc.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+	} else if oc.Edges.Source != nil &&
+		oc.Edges.Source.Edges.Namespace != nil &&
+		oc.Edges.Source.Edges.Namespace.Edges.SourceType != nil {
+
+		// Manually construct back references to avoid another 3 queries
+		s := oc.Edges.Source
+		ns := s.Edges.Namespace
+		ns.Edges.Names = []*ent.SourceName{s}
+		st := ns.Edges.SourceType
+		st.Edges.Namespaces = []*ent.SourceNamespace{ns}
+		return toModelSource(st)
 	}
 	return nil
 }

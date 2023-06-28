@@ -14,14 +14,6 @@ const (
 	FieldID = "id"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
-	// FieldNamespace holds the string denoting the namespace field in the database.
-	FieldNamespace = "namespace"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
-	// FieldTag holds the string denoting the tag field in the database.
-	FieldTag = "tag"
-	// FieldCommit holds the string denoting the commit field in the database.
-	FieldCommit = "commit"
 	// EdgeNamespaces holds the string denoting the namespaces edge name in mutations.
 	EdgeNamespaces = "namespaces"
 	// Table holds the table name of the source in the database.
@@ -39,10 +31,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldType,
-	FieldNamespace,
-	FieldName,
-	FieldTag,
-	FieldCommit,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -66,26 +54,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByType orders the results by the type field.
 func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
-}
-
-// ByNamespace orders the results by the namespace field.
-func ByNamespace(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNamespace, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByTag orders the results by the tag field.
-func ByTag(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTag, opts...).ToFunc()
-}
-
-// ByCommit orders the results by the commit field.
-func ByCommit(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCommit, opts...).ToFunc()
 }
 
 // ByNamespacesCount orders the results by namespaces count.

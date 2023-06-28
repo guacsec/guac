@@ -148,21 +148,21 @@ func SourceIDNotIn(vs ...int) predicate.SourceNamespace {
 	return predicate.SourceNamespace(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
-// HasSource applies the HasEdge predicate on the "source" edge.
-func HasSource() predicate.SourceNamespace {
+// HasSourceType applies the HasEdge predicate on the "source_type" edge.
+func HasSourceType() predicate.SourceNamespace {
 	return predicate.SourceNamespace(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, SourceTable, SourceColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, SourceTypeTable, SourceTypeColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSourceWith applies the HasEdge predicate on the "source" edge with a given conditions (other predicates).
-func HasSourceWith(preds ...predicate.Source) predicate.SourceNamespace {
+// HasSourceTypeWith applies the HasEdge predicate on the "source_type" edge with a given conditions (other predicates).
+func HasSourceTypeWith(preds ...predicate.Source) predicate.SourceNamespace {
 	return predicate.SourceNamespace(func(s *sql.Selector) {
-		step := newSourceStep()
+		step := newSourceTypeStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -35,9 +35,15 @@ func (snc *SourceNamespaceCreate) SetSourceID(i int) *SourceNamespaceCreate {
 	return snc
 }
 
-// SetSource sets the "source" edge to the Source entity.
-func (snc *SourceNamespaceCreate) SetSource(s *Source) *SourceNamespaceCreate {
-	return snc.SetSourceID(s.ID)
+// SetSourceTypeID sets the "source_type" edge to the Source entity by ID.
+func (snc *SourceNamespaceCreate) SetSourceTypeID(id int) *SourceNamespaceCreate {
+	snc.mutation.SetSourceTypeID(id)
+	return snc
+}
+
+// SetSourceType sets the "source_type" edge to the Source entity.
+func (snc *SourceNamespaceCreate) SetSourceType(s *Source) *SourceNamespaceCreate {
+	return snc.SetSourceTypeID(s.ID)
 }
 
 // AddNameIDs adds the "names" edge to the SourceName entity by IDs.
@@ -95,8 +101,8 @@ func (snc *SourceNamespaceCreate) check() error {
 	if _, ok := snc.mutation.SourceID(); !ok {
 		return &ValidationError{Name: "source_id", err: errors.New(`ent: missing required field "SourceNamespace.source_id"`)}
 	}
-	if _, ok := snc.mutation.SourceID(); !ok {
-		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "SourceNamespace.source"`)}
+	if _, ok := snc.mutation.SourceTypeID(); !ok {
+		return &ValidationError{Name: "source_type", err: errors.New(`ent: missing required edge "SourceNamespace.source_type"`)}
 	}
 	return nil
 }
@@ -129,12 +135,12 @@ func (snc *SourceNamespaceCreate) createSpec() (*SourceNamespace, *sqlgraph.Crea
 		_spec.SetField(sourcenamespace.FieldNamespace, field.TypeString, value)
 		_node.Namespace = value
 	}
-	if nodes := snc.mutation.SourceIDs(); len(nodes) > 0 {
+	if nodes := snc.mutation.SourceTypeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   sourcenamespace.SourceTable,
-			Columns: []string{sourcenamespace.SourceColumn},
+			Table:   sourcenamespace.SourceTypeTable,
+			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),

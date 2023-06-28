@@ -23,7 +23,7 @@ func (SourceNamespace) Fields() []ent.Field {
 // Edges of the SourceNamespace.
 func (SourceNamespace) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("source", Source.Type).Unique().Required().Field("source_id"),
+		edge.To("source_type", Source.Type).Unique().Required().Field("source_id"),
 		edge.From("names", SourceName.Type).Ref("namespace"),
 	}
 }
@@ -31,6 +31,6 @@ func (SourceNamespace) Edges() []ent.Edge {
 // Indexes of the SourceNamespace.
 func (SourceNamespace) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("namespace").Edges("source").Unique(),
+		index.Fields("namespace", "source_id").Unique(),
 	}
 }

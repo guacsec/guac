@@ -29,8 +29,8 @@ type SourceNamespace struct {
 
 // SourceNamespaceEdges holds the relations/edges for other nodes in the graph.
 type SourceNamespaceEdges struct {
-	// Source holds the value of the source edge.
-	Source *Source `json:"source,omitempty"`
+	// SourceType holds the value of the source_type edge.
+	SourceType *Source `json:"source_type,omitempty"`
 	// Names holds the value of the names edge.
 	Names []*SourceName `json:"names,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -38,17 +38,17 @@ type SourceNamespaceEdges struct {
 	loadedTypes [2]bool
 }
 
-// SourceOrErr returns the Source value or an error if the edge
+// SourceTypeOrErr returns the SourceType value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SourceNamespaceEdges) SourceOrErr() (*Source, error) {
+func (e SourceNamespaceEdges) SourceTypeOrErr() (*Source, error) {
 	if e.loadedTypes[0] {
-		if e.Source == nil {
+		if e.SourceType == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: source.Label}
 		}
-		return e.Source, nil
+		return e.SourceType, nil
 	}
-	return nil, &NotLoadedError{edge: "source"}
+	return nil, &NotLoadedError{edge: "source_type"}
 }
 
 // NamesOrErr returns the Names value or an error if the edge
@@ -115,9 +115,9 @@ func (sn *SourceNamespace) Value(name string) (ent.Value, error) {
 	return sn.selectValues.Get(name)
 }
 
-// QuerySource queries the "source" edge of the SourceNamespace entity.
-func (sn *SourceNamespace) QuerySource() *SourceQuery {
-	return NewSourceNamespaceClient(sn.config).QuerySource(sn)
+// QuerySourceType queries the "source_type" edge of the SourceNamespace entity.
+func (sn *SourceNamespace) QuerySourceType() *SourceQuery {
+	return NewSourceNamespaceClient(sn.config).QuerySourceType(sn)
 }
 
 // QueryNames queries the "names" edge of the SourceNamespace entity.

@@ -34,86 +34,6 @@ func (su *SourceUpdate) SetType(s string) *SourceUpdate {
 	return su
 }
 
-// SetNamespace sets the "namespace" field.
-func (su *SourceUpdate) SetNamespace(s string) *SourceUpdate {
-	su.mutation.SetNamespace(s)
-	return su
-}
-
-// SetNillableNamespace sets the "namespace" field if the given value is not nil.
-func (su *SourceUpdate) SetNillableNamespace(s *string) *SourceUpdate {
-	if s != nil {
-		su.SetNamespace(*s)
-	}
-	return su
-}
-
-// ClearNamespace clears the value of the "namespace" field.
-func (su *SourceUpdate) ClearNamespace() *SourceUpdate {
-	su.mutation.ClearNamespace()
-	return su
-}
-
-// SetName sets the "name" field.
-func (su *SourceUpdate) SetName(s string) *SourceUpdate {
-	su.mutation.SetName(s)
-	return su
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (su *SourceUpdate) SetNillableName(s *string) *SourceUpdate {
-	if s != nil {
-		su.SetName(*s)
-	}
-	return su
-}
-
-// ClearName clears the value of the "name" field.
-func (su *SourceUpdate) ClearName() *SourceUpdate {
-	su.mutation.ClearName()
-	return su
-}
-
-// SetTag sets the "tag" field.
-func (su *SourceUpdate) SetTag(s string) *SourceUpdate {
-	su.mutation.SetTag(s)
-	return su
-}
-
-// SetNillableTag sets the "tag" field if the given value is not nil.
-func (su *SourceUpdate) SetNillableTag(s *string) *SourceUpdate {
-	if s != nil {
-		su.SetTag(*s)
-	}
-	return su
-}
-
-// ClearTag clears the value of the "tag" field.
-func (su *SourceUpdate) ClearTag() *SourceUpdate {
-	su.mutation.ClearTag()
-	return su
-}
-
-// SetCommit sets the "commit" field.
-func (su *SourceUpdate) SetCommit(s string) *SourceUpdate {
-	su.mutation.SetCommit(s)
-	return su
-}
-
-// SetNillableCommit sets the "commit" field if the given value is not nil.
-func (su *SourceUpdate) SetNillableCommit(s *string) *SourceUpdate {
-	if s != nil {
-		su.SetCommit(*s)
-	}
-	return su
-}
-
-// ClearCommit clears the value of the "commit" field.
-func (su *SourceUpdate) ClearCommit() *SourceUpdate {
-	su.mutation.ClearCommit()
-	return su
-}
-
 // AddNamespaceIDs adds the "namespaces" edge to the SourceNamespace entity by IDs.
 func (su *SourceUpdate) AddNamespaceIDs(ids ...int) *SourceUpdate {
 	su.mutation.AddNamespaceIDs(ids...)
@@ -194,30 +114,6 @@ func (su *SourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := su.mutation.GetType(); ok {
 		_spec.SetField(source.FieldType, field.TypeString, value)
 	}
-	if value, ok := su.mutation.Namespace(); ok {
-		_spec.SetField(source.FieldNamespace, field.TypeString, value)
-	}
-	if su.mutation.NamespaceCleared() {
-		_spec.ClearField(source.FieldNamespace, field.TypeString)
-	}
-	if value, ok := su.mutation.Name(); ok {
-		_spec.SetField(source.FieldName, field.TypeString, value)
-	}
-	if su.mutation.NameCleared() {
-		_spec.ClearField(source.FieldName, field.TypeString)
-	}
-	if value, ok := su.mutation.Tag(); ok {
-		_spec.SetField(source.FieldTag, field.TypeString, value)
-	}
-	if su.mutation.TagCleared() {
-		_spec.ClearField(source.FieldTag, field.TypeString)
-	}
-	if value, ok := su.mutation.Commit(); ok {
-		_spec.SetField(source.FieldCommit, field.TypeString, value)
-	}
-	if su.mutation.CommitCleared() {
-		_spec.ClearField(source.FieldCommit, field.TypeString)
-	}
 	if su.mutation.NamespacesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -286,86 +182,6 @@ type SourceUpdateOne struct {
 // SetType sets the "type" field.
 func (suo *SourceUpdateOne) SetType(s string) *SourceUpdateOne {
 	suo.mutation.SetType(s)
-	return suo
-}
-
-// SetNamespace sets the "namespace" field.
-func (suo *SourceUpdateOne) SetNamespace(s string) *SourceUpdateOne {
-	suo.mutation.SetNamespace(s)
-	return suo
-}
-
-// SetNillableNamespace sets the "namespace" field if the given value is not nil.
-func (suo *SourceUpdateOne) SetNillableNamespace(s *string) *SourceUpdateOne {
-	if s != nil {
-		suo.SetNamespace(*s)
-	}
-	return suo
-}
-
-// ClearNamespace clears the value of the "namespace" field.
-func (suo *SourceUpdateOne) ClearNamespace() *SourceUpdateOne {
-	suo.mutation.ClearNamespace()
-	return suo
-}
-
-// SetName sets the "name" field.
-func (suo *SourceUpdateOne) SetName(s string) *SourceUpdateOne {
-	suo.mutation.SetName(s)
-	return suo
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (suo *SourceUpdateOne) SetNillableName(s *string) *SourceUpdateOne {
-	if s != nil {
-		suo.SetName(*s)
-	}
-	return suo
-}
-
-// ClearName clears the value of the "name" field.
-func (suo *SourceUpdateOne) ClearName() *SourceUpdateOne {
-	suo.mutation.ClearName()
-	return suo
-}
-
-// SetTag sets the "tag" field.
-func (suo *SourceUpdateOne) SetTag(s string) *SourceUpdateOne {
-	suo.mutation.SetTag(s)
-	return suo
-}
-
-// SetNillableTag sets the "tag" field if the given value is not nil.
-func (suo *SourceUpdateOne) SetNillableTag(s *string) *SourceUpdateOne {
-	if s != nil {
-		suo.SetTag(*s)
-	}
-	return suo
-}
-
-// ClearTag clears the value of the "tag" field.
-func (suo *SourceUpdateOne) ClearTag() *SourceUpdateOne {
-	suo.mutation.ClearTag()
-	return suo
-}
-
-// SetCommit sets the "commit" field.
-func (suo *SourceUpdateOne) SetCommit(s string) *SourceUpdateOne {
-	suo.mutation.SetCommit(s)
-	return suo
-}
-
-// SetNillableCommit sets the "commit" field if the given value is not nil.
-func (suo *SourceUpdateOne) SetNillableCommit(s *string) *SourceUpdateOne {
-	if s != nil {
-		suo.SetCommit(*s)
-	}
-	return suo
-}
-
-// ClearCommit clears the value of the "commit" field.
-func (suo *SourceUpdateOne) ClearCommit() *SourceUpdateOne {
-	suo.mutation.ClearCommit()
 	return suo
 }
 
@@ -478,30 +294,6 @@ func (suo *SourceUpdateOne) sqlSave(ctx context.Context) (_node *Source, err err
 	}
 	if value, ok := suo.mutation.GetType(); ok {
 		_spec.SetField(source.FieldType, field.TypeString, value)
-	}
-	if value, ok := suo.mutation.Namespace(); ok {
-		_spec.SetField(source.FieldNamespace, field.TypeString, value)
-	}
-	if suo.mutation.NamespaceCleared() {
-		_spec.ClearField(source.FieldNamespace, field.TypeString)
-	}
-	if value, ok := suo.mutation.Name(); ok {
-		_spec.SetField(source.FieldName, field.TypeString, value)
-	}
-	if suo.mutation.NameCleared() {
-		_spec.ClearField(source.FieldName, field.TypeString)
-	}
-	if value, ok := suo.mutation.Tag(); ok {
-		_spec.SetField(source.FieldTag, field.TypeString, value)
-	}
-	if suo.mutation.TagCleared() {
-		_spec.ClearField(source.FieldTag, field.TypeString)
-	}
-	if value, ok := suo.mutation.Commit(); ok {
-		_spec.SetField(source.FieldCommit, field.TypeString, value)
-	}
-	if suo.mutation.CommitCleared() {
-		_spec.ClearField(source.FieldCommit, field.TypeString)
 	}
 	if suo.mutation.NamespacesCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -4570,10 +4570,6 @@ type SourceMutation struct {
 	typ               string
 	id                *int
 	_type             *string
-	namespace         *string
-	name              *string
-	tag               *string
-	commit            *string
 	clearedFields     map[string]struct{}
 	namespaces        map[int]struct{}
 	removednamespaces map[int]struct{}
@@ -4717,202 +4713,6 @@ func (m *SourceMutation) ResetType() {
 	m._type = nil
 }
 
-// SetNamespace sets the "namespace" field.
-func (m *SourceMutation) SetNamespace(s string) {
-	m.namespace = &s
-}
-
-// Namespace returns the value of the "namespace" field in the mutation.
-func (m *SourceMutation) Namespace() (r string, exists bool) {
-	v := m.namespace
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldNamespace returns the old "namespace" field's value of the Source entity.
-// If the Source object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SourceMutation) OldNamespace(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNamespace is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNamespace requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNamespace: %w", err)
-	}
-	return oldValue.Namespace, nil
-}
-
-// ClearNamespace clears the value of the "namespace" field.
-func (m *SourceMutation) ClearNamespace() {
-	m.namespace = nil
-	m.clearedFields[source.FieldNamespace] = struct{}{}
-}
-
-// NamespaceCleared returns if the "namespace" field was cleared in this mutation.
-func (m *SourceMutation) NamespaceCleared() bool {
-	_, ok := m.clearedFields[source.FieldNamespace]
-	return ok
-}
-
-// ResetNamespace resets all changes to the "namespace" field.
-func (m *SourceMutation) ResetNamespace() {
-	m.namespace = nil
-	delete(m.clearedFields, source.FieldNamespace)
-}
-
-// SetName sets the "name" field.
-func (m *SourceMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *SourceMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the Source entity.
-// If the Source object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SourceMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ClearName clears the value of the "name" field.
-func (m *SourceMutation) ClearName() {
-	m.name = nil
-	m.clearedFields[source.FieldName] = struct{}{}
-}
-
-// NameCleared returns if the "name" field was cleared in this mutation.
-func (m *SourceMutation) NameCleared() bool {
-	_, ok := m.clearedFields[source.FieldName]
-	return ok
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *SourceMutation) ResetName() {
-	m.name = nil
-	delete(m.clearedFields, source.FieldName)
-}
-
-// SetTag sets the "tag" field.
-func (m *SourceMutation) SetTag(s string) {
-	m.tag = &s
-}
-
-// Tag returns the value of the "tag" field in the mutation.
-func (m *SourceMutation) Tag() (r string, exists bool) {
-	v := m.tag
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTag returns the old "tag" field's value of the Source entity.
-// If the Source object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SourceMutation) OldTag(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTag is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTag requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTag: %w", err)
-	}
-	return oldValue.Tag, nil
-}
-
-// ClearTag clears the value of the "tag" field.
-func (m *SourceMutation) ClearTag() {
-	m.tag = nil
-	m.clearedFields[source.FieldTag] = struct{}{}
-}
-
-// TagCleared returns if the "tag" field was cleared in this mutation.
-func (m *SourceMutation) TagCleared() bool {
-	_, ok := m.clearedFields[source.FieldTag]
-	return ok
-}
-
-// ResetTag resets all changes to the "tag" field.
-func (m *SourceMutation) ResetTag() {
-	m.tag = nil
-	delete(m.clearedFields, source.FieldTag)
-}
-
-// SetCommit sets the "commit" field.
-func (m *SourceMutation) SetCommit(s string) {
-	m.commit = &s
-}
-
-// Commit returns the value of the "commit" field in the mutation.
-func (m *SourceMutation) Commit() (r string, exists bool) {
-	v := m.commit
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCommit returns the old "commit" field's value of the Source entity.
-// If the Source object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SourceMutation) OldCommit(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCommit is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCommit requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCommit: %w", err)
-	}
-	return oldValue.Commit, nil
-}
-
-// ClearCommit clears the value of the "commit" field.
-func (m *SourceMutation) ClearCommit() {
-	m.commit = nil
-	m.clearedFields[source.FieldCommit] = struct{}{}
-}
-
-// CommitCleared returns if the "commit" field was cleared in this mutation.
-func (m *SourceMutation) CommitCleared() bool {
-	_, ok := m.clearedFields[source.FieldCommit]
-	return ok
-}
-
-// ResetCommit resets all changes to the "commit" field.
-func (m *SourceMutation) ResetCommit() {
-	m.commit = nil
-	delete(m.clearedFields, source.FieldCommit)
-}
-
 // AddNamespaceIDs adds the "namespaces" edge to the SourceNamespace entity by ids.
 func (m *SourceMutation) AddNamespaceIDs(ids ...int) {
 	if m.namespaces == nil {
@@ -5001,21 +4801,9 @@ func (m *SourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SourceMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 1)
 	if m._type != nil {
 		fields = append(fields, source.FieldType)
-	}
-	if m.namespace != nil {
-		fields = append(fields, source.FieldNamespace)
-	}
-	if m.name != nil {
-		fields = append(fields, source.FieldName)
-	}
-	if m.tag != nil {
-		fields = append(fields, source.FieldTag)
-	}
-	if m.commit != nil {
-		fields = append(fields, source.FieldCommit)
 	}
 	return fields
 }
@@ -5027,14 +4815,6 @@ func (m *SourceMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case source.FieldType:
 		return m.GetType()
-	case source.FieldNamespace:
-		return m.Namespace()
-	case source.FieldName:
-		return m.Name()
-	case source.FieldTag:
-		return m.Tag()
-	case source.FieldCommit:
-		return m.Commit()
 	}
 	return nil, false
 }
@@ -5046,14 +4826,6 @@ func (m *SourceMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case source.FieldType:
 		return m.OldType(ctx)
-	case source.FieldNamespace:
-		return m.OldNamespace(ctx)
-	case source.FieldName:
-		return m.OldName(ctx)
-	case source.FieldTag:
-		return m.OldTag(ctx)
-	case source.FieldCommit:
-		return m.OldCommit(ctx)
 	}
 	return nil, fmt.Errorf("unknown Source field %s", name)
 }
@@ -5069,34 +4841,6 @@ func (m *SourceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetType(v)
-		return nil
-	case source.FieldNamespace:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetNamespace(v)
-		return nil
-	case source.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	case source.FieldTag:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTag(v)
-		return nil
-	case source.FieldCommit:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCommit(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Source field %s", name)
@@ -5127,20 +4871,7 @@ func (m *SourceMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SourceMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(source.FieldNamespace) {
-		fields = append(fields, source.FieldNamespace)
-	}
-	if m.FieldCleared(source.FieldName) {
-		fields = append(fields, source.FieldName)
-	}
-	if m.FieldCleared(source.FieldTag) {
-		fields = append(fields, source.FieldTag)
-	}
-	if m.FieldCleared(source.FieldCommit) {
-		fields = append(fields, source.FieldCommit)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5153,20 +4884,6 @@ func (m *SourceMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SourceMutation) ClearField(name string) error {
-	switch name {
-	case source.FieldNamespace:
-		m.ClearNamespace()
-		return nil
-	case source.FieldName:
-		m.ClearName()
-		return nil
-	case source.FieldTag:
-		m.ClearTag()
-		return nil
-	case source.FieldCommit:
-		m.ClearCommit()
-		return nil
-	}
 	return fmt.Errorf("unknown Source nullable field %s", name)
 }
 
@@ -5176,18 +4893,6 @@ func (m *SourceMutation) ResetField(name string) error {
 	switch name {
 	case source.FieldType:
 		m.ResetType()
-		return nil
-	case source.FieldNamespace:
-		m.ResetNamespace()
-		return nil
-	case source.FieldName:
-		m.ResetName()
-		return nil
-	case source.FieldTag:
-		m.ResetTag()
-		return nil
-	case source.FieldCommit:
-		m.ResetCommit()
 		return nil
 	}
 	return fmt.Errorf("unknown Source field %s", name)
@@ -5950,19 +5655,19 @@ func (m *SourceNameMutation) ResetEdge(name string) error {
 // SourceNamespaceMutation represents an operation that mutates the SourceNamespace nodes in the graph.
 type SourceNamespaceMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	namespace     *string
-	clearedFields map[string]struct{}
-	source        *int
-	clearedsource bool
-	names         map[int]struct{}
-	removednames  map[int]struct{}
-	clearednames  bool
-	done          bool
-	oldValue      func(context.Context) (*SourceNamespace, error)
-	predicates    []predicate.SourceNamespace
+	op                 Op
+	typ                string
+	id                 *int
+	namespace          *string
+	clearedFields      map[string]struct{}
+	source_type        *int
+	clearedsource_type bool
+	names              map[int]struct{}
+	removednames       map[int]struct{}
+	clearednames       bool
+	done               bool
+	oldValue           func(context.Context) (*SourceNamespace, error)
+	predicates         []predicate.SourceNamespace
 }
 
 var _ ent.Mutation = (*SourceNamespaceMutation)(nil)
@@ -6101,12 +5806,12 @@ func (m *SourceNamespaceMutation) ResetNamespace() {
 
 // SetSourceID sets the "source_id" field.
 func (m *SourceNamespaceMutation) SetSourceID(i int) {
-	m.source = &i
+	m.source_type = &i
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
 func (m *SourceNamespaceMutation) SourceID() (r int, exists bool) {
-	v := m.source
+	v := m.source_type
 	if v == nil {
 		return
 	}
@@ -6132,33 +5837,46 @@ func (m *SourceNamespaceMutation) OldSourceID(ctx context.Context) (v int, err e
 
 // ResetSourceID resets all changes to the "source_id" field.
 func (m *SourceNamespaceMutation) ResetSourceID() {
-	m.source = nil
+	m.source_type = nil
 }
 
-// ClearSource clears the "source" edge to the Source entity.
-func (m *SourceNamespaceMutation) ClearSource() {
-	m.clearedsource = true
+// SetSourceTypeID sets the "source_type" edge to the Source entity by id.
+func (m *SourceNamespaceMutation) SetSourceTypeID(id int) {
+	m.source_type = &id
 }
 
-// SourceCleared reports if the "source" edge to the Source entity was cleared.
-func (m *SourceNamespaceMutation) SourceCleared() bool {
-	return m.clearedsource
+// ClearSourceType clears the "source_type" edge to the Source entity.
+func (m *SourceNamespaceMutation) ClearSourceType() {
+	m.clearedsource_type = true
 }
 
-// SourceIDs returns the "source" edge IDs in the mutation.
+// SourceTypeCleared reports if the "source_type" edge to the Source entity was cleared.
+func (m *SourceNamespaceMutation) SourceTypeCleared() bool {
+	return m.clearedsource_type
+}
+
+// SourceTypeID returns the "source_type" edge ID in the mutation.
+func (m *SourceNamespaceMutation) SourceTypeID() (id int, exists bool) {
+	if m.source_type != nil {
+		return *m.source_type, true
+	}
+	return
+}
+
+// SourceTypeIDs returns the "source_type" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// SourceID instead. It exists only for internal usage by the builders.
-func (m *SourceNamespaceMutation) SourceIDs() (ids []int) {
-	if id := m.source; id != nil {
+// SourceTypeID instead. It exists only for internal usage by the builders.
+func (m *SourceNamespaceMutation) SourceTypeIDs() (ids []int) {
+	if id := m.source_type; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetSource resets all changes to the "source" edge.
-func (m *SourceNamespaceMutation) ResetSource() {
-	m.source = nil
-	m.clearedsource = false
+// ResetSourceType resets all changes to the "source_type" edge.
+func (m *SourceNamespaceMutation) ResetSourceType() {
+	m.source_type = nil
+	m.clearedsource_type = false
 }
 
 // AddNameIDs adds the "names" edge to the SourceName entity by ids.
@@ -6253,7 +5971,7 @@ func (m *SourceNamespaceMutation) Fields() []string {
 	if m.namespace != nil {
 		fields = append(fields, sourcenamespace.FieldNamespace)
 	}
-	if m.source != nil {
+	if m.source_type != nil {
 		fields = append(fields, sourcenamespace.FieldSourceID)
 	}
 	return fields
@@ -6369,8 +6087,8 @@ func (m *SourceNamespaceMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SourceNamespaceMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.source != nil {
-		edges = append(edges, sourcenamespace.EdgeSource)
+	if m.source_type != nil {
+		edges = append(edges, sourcenamespace.EdgeSourceType)
 	}
 	if m.names != nil {
 		edges = append(edges, sourcenamespace.EdgeNames)
@@ -6382,8 +6100,8 @@ func (m *SourceNamespaceMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *SourceNamespaceMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case sourcenamespace.EdgeSource:
-		if id := m.source; id != nil {
+	case sourcenamespace.EdgeSourceType:
+		if id := m.source_type; id != nil {
 			return []ent.Value{*id}
 		}
 	case sourcenamespace.EdgeNames:
@@ -6422,8 +6140,8 @@ func (m *SourceNamespaceMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SourceNamespaceMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.clearedsource {
-		edges = append(edges, sourcenamespace.EdgeSource)
+	if m.clearedsource_type {
+		edges = append(edges, sourcenamespace.EdgeSourceType)
 	}
 	if m.clearednames {
 		edges = append(edges, sourcenamespace.EdgeNames)
@@ -6435,8 +6153,8 @@ func (m *SourceNamespaceMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *SourceNamespaceMutation) EdgeCleared(name string) bool {
 	switch name {
-	case sourcenamespace.EdgeSource:
-		return m.clearedsource
+	case sourcenamespace.EdgeSourceType:
+		return m.clearedsource_type
 	case sourcenamespace.EdgeNames:
 		return m.clearednames
 	}
@@ -6447,8 +6165,8 @@ func (m *SourceNamespaceMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *SourceNamespaceMutation) ClearEdge(name string) error {
 	switch name {
-	case sourcenamespace.EdgeSource:
-		m.ClearSource()
+	case sourcenamespace.EdgeSourceType:
+		m.ClearSourceType()
 		return nil
 	}
 	return fmt.Errorf("unknown SourceNamespace unique edge %s", name)
@@ -6458,8 +6176,8 @@ func (m *SourceNamespaceMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SourceNamespaceMutation) ResetEdge(name string) error {
 	switch name {
-	case sourcenamespace.EdgeSource:
-		m.ResetSource()
+	case sourcenamespace.EdgeSourceType:
+		m.ResetSourceType()
 		return nil
 	case sourcenamespace.EdgeNames:
 		m.ResetNames()

@@ -16,19 +16,19 @@ const (
 	FieldNamespace = "namespace"
 	// FieldSourceID holds the string denoting the source_id field in the database.
 	FieldSourceID = "source_id"
-	// EdgeSource holds the string denoting the source edge name in mutations.
-	EdgeSource = "source"
+	// EdgeSourceType holds the string denoting the source_type edge name in mutations.
+	EdgeSourceType = "source_type"
 	// EdgeNames holds the string denoting the names edge name in mutations.
 	EdgeNames = "names"
 	// Table holds the table name of the sourcenamespace in the database.
 	Table = "source_namespaces"
-	// SourceTable is the table that holds the source relation/edge.
-	SourceTable = "source_namespaces"
-	// SourceInverseTable is the table name for the Source entity.
+	// SourceTypeTable is the table that holds the source_type relation/edge.
+	SourceTypeTable = "source_namespaces"
+	// SourceTypeInverseTable is the table name for the Source entity.
 	// It exists in this package in order to avoid circular dependency with the "source" package.
-	SourceInverseTable = "sources"
-	// SourceColumn is the table column denoting the source relation/edge.
-	SourceColumn = "source_id"
+	SourceTypeInverseTable = "sources"
+	// SourceTypeColumn is the table column denoting the source_type relation/edge.
+	SourceTypeColumn = "source_id"
 	// NamesTable is the table that holds the names relation/edge.
 	NamesTable = "source_names"
 	// NamesInverseTable is the table name for the SourceName entity.
@@ -73,10 +73,10 @@ func BySourceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSourceID, opts...).ToFunc()
 }
 
-// BySourceField orders the results by source field.
-func BySourceField(field string, opts ...sql.OrderTermOption) OrderOption {
+// BySourceTypeField orders the results by source_type field.
+func BySourceTypeField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSourceStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newSourceTypeStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -93,11 +93,11 @@ func ByNames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newNamesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newSourceStep() *sqlgraph.Step {
+func newSourceTypeStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SourceInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, SourceTable, SourceColumn),
+		sqlgraph.To(SourceTypeInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, SourceTypeTable, SourceTypeColumn),
 	)
 }
 func newNamesStep() *sqlgraph.Step {

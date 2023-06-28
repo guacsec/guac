@@ -121,9 +121,20 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "occurrence_package_uniq",
+				Name:    "occurrence_unique_package",
 				Unique:  true,
 				Columns: []*schema.Column{OccurrencesColumns[1], OccurrencesColumns[2], OccurrencesColumns[3], OccurrencesColumns[4], OccurrencesColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NOT NULL AND source_id IS NULL",
+				},
+			},
+			{
+				Name:    "occurrence_unique_source",
+				Unique:  true,
+				Columns: []*schema.Column{OccurrencesColumns[1], OccurrencesColumns[2], OccurrencesColumns[3], OccurrencesColumns[4], OccurrencesColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "package_id IS NULL AND source_id IS NOT NULL",
+				},
 			},
 		},
 	}
@@ -235,24 +246,13 @@ var (
 	// SourcesColumns holds the columns for the "sources" table.
 	SourcesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "type", Type: field.TypeString},
-		{Name: "namespace", Type: field.TypeString, Nullable: true},
-		{Name: "name", Type: field.TypeString, Nullable: true},
-		{Name: "tag", Type: field.TypeString, Nullable: true},
-		{Name: "commit", Type: field.TypeString, Nullable: true},
+		{Name: "type", Type: field.TypeString, Unique: true},
 	}
 	// SourcesTable holds the schema information for the "sources" table.
 	SourcesTable = &schema.Table{
 		Name:       "sources",
 		Columns:    SourcesColumns,
 		PrimaryKey: []*schema.Column{SourcesColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "source_type_namespace_name_tag_commit",
-				Unique:  true,
-				Columns: []*schema.Column{SourcesColumns[1], SourcesColumns[2], SourcesColumns[3], SourcesColumns[4], SourcesColumns[5]},
-			},
-		},
 	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
@@ -277,9 +277,12 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "sourcename_name_commit_tag",
+				Name:    "sourcename_namespace_id_name_commit_tag",
 				Unique:  true,
-				Columns: []*schema.Column{SourceNamesColumns[1], SourceNamesColumns[2], SourceNamesColumns[3]},
+				Columns: []*schema.Column{SourceNamesColumns[4], SourceNamesColumns[1], SourceNamesColumns[2], SourceNamesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "commit IS NOT NULL OR tag IS NOT NULL",
+				},
 			},
 		},
 	}
@@ -296,7 +299,7 @@ var (
 		PrimaryKey: []*schema.Column{SourceNamespacesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "source_namespaces_sources_source",
+				Symbol:     "source_namespaces_sources_source_type",
 				Columns:    []*schema.Column{SourceNamespacesColumns[2]},
 				RefColumns: []*schema.Column{SourcesColumns[0]},
 				OnDelete:   schema.NoAction,

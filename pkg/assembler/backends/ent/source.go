@@ -18,14 +18,6 @@ type Source struct {
 	ID int `json:"id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
-	// Namespace holds the value of the "namespace" field.
-	Namespace string `json:"namespace,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
-	// Tag holds the value of the "tag" field.
-	Tag string `json:"tag,omitempty"`
-	// Commit holds the value of the "commit" field.
-	Commit string `json:"commit,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SourceQuery when eager-loading is set.
 	Edges        SourceEdges `json:"edges"`
@@ -57,7 +49,7 @@ func (*Source) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case source.FieldID:
 			values[i] = new(sql.NullInt64)
-		case source.FieldType, source.FieldNamespace, source.FieldName, source.FieldTag, source.FieldCommit:
+		case source.FieldType:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -85,30 +77,6 @@ func (s *Source) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
 				s.Type = value.String
-			}
-		case source.FieldNamespace:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field namespace", values[i])
-			} else if value.Valid {
-				s.Namespace = value.String
-			}
-		case source.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				s.Name = value.String
-			}
-		case source.FieldTag:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field tag", values[i])
-			} else if value.Valid {
-				s.Tag = value.String
-			}
-		case source.FieldCommit:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field commit", values[i])
-			} else if value.Valid {
-				s.Commit = value.String
 			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
@@ -153,18 +121,6 @@ func (s *Source) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
 	builder.WriteString("type=")
 	builder.WriteString(s.Type)
-	builder.WriteString(", ")
-	builder.WriteString("namespace=")
-	builder.WriteString(s.Namespace)
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(s.Name)
-	builder.WriteString(", ")
-	builder.WriteString("tag=")
-	builder.WriteString(s.Tag)
-	builder.WriteString(", ")
-	builder.WriteString("commit=")
-	builder.WriteString(s.Commit)
 	builder.WriteByte(')')
 	return builder.String()
 }

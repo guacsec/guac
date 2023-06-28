@@ -43,7 +43,9 @@ func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInpu
 			optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
 			packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
 		).
-		Only(ctx)
+		// FIXME: (ivanvanderbyl) This should use .Only() but it is not working because
+		// the ingestion of versions is not hitting the unqiue constraint.
+		First(ctx)
 
 	// return client.PackageVersion.Query().
 	// 	Where(

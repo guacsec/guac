@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"reflect"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
@@ -342,7 +343,6 @@ func (s *Suite) TestOccurrence() {
 		},
 		{
 			Name:  "Query on Package",
-			Only:  true,
 			InPkg: []*model.PkgInputSpec{p1, p2},
 			InArt: []*model.ArtifactInputSpec{a1},
 			Calls: []call{
@@ -541,6 +541,14 @@ func (s *Suite) TestOccurrence() {
 		return strings.Compare(".ID", p[len(p)-1].String()) == 0
 	}, cmp.Ignore())
 
+	ignoreEmptySlices := cmp.FilterValues(func(x, y interface{}) bool {
+		xv, yv := reflect.ValueOf(x), reflect.ValueOf(y)
+		if xv.Kind() == reflect.Slice && yv.Kind() == reflect.Slice {
+			return xv.Len() == 0 && yv.Len() == 0
+		}
+		return false
+	}, cmp.Ignore())
+
 	ctx := s.Ctx
 
 	hasOnly := false
@@ -580,11 +588,10 @@ func (s *Suite) TestOccurrence() {
 
 			for _, o := range test.Calls {
 				_, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
-				if (err != nil) != test.ExpIngestErr {
-					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
-				}
-				if err != nil {
-					return
+				if test.ExpIngestErr {
+					s.Require().Error(err, "Expected ingest error")
+				} else {
+					s.Require().NoError(err, "Unexpected ingest error")
 				}
 			}
 			got, err := b.IsOccurrence(ctx, test.Query)
@@ -594,7 +601,7 @@ func (s *Suite) TestOccurrence() {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpOcc, got, ignoreID, ignoreEmptySlices); diff != "" {
 				s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
