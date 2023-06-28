@@ -165,8 +165,11 @@ var s2out = &model.Source{
 	}},
 }
 
-func (s *Suite) TestHappyPath() {
+func (s *Suite) TestOccurrenceHappyPath() {
 	be, err := GetBackend(s.Client)
+	s.Require().NoError(err)
+
+	_, err = be.IngestPackage(s.Ctx, *p1)
 	s.Require().NoError(err)
 
 	_, err = be.IngestArtifact(s.Ctx, a1)
