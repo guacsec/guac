@@ -69,19 +69,16 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 			break
 		}
 
-		nodes := map[string]model.NeighborsResponse{}
+		neighborsResponse, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{})
 
-		isDependencyNeighborResponses, err := model.Neighbors(ctx, gqlclient, now, []model.Edge{model.EdgePackageIsDependency})
 		if err != nil {
 			return nil, fmt.Errorf("failed getting package parent:%w", err)
 		}
 
-		nodes["isDep"] = *isDependencyNeighborResponses
-
-		for predicateType, response := range nodes {
-			switch predicateType {
-			case "isDep":
-				err := exploreIsDependency(response, ctx, gqlclient)
+		// case on predicates
+		for _, neighbor := range neighborsResponse.Neighbors {
+			if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
+				err := exploreIsDependency(*isDependency, ctx, gqlclient)
 
 				if err != nil {
 					return nil, err
@@ -97,54 +94,50 @@ func SearchDependenciesFromStartNode(ctx context.Context, gqlclient graphql.Clie
 
 }
 
-func exploreIsDependency(isDependencyNeighborResponses model.NeighborsResponse, ctx context.Context, gqlclient graphql.Client) error {
-	for _, neighbor := range isDependencyNeighborResponses.Neighbors {
-		if isDependency, ok := neighbor.(*model.NeighborsNeighborsIsDependency); ok {
-			dependentPkgFilter := &model.PkgSpec{
-				Type:      &isDependency.DependentPackage.Type,
-				Namespace: &isDependency.DependentPackage.Namespaces[0].Namespace,
-				Name:      &isDependency.DependentPackage.Namespaces[0].Names[0].Name,
+func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx context.Context, gqlclient graphql.Client) error {
+	dependentPkgFilter := &model.PkgSpec{
+		Type:      &isDependency.DependentPackage.Type,
+		Namespace: &isDependency.DependentPackage.Namespaces[0].Namespace,
+		Name:      &isDependency.DependentPackage.Namespaces[0].Names[0].Name,
+	}
+
+	depPkgResponse, err := model.Packages(ctx, gqlclient, dependentPkgFilter)
+	if err != nil {
+		return fmt.Errorf("error querying for dependent package: %w", err)
+	}
+
+	depPkgVersionsMap := map[string]string{}
+	var depPkgVersions []string
+	for _, depPkgVersion := range depPkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+		depPkgVersions = append(depPkgVersions, depPkgVersion.Version)
+		depPkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Id
+	}
+
+	matchingDepPkgVersions, err := depversion.WhichVersionMatches(depPkgVersions, isDependency.VersionRange)
+	if err != nil {
+		return fmt.Errorf("error determining dependent version matches: %w", err)
+	}
+
+	for matchingDepPkgVersion := range matchingDepPkgVersions {
+		matchingDepPkgVersionID := depPkgVersionsMap[matchingDepPkgVersion]
+		if err != nil {
+			return fmt.Errorf("error querying neighbor: %w", err)
+		}
+
+		path = append(path, isDependency.Id, matchingDepPkgVersionID,
+			depPkgResponse.Packages[0].Namespaces[0].Names[0].Id, depPkgResponse.Packages[0].Namespaces[0].Id,
+			depPkgResponse.Packages[0].Id)
+
+		dfsN, seen := nodeMap[matchingDepPkgVersionID]
+		if !seen {
+			dfsN = DfsNode{
+				Parent: now,
+				depth:  nowNode.depth + 1,
 			}
-
-			depPkgResponse, err := model.Packages(ctx, gqlclient, dependentPkgFilter)
-			if err != nil {
-				return fmt.Errorf("error querying for dependent package: %w", err)
-			}
-
-			depPkgVersionsMap := map[string]string{}
-			depPkgVersions := []string{}
-			for _, depPkgVersion := range depPkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
-				depPkgVersions = append(depPkgVersions, depPkgVersion.Version)
-				depPkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Id
-			}
-
-			matchingDepPkgVersions, err := depversion.WhichVersionMatches(depPkgVersions, isDependency.VersionRange)
-			if err != nil {
-				return fmt.Errorf("error determining dependent version matches: %w", err)
-			}
-
-			for matchingDepPkgVersion := range matchingDepPkgVersions {
-				matchingDepPkgVersionID := depPkgVersionsMap[matchingDepPkgVersion]
-				if err != nil {
-					return fmt.Errorf("error querying neighbor: %w", err)
-				}
-
-				path = append(path, isDependency.Id, matchingDepPkgVersionID,
-					depPkgResponse.Packages[0].Namespaces[0].Names[0].Id, depPkgResponse.Packages[0].Namespaces[0].Id,
-					depPkgResponse.Packages[0].Id)
-
-				dfsN, seen := nodeMap[matchingDepPkgVersionID]
-				if !seen {
-					dfsN = DfsNode{
-						Parent: now,
-						depth:  nowNode.depth + 1,
-					}
-					nodeMap[matchingDepPkgVersionID] = dfsN
-				}
-				if !dfsN.expanded {
-					queue = append(queue, matchingDepPkgVersionID)
-				}
-			}
+			nodeMap[matchingDepPkgVersionID] = dfsN
+		}
+		if !dfsN.expanded {
+			queue = append(queue, matchingDepPkgVersionID)
 		}
 	}
 	return nil
