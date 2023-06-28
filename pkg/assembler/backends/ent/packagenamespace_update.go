@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -41,8 +41,8 @@ func (pnu *PackageNamespaceUpdate) SetNamespace(s string) *PackageNamespaceUpdat
 	return pnu
 }
 
-// SetPackage sets the "package" edge to the PackageNode entity.
-func (pnu *PackageNamespaceUpdate) SetPackage(p *PackageNode) *PackageNamespaceUpdate {
+// SetPackage sets the "package" edge to the PackageType entity.
+func (pnu *PackageNamespaceUpdate) SetPackage(p *PackageType) *PackageNamespaceUpdate {
 	return pnu.SetPackageID(p.ID)
 }
 
@@ -66,7 +66,7 @@ func (pnu *PackageNamespaceUpdate) Mutation() *PackageNamespaceMutation {
 	return pnu.mutation
 }
 
-// ClearPackage clears the "package" edge to the PackageNode entity.
+// ClearPackage clears the "package" edge to the PackageType entity.
 func (pnu *PackageNamespaceUpdate) ClearPackage() *PackageNamespaceUpdate {
 	pnu.mutation.ClearPackage()
 	return pnu
@@ -151,7 +151,7 @@ func (pnu *PackageNamespaceUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{packagenamespace.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -164,7 +164,7 @@ func (pnu *PackageNamespaceUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{packagenamespace.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -249,8 +249,8 @@ func (pnuo *PackageNamespaceUpdateOne) SetNamespace(s string) *PackageNamespaceU
 	return pnuo
 }
 
-// SetPackage sets the "package" edge to the PackageNode entity.
-func (pnuo *PackageNamespaceUpdateOne) SetPackage(p *PackageNode) *PackageNamespaceUpdateOne {
+// SetPackage sets the "package" edge to the PackageType entity.
+func (pnuo *PackageNamespaceUpdateOne) SetPackage(p *PackageType) *PackageNamespaceUpdateOne {
 	return pnuo.SetPackageID(p.ID)
 }
 
@@ -274,7 +274,7 @@ func (pnuo *PackageNamespaceUpdateOne) Mutation() *PackageNamespaceMutation {
 	return pnuo.mutation
 }
 
-// ClearPackage clears the "package" edge to the PackageNode entity.
+// ClearPackage clears the "package" edge to the PackageType entity.
 func (pnuo *PackageNamespaceUpdateOne) ClearPackage() *PackageNamespaceUpdateOne {
 	pnuo.mutation.ClearPackage()
 	return pnuo
@@ -389,7 +389,7 @@ func (pnuo *PackageNamespaceUpdateOne) sqlSave(ctx context.Context) (_node *Pack
 			Columns: []string{packagenamespace.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -402,7 +402,7 @@ func (pnuo *PackageNamespaceUpdateOne) sqlSave(ctx context.Context) (_node *Pack
 			Columns: []string{packagenamespace.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

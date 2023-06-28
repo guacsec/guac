@@ -160,7 +160,7 @@ func HasPackage() predicate.PackageNamespace {
 }
 
 // HasPackageWith applies the HasEdge predicate on the "package" edge with a given conditions (other predicates).
-func HasPackageWith(preds ...predicate.PackageNode) predicate.PackageNamespace {
+func HasPackageWith(preds ...predicate.PackageType) predicate.PackageNamespace {
 	return predicate.PackageNamespace(func(s *sql.Selector) {
 		step := newPackageStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

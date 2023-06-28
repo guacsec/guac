@@ -18,7 +18,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -89,7 +89,7 @@ func checkColumn(table, column string) error {
 			occurrence.Table:       occurrence.ValidColumn,
 			packagename.Table:      packagename.ValidColumn,
 			packagenamespace.Table: packagenamespace.ValidColumn,
-			packagenode.Table:      packagenode.ValidColumn,
+			packagetype.Table:      packagetype.ValidColumn,
 			packageversion.Table:   packageversion.ValidColumn,
 			source.Table:           source.ValidColumn,
 			sourcename.Table:       sourcename.ValidColumn,

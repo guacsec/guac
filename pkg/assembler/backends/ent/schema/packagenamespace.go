@@ -24,7 +24,7 @@ func (PackageNamespace) Fields() []ent.Field {
 // Edges of the PackageNamespace.
 func (PackageNamespace) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("package", PackageNode.Type).Required().Field("package_id").Ref("namespaces").Unique(),
+		edge.From("package", PackageType.Type).Required().Field("package_id").Ref("namespaces").Unique(),
 		edge.To("names", PackageName.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

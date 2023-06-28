@@ -9,7 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 )
 
 // PackageNamespace is the model entity for the PackageNamespace schema.
@@ -30,7 +30,7 @@ type PackageNamespace struct {
 // PackageNamespaceEdges holds the relations/edges for other nodes in the graph.
 type PackageNamespaceEdges struct {
 	// Package holds the value of the package edge.
-	Package *PackageNode `json:"package,omitempty"`
+	Package *PackageType `json:"package,omitempty"`
 	// Names holds the value of the names edge.
 	Names []*PackageName `json:"names,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -40,11 +40,11 @@ type PackageNamespaceEdges struct {
 
 // PackageOrErr returns the Package value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PackageNamespaceEdges) PackageOrErr() (*PackageNode, error) {
+func (e PackageNamespaceEdges) PackageOrErr() (*PackageType, error) {
 	if e.loadedTypes[0] {
 		if e.Package == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packagenode.Label}
+			return nil, &NotFoundError{label: packagetype.Label}
 		}
 		return e.Package, nil
 	}
@@ -116,7 +116,7 @@ func (pn *PackageNamespace) Value(name string) (ent.Value, error) {
 }
 
 // QueryPackage queries the "package" edge of the PackageNamespace entity.
-func (pn *PackageNamespace) QueryPackage() *PackageNodeQuery {
+func (pn *PackageNamespace) QueryPackage() *PackageTypeQuery {
 	return NewPackageNamespaceClient(pn.config).QueryPackage(pn)
 }
 

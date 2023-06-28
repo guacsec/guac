@@ -24,9 +24,9 @@ const (
 	Table = "package_namespaces"
 	// PackageTable is the table that holds the package relation/edge.
 	PackageTable = "package_namespaces"
-	// PackageInverseTable is the table name for the PackageNode entity.
-	// It exists in this package in order to avoid circular dependency with the "packagenode" package.
-	PackageInverseTable = "package_nodes"
+	// PackageInverseTable is the table name for the PackageType entity.
+	// It exists in this package in order to avoid circular dependency with the "packagetype" package.
+	PackageInverseTable = "package_types"
 	// PackageColumn is the table column denoting the package relation/edge.
 	PackageColumn = "package_id"
 	// NamesTable is the table that holds the names relation/edge.

@@ -7,20 +7,20 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// PackageNode holds the schema definition for the PackageNode entity.
-type PackageNode struct {
+// PackageType holds the schema definition for the PackageType entity.
+type PackageType struct {
 	ent.Schema
 }
 
-// Fields of the PackageNode.
-func (PackageNode) Fields() []ent.Field {
+// Fields of the PackageType.
+func (PackageType) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("type").NotEmpty().Unique().Comment("This node matches a pkg:<type> partial pURL"),
 	}
 }
 
-// Edges of the PackageNode.
-func (PackageNode) Edges() []ent.Edge {
+// Edges of the PackageType.
+func (PackageType) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("namespaces", PackageNamespace.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}

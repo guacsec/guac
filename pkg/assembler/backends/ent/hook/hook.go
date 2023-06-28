@@ -81,16 +81,16 @@ func (f PackageNamespaceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageNamespaceMutation", m)
 }
 
-// The PackageNodeFunc type is an adapter to allow the use of ordinary
-// function as PackageNode mutator.
-type PackageNodeFunc func(context.Context, *ent.PackageNodeMutation) (ent.Value, error)
+// The PackageTypeFunc type is an adapter to allow the use of ordinary
+// function as PackageType mutator.
+type PackageTypeFunc func(context.Context, *ent.PackageTypeMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PackageNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.PackageNodeMutation); ok {
+func (f PackageTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PackageTypeMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageNodeMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageTypeMutation", m)
 }
 
 // The PackageVersionFunc type is an adapter to allow the use of ordinary

@@ -20,7 +20,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -44,8 +44,8 @@ type Client struct {
 	PackageName *PackageNameClient
 	// PackageNamespace is the client for interacting with the PackageNamespace builders.
 	PackageNamespace *PackageNamespaceClient
-	// PackageNode is the client for interacting with the PackageNode builders.
-	PackageNode *PackageNodeClient
+	// PackageType is the client for interacting with the PackageType builders.
+	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
 	// Source is the client for interacting with the Source builders.
@@ -73,7 +73,7 @@ func (c *Client) init() {
 	c.Occurrence = NewOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
-	c.PackageNode = NewPackageNodeClient(c.config)
+	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
 	c.Source = NewSourceClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
@@ -166,7 +166,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
-		PackageNode:      NewPackageNodeClient(cfg),
+		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
 		Source:           NewSourceClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
@@ -196,7 +196,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Occurrence:       NewOccurrenceClient(cfg),
 		PackageName:      NewPackageNameClient(cfg),
 		PackageNamespace: NewPackageNamespaceClient(cfg),
-		PackageNode:      NewPackageNodeClient(cfg),
+		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
 		Source:           NewSourceClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
@@ -231,7 +231,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.Source, c.SourceName,
 		c.SourceNamespace,
 	} {
 		n.Use(hooks...)
@@ -243,7 +243,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageNode, c.PackageVersion, c.Source, c.SourceName,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.Source, c.SourceName,
 		c.SourceNamespace,
 	} {
 		n.Intercept(interceptors...)
@@ -265,8 +265,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PackageName.mutate(ctx, m)
 	case *PackageNamespaceMutation:
 		return c.PackageNamespace.mutate(ctx, m)
-	case *PackageNodeMutation:
-		return c.PackageNode.mutate(ctx, m)
+	case *PackageTypeMutation:
+		return c.PackageType.mutate(ctx, m)
 	case *PackageVersionMutation:
 		return c.PackageVersion.mutate(ctx, m)
 	case *SourceMutation:
@@ -1092,13 +1092,13 @@ func (c *PackageNamespaceClient) GetX(ctx context.Context, id int) *PackageNames
 }
 
 // QueryPackage queries the package edge of a PackageNamespace.
-func (c *PackageNamespaceClient) QueryPackage(pn *PackageNamespace) *PackageNodeQuery {
-	query := (&PackageNodeClient{config: c.config}).Query()
+func (c *PackageNamespaceClient) QueryPackage(pn *PackageNamespace) *PackageTypeQuery {
+	query := (&PackageTypeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pn.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, id),
-			sqlgraph.To(packagenode.Table, packagenode.FieldID),
+			sqlgraph.To(packagetype.Table, packagetype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, packagenamespace.PackageTable, packagenamespace.PackageColumn),
 		)
 		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
@@ -1148,92 +1148,92 @@ func (c *PackageNamespaceClient) mutate(ctx context.Context, m *PackageNamespace
 	}
 }
 
-// PackageNodeClient is a client for the PackageNode schema.
-type PackageNodeClient struct {
+// PackageTypeClient is a client for the PackageType schema.
+type PackageTypeClient struct {
 	config
 }
 
-// NewPackageNodeClient returns a client for the PackageNode from the given config.
-func NewPackageNodeClient(c config) *PackageNodeClient {
-	return &PackageNodeClient{config: c}
+// NewPackageTypeClient returns a client for the PackageType from the given config.
+func NewPackageTypeClient(c config) *PackageTypeClient {
+	return &PackageTypeClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `packagenode.Hooks(f(g(h())))`.
-func (c *PackageNodeClient) Use(hooks ...Hook) {
-	c.hooks.PackageNode = append(c.hooks.PackageNode, hooks...)
+// A call to `Use(f, g, h)` equals to `packagetype.Hooks(f(g(h())))`.
+func (c *PackageTypeClient) Use(hooks ...Hook) {
+	c.hooks.PackageType = append(c.hooks.PackageType, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `packagenode.Intercept(f(g(h())))`.
-func (c *PackageNodeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PackageNode = append(c.inters.PackageNode, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `packagetype.Intercept(f(g(h())))`.
+func (c *PackageTypeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PackageType = append(c.inters.PackageType, interceptors...)
 }
 
-// Create returns a builder for creating a PackageNode entity.
-func (c *PackageNodeClient) Create() *PackageNodeCreate {
-	mutation := newPackageNodeMutation(c.config, OpCreate)
-	return &PackageNodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a PackageType entity.
+func (c *PackageTypeClient) Create() *PackageTypeCreate {
+	mutation := newPackageTypeMutation(c.config, OpCreate)
+	return &PackageTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of PackageNode entities.
-func (c *PackageNodeClient) CreateBulk(builders ...*PackageNodeCreate) *PackageNodeCreateBulk {
-	return &PackageNodeCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of PackageType entities.
+func (c *PackageTypeClient) CreateBulk(builders ...*PackageTypeCreate) *PackageTypeCreateBulk {
+	return &PackageTypeCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for PackageNode.
-func (c *PackageNodeClient) Update() *PackageNodeUpdate {
-	mutation := newPackageNodeMutation(c.config, OpUpdate)
-	return &PackageNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for PackageType.
+func (c *PackageTypeClient) Update() *PackageTypeUpdate {
+	mutation := newPackageTypeMutation(c.config, OpUpdate)
+	return &PackageTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PackageNodeClient) UpdateOne(pn *PackageNode) *PackageNodeUpdateOne {
-	mutation := newPackageNodeMutation(c.config, OpUpdateOne, withPackageNode(pn))
-	return &PackageNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PackageTypeClient) UpdateOne(pt *PackageType) *PackageTypeUpdateOne {
+	mutation := newPackageTypeMutation(c.config, OpUpdateOne, withPackageType(pt))
+	return &PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PackageNodeClient) UpdateOneID(id int) *PackageNodeUpdateOne {
-	mutation := newPackageNodeMutation(c.config, OpUpdateOne, withPackageNodeID(id))
-	return &PackageNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PackageTypeClient) UpdateOneID(id int) *PackageTypeUpdateOne {
+	mutation := newPackageTypeMutation(c.config, OpUpdateOne, withPackageTypeID(id))
+	return &PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for PackageNode.
-func (c *PackageNodeClient) Delete() *PackageNodeDelete {
-	mutation := newPackageNodeMutation(c.config, OpDelete)
-	return &PackageNodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for PackageType.
+func (c *PackageTypeClient) Delete() *PackageTypeDelete {
+	mutation := newPackageTypeMutation(c.config, OpDelete)
+	return &PackageTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *PackageNodeClient) DeleteOne(pn *PackageNode) *PackageNodeDeleteOne {
-	return c.DeleteOneID(pn.ID)
+func (c *PackageTypeClient) DeleteOne(pt *PackageType) *PackageTypeDeleteOne {
+	return c.DeleteOneID(pt.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PackageNodeClient) DeleteOneID(id int) *PackageNodeDeleteOne {
-	builder := c.Delete().Where(packagenode.ID(id))
+func (c *PackageTypeClient) DeleteOneID(id int) *PackageTypeDeleteOne {
+	builder := c.Delete().Where(packagetype.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &PackageNodeDeleteOne{builder}
+	return &PackageTypeDeleteOne{builder}
 }
 
-// Query returns a query builder for PackageNode.
-func (c *PackageNodeClient) Query() *PackageNodeQuery {
-	return &PackageNodeQuery{
+// Query returns a query builder for PackageType.
+func (c *PackageTypeClient) Query() *PackageTypeQuery {
+	return &PackageTypeQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypePackageNode},
+		ctx:    &QueryContext{Type: TypePackageType},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a PackageNode entity by its id.
-func (c *PackageNodeClient) Get(ctx context.Context, id int) (*PackageNode, error) {
-	return c.Query().Where(packagenode.ID(id)).Only(ctx)
+// Get returns a PackageType entity by its id.
+func (c *PackageTypeClient) Get(ctx context.Context, id int) (*PackageType, error) {
+	return c.Query().Where(packagetype.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PackageNodeClient) GetX(ctx context.Context, id int) *PackageNode {
+func (c *PackageTypeClient) GetX(ctx context.Context, id int) *PackageType {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1241,44 +1241,44 @@ func (c *PackageNodeClient) GetX(ctx context.Context, id int) *PackageNode {
 	return obj
 }
 
-// QueryNamespaces queries the namespaces edge of a PackageNode.
-func (c *PackageNodeClient) QueryNamespaces(pn *PackageNode) *PackageNamespaceQuery {
+// QueryNamespaces queries the namespaces edge of a PackageType.
+func (c *PackageTypeClient) QueryNamespaces(pt *PackageType) *PackageNamespaceQuery {
 	query := (&PackageNamespaceClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
+		id := pt.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(packagenode.Table, packagenode.FieldID, id),
+			sqlgraph.From(packagetype.Table, packagetype.FieldID, id),
 			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, packagenode.NamespacesTable, packagenode.NamespacesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, packagetype.NamespacesTable, packagetype.NamespacesColumn),
 		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *PackageNodeClient) Hooks() []Hook {
-	return c.hooks.PackageNode
+func (c *PackageTypeClient) Hooks() []Hook {
+	return c.hooks.PackageType
 }
 
 // Interceptors returns the client interceptors.
-func (c *PackageNodeClient) Interceptors() []Interceptor {
-	return c.inters.PackageNode
+func (c *PackageTypeClient) Interceptors() []Interceptor {
+	return c.inters.PackageType
 }
 
-func (c *PackageNodeClient) mutate(ctx context.Context, m *PackageNodeMutation) (Value, error) {
+func (c *PackageTypeClient) mutate(ctx context.Context, m *PackageTypeMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&PackageNodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PackageTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&PackageNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PackageTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&PackageNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&PackageNodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&PackageTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown PackageNode mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown PackageType mutation op: %q", m.Op())
 	}
 }
 
@@ -1870,11 +1870,11 @@ func (c *SourceNamespaceClient) mutate(ctx context.Context, m *SourceNamespaceMu
 type (
 	hooks struct {
 		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageNode, PackageVersion, Source, SourceName, SourceNamespace []ent.Hook
+		PackageType, PackageVersion, Source, SourceName, SourceNamespace []ent.Hook
 	}
 	inters struct {
 		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageNode, PackageVersion, Source, SourceName,
+		PackageType, PackageVersion, Source, SourceName,
 		SourceNamespace []ent.Interceptor
 	}
 )

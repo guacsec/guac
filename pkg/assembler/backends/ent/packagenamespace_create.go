@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 )
 
 // PackageNamespaceCreate is the builder for creating a PackageNamespace entity.
@@ -35,8 +35,8 @@ func (pnc *PackageNamespaceCreate) SetNamespace(s string) *PackageNamespaceCreat
 	return pnc
 }
 
-// SetPackage sets the "package" edge to the PackageNode entity.
-func (pnc *PackageNamespaceCreate) SetPackage(p *PackageNode) *PackageNamespaceCreate {
+// SetPackage sets the "package" edge to the PackageType entity.
+func (pnc *PackageNamespaceCreate) SetPackage(p *PackageType) *PackageNamespaceCreate {
 	return pnc.SetPackageID(p.ID)
 }
 
@@ -137,7 +137,7 @@ func (pnc *PackageNamespaceCreate) createSpec() (*PackageNamespace, *sqlgraph.Cr
 			Columns: []string{packagenamespace.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenode.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

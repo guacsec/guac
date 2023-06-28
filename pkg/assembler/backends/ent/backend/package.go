@@ -11,7 +11,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -19,7 +19,7 @@ import (
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
-	query := b.client.PackageNode.Query().Order(ent.Asc(packagenode.FieldType))
+	query := b.client.PackageType.Query().Order(ent.Asc(packagetype.FieldType))
 
 	paths := getPreloads(ctx)
 
@@ -27,7 +27,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query.Where(optionalPredicate(pkgSpec.Type, packagenode.TypeEQ))
+	query.Where(optionalPredicate(pkgSpec.Type, packagetype.TypeEQ))
 
 	if PathContains(paths, "namespaces") {
 		query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
@@ -106,7 +106,7 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 	// 	Only(ctx)
 
 	// TODO: Figure out if we need to preload the edges from the graphql query
-	// record, err := b.client.PackageNode.Query().Where(packagenode.ID(*pvID)).
+	// record, err := b.client.PackageType.Query().Where(packagetype.ID(*pvID)).
 	// 	WithNamespaces(func(q *PackageNamespaceQuery) {
 	// 		q.Order(Asc(packagenamespace.FieldNamespace))
 	// 		q.WithNames(func(q *PackageNameQuery) {
@@ -124,8 +124,8 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Client, pkg model.PkgInputSpec) (*ent.PackageVersion, error) {
-	pkgID, err := client.PackageNode.Create().SetType(pkg.Type).
-		OnConflict(sql.ConflictColumns(packagenode.FieldType)).UpdateNewValues().ID(ctx)
+	pkgID, err := client.PackageType.Create().SetType(pkg.Type).
+		OnConflict(sql.ConflictColumns(packagetype.FieldType)).UpdateNewValues().ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert package node")
 	}
@@ -228,7 +228,7 @@ func pkgVersionPredicates(spec *model.PkgSpec) []predicate.PackageVersion {
 			packagename.HasNamespaceWith(
 				optionalPredicate(spec.Namespace, packagenamespace.Namespace),
 				packagenamespace.HasPackageWith(
-					optionalPredicate(spec.Type, packagenode.Type),
+					optionalPredicate(spec.Type, packagetype.Type),
 				),
 			),
 		),
@@ -247,7 +247,7 @@ func pkgNamePredicates(spec *model.PkgNameSpec) []predicate.PackageName {
 		packagename.HasNamespaceWith(
 			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
 			packagenamespace.HasPackageWith(
-				optionalPredicate(spec.Type, packagenode.Type),
+				optionalPredicate(spec.Type, packagetype.Type),
 			),
 		),
 	}

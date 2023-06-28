@@ -178,9 +178,9 @@ var (
 		PrimaryKey: []*schema.Column{PackageNamespacesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "package_namespaces_package_nodes_namespaces",
+				Symbol:     "package_namespaces_package_types_namespaces",
 				Columns:    []*schema.Column{PackageNamespacesColumns[2]},
-				RefColumns: []*schema.Column{PackageNodesColumns[0]},
+				RefColumns: []*schema.Column{PackageTypesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -192,16 +192,16 @@ var (
 			},
 		},
 	}
-	// PackageNodesColumns holds the columns for the "package_nodes" table.
-	PackageNodesColumns = []*schema.Column{
+	// PackageTypesColumns holds the columns for the "package_types" table.
+	PackageTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "type", Type: field.TypeString, Unique: true},
 	}
-	// PackageNodesTable holds the schema information for the "package_nodes" table.
-	PackageNodesTable = &schema.Table{
-		Name:       "package_nodes",
-		Columns:    PackageNodesColumns,
-		PrimaryKey: []*schema.Column{PackageNodesColumns[0]},
+	// PackageTypesTable holds the schema information for the "package_types" table.
+	PackageTypesTable = &schema.Table{
+		Name:       "package_types",
+		Columns:    PackageTypesColumns,
+		PrimaryKey: []*schema.Column{PackageTypesColumns[0]},
 	}
 	// PackageVersionsColumns holds the columns for the "package_versions" table.
 	PackageVersionsColumns = []*schema.Column{
@@ -321,7 +321,7 @@ var (
 		OccurrencesTable,
 		PackageNamesTable,
 		PackageNamespacesTable,
-		PackageNodesTable,
+		PackageTypesTable,
 		PackageVersionsTable,
 		SourcesTable,
 		SourceNamesTable,
@@ -336,7 +336,7 @@ func init() {
 	OccurrencesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	OccurrencesTable.ForeignKeys[2].RefTable = SourceNamesTable
 	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
-	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageNodesTable
+	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourcesTable

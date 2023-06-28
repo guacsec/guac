@@ -8,24 +8,24 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 )
 
-// PackageNode is the model entity for the PackageNode schema.
-type PackageNode struct {
+// PackageType is the model entity for the PackageType schema.
+type PackageType struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// This node matches a pkg:<type> partial pURL
 	Type string `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the PackageNodeQuery when eager-loading is set.
-	Edges        PackageNodeEdges `json:"edges"`
+	// The values are being populated by the PackageTypeQuery when eager-loading is set.
+	Edges        PackageTypeEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// PackageNodeEdges holds the relations/edges for other nodes in the graph.
-type PackageNodeEdges struct {
+// PackageTypeEdges holds the relations/edges for other nodes in the graph.
+type PackageTypeEdges struct {
 	// Namespaces holds the value of the namespaces edge.
 	Namespaces []*PackageNamespace `json:"namespaces,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -35,7 +35,7 @@ type PackageNodeEdges struct {
 
 // NamespacesOrErr returns the Namespaces value or an error if the edge
 // was not loaded in eager-loading.
-func (e PackageNodeEdges) NamespacesOrErr() ([]*PackageNamespace, error) {
+func (e PackageTypeEdges) NamespacesOrErr() ([]*PackageNamespace, error) {
 	if e.loadedTypes[0] {
 		return e.Namespaces, nil
 	}
@@ -43,13 +43,13 @@ func (e PackageNodeEdges) NamespacesOrErr() ([]*PackageNamespace, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*PackageNode) scanValues(columns []string) ([]any, error) {
+func (*PackageType) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case packagenode.FieldID:
+		case packagetype.FieldID:
 			values[i] = new(sql.NullInt64)
-		case packagenode.FieldType:
+		case packagetype.FieldType:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -59,71 +59,71 @@ func (*PackageNode) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the PackageNode fields.
-func (pn *PackageNode) assignValues(columns []string, values []any) error {
+// to the PackageType fields.
+func (pt *PackageType) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case packagenode.FieldID:
+		case packagetype.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			pn.ID = int(value.Int64)
-		case packagenode.FieldType:
+			pt.ID = int(value.Int64)
+		case packagetype.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				pn.Type = value.String
+				pt.Type = value.String
 			}
 		default:
-			pn.selectValues.Set(columns[i], values[i])
+			pt.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the PackageNode.
+// Value returns the ent.Value that was dynamically selected and assigned to the PackageType.
 // This includes values selected through modifiers, order, etc.
-func (pn *PackageNode) Value(name string) (ent.Value, error) {
-	return pn.selectValues.Get(name)
+func (pt *PackageType) Value(name string) (ent.Value, error) {
+	return pt.selectValues.Get(name)
 }
 
-// QueryNamespaces queries the "namespaces" edge of the PackageNode entity.
-func (pn *PackageNode) QueryNamespaces() *PackageNamespaceQuery {
-	return NewPackageNodeClient(pn.config).QueryNamespaces(pn)
+// QueryNamespaces queries the "namespaces" edge of the PackageType entity.
+func (pt *PackageType) QueryNamespaces() *PackageNamespaceQuery {
+	return NewPackageTypeClient(pt.config).QueryNamespaces(pt)
 }
 
-// Update returns a builder for updating this PackageNode.
-// Note that you need to call PackageNode.Unwrap() before calling this method if this PackageNode
+// Update returns a builder for updating this PackageType.
+// Note that you need to call PackageType.Unwrap() before calling this method if this PackageType
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pn *PackageNode) Update() *PackageNodeUpdateOne {
-	return NewPackageNodeClient(pn.config).UpdateOne(pn)
+func (pt *PackageType) Update() *PackageTypeUpdateOne {
+	return NewPackageTypeClient(pt.config).UpdateOne(pt)
 }
 
-// Unwrap unwraps the PackageNode entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the PackageType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pn *PackageNode) Unwrap() *PackageNode {
-	_tx, ok := pn.config.driver.(*txDriver)
+func (pt *PackageType) Unwrap() *PackageType {
+	_tx, ok := pt.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: PackageNode is not a transactional entity")
+		panic("ent: PackageType is not a transactional entity")
 	}
-	pn.config.driver = _tx.drv
-	return pn
+	pt.config.driver = _tx.drv
+	return pt
 }
 
 // String implements the fmt.Stringer.
-func (pn *PackageNode) String() string {
+func (pt *PackageType) String() string {
 	var builder strings.Builder
-	builder.WriteString("PackageNode(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", pn.ID))
+	builder.WriteString("PackageType(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", pt.ID))
 	builder.WriteString("type=")
-	builder.WriteString(pn.Type)
+	builder.WriteString(pt.Type)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// PackageNodes is a parsable slice of PackageNode.
-type PackageNodes []*PackageNode
+// PackageTypes is a parsable slice of PackageType.
+type PackageTypes []*PackageType

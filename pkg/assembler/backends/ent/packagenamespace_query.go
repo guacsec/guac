@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -24,7 +24,7 @@ type PackageNamespaceQuery struct {
 	order       []packagenamespace.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.PackageNamespace
-	withPackage *PackageNodeQuery
+	withPackage *PackageTypeQuery
 	withNames   *PackageNameQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -63,8 +63,8 @@ func (pnq *PackageNamespaceQuery) Order(o ...packagenamespace.OrderOption) *Pack
 }
 
 // QueryPackage chains the current query on the "package" edge.
-func (pnq *PackageNamespaceQuery) QueryPackage() *PackageNodeQuery {
-	query := (&PackageNodeClient{config: pnq.config}).Query()
+func (pnq *PackageNamespaceQuery) QueryPackage() *PackageTypeQuery {
+	query := (&PackageTypeClient{config: pnq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pnq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -75,7 +75,7 @@ func (pnq *PackageNamespaceQuery) QueryPackage() *PackageNodeQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, selector),
-			sqlgraph.To(packagenode.Table, packagenode.FieldID),
+			sqlgraph.To(packagetype.Table, packagetype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, packagenamespace.PackageTable, packagenamespace.PackageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
@@ -308,8 +308,8 @@ func (pnq *PackageNamespaceQuery) Clone() *PackageNamespaceQuery {
 
 // WithPackage tells the query-builder to eager-load the nodes that are connected to
 // the "package" edge. The optional arguments are used to configure the query builder of the edge.
-func (pnq *PackageNamespaceQuery) WithPackage(opts ...func(*PackageNodeQuery)) *PackageNamespaceQuery {
-	query := (&PackageNodeClient{config: pnq.config}).Query()
+func (pnq *PackageNamespaceQuery) WithPackage(opts ...func(*PackageTypeQuery)) *PackageNamespaceQuery {
+	query := (&PackageTypeClient{config: pnq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -431,7 +431,7 @@ func (pnq *PackageNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	}
 	if query := pnq.withPackage; query != nil {
 		if err := pnq.loadPackage(ctx, query, nodes, nil,
-			func(n *PackageNamespace, e *PackageNode) { n.Edges.Package = e }); err != nil {
+			func(n *PackageNamespace, e *PackageType) { n.Edges.Package = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -445,7 +445,7 @@ func (pnq *PackageNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	return nodes, nil
 }
 
-func (pnq *PackageNamespaceQuery) loadPackage(ctx context.Context, query *PackageNodeQuery, nodes []*PackageNamespace, init func(*PackageNamespace), assign func(*PackageNamespace, *PackageNode)) error {
+func (pnq *PackageNamespaceQuery) loadPackage(ctx context.Context, query *PackageTypeQuery, nodes []*PackageNamespace, init func(*PackageNamespace), assign func(*PackageNamespace, *PackageType)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*PackageNamespace)
 	for i := range nodes {
@@ -458,7 +458,7 @@ func (pnq *PackageNamespaceQuery) loadPackage(ctx context.Context, query *Packag
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(packagenode.IDIn(ids...))
+	query.Where(packagetype.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

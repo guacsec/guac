@@ -24,8 +24,8 @@ type Tx struct {
 	PackageName *PackageNameClient
 	// PackageNamespace is the client for interacting with the PackageNamespace builders.
 	PackageNamespace *PackageNamespaceClient
-	// PackageNode is the client for interacting with the PackageNode builders.
-	PackageNode *PackageNodeClient
+	// PackageType is the client for interacting with the PackageType builders.
+	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
 	// Source is the client for interacting with the Source builders.
@@ -171,7 +171,7 @@ func (tx *Tx) init() {
 	tx.Occurrence = NewOccurrenceClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)
 	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
-	tx.PackageNode = NewPackageNodeClient(tx.config)
+	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
 	tx.Source = NewSourceClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)

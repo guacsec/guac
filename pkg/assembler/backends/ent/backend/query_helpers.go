@@ -7,7 +7,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenode"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -25,16 +25,16 @@ import (
 // and should allow using the db index.
 
 func getPkgName(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageName, error) {
-	return client.PackageNode.Query().
-		Where(packagenode.Type(pkgin.Type)).
+	return client.PackageType.Query().
+		Where(packagetype.Type(pkgin.Type)).
 		QueryNamespaces().Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
 		QueryNames().Where(packagename.Name(pkgin.Name)).
 		Only(ctx)
 }
 
 func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInputSpec) (*ent.PackageVersion, error) {
-	return client.PackageNode.Query().
-		Where(packagenode.Type(pkgin.Type)).
+	return client.PackageType.Query().
+		Where(packagetype.Type(pkgin.Type)).
 		QueryNamespaces().Where(packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, ""))).
 		QueryNames().Where(packagename.Name(pkgin.Name)).
 		QueryVersions().
@@ -45,7 +45,7 @@ func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInpu
 		).
 		// FIXME: (ivanvanderbyl) This should use .Only() but it is not working because
 		// the ingestion of versions is not hitting the unqiue constraint.
-		First(ctx)
+		Only(ctx)
 
 	// return client.PackageVersion.Query().
 	// 	Where(
@@ -57,7 +57,7 @@ func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInpu
 	// 			packagename.HasNamespaceWith(
 	// 				packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, "")),
 	// 				packagenamespace.HasPackageWith(
-	// 					packagenode.Type(pkgin.Type),
+	// 					packagetype.Type(pkgin.Type),
 	// 				),
 	// 			),
 	// 		),
@@ -75,7 +75,7 @@ func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactI
 // rebuild the full top level tree object with just the nested objects that are
 // part of the path to that node
 
-func pkgTreeFromVersion(ctx context.Context, pv *ent.PackageVersion) (*ent.PackageNode, error) {
+func pkgTreeFromVersion(ctx context.Context, pv *ent.PackageVersion) (*ent.PackageType, error) {
 	// pv.QueryName().QueryNamespace().QueryPackage().Query
 
 	// eagerLoadedVersion, err := pv.
@@ -121,7 +121,7 @@ func pkgTreeFromVersion(ctx context.Context, pv *ent.PackageVersion) (*ent.Packa
 	return q.Only(ctx)
 }
 
-func buildPackageTreeQuery(q *ent.PackageNodeQuery, ns, packageName string, pv *ent.PackageVersion) {
+func buildPackageTreeQuery(q *ent.PackageTypeQuery, ns, packageName string, pv *ent.PackageVersion) {
 	q.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 		q.Where(packagenamespace.Namespace(ns))
 		q.WithNames(func(q *ent.PackageNameQuery) {
@@ -133,7 +133,7 @@ func buildPackageTreeQuery(q *ent.PackageNodeQuery, ns, packageName string, pv *
 	})
 }
 
-func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageNode, error) {
+func pkgTreeFromName(ctx context.Context, pn *ent.PackageName) (*ent.PackageType, error) {
 	ns, err := pn.QueryNamespace().Only(ctx)
 	if err != nil {
 		return nil, err
