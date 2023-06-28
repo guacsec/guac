@@ -220,7 +220,8 @@ func pkgVersionPredicates(spec *model.PkgSpec) []predicate.PackageVersion {
 	}
 	rv := []predicate.PackageVersion{
 		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.Version, packageversion.Version),
+		packageversion.VersionEQ(valueOrDefault(spec.Version, "")),
+		// optionalPredicate(spec.Version, packageversion.Version),
 		optionalPredicate(spec.Subpath, packageversion.Subpath),
 		packageversion.QualifiersMatchSpec(spec.Qualifiers),
 		packageversion.HasNameWith(
