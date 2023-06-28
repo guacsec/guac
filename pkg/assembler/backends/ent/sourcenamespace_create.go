@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
 
 // SourceNamespaceCreate is the builder for creating a SourceNamespace entity.
@@ -35,14 +35,14 @@ func (snc *SourceNamespaceCreate) SetSourceID(i int) *SourceNamespaceCreate {
 	return snc
 }
 
-// SetSourceTypeID sets the "source_type" edge to the Source entity by ID.
+// SetSourceTypeID sets the "source_type" edge to the SourceType entity by ID.
 func (snc *SourceNamespaceCreate) SetSourceTypeID(id int) *SourceNamespaceCreate {
 	snc.mutation.SetSourceTypeID(id)
 	return snc
 }
 
-// SetSourceType sets the "source_type" edge to the Source entity.
-func (snc *SourceNamespaceCreate) SetSourceType(s *Source) *SourceNamespaceCreate {
+// SetSourceType sets the "source_type" edge to the SourceType entity.
+func (snc *SourceNamespaceCreate) SetSourceType(s *SourceType) *SourceNamespaceCreate {
 	return snc.SetSourceTypeID(s.ID)
 }
 
@@ -143,7 +143,7 @@ func (snc *SourceNamespaceCreate) createSpec() (*SourceNamespace, *sqlgraph.Crea
 			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

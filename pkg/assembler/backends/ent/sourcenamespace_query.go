@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
 
 // SourceNamespaceQuery is the builder for querying SourceNamespace entities.
@@ -24,7 +24,7 @@ type SourceNamespaceQuery struct {
 	order          []sourcenamespace.OrderOption
 	inters         []Interceptor
 	predicates     []predicate.SourceNamespace
-	withSourceType *SourceQuery
+	withSourceType *SourceTypeQuery
 	withNames      *SourceNameQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -63,8 +63,8 @@ func (snq *SourceNamespaceQuery) Order(o ...sourcenamespace.OrderOption) *Source
 }
 
 // QuerySourceType chains the current query on the "source_type" edge.
-func (snq *SourceNamespaceQuery) QuerySourceType() *SourceQuery {
-	query := (&SourceClient{config: snq.config}).Query()
+func (snq *SourceNamespaceQuery) QuerySourceType() *SourceTypeQuery {
+	query := (&SourceTypeClient{config: snq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := snq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -75,7 +75,7 @@ func (snq *SourceNamespaceQuery) QuerySourceType() *SourceQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, selector),
-			sqlgraph.To(source.Table, source.FieldID),
+			sqlgraph.To(sourcetype.Table, sourcetype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTypeTable, sourcenamespace.SourceTypeColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
@@ -308,8 +308,8 @@ func (snq *SourceNamespaceQuery) Clone() *SourceNamespaceQuery {
 
 // WithSourceType tells the query-builder to eager-load the nodes that are connected to
 // the "source_type" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNamespaceQuery) WithSourceType(opts ...func(*SourceQuery)) *SourceNamespaceQuery {
-	query := (&SourceClient{config: snq.config}).Query()
+func (snq *SourceNamespaceQuery) WithSourceType(opts ...func(*SourceTypeQuery)) *SourceNamespaceQuery {
+	query := (&SourceTypeClient{config: snq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -431,7 +431,7 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	}
 	if query := snq.withSourceType; query != nil {
 		if err := snq.loadSourceType(ctx, query, nodes, nil,
-			func(n *SourceNamespace, e *Source) { n.Edges.SourceType = e }); err != nil {
+			func(n *SourceNamespace, e *SourceType) { n.Edges.SourceType = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -445,7 +445,7 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 	return nodes, nil
 }
 
-func (snq *SourceNamespaceQuery) loadSourceType(ctx context.Context, query *SourceQuery, nodes []*SourceNamespace, init func(*SourceNamespace), assign func(*SourceNamespace, *Source)) error {
+func (snq *SourceNamespaceQuery) loadSourceType(ctx context.Context, query *SourceTypeQuery, nodes []*SourceNamespace, init func(*SourceNamespace), assign func(*SourceNamespace, *SourceType)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*SourceNamespace)
 	for i := range nodes {
@@ -458,7 +458,7 @@ func (snq *SourceNamespaceQuery) loadSourceType(ctx context.Context, query *Sour
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(source.IDIn(ids...))
+	query.Where(sourcetype.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

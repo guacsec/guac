@@ -24,9 +24,9 @@ const (
 	Table = "source_namespaces"
 	// SourceTypeTable is the table that holds the source_type relation/edge.
 	SourceTypeTable = "source_namespaces"
-	// SourceTypeInverseTable is the table name for the Source entity.
-	// It exists in this package in order to avoid circular dependency with the "source" package.
-	SourceTypeInverseTable = "sources"
+	// SourceTypeInverseTable is the table name for the SourceType entity.
+	// It exists in this package in order to avoid circular dependency with the "sourcetype" package.
+	SourceTypeInverseTable = "source_types"
 	// SourceTypeColumn is the table column denoting the source_type relation/edge.
 	SourceTypeColumn = "source_id"
 	// NamesTable is the table that holds the names relation/edge.

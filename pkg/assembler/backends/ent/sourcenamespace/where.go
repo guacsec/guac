@@ -160,7 +160,7 @@ func HasSourceType() predicate.SourceNamespace {
 }
 
 // HasSourceTypeWith applies the HasEdge predicate on the "source_type" edge with a given conditions (other predicates).
-func HasSourceTypeWith(preds ...predicate.Source) predicate.SourceNamespace {
+func HasSourceTypeWith(preds ...predicate.SourceType) predicate.SourceNamespace {
 	return predicate.SourceNamespace(func(s *sql.Selector) {
 		step := newSourceTypeStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

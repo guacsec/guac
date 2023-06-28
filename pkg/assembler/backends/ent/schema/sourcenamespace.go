@@ -23,7 +23,7 @@ func (SourceNamespace) Fields() []ent.Field {
 // Edges of the SourceNamespace.
 func (SourceNamespace) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("source_type", Source.Type).Unique().Required().Field("source_id"),
+		edge.To("source_type", SourceType.Type).Unique().Required().Field("source_id"),
 		edge.From("names", SourceName.Type).Ref("namespace"),
 	}
 }

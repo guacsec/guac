@@ -243,17 +243,6 @@ var (
 			},
 		},
 	}
-	// SourcesColumns holds the columns for the "sources" table.
-	SourcesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "type", Type: field.TypeString, Unique: true},
-	}
-	// SourcesTable holds the schema information for the "sources" table.
-	SourcesTable = &schema.Table{
-		Name:       "sources",
-		Columns:    SourcesColumns,
-		PrimaryKey: []*schema.Column{SourcesColumns[0]},
-	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -299,9 +288,9 @@ var (
 		PrimaryKey: []*schema.Column{SourceNamespacesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "source_namespaces_sources_source_type",
+				Symbol:     "source_namespaces_source_types_source_type",
 				Columns:    []*schema.Column{SourceNamespacesColumns[2]},
-				RefColumns: []*schema.Column{SourcesColumns[0]},
+				RefColumns: []*schema.Column{SourceTypesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -313,6 +302,17 @@ var (
 			},
 		},
 	}
+	// SourceTypesColumns holds the columns for the "source_types" table.
+	SourceTypesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeString, Unique: true},
+	}
+	// SourceTypesTable holds the schema information for the "source_types" table.
+	SourceTypesTable = &schema.Table{
+		Name:       "source_types",
+		Columns:    SourceTypesColumns,
+		PrimaryKey: []*schema.Column{SourceTypesColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
@@ -323,9 +323,9 @@ var (
 		PackageNamespacesTable,
 		PackageTypesTable,
 		PackageVersionsTable,
-		SourcesTable,
 		SourceNamesTable,
 		SourceNamespacesTable,
+		SourceTypesTable,
 	}
 )
 
@@ -339,5 +339,5 @@ func init() {
 	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
 	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
-	SourceNamespacesTable.ForeignKeys[0].RefTable = SourcesTable
+	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
 }

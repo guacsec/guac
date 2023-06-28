@@ -105,18 +105,6 @@ func (f PackageVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PackageVersionMutation", m)
 }
 
-// The SourceFunc type is an adapter to allow the use of ordinary
-// function as Source mutator.
-type SourceFunc func(context.Context, *ent.SourceMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f SourceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.SourceMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SourceMutation", m)
-}
-
 // The SourceNameFunc type is an adapter to allow the use of ordinary
 // function as SourceName mutator.
 type SourceNameFunc func(context.Context, *ent.SourceNameMutation) (ent.Value, error)
@@ -139,6 +127,18 @@ func (f SourceNamespaceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SourceNamespaceMutation", m)
+}
+
+// The SourceTypeFunc type is an adapter to allow the use of ordinary
+// function as SourceType mutator.
+type SourceTypeFunc func(context.Context, *ent.SourceTypeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SourceTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SourceTypeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SourceTypeMutation", m)
 }
 
 // Condition is a hook condition function.

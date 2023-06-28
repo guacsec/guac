@@ -8,24 +8,24 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
 
-// Source is the model entity for the Source schema.
-type Source struct {
+// SourceType is the model entity for the SourceType schema.
+type SourceType struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the SourceQuery when eager-loading is set.
-	Edges        SourceEdges `json:"edges"`
+	// The values are being populated by the SourceTypeQuery when eager-loading is set.
+	Edges        SourceTypeEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// SourceEdges holds the relations/edges for other nodes in the graph.
-type SourceEdges struct {
+// SourceTypeEdges holds the relations/edges for other nodes in the graph.
+type SourceTypeEdges struct {
 	// Namespaces holds the value of the namespaces edge.
 	Namespaces []*SourceNamespace `json:"namespaces,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -35,7 +35,7 @@ type SourceEdges struct {
 
 // NamespacesOrErr returns the Namespaces value or an error if the edge
 // was not loaded in eager-loading.
-func (e SourceEdges) NamespacesOrErr() ([]*SourceNamespace, error) {
+func (e SourceTypeEdges) NamespacesOrErr() ([]*SourceNamespace, error) {
 	if e.loadedTypes[0] {
 		return e.Namespaces, nil
 	}
@@ -43,13 +43,13 @@ func (e SourceEdges) NamespacesOrErr() ([]*SourceNamespace, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Source) scanValues(columns []string) ([]any, error) {
+func (*SourceType) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case source.FieldID:
+		case sourcetype.FieldID:
 			values[i] = new(sql.NullInt64)
-		case source.FieldType:
+		case sourcetype.FieldType:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -59,71 +59,71 @@ func (*Source) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Source fields.
-func (s *Source) assignValues(columns []string, values []any) error {
+// to the SourceType fields.
+func (st *SourceType) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case source.FieldID:
+		case sourcetype.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			s.ID = int(value.Int64)
-		case source.FieldType:
+			st.ID = int(value.Int64)
+		case sourcetype.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				s.Type = value.String
+				st.Type = value.String
 			}
 		default:
-			s.selectValues.Set(columns[i], values[i])
+			st.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Source.
+// Value returns the ent.Value that was dynamically selected and assigned to the SourceType.
 // This includes values selected through modifiers, order, etc.
-func (s *Source) Value(name string) (ent.Value, error) {
-	return s.selectValues.Get(name)
+func (st *SourceType) Value(name string) (ent.Value, error) {
+	return st.selectValues.Get(name)
 }
 
-// QueryNamespaces queries the "namespaces" edge of the Source entity.
-func (s *Source) QueryNamespaces() *SourceNamespaceQuery {
-	return NewSourceClient(s.config).QueryNamespaces(s)
+// QueryNamespaces queries the "namespaces" edge of the SourceType entity.
+func (st *SourceType) QueryNamespaces() *SourceNamespaceQuery {
+	return NewSourceTypeClient(st.config).QueryNamespaces(st)
 }
 
-// Update returns a builder for updating this Source.
-// Note that you need to call Source.Unwrap() before calling this method if this Source
+// Update returns a builder for updating this SourceType.
+// Note that you need to call SourceType.Unwrap() before calling this method if this SourceType
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (s *Source) Update() *SourceUpdateOne {
-	return NewSourceClient(s.config).UpdateOne(s)
+func (st *SourceType) Update() *SourceTypeUpdateOne {
+	return NewSourceTypeClient(st.config).UpdateOne(st)
 }
 
-// Unwrap unwraps the Source entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the SourceType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (s *Source) Unwrap() *Source {
-	_tx, ok := s.config.driver.(*txDriver)
+func (st *SourceType) Unwrap() *SourceType {
+	_tx, ok := st.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Source is not a transactional entity")
+		panic("ent: SourceType is not a transactional entity")
 	}
-	s.config.driver = _tx.drv
-	return s
+	st.config.driver = _tx.drv
+	return st
 }
 
 // String implements the fmt.Stringer.
-func (s *Source) String() string {
+func (st *SourceType) String() string {
 	var builder strings.Builder
-	builder.WriteString("Source(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
+	builder.WriteString("SourceType(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", st.ID))
 	builder.WriteString("type=")
-	builder.WriteString(s.Type)
+	builder.WriteString(st.Type)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Sources is a parsable slice of Source.
-type Sources []*Source
+// SourceTypes is a parsable slice of SourceType.
+type SourceTypes []*SourceType

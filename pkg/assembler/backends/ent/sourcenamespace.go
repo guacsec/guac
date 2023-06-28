@@ -8,8 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
 
 // SourceNamespace is the model entity for the SourceNamespace schema.
@@ -30,7 +30,7 @@ type SourceNamespace struct {
 // SourceNamespaceEdges holds the relations/edges for other nodes in the graph.
 type SourceNamespaceEdges struct {
 	// SourceType holds the value of the source_type edge.
-	SourceType *Source `json:"source_type,omitempty"`
+	SourceType *SourceType `json:"source_type,omitempty"`
 	// Names holds the value of the names edge.
 	Names []*SourceName `json:"names,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -40,11 +40,11 @@ type SourceNamespaceEdges struct {
 
 // SourceTypeOrErr returns the SourceType value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SourceNamespaceEdges) SourceTypeOrErr() (*Source, error) {
+func (e SourceNamespaceEdges) SourceTypeOrErr() (*SourceType, error) {
 	if e.loadedTypes[0] {
 		if e.SourceType == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: source.Label}
+			return nil, &NotFoundError{label: sourcetype.Label}
 		}
 		return e.SourceType, nil
 	}
@@ -116,7 +116,7 @@ func (sn *SourceNamespace) Value(name string) (ent.Value, error) {
 }
 
 // QuerySourceType queries the "source_type" edge of the SourceNamespace entity.
-func (sn *SourceNamespace) QuerySourceType() *SourceQuery {
+func (sn *SourceNamespace) QuerySourceType() *SourceTypeQuery {
 	return NewSourceNamespaceClient(sn.config).QuerySourceType(sn)
 }
 

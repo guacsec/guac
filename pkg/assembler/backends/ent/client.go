@@ -22,9 +22,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
 
 // Client is the client that holds all ent builders.
@@ -48,12 +48,12 @@ type Client struct {
 	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
-	// Source is the client for interacting with the Source builders.
-	Source *SourceClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// SourceNamespace is the client for interacting with the SourceNamespace builders.
 	SourceNamespace *SourceNamespaceClient
+	// SourceType is the client for interacting with the SourceType builders.
+	SourceType *SourceTypeClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -75,9 +75,9 @@ func (c *Client) init() {
 	c.PackageNamespace = NewPackageNamespaceClient(c.config)
 	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
-	c.Source = NewSourceClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
 	c.SourceNamespace = NewSourceNamespaceClient(c.config)
+	c.SourceType = NewSourceTypeClient(c.config)
 }
 
 type (
@@ -168,9 +168,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
-		Source:           NewSourceClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
+		SourceType:       NewSourceTypeClient(cfg),
 	}, nil
 }
 
@@ -198,9 +198,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PackageNamespace: NewPackageNamespaceClient(cfg),
 		PackageType:      NewPackageTypeClient(cfg),
 		PackageVersion:   NewPackageVersionClient(cfg),
-		Source:           NewSourceClient(cfg),
 		SourceName:       NewSourceNameClient(cfg),
 		SourceNamespace:  NewSourceNamespaceClient(cfg),
+		SourceType:       NewSourceTypeClient(cfg),
 	}, nil
 }
 
@@ -231,8 +231,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.Source, c.SourceName,
-		c.SourceNamespace,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SourceName,
+		c.SourceNamespace, c.SourceType,
 	} {
 		n.Use(hooks...)
 	}
@@ -243,8 +243,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BuilderNode, c.Dependency, c.Occurrence, c.PackageName,
-		c.PackageNamespace, c.PackageType, c.PackageVersion, c.Source, c.SourceName,
-		c.SourceNamespace,
+		c.PackageNamespace, c.PackageType, c.PackageVersion, c.SourceName,
+		c.SourceNamespace, c.SourceType,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -269,12 +269,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PackageType.mutate(ctx, m)
 	case *PackageVersionMutation:
 		return c.PackageVersion.mutate(ctx, m)
-	case *SourceMutation:
-		return c.Source.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
 	case *SourceNamespaceMutation:
 		return c.SourceNamespace.mutate(ctx, m)
+	case *SourceTypeMutation:
+		return c.SourceType.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1432,140 +1432,6 @@ func (c *PackageVersionClient) mutate(ctx context.Context, m *PackageVersionMuta
 	}
 }
 
-// SourceClient is a client for the Source schema.
-type SourceClient struct {
-	config
-}
-
-// NewSourceClient returns a client for the Source from the given config.
-func NewSourceClient(c config) *SourceClient {
-	return &SourceClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `source.Hooks(f(g(h())))`.
-func (c *SourceClient) Use(hooks ...Hook) {
-	c.hooks.Source = append(c.hooks.Source, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `source.Intercept(f(g(h())))`.
-func (c *SourceClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Source = append(c.inters.Source, interceptors...)
-}
-
-// Create returns a builder for creating a Source entity.
-func (c *SourceClient) Create() *SourceCreate {
-	mutation := newSourceMutation(c.config, OpCreate)
-	return &SourceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Source entities.
-func (c *SourceClient) CreateBulk(builders ...*SourceCreate) *SourceCreateBulk {
-	return &SourceCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Source.
-func (c *SourceClient) Update() *SourceUpdate {
-	mutation := newSourceMutation(c.config, OpUpdate)
-	return &SourceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *SourceClient) UpdateOne(s *Source) *SourceUpdateOne {
-	mutation := newSourceMutation(c.config, OpUpdateOne, withSource(s))
-	return &SourceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *SourceClient) UpdateOneID(id int) *SourceUpdateOne {
-	mutation := newSourceMutation(c.config, OpUpdateOne, withSourceID(id))
-	return &SourceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Source.
-func (c *SourceClient) Delete() *SourceDelete {
-	mutation := newSourceMutation(c.config, OpDelete)
-	return &SourceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *SourceClient) DeleteOne(s *Source) *SourceDeleteOne {
-	return c.DeleteOneID(s.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SourceClient) DeleteOneID(id int) *SourceDeleteOne {
-	builder := c.Delete().Where(source.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &SourceDeleteOne{builder}
-}
-
-// Query returns a query builder for Source.
-func (c *SourceClient) Query() *SourceQuery {
-	return &SourceQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeSource},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Source entity by its id.
-func (c *SourceClient) Get(ctx context.Context, id int) (*Source, error) {
-	return c.Query().Where(source.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *SourceClient) GetX(ctx context.Context, id int) *Source {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryNamespaces queries the namespaces edge of a Source.
-func (c *SourceClient) QueryNamespaces(s *Source) *SourceNamespaceQuery {
-	query := (&SourceNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(source.Table, source.FieldID, id),
-			sqlgraph.To(sourcenamespace.Table, sourcenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, source.NamespacesTable, source.NamespacesColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *SourceClient) Hooks() []Hook {
-	return c.hooks.Source
-}
-
-// Interceptors returns the client interceptors.
-func (c *SourceClient) Interceptors() []Interceptor {
-	return c.inters.Source
-}
-
-func (c *SourceClient) mutate(ctx context.Context, m *SourceMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&SourceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&SourceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&SourceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&SourceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Source mutation op: %q", m.Op())
-	}
-}
-
 // SourceNameClient is a client for the SourceName schema.
 type SourceNameClient struct {
 	config
@@ -1810,13 +1676,13 @@ func (c *SourceNamespaceClient) GetX(ctx context.Context, id int) *SourceNamespa
 }
 
 // QuerySourceType queries the source_type edge of a SourceNamespace.
-func (c *SourceNamespaceClient) QuerySourceType(sn *SourceNamespace) *SourceQuery {
-	query := (&SourceClient{config: c.config}).Query()
+func (c *SourceNamespaceClient) QuerySourceType(sn *SourceNamespace) *SourceTypeQuery {
+	query := (&SourceTypeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := sn.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, id),
-			sqlgraph.To(source.Table, source.FieldID),
+			sqlgraph.To(sourcetype.Table, sourcetype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTypeTable, sourcenamespace.SourceTypeColumn),
 		)
 		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
@@ -1866,15 +1732,149 @@ func (c *SourceNamespaceClient) mutate(ctx context.Context, m *SourceNamespaceMu
 	}
 }
 
+// SourceTypeClient is a client for the SourceType schema.
+type SourceTypeClient struct {
+	config
+}
+
+// NewSourceTypeClient returns a client for the SourceType from the given config.
+func NewSourceTypeClient(c config) *SourceTypeClient {
+	return &SourceTypeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sourcetype.Hooks(f(g(h())))`.
+func (c *SourceTypeClient) Use(hooks ...Hook) {
+	c.hooks.SourceType = append(c.hooks.SourceType, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sourcetype.Intercept(f(g(h())))`.
+func (c *SourceTypeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SourceType = append(c.inters.SourceType, interceptors...)
+}
+
+// Create returns a builder for creating a SourceType entity.
+func (c *SourceTypeClient) Create() *SourceTypeCreate {
+	mutation := newSourceTypeMutation(c.config, OpCreate)
+	return &SourceTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SourceType entities.
+func (c *SourceTypeClient) CreateBulk(builders ...*SourceTypeCreate) *SourceTypeCreateBulk {
+	return &SourceTypeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SourceType.
+func (c *SourceTypeClient) Update() *SourceTypeUpdate {
+	mutation := newSourceTypeMutation(c.config, OpUpdate)
+	return &SourceTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SourceTypeClient) UpdateOne(st *SourceType) *SourceTypeUpdateOne {
+	mutation := newSourceTypeMutation(c.config, OpUpdateOne, withSourceType(st))
+	return &SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SourceTypeClient) UpdateOneID(id int) *SourceTypeUpdateOne {
+	mutation := newSourceTypeMutation(c.config, OpUpdateOne, withSourceTypeID(id))
+	return &SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SourceType.
+func (c *SourceTypeClient) Delete() *SourceTypeDelete {
+	mutation := newSourceTypeMutation(c.config, OpDelete)
+	return &SourceTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SourceTypeClient) DeleteOne(st *SourceType) *SourceTypeDeleteOne {
+	return c.DeleteOneID(st.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SourceTypeClient) DeleteOneID(id int) *SourceTypeDeleteOne {
+	builder := c.Delete().Where(sourcetype.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SourceTypeDeleteOne{builder}
+}
+
+// Query returns a query builder for SourceType.
+func (c *SourceTypeClient) Query() *SourceTypeQuery {
+	return &SourceTypeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSourceType},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SourceType entity by its id.
+func (c *SourceTypeClient) Get(ctx context.Context, id int) (*SourceType, error) {
+	return c.Query().Where(sourcetype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SourceTypeClient) GetX(ctx context.Context, id int) *SourceType {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryNamespaces queries the namespaces edge of a SourceType.
+func (c *SourceTypeClient) QueryNamespaces(st *SourceType) *SourceNamespaceQuery {
+	query := (&SourceNamespaceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := st.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcetype.Table, sourcetype.FieldID, id),
+			sqlgraph.To(sourcenamespace.Table, sourcenamespace.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcetype.NamespacesTable, sourcetype.NamespacesColumn),
+		)
+		fromV = sqlgraph.Neighbors(st.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SourceTypeClient) Hooks() []Hook {
+	return c.hooks.SourceType
+}
+
+// Interceptors returns the client interceptors.
+func (c *SourceTypeClient) Interceptors() []Interceptor {
+	return c.inters.SourceType
+}
+
+func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SourceTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SourceTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SourceTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SourceType mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, Source, SourceName, SourceNamespace []ent.Hook
+		PackageType, PackageVersion, SourceName, SourceNamespace, SourceType []ent.Hook
 	}
 	inters struct {
 		Artifact, BuilderNode, Dependency, Occurrence, PackageName, PackageNamespace,
-		PackageType, PackageVersion, Source, SourceName,
-		SourceNamespace []ent.Interceptor
+		PackageType, PackageVersion, SourceName, SourceNamespace,
+		SourceType []ent.Interceptor
 	}
 )

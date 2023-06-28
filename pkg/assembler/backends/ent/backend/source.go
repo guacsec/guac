@@ -7,9 +7,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -31,10 +31,10 @@ func (b *EntBackend) IngestSource(ctx context.Context, src model.SourceInputSpec
 }
 
 func upsertSource(ctx context.Context, client *ent.Client, src model.SourceInputSpec) (*ent.SourceName, error) {
-	sourceTypeID, err := client.Source.Create().
+	sourceTypeID, err := client.SourceType.Create().
 		SetType(src.Type).
 		OnConflict(
-			sql.ConflictColumns(source.FieldType),
+			sql.ConflictColumns(sourcetype.FieldType),
 		).
 		UpdateNewValues().
 		ID(ctx)

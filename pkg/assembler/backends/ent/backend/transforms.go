@@ -26,7 +26,7 @@ func toModelBuilder(b *ent.BuilderNode) *model.Builder {
 	}
 }
 
-func toModelPackage(p *ent.PackageNode) *model.Package {
+func toModelPackage(p *ent.PackageType) *model.Package {
 	return &model.Package{
 		ID:         nodeID(p.ID),
 		Type:       p.Type,
@@ -50,7 +50,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 	}
 }
 
-func toModelSource(s *ent.Source) *model.Source {
+func toModelSource(s *ent.SourceType) *model.Source {
 	return &model.Source{
 		ID:   nodeID(s.ID),
 		Type: s.Type,
@@ -82,7 +82,7 @@ func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
 }
 
 func (e *EntBackend) buildPackageResponse(ctx context.Context, id int, filter model.PkgSpec) (*model.Package, error) {
-	// e.client.PackageNode.Query().
+	// e.client.PackageType.Query().
 	// 	Where().
 	// 	WithNamespaces(func(q *ent.PackageNamespaceQuery) {
 	// 		q.Where(optionalPredicate(filter.Namespace, packagenamespace.NamespaceEQ))
@@ -200,7 +200,7 @@ func valueOrDefault[T any](v *T, def T) T {
 	return *v
 }
 
-func packageToModelPackage(p *ent.PackageNode) *model.Package {
+func packageToModelPackage(p *ent.PackageType) *model.Package {
 	return &model.Package{
 		ID:         nodeID(p.ID),
 		Type:       p.Type,

@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/source"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
 
 // SourceNamespaceUpdate is the builder for updating SourceNamespace entities.
@@ -41,14 +41,14 @@ func (snu *SourceNamespaceUpdate) SetSourceID(i int) *SourceNamespaceUpdate {
 	return snu
 }
 
-// SetSourceTypeID sets the "source_type" edge to the Source entity by ID.
+// SetSourceTypeID sets the "source_type" edge to the SourceType entity by ID.
 func (snu *SourceNamespaceUpdate) SetSourceTypeID(id int) *SourceNamespaceUpdate {
 	snu.mutation.SetSourceTypeID(id)
 	return snu
 }
 
-// SetSourceType sets the "source_type" edge to the Source entity.
-func (snu *SourceNamespaceUpdate) SetSourceType(s *Source) *SourceNamespaceUpdate {
+// SetSourceType sets the "source_type" edge to the SourceType entity.
+func (snu *SourceNamespaceUpdate) SetSourceType(s *SourceType) *SourceNamespaceUpdate {
 	return snu.SetSourceTypeID(s.ID)
 }
 
@@ -72,7 +72,7 @@ func (snu *SourceNamespaceUpdate) Mutation() *SourceNamespaceMutation {
 	return snu.mutation
 }
 
-// ClearSourceType clears the "source_type" edge to the Source entity.
+// ClearSourceType clears the "source_type" edge to the SourceType entity.
 func (snu *SourceNamespaceUpdate) ClearSourceType() *SourceNamespaceUpdate {
 	snu.mutation.ClearSourceType()
 	return snu
@@ -157,7 +157,7 @@ func (snu *SourceNamespaceUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -170,7 +170,7 @@ func (snu *SourceNamespaceUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -255,14 +255,14 @@ func (snuo *SourceNamespaceUpdateOne) SetSourceID(i int) *SourceNamespaceUpdateO
 	return snuo
 }
 
-// SetSourceTypeID sets the "source_type" edge to the Source entity by ID.
+// SetSourceTypeID sets the "source_type" edge to the SourceType entity by ID.
 func (snuo *SourceNamespaceUpdateOne) SetSourceTypeID(id int) *SourceNamespaceUpdateOne {
 	snuo.mutation.SetSourceTypeID(id)
 	return snuo
 }
 
-// SetSourceType sets the "source_type" edge to the Source entity.
-func (snuo *SourceNamespaceUpdateOne) SetSourceType(s *Source) *SourceNamespaceUpdateOne {
+// SetSourceType sets the "source_type" edge to the SourceType entity.
+func (snuo *SourceNamespaceUpdateOne) SetSourceType(s *SourceType) *SourceNamespaceUpdateOne {
 	return snuo.SetSourceTypeID(s.ID)
 }
 
@@ -286,7 +286,7 @@ func (snuo *SourceNamespaceUpdateOne) Mutation() *SourceNamespaceMutation {
 	return snuo.mutation
 }
 
-// ClearSourceType clears the "source_type" edge to the Source entity.
+// ClearSourceType clears the "source_type" edge to the SourceType entity.
 func (snuo *SourceNamespaceUpdateOne) ClearSourceType() *SourceNamespaceUpdateOne {
 	snuo.mutation.ClearSourceType()
 	return snuo
@@ -401,7 +401,7 @@ func (snuo *SourceNamespaceUpdateOne) sqlSave(ctx context.Context) (_node *Sourc
 			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -414,7 +414,7 @@ func (snuo *SourceNamespaceUpdateOne) sqlSave(ctx context.Context) (_node *Sourc
 			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(source.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
