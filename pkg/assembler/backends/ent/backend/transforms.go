@@ -1,13 +1,9 @@
 package backend
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -26,7 +22,37 @@ func toModelBuilder(b *ent.BuilderNode) *model.Builder {
 	}
 }
 
+func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
+	if pv.Edges.Name != nil &&
+		pv.Edges.Name.Edges.Namespace != nil &&
+		pv.Edges.Name.Edges.Namespace.Edges.Package != nil {
+		pn := pv.Edges.Name
+		ns := pn.Edges.Namespace
+		pt := ns.Edges.Package
+		pn.Edges.Versions = []*ent.PackageVersion{pv}
+		ns.Edges.Names = []*ent.PackageName{pn}
+		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
+		return pt
+	}
+	return nil
+}
+func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
+	if pn.Edges.Namespace != nil &&
+		pn.Edges.Namespace.Edges.Package != nil {
+		ns := pn.Edges.Namespace
+		pt := ns.Edges.Package
+		// pn.Edges.Versions = []*ent.PackageVersion{}
+		ns.Edges.Names = []*ent.PackageName{pn}
+		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
+		return pt
+	}
+	return nil
+}
+
 func toModelPackage(p *ent.PackageType) *model.Package {
+	if p == nil {
+		return nil
+	}
 	return &model.Package{
 		ID:         nodeID(p.ID),
 		Type:       p.Type,
@@ -35,6 +61,9 @@ func toModelPackage(p *ent.PackageType) *model.Package {
 }
 
 func toModelNamespace(n *ent.PackageNamespace) *model.PackageNamespace {
+	if n == nil {
+		return nil
+	}
 	return &model.PackageNamespace{
 		ID:        nodeID(n.ID),
 		Namespace: n.Namespace,
@@ -43,6 +72,9 @@ func toModelNamespace(n *ent.PackageNamespace) *model.PackageNamespace {
 }
 
 func toModelPackageName(n *ent.PackageName) *model.PackageName {
+	if n == nil {
+		return nil
+	}
 	return &model.PackageName{
 		ID:       nodeID(n.ID),
 		Name:     n.Name,
@@ -51,6 +83,9 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 }
 
 func toModelSource(s *ent.SourceType) *model.Source {
+	if s == nil {
+		return nil
+	}
 	return &model.Source{
 		ID:   nodeID(s.ID),
 		Type: s.Type,
@@ -81,76 +116,6 @@ func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
 	}
 }
 
-func (e *EntBackend) buildPackageResponse(ctx context.Context, id int, filter model.PkgSpec) (*model.Package, error) {
-	// e.client.PackageType.Query().
-	// 	Where().
-	// 	WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-	// 		q.Where(optionalPredicate(filter.Namespace, packagenamespace.NamespaceEQ))
-	// 		q.WithNames(func(q *ent.PackageNameQuery) {
-	// 			q.Where(optionalPredicate(filter.Name, packagename.NameEQ))
-	// 			q.WithVersions(func(q *ent.PackageVersionQuery) {
-	// 				q.Where(optionalPredicate(filter.Version, packageversion.VersionEQ))
-	// 				q.Where(optionalPredicate(filter.Subpath, packageversion.SubpathEQ))
-	// 			})
-	// 		})
-	// 	})
-
-	// Version
-	records, err := e.client.PackageVersion.Query().
-		Where(
-			optionalPredicate(filter.ID, IDEQ),
-			optionalPredicate(filter.Version, packageversion.VersionEQ),
-			optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
-		).
-		All(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(records) == 0 {
-		return nil, nil
-	}
-
-	// if filter.Name == nil {
-	// 	return nil, nil
-	// }
-	pvl := collect(records, toModelPackageVersion)
-
-	// Name
-	pnl := []*model.PackageName{}
-	nameRecord, err := e.client.PackageName.Query().Where(optionalPredicate(filter.Name, packagename.NameEQ)).Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	name := toModelPackageName(nameRecord)
-	name.Versions = pvl
-	pnl = append(pnl, name)
-
-	// Namespace
-	pnsl := []*model.PackageNamespace{}
-	nsRecord, err := nameRecord.QueryNamespace().Where(optionalPredicate(filter.Namespace, packagenamespace.NamespaceEQ)).Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	ns := toModelNamespace(nsRecord)
-	ns.Names = pnl
-	pnsl = append(pnsl, ns)
-
-	// Package
-	pkg, err := nsRecord.QueryPackage().Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	p := &model.Package{
-		ID:         nodeID(pkg.ID),
-		Type:       pkg.Type,
-		Namespaces: pnsl,
-	}
-
-	return p, nil
-}
-
 // collect is a simple helper to transform collections of a certain type to another type
 // using the transform function func(T) R
 func collect[T any, R any](items []T, transformer func(T) R) []R {
@@ -167,28 +132,6 @@ func collect[T any, R any](items []T, transformer func(T) R) []R {
 	return out
 }
 
-func collectErr[T any, R any](ctx context.Context, items []T, transformer func(context.Context, T) (R, error)) ([]R, error) {
-	// NOTE: In most cases this shouldn't be needed, but it's here for completeness
-	if items == nil {
-		return nil, nil
-	}
-
-	out := make([]R, len(items))
-	for i, item := range items {
-		t, err := transformer(ctx, item)
-		if err != nil {
-			return nil, err
-		}
-		out[i] = t
-	}
-
-	if len(out) == 0 {
-		return nil, nil
-	}
-
-	return out, nil
-}
-
 func nodeID(id int) string {
 	return fmt.Sprintf("%d", id)
 }
@@ -198,30 +141,6 @@ func valueOrDefault[T any](v *T, def T) T {
 		return def
 	}
 	return *v
-}
-
-func packageToModelPackage(p *ent.PackageType) *model.Package {
-	return &model.Package{
-		ID:         nodeID(p.ID),
-		Type:       p.Type,
-		Namespaces: collect(p.Edges.Namespaces, toModelNamespace),
-	}
-}
-
-func packageNamespaceToModelPackage(n *ent.PackageNamespace) *model.Package {
-	return &model.Package{
-		ID:         nodeID(n.ID),
-		Type:       n.Edges.Package.Type,
-		Namespaces: []*model.PackageNamespace{toModelNamespace(n)},
-	}
-}
-
-func packageVersionToModelPackage(pv *ent.PackageVersion) *model.Package {
-	return &model.Package{
-		ID:         nodeID(pv.ID),
-		Type:       pv.Edges.Name.Edges.Namespace.Edges.Package.Type,
-		Namespaces: []*model.PackageNamespace{toModelNamespace(pv.Edges.Name.Edges.Namespace)},
-	}
 }
 
 func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
@@ -247,22 +166,10 @@ func toModelIsOccurrence(o *ent.Occurrence, sub model.PackageOrSource) *model.Is
 }
 
 func toOccurrenceSubject(oc *ent.Occurrence) model.PackageOrSource {
-	if oc.Edges.Package != nil &&
-		oc.Edges.Package.Edges.Name != nil &&
-		oc.Edges.Package.Edges.Name.Edges.Namespace != nil &&
-		oc.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package != nil {
-
-		pv := oc.Edges.Package
-		pn := pv.Edges.Name
-		ns := pn.Edges.Namespace
-		pt := ns.Edges.Package
-		pn.Edges.Versions = []*ent.PackageVersion{pv}
-		ns.Edges.Names = []*ent.PackageName{pn}
-		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
-		return toModelPackage(pt)
-
-		// return toModelPackage(oc.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+	if oc.Edges.Package != nil {
+		return toModelPackage(backReferencePackageVersion(oc.Edges.Package))
 	} else if oc.Edges.Source != nil &&
+		// FIXME: (ivanvanderbyl) Refactor into backReferenceSubject(...)
 		oc.Edges.Source.Edges.Namespace != nil &&
 		oc.Edges.Source.Edges.Namespace.Edges.SourceType != nil {
 
@@ -291,23 +198,15 @@ func pkgQualifierInputSpecToQuerySpec(input []*model.PackageQualifierInputSpec) 
 	return out
 }
 
-func toModelIsDependency(ctx context.Context, id *ent.Dependency) (*model.IsDependency, error) {
-	p, err := pkgTreeFromVersion(ctx, id.Edges.Package)
-	if err != nil {
-		return nil, err
-	}
-	dp, err := pkgTreeFromName(ctx, id.Edges.DependentPackage)
-	if err != nil {
-		return nil, err
-	}
+func toModelIsDependency(id *ent.Dependency) *model.IsDependency {
 	return &model.IsDependency{
 		ID:               nodeID(id.ID),
-		Package:          toModelPackage(p),
-		DependentPackage: toModelPackage(dp),
+		Package:          toModelPackage(backReferencePackageVersion(id.Edges.Package)),
+		DependentPackage: toModelPackage(backReferencePackageName(id.Edges.DependentPackage)),
 		VersionRange:     id.VersionRange,
 		DependencyType:   model.DependencyType(id.DependencyType),
 		Justification:    id.Justification,
 		Origin:           id.Origin,
 		Collector:        id.Collector,
-	}, nil
+	}
 }
