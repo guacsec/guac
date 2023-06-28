@@ -251,7 +251,17 @@ func toOccurrenceSubject(oc *ent.Occurrence) model.PackageOrSource {
 		oc.Edges.Package.Edges.Name != nil &&
 		oc.Edges.Package.Edges.Name.Edges.Namespace != nil &&
 		oc.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package != nil {
-		return toModelPackage(oc.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+
+		pv := oc.Edges.Package
+		pn := pv.Edges.Name
+		ns := pn.Edges.Namespace
+		pt := ns.Edges.Package
+		pn.Edges.Versions = []*ent.PackageVersion{pv}
+		ns.Edges.Names = []*ent.PackageName{pn}
+		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
+		return toModelPackage(pt)
+
+		// return toModelPackage(oc.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
 	} else if oc.Edges.Source != nil &&
 		oc.Edges.Source.Edges.Namespace != nil &&
 		oc.Edges.Source.Edges.Namespace.Edges.SourceType != nil {

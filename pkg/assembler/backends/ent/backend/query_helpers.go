@@ -39,30 +39,11 @@ func getPkgVersion(ctx context.Context, client *ent.Client, pkgin *model.PkgInpu
 		QueryNames().Where(packagename.Name(pkgin.Name)).
 		QueryVersions().
 		Where(
-			optionalPredicate(pkgin.Version, packageversion.VersionEQ),
+			packageversion.VersionEQ(valueOrDefault(pkgin.Version, "")),
 			optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
 			packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
 		).
-		// FIXME: (ivanvanderbyl) This should use .Only() but it is not working because
-		// the ingestion of versions is not hitting the unqiue constraint.
 		Only(ctx)
-
-	// return client.PackageVersion.Query().
-	// 	Where(
-	// 		optionalPredicate(pkgin.Version, packageversion.VersionEQ),
-	// 		optionalPredicate(pkgin.Subpath, packageversion.SubpathEQ),
-	// 		packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(pkgin.Qualifiers)),
-	// 		packageversion.HasNameWith(
-	// 			packagename.Name(pkgin.Name),
-	// 			packagename.HasNamespaceWith(
-	// 				packagenamespace.Namespace(valueOrDefault(pkgin.Namespace, "")),
-	// 				packagenamespace.HasPackageWith(
-	// 					packagetype.Type(pkgin.Type),
-	// 				),
-	// 			),
-	// 		),
-	// 	).
-	// 	Only(ctx)
 }
 
 func getArtifact(ctx context.Context, client *ent.Client, artin *model.ArtifactInputSpec) (*ent.Artifact, error) {

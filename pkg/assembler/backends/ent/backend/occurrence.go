@@ -12,6 +12,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -65,7 +66,13 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	records, err := b.client.Occurrence.Query().
 		Where(predicates...).
 		WithArtifact().
-		WithPackage().
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {
+				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
+					q.WithPackage()
+				})
+			})
+		}).
 		WithSource(func(q *ent.SourceNameQuery) {
 			q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
 				q.WithSourceType()
@@ -78,24 +85,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 
 	models := make([]*model.IsOccurrence, len(records))
 	for i, record := range records {
-
-		var sub model.PackageOrSource
-
-		if pv := record.Edges.Package; pv != nil {
-			p, err := pkgTreeFromVersion(ctx, pv)
-			if err != nil {
-				return nil, err
-			}
-
-			sub = toModelPackage(p)
-			models[i] = toModelIsOccurrence(record, sub)
-		} else {
-			models[i] = toModelIsOccurrenceWithSubject(record)
-		}
-	}
-
-	if len(models) == 0 {
-		return nil, nil
+		models[i] = toModelIsOccurrenceWithSubject(record)
 	}
 
 	return models, nil
@@ -141,7 +131,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		if subject.Package != nil {
 			pkgVersion, err := getPkgVersion(ctx, client, subject.Package)
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "failed to get package version")
 			}
 			occurrenceCreate.SetPackage(pkgVersion)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldPackageID)
@@ -186,15 +176,12 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	record, err := b.client.Occurrence.Query().
 		Where(occurrence.ID(*recordID)).
 		WithArtifact().
-		// WithSubject(func(q *ent.OccurrenceSubjectQuery) {
 		WithPackage(func(q *ent.PackageVersionQuery) {
-			// q.WithName(func(q *ent.PackageNameQuery) {
-			// 	q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-			// 		q.WithPackage(func(q *ent.PackageNodeQuery) {
-			// 			// buildPackageTreeQuery(q, ns string, packageName string, pv *ent.PackageVersion)
-			// 		})
-			// 	})
-			// })
+			q.WithName(func(q *ent.PackageNameQuery) {
+				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
+					q.WithPackage()
+				})
+			})
 		}).
 		WithSource(func(q *ent.SourceNameQuery) {
 			q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
@@ -206,18 +193,5 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	var sub model.PackageOrSource
-
-	if pv := record.Edges.Package; pv != nil {
-		p, err := pkgTreeFromVersion(ctx, pv)
-		if err != nil {
-			return nil, err
-		}
-
-		sub = toModelPackage(p)
-	} else {
-		return toModelIsOccurrenceWithSubject(record), nil
-	}
-
-	return toModelIsOccurrence(record, sub), nil
+	return toModelIsOccurrenceWithSubject(record), nil
 }
