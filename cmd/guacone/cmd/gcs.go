@@ -51,7 +51,7 @@ var gcsCmd = &cobra.Command{
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
-		opts, err := validateGCSFlags(viper.GetString("gql-addr"), viper.GetString("csub-addr"), args)
+		opts, err := validateGCSFlags(viper.GetString("gql-addr"), viper.GetString("csub-addr"), viper.GetString(gcsCredentialsPathFlag), args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -69,17 +69,19 @@ var gcsCmd = &cobra.Command{
 		}
 
 		client, err := storage.NewClient(ctx, gcsOpts...)
-		cobra.CheckErr(err)
+		if err != nil {
+			logger.Fatalf("creating client: %v", err)
+		}
 
 		// Register collector by providing a new GCS Client and bucket name
 		gcsCollector, err := gcs.NewGCSCollector(gcs.WithBucket(opts.bucket), gcs.WithClient(client))
 		if err != nil {
-			logger.Errorf("unable to create gcs client: %v", err)
+			logger.Fatalf("unable to create gcs client: %v", err)
 		}
 
 		err = collector.RegisterDocumentCollector(gcsCollector, gcs.CollectorGCS)
 		if err != nil {
-			logger.Errorf("unable to register gcs collector: %v", err)
+			logger.Fatalf("unable to register gcs collector: %v", err)
 		}
 
 		// initialize collectsub client
@@ -155,15 +157,20 @@ var gcsCmd = &cobra.Command{
 	},
 }
 
-func validateGCSFlags(gqlEndpoint string, csubAddr string, args []string) (gcsOptions, error) {
+func validateGCSFlags(gqlEndpoint, csubAddr, credentialsPath string, args []string) (gcsOptions, error) {
 	var opts gcsOptions
 	opts.graphqlEndpoint = gqlEndpoint
 	opts.csubAddr = csubAddr
 
 	if len(args) < 1 {
-		return opts, fmt.Errorf("expected positional argument for bucket_path")
+		return opts, fmt.Errorf("expected positional argument: bucket")
 	}
 	opts.bucket = args[0]
+
+	if credentialsPath == "" && os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") == "" {
+		return opts, fmt.Errorf("expected either --%s flag or GOOGLE_APPLICATION_CREDENTIALS environment variable", gcsCredentialsPathFlag)
+	}
+
 	return opts, nil
 }
 
