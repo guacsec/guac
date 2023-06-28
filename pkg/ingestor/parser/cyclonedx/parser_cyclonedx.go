@@ -105,8 +105,12 @@ func (c *cyclonedxParser) getTopLevelPackage(cdxBom *cdx.BOM) error {
 				c.packageArtifacts[string(cdxBom.Metadata.Component.BOMRef)] = append(c.packageArtifacts[string(cdxBom.Metadata.Component.BOMRef)], artifact)
 			}
 		}
+		return nil
+	} else {
+		// currently GUAC does not support CycloneDX component field in metadata or the BOM ref being nil.
+		// see https://github.com/guacsec/guac/issues/976 for more details.
+		return fmt.Errorf("guac currently does not support CycloneDX component field in metadata or the BOM ref being nil. See issue #976 for more details")
 	}
-	return nil
 }
 
 func parseContainerType(name string, version string, topLevel bool) string {

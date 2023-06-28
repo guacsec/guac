@@ -91,6 +91,9 @@ var (
 	//go:embed exampledata/no-dependent-components-cyclonedx.json
 	CycloneDXExampleNoDependentComponents []byte
 
+	//go:embed exampledata/cyclonedx-no-top-level.json
+	CycloneDXExampleNoTopLevelComp []byte
+
 	//go:embed exampledata/crev-review.json
 	ITE6CREVExample []byte
 
