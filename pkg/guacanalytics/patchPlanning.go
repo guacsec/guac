@@ -106,7 +106,7 @@ func exploreIsDependency(isDependency model.NeighborsNeighborsIsDependency, ctx 
 		return fmt.Errorf("error querying for dependent package: %w", err)
 	}
 
-	depPkgVersionsMap := map[string]string{}
+	var depPkgVersionsMap map[string]string
 	var depPkgVersions []string
 	for _, depPkgVersion := range depPkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
 		depPkgVersions = append(depPkgVersions, depPkgVersion.Version)
