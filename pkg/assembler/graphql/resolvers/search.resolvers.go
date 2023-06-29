@@ -6,12 +6,11 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // FindSoftware is the resolver for the findSoftware field.
 func (r *queryResolver) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
-	panic(fmt.Errorf("not implemented: FindSoftware - findSoftware"))
+	return r.Backend.FindSoftware(ctx, searchText)
 }
