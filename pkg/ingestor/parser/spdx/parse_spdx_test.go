@@ -64,6 +64,7 @@ func Test_spdxParser(t *testing.T) {
 			doc: &processor.Document{
 				Blob: []byte(`
 			{
+			"spdxVersion": "SPDX-2.3",
 			"SPDXID":"SPDXRef-DOCUMENT",
 			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 			"packages":[
@@ -110,6 +111,7 @@ func Test_spdxParser(t *testing.T) {
 			doc: &processor.Document{
 				Blob: []byte(`
 			{
+			"spdxVersion": "SPDX-2.3",
 			"SPDXID":"SPDXRef-DOCUMENT",
 			"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 			"packages":[
@@ -173,6 +175,7 @@ func Test_spdxParser(t *testing.T) {
 			doc: &processor.Document{
 				Blob: []byte(`
 		{
+		"spdxVersion": "SPDX-2.3",
 		"SPDXID":"SPDXRef-DOCUMENT",
 		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 		"packages":[
@@ -219,6 +222,7 @@ func Test_spdxParser(t *testing.T) {
 			doc: &processor.Document{
 				Blob: []byte(`
 		{
+		"spdxVersion": "SPDX-2.3",
 		"SPDXID":"SPDXRef-DOCUMENT",
 		"name":"sbom-sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10",
 		"relationships":[
