@@ -3661,6 +3661,465 @@ const (
 	EdgePkgEqualPackage             Edge = "PKG_EQUAL_PACKAGE"
 )
 
+// FindSoftwareFindSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type FindSoftwareFindSoftwareArtifact struct {
+	Typename        *string `json:"__typename"`
+	AllArtifactTree `json:"-"`
+}
+
+// GetTypename returns FindSoftwareFindSoftwareArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns FindSoftwareFindSoftwareArtifact.Id, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns FindSoftwareFindSoftwareArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns FindSoftwareFindSoftwareArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *FindSoftwareFindSoftwareArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareFindSoftwareArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareFindSoftwareArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareFindSoftwareArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *FindSoftwareFindSoftwareArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareFindSoftwareArtifact) __premarshalJSON() (*__premarshalFindSoftwareFindSoftwareArtifact, error) {
+	var retval __premarshalFindSoftwareFindSoftwareArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// FindSoftwareFindSoftwarePackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type FindSoftwareFindSoftwarePackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns FindSoftwareFindSoftwarePackage.Typename, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetTypename() *string { return v.Typename }
+
+// GetId returns FindSoftwareFindSoftwarePackage.Id, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns FindSoftwareFindSoftwarePackage.Type, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns FindSoftwareFindSoftwarePackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwarePackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *FindSoftwareFindSoftwarePackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareFindSoftwarePackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareFindSoftwarePackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareFindSoftwarePackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *FindSoftwareFindSoftwarePackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareFindSoftwarePackage) __premarshalJSON() (*__premarshalFindSoftwareFindSoftwarePackage, error) {
+	var retval __premarshalFindSoftwareFindSoftwarePackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// FindSoftwareFindSoftwarePackageSourceOrArtifact includes the requested fields of the GraphQL interface PackageSourceOrArtifact.
+//
+// FindSoftwareFindSoftwarePackageSourceOrArtifact is implemented by the following types:
+// FindSoftwareFindSoftwareArtifact
+// FindSoftwareFindSoftwarePackage
+// FindSoftwareFindSoftwareSource
+// The GraphQL type's documentation follows.
+//
+// PackageSourceOrArtifact is a union of Package, Source, and Artifact.
+type FindSoftwareFindSoftwarePackageSourceOrArtifact interface {
+	implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *FindSoftwareFindSoftwareArtifact) implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact() {
+}
+func (v *FindSoftwareFindSoftwarePackage) implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact() {
+}
+func (v *FindSoftwareFindSoftwareSource) implementsGraphQLInterfaceFindSoftwareFindSoftwarePackageSourceOrArtifact() {
+}
+
+func __unmarshalFindSoftwareFindSoftwarePackageSourceOrArtifact(b []byte, v *FindSoftwareFindSoftwarePackageSourceOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Artifact":
+		*v = new(FindSoftwareFindSoftwareArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(FindSoftwareFindSoftwarePackage)
+		return json.Unmarshal(b, *v)
+	case "Source":
+		*v = new(FindSoftwareFindSoftwareSource)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageSourceOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for FindSoftwareFindSoftwarePackageSourceOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalFindSoftwareFindSoftwarePackageSourceOrArtifact(v *FindSoftwareFindSoftwarePackageSourceOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *FindSoftwareFindSoftwareArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalFindSoftwareFindSoftwareArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *FindSoftwareFindSoftwarePackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalFindSoftwareFindSoftwarePackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *FindSoftwareFindSoftwareSource:
+		typename = "Source"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalFindSoftwareFindSoftwareSource
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for FindSoftwareFindSoftwarePackageSourceOrArtifact: "%T"`, v)
+	}
+}
+
+// FindSoftwareFindSoftwareSource includes the requested fields of the GraphQL type Source.
+// The GraphQL type's documentation follows.
+//
+// Source represents the root of the source trie/tree.
+//
+// We map source information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type, namespace, name and an optional
+// qualifier that stands for tag/commit information.
+//
+// This node represents the type part of the trie path. It is used to represent
+// the version control system that is being used.
+//
+// Since this node is at the root of the source trie, it is named Source, not
+// SourceType.
+type FindSoftwareFindSoftwareSource struct {
+	Typename      *string `json:"__typename"`
+	AllSourceTree `json:"-"`
+}
+
+// GetTypename returns FindSoftwareFindSoftwareSource.Typename, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetTypename() *string { return v.Typename }
+
+// GetId returns FindSoftwareFindSoftwareSource.Id, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetId() string { return v.AllSourceTree.Id }
+
+// GetType returns FindSoftwareFindSoftwareSource.Type, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetType() string { return v.AllSourceTree.Type }
+
+// GetNamespaces returns FindSoftwareFindSoftwareSource.Namespaces, and is useful for accessing the field via an interface.
+func (v *FindSoftwareFindSoftwareSource) GetNamespaces() []AllSourceTreeNamespacesSourceNamespace {
+	return v.AllSourceTree.Namespaces
+}
+
+func (v *FindSoftwareFindSoftwareSource) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareFindSoftwareSource
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareFindSoftwareSource = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllSourceTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareFindSoftwareSource struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllSourceTreeNamespacesSourceNamespace `json:"namespaces"`
+}
+
+func (v *FindSoftwareFindSoftwareSource) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareFindSoftwareSource) __premarshalJSON() (*__premarshalFindSoftwareFindSoftwareSource, error) {
+	var retval __premarshalFindSoftwareFindSoftwareSource
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllSourceTree.Id
+	retval.Type = v.AllSourceTree.Type
+	retval.Namespaces = v.AllSourceTree.Namespaces
+	return &retval, nil
+}
+
+// FindSoftwareResponse is returned by FindSoftware on success.
+type FindSoftwareResponse struct {
+	// findSoftware takes in a searchText string and looks for software
+	// that may be relevant for the input text. This can be seen as fuzzy search
+	// function for Packages, Sources and Artifacts. findSoftware returns a list
+	// of Packages, Sources and Artifacts that it determines to be relevant to
+	// the input searchText.
+	//
+	// Due to the nature of full text search being implemented differently on
+	// different db platforms, the behavior of findSoftware is not guaranteed
+	// to be the same. In addition, their statistical nature may result in
+	// results being different per call and not reproducible.
+	//
+	// All that is asked in the implementation of this API is that it follows
+	// the spirit of helping to retrieve the right nodes with best effort.
+	//
+	// Warning: This is an EXPERIMENTAL feature. This is subject to change.
+	// Warning: This is an OPTIONAL feature. Backends are not required to
+	// implement this API.
+	FindSoftware []FindSoftwareFindSoftwarePackageSourceOrArtifact `json:"-"`
+}
+
+// GetFindSoftware returns FindSoftwareResponse.FindSoftware, and is useful for accessing the field via an interface.
+func (v *FindSoftwareResponse) GetFindSoftware() []FindSoftwareFindSoftwarePackageSourceOrArtifact {
+	return v.FindSoftware
+}
+
+func (v *FindSoftwareResponse) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*FindSoftwareResponse
+		FindSoftware []json.RawMessage `json:"findSoftware"`
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.FindSoftwareResponse = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	{
+		dst := &v.FindSoftware
+		src := firstPass.FindSoftware
+		*dst = make(
+			[]FindSoftwareFindSoftwarePackageSourceOrArtifact,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalFindSoftwareFindSoftwarePackageSourceOrArtifact(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"unable to unmarshal FindSoftwareResponse.FindSoftware: %w", err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type __premarshalFindSoftwareResponse struct {
+	FindSoftware []json.RawMessage `json:"findSoftware"`
+}
+
+func (v *FindSoftwareResponse) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *FindSoftwareResponse) __premarshalJSON() (*__premarshalFindSoftwareResponse, error) {
+	var retval __premarshalFindSoftwareResponse
+
+	{
+
+		dst := &retval.FindSoftware
+		src := v.FindSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalFindSoftwareFindSoftwarePackageSourceOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal FindSoftwareResponse.FindSoftware: %w", err)
+			}
+		}
+	}
+	return &retval, nil
+}
+
 // GHSAInputSpec specifies a GitHub Security Advisory for mutations.
 type GHSAInputSpec struct {
 	GhsaId string `json:"ghsaId"`
@@ -17447,6 +17906,14 @@ func (v *__CertifyOSVInput) GetOsv() OSVInputSpec { return v.Osv }
 // GetCertifyVuln returns __CertifyOSVInput.CertifyVuln, and is useful for accessing the field via an interface.
 func (v *__CertifyOSVInput) GetCertifyVuln() VulnerabilityMetaDataInput { return v.CertifyVuln }
 
+// __FindSoftwareInput is used internally by genqlient
+type __FindSoftwareInput struct {
+	SearchText string `json:"searchText"`
+}
+
+// GetSearchText returns __FindSoftwareInput.SearchText, and is useful for accessing the field via an interface.
+func (v *__FindSoftwareInput) GetSearchText() string { return v.SearchText }
+
 // __GHSAsInput is used internally by genqlient
 type __GHSAsInput struct {
 	Filter *GHSASpec `json:"filter"`
@@ -22048,6 +22515,90 @@ func CertifyOSV(
 	var err error
 
 	var data CertifyOSVResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by FindSoftware.
+const FindSoftware_Operation = `
+query FindSoftware ($searchText: String!) {
+	findSoftware(searchText: $searchText) {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func FindSoftware(
+	ctx context.Context,
+	client graphql.Client,
+	searchText string,
+) (*FindSoftwareResponse, error) {
+	req := &graphql.Request{
+		OpName: "FindSoftware",
+		Query:  FindSoftware_Operation,
+		Variables: &__FindSoftwareInput{
+			SearchText: searchText,
+		},
+	}
+	var err error
+
+	var data FindSoftwareResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
