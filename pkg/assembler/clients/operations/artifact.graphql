@@ -15,6 +15,22 @@
 
 # NOTE: This is experimental and might change in the future!
 
+# Ingest Artifact
+
+mutation IngestArtifact($artifact: ArtifactInputSpec!) {
+  ingestArtifact(artifact: $artifact) {
+    ...AllArtifactTree
+  }
+}
+
+# Ingest Materials (artifacts) used by hasSLSA
+
+mutation IngestMaterials($materials: [ArtifactInputSpec!]!) {
+  ingestMaterials(materials: $materials) {
+    ...AllArtifactTree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC sources
 
 query Artifacts($filter: ArtifactSpec) {

@@ -15,6 +15,14 @@
 
 # NOTE: This is experimental and might change in the future!
 
+# Ingest GHSA
+
+mutation IngestGHSA($ghsa: GHSAInputSpec!) {
+  ingestGHSA(ghsa: $ghsa) {
+    ...AllGHSATree
+  }
+}
+
 # Exposes GraphQL queries to retrieve GUAC GHSAs
 
 query GHSAs($filter: GHSASpec) {

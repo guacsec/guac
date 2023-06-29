@@ -18,12 +18,6 @@
 # Defines the GraphQL operations to ingest that a package (either at the package version or package name level) has the specified source into GUAC
 
 mutation HasSourceAt($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
-  ingestPackage(pkg: $pkg) {
-    ...AllPkgTree
-  }
-  ingestSource(source: $source) {
-    ...AllSourceTree
-  }
   ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt) {
     ...allHasSourceAt
   }

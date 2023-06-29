@@ -32,104 +32,190 @@ func GetParallelAssembler(ctx context.Context, gqlclient graphql.Client) func([]
 	// parallel.
 
 	return func(preds []assembler.AssemblerInput) error {
-		g, ctx := errgroup.WithContext(ctx)
+		nouns, errGroupNounCtx := errgroup.WithContext(ctx)
 
 		// Backend can only process one write at a time, but make
 		// sure there are enough in flight so we don't wait for any round trips.
-		g.SetLimit(20)
+		nouns.SetLimit(20)
+
+		for _, p := range preds {
+			packages := p.GetPackages(errGroupNounCtx)
+			logger.Infof("assembling Package: %v", len(packages))
+			for _, v := range packages {
+				if errGroupNounCtx.Err() != nil {
+					break
+				}
+				v := v
+				nouns.Go(func() error { return ingestPackage(errGroupNounCtx, gqlclient, v) })
+			}
+
+			sources := p.GetSources(errGroupNounCtx)
+			logger.Infof("assembling Source: %v", len(sources))
+			for _, v := range sources {
+				if errGroupNounCtx.Err() != nil {
+					break
+				}
+				v := v
+				nouns.Go(func() error { return ingestSource(errGroupNounCtx, gqlclient, v) })
+			}
+
+			artifacts := p.GetArtifacts(errGroupNounCtx)
+			logger.Infof("assembling Artifact: %v", len(artifacts))
+			for _, v := range artifacts {
+				if errGroupNounCtx.Err() != nil {
+					break
+				}
+				v := v
+				nouns.Go(func() error { return ingestArtifact(errGroupNounCtx, gqlclient, v) })
+			}
+
+			builders := p.GetBuilders(errGroupNounCtx)
+			logger.Infof("assembling Builder: %v", len(builders))
+			for _, v := range builders {
+				if errGroupNounCtx.Err() != nil {
+					break
+				}
+				v := v
+				nouns.Go(func() error { return ingestBuilder(errGroupNounCtx, gqlclient, v) })
+			}
+
+			materials := p.GetMaterials(errGroupNounCtx)
+			logger.Infof("assembling Materials: %v", len(materials))
+			nouns.Go(func() error { return ingestMaterials(errGroupNounCtx, gqlclient, materials) })
+
+			cves := p.GetCVEs(errGroupNounCtx)
+			logger.Infof("assembling CVE: %v", len(cves))
+			for _, v := range cves {
+				if errGroupNounCtx.Err() != nil {
+					break
+				}
+				v := v
+				nouns.Go(func() error { return ingestCVE(errGroupNounCtx, gqlclient, v) })
+			}
+
+			osvs := p.GetOSVs(errGroupNounCtx)
+			logger.Infof("assembling OSV: %v", len(osvs))
+			for _, v := range osvs {
+				if errGroupNounCtx.Err() != nil {
+					break
+				}
+				v := v
+				nouns.Go(func() error { return ingestOSV(errGroupNounCtx, gqlclient, v) })
+			}
+
+			ghsas := p.GetGHSAs(errGroupNounCtx)
+			logger.Infof("assembling GHSA: %v", len(ghsas))
+			for _, v := range ghsas {
+				if errGroupNounCtx.Err() != nil {
+					break
+				}
+				v := v
+				nouns.Go(func() error { return ingestGHSA(errGroupNounCtx, gqlclient, v) })
+			}
+		}
+
+		if err := nouns.Wait(); err != nil {
+			return err
+		}
+
+		verbs, errGroupVerbCtx := errgroup.WithContext(ctx)
+
+		// Backend can only process one write at a time, but make
+		// sure there are enough in flight so we don't wait for any round trips.
+		verbs.SetLimit(20)
 
 		for _, p := range preds {
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				v := v
-				g.Go(func() error { return ingestCertifyScorecards(ctx, gqlclient, v) })
+				verbs.Go(func() error { return ingestCertifyScorecards(errGroupVerbCtx, gqlclient, v) })
 			}
 
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
 			for _, v := range p.IsDependency {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				v := v
-				g.Go(func() error { return ingestIsDependency(ctx, gqlclient, v) })
+				verbs.Go(func() error { return ingestIsDependency(errGroupVerbCtx, gqlclient, v) })
 			}
 
 			logger.Infof("assembling IsOccurence: %v", len(p.IsOccurrence))
 			for _, v := range p.IsOccurrence {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				v := v
-				g.Go(func() error { return ingestIsOccurrence(ctx, gqlclient, v) })
+				verbs.Go(func() error { return ingestIsOccurrence(errGroupVerbCtx, gqlclient, v) })
 			}
 
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
 			for _, v := range p.HasSlsa {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				v := v
-				g.Go(func() error { return ingestHasSlsa(ctx, gqlclient, v) })
+				verbs.Go(func() error { return ingestHasSlsa(errGroupVerbCtx, gqlclient, v) })
 			}
 
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
 			for _, cv := range p.CertifyVuln {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				cv := cv
-				g.Go(func() error { return ingestCertifyVuln(ctx, gqlclient, cv) })
+				verbs.Go(func() error { return ingestCertifyVuln(errGroupVerbCtx, gqlclient, cv) })
 			}
 
 			logger.Infof("assembling IsVuln: %v", len(p.IsVuln))
 			for _, iv := range p.IsVuln {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				iv := iv
-				g.Go(func() error { return ingestIsVuln(ctx, gqlclient, iv) })
+				verbs.Go(func() error { return ingestIsVuln(errGroupVerbCtx, gqlclient, iv) })
 			}
 
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
 			for _, hsa := range p.HasSourceAt {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				hsa := hsa
-				g.Go(func() error { return hasSourceAt(ctx, gqlclient, hsa) })
+				verbs.Go(func() error { return hasSourceAt(errGroupVerbCtx, gqlclient, hsa) })
 			}
 
 			logger.Infof("assembling CertifyBad: %v", len(p.CertifyBad))
 			for _, bad := range p.CertifyBad {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				bad := bad
-				g.Go(func() error { return ingestCertifyBad(ctx, gqlclient, bad) })
+				verbs.Go(func() error { return ingestCertifyBad(errGroupVerbCtx, gqlclient, bad) })
 			}
 
 			logger.Infof("assembling CertifyGood: %v", len(p.CertifyGood))
 			for _, good := range p.CertifyGood {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				good := good
-				g.Go(func() error { return ingestCertifyGood(ctx, gqlclient, good) })
+				verbs.Go(func() error { return ingestCertifyGood(errGroupVerbCtx, gqlclient, good) })
 			}
 
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
-				if ctx.Err() != nil {
+				if errGroupVerbCtx.Err() != nil {
 					break
 				}
 				hb := hb
-				g.Go(func() error { return ingestHasSBOM(ctx, gqlclient, hb) })
+				verbs.Go(func() error { return ingestHasSBOM(errGroupVerbCtx, gqlclient, hb) })
 			}
-
 		}
-		return g.Wait()
+
+		return verbs.Wait()
 	}
 }

@@ -15,16 +15,10 @@
 
 # NOTE: This is experimental and might change in the future!
 
-# Defines the GraphQL operations to ingest occurence information into GUAC
+# Ingest Builder
 
-mutation IsOccurrencePkg($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
-  ingestOccurrence(subject: {package: $pkg}, artifact: $artifact, occurrence: $occurrence) {
-    ...AllIsOccurrencesTree
-  }
-}
-
-mutation IsOccurrenceSrc($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
-  ingestOccurrence(subject: {source: $source}, artifact: $artifact, occurrence: $occurrence) {
-    ...AllIsOccurrencesTree
+mutation IngestBuilder($builder: BuilderInputSpec!) {
+  ingestBuilder(builder: $builder) {
+    uri
   }
 }
