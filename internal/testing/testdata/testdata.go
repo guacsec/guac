@@ -50,6 +50,10 @@ var (
 	//go:embed exampledata/invalid-spdx.json
 	SpdxInvalidExample []byte
 
+	// Invalid SPDXIdentifier document
+	//go:embed exampledata/invalid-spdx-identifier-spdx.json
+	SpdxInvalidSPDXIdentifierExample []byte
+
 	// Example scorecard
 	//go:embed exampledata/kubernetes-scorecard.json
 	ScorecardExample []byte

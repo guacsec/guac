@@ -16,6 +16,7 @@
 package spdx
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -26,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/spdx/tools-golang/json"
 	spdx "github.com/spdx/tools-golang/spdx"
 	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
 	"golang.org/x/exp/slices"
@@ -175,11 +177,7 @@ func (s *spdxParser) getFiles() error {
 }
 
 func parseSpdxBlob(p []byte) (*spdx.Document, error) {
-	doc := &spdx.Document{}
-	if err := doc.UnmarshalJSON(p); err != nil {
-		return nil, err
-	}
-	return doc, nil
+	return json.Read(bytes.NewReader(p))
 }
 
 func (s *spdxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
