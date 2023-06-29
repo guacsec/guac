@@ -41,6 +41,16 @@ input PackageOrSourceInput {
 }
 
 """
+PackageOrSourceInputs allows using packages and sources as input for batch mutations.
+Exactly one list must be specified.
+"""
+input PackageOrSourceInputs {
+  packages: [PkgInputSpec!]
+  sources: [SourceInputSpec!]
+}
+
+
+"""
 IsOccurrence is an attestation to link an artifact to a package or source.
 
 Attestation must occur at the PackageVersion or at the SourceName.
@@ -87,4 +97,6 @@ extend type Query {
 extend type Mutation {
   "Ingest that an artifact is produced from a package or source."
   ingestOccurrence(subject: PackageOrSourceInput!, artifact: ArtifactInputSpec!, occurrence: IsOccurrenceInputSpec!): IsOccurrence!
+  "Bulk ingest that an artifact is produced from a package or source."
+  ingestOccurrences(subject: PackageOrSourceInputs!, artifacts: [ArtifactInputSpec!]!, occurrences: [IsOccurrenceInputSpec!]!): [IsOccurrence!]!
 }

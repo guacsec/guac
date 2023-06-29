@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -13,6 +14,11 @@ import (
 // IngestPackage is the resolver for the ingestPackage field.
 func (r *mutationResolver) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
 	return r.Backend.IngestPackage(ctx, pkg)
+}
+
+// IngestPackages is the resolver for the ingestPackages field.
+func (r *mutationResolver) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
+	panic(fmt.Errorf("not implemented: IngestPackages - ingestPackages"))
 }
 
 // Packages is the resolver for the packages field.
