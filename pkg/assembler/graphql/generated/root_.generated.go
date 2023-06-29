@@ -252,6 +252,7 @@ type ComplexityRoot struct {
 		CertifyVEXStatement func(childComplexity int, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) int
 		CertifyVuln         func(childComplexity int, certifyVulnSpec *model.CertifyVulnSpec) int
 		Cve                 func(childComplexity int, cveSpec *model.CVESpec) int
+		FindSoftware        func(childComplexity int, searchText string) int
 		Ghsa                func(childComplexity int, ghsaSpec *model.GHSASpec) int
 		HasSbom             func(childComplexity int, hasSBOMSpec *model.HasSBOMSpec) int
 		HasSlsa             func(childComplexity int, hasSLSASpec *model.HasSLSASpec) int
@@ -1425,6 +1426,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Cve(childComplexity, args["cveSpec"].(*model.CVESpec)), true
+
+	case "Query.findSoftware":
+		if e.complexity.Query.FindSoftware == nil {
+			break
+		}
+
+		args, err := ec.field_Query_findSoftware_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FindSoftware(childComplexity, args["searchText"].(string)), true
 
 	case "Query.ghsa":
 		if e.complexity.Query.Ghsa == nil {
@@ -4010,6 +4023,44 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that two packages are similar."
   ingestPkgEqual(pkg: PkgInputSpec!, otherPackage: PkgInputSpec!, pkgEqual: PkgEqualInputSpec!): PkgEqual!
+}
+`, BuiltIn: false},
+	{Name: "../schema/search.graphql", Input: `#
+# Copyright 2023 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+extend type Query {
+  """
+  findSoftware takes in a searchText string and looks for software
+  that may be relevant for the input text. This can be seen as fuzzy search
+  function for Packages, Sources and Artifacts. findSoftware returns a list
+  of Packages, Sources and Artifacts that it determines to be relevant to
+  the input searchText.
+
+  Due to the nature of full text search being implemented differently on
+  different db platforms, the behavior of findSoftware is not guaranteed
+  to be the same. In addition, their statistical nature may result in
+  results being different per call and not reproducible.
+
+  All that is asked in the implementation of this API is that it follows
+  the spirit of helping to retrieve the right nodes with best effort.
+
+  Warning: This is an EXPERIMENTAL feature. This is subject to change.
+  Warning: This is an OPTIONAL feature. Backends are not required to
+  implement this API.
+  """
+  findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#
