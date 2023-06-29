@@ -66,6 +66,7 @@ if you encounter any errors or bugs with ingestion.
 
 ## Additional References
 
+- [GUAC use cases](use-cases.md)
 - [GUAC presentation at OSS NA 2023](https://sched.co/1K5Hn)
 - [GUAC 2023 Q1 Maintainer Summit Notes](https://docs.google.com/document/d/15Kb3I3SWhq-9_R7WYhSjsIxn_FykYgPyFlQWlLgF4fA/edit)
 - [GUAC presentation at KubeCon NA 2022](https://www.youtube.com/watch?v=xFRNgIEzbkA)
