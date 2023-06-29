@@ -79,6 +79,9 @@ type Backend interface {
 	Node(ctx context.Context, node string) (model.Node, error)
 	Nodes(ctx context.Context, nodes []string) ([]model.Node, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
+
+	// Search queries: queries to help find data in GUAC based on text search
+	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to
