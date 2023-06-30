@@ -305,10 +305,6 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			for k, v := range gotMap {
-				fmt.Println(k, "value is", v)
-			}
-
-			for k, v := range gotMap {
 				if k == startID && (v.Parent != "" || v.depth != 0) {
 					t.Errorf("Incorrect starting node entry")
 				}
