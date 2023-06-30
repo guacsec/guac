@@ -195,92 +195,71 @@ func Test_SearchConnectionsFromStartNode(t *testing.T) {
 	gqlclient := graphql.NewClient("http://localhost:9090/query", &httpClient)
 
 	testCases := []struct {
-		name           string
-		startType      string
-		startNamespace *string
-		startName      string
-		stopType       string
-		stopNamespace  *string
-		stopName       string
-		maxDepth       int
-		expectedLen    int
-		graphInput     string
+		name        string
+		start       int
+		stop        int
+		maxDepth    int
+		expectedLen int
+		graphInput  string
 	}{
-
 		{
-			name:           "1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth",
-			startType:      "deb",
-			startNamespace: ptrfrom.String("ubuntu"),
-			startName:      "dpkg",
-			stopType:       "",
-			maxDepth:       10,
-			expectedLen:    5,
-			graphInput:     "isDependency",
+			name:        "1: test case with two dependencies at the same depth, no stopID and no limiting maxDepth",
+			start:       0,
+			stop:        -1,
+			maxDepth:    10,
+			expectedLen: 5,
+			graphInput:  "isDependency",
 		},
 		{
-			name:           "2: two levels of dependencies, no stopID and no limiting maxDepth",
-			startType:      "top",
-			startNamespace: ptrfrom.String("topns"),
-			startName:      "toppkg",
-			stopType:       "",
-			maxDepth:       10,
-			expectedLen:    7,
-			graphInput:     "isDependency",
-		},
-
-		{
-			name:           "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
-			startType:      "top",
-			startNamespace: ptrfrom.String("topns"),
-			startName:      "toppkg",
-			stopType:       "deb",
-			stopNamespace:  ptrfrom.String("ubuntu"),
-			stopName:       "dpkg",
-			maxDepth:       10,
-			expectedLen:    3,
-			graphInput:     "isDependency",
-		},
-
-		{
-			name:           "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
-			startType:      "top1",
-			startNamespace: ptrfrom.String("topns1"),
-			startName:      "toppkg1",
-			stopType:       "",
-			maxDepth:       1,
-			expectedLen:    3,
-			graphInput:     "isDependency",
+			name:        " 2: two levels of dependencies, no stopID and no limiting maxDepth",
+			start:       1,
+			stop:        -1,
+			maxDepth:    10,
+			expectedLen: 7,
+			graphInput:  "isDependency",
 		},
 		{
-			name:           "5: isDependency indirect dependency",
-			startType:      "top2",
-			startNamespace: ptrfrom.String("topns2"),
-			startName:      "toppkg2",
-			stopType:       "",
-			maxDepth:       10,
-			expectedLen:    9,
-			graphInput:     "isDependency",
+			name:        "3: two levels of dependencies, a stopID at the first level and no limiting maxDepth",
+			start:       1,
+			stop:        0,
+			maxDepth:    10,
+			expectedLen: 3,
+			graphInput:  "isDependency",
 		},
 		{
-			name:           "6: isDependency range that does not include the dependency",
-			startType:      "top3",
-			startNamespace: ptrfrom.String("topns3"),
-			startName:      "toppkg3",
-			stopType:       "",
-			maxDepth:       10,
-			expectedLen:    1,
-			graphInput:     "isDependency",
+			name:        "4: two levels of dependencies, no stopID and a limiting maxDepth at the first level",
+			start:       2,
+			stop:        -1,
+			maxDepth:    1,
+			expectedLen: 3,
+			graphInput:  "isDependency",
+		},
+		{
+			name:        "5: indirect dependency",
+			start:       3,
+			stop:        -1,
+			maxDepth:    10,
+			expectedLen: 9,
+			graphInput:  "isDependency",
+		},
+		{
+			name:        "6: isDependency range that does not include the dependency",
+			start:       4,
+			stop:        -1,
+			maxDepth:    10,
+			expectedLen: 1,
+			graphInput:  "isDependency",
 		},
 	}
 
 	for _, tt := range testCases {
 		t.Run(fmt.Sprintf("test case %s\n", tt.name), func(t *testing.T) {
 			ingestTestData(tt.graphInput, ctx, gqlclient)
-			startID := getPackageId("isDependency", tt.startType, tt.startNamespace, tt.startName, ctx, gqlclient)
+			startID := getPackageId("isDependency", tt.start, ctx, gqlclient)
 
 			var stopID string
-			if tt.stopType != "" {
-				stopID = getPackageId("isDependency", tt.stopType, tt.stopNamespace, tt.stopName, ctx, gqlclient)
+			if tt.stop >= 0 {
+				stopID = getPackageId("isDependency", tt.stop, ctx, gqlclient)
 			} else {
 				stopID = ""
 			}
@@ -369,21 +348,19 @@ func getGraphqlTestServer() (*handler.Server, error) {
 	return srv, nil
 }
 
-func getPackageId(graph string, nodeType string, nodeNamespace *string, nodeName string, ctx context.Context, gqlclient graphql.Client) string {
+func getPackageId(graph string, entry int, ctx context.Context, gqlclient graphql.Client) string {
 	if graph == "isDependency" {
 		pkgFilter := &model.PkgSpec{
-			Type:      &nodeType,
-			Namespace: nodeNamespace,
-			Name:      &nodeName,
+			Type:      &isDepTestData.IsDependency[entry].Pkg.Type,
+			Namespace: isDepTestData.IsDependency[entry].Pkg.Namespace,
+			Name:      &isDepTestData.IsDependency[entry].Pkg.Name,
 		}
 		pkgResponse, err := model.Packages(ctx, gqlclient, pkgFilter)
-
 		if err != nil {
 			fmt.Printf("Error getting id for isDependency test case: %s\n", err)
 			return ""
 		}
 		return pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id
 	}
-
 	return ""
 }
