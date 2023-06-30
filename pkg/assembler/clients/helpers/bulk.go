@@ -38,7 +38,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				collectedPackages = append(collectedPackages, *v)
 			}
 			if err := ingestPackages(ctx, gqlclient, collectedPackages); err != nil {
-				return err
+				return fmt.Errorf("ingestPackages failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for sources
@@ -46,7 +46,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling Source: %v", len(sources))
 			for _, v := range sources {
 				if err := ingestSource(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestSource failed with error: %w", err)
 				}
 			}
 
@@ -58,7 +58,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				collectedArtifacts = append(collectedArtifacts, *v)
 			}
 			if err := ingestArtifacts(ctx, gqlclient, collectedArtifacts); err != nil {
-				return err
+				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for builders
@@ -66,7 +66,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling Builder: %v", len(builders))
 			for _, v := range builders {
 				if err := ingestBuilder(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestBuilder failed with error: %w", err)
 				}
 			}
 
@@ -74,7 +74,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			materials := p.GetMaterials(ctx)
 			logger.Infof("assembling Materials (Artifact): %v", len(materials))
 			if err := ingestMaterials(ctx, gqlclient, materials); err != nil {
-				return err
+				return fmt.Errorf("ingestMaterials failed with error: %w", err)
 			}
 
 			// TODO(pxp928): add bulk ingestion for cves
@@ -82,7 +82,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling CVE: %v", len(cves))
 			for _, v := range cves {
 				if err := ingestCVE(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestCVE failed with error: %w", err)
 				}
 			}
 
@@ -91,7 +91,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling OSV: %v", len(osvs))
 			for _, v := range osvs {
 				if err := ingestOSV(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestOSV failed with error: %w", err)
 				}
 			}
 
@@ -100,7 +100,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling GHSA: %v", len(ghsas))
 			for _, v := range ghsas {
 				if err := ingestGHSA(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestGHSA failed with error: %w", err)
 				}
 			}
 
@@ -108,21 +108,25 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			for _, v := range p.CertifyScorecard {
 				if err := ingestCertifyScorecards(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestCertifyScorecards failed with error: %w", err)
 				}
 			}
 
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
-			ingestIsDependencies(ctx, gqlclient, p.IsDependency)
+			if err := ingestIsDependencies(ctx, gqlclient, p.IsDependency); err != nil {
+				return fmt.Errorf("ingestIsDependencies failed with error: %w", err)
+			}
 
 			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
-			ingestIsOccurrences(ctx, gqlclient, p.IsOccurrence)
+			if err := ingestIsOccurrences(ctx, gqlclient, p.IsOccurrence); err != nil {
+				return fmt.Errorf("ingestIsOccurrences failed with error: %w", err)
+			}
 
 			// TODO(pxp928): add bulk ingestion for HasSLSA
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
 			for _, v := range p.HasSlsa {
 				if err := ingestHasSlsa(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestHasSlsa failed with error: %w", err)
 				}
 			}
 
@@ -130,7 +134,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
 			for _, cv := range p.CertifyVuln {
 				if err := ingestCertifyVuln(ctx, gqlclient, cv); err != nil {
-					return err
+					return fmt.Errorf("ingestCertifyVuln failed with error: %w", err)
 				}
 			}
 
@@ -138,7 +142,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling IsVuln: %v", len(p.IsVuln))
 			for _, iv := range p.IsVuln {
 				if err := ingestIsVuln(ctx, gqlclient, iv); err != nil {
-					return err
+					return fmt.Errorf("ingestIsVuln failed with error: %w", err)
+
 				}
 			}
 
@@ -146,7 +151,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
 			for _, hsa := range p.HasSourceAt {
 				if err := hasSourceAt(ctx, gqlclient, hsa); err != nil {
-					return err
+					return fmt.Errorf("hasSourceAt failed with error: %w", err)
+
 				}
 			}
 
@@ -154,7 +160,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling CertifyBad: %v", len(p.CertifyBad))
 			for _, bad := range p.CertifyBad {
 				if err := ingestCertifyBad(ctx, gqlclient, bad); err != nil {
-					return err
+					return fmt.Errorf("ingestCertifyBad failed with error: %w", err)
+
 				}
 			}
 
@@ -162,7 +169,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling CertifyGood: %v", len(p.CertifyGood))
 			for _, good := range p.CertifyGood {
 				if err := ingestCertifyGood(ctx, gqlclient, good); err != nil {
-					return err
+					return fmt.Errorf("ingestCertifyGood failed with error: %w", err)
+
 				}
 			}
 
@@ -170,7 +178,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			for _, hb := range p.HasSBOM {
 				if err := ingestHasSBOM(ctx, gqlclient, hb); err != nil {
-					return err
+					return fmt.Errorf("ingestHasSBOM failed with error: %w", err)
+
 				}
 			}
 
@@ -178,7 +187,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling VEX : %v", len(p.Vex))
 			for _, v := range p.Vex {
 				if err := ingestVex(ctx, gqlclient, v); err != nil {
-					return err
+					return fmt.Errorf("ingestVex failed with error: %w", err)
+
 				}
 			}
 
@@ -186,7 +196,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling HashEqual : %v", len(p.HashEqual))
 			for _, equal := range p.HashEqual {
 				if err := ingestHashEqual(ctx, gqlclient, equal); err != nil {
-					return err
+					return fmt.Errorf("ingestHashEqual failed with error: %w", err)
+
 				}
 			}
 
@@ -194,7 +205,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
 			for _, equal := range p.PkgEqual {
 				if err := ingestPkgEqual(ctx, gqlclient, equal); err != nil {
-					return err
+					return fmt.Errorf("ingestPkgEqual failed with error: %w", err)
+
 				}
 			}
 		}
@@ -204,12 +216,14 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 
 func ingestPackages(ctx context.Context, client graphql.Client, v []model.PkgInputSpec) error {
 	_, err := model.IngestPackages(ctx, client, v)
-	return err
+	return fmt.Errorf("ingestPackages failed with error: %w", err)
+
 }
 
 func ingestArtifacts(ctx context.Context, client graphql.Client, v []model.ArtifactInputSpec) error {
 	_, err := model.IngestArtifacts(ctx, client, v)
-	return err
+	return fmt.Errorf("ingestArtifacts failed with error: %w", err)
+
 }
 
 func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assembler.IsDependencyIngest) error {
@@ -222,7 +236,8 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assemb
 		dependencies = append(dependencies, *ingest.IsDependency)
 	}
 	_, err := model.IsDependencies(ctx, client, pkgs, depPkgs, dependencies)
-	return err
+	return fmt.Errorf("isDependencies failed with error: %w", err)
+
 }
 
 func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembler.IsOccurrenceIngest) error {
@@ -249,8 +264,10 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembl
 	}
 	if len(sources) > 0 {
 		_, err := model.IsOccurrencesSrc(ctx, client, sources, artifacts, occurrences)
-		return err
+		return fmt.Errorf("isOccurrencesSrc failed with error: %w", err)
+
 	}
 	_, err := model.IsOccurrencesPkg(ctx, client, pkgs, artifacts, occurrences)
-	return err
+	return fmt.Errorf("isOccurrencesPkg failed with error: %w", err)
+
 }
