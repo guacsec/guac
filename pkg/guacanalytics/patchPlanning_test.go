@@ -301,10 +301,11 @@ func Test_SearchSubgraphFromVuln(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.expectedLen, len(gotMap)); len(diff) > 0 {
-				for k, v := range gotMap {
-					fmt.Println(k, "value is", v)
-				}
 				t.Errorf("Number of map entries (-want +got):\n%s", diff)
+			}
+
+			for k, v := range gotMap {
+				fmt.Println(k, "value is", v)
 			}
 
 			for k, v := range gotMap {
